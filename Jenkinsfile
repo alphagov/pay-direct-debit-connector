@@ -44,7 +44,7 @@ pipeline {
       steps {
         script {
           buildApp{
-            app = "direct-debit-connector"
+            app = "directdebit-connector"
           }
         }
       }
@@ -57,14 +57,14 @@ pipeline {
         }
       }
       steps {
-        runEndToEnd("direct-debit-connector")
+        runEndToEnd("directdebit-connector")
       }
     }
     stage('Docker Tag') {
       steps {
         script {
           dockerTag {
-            app = "direct-debit-connector"
+            app = "directdebit-connector"
           }
         }
       }
@@ -74,7 +74,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        deploy("direct-debit-connector", "test", null, true)
+        deploy("directdebit-connector", "test", null, true)
       }
     }
   }
