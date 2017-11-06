@@ -57,7 +57,7 @@ pipeline {
         }
       }
       steps {
-        runEndToEnd("directdebit-connector")
+        runEndToEnd("directdebit_connector")
       }
     }
     stage('Docker Tag') {
@@ -74,7 +74,7 @@ pipeline {
         branch 'master'
       }
       steps {
-        deploy("directdebit-connector", "test", null, true)
+        deployEcs("directdebit-connector", "test", null, true, true)
       }
     }
   }
