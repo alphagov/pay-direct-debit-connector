@@ -9,6 +9,11 @@ The [GOV.UK Pay](https://www.payments.service.gov.uk/) Direct Debit Connector
 
 ## API Specification
 
+
+## Wiki
+
+- [Wiki page](https://github.com/alphagov/pay-direct-debit/wiki)
+
 ## Licence
 
 [MIT License](LICENCE)
