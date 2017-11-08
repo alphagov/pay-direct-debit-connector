@@ -49,17 +49,6 @@ pipeline {
         }
       }
     }
-    stage('Test') {
-      when {
-        anyOf {
-          branch 'master'
-          environment name: 'RUN_END_TO_END_ON_PR', value: 'true'
-        }
-      }
-      steps {
-        runEndToEnd("directdebit_connector")
-      }
-    }
     stage('Docker Tag') {
       steps {
         script {
