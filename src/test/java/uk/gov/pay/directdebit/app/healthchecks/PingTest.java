@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.app.healthchecks;
 
-import com.codahale.metrics.health.HealthCheck;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,6 +9,6 @@ public class PingTest {
 
     @Test
     public void testPing() {
-        assertThat(new Ping().execute(), is(HealthCheck.Result.healthy()));
+        assertThat(new Ping().execute().isHealthy(), is(true));
     }
 }
