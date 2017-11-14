@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.app.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gocardless.GoCardlessClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import io.dropwizard.setup.Environment;
@@ -45,6 +46,11 @@ public class DirectDebitModule extends AbstractModule {
 //
 //        return jpaModule;
 //    }
+
+    @Provides
+    public GoCardlessClient provideGoCardlessClient() {
+        return configuration.getGoCardless().buildClient();
+    }
 
     @Provides
     public ObjectMapper provideObjectMapper() {
