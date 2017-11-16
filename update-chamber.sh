@@ -19,7 +19,7 @@ chamber_url="https://github.com/segmentio/chamber/releases/download/v${chamber_v
 curl --fail --silent -L "$chamber_url" | shasum -a 256 | sed -e 's#-$#bin/chamber#' > chamber.sha256sum
 
 # Rewrite the download URL in the dockerfile
-sed -i '' -e "/wget.*https:.*chamber/s#https://[^ ]*#${chamber_url}#" Dockerfile
+sed -i '' -e "s#^ARG CHAMBER_URL=https://.*#ARG CHAMBER_URL=${chamber_url}#" Dockerfile
 
 # See if the container still builds
 docker build .
