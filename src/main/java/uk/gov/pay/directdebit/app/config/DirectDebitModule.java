@@ -5,6 +5,7 @@ import com.gocardless.GoCardlessClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import io.dropwizard.setup.Environment;
+import uk.gov.pay.directdebit.app.core.WebhookVerifier;
 
 public class DirectDebitModule extends AbstractModule {
 
@@ -50,6 +51,11 @@ public class DirectDebitModule extends AbstractModule {
     @Provides
     public GoCardlessClient provideGoCardlessClient() {
         return configuration.getGoCardless().buildClient();
+    }
+
+    @Provides
+    public WebhookVerifier provideWebhookVerifier() {
+        return configuration.getGoCardless().buildSignatureVerifier();
     }
 
     @Provides
