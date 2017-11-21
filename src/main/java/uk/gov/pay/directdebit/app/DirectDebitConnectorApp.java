@@ -9,6 +9,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.DirectDebitModule;
+import uk.gov.pay.directdebit.app.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.app.healthchecks.Ping;
 import uk.gov.pay.directdebit.resources.HealthCheckResource;
 
@@ -46,6 +47,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
 
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
 
+        // Register the custom ExceptionMapper(s)
+        environment.jersey().register(new InvalidWebhookExceptionMapper());
     }
 
     public static void main(String[] args) throws Exception {
