@@ -10,8 +10,12 @@ import io.dropwizard.setup.Environment;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.DirectDebitModule;
 import uk.gov.pay.directdebit.app.exception.InvalidWebhookExceptionMapper;
+import uk.gov.pay.directdebit.app.filters.LoggingFilter;
 import uk.gov.pay.directdebit.app.healthchecks.Ping;
 import uk.gov.pay.directdebit.resources.HealthCheckResource;
+
+import static java.util.EnumSet.of;
+import static javax.servlet.DispatcherType.REQUEST;
 
 public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
 
@@ -40,6 +44,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     public void run(DirectDebitConfig configuration, Environment environment) throws Exception {
         final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment));
 
+        environment.servlets().addFilter("LoggingFilter", new LoggingFilter());
         environment.healthChecks().register("ping", new Ping());
         //TODO: Awaiting AWS DB environment ready
 //        injector.getInstance(PersistenceServiceInitialiser.class);
