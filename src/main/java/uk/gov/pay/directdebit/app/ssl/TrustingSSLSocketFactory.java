@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.app.util;
+package uk.gov.pay.directdebit.app.ssl;
 
 import org.postgresql.ssl.WrappedFactory;
 

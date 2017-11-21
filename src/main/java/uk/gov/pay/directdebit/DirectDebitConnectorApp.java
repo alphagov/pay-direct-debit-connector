@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.app;
+package uk.gov.pay.directdebit;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -9,12 +9,12 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.DirectDebitModule;
-import uk.gov.pay.directdebit.app.core.V1ApiPaths;
-import uk.gov.pay.directdebit.app.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.app.filters.LoggingFilter;
 import uk.gov.pay.directdebit.app.healthchecks.Ping;
-import uk.gov.pay.directdebit.resources.HealthCheckResource;
-import uk.gov.pay.directdebit.resources.WebhookGoCardlessResource;
+import uk.gov.pay.directdebit.common.resources.V1ApiPaths;
+import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
+import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
+import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;

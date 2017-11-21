@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.app.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

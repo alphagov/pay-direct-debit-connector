@@ -1,10 +1,10 @@
-package uk.gov.pay.directdebit.resources;
+package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
 import com.google.inject.Inject;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.core.V1ApiPaths;
-import uk.gov.pay.directdebit.app.core.WebhookVerifier;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.common.resources.V1ApiPaths;
+import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
 
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;

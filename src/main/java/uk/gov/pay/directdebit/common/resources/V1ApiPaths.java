@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.app.core;
+package uk.gov.pay.directdebit.common.resources;
 
 public class V1ApiPaths {
 
