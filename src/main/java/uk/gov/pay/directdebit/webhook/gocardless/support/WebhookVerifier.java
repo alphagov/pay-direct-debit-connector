@@ -1,7 +1,7 @@
-package uk.gov.pay.directdebit.app.core;
+package uk.gov.pay.directdebit.webhook.gocardless.support;
 
 import org.apache.commons.lang3.StringUtils;
-import uk.gov.pay.directdebit.app.exception.InvalidWebhookException;
+import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

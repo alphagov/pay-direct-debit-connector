@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.app.exception;
+package uk.gov.pay.directdebit.webhook.gocardless.exception;
 
 public class InvalidWebhookException extends RuntimeException {
 

@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.app.util;
+package uk.gov.pay.directdebit.app.ssl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +64,7 @@ public class TrustStoreLoader {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(TRUST_STORE);
             SSL_CONTEXT.init(null, tmf.getTrustManagers(), null);
-        }
-        catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new RuntimeException("Could not initialize SSLContext", e);
         }
     }
