@@ -25,7 +25,9 @@ public class GoCardlessFactory {
 
     public WebhookVerifier buildSignatureVerifier() {
         if (StringUtils.isBlank(webhookSecret)) {
-            throw new RuntimeException("GoCardless webhook secret is blank");
+            return null;
+            // do not throw exception for now (until we have GoCardless webhook secret for testing)
+            //throw new RuntimeException("GoCardless webhook secret is blank");
         }
 
         return new WebhookVerifier(webhookSecret);
