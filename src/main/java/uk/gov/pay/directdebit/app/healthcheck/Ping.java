@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.app.healthchecks;
+package uk.gov.pay.directdebit.app.healthcheck;
 
 import com.codahale.metrics.health.HealthCheck;
 

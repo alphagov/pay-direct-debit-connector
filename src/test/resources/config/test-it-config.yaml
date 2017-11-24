@@ -1,10 +1,10 @@
 server:
   applicationConnectors:
     - type: http
-      port: ${PORT}
+      port: 0
   adminConnectors:
     - type: http
-      port: ${ADMIN_PORT}
+      port: 0
 
 logging:
     level: INFO
@@ -13,20 +13,18 @@ logging:
         threshold: ALL
         timeZone: UTC
         target: stdout
-        logFormat: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n"
+        logFormat: "[%thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n"
 
 goCardless:
-  # For initial integration we will use sandbox access token.
-  # When in live mode: access token should be removed from the config and we should use partner integration instead.
-  accessToken: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN:-}
-  webhookSecret: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_WEBHOOK_SECRET:-change-me}
-  environment: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ENVIRONMENT:-sandbox}
+  accessToken: accesstoken
+  webhookSecret: secret
+  environment: sandbox
 
 database:
   driverClass: org.postgresql.Driver
-  user: ${DB_USER}
-  password: ${DB_PASSWORD}
-  url: jdbc:postgresql://${DB_HOST}:5432/${DB_NAME:-directdebitconnector}?sslfactory=uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory&${DB_SSL_OPTION}
+  user: postgres
+  password: mysecretpassword
+  url:
 
   # the maximum amount of time to wait on an empty pool before throwing an exception
   maxWaitForConnection: 1s
