@@ -29,7 +29,7 @@ pipeline {
         }
       }
       steps {
-        sh 'mvn clean package'
+        sh 'mvn clean verify'
       }
     }
     stage('Maven Build Without Tests') {
