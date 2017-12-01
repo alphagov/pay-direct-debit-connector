@@ -18,6 +18,13 @@ public class DirectDebitConfig extends Configuration {
     @NotNull
     private DataSourceFactory dataSourceFactory;
 
+    @Valid
+    @NotNull
+    private LinksConfig links = new LinksConfig();
+
+    @NotNull
+    private ProxyConfiguration proxyConfiguration;
+
     @JsonProperty("database")
     public DataSourceFactory getDataSourceFactory() {
         return dataSourceFactory;
@@ -27,4 +34,15 @@ public class DirectDebitConfig extends Configuration {
     public GoCardlessFactory getGoCardless() {
         return goCardless;
     }
+
+
+    public LinksConfig getLinks() {
+        return links;
+    }
+
+    @JsonProperty("proxy")
+    public ProxyConfiguration getProxyConfiguration() {
+        return proxyConfiguration;
+    }
+
 }
