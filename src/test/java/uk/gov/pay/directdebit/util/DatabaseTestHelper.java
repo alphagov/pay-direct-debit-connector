@@ -35,16 +35,6 @@ public class DatabaseTestHelper {
         );
     }
 
-    public void add(TokenFixture token) {
-        jdbi.withHandle(handle ->
-                handle
-                        .createStatement("INSERT INTO tokens(charge_id, secure_redirect_token) VALUES (:charge_id, :secure_redirect_token)")
-                        .bind("charge_id", token.getChargeId())
-                        .bind("secure_redirect_token", token.getToken())
-                        .execute()
-        );
-    }
-
     public Map<String, Object> getPaymentRequestById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
@@ -53,30 +43,13 @@ public class DatabaseTestHelper {
                         .first()
         );
     }
-    public void add(PaymentRequestFixture paymentRequest) {
-        jdbi.withHandle(h ->
-                h.update(
-                        "INSERT INTO" +
-                                "    payment_requests(\n" +
-                                "        id,\n" +
-                                "        external_id,\n" +
-                                "        amount,\n" +
-                                "        gateway_account_id,\n" +
-                                "        return_url,\n" +
-                                "        description,\n" +
-                                "        created_date,\n" +
-                                "        reference\n" +
-                                "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?)\n",
-                        paymentRequest.getId(),
-                        paymentRequest.getExternalId(),
-                        paymentRequest.getAmount(),
-                        paymentRequest.getGatewayAccountId(),
-                        paymentRequest.getReturnUrl(),
-                        paymentRequest.getDescription(),
-                        Timestamp.from(paymentRequest.getCreatedDate().toInstant()),
-                        paymentRequest.getReference()
-                )
+    public Map<String, Object> getPaymentRequestEventById(Long id) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from payment_request_events p WHERE p.id = :id")
+                        .bind("id", id)
+                        .first()
         );
     }
+
 }
