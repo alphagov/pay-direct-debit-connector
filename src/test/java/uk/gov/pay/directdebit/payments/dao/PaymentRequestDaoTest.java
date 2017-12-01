@@ -11,7 +11,6 @@ import uk.gov.pay.directdebit.infra.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
-import uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -23,7 +22,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.paymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TokenFixture.tokenFixture;
-import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.*;
+import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 
 public class PaymentRequestDaoTest extends DaoITestBase {

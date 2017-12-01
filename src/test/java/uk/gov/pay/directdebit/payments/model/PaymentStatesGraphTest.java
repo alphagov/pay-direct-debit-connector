@@ -5,7 +5,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
-import uk.gov.pay.directdebit.payments.exception.UnsupportedPaymentRequestEventException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -32,7 +31,7 @@ public class PaymentStatesGraphTest {
 
     @Test
     public void getNextStateForEvent_shouldGiveTheNextStateIfEventIsValid() {
-        assertThat(paymentStatesGraph.getNextValidStateForEvent(NEW, SYSTEM_CANCEL), is(PaymentState.SYSTEM_CANCELLED));
+        assertThat(paymentStatesGraph.getNextStateForEvent(NEW, SYSTEM_CANCEL), is(PaymentState.SYSTEM_CANCELLED));
     }
 
     @Test
@@ -40,7 +39,7 @@ public class PaymentStatesGraphTest {
         thrown.expect(InvalidStateTransitionException.class);
         thrown.expectMessage("Transition WEBHOOK_ACTION_PAID_OUT from state NEW is not valid");
         thrown.reportMissingExceptionWithMessage("InvalidStateTransitionException expected");
-        paymentStatesGraph.getNextValidStateForEvent(NEW, WEBHOOK_ACTION_PAID_OUT);
+        paymentStatesGraph.getNextStateForEvent(NEW, WEBHOOK_ACTION_PAID_OUT);
     }
 
     @Test
@@ -52,3 +51,4 @@ public class PaymentStatesGraphTest {
         assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.ENTER_DIRECT_DEBIT_DETAILS, SupportedEvent.SYSTEM_CANCEL), is(false));
     }
 }
+

@@ -2,10 +2,7 @@ package uk.gov.pay.directdebit.util;
 
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.util.StringColumnMapper;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TokenFixture;
 
-import java.sql.Timestamp;
 import java.util.Map;
 
 public class DatabaseTestHelper {
@@ -52,4 +49,12 @@ public class DatabaseTestHelper {
         );
     }
 
+    public Map<String, Object> getTransactionById(Long id) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from transactions t WHERE t.id = :id")
+                        .bind("id", id)
+                        .first()
+        );
+    }
 }

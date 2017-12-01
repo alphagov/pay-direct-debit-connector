@@ -2,12 +2,13 @@ package uk.gov.pay.directdebit.payments.model;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.exception.UnsupportedPaymentRequestEventException;
 
 import java.time.ZonedDateTime;
 
 public class PaymentRequestEvent {
-    private static final Logger logger = LoggerFactory.getLogger(PaymentRequestEvent.class);
+    private static final Logger logger = PayLoggerFactory.getLogger(PaymentRequestEvent.class);
 
     private Long id;
     private Long paymentRequestId;
@@ -68,7 +69,7 @@ public class PaymentRequestEvent {
     }
 
     public enum Type {
-        CHARGE, MANDATE, PAYER;
+        CHARGE, MANDATE, PAYER
     }
 
     public enum SupportedEvent {

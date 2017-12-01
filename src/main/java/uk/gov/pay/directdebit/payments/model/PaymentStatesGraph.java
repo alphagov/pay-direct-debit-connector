@@ -54,7 +54,7 @@ public class PaymentStatesGraph {
         this.goCardlessGraphStates = buildGoCardlessStatesGraph();
     }
 
-    public PaymentState getNextValidStateForEvent(PaymentState from, SupportedEvent event) {
+    public PaymentState getNextStateForEvent(PaymentState from, SupportedEvent event) {
         return goCardlessGraphStates.successors(from).stream()
                 .filter(to -> isValidTransition(from, to, event))
                 .findFirst()
