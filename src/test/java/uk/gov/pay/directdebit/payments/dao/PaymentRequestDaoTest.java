@@ -41,10 +41,10 @@ public class PaymentRequestDaoTest extends DaoITestBase {
     @Before
     public void setup() throws IOException, LiquibaseException {
         paymentRequestDao = jdbi.onDemand(PaymentRequestDao.class);
-        this.testPaymentRequest = paymentRequestFixture(databaseTestHelper)
+        this.testPaymentRequest = paymentRequestFixture(jdbi)
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert();
-       this.testToken = tokenFixture(databaseTestHelper)
+       this.testToken = tokenFixture(jdbi)
                 .withChargeId(testPaymentRequest.getId())
                 .insert();
     }

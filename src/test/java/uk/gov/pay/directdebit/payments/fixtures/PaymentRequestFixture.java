@@ -1,15 +1,16 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
-import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
+import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, PaymentRequest> {
-    private DatabaseTestHelper databaseTestHelper;
+    private DBI jdbi;
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long gatewayAccountId = 23L;
     private String description = "Test description";
@@ -20,12 +21,12 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
 
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneId.of("UTC"));
 
-    public PaymentRequestFixture(DatabaseTestHelper databaseTestHelper) {
-        this.databaseTestHelper = databaseTestHelper;
+    public PaymentRequestFixture(DBI jdbi) {
+        this.jdbi = jdbi;
     }
 
-    public static PaymentRequestFixture paymentRequestFixture(DatabaseTestHelper databaseHelper) {
-        return new PaymentRequestFixture(databaseHelper);
+    public static PaymentRequestFixture paymentRequestFixture(DBI jdbi) {
+        return new PaymentRequestFixture(jdbi);
     }
 
     public PaymentRequestFixture withId(long id) {
@@ -97,7 +98,30 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
 
     @Override
     public PaymentRequestFixture insert() {
-        databaseTestHelper.add(this);
+        jdbi.withHandle(h ->
+                h.update(
+                        "INSERT INTO" +
+                                "    payment_requests(\n" +
+                                "        id,\n" +
+                                "        external_id,\n" +
+                                "        amount,\n" +
+                                "        gateway_account_id,\n" +
+                                "        return_url,\n" +
+                                "        description,\n" +
+                                "        created_date,\n" +
+                                "        reference\n" +
+                                "    )\n" +
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?)\n",
+                        id,
+                        externalId,
+                        amount,
+                        gatewayAccountId,
+                        returnUrl,
+                        description,
+                        Timestamp.from(createdDate.toInstant()),
+                        reference
+                )
+        );
         return this;
     }
 
