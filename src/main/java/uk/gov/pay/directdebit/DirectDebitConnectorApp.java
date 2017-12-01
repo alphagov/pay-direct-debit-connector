@@ -5,6 +5,8 @@ import com.google.inject.Injector;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
@@ -36,6 +38,12 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                         new EnvironmentVariableSubstitutor(NON_STRICT_VARIABLE_SUBSTITUTOR)
                 )
         );
+        bootstrap.addBundle(new MigrationsBundle<DirectDebitConfig>() {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DirectDebitConfig configuration) {
+                return configuration.getDataSourceFactory();
+            }
+        });
         bootstrap.addCommand(new DependentResourcesWaitCommand());
     }
 

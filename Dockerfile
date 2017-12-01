@@ -19,6 +19,7 @@ WORKDIR /app
 ADD target/*.yaml /app/
 ADD target/pay-*-allinone.jar /app/
 ADD docker-startup.sh /app/docker-startup.sh
+ADD docker-startup-with-db-migration.sh /app/docker-startup-with-db-migration.sh
 ADD chamber.sha256sum /app/chamber.sha256sum
 
 RUN apk add openssl && \
