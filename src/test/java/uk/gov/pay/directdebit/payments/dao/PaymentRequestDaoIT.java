@@ -39,18 +39,19 @@ public class PaymentRequestDaoIT extends DaoITestBase {
         this.testPaymentRequest = paymentRequestFixture(jdbi)
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert();
-        this.testToken = tokenFixture(jdbi)
-                .withChargeId(testPaymentRequest.getId())
+       this.testToken = tokenFixture(jdbi)
+                .withPaymentRequestId(testPaymentRequest.getId())
                 .insert();
     }
 
 
     @Test
     public void shouldInsertAPaymentRequest() {
-        Long id = paymentRequestDao.insert(testPaymentRequest.toEntity());
+        String externalId = "externalId";
+        Long id = paymentRequestDao.insert(testPaymentRequest.withExternalId(externalId).toEntity());
         Map<String, Object> foundPaymentRequest = databaseTestHelper.getPaymentRequestById(id);
         assertThat(foundPaymentRequest.get("id"), is(id));
-        assertThat(foundPaymentRequest.get("external_id"), is(testPaymentRequest.getExternalId()));
+        assertThat(foundPaymentRequest.get("external_id"), is(externalId));
         assertThat(foundPaymentRequest.get("amount"), is(testPaymentRequest.getAmount()));
         assertThat(foundPaymentRequest.get("reference"), is(testPaymentRequest.getReference()));
         assertThat(foundPaymentRequest.get("description"), is(testPaymentRequest.getDescription()));

@@ -15,11 +15,11 @@ public interface TokenDao {
     @SingleValueResult(Token.class)
     Optional<Token> findByTokenId(@Bind("token") String token);
 
-    @SqlQuery("SELECT * FROM tokens t WHERE t.charge_id = :chargeId")
+    @SqlQuery("SELECT * FROM tokens t WHERE t.payment_request_id = :paymentRequestId")
     @SingleValueResult(Token.class)
-    Optional<Token> findByChargeId(@Bind("chargeId") Long chargeId);
+    Optional<Token> findByPaymentId(@Bind("paymentRequestId") Long chargeId);
 
-    @SqlUpdate("INSERT INTO tokens(charge_id, secure_redirect_token) VALUES (:chargeId, :token)")
+    @SqlUpdate("INSERT INTO tokens(payment_request_id, secure_redirect_token) VALUES (:paymentRequestId, :token)")
     @GetGeneratedKeys
     Long insert(@BindBean Token token);
 }

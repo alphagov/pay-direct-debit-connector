@@ -13,19 +13,19 @@ public class DatabaseTestHelper {
         this.jdbi = jdbi;
     }
 
-    public Map<String, Object> getTokenByChargeId(Long chargeId) {
+    public Map<String, Object> getTokenByPaymentRequestId(Long paymentRequestId) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * from tokens t WHERE t.charge_id = :charge_id")
-                        .bind("charge_id", chargeId)
+                        .createQuery("SELECT * from tokens t WHERE t.payment_request_id = :payment_request_id  ORDER BY t.id DESC")
+                        .bind("payment_request_id", paymentRequestId)
                         .first()
         );
     }
 
-    public String getTokenByChargeExternalId(String externalId) {
+    public String getTokenByPaymentRequestExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT secure_redirect_token from tokens t JOIN payment_requests p ON p.id = t.charge_id WHERE p.external_id = :external_id ORDER BY t.id DESC")
+                        .createQuery("SELECT secure_redirect_token from tokens t JOIN payment_requests p ON p.id = t.payment_request_id WHERE p.external_id = :external_id ORDER BY t.id DESC")
                         .bind("external_id", externalId)
                         .map(StringColumnMapper.INSTANCE)
                         .first()

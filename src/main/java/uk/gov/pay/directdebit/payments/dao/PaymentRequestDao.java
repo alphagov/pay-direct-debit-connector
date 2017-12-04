@@ -20,7 +20,7 @@ public interface PaymentRequestDao {
     @SingleValueResult(PaymentRequest.class)
     Optional<PaymentRequest> findByExternalId(@Bind("externalId") String externalId);
 
-    @SqlQuery("SELECT * FROM payment_requests p INNER JOIN tokens t ON t.charge_id = p.id WHERE t.secure_redirect_token = :tokenId")
+    @SqlQuery("SELECT * FROM payment_requests p INNER JOIN tokens t ON t.payment_request_id = p.id WHERE t.secure_redirect_token = :tokenId")
     @SingleValueResult(PaymentRequest.class)
     Optional<PaymentRequest> findByTokenId(@Bind("tokenId") String tokenId);
 
