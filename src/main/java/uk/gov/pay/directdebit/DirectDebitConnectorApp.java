@@ -6,9 +6,11 @@ import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.jdbi.DBIFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.DirectDebitModule;
@@ -18,7 +20,14 @@ import uk.gov.pay.directdebit.app.healthcheck.Ping;
 import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
 import uk.gov.pay.directdebit.common.resources.V1ApiPaths;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
+import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
+import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
+import uk.gov.pay.directdebit.payments.dao.TokenDao;
+import uk.gov.pay.directdebit.payments.dao.TransactionDao;
+import uk.gov.pay.directdebit.payments.exception.ChageNotFoundExceptionMapper;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionExceptionMapper;
+import uk.gov.pay.directdebit.payments.resources.PaymentRequestResource;
+import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 
@@ -55,13 +64,22 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, V1ApiPaths.ROOT_PATH + "/*");
 
+
         environment.healthChecks().register("ping", new Ping());
         environment.healthChecks().register("database", injector.getInstance(Database.class));
 
+        final DBI jdbi = new DBIFactory().build(environment, configuration.getDataSourceFactory(), "postgresql");
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
+        environment.jersey().register(new PaymentRequestResource(new PaymentRequestService(
+                configuration,
+                jdbi.onDemand(PaymentRequestDao.class),
+                jdbi.onDemand(TokenDao.class),
+                jdbi.onDemand(PaymentRequestEventDao.class),
+                jdbi.onDemand(TransactionDao.class))));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new InvalidStateTransitionExceptionMapper());
+        environment.jersey().register(new ChageNotFoundExceptionMapper());
         setupSSL(configuration);
     }
 
@@ -72,7 +90,9 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         System.setProperty("https.proxyPort", configuration.getProxyConfiguration().getPort().toString());
     }
 
+
     public static void main(String[] args) throws Exception {
         new DirectDebitConnectorApp().run(args);
     }
 }
+
