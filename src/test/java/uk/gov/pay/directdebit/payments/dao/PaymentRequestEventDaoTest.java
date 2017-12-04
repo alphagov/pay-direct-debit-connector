@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.infra.DaoITestBase;
 import uk.gov.pay.directdebit.infra.DropwizardAppWithPostgresRule;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 
@@ -20,7 +19,7 @@ import java.util.Map;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.paymentRequestFixture;
-import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.*;
+import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 public class PaymentRequestEventDaoTest extends DaoITestBase {
 
