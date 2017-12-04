@@ -201,6 +201,7 @@
                     <testFailureIgnore>false</testFailureIgnore>
                     <excludes>
                         <exclude>**/*IT.java</exclude>
+                        <exclude>**/*IntegrationTestsSuite.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -218,7 +219,7 @@
                 </executions>
                 <configuration>
                     <includes>
-                        <include>**/*IT.java</include>
+                        <include>**/*IntegrationTestsSuite.java</include>
                     </includes>
                 </configuration>
             </plugin>

@@ -11,8 +11,8 @@ public class PostgresResetRule implements TestRule {
 
     private final DataSourceFactory dbConfig;
 
-    public PostgresResetRule(EnvironmentRule app) {
-        dbConfig = app.getConfiguration().getDataSourceFactory();
+    public PostgresResetRule(EnvironmentRule env) {
+        dbConfig = env.getConfiguration().getDataSourceFactory();
     }
 
     @Override

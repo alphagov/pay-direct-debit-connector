@@ -78,8 +78,4 @@ public class PostgresDockerRule implements TestRule {
             container = new PostgresContainer(DefaultDockerClient.fromEnv().build(), HOST);
         }
     }
-
-    public String getDriverClass() {
-        return "org.postgresql.Driver";
-    }
 }

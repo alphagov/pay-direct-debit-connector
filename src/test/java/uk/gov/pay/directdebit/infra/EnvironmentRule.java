@@ -22,6 +22,7 @@ import static uk.gov.pay.directdebit.infra.PostgresDockerRule.DB_NAME;
 public class EnvironmentRule implements TestRule {
 
     private final DropwizardAppRule appRule;
+    private final String configFilePath;
     private final RuleChain rules;
 
     public EnvironmentRule(ConfigOverride... configOverrides) {
@@ -29,6 +30,7 @@ public class EnvironmentRule implements TestRule {
     }
 
     private EnvironmentRule(String configPath, ConfigOverride... configOverrides) {
+        configFilePath = resourceFilePath(configPath);
         PostgresDockerRule postgres = new PostgresDockerRule();
         appRule = new DropwizardAppRule(DirectDebitConnectorApp.class,
                 resourceFilePath(configPath),
@@ -41,6 +43,8 @@ public class EnvironmentRule implements TestRule {
         return rules.apply(new Statement() {
             @Override
             public void evaluate() throws Throwable {
+                //FIXME This will be out of here
+                appRule.getApplication().run("db", "migrate", configFilePath);
                 restoreDropwizardsLogging();
                 base.evaluate();
             }
