@@ -18,6 +18,7 @@ import uk.gov.pay.directdebit.app.healthcheck.Ping;
 import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
 import uk.gov.pay.directdebit.common.resources.V1ApiPaths;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
+import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 
@@ -60,6 +61,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
+        environment.jersey().register(new InvalidStateTransitionExceptionMapper());
         setupSSL();
     }
 
