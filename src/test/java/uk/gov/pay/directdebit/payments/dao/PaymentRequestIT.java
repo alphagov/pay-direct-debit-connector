@@ -6,7 +6,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.DaoITestBase;
+import org.junit.runner.RunWith;
+import uk.gov.pay.directdebit.IntegrationTestsSuite;
+import uk.gov.pay.directdebit.infra.ITestBase;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
@@ -23,8 +25,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.pay
 import static uk.gov.pay.directdebit.payments.fixtures.TokenFixture.tokenFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
-
-public class PaymentRequestDaoIT extends DaoITestBase {
+public class PaymentRequestIT extends ITestBase {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();

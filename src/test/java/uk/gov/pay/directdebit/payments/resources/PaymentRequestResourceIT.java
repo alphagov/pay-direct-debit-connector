@@ -3,26 +3,27 @@ package uk.gov.pay.directdebit.payments.resources;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import io.restassured.response.ValidatableResponse;
+import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
-import uk.gov.pay.directdebit.resources.IntegrationTest;
+import uk.gov.pay.directdebit.infra.ITestBase;
 
 import javax.ws.rs.core.Response;
-
 import java.util.HashMap;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
+import static uk.gov.pay.directdebit.IntegrationTestsSuite.env;
 import static uk.gov.pay.directdebit.common.resources.V1ApiPaths.CHARGES_API_PATH;
 import static uk.gov.pay.directdebit.common.resources.V1ApiPaths.CHARGE_API_PATH;
-import static uk.gov.pay.directdebit.util.NumberMatcher.*;
+import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
-public class PaymentRequestResourceTest extends IntegrationTest {
+public class PaymentRequestResourceIT extends ITestBase {
     private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
     private static final String JSON_AMOUNT_KEY = "amount";
     private static final String JSON_REFERENCE_KEY = "reference";
@@ -34,7 +35,6 @@ public class PaymentRequestResourceTest extends IntegrationTest {
     private static final String accountId = "20";
 
     private Gson gson = new Gson();
-
     @Test
     public void shouldCreateAPaymentRequest() throws Exception {
 
@@ -65,7 +65,7 @@ public class PaymentRequestResourceTest extends IntegrationTest {
 
         String externalPaymentRequestId = response.extract().path(JSON_CHARGE_KEY).toString();
         String documentLocation = expectedPaymentRequestLocationFor(accountId, externalPaymentRequestId);
-        String chargeTokenId = app.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
+        String chargeTokenId = databaseTestHelper.getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
         String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + chargeTokenId;
         String hrefNextUrlPost = "http://Frontend" + FRONTEND_CARD_DETAILS_URL;
@@ -96,7 +96,7 @@ public class PaymentRequestResourceTest extends IntegrationTest {
 
         // Reload the charge token which as it should have changed
 
-        String newChargeTokenId = app.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
+        String newChargeTokenId = databaseTestHelper.getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
         String newHrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + newChargeTokenId;
 
@@ -173,8 +173,13 @@ public class PaymentRequestResourceTest extends IntegrationTest {
     }
 
     private String expectedPaymentRequestLocationFor(String accountId, String chargeId) {
-        return "http://localhost:" + app.getLocalPort() + CHARGE_API_PATH
+        return "http://localhost:" + env().getPort() + CHARGE_API_PATH
                 .replace("{accountId}", accountId)
                 .replace("{paymentRequestExternalId}", chargeId);
+    }
+
+    private RequestSpecification givenSetup() {
+        return given().port(env().getPort())
+                .contentType(JSON);
     }
 }
