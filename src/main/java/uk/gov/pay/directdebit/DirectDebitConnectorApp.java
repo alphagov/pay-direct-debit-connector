@@ -62,12 +62,14 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new InvalidStateTransitionExceptionMapper());
-        setupSSL();
+        setupSSL(configuration);
     }
 
-    private void setupSSL() {
+    private void setupSSL(DirectDebitConfig configuration) {
         SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
         HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory);
+        System.setProperty("https.proxyHost", configuration.getProxyConfiguration().getHost());
+        System.setProperty("https.proxyPort", configuration.getProxyConfiguration().getPort().toString());
     }
 
     public static void main(String[] args) throws Exception {
