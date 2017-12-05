@@ -7,7 +7,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.infra.DaoITestBase;
-import uk.gov.pay.directdebit.infra.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -21,10 +20,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.pay
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
 
-public class TransactionDaoTest extends DaoITestBase {
-
-    @Rule
-    public DropwizardAppWithPostgresRule postgres;
+public class TransactionDaoIT extends DaoITestBase {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();

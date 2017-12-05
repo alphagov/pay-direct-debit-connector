@@ -7,7 +7,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.infra.DaoITestBase;
-import uk.gov.pay.directdebit.infra.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
@@ -25,10 +24,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.TokenFixture.tokenFixture
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 
-public class PaymentRequestDaoTest extends DaoITestBase {
-
-    @Rule
-    public DropwizardAppWithPostgresRule postgres;
+public class PaymentRequestDaoIT extends DaoITestBase {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -43,7 +39,7 @@ public class PaymentRequestDaoTest extends DaoITestBase {
         this.testPaymentRequest = paymentRequestFixture(jdbi)
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert();
-       this.testToken = tokenFixture(jdbi)
+        this.testToken = tokenFixture(jdbi)
                 .withChargeId(testPaymentRequest.getId())
                 .insert();
     }

@@ -7,7 +7,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.infra.DaoITestBase;
-import uk.gov.pay.directdebit.infra.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -19,14 +18,11 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.*;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.paymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TokenFixture.tokenFixture;
 
 
-public class TokenDaoTest extends DaoITestBase {
-
-    @Rule
-    public DropwizardAppWithPostgresRule postgres;
+public class TokenDaoIT extends DaoITestBase {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -41,7 +37,7 @@ public class TokenDaoTest extends DaoITestBase {
         this.testPaymentRequest = paymentRequestFixture(jdbi)
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert();
-       this.testToken = tokenFixture(jdbi)
+        this.testToken = tokenFixture(jdbi)
                 .withChargeId(testPaymentRequest.getId())
                 .insert();
     }

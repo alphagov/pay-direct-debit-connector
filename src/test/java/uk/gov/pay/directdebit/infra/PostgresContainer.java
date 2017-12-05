@@ -20,70 +20,80 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Integer.parseInt;
+import static java.sql.DriverManager.*;
 import static java.util.stream.Collectors.joining;
 
-public class PostgresContainer {
+class PostgresContainer {
 
-    private static final Logger logger = LoggerFactory.getLogger(PostgresContainer.class);
+    static final String DB_USERNAME = "postgres";
+    static final String DB_PASSWORD = "mysecretpassword";
+
+    private static final Logger LOG = LoggerFactory.getLogger(PostgresContainer.class);
+    private static final String GOVUK_POSTGRES_IMAGE = "govukpay/postgres:9.4.4";
+    private static final String INTERNAL_PORT = "5432";
+    private static final int DB_TIMEOUT_SEC = 15;
 
     private final String containerId;
-    private final int port;
-    private DockerClient docker;
-    private String host;
+    private final DockerClient docker;
+    private final String postgresUri;
+
     private volatile boolean stopped = false;
 
-    private static final String GOVUK_POSTGRES_IMAGE = "govukpay/postgres:9.4.4";
-    private static final String DB_PASSWORD = "mysecretpassword";
-    private static final String DB_USERNAME = "postgres";
-    private static final int DB_TIMEOUT_SEC = 15;
-    private static final String INTERNAL_PORT = "5432";
-
-    public PostgresContainer(DockerClient docker, String host) throws InterruptedException, IOException, ClassNotFoundException, DockerException {
+    PostgresContainer(DockerClient docker, String host) throws Exception {
         Class.forName("org.postgresql.Driver");
-
-        this.docker = docker;
-        this.host = host;
-
         failsafeDockerPull(docker, GOVUK_POSTGRES_IMAGE);
-        docker.listImages(DockerClient.ListImagesParam.create("name", GOVUK_POSTGRES_IMAGE));
+        this.docker = docker;
+        this.containerId = createContainer(docker);
+        docker.startContainer(containerId);
+        this.postgresUri = "jdbc:postgresql://" + host + ":" + getContainerPortBy(docker, containerId) + "/";
+        registerShutdownHook();
+        waitForPostgresToStart();
+    }
 
+    String getPostgresDbUri() {
+        return postgresUri;
+    }
+
+    void stop() {
+        if (!stopped) {
+            try {
+                stopped = true;
+                LOG.info("Killing postgres container with ID: " + containerId);
+                LogStream logs = docker.logs(containerId, DockerClient.LogsParam.stdout(), DockerClient.LogsParam.stderr());
+                LOG.info("Killed container logs:\n");
+                logs.attach(System.out, System.err);
+                docker.stopContainer(containerId, 5);
+                docker.removeContainer(containerId);
+            } catch (Exception e) {
+                LOG.error("Could not shutdown " + containerId, e);
+            }
+        }
+    }
+
+    private String createContainer(DockerClient docker) throws DockerException, InterruptedException {
+        docker.listImages(DockerClient.ListImagesParam.create("name", GOVUK_POSTGRES_IMAGE));
         final HostConfig hostConfig = HostConfig.builder().logConfig(LogConfig.create("json-file")).publishAllPorts(true).build();
         ContainerConfig containerConfig = ContainerConfig.builder()
                 .image(GOVUK_POSTGRES_IMAGE)
                 .hostConfig(hostConfig)
                 .env("POSTGRES_USER=" + DB_USERNAME, "POSTGRES_PASSWORD=" + DB_PASSWORD)
                 .build();
-        containerId = docker.createContainer(containerConfig).id();
-        docker.startContainer(containerId);
-        port = hostPortNumber(docker.inspectContainer(containerId));
-        registerShutdownHook();
-        waitForPostgresToStart();
+        return docker.createContainer(containerConfig).id();
     }
 
-    public String getUsername() {
-        return DB_USERNAME;
-    }
-
-    public String getPassword() {
-        return DB_PASSWORD;
-    }
-
-    public String getConnectionUrl() {
-        return "jdbc:postgresql://" + host + ":" + port + "/";
+    private int getContainerPortBy(DockerClient docker, String containerId) throws Exception {
+        ContainerInfo containerInfo = docker.inspectContainer(containerId);
+        List<PortBinding> portBindings = containerInfo.networkSettings().ports().get(INTERNAL_PORT + "/tcp");
+        LOG.info("Postgres host port: {}", portBindings.stream().map(PortBinding::hostPort).collect(joining(", ")));
+        return parseInt(portBindings.get(0).hostPort());
     }
 
     private void failsafeDockerPull(DockerClient docker, String image) {
         try {
             docker.pull(image);
         } catch (Exception e) {
-            logger.error("Docker image " + image + " could not be pulled from DockerHub", e);
+            LOG.error("Docker image " + image + " could not be pulled from DockerHub", e);
         }
-    }
-
-    private static int hostPortNumber(ContainerInfo containerInfo) {
-        List<PortBinding> portBindings = containerInfo.networkSettings().ports().get(INTERNAL_PORT + "/tcp");
-        logger.info("Postgres host port: {}", portBindings.stream().map(PortBinding::hostPort).collect(joining(", ")));
-        return parseInt(portBindings.get(0).hostPort());
     }
 
     private void registerShutdownHook() {
@@ -100,37 +110,14 @@ public class PostgresContainer {
         if (!succeeded) {
             throw new RuntimeException("Postgres did not start in " + DB_TIMEOUT_SEC + " seconds.");
         }
-        logger.info("Postgres docker container started in {}.", timer.elapsed(TimeUnit.MILLISECONDS));
+        LOG.info("Postgres docker container started in {}.", timer.elapsed(TimeUnit.MILLISECONDS));
     }
 
     private boolean checkPostgresConnection() throws IOException {
-
-        Properties props = new Properties();
-        props.setProperty("user", DB_USERNAME);
-        props.setProperty("password", DB_PASSWORD);
-
-        try (Connection connection = DriverManager.getConnection(getConnectionUrl(), props)) {
+        try (Connection connection = getConnection(getPostgresDbUri(), DB_USERNAME, DB_PASSWORD)) {
             return true;
         } catch (Exception except) {
             return false;
-        }
-    }
-
-    public void stop() {
-        if (stopped) {
-            return;
-        }
-        try {
-            stopped = true;
-            System.out.println("Killing postgres container with ID: " + containerId);
-            LogStream logs = docker.logs(containerId, DockerClient.LogsParam.stdout(), DockerClient.LogsParam.stderr());
-            System.out.println("Killed container logs:\n");
-            logs.attach(System.out, System.err);
-            docker.stopContainer(containerId, 5);
-            docker.removeContainer(containerId);
-        } catch (DockerException | InterruptedException | IOException e) {
-            System.err.println("Could not shutdown " + containerId);
-            e.printStackTrace();
         }
     }
 }
