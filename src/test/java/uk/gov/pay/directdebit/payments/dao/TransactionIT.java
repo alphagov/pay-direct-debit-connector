@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.ITestBase;
+import uk.gov.pay.directdebit.infra.IntegrationTest;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -20,8 +20,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.paymentRequestFixture;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
-
-public class TransactionIT extends ITestBase {
+public class TransactionIT extends IntegrationTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();

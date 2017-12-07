@@ -160,7 +160,7 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void serviceCreate_shouldPopulateAResponse() throws Exception{
-        PaymentRequestResponse response = service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo).get();
+        PaymentRequestResponse response = service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
         ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
         verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
 
@@ -199,7 +199,7 @@ public class PaymentRequestServiceTest {
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 
 
-        PaymentRequestResponse response = service.getPaymentWithExternalId(paymentRequest.getExternalId(), uriInfo).get();
+        PaymentRequestResponse response = service.getPaymentWithExternalId(paymentRequest.getExternalId(), uriInfo);
         ArgumentCaptor<Token> tokenEntityArgumentCaptor = forClass(Token.class);
         verify(mockedTokenDao).insert(tokenEntityArgumentCaptor.capture());
         Token createdToken = tokenEntityArgumentCaptor.getValue();
@@ -233,7 +233,7 @@ public class PaymentRequestServiceTest {
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 
 
-        PaymentRequestResponse response = service.getPaymentWithExternalId(paymentRequest.getExternalId(), uriInfo).get();
+        PaymentRequestResponse response = service.getPaymentWithExternalId(paymentRequest.getExternalId(), uriInfo);
         verifyNoMoreInteractions(mockedTokenDao);
 
         assertThat(response.getAmount().toString(), is(AMOUNT));
@@ -247,21 +247,22 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void getPaymentWithExternalId_shouldNotReturnAResponse_ifPaymentDoesNotExist() throws URISyntaxException {
-        when(mockedPaymentRequestDao.findByExternalId(anyString())).thenReturn(Optional.empty());
-        Optional<PaymentRequestResponse> maybeResponse = service.getPaymentWithExternalId("not_existing", uriInfo);
-        verifyNoMoreInteractions(mockedTokenDao);
-
-        assertThat(maybeResponse.isPresent(), is(false));
+    public void getPaymentWithExternalId_shouldThrow_ifPaymentDoesNotExist() throws URISyntaxException {
+        String externalPaymentId = "not_existing";
+        when(mockedPaymentRequestDao.findByExternalId(externalPaymentId)).thenReturn(Optional.empty());
+        thrown.expect(ChargeNotFoundException.class);
+        thrown.expectMessage("No charges found for payment request with id: " + externalPaymentId);
+        thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
+        service.getPaymentWithExternalId(externalPaymentId, uriInfo);
     }
 
     @Test
-    public void getPaymentWithExternalId_shouldThrowExceptionIfNoChargeExistsForPayment() throws URISyntaxException {
+    public void getPaymentWithExternalId_shouldThrow_ifNoChargeExistsForPayment() throws URISyntaxException {
         PaymentRequest paymentRequest = new PaymentRequest(Long.parseLong(AMOUNT), RETURN_URL, GATEWAY_ACCOUNT_ID, DESCRIPTION, REFERENCE);
         when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId())).thenReturn(Optional.of(paymentRequest));
         thrown.expect(ChargeNotFoundException.class);
         thrown.expectMessage("No charges found for payment request with id: " + paymentRequest.getExternalId());
         thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
-        service.getPaymentWithExternalId(paymentRequest.getExternalId(), uriInfo).get();
+        service.getPaymentWithExternalId(paymentRequest.getExternalId(), uriInfo);
     }
 }

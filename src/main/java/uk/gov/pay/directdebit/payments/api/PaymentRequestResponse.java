@@ -108,7 +108,6 @@ public class PaymentRequestResponse {
 
     @Override
     public String toString() {
-        // Some services put PII in the description, so don’t include it in the stringification
         return "PaymentRequestResponse{" +
                 "dataLinks=" + dataLinks +
                 ", paymentRequestId='" + paymentExternalId + '\'' +

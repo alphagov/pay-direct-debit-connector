@@ -1,6 +1,9 @@
 package uk.gov.pay.directdebit.common.validation;
 
 
+import uk.gov.pay.directdebit.payments.exception.validation.InvalidFieldsException;
+import uk.gov.pay.directdebit.payments.exception.validation.InvalidSizeFieldsException;
+import uk.gov.pay.directdebit.payments.exception.validation.MissingMandatoryFieldsException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,19 +50,18 @@ public abstract class ApiValidation {
                 .collect(Collectors.toList());
     }
 
-    public Optional<ValidationError> validate(Map<String, String>  request) {
+    public void validate(Map<String, String>  request) {
         List<String> missingFields = checkMissingFields(request, requiredFields);
         if (!missingFields.isEmpty()) {
-            return Optional.of(new ValidationError(ValidationError.ErrorType.MISSING_MANDATORY_FIELDS, missingFields));
+            throw new MissingMandatoryFieldsException(missingFields);
         }
         List<String> invalidSizeFields = checkInvalidSizeFields(request, maximumFieldsSize);
         if (!invalidSizeFields.isEmpty()) {
-            return Optional.of(new ValidationError(ValidationError.ErrorType.INVALID_SIZE_FIELDS, invalidSizeFields));
+            throw new InvalidSizeFieldsException(invalidSizeFields);
         }
         List<String> invalidFields = validateParams(request, validators);
         if (!invalidFields.isEmpty()) {
-            return Optional.of(new ValidationError(ValidationError.ErrorType.INVALID_FIELDS, invalidFields));
+            throw new InvalidFieldsException(invalidFields);
         }
-        return Optional.empty();
     }
 }

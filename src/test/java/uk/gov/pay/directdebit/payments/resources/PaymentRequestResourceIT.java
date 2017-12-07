@@ -6,7 +6,8 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
-import uk.gov.pay.directdebit.infra.ITestBase;
+import uk.gov.pay.directdebit.IntegrationTestsSuite;
+import uk.gov.pay.directdebit.infra.IntegrationTest;
 
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -17,13 +18,12 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.pay.directdebit.IntegrationTestsSuite.env;
-import static uk.gov.pay.directdebit.common.resources.V1ApiPaths.CHARGES_API_PATH;
-import static uk.gov.pay.directdebit.common.resources.V1ApiPaths.CHARGE_API_PATH;
+import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGES_API_PATH;
+import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
-public class PaymentRequestResourceIT extends ITestBase {
+public class PaymentRequestResourceIT extends IntegrationTest {
     private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
     private static final String JSON_AMOUNT_KEY = "amount";
     private static final String JSON_REFERENCE_KEY = "reference";
@@ -35,6 +35,7 @@ public class PaymentRequestResourceIT extends ITestBase {
     private static final String accountId = "20";
 
     private Gson gson = new Gson();
+
     @Test
     public void shouldCreateAPaymentRequest() throws Exception {
 
@@ -173,13 +174,13 @@ public class PaymentRequestResourceIT extends ITestBase {
     }
 
     private String expectedPaymentRequestLocationFor(String accountId, String chargeId) {
-        return "http://localhost:" + env().getPort() + CHARGE_API_PATH
+        return "http://localhost:" + IntegrationTestsSuite.env().getPort() + CHARGE_API_PATH
                 .replace("{accountId}", accountId)
                 .replace("{paymentRequestExternalId}", chargeId);
     }
 
     private RequestSpecification givenSetup() {
-        return given().port(env().getPort())
+        return given().port(IntegrationTestsSuite.env().getPort())
                 .contentType(JSON);
     }
 }

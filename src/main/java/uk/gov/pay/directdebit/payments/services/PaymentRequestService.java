@@ -17,12 +17,15 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static uk.gov.pay.directdebit.common.resources.V1ApiPaths.CHARGE_API_PATH;
+import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 
 public class PaymentRequestService {
     private static final Logger logger = LoggerFactory.getLogger(PaymentRequestService.class);
@@ -82,7 +85,8 @@ public class PaymentRequestService {
                 dataLinks);
     }
 
-    public Optional<PaymentRequestResponse> create(Map<String, String> paymentRequestMap, Long accountId, UriInfo uriInfo) {
+    public PaymentRequestResponse create(Map<String, String> paymentRequestMap, Long accountId, UriInfo uriInfo) {
+        //todo when we check the account id, return  notFoundResponse("Unknown gateway account: " + accountId)) if not found
         PaymentRequest paymentRequest = new PaymentRequest(
                 new Long(paymentRequestMap.get("amount")),
                 paymentRequestMap.get("return_url"),
@@ -93,7 +97,7 @@ public class PaymentRequestService {
         paymentRequest.setId(id);
         insertCreatedEventFor(paymentRequest);
         Transaction createdTransaction = insertCreatedTransactionFor(paymentRequest);
-        return Optional.of(populateResponseWith(paymentRequest, createdTransaction, uriInfo));
+        return populateResponseWith(paymentRequest, createdTransaction, uriInfo);
     }
     private URI selfUriFor(UriInfo uriInfo, Long accountId, String chargeId) {
         return uriInfo.getBaseUriBuilder()
@@ -114,14 +118,15 @@ public class PaymentRequestService {
                 .build();
     }
 
-    public Optional<PaymentRequestResponse> getPaymentWithExternalId(String paymentExternalId, UriInfo uriInfo) {
+    public PaymentRequestResponse getPaymentWithExternalId(String paymentExternalId, UriInfo uriInfo) {
         return paymentRequestDao
                 .findByExternalId(paymentExternalId)
                 .map(paymentRequest ->  {
                     Transaction transaction = transactionDao.findByPaymentRequestId(paymentRequest.getId())
-                            .orElseThrow(() -> new ChargeNotFoundException(paymentRequest.getExternalId()));
+                            .orElseThrow(() -> new ChargeNotFoundException(paymentExternalId));
                     return populateResponseWith(paymentRequest, transaction, uriInfo);
-                });
+                })
+                .orElseThrow(() -> new ChargeNotFoundException(paymentExternalId));
     }
 
 

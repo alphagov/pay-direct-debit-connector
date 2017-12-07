@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.resources;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestValidator;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
 
@@ -13,12 +14,13 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
-import static uk.gov.pay.directdebit.common.resources.V1ApiPaths.CHARGES_API_PATH;
-import static uk.gov.pay.directdebit.common.resources.V1ApiPaths.CHARGE_API_PATH;
-import static uk.gov.pay.directdebit.common.util.ResponseUtil.*;
+import static uk.gov.pay.directdebit.common.resources.V1ApiPaths.ROOT_PATH;
 
 @Path("/")
 public class PaymentRequestResource {
+    //have to be /charges unless we change public api
+    public static final String CHARGE_API_PATH = ROOT_PATH +"/api/accounts/{accountId}/charges/{paymentRequestExternalId}";
+    public static final String CHARGES_API_PATH = ROOT_PATH +"/api/accounts/{accountId}/charges";
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentRequestResource.class);
     private final PaymentRequestService paymentRequestService;
@@ -33,31 +35,17 @@ public class PaymentRequestResource {
     @Path(CHARGE_API_PATH)
     @Produces(APPLICATION_JSON)
     public Response getCharge(@PathParam(ACCOUNT_ID) Long accountId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, @Context UriInfo uriInfo) {
-        return paymentRequestService.getPaymentWithExternalId(paymentRequestExternalId, uriInfo)
-                .map(chargeResponse -> Response.ok(chargeResponse).build())
-                .orElseGet(() -> responseWithChargeNotFound(paymentRequestExternalId));
+        PaymentRequestResponse response = paymentRequestService.getPaymentWithExternalId(paymentRequestExternalId, uriInfo);
+        return Response.ok(response).build();
     }
 
     @POST
     @Path(CHARGES_API_PATH)
     @Produces(APPLICATION_JSON)
     public Response createNewPaymentRequest(@PathParam(ACCOUNT_ID) Long accountId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
-        //this is a good case for an Either :P
-        return paymentRequestValidator.validate(paymentRequest).map(errors -> {
-                    switch(errors.getType()) {
-                        case MISSING_MANDATORY_FIELDS:
-                            return fieldsMissingResponse(errors.getFields());
-                        case INVALID_SIZE_FIELDS:
-                            return fieldsInvalidSizeResponse(errors.getFields());
-                        default:
-                            return fieldsInvalidResponse(errors.getFields());
-                    }
-                }
-        ).orElseGet(() -> {
-            logger.info("Creating new payment request - {}", paymentRequest.toString());
-            return paymentRequestService.create(paymentRequest, accountId, uriInfo)
-                    .map(response -> created(response.getLink("self")).entity(response).build())
-                    .orElseGet(() -> notFoundResponse("Unknown gateway account: " + accountId));
-        });
+        paymentRequestValidator.validate(paymentRequest);
+        logger.info("Creating new payment request - {}", paymentRequest.toString());
+        PaymentRequestResponse response = paymentRequestService.create(paymentRequest, accountId, uriInfo);
+        return created(response.getLink("self")).entity(response).build();
     }
 }

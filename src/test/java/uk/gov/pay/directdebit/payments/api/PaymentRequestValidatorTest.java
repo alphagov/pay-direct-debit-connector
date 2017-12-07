@@ -2,67 +2,71 @@ package uk.gov.pay.directdebit.payments.api;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.RandomStringUtils;
+import org.junit.Rule;
 import org.junit.Test;
-import uk.gov.pay.directdebit.common.validation.ValidationError;
+import org.junit.rules.ExpectedException;
+import uk.gov.pay.directdebit.payments.exception.validation.InvalidFieldsException;
+import uk.gov.pay.directdebit.payments.exception.validation.InvalidSizeFieldsException;
+import uk.gov.pay.directdebit.payments.exception.validation.MissingMandatoryFieldsException;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
 
 public class PaymentRequestValidatorTest {
 
     private PaymentRequestValidator paymentRequestValidator = new PaymentRequestValidator();
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void shouldNotReturnErrorIfRequestIsValid() {
+    public void shouldNotThrowExceptionIfRequestIsValid() {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "100",
                 "description", "bla",
                 "return_url", "blabla",
                 "reference", "blablabla"
         );
-        assertThat(paymentRequestValidator.validate(request).isPresent(), is(false));
+        paymentRequestValidator.validate(request);
     }
 
 
     @Test
-    public void shouldReturnErrorIfMissingRequiredFields() {
+    public void shouldThrowIfMissingRequiredFields() {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "100",
                 "description", "bla",
                 "return_url", "blabla"
         );
-        ValidationError validationError = paymentRequestValidator.validate(request).get();
-        assertThat(validationError.getType(), is(ValidationError.ErrorType.MISSING_MANDATORY_FIELDS));
-        assertThat(validationError.getFields(), is(Collections.singletonList("reference")));
+        thrown.expect(MissingMandatoryFieldsException.class);
+        thrown.expectMessage("Field(s) missing: [reference]");
+        thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
+        paymentRequestValidator.validate(request);
     }
 
     @Test
-    public void shouldReturnErrorIfFieldsAreOfWrongSize() {
+    public void shouldThrowIfFieldsAreOfWrongSize() {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "100",
                 "description", RandomStringUtils.random(256),
                 "return_url", "bla",
                 "reference", RandomStringUtils.random(256)
         );
-        ValidationError validationError = paymentRequestValidator.validate(request).get();
-        assertThat(validationError.getType(), is(ValidationError.ErrorType.INVALID_SIZE_FIELDS));
-        assertThat(validationError.getFields(), is(Arrays.asList("description", "reference")));
+        thrown.expect(InvalidSizeFieldsException.class);
+        thrown.expectMessage("Field(s) are too big: [description, reference]");
+        thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
+        paymentRequestValidator.validate(request);
     }
 
     @Test
-    public void shouldReturnErrorIfFieldsAreInvalid() {
+    public void shouldThrowIfFieldsAreInvalid() {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "10000001",
                 "description", "bla",
                 "return_url", "bla",
                 "reference", "blabla"
         );
-        ValidationError validationError = paymentRequestValidator.validate(request).get();
-        assertThat(validationError.getType(), is(ValidationError.ErrorType.INVALID_FIELDS));
-        assertThat(validationError.getFields(), is(Collections.singletonList("amount")));
+        thrown.expect(InvalidFieldsException.class);
+        thrown.expectMessage("Field(s) are invalid: [amount]");
+        thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
+        paymentRequestValidator.validate(request);
     }
 }
