@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
-public class ApiExceptionMapper implements ExceptionMapper<ApiException> {
+public class InternalServerErrorExceptionMapper implements ExceptionMapper<InternalServerErrorException> {
     /**
      * Map an exception to a {@link Response}.
      *
@@ -13,9 +13,9 @@ public class ApiExceptionMapper implements ExceptionMapper<ApiException> {
      * @return a response mapped from the supplied exception.
      */
     @Override
-    public Response toResponse(ApiException exception) {
+    public Response toResponse(InternalServerErrorException exception) {
         ImmutableMap<String, String> entity = ImmutableMap.of("message", exception.getMessage());
-        return Response.status(exception.getStatusCode()).entity(entity).build();
+        return Response.status(500).entity(entity).build();
     }
 
 }

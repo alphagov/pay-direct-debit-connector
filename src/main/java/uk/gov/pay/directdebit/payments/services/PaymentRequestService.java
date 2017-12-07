@@ -5,12 +5,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TokenDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
 import uk.gov.pay.directdebit.payments.model.*;
 
 import javax.ws.rs.core.UriBuilder;
@@ -28,7 +30,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 
 public class PaymentRequestService {
-    private static final Logger logger = LoggerFactory.getLogger(PaymentRequestService.class);
+    private static final Logger logger = PayLoggerFactory.getLogger(PaymentRequestService.class);
 
     private final LinksConfig linksConfig;
     private final TokenDao tokenDao;
@@ -124,9 +126,10 @@ public class PaymentRequestService {
                 .map(paymentRequest ->  {
                     Transaction transaction = transactionDao.findByPaymentRequestId(paymentRequest.getId())
                             .orElseThrow(() -> new ChargeNotFoundException(paymentExternalId));
+                    logger.info("Found charge for payment request with id: {}", paymentRequest.getExternalId());
                     return populateResponseWith(paymentRequest, transaction, uriInfo);
                 })
-                .orElseThrow(() -> new ChargeNotFoundException(paymentExternalId));
+                .orElseThrow(() -> new PaymentRequestNotFoundException(paymentExternalId));
     }
 
 
@@ -136,7 +139,7 @@ public class PaymentRequestService {
                 PaymentRequestEvent.Type.CHARGE,
                 PaymentRequestEvent.SupportedEvent.CHARGE_CREATED,
                 ZonedDateTime.now());
-        logger.info("Created event for charge {}", paymentRequest.getId());
+        logger.info("Created event for payment request {}", paymentRequest.getExternalId());
         paymentRequestEventDao.insert(paymentRequestEvent);
     }
     private Transaction insertCreatedTransactionFor(PaymentRequest paymentRequest) {
@@ -145,7 +148,7 @@ public class PaymentRequestService {
                 paymentRequest.getAmount(),
                 Transaction.Type.CHARGE,
                 PaymentStatesGraph.initialState());
-        logger.info("Created transaction for charge {}", paymentRequest.getId());
+        logger.info("Created transaction for payment request {}", paymentRequest.getExternalId());
         transactionDao.insert(transaction);
         return transaction;
     }

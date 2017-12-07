@@ -1,6 +1,8 @@
 package uk.gov.pay.directdebit.common.validation;
 
 
+import org.slf4j.Logger;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.exception.validation.InvalidFieldsException;
 import uk.gov.pay.directdebit.payments.exception.validation.InvalidSizeFieldsException;
 import uk.gov.pay.directdebit.payments.exception.validation.MissingMandatoryFieldsException;
@@ -13,6 +15,8 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.stream;
 
 public abstract class ApiValidation {
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(ApiValidation.class);
+
     private String[] requiredFields;
     private Map<String, Integer> maximumFieldsSize;
     private Map<String, Function<String, Boolean>> validators;
@@ -53,14 +57,17 @@ public abstract class ApiValidation {
     public void validate(Map<String, String>  request) {
         List<String> missingFields = checkMissingFields(request, requiredFields);
         if (!missingFields.isEmpty()) {
+            LOGGER.error("Error validating request {}, missing mandatory fields", request.getOrDefault("external_id", "unknown_id"));
             throw new MissingMandatoryFieldsException(missingFields);
         }
         List<String> invalidSizeFields = checkInvalidSizeFields(request, maximumFieldsSize);
         if (!invalidSizeFields.isEmpty()) {
+            LOGGER.error("Error validating request {}, fields are too big", request.getOrDefault("external_id", "unknown_id"));
             throw new InvalidSizeFieldsException(invalidSizeFields);
         }
         List<String> invalidFields = validateParams(request, validators);
         if (!invalidFields.isEmpty()) {
+            LOGGER.error("Error validating request {}, fields are invalid", request.getOrDefault("external_id", "unknown_id"));
             throw new InvalidFieldsException(invalidFields);
         }
     }

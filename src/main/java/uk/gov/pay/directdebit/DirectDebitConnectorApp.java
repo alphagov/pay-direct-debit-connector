@@ -18,7 +18,9 @@ import uk.gov.pay.directdebit.app.filters.LoggingFilter;
 import uk.gov.pay.directdebit.app.healthcheck.Database;
 import uk.gov.pay.directdebit.app.healthcheck.Ping;
 import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
-import uk.gov.pay.directdebit.common.exception.ApiExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.common.resources.V1ApiPaths;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
@@ -82,7 +84,9 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 jdbi.onDemand(PaymentRequestEventDao.class),
                 jdbi.onDemand(TransactionDao.class))));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
-        environment.jersey().register(new ApiExceptionMapper());
+        environment.jersey().register(new BadRequestExceptionMapper());
+        environment.jersey().register(new NotFoundExceptionMapper());
+        environment.jersey().register(new InternalServerErrorExceptionMapper());
         setupSSL(configuration);
     }
 

@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.payments.exception.validation;
 
 import com.google.common.base.Joiner;
-import uk.gov.pay.directdebit.common.exception.ApiException;
-import uk.gov.pay.directdebit.common.exception.ApiExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.BadRequestException;
 
 import java.util.List;

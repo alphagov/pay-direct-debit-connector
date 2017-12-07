@@ -18,6 +18,7 @@ import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TokenDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
 import uk.gov.pay.directdebit.payments.model.*;
 
 import javax.ws.rs.core.UriBuilder;
@@ -250,9 +251,9 @@ public class PaymentRequestServiceTest {
     public void getPaymentWithExternalId_shouldThrow_ifPaymentDoesNotExist() throws URISyntaxException {
         String externalPaymentId = "not_existing";
         when(mockedPaymentRequestDao.findByExternalId(externalPaymentId)).thenReturn(Optional.empty());
-        thrown.expect(ChargeNotFoundException.class);
-        thrown.expectMessage("No charges found for payment request with id: " + externalPaymentId);
-        thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
+        thrown.expect(PaymentRequestNotFoundException.class);
+        thrown.expectMessage("No payment request found with id: " + externalPaymentId);
+        thrown.reportMissingExceptionWithMessage("PaymentNotFoundException expected");
         service.getPaymentWithExternalId(externalPaymentId, uriInfo);
     }
 
