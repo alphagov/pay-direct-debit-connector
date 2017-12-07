@@ -6,19 +6,19 @@ public class Token {
 
     private Long id;
     private String token;
-    private Long chargeId;
+    private Long paymentRequestId;
 
-    public Token(Long id, String token, Long chargeId) {
+    public Token(Long id, String token, Long paymentRequestId) {
         this.id = id;
         this.token = token;
-        this.chargeId = chargeId;
+        this.paymentRequestId = paymentRequestId;
     }
 
-    public Token(String token, Long chargeId) {
-        this(null, token, chargeId);
+    public Token(String token, Long paymentRequestId) {
+        this(null, token, paymentRequestId);
     }
-    public static Token generateNewTokenFor(Long chargeId) {
-        return new Token(UUID.randomUUID().toString(), chargeId);
+    public static Token generateNewTokenFor(Long paymentRequestId) {
+        return new Token(UUID.randomUUID().toString(), paymentRequestId);
     }
 
     public Long getId() {
@@ -33,11 +33,11 @@ public class Token {
         this.token = token;
     }
 
-    public Long getChargeId() {
-        return chargeId;
+    public Long getPaymentRequestId() {
+        return paymentRequestId;
     }
 
-    public void setChargeId(Long chargeId) {
-        this.chargeId = chargeId;
+    public void setPaymentRequestId(Long paymentRequestId) {
+        this.paymentRequestId = paymentRequestId;
     }
 }

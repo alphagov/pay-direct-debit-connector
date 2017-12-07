@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.DaoITestBase;
+import uk.gov.pay.directdebit.infra.IntegrationTest;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
@@ -23,8 +23,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.pay
 import static uk.gov.pay.directdebit.payments.fixtures.TokenFixture.tokenFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
-
-public class PaymentRequestDaoIT extends DaoITestBase {
+public class PaymentRequestIT extends IntegrationTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -39,18 +38,19 @@ public class PaymentRequestDaoIT extends DaoITestBase {
         this.testPaymentRequest = paymentRequestFixture(jdbi)
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert();
-        this.testToken = tokenFixture(jdbi)
-                .withChargeId(testPaymentRequest.getId())
+       this.testToken = tokenFixture(jdbi)
+                .withPaymentRequestId(testPaymentRequest.getId())
                 .insert();
     }
 
 
     @Test
     public void shouldInsertAPaymentRequest() {
-        Long id = paymentRequestDao.insert(testPaymentRequest.toEntity());
+        String externalId = "externalId";
+        Long id = paymentRequestDao.insert(testPaymentRequest.withExternalId(externalId).toEntity());
         Map<String, Object> foundPaymentRequest = databaseTestHelper.getPaymentRequestById(id);
         assertThat(foundPaymentRequest.get("id"), is(id));
-        assertThat(foundPaymentRequest.get("external_id"), is(testPaymentRequest.getExternalId()));
+        assertThat(foundPaymentRequest.get("external_id"), is(externalId));
         assertThat(foundPaymentRequest.get("amount"), is(testPaymentRequest.getAmount()));
         assertThat(foundPaymentRequest.get("reference"), is(testPaymentRequest.getReference()));
         assertThat(foundPaymentRequest.get("description"), is(testPaymentRequest.getDescription()));

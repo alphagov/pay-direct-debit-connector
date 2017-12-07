@@ -6,8 +6,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.DaoITestBase;
+import uk.gov.pay.directdebit.infra.IntegrationTest;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
@@ -19,8 +20,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.paymentRequestFixture;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
-
-public class TransactionDaoIT extends DaoITestBase {
+public class TransactionIT extends IntegrationTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -50,5 +50,18 @@ public class TransactionDaoIT extends DaoITestBase {
         assertThat((Long) foundTransaction.get("amount"), isNumber(amount));
         assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(type));
         assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(state));
+    }
+
+    @Test
+    public void shouldGetATransactionByPaymentRequestId() {
+        Long paymentRequestId = testPaymentRequest.getId();
+        TransactionFixture transactionFixture = TransactionFixture.transactionFixture(jdbi)
+                .withPaymentRequestId(paymentRequestId).insert();
+        Transaction transaction = transactionDao.findByPaymentRequestId(paymentRequestId).get();
+        assertThat(transaction.getId(), is(transactionFixture.getId()));
+        assertThat(transaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(transaction.getType(), is(transactionFixture.getType()));
+        assertThat(transaction.getAmount(), is(transactionFixture.getAmount()));
+        assertThat(transaction.getState(), is(transactionFixture.getState()));
     }
 }

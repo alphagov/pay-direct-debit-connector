@@ -3,13 +3,7 @@ package uk.gov.pay.directdebit.payments.fixtures;
 import org.apache.commons.lang3.RandomUtils;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.util.DatabaseTestHelper;
-
-import java.sql.Timestamp;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, Transaction> {
     private DBI jdbi;
@@ -57,6 +51,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public Transaction.Type getType() {
         return type;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public PaymentState getState() {

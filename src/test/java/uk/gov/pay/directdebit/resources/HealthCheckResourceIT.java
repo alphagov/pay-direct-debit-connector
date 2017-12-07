@@ -11,13 +11,11 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.IntegrationTestsSuite.env;
 
 public class HealthCheckResourceIT {
-
     @Rule
     public PostgresResetRule postgresResetRule = new PostgresResetRule(env());
 
     @Test
     public void healthcheck_shouldReturnHealthy() {
-
         given()
                 .port(env().getPort())
                 .contentType(JSON)

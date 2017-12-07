@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.DaoITestBase;
+import uk.gov.pay.directdebit.infra.IntegrationTest;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -22,7 +22,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.pay
 import static uk.gov.pay.directdebit.payments.fixtures.TokenFixture.tokenFixture;
 
 
-public class TokenDaoIT extends DaoITestBase {
+public class TokenIT extends IntegrationTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -37,43 +37,40 @@ public class TokenDaoIT extends DaoITestBase {
         this.testPaymentRequest = paymentRequestFixture(jdbi)
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert();
-        this.testToken = tokenFixture(jdbi)
-                .withChargeId(testPaymentRequest.getId())
+       this.testToken = tokenFixture(jdbi)
+                .withPaymentRequestId(testPaymentRequest.getId())
                 .insert();
     }
 
 
     @Test
     public void shouldInsertAToken() {
-        String tokenId = "ldfbsdfsaf";
-        Long chargeId = 103244L;
-        Token token = new Token(tokenId, chargeId);
-        Long id = tokenDao.insert(token);
-        Map<String, Object> foundToken = databaseTestHelper.getTokenByChargeId(chargeId);
+        Long id = tokenDao.insert(testToken.toEntity());
+        Map<String, Object> foundToken = databaseTestHelper.getTokenByPaymentRequestId(testPaymentRequest.getId());
         assertThat(foundToken.get("id"), is(id));
-        assertThat(foundToken.get("charge_id"), is(chargeId));
-        assertThat(foundToken.get("secure_redirect_token"), is(tokenId));
+        assertThat(foundToken.get("payment_request_id"), is(testToken.getPaymentRequestId()));
+        assertThat(foundToken.get("secure_redirect_token"), is(testToken.getToken()));
     }
 
     @Test
     public void findByChargeId_shouldFindToken() {
-        Token token = tokenDao.findByChargeId(testPaymentRequest.getId()).get();
+        Token token = tokenDao.findByPaymentId(testPaymentRequest.getId()).get();
         assertThat(token.getId(), is(notNullValue()));
         assertThat(token.getToken(), is(testToken.getToken()));
-        assertThat(token.getChargeId(), is(testPaymentRequest.getId()));
+        assertThat(token.getPaymentRequestId(), is(testPaymentRequest.getId()));
     }
 
     @Test
     public void findByChargeId_shouldNotFindToken() {
         Long noExistingChargeId = 9876512L;
-        assertThat(tokenDao.findByChargeId(noExistingChargeId).isPresent(), is(false));
+        assertThat(tokenDao.findByPaymentId(noExistingChargeId).isPresent(), is(false));
     }
 
     @Test
     public void findByTokenId_shouldFindToken() {
         Token token = tokenDao.findByTokenId(testToken.getToken()).get();
         assertThat(token.getId(), is(notNullValue()));
-        assertThat(token.getChargeId(), is(testPaymentRequest.getId()));
+        assertThat(token.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(token.getToken(), is(testToken.getToken()));
     }
 

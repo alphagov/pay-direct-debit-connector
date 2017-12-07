@@ -9,11 +9,11 @@ import java.sql.SQLException;
 
 public class TokenMapper implements ResultSetMapper<Token> {
     private static final String ID_COLUMN = "id";
-    private static final String CHARGE_ID_COLUMN = "charge_id";
+    private static final String PAYMENT_REQUEST_ID_COLUMN = "payment_request_id";
     private static final String TOKEN_COLUMN = "secure_redirect_token";
 
     @Override
     public Token map(int index, ResultSet resultSet, StatementContext statementContext) throws SQLException {
-        return new Token(resultSet.getLong(ID_COLUMN), resultSet.getString(TOKEN_COLUMN), resultSet.getLong(CHARGE_ID_COLUMN));
+        return new Token(resultSet.getLong(ID_COLUMN), resultSet.getString(TOKEN_COLUMN), resultSet.getLong(PAYMENT_REQUEST_ID_COLUMN));
     }
 }

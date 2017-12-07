@@ -8,7 +8,7 @@ import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 import static uk.gov.pay.directdebit.IntegrationTestsSuite.env;
 
-public class DaoITestBase {
+public abstract class IntegrationTest {
 
     private final String databaseUrl = env().getConfiguration().getDataSourceFactory().getUrl();
     private final String username = env().getConfiguration().getDataSourceFactory().getUser();
@@ -26,4 +26,5 @@ public class DaoITestBase {
         jdbi.registerContainerFactory(new OptionalContainerFactory());
         databaseTestHelper = new DatabaseTestHelper(jdbi);
     }
+
 }
