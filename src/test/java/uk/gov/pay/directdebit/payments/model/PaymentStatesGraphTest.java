@@ -44,11 +44,11 @@ public class PaymentStatesGraphTest {
 
     @Test
     public void isValidTransition_shouldReturnTrueFromWhenTransitionIsExpected() {
-        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.ENTER_DIRECT_DEBIT_DETAILS, SupportedEvent.SHOW_ENTER_DIRECT_DEBIT_DETAILS), is(true));
+        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.ENTERING_DIRECT_DEBIT_DETAILS, SupportedEvent.TOKEN_EXCHANGE), is(true));
     }
     @Test
     public void isValidTransition_shouldReturnFalseWhenTransitionIsInvalid() {
-        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.ENTER_DIRECT_DEBIT_DETAILS, SupportedEvent.SYSTEM_CANCEL), is(false));
+        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.ENTERING_DIRECT_DEBIT_DETAILS, SupportedEvent.SYSTEM_CANCEL), is(false));
     }
 }
 

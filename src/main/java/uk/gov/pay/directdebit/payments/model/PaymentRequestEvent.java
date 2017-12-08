@@ -74,7 +74,7 @@ public class PaymentRequestEvent {
 
     public enum SupportedEvent {
         CHARGE_CREATED,
-        SHOW_ENTER_DIRECT_DEBIT_DETAILS,
+        TOKEN_EXCHANGE,
         SYSTEM_CANCEL,
         PAYMENT_EXPIRED,
         SHOW_CONFIRM,
