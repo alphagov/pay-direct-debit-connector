@@ -2,14 +2,13 @@ package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
-import uk.gov.pay.directdebit.payments.dao.TokenDao;
+import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
@@ -145,6 +144,7 @@ public class PaymentRequestService {
     private Transaction insertCreatedTransactionFor(PaymentRequest paymentRequest) {
         Transaction transaction = new Transaction(
                 paymentRequest.getId(),
+                paymentRequest.getExternalId(),
                 paymentRequest.getAmount(),
                 Transaction.Type.CHARGE,
                 PaymentStatesGraph.initialState());

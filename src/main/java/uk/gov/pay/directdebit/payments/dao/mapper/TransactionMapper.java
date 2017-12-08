@@ -13,12 +13,14 @@ public class TransactionMapper implements ResultSetMapper<Transaction> {
     private static final String AMOUNT_COLUMN = "amount";
     private static final String TYPE_COLUMN = "type";
     private static final String STATE_COLUMN = "state";
+    private static final String PAYMENT_REQUEST_EXTERNAL_ID = "external_id";
 
     @Override
     public Transaction map(int index, ResultSet resultSet, StatementContext statementContext) throws SQLException {
         return new Transaction(
                 resultSet.getLong(ID_COLUMN),
                 resultSet.getLong(PAYMENT_REQUEST_ID_COLUMN),
+                resultSet.getString(PAYMENT_REQUEST_EXTERNAL_ID),
                 resultSet.getLong(AMOUNT_COLUMN),
                 Transaction.Type.valueOf(resultSet.getString(TYPE_COLUMN)),
                 PaymentState.valueOf(resultSet.getString(STATE_COLUMN)));

@@ -17,10 +17,10 @@ import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.paymentRequestFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
-public class PaymentRequestEventIT extends IntegrationTest {
+public class PaymentRequestEventDaoIT extends IntegrationTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -31,9 +31,9 @@ public class PaymentRequestEventIT extends IntegrationTest {
     @Before
     public void setup() throws IOException, LiquibaseException {
         paymentRequestEventDao = jdbi.onDemand(PaymentRequestEventDao.class);
-        this.testPaymentRequest = paymentRequestFixture(jdbi)
+        this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
-                .insert();
+                .insert(jdbi);
     }
 
     @Test

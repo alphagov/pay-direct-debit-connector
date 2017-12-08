@@ -12,20 +12,19 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 
 public class PaymentRequestEventTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void shouldGetPaymentEventFromString() throws UnsupportedPaymentRequestEventException {
         assertThat(fromString("WEBHOOK_ACTION_CONFIRMED"), is(WEBHOOK_ACTION_CONFIRMED));
     }
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void shouldThrowExceptionIfUnknownEvent() throws UnsupportedPaymentRequestEventException {
         thrown.expect(Exception.class);
         thrown.expectMessage("Event \"blabla\" is not supported");
         thrown.reportMissingExceptionWithMessage("UnknownPaymentRequestEventException expected");
-        //any other expectations
         fromString("blabla");
     }
 }

@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.dao;
+package uk.gov.pay.directdebit.tokens.dao;
 
 import liquibase.exception.LiquibaseException;
 import org.apache.commons.lang3.RandomUtils;
@@ -8,8 +8,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.infra.IntegrationTest;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.payments.model.Token;
+import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 
 import java.io.IOException;
 import java.util.Map;
@@ -18,11 +18,11 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.paymentRequestFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TokenFixture.tokenFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 
 
-public class TokenIT extends IntegrationTest {
+public class TokenDaoIT extends IntegrationTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -34,12 +34,12 @@ public class TokenIT extends IntegrationTest {
     @Before
     public void setup() throws IOException, LiquibaseException {
         tokenDao = jdbi.onDemand(TokenDao.class);
-        this.testPaymentRequest = paymentRequestFixture(jdbi)
+        this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
-                .insert();
-       this.testToken = tokenFixture(jdbi)
+                .insert(jdbi);
+       this.testToken = aTokenFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .insert();
+                .insert(jdbi);
     }
 
 
@@ -78,5 +78,19 @@ public class TokenIT extends IntegrationTest {
     public void findByTokenId_shouldNotFindToken() {
         String tokenId = "non_existing_tokenId";
         assertThat(tokenDao.findByTokenId(tokenId), is(Optional.empty()));
+    }
+
+    @Test
+    public void deleteToken_shouldDeleteTokenAndReturnNumberOfAffectedRows() {
+        int numOfDeletedToken = tokenDao.deleteToken(testToken.getToken());
+        Optional<Token> maybeTokenAfterDeletion = tokenDao.findByTokenId(testToken.getToken());
+        assertThat(numOfDeletedToken, is(1));
+        assertThat(maybeTokenAfterDeletion.isPresent(), is(false));
+    }
+
+    @Test
+    public void deleteToken_shouldNotDeleteAnythingIfTokenDoesNotExist() {
+        int numOfDeletedToken = tokenDao.deleteToken("not_existing");
+        assertThat(numOfDeletedToken, is(0));
     }
 }

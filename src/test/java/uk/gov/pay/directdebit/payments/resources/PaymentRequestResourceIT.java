@@ -49,6 +49,7 @@ public class PaymentRequestResourceIT extends IntegrationTest {
                 .put(JSON_GATEWAY_ACC_KEY, accountId)
                 .put(JSON_RETURN_URL_KEY, returnUrl)
                 .build());
+
         String requestPath = CHARGES_API_PATH
                 .replace("{accountId}", accountId);
 
@@ -177,10 +178,5 @@ public class PaymentRequestResourceIT extends IntegrationTest {
         return "http://localhost:" + IntegrationTestsSuite.env().getPort() + CHARGE_API_PATH
                 .replace("{accountId}", accountId)
                 .replace("{paymentRequestExternalId}", chargeId);
-    }
-
-    private RequestSpecification givenSetup() {
-        return given().port(IntegrationTestsSuite.env().getPort())
-                .contentType(JSON);
     }
 }
