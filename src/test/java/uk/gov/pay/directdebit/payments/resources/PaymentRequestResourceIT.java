@@ -2,12 +2,21 @@ package uk.gov.pay.directdebit.payments.resources;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import io.dropwizard.jdbi.OptionalContainerFactory;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import uk.gov.pay.directdebit.IntegrationTestsSuite;
-import uk.gov.pay.directdebit.infra.IntegrationTest;
+import org.junit.runner.RunWith;
+import org.skife.jdbi.v2.DBI;
+import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.infra.PostgresResetRule;
+import uk.gov.pay.directdebit.junit.DropwizardConfig;
+import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
+import uk.gov.pay.directdebit.junit.DropwizardPortValue;
+import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -18,12 +27,19 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
+import static uk.gov.pay.directdebit.junit.DropwizardJUnitRunner.getDbConfig;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGES_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
-public class PaymentRequestResourceIT extends IntegrationTest {
+@RunWith(DropwizardJUnitRunner.class)
+@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+public class PaymentRequestResourceIT {
+
+    @Rule
+    public PostgresResetRule postgresResetRule = new PostgresResetRule(DropwizardJUnitRunner.getDbConfig());
+
     private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
     private static final String JSON_AMOUNT_KEY = "amount";
     private static final String JSON_REFERENCE_KEY = "reference";
@@ -34,7 +50,19 @@ public class PaymentRequestResourceIT extends IntegrationTest {
     private static final long AMOUNT = 6234L;
     private static final String accountId = "20";
 
+    private DBI jdbi;
+    private DatabaseTestHelper databaseTestHelper;
     private Gson gson = new Gson();
+
+    @DropwizardPortValue
+    private int port;
+
+    @Before
+    public void before() {
+        jdbi = new DBI(getDbConfig().getUrl(), getDbConfig().getUser(), getDbConfig().getPassword());
+        jdbi.registerContainerFactory(new OptionalContainerFactory());
+        databaseTestHelper = new DatabaseTestHelper(jdbi);
+    }
 
     @Test
     public void shouldCreateAPaymentRequest() throws Exception {
@@ -175,8 +203,13 @@ public class PaymentRequestResourceIT extends IntegrationTest {
     }
 
     private String expectedPaymentRequestLocationFor(String accountId, String chargeId) {
-        return "http://localhost:" + IntegrationTestsSuite.env().getPort() + CHARGE_API_PATH
+        return "http://localhost:" + port + CHARGE_API_PATH
                 .replace("{accountId}", accountId)
                 .replace("{paymentRequestExternalId}", chargeId);
+    }
+
+    private RequestSpecification givenSetup() {
+        return given().port(port)
+                .contentType(JSON);
     }
 }

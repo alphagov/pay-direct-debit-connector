@@ -8,7 +8,6 @@ import io.dropwizard.testing.ResourceHelpers;
 import org.apache.commons.lang3.tuple.Pair;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,7 +47,7 @@ final class DropwizardTestApplications {
             newApp.before();
             try {
                 newApp.getApplication().run("db", "migrate", resourceConfigFilePath);
-                createTemplate(((DirectDebitConfig)newApp.getConfiguration()).getDataSourceFactory());
+                createTemplate(((DirectDebitConfig) newApp.getConfiguration()).getDataSourceFactory());
             } catch (Exception e) {
                 throw new DropwizardJUnitRunnerException(e);
             }
@@ -61,7 +60,7 @@ final class DropwizardTestApplications {
     }
 
     static DataSourceFactory getFirstPostgresConfig() {
-        if(!apps.isEmpty()) {
+        if (!apps.isEmpty()) {
             return ((DirectDebitConfig) apps.values().iterator().next().getConfiguration()).getDataSourceFactory();
         }
         return null;

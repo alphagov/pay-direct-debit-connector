@@ -50,6 +50,7 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
         this.gatewayAccountId = gatewayAccountId;
         return this;
     }
+
     public PaymentRequestFixture withAmount(long amount) {
         this.amount = amount;
         return this;

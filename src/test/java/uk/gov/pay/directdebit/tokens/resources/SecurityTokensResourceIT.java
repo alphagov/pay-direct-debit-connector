@@ -1,27 +1,49 @@
 package uk.gov.pay.directdebit.tokens.resources;
 
+import io.dropwizard.jdbi.OptionalContainerFactory;
+import io.restassured.specification.RequestSpecification;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import uk.gov.pay.directdebit.infra.IntegrationTest;
+import org.junit.runner.RunWith;
+import org.skife.jdbi.v2.DBI;
+import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.infra.PostgresResetRule;
+import uk.gov.pay.directdebit.junit.DropwizardConfig;
+import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
+import uk.gov.pay.directdebit.junit.DropwizardPortValue;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 
+import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.*;
+import static uk.gov.pay.directdebit.junit.DropwizardJUnitRunner.getDbConfig;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
-public class SecurityTokensResourceIT extends IntegrationTest {
+@RunWith(DropwizardJUnitRunner.class)
+@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+public class SecurityTokensResourceIT {
+    @Rule
+    public PostgresResetRule postgresResetRule = new PostgresResetRule(DropwizardJUnitRunner.getDbConfig());
+
     private TokenFixture testToken;
     private TransactionFixture testTransaction;
     private PaymentRequestFixture testPaymentRequest;
+    private DBI jdbi;
+
+    @DropwizardPortValue
+    private int port;
 
     @Before
     public void setUp() {
+        jdbi = new DBI(getDbConfig().getUrl(), getDbConfig().getUser(), getDbConfig().getPassword());
+        jdbi.registerContainerFactory(new OptionalContainerFactory());
         testPaymentRequest = aPaymentRequestFixture().insert(jdbi);
         testTransaction = aTransactionFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
@@ -48,6 +70,11 @@ public class SecurityTokensResourceIT extends IntegrationTest {
                 .delete(tokensUrlFor(testToken.getToken()))
                 .then()
                 .statusCode(204);
+    }
+
+    private RequestSpecification givenSetup() {
+        return given().port(port)
+                .contentType(JSON);
     }
 
     private String tokensUrlFor(String id) {

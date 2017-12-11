@@ -14,13 +14,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Integer.parseInt;
-import static java.sql.DriverManager.*;
+import static java.sql.DriverManager.getConnection;
 import static java.util.stream.Collectors.joining;
 
 class PostgresContainer {

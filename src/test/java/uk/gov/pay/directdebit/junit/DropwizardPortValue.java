@@ -8,9 +8,9 @@ import java.lang.annotation.Target;
 /**
  * Optional field level annotation that injects an int value of the port of the given Dropwizard application.
  * Useful if unknown, such as a configuration that assigns an available port value like `server.applicationConnectors[0].port=0`
- *
+ * <p>
  * Example:
- *
+ * <p>
  * <pre>
  *  &#64;RunWith(DropwizardJUnitRunner.class)
  *  &#64;DropwizardConfig(app = MyApp.class, config = "config/test.yaml")

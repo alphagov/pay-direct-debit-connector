@@ -1,15 +1,23 @@
 package uk.gov.pay.directdebit.tokens.dao;
 
+import io.dropwizard.jdbi.OptionalContainerFactory;
 import liquibase.exception.LiquibaseException;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.IntegrationTest;
+import org.junit.runner.RunWith;
+import org.skife.jdbi.v2.DBI;
+import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.infra.PostgresResetRule;
+import uk.gov.pay.directdebit.junit.DropwizardConfig;
+import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
+import uk.gov.pay.directdebit.junit.DropwizardPortValue;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
+import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 import java.io.IOException;
 import java.util.Map;
@@ -18,11 +26,16 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.junit.DropwizardJUnitRunner.getDbConfig;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 
+@RunWith(DropwizardJUnitRunner.class)
+@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+public class TokenDaoIT {
 
-public class TokenDaoIT extends IntegrationTest {
+    @Rule
+    public PostgresResetRule postgresResetRule = new PostgresResetRule(DropwizardJUnitRunner.getDbConfig());
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -31,13 +44,23 @@ public class TokenDaoIT extends IntegrationTest {
     private PaymentRequestFixture testPaymentRequest;
     private TokenFixture testToken;
 
+    @DropwizardPortValue
+    private int port;
+
+    private DBI jdbi;
+    private DatabaseTestHelper databaseTestHelper;
+
+
     @Before
     public void setup() throws IOException, LiquibaseException {
+        jdbi = new DBI(getDbConfig().getUrl(), getDbConfig().getUser(), getDbConfig().getPassword());
+        jdbi.registerContainerFactory(new OptionalContainerFactory());
+        databaseTestHelper = new DatabaseTestHelper(jdbi);
         tokenDao = jdbi.onDemand(TokenDao.class);
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert(jdbi);
-       this.testToken = aTokenFixture()
+        this.testToken = aTokenFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .insert(jdbi);
     }

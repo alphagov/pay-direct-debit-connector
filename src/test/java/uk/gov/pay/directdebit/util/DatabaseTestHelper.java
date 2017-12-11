@@ -40,6 +40,7 @@ public class DatabaseTestHelper {
                         .first()
         );
     }
+
     public Map<String, Object> getPaymentRequestEventById(Long id) {
         return jdbi.withHandle(handle ->
                 handle

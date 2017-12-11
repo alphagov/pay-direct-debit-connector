@@ -18,15 +18,15 @@ public class PaymentRequestResponseTest {
         String description = "desc";
         String reference = "ref";
         String createdDate = ZonedDateTime.now().toString();
-     PaymentRequestResponse paymentRequestResponse = new PaymentRequestResponse(
-             paymentRequestId,
-             amount,
-             returnUrl,
-             description,
-             reference,
-             createdDate,
-             new ArrayList<>()
-     );
-     assertFalse(paymentRequestResponse.toString().contains(description));
+        PaymentRequestResponse paymentRequestResponse = new PaymentRequestResponse(
+                paymentRequestId,
+                amount,
+                returnUrl,
+                description,
+                reference,
+                createdDate,
+                new ArrayList<>()
+        );
+        assertFalse(paymentRequestResponse.toString().contains(description));
     }
 }

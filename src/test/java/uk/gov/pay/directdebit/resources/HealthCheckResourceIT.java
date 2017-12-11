@@ -1,10 +1,8 @@
 package uk.gov.pay.directdebit.resources;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.infra.PostgresResetRule;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardPortValue;
@@ -17,9 +15,6 @@ import static org.hamcrest.core.Is.is;
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class HealthCheckResourceIT {
-
-    @Rule
-    public PostgresResetRule postgresResetRule = new PostgresResetRule(DropwizardJUnitRunner.getDbConfig());
 
     @DropwizardPortValue
     private int port;
