@@ -1,12 +1,12 @@
 package uk.gov.pay.directdebit.junit;
 
-public class PostgresTestDockerException extends RuntimeException {
+class PostgresTestDockerException extends RuntimeException {
 
-    public PostgresTestDockerException(String message) {
+    PostgresTestDockerException(String message) {
         super(message);
     }
 
-    public PostgresTestDockerException(Throwable cause) {
+    PostgresTestDockerException(Throwable cause) {
         super(cause);
     }
 }

@@ -8,13 +8,13 @@ import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 public class TestContext {
 
     private final String databaseUrl;
+    private final String databaseUser;
+    private final String databasePassword;
     private DBI jdbi;
     // This should be out of the text context really (since it is a specific class for this project)
     // but is fine for now
     private DatabaseTestHelper databaseTestHelper;
     private int port;
-    private final String databaseUser;
-    private final String databasePassword;
 
     public TestContext(int port, DataSourceFactory dataSourceFactory) {
         databaseUrl = dataSourceFactory.getUrl();
@@ -38,15 +38,15 @@ public class TestContext {
         return port;
     }
 
-    public String getDatabaseUrl() {
+    String getDatabaseUrl() {
         return databaseUrl;
     }
 
-    public String getDatabaseUser() {
+    String getDatabaseUser() {
         return databaseUser;
     }
 
-    public String getDatabasePassword() {
+    String getDatabasePassword() {
         return databasePassword;
     }
 }

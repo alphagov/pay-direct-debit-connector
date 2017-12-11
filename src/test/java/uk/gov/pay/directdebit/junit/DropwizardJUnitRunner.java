@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.junit;
 
 import io.dropwizard.testing.ConfigOverride;
+import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkField;
@@ -8,12 +9,19 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.dropwizard.testing.ConfigOverride.config;
+import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static java.util.Arrays.stream;
 import static uk.gov.pay.directdebit.junit.DropwizardTestApplications.createIfNotRunning;
+import static uk.gov.pay.directdebit.junit.PostgresTemplate.createTemplate;
 import static uk.gov.pay.directdebit.junit.PostgresTemplate.restorePostgres;
+import static uk.gov.pay.directdebit.junit.PostgresTestContainer.DB_PASSWORD;
+import static uk.gov.pay.directdebit.junit.PostgresTestContainer.DB_USERNAME;
+import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbUri;
+import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getOrCreate;
 
 /**
  * Runs a Dropwizard application with the given {@link DropwizardConfig} before the Test class if there is not an
@@ -49,28 +57,37 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
         DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
         List<ConfigOverride> configOverride = newArrayList();
         if (dropwizardConfigAnnotation.withDockerPostgres()) {
-            PostgresTestDocker.getOrCreate(dropwizardConfigAnnotation.postgresDockerImage());
-            configOverride.add(config("database.url", PostgresTestDocker.getDbRootUri() + PostgresTestDocker.DB_NAME));
-            configOverride.add(config("database.user", PostgresTestContainer.DB_USERNAME));
-            configOverride.add(config("database.password", PostgresTestContainer.DB_PASSWORD));
+            getOrCreate(dropwizardConfigAnnotation.postgresDockerImage());
+            configOverride.add(config("database.url", getDbUri()));
+            configOverride.add(config("database.user", DB_USERNAME));
+            configOverride.add(config("database.password", DB_PASSWORD));
         }
-        createIfNotRunning(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config(), configOverride.toArray(new ConfigOverride[0]));
+        Optional<DropwizardTestSupport> createdApp = createIfNotRunning(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config(), configOverride.toArray(new ConfigOverride[0]));
+        if (dropwizardConfigAnnotation.withDockerPostgres() && createdApp.isPresent()) {
+            try {
+                createdApp.get().getApplication().run("db", "migrate", resourceFilePath(dropwizardConfigAnnotation.config()));
+                createTemplate(getDbUri(), DB_USERNAME, DB_PASSWORD);
+            } catch (Exception e) {
+                throw new DropwizardJUnitRunnerException(e);
+            }
+        }
+
         return super.classBlock(notifier);
     }
 
     @Override
     public Object createTest() throws Exception {
         Object testInstance = super.createTest();
-        DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
-        TestContext testContext = DropwizardTestApplications.getTestContextOf(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config());
-        addTestContextIfAnnotationIsDeclared(testInstance, testContext);
-        if (dropwizardConfigAnnotation.withDockerPostgres()) {
+        DropwizardConfig declaredConfiguration = dropwizardConfigAnnotation();
+        TestContext testContext = DropwizardTestApplications.getTestContextOf(declaredConfiguration.app(), declaredConfiguration.config());
+        setTestContextToDeclaredAnnotations(testInstance, testContext);
+        if (declaredConfiguration.withDockerPostgres()) {
             restorePostgres(testContext.getDatabaseUrl(), testContext.getDatabaseUser(), testContext.getDatabasePassword());
         }
         return testInstance;
     }
 
-    private void addTestContextIfAnnotationIsDeclared(Object testInstance, TestContext testContext) {
+    private void setTestContextToDeclaredAnnotations(Object testInstance, TestContext testContext) {
         List<FrameworkField> annotatedFields = getTestClass().getAnnotatedFields();
         annotatedFields.forEach(frameworkField -> stream(frameworkField.getAnnotations())
                 .filter(annotation -> annotation.annotationType().equals(DropwizardTestContext.class))

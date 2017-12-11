@@ -8,10 +8,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.Runtime.getRuntime;
-import static uk.gov.pay.directdebit.junit.PostgresTemplate.createTemplate;
 
 /**
  * Runs and hold current Dropwizard Applications running
@@ -35,7 +35,7 @@ final class DropwizardTestApplications {
         }));
     }
 
-    static void createIfNotRunning(Class<? extends Application> appClass, String configClasspathLocation, ConfigOverride... configOverrides) {
+    static Optional<DropwizardTestSupport> createIfNotRunning(Class<? extends Application> appClass, String configClasspathLocation, ConfigOverride... configOverrides) {
         Pair<Class<? extends Application>, String> key = Pair.of(appClass, configClasspathLocation);
         if (!apps.containsKey(key)) {
             String resourceConfigFilePath = ResourceHelpers.resourceFilePath(configClasspathLocation);
@@ -44,13 +44,9 @@ final class DropwizardTestApplications {
                     configOverrides);
             apps.put(key, newApp);
             newApp.before();
-            try {
-                newApp.getApplication().run("db", "migrate", resourceConfigFilePath);
-                createTemplate(((DirectDebitConfig) newApp.getConfiguration()).getDataSourceFactory());
-            } catch (Exception e) {
-                throw new DropwizardJUnitRunnerException(e);
-            }
+            return Optional.of(newApp);
         }
+        return Optional.empty();
     }
 
     static TestContext getTestContextOf(Class<? extends Application<?>> appClass, String configClasspathLocation) {

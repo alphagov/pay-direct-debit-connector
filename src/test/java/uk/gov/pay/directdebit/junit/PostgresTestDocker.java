@@ -65,4 +65,8 @@ final class PostgresTestDocker {
     static String getDbRootUri() {
         return container.getPostgresDbUri();
     }
+
+    static String getDbUri() {
+        return getDbRootUri() + DB_NAME;
+    }
 }
