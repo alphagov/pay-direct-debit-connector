@@ -5,7 +5,8 @@ import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardPortValue;
+import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import uk.gov.pay.directdebit.junit.TestContext;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -16,13 +17,13 @@ import static org.hamcrest.core.Is.is;
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class HealthCheckResourceIT {
 
-    @DropwizardPortValue
-    private int port;
+    @DropwizardTestContext
+    private TestContext testContext;
 
     @Test
     public void healthcheck_shouldReturnHealthy() {
         given()
-                .port(port)
+                .port(testContext.getPort())
                 .contentType(JSON)
                 .when()
                 .accept(JSON)

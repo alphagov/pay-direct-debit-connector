@@ -8,9 +8,7 @@ import org.junit.runners.model.FrameworkField;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.dropwizard.testing.ConfigOverride.config;
@@ -73,24 +71,23 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
     public Object createTest() throws Exception {
         Object testInstance = super.createTest();
         List<FrameworkField> annotatedFields = getTestClass().getAnnotatedFields();
+
         annotatedFields.forEach(frameworkField -> stream(frameworkField.getAnnotations())
-                .filter(annotation -> annotation.annotationType().equals(DropwizardPortValue.class))
-                .findFirst().ifPresent(injectPortValue(testInstance, frameworkField)));
+                .filter(annotation -> annotation.annotationType().equals(DropwizardTestContext.class))
+                .findFirst().ifPresent(annotation1 -> {
+                    frameworkField.getField().setAccessible(true);
+                    try {
+                        DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
+                        frameworkField.getField().set(testInstance, new TestContext(DropwizardTestApplications.getPort(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config()),
+                                DropwizardTestApplications.getFirstPostgresConfig()));
+                    } catch (IllegalAccessException e) {
+                        throw new DropwizardJUnitRunnerException(e);
+                    }
+                }));
+
+
         restoreTemplate(getDbConfig());
         return testInstance;
-    }
-
-    private Consumer<Annotation> injectPortValue(Object testInstance, FrameworkField frameworkField) {
-        return annotation -> {
-            frameworkField.getField().setAccessible(true);
-            try {
-                DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
-                frameworkField.getField().setInt(testInstance,
-                        DropwizardTestApplications.getPort(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config()));
-            } catch (IllegalAccessException e) {
-                throw new DropwizardJUnitRunnerException(e);
-            }
-        };
     }
 
     private DropwizardConfig dropwizardConfigAnnotation() {

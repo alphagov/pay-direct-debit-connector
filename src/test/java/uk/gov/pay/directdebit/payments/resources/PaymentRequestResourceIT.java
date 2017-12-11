@@ -2,19 +2,16 @@ package uk.gov.pay.directdebit.payments.resources;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import io.dropwizard.jdbi.OptionalContainerFactory;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardPortValue;
-import uk.gov.pay.directdebit.util.DatabaseTestHelper;
+import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import uk.gov.pay.directdebit.junit.TestContext;
 
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -25,11 +22,11 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.pay.directdebit.junit.DropwizardJUnitRunner.getDbConfig;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGES_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
+
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -45,19 +42,10 @@ public class PaymentRequestResourceIT {
     private static final long AMOUNT = 6234L;
     private static final String accountId = "20";
 
-    private DBI jdbi;
-    private DatabaseTestHelper databaseTestHelper;
     private Gson gson = new Gson();
 
-    @DropwizardPortValue
-    private int port;
-
-    @Before
-    public void before() {
-        jdbi = new DBI(getDbConfig().getUrl(), getDbConfig().getUser(), getDbConfig().getPassword());
-        jdbi.registerContainerFactory(new OptionalContainerFactory());
-        databaseTestHelper = new DatabaseTestHelper(jdbi);
-    }
+    @DropwizardTestContext
+    private TestContext testContext;
 
     @Test
     public void shouldCreateAPaymentRequest() throws Exception {
@@ -90,7 +78,7 @@ public class PaymentRequestResourceIT {
 
         String externalPaymentRequestId = response.extract().path(JSON_CHARGE_KEY).toString();
         String documentLocation = expectedPaymentRequestLocationFor(accountId, externalPaymentRequestId);
-        String chargeTokenId = databaseTestHelper.getTokenByPaymentRequestExternalId(externalPaymentRequestId);
+        String chargeTokenId = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
         String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + chargeTokenId;
         String hrefNextUrlPost = "http://Frontend" + FRONTEND_CARD_DETAILS_URL;
@@ -121,7 +109,7 @@ public class PaymentRequestResourceIT {
 
         // Reload the charge token which as it should have changed
 
-        String newChargeTokenId = databaseTestHelper.getTokenByPaymentRequestExternalId(externalPaymentRequestId);
+        String newChargeTokenId = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
         String newHrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + newChargeTokenId;
 
@@ -198,13 +186,13 @@ public class PaymentRequestResourceIT {
     }
 
     private String expectedPaymentRequestLocationFor(String accountId, String chargeId) {
-        return "http://localhost:" + port + CHARGE_API_PATH
+        return "http://localhost:" + testContext.getPort() + CHARGE_API_PATH
                 .replace("{accountId}", accountId)
                 .replace("{paymentRequestExternalId}", chargeId);
     }
 
     private RequestSpecification givenSetup() {
-        return given().port(port)
+        return given().port(testContext.getPort())
                 .contentType(JSON);
     }
 }
