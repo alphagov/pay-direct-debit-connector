@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.junit;
 
-import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.testing.ConfigOverride;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -14,7 +13,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static java.util.Arrays.stream;
 import static uk.gov.pay.directdebit.junit.DropwizardTestApplications.createIfNotRunning;
-import static uk.gov.pay.directdebit.junit.PostgresTemplate.restoreTemplate;
+import static uk.gov.pay.directdebit.junit.PostgresTemplate.restorePostgres;
 
 /**
  * Runs a Dropwizard application with the given {@link DropwizardConfig} before the Test class if there is not an
@@ -45,10 +44,6 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
         super(testClass);
     }
 
-    public static final DataSourceFactory getDbConfig() {
-        return DropwizardTestApplications.getFirstPostgresConfig();
-    }
-
     @Override
     protected Statement classBlock(final RunNotifier notifier) {
         DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
@@ -66,24 +61,28 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
     @Override
     public Object createTest() throws Exception {
         Object testInstance = super.createTest();
-        List<FrameworkField> annotatedFields = getTestClass().getAnnotatedFields();
+        DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
+        TestContext testContext = DropwizardTestApplications.getTestContextOf(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config());
+        addTestContextIfAnnotationIsDeclared(testInstance, testContext);
+        if (dropwizardConfigAnnotation.withDockerPostgres()) {
+            restorePostgres(testContext.getDatabaseUrl(), testContext.getDatabaseUser(), testContext.getDatabasePassword());
+        }
+        return testInstance;
+    }
 
+    private void addTestContextIfAnnotationIsDeclared(Object testInstance, TestContext testContext) {
+        List<FrameworkField> annotatedFields = getTestClass().getAnnotatedFields();
         annotatedFields.forEach(frameworkField -> stream(frameworkField.getAnnotations())
                 .filter(annotation -> annotation.annotationType().equals(DropwizardTestContext.class))
-                .findFirst().ifPresent(annotation1 -> {
+                .findFirst()
+                .ifPresent(testContextAnnotation -> {
                     frameworkField.getField().setAccessible(true);
                     try {
-                        DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
-                        frameworkField.getField().set(testInstance, new TestContext(DropwizardTestApplications.getPort(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config()),
-                                DropwizardTestApplications.getFirstPostgresConfig()));
+                        frameworkField.getField().set(testInstance, testContext);
                     } catch (IllegalAccessException e) {
                         throw new DropwizardJUnitRunnerException(e);
                     }
                 }));
-
-
-        restoreTemplate(getDbConfig());
-        return testInstance;
     }
 
     private DropwizardConfig dropwizardConfigAnnotation() {
@@ -92,9 +91,4 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
                 .findFirst()
                 .orElseThrow(() -> new DropwizardJUnitRunnerException("DropwizardJUnitRunner requires annotation @DropwizardConfig to be present"));
     }
-
-    //private void restoreDropwizardsLogging() {
-    //    appRule.getConfiguration().getLoggingFactory()
-    //            .configure(appRule.getEnvironment().metrics(), appRule.getApplication().getName());
-    //}
 }

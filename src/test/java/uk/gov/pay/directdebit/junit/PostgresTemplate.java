@@ -21,8 +21,8 @@ public class PostgresTemplate {
         }
     }
 
-    public static void restoreTemplate(DataSourceFactory source) {
-        PostgresConfig config = PostgresConfig.valueOf(source);
+    public static void restorePostgres(String databaseUrl, String user, String password) {
+        PostgresConfig config = PostgresConfig.valueOf(databaseUrl, user, password);
         try (Connection connection = getConnection(config.getDatabaseRootUri(), config.getUserName(), config.getPassword())) {
             terminateDbConnections(connection, config.getDatabaseName());
             connection.createStatement().execute("DROP DATABASE " + config.getDatabaseName());
@@ -51,10 +51,15 @@ public class PostgresTemplate {
             this.databaseRootUri = databaseRootUri;
         }
 
-        private static final PostgresConfig valueOf(DataSourceFactory datasource) {
+        private static PostgresConfig valueOf(DataSourceFactory datasource) {
             String databaseUri = datasource.getUrl();
             int indexDbName = databaseUri.lastIndexOf("/");
             return new PostgresConfig(datasource.getUser(), datasource.getPassword(), databaseUri.substring(indexDbName + 1), databaseUri.substring(0, indexDbName + 1));
+        }
+
+        private static PostgresConfig valueOf(String databaseUri, String user, String password) {
+            int indexDbName = databaseUri.lastIndexOf("/");
+            return new PostgresConfig(user, password, databaseUri.substring(indexDbName + 1), databaseUri.substring(0, indexDbName + 1));
         }
 
         String getUserName() {

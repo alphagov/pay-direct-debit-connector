@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.junit;
 
 import io.dropwizard.Application;
-import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
@@ -54,16 +53,9 @@ final class DropwizardTestApplications {
         }
     }
 
-    static int getPort(Class<? extends Application<?>> appClass, String configClasspathLocation) {
-        Pair<Class<? extends Application>, String> key = Pair.of(appClass, configClasspathLocation);
-        return apps.get(key).getLocalPort();
+    static TestContext getTestContextOf(Class<? extends Application<?>> appClass, String configClasspathLocation) {
+        Pair<Class<? extends Application>, String> appConfig = Pair.of(appClass, configClasspathLocation);
+        DropwizardTestSupport application = apps.get(appConfig);
+        return new TestContext(application.getLocalPort(), ((DirectDebitConfig) application.getConfiguration()).getDataSourceFactory());
     }
-
-    static DataSourceFactory getFirstPostgresConfig() {
-        if (!apps.isEmpty()) {
-            return ((DirectDebitConfig) apps.values().iterator().next().getConfiguration()).getDataSourceFactory();
-        }
-        return null;
-    }
-
 }
