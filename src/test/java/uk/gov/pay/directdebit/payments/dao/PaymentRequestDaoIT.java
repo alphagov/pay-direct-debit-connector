@@ -10,13 +10,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.infra.PostgresResetRule;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardPortValue;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
-import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 import java.io.IOException;
@@ -37,12 +35,8 @@ import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 public class PaymentRequestDaoIT {
 
     @Rule
-    public PostgresResetRule postgresResetRule = new PostgresResetRule(DropwizardJUnitRunner.getDbConfig());
-
-    @Rule
     public ExpectedException expectedException = ExpectedException.none();
     private PaymentRequestDao paymentRequestDao;
-    private TokenFixture testToken;
     private PaymentRequestFixture testPaymentRequest;
 
     @DropwizardPortValue
@@ -60,7 +54,7 @@ public class PaymentRequestDaoIT {
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert(jdbi);
-        this.testToken = aTokenFixture()
+        aTokenFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .insert(jdbi);
     }

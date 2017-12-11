@@ -7,12 +7,10 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.infra.PostgresResetRule;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardPortValue;
@@ -36,9 +34,6 @@ import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLi
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class PaymentRequestResourceIT {
-
-    @Rule
-    public PostgresResetRule postgresResetRule = new PostgresResetRule(DropwizardJUnitRunner.getDbConfig());
 
     private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
     private static final String JSON_AMOUNT_KEY = "amount";

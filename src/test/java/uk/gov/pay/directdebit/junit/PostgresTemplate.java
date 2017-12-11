@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.infra;
+package uk.gov.pay.directdebit.junit;
 
 import io.dropwizard.db.DataSourceFactory;
 
@@ -21,7 +21,7 @@ public class PostgresTemplate {
         }
     }
 
-    static void restoreTemplate(DataSourceFactory source) {
+    public static void restoreTemplate(DataSourceFactory source) {
         PostgresConfig config = PostgresConfig.valueOf(source);
         try (Connection connection = getConnection(config.getDatabaseRootUri(), config.getUserName(), config.getPassword())) {
             terminateDbConnections(connection, config.getDatabaseName());

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.Runtime.getRuntime;
-import static uk.gov.pay.directdebit.infra.PostgresTemplate.createTemplate;
+import static uk.gov.pay.directdebit.junit.PostgresTemplate.createTemplate;
 
 /**
  * Runs and hold current Dropwizard Applications running

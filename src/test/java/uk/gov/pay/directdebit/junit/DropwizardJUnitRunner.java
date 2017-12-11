@@ -16,6 +16,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static java.util.Arrays.stream;
 import static uk.gov.pay.directdebit.junit.DropwizardTestApplications.createIfNotRunning;
+import static uk.gov.pay.directdebit.junit.PostgresTemplate.restoreTemplate;
 
 /**
  * Runs a Dropwizard application with the given {@link DropwizardConfig} before the Test class if there is not an
@@ -46,6 +47,10 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
         super(testClass);
     }
 
+    public static final DataSourceFactory getDbConfig() {
+        return DropwizardTestApplications.getFirstPostgresConfig();
+    }
+
     @Override
     protected Statement classBlock(final RunNotifier notifier) {
         DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
@@ -71,6 +76,7 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
         annotatedFields.forEach(frameworkField -> stream(frameworkField.getAnnotations())
                 .filter(annotation -> annotation.annotationType().equals(DropwizardPortValue.class))
                 .findFirst().ifPresent(injectPortValue(testInstance, frameworkField)));
+        restoreTemplate(getDbConfig());
         return testInstance;
     }
 
@@ -94,7 +100,8 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
                 .orElseThrow(() -> new DropwizardJUnitRunnerException("DropwizardJUnitRunner requires annotation @DropwizardConfig to be present"));
     }
 
-    public static final DataSourceFactory getDbConfig() {
-        return DropwizardTestApplications.getFirstPostgresConfig();
-    }
+    //private void restoreDropwizardsLogging() {
+    //    appRule.getConfiguration().getLoggingFactory()
+    //            .configure(appRule.getEnvironment().metrics(), appRule.getApplication().getName());
+    //}
 }

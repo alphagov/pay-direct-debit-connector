@@ -3,12 +3,10 @@ package uk.gov.pay.directdebit.tokens.resources;
 import io.dropwizard.jdbi.OptionalContainerFactory;
 import io.restassured.specification.RequestSpecification;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.infra.PostgresResetRule;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardPortValue;
@@ -29,8 +27,6 @@ import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class SecurityTokensResourceIT {
-    @Rule
-    public PostgresResetRule postgresResetRule = new PostgresResetRule(DropwizardJUnitRunner.getDbConfig());
 
     private TokenFixture testToken;
     private TransactionFixture testTransaction;

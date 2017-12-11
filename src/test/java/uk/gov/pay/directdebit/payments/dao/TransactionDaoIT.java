@@ -10,7 +10,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.infra.PostgresResetRule;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
@@ -34,9 +33,6 @@ import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class TransactionDaoIT {
-
-    @Rule
-    public PostgresResetRule postgresResetRule = new PostgresResetRule(DropwizardJUnitRunner.getDbConfig());
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
