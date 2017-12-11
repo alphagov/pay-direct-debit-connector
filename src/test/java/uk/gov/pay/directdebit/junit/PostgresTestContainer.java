@@ -27,19 +27,20 @@ final class PostgresTestContainer {
     static final String DB_PASSWORD = "mysecretpassword";
 
     private static final Logger LOG = LoggerFactory.getLogger(PostgresTestContainer.class);
-    private static final String GOVUK_POSTGRES_IMAGE = "govukpay/postgres:9.4.4";
     private static final String INTERNAL_PORT = "5432";
     private static final int DB_TIMEOUT_SEC = 15;
 
     private final String containerId;
     private final DockerClient docker;
     private final String postgresUri;
+    private final String dockerImage;
 
     private volatile boolean stopped = false;
 
-    PostgresTestContainer(DockerClient docker, String host) throws Exception {
+    PostgresTestContainer(DockerClient docker, String host, String dockerImage) throws Exception {
         Class.forName("org.postgresql.Driver");
-        failsafeDockerPull(docker, GOVUK_POSTGRES_IMAGE);
+        this.dockerImage = dockerImage;
+        failsafeDockerPull(docker, this.dockerImage);
         this.docker = docker;
         this.containerId = createContainer(docker);
         docker.startContainer(containerId);
@@ -69,10 +70,10 @@ final class PostgresTestContainer {
     }
 
     private String createContainer(DockerClient docker) throws DockerException, InterruptedException {
-        docker.listImages(DockerClient.ListImagesParam.create("name", GOVUK_POSTGRES_IMAGE));
+        docker.listImages(DockerClient.ListImagesParam.create("name", dockerImage));
         final HostConfig hostConfig = HostConfig.builder().logConfig(LogConfig.create("json-file")).publishAllPorts(true).build();
         ContainerConfig containerConfig = ContainerConfig.builder()
-                .image(GOVUK_POSTGRES_IMAGE)
+                .image(dockerImage)
                 .hostConfig(hostConfig)
                 .env("POSTGRES_USER=" + DB_USERNAME, "POSTGRES_PASSWORD=" + DB_PASSWORD)
                 .build();

@@ -50,14 +50,16 @@ public @interface DropwizardConfig {
     String config();
 
     /**
-     * Set to true if running Postgres with Dropwizard app, defaults to true
+     * Run a Postgres Docker image as a dependency of the given Dropwizard Application
      *
      * @return boolean
      */
     boolean withDockerPostgres() default true;
 
     /**
-     * Docker Postgres image, defaults to govukpay/postgres:9.4.4
+     * Docker Postgres image
+     *
+     * Notes:
      *
      * @return String
      */

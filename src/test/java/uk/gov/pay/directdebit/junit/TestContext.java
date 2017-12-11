@@ -8,6 +8,8 @@ import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 public class TestContext {
 
     private DBI jdbi;
+    // This should be out of the text context really (since it is a specific class for this project)
+    // but is fine for now
     private DatabaseTestHelper databaseTestHelper;
     private int port;
 

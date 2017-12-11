@@ -21,10 +21,10 @@ final class PostgresTestDocker {
     private static final String HOST = dockerHostLocalAware();
     private static PostgresTestContainer container;
 
-    static void getOrCreate() {
+    static void getOrCreate(String image) {
         try {
             if (container == null) {
-                container = new PostgresTestContainer(DefaultDockerClient.fromEnv().build(), HOST);
+                container = new PostgresTestContainer(DefaultDockerClient.fromEnv().build(), HOST, image);
                 createDatabase();
             }
         } catch (Exception e) {

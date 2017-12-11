@@ -53,17 +53,13 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
     protected Statement classBlock(final RunNotifier notifier) {
         DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
         List<ConfigOverride> configOverride = newArrayList();
-
         if (dropwizardConfigAnnotation.withDockerPostgres()) {
-            PostgresTestDocker.getOrCreate();
+            PostgresTestDocker.getOrCreate(dropwizardConfigAnnotation.postgresDockerImage());
             configOverride.add(config("database.url", PostgresTestDocker.getDbRootUri() + PostgresTestDocker.DB_NAME));
             configOverride.add(config("database.user", PostgresTestContainer.DB_USERNAME));
             configOverride.add(config("database.password", PostgresTestContainer.DB_PASSWORD));
         }
-
         createIfNotRunning(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config(), configOverride.toArray(new ConfigOverride[0]));
-
-
         return super.classBlock(notifier);
     }
 
