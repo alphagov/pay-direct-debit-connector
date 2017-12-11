@@ -18,8 +18,8 @@ public abstract class IntegrationTest {
     private final String username = env().getConfiguration().getDataSourceFactory().getUser();
     private final String password = env().getConfiguration().getDataSourceFactory().getPassword();
 
-    @Rule
-    public PostgresResetRule postgresReset = new PostgresResetRule(env());
+  //  @Rule
+  //  public PostgresResetRule postgresReset = new PostgresResetRule(env());
 
     protected DBI jdbi;
     protected DatabaseTestHelper databaseTestHelper;
