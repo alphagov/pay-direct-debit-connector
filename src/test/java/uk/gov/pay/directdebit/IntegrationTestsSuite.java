@@ -5,23 +5,25 @@ import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import uk.gov.pay.directdebit.infra.EnvironmentRule;
-import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventIT;
-import uk.gov.pay.directdebit.payments.dao.PaymentRequestIT;
-import uk.gov.pay.directdebit.payments.dao.TokenIT;
-import uk.gov.pay.directdebit.payments.dao.TransactionIT;
+import uk.gov.pay.directdebit.payments.dao.PaymentRequestDaoIT;
+import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDaoIT;
+import uk.gov.pay.directdebit.payments.dao.TransactionDaoIT;
 import uk.gov.pay.directdebit.payments.resources.PaymentRequestResourceIT;
 import uk.gov.pay.directdebit.resources.HealthCheckResourceIT;
+import uk.gov.pay.directdebit.tokens.dao.TokenDaoIT;
+import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResourceIT;
 
 import static uk.gov.pay.directdebit.infra.PostgresTemplate.createTemplate;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        PaymentRequestIT.class,
-        PaymentRequestEventIT.class,
-        TokenIT.class,
-        TransactionIT.class,
+        PaymentRequestDaoIT.class,
+        PaymentRequestEventDaoIT.class,
+        TokenDaoIT.class,
+        TransactionDaoIT.class,
         HealthCheckResourceIT.class,
-        PaymentRequestResourceIT.class
+        PaymentRequestResourceIT.class,
+        SecurityTokensResourceIT.class
 })
 public class IntegrationTestsSuite {
 

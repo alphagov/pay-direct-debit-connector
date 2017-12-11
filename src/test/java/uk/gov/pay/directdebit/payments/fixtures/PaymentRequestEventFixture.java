@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.payments.fixtures;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.skife.jdbi.v2.DBI;
-import uk.gov.pay.directdebit.payments.model.PaymentRequest;
+import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 
 import java.sql.Timestamp;
@@ -10,19 +10,17 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class PaymentRequestEventFixture implements DbFixture<PaymentRequestEventFixture, PaymentRequestEvent> {
-    private DBI jdbi;
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
     private PaymentRequestEvent.Type eventType;
     private PaymentRequestEvent.SupportedEvent event;
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneId.of("UTC"));
 
-    public PaymentRequestEventFixture(DBI jdbi) {
-        this.jdbi = jdbi;
+    private PaymentRequestEventFixture() {
     }
 
-    public static PaymentRequestEventFixture paymentRequestEventFixture(DBI jdbi) {
-        return new PaymentRequestEventFixture(jdbi);
+    public static PaymentRequestEventFixture aPaymentRequestEventFixture() {
+        return new PaymentRequestEventFixture();
     }
 
     public PaymentRequestEventFixture withId(long id) {
@@ -69,7 +67,7 @@ public class PaymentRequestEventFixture implements DbFixture<PaymentRequestEvent
     }
 
     @Override
-    public PaymentRequestEventFixture insert() {
+    public PaymentRequestEventFixture insert(DBI jdbi) {
         jdbi.withHandle(h ->
                 h.update(
                         "INSERT INTO" +

@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.fixtures;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.skife.jdbi.v2.DBI;
+import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
@@ -10,7 +11,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, PaymentRequest> {
-    private DBI jdbi;
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long gatewayAccountId = 23L;
     private String description = "Test description";
@@ -21,12 +21,11 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
 
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneId.of("UTC"));
 
-    public PaymentRequestFixture(DBI jdbi) {
-        this.jdbi = jdbi;
+    private PaymentRequestFixture() {
     }
 
-    public static PaymentRequestFixture paymentRequestFixture(DBI jdbi) {
-        return new PaymentRequestFixture(jdbi);
+    public static PaymentRequestFixture aPaymentRequestFixture() {
+        return new PaymentRequestFixture();
     }
 
     public PaymentRequestFixture withId(long id) {
@@ -43,7 +42,10 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
         this.reference = reference;
         return this;
     }
-
+    public PaymentRequestFixture withReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
+        return this;
+    }
     public PaymentRequestFixture withGatewayAccountId(Long gatewayAccountId) {
         this.gatewayAccountId = gatewayAccountId;
         return this;
@@ -97,7 +99,7 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
     }
 
     @Override
-    public PaymentRequestFixture insert() {
+    public PaymentRequestFixture insert(DBI jdbi) {
         jdbi.withHandle(h ->
                 h.update(
                         "INSERT INTO" +

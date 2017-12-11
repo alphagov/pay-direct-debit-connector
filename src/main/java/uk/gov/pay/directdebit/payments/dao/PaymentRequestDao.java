@@ -20,10 +20,6 @@ public interface PaymentRequestDao {
     @SingleValueResult(PaymentRequest.class)
     Optional<PaymentRequest> findByExternalId(@Bind("externalId") String externalId);
 
-    @SqlQuery("SELECT * FROM payment_requests p INNER JOIN tokens t ON t.payment_request_id = p.id WHERE t.secure_redirect_token = :tokenId")
-    @SingleValueResult(PaymentRequest.class)
-    Optional<PaymentRequest> findByTokenId(@Bind("tokenId") String tokenId);
-
     @SqlUpdate("INSERT INTO payment_requests(external_id, gateway_account_id, amount, reference, description, return_url, created_date) VALUES (:externalId, :gatewayAccountId, :amount, :reference, :description, :returnUrl, :createdDate)")
     @GetGeneratedKeys
     @RegisterArgumentFactory(DateArgumentFactory.class)

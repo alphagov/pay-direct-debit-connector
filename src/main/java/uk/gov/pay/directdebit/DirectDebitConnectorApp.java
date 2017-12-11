@@ -25,10 +25,12 @@ import uk.gov.pay.directdebit.common.resources.V1ApiPaths;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
-import uk.gov.pay.directdebit.payments.dao.TokenDao;
+import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.resources.PaymentRequestResource;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
+import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
+import uk.gov.pay.directdebit.tokens.services.TokenService;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 
@@ -62,27 +64,38 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     public void run(DirectDebitConfig configuration, Environment environment) throws Exception {
         final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment));
 
-        environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
-                .addMappingForUrlPatterns(of(REQUEST), true, V1ApiPaths.ROOT_PATH + "/*");
-
-
-        environment.healthChecks().register("ping", new Ping());
-        environment.healthChecks().register("database", injector.getInstance(Database.class));
         DataSourceFactory dataSourceFactory = configuration.getDataSourceFactory();
         final DBI jdbi = new DBI(
                 dataSourceFactory.getUrl(),
                 dataSourceFactory.getUser(),
                 dataSourceFactory.getPassword()
         );
+        PaymentRequestDao paymentRequestDao = jdbi.onDemand(PaymentRequestDao.class);
+        TokenDao tokenDao = jdbi.onDemand(TokenDao.class);
+        PaymentRequestEventDao paymentRequestEventDao = jdbi.onDemand(PaymentRequestEventDao.class);
+        TransactionDao transactionDao = jdbi.onDemand(TransactionDao.class);
+
+        environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
+                .addMappingForUrlPatterns(of(REQUEST), true, V1ApiPaths.ROOT_PATH + "/*");
+
+
+        environment.healthChecks().register("ping", new Ping());
+        environment.healthChecks().register("database", injector.getInstance(Database.class));
+
         jdbi.registerContainerFactory(new OptionalContainerFactory());
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
+
         environment.jersey().register(new PaymentRequestResource(new PaymentRequestService(
                 configuration,
-                jdbi.onDemand(PaymentRequestDao.class),
-                jdbi.onDemand(TokenDao.class),
-                jdbi.onDemand(PaymentRequestEventDao.class),
-                jdbi.onDemand(TransactionDao.class))));
+                paymentRequestDao,
+                tokenDao,
+                paymentRequestEventDao,
+                transactionDao)));
+        environment.jersey().register(new SecurityTokensResource(new TokenService(
+                tokenDao,
+                paymentRequestEventDao,
+                transactionDao)));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new BadRequestExceptionMapper());
         environment.jersey().register(new NotFoundExceptionMapper());

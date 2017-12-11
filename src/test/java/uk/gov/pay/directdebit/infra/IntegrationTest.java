@@ -1,11 +1,15 @@
 package uk.gov.pay.directdebit.infra;
 
 import io.dropwizard.jdbi.OptionalContainerFactory;
+import io.restassured.specification.RequestSpecification;
 import org.junit.Before;
 import org.junit.Rule;
 import org.skife.jdbi.v2.DBI;
+import uk.gov.pay.directdebit.IntegrationTestsSuite;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
+import static io.restassured.RestAssured.given;
+import static io.restassured.http.ContentType.JSON;
 import static uk.gov.pay.directdebit.IntegrationTestsSuite.env;
 
 public abstract class IntegrationTest {
@@ -27,4 +31,8 @@ public abstract class IntegrationTest {
         databaseTestHelper = new DatabaseTestHelper(jdbi);
     }
 
+    protected RequestSpecification givenSetup() {
+        return given().port(IntegrationTestsSuite.env().getPort())
+                .contentType(JSON);
+    }
 }

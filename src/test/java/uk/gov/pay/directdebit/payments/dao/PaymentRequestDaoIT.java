@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.infra.IntegrationTest;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TokenFixture;
+import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
 import java.io.IOException;
@@ -19,11 +19,11 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.paymentRequestFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TokenFixture.tokenFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
-public class PaymentRequestIT extends IntegrationTest {
+public class PaymentRequestDaoIT extends IntegrationTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -35,12 +35,12 @@ public class PaymentRequestIT extends IntegrationTest {
     @Before
     public void setup() throws IOException, LiquibaseException {
         paymentRequestDao = jdbi.onDemand(PaymentRequestDao.class);
-        this.testPaymentRequest = paymentRequestFixture(jdbi)
+        this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
-                .insert();
-       this.testToken = tokenFixture(jdbi)
+                .insert(jdbi);
+       this.testToken = aTokenFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .insert();
+                .insert(jdbi);
     }
 
 
@@ -93,25 +93,6 @@ public class PaymentRequestIT extends IntegrationTest {
     @Test
     public void shouldNotFindPaymentRequestByExternalId_ifExternalIdIsInvalid() {
         String externalId = "non_existing_externalId";
-        assertThat(paymentRequestDao.findByTokenId(externalId), is(Optional.empty()));
-    }
-
-    @Test
-    public void shouldFindPaymentRequestByTokenId() {
-        PaymentRequest paymentRequest = paymentRequestDao.findByTokenId(testToken.getToken()).get();
-        assertThat(paymentRequest.getId(), is(notNullValue()));
-        assertThat(paymentRequest.getAmount(), is(testPaymentRequest.getAmount()));
-        assertThat(paymentRequest.getCreatedDate(), is(testPaymentRequest.getCreatedDate()));
-        assertThat(paymentRequest.getDescription(), is(testPaymentRequest.getDescription()));
-        assertThat(paymentRequest.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
-        assertThat(paymentRequest.getReference(), is(testPaymentRequest.getReference()));
-        assertThat(paymentRequest.getReturnUrl(), is(testPaymentRequest.getReturnUrl()));
-        assertThat(paymentRequest.getExternalId(), is(testPaymentRequest.getExternalId()));
-    }
-
-    @Test
-    public void shouldNotFindPaymentRequestByTokenId_ifTokenIdIsInvalid() {
-        String tokenId = "non_existing_tokenId";
-        assertThat(paymentRequestDao.findByTokenId(tokenId), is(Optional.empty()));
+        assertThat(paymentRequestDao.findByExternalId(externalId), is(Optional.empty()));
     }
 }

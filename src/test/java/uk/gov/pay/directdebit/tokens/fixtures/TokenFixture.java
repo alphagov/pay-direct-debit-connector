@@ -1,21 +1,20 @@
-package uk.gov.pay.directdebit.payments.fixtures;
+package uk.gov.pay.directdebit.tokens.fixtures;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.skife.jdbi.v2.DBI;
+import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.payments.model.Token;
 
 public class TokenFixture implements DbFixture<TokenFixture, Token> {
-    private DBI jdbi;
     private Long id = RandomUtils.nextLong(1, 99999);
     private String token = "3c9fee80-977a-4da5-a003-4872a8cf95b6";
     private Long paymentRequestId =  RandomUtils.nextLong(1, 99999);
 
-    private TokenFixture( DBI jdbi) {
-        this.jdbi = jdbi;
+    private TokenFixture() {
     }
 
-    public static TokenFixture tokenFixture(DBI jdbi) {
-        return new TokenFixture(jdbi);
+    public static TokenFixture aTokenFixture() {
+        return new TokenFixture();
     }
 
     public TokenFixture withPaymentRequestId(Long paymentRequestId) {
@@ -37,7 +36,7 @@ public class TokenFixture implements DbFixture<TokenFixture, Token> {
     }
 
     @Override
-    public TokenFixture insert() {
+    public TokenFixture insert(DBI jdbi) {
         jdbi.withHandle(handle ->
                 handle
                         .createStatement("INSERT INTO tokens(payment_request_id, secure_redirect_token) VALUES (:payment_request_id, :secure_redirect_token)")

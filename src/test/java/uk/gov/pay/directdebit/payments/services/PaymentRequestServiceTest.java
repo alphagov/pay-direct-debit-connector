@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
 import org.junit.Before;
 import org.junit.Rule;
@@ -15,7 +16,10 @@ import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
-import uk.gov.pay.directdebit.payments.dao.TokenDao;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.model.Transaction.Type;
+import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
@@ -36,8 +40,9 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.*;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.*;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentRequestServiceTest {
@@ -47,6 +52,17 @@ public class PaymentRequestServiceTest {
     private static final String RETURN_URL = "http://return-service.com";
     private static final String DESCRIPTION = "This is a description";
     private static final String REFERENCE = "Pay reference";
+
+    private PaymentRequestFixture paymentRequest = aPaymentRequestFixture()
+            .withAmount(Long.parseLong(AMOUNT))
+            .withDescription(DESCRIPTION)
+            .withReference(REFERENCE)
+            .withReturnUrl(RETURN_URL)
+            .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+    private TransactionFixture transaction = aTransactionFixture()
+            .withPaymentRequestId(paymentRequest.getId())
+            .withExternalId(paymentRequest.getExternalId())
+            .withAmount(paymentRequest.getAmount());
 
     private static final Map<String, String> CHARGE_REQUEST = new HashMap<String, String>() {{
         put("amount", AMOUNT);
@@ -123,7 +139,7 @@ public class PaymentRequestServiceTest {
         verify(mockedPaymentRequestEventDao).insert(paymentRequestEventArgumentCaptor.capture());
         PaymentRequestEvent createdPaymentRequestEvent = paymentRequestEventArgumentCaptor.getValue();
         assertThat(createdPaymentRequestEvent.getPaymentRequestId(), is(createdPaymentRequest.getId()));
-        assertThat(createdPaymentRequestEvent.getEventType(), is(Type.CHARGE));
+        assertThat(createdPaymentRequestEvent.getEventType(), is(PaymentRequestEvent.Type.CHARGE));
         assertThat(createdPaymentRequestEvent.getEvent(), is(SupportedEvent.CHARGE_CREATED));
         assertThat(createdPaymentRequestEvent.getEventDate(),
                 is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS,  ZonedDateTime.now())));
@@ -192,10 +208,10 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndTransactionIsInProgress() throws URISyntaxException {
-        PaymentRequest paymentRequest = new PaymentRequest(Long.parseLong(AMOUNT), RETURN_URL, GATEWAY_ACCOUNT_ID, DESCRIPTION, REFERENCE);
-        Transaction transaction = new Transaction(paymentRequest.getId(), 2L, Transaction.Type.CHARGE, PaymentState.NEW);
-        when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId())).thenReturn(Optional.of(paymentRequest));
-        when(mockTransactionDao.findByPaymentRequestId(paymentRequest.getId())).thenReturn(Optional.of(transaction));
+        when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId()))
+                .thenReturn(Optional.of(paymentRequest.toEntity()));
+        when(mockTransactionDao.findByPaymentRequestId(paymentRequest.getId()))
+                .thenReturn(Optional.of(transaction.toEntity()));
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 
@@ -226,10 +242,9 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndChargeIsInFinalState() throws URISyntaxException {
-        PaymentRequest paymentRequest = new PaymentRequest(Long.parseLong(AMOUNT), RETURN_URL, GATEWAY_ACCOUNT_ID, DESCRIPTION, REFERENCE);
-        Transaction transaction = new Transaction(paymentRequest.getId(), 2L, Transaction.Type.CHARGE, PaymentState.REQUESTED_FAILED);
-        when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId())).thenReturn(Optional.of(paymentRequest));
-        when(mockTransactionDao.findByPaymentRequestId(paymentRequest.getId())).thenReturn(Optional.of(transaction));
+        transaction.withState(PaymentState.REQUESTED_FAILED);
+        when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId())).thenReturn(Optional.of(paymentRequest.toEntity()));
+        when(mockTransactionDao.findByPaymentRequestId(paymentRequest.getId())).thenReturn(Optional.of(transaction.toEntity()));
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 

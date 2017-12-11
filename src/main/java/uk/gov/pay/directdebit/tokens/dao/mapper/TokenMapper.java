@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.dao.mapper;
+package uk.gov.pay.directdebit.tokens.dao.mapper;
 
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;

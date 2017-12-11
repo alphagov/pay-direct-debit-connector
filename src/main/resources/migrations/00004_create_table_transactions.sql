@@ -10,3 +10,7 @@ CREATE TABLE transactions (
     version INTEGER DEFAULT 0 NOT NULL
 );
 --rollback drop table transactions;
+
+--changeset uk.gov.pay:add_index-transactions_payment_request_id
+CREATE INDEX transactions_payment_request_id ON transactions(payment_request_id)
+--rollback drop index transactions_payment_request_id;
