@@ -6,9 +6,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.IntegrationTest;
+import org.junit.runner.RunWith;
+import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.junit.DropwizardConfig;
+import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
+import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
 import java.io.IOException;
@@ -23,32 +27,35 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPa
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
-public class PaymentRequestDaoIT extends IntegrationTest {
+@RunWith(DropwizardJUnitRunner.class)
+@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+public class PaymentRequestDaoIT {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-    private PaymentRequestDao paymentRequestDao;
 
+    @DropwizardTestContext
+    private TestContext testContext;
+
+    private PaymentRequestDao paymentRequestDao;
     private PaymentRequestFixture testPaymentRequest;
-    private TokenFixture testToken;
 
     @Before
     public void setup() throws IOException, LiquibaseException {
-        paymentRequestDao = jdbi.onDemand(PaymentRequestDao.class);
+        paymentRequestDao = testContext.getJdbi().onDemand(PaymentRequestDao.class);
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
-                .insert(jdbi);
-       this.testToken = aTokenFixture()
+                .insert(testContext.getJdbi());
+        aTokenFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .insert(jdbi);
+                .insert(testContext.getJdbi());
     }
-
 
     @Test
     public void shouldInsertAPaymentRequest() {
         String externalId = "externalId";
         Long id = paymentRequestDao.insert(testPaymentRequest.withExternalId(externalId).toEntity());
-        Map<String, Object> foundPaymentRequest = databaseTestHelper.getPaymentRequestById(id);
+        Map<String, Object> foundPaymentRequest = testContext.getDatabaseTestHelper().getPaymentRequestById(id);
         assertThat(foundPaymentRequest.get("id"), is(id));
         assertThat(foundPaymentRequest.get("external_id"), is(externalId));
         assertThat(foundPaymentRequest.get("amount"), is(testPaymentRequest.getAmount()));

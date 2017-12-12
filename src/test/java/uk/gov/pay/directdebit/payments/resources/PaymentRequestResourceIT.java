@@ -6,8 +6,12 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
-import uk.gov.pay.directdebit.IntegrationTestsSuite;
-import uk.gov.pay.directdebit.infra.IntegrationTest;
+import org.junit.runner.RunWith;
+import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.junit.DropwizardConfig;
+import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
+import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import uk.gov.pay.directdebit.junit.TestContext;
 
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -23,7 +27,11 @@ import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.C
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
-public class PaymentRequestResourceIT extends IntegrationTest {
+
+@RunWith(DropwizardJUnitRunner.class)
+@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+public class PaymentRequestResourceIT {
+
     private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
     private static final String JSON_AMOUNT_KEY = "amount";
     private static final String JSON_REFERENCE_KEY = "reference";
@@ -35,6 +43,9 @@ public class PaymentRequestResourceIT extends IntegrationTest {
     private static final String accountId = "20";
 
     private Gson gson = new Gson();
+
+    @DropwizardTestContext
+    private TestContext testContext;
 
     @Test
     public void shouldCreateAPaymentRequest() throws Exception {
@@ -67,7 +78,7 @@ public class PaymentRequestResourceIT extends IntegrationTest {
 
         String externalPaymentRequestId = response.extract().path(JSON_CHARGE_KEY).toString();
         String documentLocation = expectedPaymentRequestLocationFor(accountId, externalPaymentRequestId);
-        String chargeTokenId = databaseTestHelper.getTokenByPaymentRequestExternalId(externalPaymentRequestId);
+        String chargeTokenId = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
         String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + chargeTokenId;
         String hrefNextUrlPost = "http://Frontend" + FRONTEND_CARD_DETAILS_URL;
@@ -98,7 +109,7 @@ public class PaymentRequestResourceIT extends IntegrationTest {
 
         // Reload the charge token which as it should have changed
 
-        String newChargeTokenId = databaseTestHelper.getTokenByPaymentRequestExternalId(externalPaymentRequestId);
+        String newChargeTokenId = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
         String newHrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + newChargeTokenId;
 
@@ -175,8 +186,13 @@ public class PaymentRequestResourceIT extends IntegrationTest {
     }
 
     private String expectedPaymentRequestLocationFor(String accountId, String chargeId) {
-        return "http://localhost:" + IntegrationTestsSuite.env().getPort() + CHARGE_API_PATH
+        return "http://localhost:" + testContext.getPort() + CHARGE_API_PATH
                 .replace("{accountId}", accountId)
                 .replace("{paymentRequestExternalId}", chargeId);
+    }
+
+    private RequestSpecification givenSetup() {
+        return given().port(testContext.getPort())
+                .contentType(JSON);
     }
 }

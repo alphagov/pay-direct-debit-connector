@@ -6,12 +6,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.IntegrationTest;
+import org.junit.runner.RunWith;
+import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.junit.DropwizardConfig;
+import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
+import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 
@@ -25,10 +28,14 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
-public class TransactionDaoIT extends IntegrationTest {
+@RunWith(DropwizardJUnitRunner.class)
+@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+public class TransactionDaoIT {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+    @DropwizardTestContext
+    private TestContext testContext;
     private TransactionDao transactionDao;
 
     private PaymentRequestFixture testPaymentRequest;
@@ -37,16 +44,16 @@ public class TransactionDaoIT extends IntegrationTest {
 
     @Before
     public void setup() throws IOException, LiquibaseException {
-        transactionDao = jdbi.onDemand(TransactionDao.class);
+        transactionDao = testContext.getJdbi().onDemand(TransactionDao.class);
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
-                .insert(jdbi);
+                .insert(testContext.getJdbi());
         this.testToken = TokenFixture.aTokenFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .insert(jdbi);
+                .insert(testContext.getJdbi());
         this.testTransaction = TransactionFixture.aTransactionFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .insert(jdbi);
+                .insert(testContext.getJdbi());
     }
 
     @Test
@@ -57,7 +64,7 @@ public class TransactionDaoIT extends IntegrationTest {
         PaymentState state = PaymentState.NEW;
         Transaction transaction = new Transaction(paymentRequestId, "externalId", amount, type, state);
         Long id = transactionDao.insert(transaction);
-        Map<String, Object> foundTransaction = databaseTestHelper.getTransactionById(id);
+        Map<String, Object> foundTransaction = testContext.getDatabaseTestHelper().getTransactionById(id);
         assertThat(foundTransaction.get("id"), is(id));
         assertThat(foundTransaction.get("payment_request_id"), is(paymentRequestId));
         assertThat((Long) foundTransaction.get("amount"), isNumber(amount));

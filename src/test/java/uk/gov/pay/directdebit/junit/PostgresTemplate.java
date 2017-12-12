@@ -1,18 +1,16 @@
-package uk.gov.pay.directdebit.infra;
-
-import io.dropwizard.db.DataSourceFactory;
+package uk.gov.pay.directdebit.junit;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import static java.sql.DriverManager.getConnection;
 
-public class PostgresTemplate {
+final class PostgresTemplate {
 
     private static final String TEMPLATE_NAME = "templateddc";
 
-    public static void createTemplate(DataSourceFactory source) {
-        PostgresConfig config = PostgresConfig.valueOf(source);
+    static void createTemplate(String databaseUrl, String user, String password) {
+        PostgresConfig config = PostgresConfig.valueOf(databaseUrl, user, password);
         try (Connection connection = getConnection(config.getDatabaseRootUri(), config.getUserName(), config.getPassword())) {
             terminateDbConnections(connection, config.getDatabaseName());
             connection.createStatement().execute("CREATE DATABASE " + TEMPLATE_NAME + " WITH TEMPLATE " + config.getDatabaseName() + " OWNER " + config.getUserName());
@@ -21,8 +19,8 @@ public class PostgresTemplate {
         }
     }
 
-    static void restoreTemplate(DataSourceFactory source) {
-        PostgresConfig config = PostgresConfig.valueOf(source);
+    static void restorePostgres(String databaseUrl, String user, String password) {
+        PostgresConfig config = PostgresConfig.valueOf(databaseUrl, user, password);
         try (Connection connection = getConnection(config.getDatabaseRootUri(), config.getUserName(), config.getPassword())) {
             terminateDbConnections(connection, config.getDatabaseName());
             connection.createStatement().execute("DROP DATABASE " + config.getDatabaseName());
@@ -51,10 +49,9 @@ public class PostgresTemplate {
             this.databaseRootUri = databaseRootUri;
         }
 
-        private static final PostgresConfig valueOf(DataSourceFactory datasource) {
-            String databaseUri = datasource.getUrl();
+        private static PostgresConfig valueOf(String databaseUri, String user, String password) {
             int indexDbName = databaseUri.lastIndexOf("/");
-            return new PostgresConfig(datasource.getUser(), datasource.getPassword(), databaseUri.substring(indexDbName + 1), databaseUri.substring(0, indexDbName + 1));
+            return new PostgresConfig(user, password, databaseUri.substring(indexDbName + 1), databaseUri.substring(0, indexDbName + 1));
         }
 
         String getUserName() {

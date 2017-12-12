@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.infra;
+package uk.gov.pay.directdebit.junit;
 
 import com.google.common.base.Stopwatch;
 import com.spotify.docker.client.DockerClient;
@@ -14,34 +14,33 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Integer.parseInt;
-import static java.sql.DriverManager.*;
+import static java.sql.DriverManager.getConnection;
 import static java.util.stream.Collectors.joining;
 
-class PostgresContainer {
+final class PostgresTestContainer {
 
     static final String DB_USERNAME = "postgres";
     static final String DB_PASSWORD = "mysecretpassword";
 
-    private static final Logger LOG = LoggerFactory.getLogger(PostgresContainer.class);
-    private static final String GOVUK_POSTGRES_IMAGE = "govukpay/postgres:9.4.4";
+    private static final Logger LOG = LoggerFactory.getLogger(PostgresTestContainer.class);
     private static final String INTERNAL_PORT = "5432";
     private static final int DB_TIMEOUT_SEC = 15;
 
     private final String containerId;
     private final DockerClient docker;
     private final String postgresUri;
+    private final String dockerImage;
 
     private volatile boolean stopped = false;
 
-    PostgresContainer(DockerClient docker, String host) throws Exception {
+    PostgresTestContainer(DockerClient docker, String host, String dockerImage) throws Exception {
         Class.forName("org.postgresql.Driver");
-        failsafeDockerPull(docker, GOVUK_POSTGRES_IMAGE);
+        this.dockerImage = dockerImage;
+        failsafeDockerPull(docker, this.dockerImage);
         this.docker = docker;
         this.containerId = createContainer(docker);
         docker.startContainer(containerId);
@@ -71,10 +70,10 @@ class PostgresContainer {
     }
 
     private String createContainer(DockerClient docker) throws DockerException, InterruptedException {
-        docker.listImages(DockerClient.ListImagesParam.create("name", GOVUK_POSTGRES_IMAGE));
+        docker.listImages(DockerClient.ListImagesParam.create("name", dockerImage));
         final HostConfig hostConfig = HostConfig.builder().logConfig(LogConfig.create("json-file")).publishAllPorts(true).build();
         ContainerConfig containerConfig = ContainerConfig.builder()
-                .image(GOVUK_POSTGRES_IMAGE)
+                .image(dockerImage)
                 .hostConfig(hostConfig)
                 .env("POSTGRES_USER=" + DB_USERNAME, "POSTGRES_PASSWORD=" + DB_PASSWORD)
                 .build();

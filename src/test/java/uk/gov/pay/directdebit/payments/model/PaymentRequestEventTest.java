@@ -6,7 +6,7 @@ import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.payments.exception.UnsupportedPaymentRequestEventException;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.WEBHOOK_ACTION_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.fromString;
 

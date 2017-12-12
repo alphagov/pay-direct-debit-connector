@@ -6,7 +6,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.IntegrationTest;
+import org.junit.runner.RunWith;
+import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.junit.DropwizardConfig;
+import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
+import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
@@ -21,8 +26,9 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 
-
-public class TokenDaoIT extends IntegrationTest {
+@RunWith(DropwizardJUnitRunner.class)
+@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+public class TokenDaoIT {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -31,22 +37,25 @@ public class TokenDaoIT extends IntegrationTest {
     private PaymentRequestFixture testPaymentRequest;
     private TokenFixture testToken;
 
+    @DropwizardTestContext
+    private TestContext testContext;
+
     @Before
     public void setup() throws IOException, LiquibaseException {
-        tokenDao = jdbi.onDemand(TokenDao.class);
+        tokenDao = testContext.getJdbi().onDemand(TokenDao.class);
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
-                .insert(jdbi);
-       this.testToken = aTokenFixture()
+                .insert(testContext.getJdbi());
+        this.testToken = aTokenFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .insert(jdbi);
+                .insert(testContext.getJdbi());
     }
 
 
     @Test
     public void shouldInsertAToken() {
         Long id = tokenDao.insert(testToken.toEntity());
-        Map<String, Object> foundToken = databaseTestHelper.getTokenByPaymentRequestId(testPaymentRequest.getId());
+        Map<String, Object> foundToken = testContext.getDatabaseTestHelper().getTokenByPaymentRequestId(testPaymentRequest.getId());
         assertThat(foundToken.get("id"), is(id));
         assertThat(foundToken.get("payment_request_id"), is(testToken.getPaymentRequestId()));
         assertThat(foundToken.get("secure_redirect_token"), is(testToken.getToken()));

@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
 import org.junit.Before;
 import org.junit.Rule;
@@ -16,14 +15,17 @@ import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.Transaction.Type;
-import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
-import uk.gov.pay.directdebit.payments.model.*;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.model.PaymentRequest;
+import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.Token;
+import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -36,12 +38,17 @@ import java.util.Map;
 import java.util.Optional;
 
 import static javax.ws.rs.core.UriBuilder.fromUri;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Mockito.*;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.*;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,7 +59,14 @@ public class PaymentRequestServiceTest {
     private static final String RETURN_URL = "http://return-service.com";
     private static final String DESCRIPTION = "This is a description";
     private static final String REFERENCE = "Pay reference";
-
+    private static final Map<String, String> CHARGE_REQUEST = new HashMap<String, String>() {{
+        put("amount", AMOUNT);
+        put("return_url", RETURN_URL);
+        put("description", DESCRIPTION);
+        put("reference", REFERENCE);
+    }};
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
     private PaymentRequestFixture paymentRequest = aPaymentRequestFixture()
             .withAmount(Long.parseLong(AMOUNT))
             .withDescription(DESCRIPTION)
@@ -63,17 +77,6 @@ public class PaymentRequestServiceTest {
             .withPaymentRequestId(paymentRequest.getId())
             .withExternalId(paymentRequest.getExternalId())
             .withAmount(paymentRequest.getAmount());
-
-    private static final Map<String, String> CHARGE_REQUEST = new HashMap<String, String>() {{
-        put("amount", AMOUNT);
-        put("return_url", RETURN_URL);
-        put("description", DESCRIPTION);
-        put("reference", REFERENCE);
-    }};
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Mock
     private TokenDao mockedTokenDao;
     @Mock
@@ -110,7 +113,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void serviceCreate_shouldCreateAPaymentRequest() throws Exception{
+    public void serviceCreate_shouldCreateAPaymentRequest() throws Exception {
         Long amount = 100L;
         service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
 
@@ -125,11 +128,11 @@ public class PaymentRequestServiceTest {
         assertThat(createdPaymentRequest.getAmount(), is(amount));
         assertThat(createdPaymentRequest.getReturnUrl(), is("http://return-service.com"));
         assertThat(createdPaymentRequest.getCreatedDate(),
-                is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS,  ZonedDateTime.now())));
+                is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }
 
     @Test
-    public void serviceCreate_shouldCreateAPaymentRequestEvent() throws Exception{
+    public void serviceCreate_shouldCreateAPaymentRequestEvent() throws Exception {
         service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
 
         ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
@@ -142,11 +145,11 @@ public class PaymentRequestServiceTest {
         assertThat(createdPaymentRequestEvent.getEventType(), is(PaymentRequestEvent.Type.CHARGE));
         assertThat(createdPaymentRequestEvent.getEvent(), is(SupportedEvent.CHARGE_CREATED));
         assertThat(createdPaymentRequestEvent.getEventDate(),
-                is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS,  ZonedDateTime.now())));
+                is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }
 
     @Test
-    public void serviceCreate_shouldCreateATransaction() throws Exception{
+    public void serviceCreate_shouldCreateATransaction() throws Exception {
         Long amount = 100L;
         service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
 
@@ -164,7 +167,7 @@ public class PaymentRequestServiceTest {
     }
 
     //todo needs proper checking of values when we introduce the gateway accounts dao
-    public void serviceCreate_shouldCreateAToken() throws Exception{
+    public void serviceCreate_shouldCreateAToken() throws Exception {
         service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
 
         ArgumentCaptor<Token> tokenEntityArgumentCaptor = forClass(Token.class);
@@ -176,7 +179,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void serviceCreate_shouldPopulateAResponse() throws Exception{
+    public void serviceCreate_shouldPopulateAResponse() throws Exception {
         PaymentRequestResponse response = service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
         ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
         verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
@@ -199,10 +202,10 @@ public class PaymentRequestServiceTest {
                         .put("rel", "next_url_post")
                         .put("method", "POST")
                         .put("href", new URI("http://payments.com/secure"))
-                        .put("type","application/x-www-form-urlencoded")
+                        .put("type", "application/x-www-form-urlencoded")
                         .put("params", new HashMap<String, Object>() {{
-                    put("chargeTokenId", createdToken.getToken());
-                }}).build()
+                            put("chargeTokenId", createdToken.getToken());
+                        }}).build()
         ));
     }
 
@@ -233,7 +236,7 @@ public class PaymentRequestServiceTest {
                         .put("rel", "next_url_post")
                         .put("method", "POST")
                         .put("href", new URI("http://payments.com/secure"))
-                        .put("type","application/x-www-form-urlencoded")
+                        .put("type", "application/x-www-form-urlencoded")
                         .put("params", new HashMap<String, Object>() {{
                             put("chargeTokenId", createdToken.getToken());
                         }}).build()

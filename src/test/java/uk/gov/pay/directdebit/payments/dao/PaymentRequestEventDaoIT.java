@@ -6,7 +6,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.infra.IntegrationTest;
+import org.junit.runner.RunWith;
+import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.junit.DropwizardConfig;
+import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
+import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 
@@ -20,7 +25,9 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
-public class PaymentRequestEventDaoIT extends IntegrationTest {
+@RunWith(DropwizardJUnitRunner.class)
+@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+public class PaymentRequestEventDaoIT {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -28,12 +35,15 @@ public class PaymentRequestEventDaoIT extends IntegrationTest {
 
     private PaymentRequestFixture testPaymentRequest;
 
+    @DropwizardTestContext
+    private TestContext testContext;
+
     @Before
     public void setup() throws IOException, LiquibaseException {
-        paymentRequestEventDao = jdbi.onDemand(PaymentRequestEventDao.class);
+        paymentRequestEventDao = testContext.getJdbi().onDemand(PaymentRequestEventDao.class);
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
-                .insert(jdbi);
+                .insert(testContext.getJdbi());
     }
 
     @Test
@@ -44,7 +54,7 @@ public class PaymentRequestEventDaoIT extends IntegrationTest {
         ZonedDateTime eventDate = ZonedDateTime.now();
         PaymentRequestEvent paymentRequestEvent = new PaymentRequestEvent(paymentRequestId, eventType, event, eventDate);
         Long id = paymentRequestEventDao.insert(paymentRequestEvent);
-        Map<String, Object> foundPaymentRequestEvent = databaseTestHelper.getPaymentRequestEventById(id);
+        Map<String, Object> foundPaymentRequestEvent = testContext.getDatabaseTestHelper().getPaymentRequestEventById(id);
         assertThat(foundPaymentRequestEvent.get("id"), is(id));
         assertThat(foundPaymentRequestEvent.get("payment_request_id"), is(paymentRequestId));
         assertThat(foundPaymentRequestEvent.get("event_type"), is(eventType.toString()));

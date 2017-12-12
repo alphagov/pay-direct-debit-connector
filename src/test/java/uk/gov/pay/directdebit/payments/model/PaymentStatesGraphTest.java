@@ -7,11 +7,11 @@ import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.*;
+import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.SYSTEM_CANCEL;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.WEBHOOK_ACTION_PAID_OUT;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.*;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 
 public class PaymentStatesGraphTest {
     private PaymentStatesGraph paymentStatesGraph;
@@ -46,6 +46,7 @@ public class PaymentStatesGraphTest {
     public void isValidTransition_shouldReturnTrueFromWhenTransitionIsExpected() {
         assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.ENTERING_DIRECT_DEBIT_DETAILS, SupportedEvent.TOKEN_EXCHANGED), is(true));
     }
+
     @Test
     public void isValidTransition_shouldReturnFalseWhenTransitionIsInvalid() {
         assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.ENTERING_DIRECT_DEBIT_DETAILS, SupportedEvent.SYSTEM_CANCEL), is(false));
