@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.payments.exception;
 
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorException;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 public class InvalidStateTransitionException extends InternalServerErrorException {
 

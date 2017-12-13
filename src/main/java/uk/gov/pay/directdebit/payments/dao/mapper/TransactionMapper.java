@@ -2,7 +2,8 @@ package uk.gov.pay.directdebit.payments.dao.mapper;
 
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
-import uk.gov.pay.directdebit.payments.model.*;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
