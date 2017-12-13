@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.payments.model;
 
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 
-import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.*;
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_STARTED;
 
 public enum PaymentState {
     NEW(EXTERNAL_STARTED),

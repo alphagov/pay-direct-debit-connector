@@ -21,14 +21,13 @@ import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
-import uk.gov.pay.directdebit.common.resources.V1ApiPaths;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
-import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.resources.PaymentRequestResource;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
+import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
@@ -43,6 +42,10 @@ import static javax.servlet.DispatcherType.REQUEST;
 public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
 
     private static final boolean NON_STRICT_VARIABLE_SUBSTITUTOR = false;
+
+    public static void main(String[] args) throws Exception {
+        new DirectDebitConnectorApp().run(args);
+    }
 
     @Override
     public void initialize(Bootstrap<DirectDebitConfig> bootstrap) {
@@ -76,7 +79,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         TransactionDao transactionDao = jdbi.onDemand(TransactionDao.class);
 
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
-                .addMappingForUrlPatterns(of(REQUEST), true, V1ApiPaths.ROOT_PATH + "/*");
+                .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
 
 
         environment.healthChecks().register("ping", new Ping());
@@ -108,11 +111,6 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory);
         System.setProperty("https.proxyHost", configuration.getProxyConfiguration().getHost());
         System.setProperty("https.proxyPort", configuration.getProxyConfiguration().getPort().toString());
-    }
-
-
-    public static void main(String[] args) throws Exception {
-        new DirectDebitConnectorApp().run(args);
     }
 }
 

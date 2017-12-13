@@ -24,11 +24,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.*;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TokenServiceTest {

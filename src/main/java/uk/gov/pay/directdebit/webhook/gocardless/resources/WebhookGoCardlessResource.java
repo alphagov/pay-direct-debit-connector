@@ -3,7 +3,6 @@ package uk.gov.pay.directdebit.webhook.gocardless.resources;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.common.resources.V1ApiPaths;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
 
 import javax.ws.rs.HeaderParam;
@@ -13,7 +12,7 @@ import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.core.Response.Status.OK;
 
-@Path(V1ApiPaths.WEBHOOKS_GOCARDLESS_PATH)
+@Path("/v1/webhooks/gocardless")
 public class WebhookGoCardlessResource {
 
     private static final Logger LOGGER = PayLoggerFactory.getLogger(WebhookGoCardlessResource.class);

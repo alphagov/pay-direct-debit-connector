@@ -6,7 +6,11 @@ import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestValidator;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -14,13 +18,12 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
-import static uk.gov.pay.directdebit.common.resources.V1ApiPaths.ROOT_PATH;
 
 @Path("/")
 public class PaymentRequestResource {
     //have to be /charges unless we change public api
-    public static final String CHARGE_API_PATH = ROOT_PATH +"/api/accounts/{accountId}/charges/{paymentRequestExternalId}";
-    public static final String CHARGES_API_PATH = ROOT_PATH +"/api/accounts/{accountId}/charges";
+    public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{paymentRequestExternalId}";
+    public static final String CHARGES_API_PATH = "/v1/api/accounts/{accountId}/charges";
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentRequestResource.class);
     private final PaymentRequestService paymentRequestService;
