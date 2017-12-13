@@ -59,7 +59,7 @@ public class TokenServiceTest {
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
         Transaction charge = service.validateChargeWithToken(token);
         assertThat(charge.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
-        assertThat(charge.getState(), is(PaymentState.ENTERING_DIRECT_DEBIT_DETAILS));
+        assertThat(charge.getState(), is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
@@ -91,9 +91,9 @@ public class TokenServiceTest {
     @Test
     public void shouldThrowIfChargeIsInInvalidState() {
         thrown.expect(InvalidStateTransitionException.class);
-        thrown.expectMessage("Transition TOKEN_EXCHANGED from state REQUESTED is not valid");
+        thrown.expectMessage("Transition TOKEN_EXCHANGED from state AWAITING_DIRECT_DEBIT_DETAILS is not valid");
         thrown.reportMissingExceptionWithMessage("InvalidStateTransitionException.class expected");
-        TransactionFixture transactionFixture = aTransactionFixture().withState(PaymentState.REQUESTED);
+        TransactionFixture transactionFixture = aTransactionFixture().withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
         String token = "token";
         when(mockedTransactionDao.findByTokenId(token))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));

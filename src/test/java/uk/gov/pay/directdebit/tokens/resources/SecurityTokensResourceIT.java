@@ -50,7 +50,7 @@ public class SecurityTokensResourceIT {
                 .statusCode(200)
                 .contentType(JSON)
                 .body("external_id", is(testTransaction.getPaymentRequestExternalId()))
-                .body("state", is(PaymentState.ENTERING_DIRECT_DEBIT_DETAILS.toString()))
+                .body("state", is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS.toString()))
                 .body("type", is(testTransaction.getType().toString()))
                 .body("amount", isNumber(testTransaction.getAmount()));
     }

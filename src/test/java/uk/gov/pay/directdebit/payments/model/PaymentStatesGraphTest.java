@@ -8,16 +8,15 @@ import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.SYSTEM_CANCEL;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.WEBHOOK_ACTION_PAID_OUT;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 
 public class PaymentStatesGraphTest {
-    private PaymentStatesGraph paymentStatesGraph;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    private PaymentStatesGraph paymentStatesGraph;
 
     @Before
     public void setup() {
@@ -31,25 +30,25 @@ public class PaymentStatesGraphTest {
 
     @Test
     public void getNextStateForEvent_shouldGiveTheNextStateIfEventIsValid() {
-        assertThat(paymentStatesGraph.getNextStateForEvent(NEW, SYSTEM_CANCEL), is(PaymentState.SYSTEM_CANCELLED));
+        assertThat(paymentStatesGraph.getNextStateForEvent(NEW, TOKEN_EXCHANGED), is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
     public void getNextStateForEvent_shouldThrowExceptionIfTransitionIsInvalid() {
         thrown.expect(InvalidStateTransitionException.class);
-        thrown.expectMessage("Transition WEBHOOK_ACTION_PAID_OUT from state NEW is not valid");
+        thrown.expectMessage("Transition CHARGE_CREATED from state NEW is not valid");
         thrown.reportMissingExceptionWithMessage("InvalidStateTransitionException expected");
-        paymentStatesGraph.getNextStateForEvent(NEW, WEBHOOK_ACTION_PAID_OUT);
+        paymentStatesGraph.getNextStateForEvent(NEW, CHARGE_CREATED);
     }
 
     @Test
     public void isValidTransition_shouldReturnTrueFromWhenTransitionIsExpected() {
-        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.ENTERING_DIRECT_DEBIT_DETAILS, SupportedEvent.TOKEN_EXCHANGED), is(true));
+        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS, TOKEN_EXCHANGED), is(true));
     }
 
     @Test
     public void isValidTransition_shouldReturnFalseWhenTransitionIsInvalid() {
-        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.ENTERING_DIRECT_DEBIT_DETAILS, SupportedEvent.SYSTEM_CANCEL), is(false));
+        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS, CHARGE_CREATED), is(false));
     }
 }
 

@@ -49,7 +49,7 @@ public class PaymentRequestEventDaoIT {
     @Test
     public void shouldInsertAnEvent() {
         Long paymentRequestId = testPaymentRequest.getId();
-        PaymentRequestEvent.Type eventType = PaymentRequestEvent.Type.PAYER;
+        PaymentRequestEvent.Type eventType = PaymentRequestEvent.Type.CHARGE;
         PaymentRequestEvent.SupportedEvent event = PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
         ZonedDateTime eventDate = ZonedDateTime.now();
         PaymentRequestEvent paymentRequestEvent = new PaymentRequestEvent(paymentRequestId, eventType, event, eventDate);

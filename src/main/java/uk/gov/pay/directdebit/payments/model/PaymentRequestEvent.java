@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.payments.model;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.exception.UnsupportedPaymentRequestEventException;
 
@@ -69,35 +68,17 @@ public class PaymentRequestEvent {
     }
 
     public enum Type {
-        CHARGE, MANDATE, PAYER
+        CHARGE
     }
 
     public enum SupportedEvent {
         CHARGE_CREATED,
-        TOKEN_EXCHANGED,
-        SYSTEM_CANCEL,
-        PAYMENT_EXPIRED,
-        SHOW_CONFIRM,
-        CREATE_CUSTOMER_FAILED,
-        CREATE_CUSTOMER_BANK_ACCOUNT_ERROR,
-        USER_CANCEL,
-        MANDATE_PAYMENT_CREATED,
-        CREATE_MANDATE_FAILED,
-        CREATE_MANDATE_ERROR,
-        WEBHOOK_ACTION_PAYMENT_CREATED,
-        WEBHOOK_ACTION_CUSTOMER_DENIED,
-        WEBHOOK_ACTION_PAYMENT_ERROR,
-        WEBHOOK_ACTION_CONFIRMED,
-        WEBHOOK_ACTION_DATA_MISSING,
-        WEBHOOK_ACTION_CUSTOMER_CANCELLED,
-        WEBHOOK_ACTION_PAID_OUT;
-
-
+        TOKEN_EXCHANGED;
         public static SupportedEvent fromString(String event) throws UnsupportedPaymentRequestEventException {
             try {
                 return SupportedEvent.valueOf(event);
             } catch (Exception e) {
-                logger.warn("Tried to parse unknown event {}", event);
+                logger.error("Tried to parse unknown event {}", event);
                 throw new UnsupportedPaymentRequestEventException(event);
             }
         }

@@ -102,7 +102,7 @@ public class TransactionDaoIT {
 
     @Test
     public void shouldUpdateStateAndReturnNumberOfAffectedRows() {
-        PaymentState newState = PaymentState.IN_PROGRESS;
+        PaymentState newState = PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
         int numOfUpdatedTransactions = transactionDao.updateState(testTransaction.getId(), newState);
         Transaction transactionAfterUpdate = transactionDao.findByPaymentRequestId(testTransaction.getPaymentRequestId()).get();
         assertThat(numOfUpdatedTransactions, is(1));
@@ -115,7 +115,7 @@ public class TransactionDaoIT {
 
     @Test
     public void shouldNotUpdateAnythingIfTransactionDoesNotExist() {
-        int numOfUpdatedTransactions = transactionDao.updateState(34L, PaymentState.IN_PROGRESS);
+        int numOfUpdatedTransactions = transactionDao.updateState(34L, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
         assertThat(numOfUpdatedTransactions, is(0));
     }
 }
