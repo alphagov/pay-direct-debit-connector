@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
@@ -12,12 +13,12 @@ import java.time.ZonedDateTime;
 
 public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, PaymentRequest> {
     private Long id = RandomUtils.nextLong(1, 99999);
-    private Long gatewayAccountId = 23L;
-    private String description = "Test description";
+    private Long gatewayAccountId = RandomUtils.nextLong(1, 20);
+    private String description = RandomStringUtils.randomAlphabetic(20);
     private String externalId = RandomIdGenerator.newId();
     private long amount = 101L;
     private String returnUrl = "http://service.com/success-page";
-    private String reference = "Test reference";
+    private String reference = RandomStringUtils.randomAlphabetic(100);
 
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneId.of("UTC"));
 

@@ -66,10 +66,10 @@ public class TransactionDaoIT {
         Long id = transactionDao.insert(transaction);
         Map<String, Object> foundTransaction = testContext.getDatabaseTestHelper().getTransactionById(id);
         assertThat(foundTransaction.get("id"), is(id));
-        assertThat(foundTransaction.get("payment_request_id"), is(paymentRequestId));
-        assertThat((Long) foundTransaction.get("amount"), isNumber(amount));
-        assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(type));
-        assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(state));
+        assertThat(foundTransaction.get("payment_request_id"), is(testPaymentRequest.getId()));
+        assertThat((Long) foundTransaction.get("amount"), isNumber(testTransaction.getAmount()));
+        assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(testTransaction.getType()));
+        assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(testTransaction.getState()));
     }
 
     @Test

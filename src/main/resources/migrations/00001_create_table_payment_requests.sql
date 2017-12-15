@@ -14,7 +14,6 @@ CREATE TABLE payment_requests (
 );
 --rollback drop table payment_requests;
 
---changeset uk.gov.pay:add_index-payment_requests_external_id
-CREATE UNIQUE INDEX payment_requests_external_id ON payment_requests(external_id)
---rollback drop index payment_requests_external_id;
-
+--changeset uk.gov.pay:add_payment_requests_external_id_idx
+CREATE UNIQUE INDEX payment_requests_external_id_idx ON payment_requests(external_id)
+--rollback drop index payment_requests_external_id_idx;

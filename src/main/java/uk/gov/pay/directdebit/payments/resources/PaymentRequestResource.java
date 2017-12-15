@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.payments.resources;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestValidator;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
+import static javax.ws.rs.core.Response.ok;
 
 @Path("/")
 public class PaymentRequestResource {
@@ -25,7 +26,7 @@ public class PaymentRequestResource {
     public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{paymentRequestExternalId}";
     public static final String CHARGES_API_PATH = "/v1/api/accounts/{accountId}/charges";
 
-    private static final Logger logger = LoggerFactory.getLogger(PaymentRequestResource.class);
+    private static final Logger logger = PayLoggerFactory.getLogger(PaymentRequestResource.class);
     private final PaymentRequestService paymentRequestService;
     private final PaymentRequestValidator paymentRequestValidator = new PaymentRequestValidator();
     private final String ACCOUNT_ID = "accountId";
@@ -39,7 +40,7 @@ public class PaymentRequestResource {
     @Produces(APPLICATION_JSON)
     public Response getCharge(@PathParam(ACCOUNT_ID) Long accountId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, @Context UriInfo uriInfo) {
         PaymentRequestResponse response = paymentRequestService.getPaymentWithExternalId(paymentRequestExternalId, uriInfo);
-        return Response.ok(response).build();
+        return ok(response).build();
     }
 
     @POST
@@ -50,5 +51,6 @@ public class PaymentRequestResource {
         logger.info("Creating new payment request - {}", paymentRequest.toString());
         PaymentRequestResponse response = paymentRequestService.create(paymentRequest, accountId, uriInfo);
         return created(response.getLink("self")).entity(response).build();
+
     }
 }

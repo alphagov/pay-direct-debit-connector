@@ -25,6 +25,11 @@ public class DirectDebitConfig extends Configuration {
     @NotNull
     private ProxyConfiguration proxyConfiguration;
 
+    @Valid
+    @NotNull
+    @JsonProperty("encryptDBSalt")
+    private String encryptDBSalt;
+
     @JsonProperty("database")
     public DataSourceFactory getDataSourceFactory() {
         return dataSourceFactory;
@@ -43,6 +48,11 @@ public class DirectDebitConfig extends Configuration {
     @JsonProperty("proxy")
     public ProxyConfiguration getProxyConfiguration() {
         return proxyConfiguration;
+    }
+
+
+    public String getEncryptDBSalt() {
+        return encryptDBSalt;
     }
 
 }

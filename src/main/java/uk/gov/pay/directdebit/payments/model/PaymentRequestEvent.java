@@ -73,7 +73,10 @@ public class PaymentRequestEvent {
 
     public enum SupportedEvent {
         CHARGE_CREATED,
-        TOKEN_EXCHANGED;
+        TOKEN_EXCHANGED,
+        DIRECT_DEBIT_DETAILS_RECEIVED,
+        PAYER_CREATED;
+
         public static SupportedEvent fromString(String event) throws UnsupportedPaymentRequestEventException {
             try {
                 return SupportedEvent.valueOf(event);

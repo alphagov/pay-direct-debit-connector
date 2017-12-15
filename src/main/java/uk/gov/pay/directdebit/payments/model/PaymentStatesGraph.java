@@ -6,7 +6,10 @@ import com.google.common.graph.ValueGraphBuilder;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 
@@ -34,7 +37,8 @@ public class PaymentStatesGraph {
         addNodes(graph, PaymentState.values());
 
         graph.putEdgeValue(NEW, AWAITING_DIRECT_DEBIT_DETAILS, TOKEN_EXCHANGED);
-
+        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, AWAITING_DIRECT_DEBIT_DETAILS, DIRECT_DEBIT_DETAILS_RECEIVED);
+        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, AWAITING_CONFIRMATION, PAYER_CREATED);
         return ImmutableValueGraph.copyOf(graph);
     }
 

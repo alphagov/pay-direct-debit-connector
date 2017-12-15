@@ -58,4 +58,13 @@ public class DatabaseTestHelper {
                         .first()
         );
     }
+
+    public Map<String, Object> getPayerById(Long id) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from payers p WHERE p.id = :id")
+                        .bind("id", id)
+                        .first()
+        );
+    }
 }

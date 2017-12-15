@@ -10,3 +10,7 @@ CREATE TABLE payment_request_events (
     version INTEGER DEFAULT 0 NOT NULL
 );
 --rollback drop table payment_request_events;
+
+--changeset uk.gov.pay:add_payment_requests_events_payment_requests_fk
+ALTER TABLE payment_request_events ADD CONSTRAINT payment_requests_events_payment_requests_fk FOREIGN KEY (payment_request_id) REFERENCES payment_requests (id);
+--rollback drop constraint payment_requests_events_payment_requests_fk;
