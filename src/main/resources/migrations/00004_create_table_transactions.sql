@@ -11,6 +11,6 @@ CREATE TABLE transactions (
 );
 --rollback drop table transactions;
 
---changeset uk.gov.pay:add_index-transactions_payment_request_id
-CREATE INDEX transactions_payment_request_id ON transactions(payment_request_id)
---rollback drop index transactions_payment_request_id;
+--changeset uk.gov.pay:add_transactions_payment_requests_fk
+ALTER TABLE transactions ADD CONSTRAINT transactions_payment_requests_fk FOREIGN KEY (payment_request_id) REFERENCES payment_requests (id);
+--rollback drop constraint transactions_payment_requests_fk;
