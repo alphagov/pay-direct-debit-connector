@@ -43,7 +43,7 @@ public class PaymentRequestResource {
     }
 
     @POST
-    @Path(CHARGES_API_PATH)
+    @Path("/v1/api/accounts/{accountId}/charges")
     @Produces(APPLICATION_JSON)
     public Response createNewPaymentRequest(@PathParam(ACCOUNT_ID) Long accountId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
         paymentRequestValidator.validate(paymentRequest);

@@ -34,7 +34,7 @@ public class TokenService {
                 .orElseThrow(TokenNotFoundException::new);
     }
 
-    public void deleteToken(String token){
+    public void deleteToken(String token) {
         int numOfDeletedTokens = tokenDao.deleteToken(token);
         if (numOfDeletedTokens == 0) {
             LOGGER.warn("Tried to delete token which was not in db");

@@ -68,11 +68,11 @@ public class DatabaseTestHelper {
         );
     }
 
-    public Map<String, Object> getPayerByPaymentRequestExternalId(String externalId) {
+    public Map<String, Object> getMandateById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT p.* from payers p INNER JOIN payment_requests r ON p.payment_request_id = r.id WHERE r.external_id = :externalId")
-                        .bind("externalId", externalId)
+                        .createQuery("SELECT * from mandates t WHERE t.id = :id")
+                        .bind("id", id)
                         .first()
         );
     }

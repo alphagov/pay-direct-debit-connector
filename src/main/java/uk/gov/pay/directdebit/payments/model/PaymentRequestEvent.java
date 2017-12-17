@@ -75,7 +75,8 @@ public class PaymentRequestEvent {
         CHARGE_CREATED,
         TOKEN_EXCHANGED,
         DIRECT_DEBIT_DETAILS_RECEIVED,
-        PAYER_CREATED;
+        PAYER_CREATED,
+        PAYMENT_CONFIRMED;
 
         public static SupportedEvent fromString(String event) throws UnsupportedPaymentRequestEventException {
             try {
