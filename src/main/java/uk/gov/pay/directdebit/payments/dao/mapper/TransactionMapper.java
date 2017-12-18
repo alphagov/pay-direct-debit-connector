@@ -10,10 +10,10 @@ import java.sql.SQLException;
 
 public class TransactionMapper implements ResultSetMapper<Transaction> {
     private static final String ID_COLUMN = "id";
-    private static final String PAYMENT_REQUEST_ID_COLUMN = "payment_request_id";
     private static final String AMOUNT_COLUMN = "amount";
     private static final String TYPE_COLUMN = "type";
     private static final String STATE_COLUMN = "state";
+    private static final String PAYMENT_REQUEST_ID_COLUMN = "payment_request_id";
     private static final String PAYMENT_REQUEST_EXTERNAL_ID_COLUMN = "external_id";
 
     @Override

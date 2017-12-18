@@ -21,6 +21,10 @@ CREATE TABLE payers (
 );
 --rollback drop table payers;
 
---changeset uk.gov.pay:add_index-payers_payment_request_id
-CREATE INDEX payers_payment_request_id ON payers(payment_request_id)
---rollback drop index payers_payment_request_id;
+--changeset uk.gov.pay:add_payers_payment_requests_fk
+ALTER TABLE payers ADD CONSTRAINT payers_payment_requests_fk FOREIGN KEY (payment_request_id) REFERENCES payment_requests (id);
+--rollback drop constraint payers_payment_requests_fk;
+
+--changeset uk.gov.pay:add_index-payers_payment_external_id
+CREATE INDEX payers_external_id_idx ON payers(external_id)
+--rollback drop index payers_payment_external_id_idx;

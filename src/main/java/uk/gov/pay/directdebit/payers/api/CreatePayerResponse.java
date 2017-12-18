@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.payers.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.payers.model.Payer;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -18,8 +19,17 @@ public class CreatePayerResponse {
     @JsonProperty("payer_external_id")
     private String payerExternalId;
 
+
     public CreatePayerResponse(String payerExternalId) {
         this.payerExternalId = payerExternalId;
+    }
+
+    public static CreatePayerResponse from(Payer payer) {
+        return new CreatePayerResponse(payer.getExternalId());
+    }
+
+    public String getPayerExternalId() {
+        return payerExternalId;
     }
 
     @Override

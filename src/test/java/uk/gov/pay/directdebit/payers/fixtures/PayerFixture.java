@@ -19,21 +19,19 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
     private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
     private String externalId = RandomIdGenerator.newId();
     private String name = RandomStringUtils.randomAlphabetic(7);
-    private String email = RandomStringUtils.randomAlphanumeric(40);
-    private String sortCode = RandomStringUtils.randomAlphanumeric(30);
-    private String accountNumber = RandomStringUtils.randomAlphanumeric(30);
-    private String accountNumberLastTwoDigits = RandomStringUtils.randomNumeric(2);
+    private String email = generateEmail();
+    private String sortCode = RandomStringUtils.randomNumeric(6);
+    private String accountNumber = RandomStringUtils.randomNumeric(8);
+    private String accountNumberLastTwoDigits = accountNumber.substring(accountNumber.length()-2);
     private boolean accountRequiresAuthorisation = true;
     private String addressLine1 = RandomStringUtils.randomAlphanumeric(10);
-    private String addressLine2;
+    private String addressLine2 = RandomStringUtils.randomAlphanumeric(10);
     private String addressPostcode = RandomStringUtils.randomAlphanumeric(6);
     private String addressCity = RandomStringUtils.randomAlphabetic(10);
     private String addressCountry = RandomStringUtils.randomAlphabetic(10);;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneId.of("UTC"));
 
-    private PayerFixture() {
-
-    }
+    private PayerFixture() { }
 
     public static PayerFixture aPayerFixture() {
         return new PayerFixture();
@@ -220,6 +218,10 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
     @Override
     public Payer toEntity() {
         return new Payer(id, paymentRequestId, externalId, name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, addressLine1, addressLine2, addressPostcode, addressCity, addressCountry, createdDate);
+    }
+
+    private String generateEmail() {
+        return RandomStringUtils.randomAlphanumeric(20) + "@" + RandomStringUtils.randomAlphanumeric(10) + ".com";
     }
 
 }

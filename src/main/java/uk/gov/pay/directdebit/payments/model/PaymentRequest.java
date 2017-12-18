@@ -94,4 +94,34 @@ public class PaymentRequest {
     public void setId(Long id) {
         this.id = id;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PaymentRequest that = (PaymentRequest) o;
+
+        if (!id.equals(that.id)) return false;
+        if (!externalId.equals(that.externalId)) return false;
+        if (!amount.equals(that.amount)) return false;
+        if (!returnUrl.equals(that.returnUrl)) return false;
+        if (!gatewayAccountId.equals(that.gatewayAccountId)) return false;
+        if (!description.equals(that.description)) return false;
+        if (!reference.equals(that.reference)) return false;
+        return createdDate.equals(that.createdDate);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + externalId.hashCode();
+        result = 31 * result + amount.hashCode();
+        result = 31 * result + returnUrl.hashCode();
+        result = 31 * result + gatewayAccountId.hashCode();
+        result = 31 * result + description.hashCode();
+        result = 31 * result + reference.hashCode();
+        result = 31 * result + createdDate.hashCode();
+        return result;
+    }
 }

@@ -50,7 +50,7 @@ public class PayerDaoIT {
 
     @Test
     public void shouldInsertAPayer() {
-        Payer aPayer = PayerFixture.aPayerFixture().insert(testContext.getJdbi()).toEntity();
+        Payer aPayer = PayerFixture.aPayerFixture().withPaymentRequestId(testPaymentRequest.getId()).toEntity();
         Long id = payerDao.insert(aPayer);
         Map<String, Object> foundPayer = testContext.getDatabaseTestHelper().getPayerById(id);
         assertThat(foundPayer.get("id"), is(id));
@@ -58,15 +58,15 @@ public class PayerDaoIT {
         assertThat(foundPayer.get("external_id"), is(aPayer.getExternalId()));
         assertThat(foundPayer.get("name"), is(aPayer.getName()));
         assertThat(foundPayer.get("email"), is(aPayer.getEmail()));
-        assertThat(foundPayer.get("bank_account_number_last_two_digits"), is(aPayer.getEmail()));
-        assertThat(foundPayer.get("bank_account_requires_authorisation"), is(aPayer.getEmail()));
-        assertThat(foundPayer.get("bank_account_number"), is(aPayer.getEmail()));
-        assertThat(foundPayer.get("bank_account_sort_code"), is(aPayer.getEmail()));
-        assertThat(foundPayer.get("address_line1"), is(aPayer.getEmail()));
-        assertThat(foundPayer.get("address_line2"), is(aPayer.getEmail()));
-        assertThat(foundPayer.get("address_postcode"), is(aPayer.getEmail()));
-        assertThat(foundPayer.get("address_city"), is(aPayer.getEmail()));
-        assertThat(foundPayer.get("address_country"), is(aPayer.getEmail()));
+        assertThat(foundPayer.get("bank_account_number_last_two_digits"), is(aPayer.getAccountNumberLastTwoDigits()));
+        assertThat(foundPayer.get("bank_account_requires_authorisation"), is(aPayer.getAccountRequiresAuthorisation()));
+        assertThat(foundPayer.get("bank_account_number"), is(aPayer.getAccountNumber()));
+        assertThat(foundPayer.get("bank_account_sort_code"), is(aPayer.getSortCode()));
+        assertThat(foundPayer.get("address_line1"), is(aPayer.getAddressLine1()));
+        assertThat(foundPayer.get("address_line2"), is(aPayer.getAddressLine2()));
+        assertThat(foundPayer.get("address_postcode"), is(aPayer.getAddressPostcode()));
+        assertThat(foundPayer.get("address_city"), is(aPayer.getAddressCity()));
+        assertThat(foundPayer.get("address_country"), is(aPayer.getAddressCountry()));
         assertThat((Timestamp) foundPayer.get("created_date"), isDate(aPayer.getCreatedDate()));
 
     }

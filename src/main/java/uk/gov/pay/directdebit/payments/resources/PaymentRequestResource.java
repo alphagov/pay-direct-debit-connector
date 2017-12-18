@@ -49,7 +49,7 @@ public class PaymentRequestResource {
     public Response createNewPaymentRequest(@PathParam(ACCOUNT_ID) Long accountId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
         paymentRequestValidator.validate(paymentRequest);
         logger.info("Creating new payment request - {}", paymentRequest.toString());
-        PaymentRequestResponse response = paymentRequestService.create(paymentRequest, accountId, uriInfo);
+        PaymentRequestResponse response = paymentRequestService.createCharge(paymentRequest, accountId, uriInfo);
         return created(response.getLink("self")).entity(response).build();
 
     }

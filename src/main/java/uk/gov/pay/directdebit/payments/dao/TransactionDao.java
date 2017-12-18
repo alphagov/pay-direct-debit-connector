@@ -15,6 +15,10 @@ import java.util.Optional;
 
 @RegisterMapper(TransactionMapper.class)
 public interface TransactionDao {
+    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id WHERE p.external_id = :paymentRequestExternalId")
+    @SingleValueResult(Transaction.class)
+    Optional<Transaction> findByPaymentRequestExternalId(@Bind("paymentRequestExternalId") String paymentRequestExternalId);
+
     @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id WHERE t.payment_request_id = :paymentRequestId")
     @SingleValueResult(Transaction.class)
     Optional<Transaction> findByPaymentRequestId(@Bind("paymentRequestId") Long paymentRequestId);
