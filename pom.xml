@@ -107,7 +107,11 @@
             <artifactId>gocardless-pro</artifactId>
             <version>${gocardless.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
         <!-- testing -->
         <dependency>
             <groupId>io.dropwizard</groupId>

@@ -22,11 +22,16 @@ import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
+import uk.gov.pay.directdebit.payers.dao.PayerDao;
+import uk.gov.pay.directdebit.payers.resources.PayerResource;
+import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.resources.PaymentRequestResource;
+import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
+import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -73,11 +78,23 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 dataSourceFactory.getUser(),
                 dataSourceFactory.getPassword()
         );
+
+
         PaymentRequestDao paymentRequestDao = jdbi.onDemand(PaymentRequestDao.class);
         TokenDao tokenDao = jdbi.onDemand(TokenDao.class);
         PaymentRequestEventDao paymentRequestEventDao = jdbi.onDemand(PaymentRequestEventDao.class);
         TransactionDao transactionDao = jdbi.onDemand(TransactionDao.class);
+        PayerDao payerDao = jdbi.onDemand(PayerDao.class);
+        PaymentRequestEventService paymentRequestEventService = new PaymentRequestEventService(paymentRequestEventDao);
+        TransactionService transactionService = new TransactionService(transactionDao, paymentRequestEventService);
+        TokenService tokenService = new TokenService(tokenDao, transactionService);
+        PaymentRequestService paymentRequestService = new PaymentRequestService(
+                configuration,
+                paymentRequestDao,
+                tokenService,
+                transactionService);
 
+        PayerService payerService = new PayerService(configuration.getEncryptionConfig(), payerDao, transactionService);
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
 
@@ -88,17 +105,9 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         jdbi.registerContainerFactory(new OptionalContainerFactory());
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
-
-        environment.jersey().register(new PaymentRequestResource(new PaymentRequestService(
-                configuration,
-                paymentRequestDao,
-                tokenDao,
-                paymentRequestEventDao,
-                transactionDao)));
-        environment.jersey().register(new SecurityTokensResource(new TokenService(
-                tokenDao,
-                paymentRequestEventDao,
-                transactionDao)));
+        environment.jersey().register(new PaymentRequestResource(paymentRequestService));
+        environment.jersey().register(new SecurityTokensResource(tokenService));
+        environment.jersey().register(new PayerResource(payerService));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new BadRequestExceptionMapper());
         environment.jersey().register(new NotFoundExceptionMapper());
@@ -109,8 +118,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     private void setupSSL(DirectDebitConfig configuration) {
         SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
         HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory);
-        System.setProperty("https.proxyHost", configuration.getProxyConfiguration().getHost());
-        System.setProperty("https.proxyPort", configuration.getProxyConfiguration().getPort().toString());
+        System.setProperty("https.proxyHost", configuration.getProxyConfig().getHost());
+        System.setProperty("https.proxyPort", configuration.getProxyConfig().getPort().toString());
     }
 }
 

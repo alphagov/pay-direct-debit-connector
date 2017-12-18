@@ -4,7 +4,7 @@ import io.dropwizard.Configuration;
 
 import javax.validation.constraints.NotNull;
 
-public class ProxyConfiguration extends Configuration {
+public class ProxyConfig extends Configuration {
 
     @NotNull
     private String host;
