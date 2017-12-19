@@ -25,7 +25,7 @@ public class PaymentRequestResource {
     public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{paymentRequestExternalId}";
     public static final String CHARGES_API_PATH = "/v1/api/accounts/{accountId}/charges";
 
-    private static final Logger logger = LoggerFactory.getLogger(PaymentRequestResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentRequestResource.class);
     private final PaymentRequestService paymentRequestService;
     private final PaymentRequestValidator paymentRequestValidator = new PaymentRequestValidator();
     private final String ACCOUNT_ID = "accountId";
@@ -47,7 +47,7 @@ public class PaymentRequestResource {
     @Produces(APPLICATION_JSON)
     public Response createNewPaymentRequest(@PathParam(ACCOUNT_ID) Long accountId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
         paymentRequestValidator.validate(paymentRequest);
-        logger.info("Creating new payment request - {}", paymentRequest.toString());
+        LOGGER.info("Creating new payment request - {}", paymentRequest.toString());
         PaymentRequestResponse response = paymentRequestService.createCharge(paymentRequest, accountId, uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }

@@ -71,7 +71,7 @@ public class Transaction {
         this.state = state;
     }
     public enum Type {
-        CHARGE, REFUND
+        CHARGE
     }
 
     @Override

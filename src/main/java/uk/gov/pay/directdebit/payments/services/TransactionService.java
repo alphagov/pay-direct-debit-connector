@@ -16,7 +16,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.chargeCr
 import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
 
 public class TransactionService {
-    private static final Logger logger = PayLoggerFactory.getLogger(TransactionService.class);
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(TransactionService.class);
 
     private final TransactionDao transactionDao;
     private final PaymentRequestEventService paymentRequestEventService;
@@ -28,7 +28,7 @@ public class TransactionService {
     public Transaction findChargeForExternalId(String paymentRequestExternalId) {
         Transaction transaction = transactionDao.findByPaymentRequestExternalId(paymentRequestExternalId)
                 .orElseThrow(() -> new ChargeNotFoundException(paymentRequestExternalId));
-        logger.info("Found charge for payment request with id: {}", paymentRequestExternalId);
+        LOGGER.info("Found charge for payment request with id: {}", paymentRequestExternalId);
         return transaction;
     }
 
@@ -39,7 +39,7 @@ public class TransactionService {
                 paymentRequest.getAmount(),
                 Transaction.Type.CHARGE,
                 PaymentStatesGraph.initialState());
-        logger.info("Created transaction for payment request {}", paymentRequest.getExternalId());
+        LOGGER.info("Created transaction for payment request {}", paymentRequest.getExternalId());
         Long id = transactionDao.insert(transaction);
         transaction.setId(id);
         paymentRequestEventService.insertEventFor(paymentRequest, chargeCreated(paymentRequest.getId()));
@@ -51,7 +51,7 @@ public class TransactionService {
                 event);
         transactionDao.updateState(charge.getId(), newState);
         charge.setState(newState);
-        logger.info("Updated charge {} - from {} to {}",
+        LOGGER.info("Updated charge {} - from {} to {}",
                 charge.getPaymentRequestExternalId(),
                 charge.getState(),
                 newState);

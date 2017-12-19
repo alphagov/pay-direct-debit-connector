@@ -17,6 +17,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,8 +32,13 @@ import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class PaymentRequestDaoIT {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private static final ZonedDateTime CREATED_DATE = ZonedDateTime.parse("2017-12-30T12:30:40Z[UTC]");
+    private static final String RETURN_URL = "https://return.url";
+    private static final String REFERENCE = "reference";
+    private static final String DESCRIPTION = "description";
+    private static final long AMOUNT = 4L;
+    private static final String EXTERNAL_ID = "externalId";
+    private static final long GATEWAY_ACCOUNT_ID = 10L;
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -44,38 +50,40 @@ public class PaymentRequestDaoIT {
     public void setup() throws IOException, LiquibaseException {
         paymentRequestDao = testContext.getJdbi().onDemand(PaymentRequestDao.class);
         this.testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
-                .insert(testContext.getJdbi());
-        aTokenFixture()
-                .withPaymentRequestId(testPaymentRequest.getId())
-                .insert(testContext.getJdbi());
+                .withGatewayAccountId(GATEWAY_ACCOUNT_ID)
+                .withExternalId(EXTERNAL_ID)
+                .withAmount(AMOUNT)
+                .withDescription(DESCRIPTION)
+                .withReference(REFERENCE)
+                .withReturnUrl(RETURN_URL)
+                .withCreatedDate(CREATED_DATE);
     }
 
     @Test
     public void shouldInsertAPaymentRequest() {
-        String externalId = "externalId";
-        Long id = paymentRequestDao.insert(testPaymentRequest.withExternalId(externalId).toEntity());
+        Long id = paymentRequestDao.insert(testPaymentRequest.toEntity());
         Map<String, Object> foundPaymentRequest = testContext.getDatabaseTestHelper().getPaymentRequestById(id);
         assertThat(foundPaymentRequest.get("id"), is(id));
-        assertThat(foundPaymentRequest.get("external_id"), is(externalId));
-        assertThat(foundPaymentRequest.get("amount"), is(testPaymentRequest.getAmount()));
-        assertThat(foundPaymentRequest.get("reference"), is(testPaymentRequest.getReference()));
-        assertThat(foundPaymentRequest.get("description"), is(testPaymentRequest.getDescription()));
-        assertThat(foundPaymentRequest.get("return_url"), is(testPaymentRequest.getReturnUrl()));
-        assertThat((Timestamp) foundPaymentRequest.get("created_date"), isDate(testPaymentRequest.getCreatedDate()));
+        assertThat(foundPaymentRequest.get("external_id"), is(EXTERNAL_ID));
+        assertThat(foundPaymentRequest.get("amount"), is(AMOUNT));
+        assertThat(foundPaymentRequest.get("reference"), is(REFERENCE));
+        assertThat(foundPaymentRequest.get("description"), is(DESCRIPTION));
+        assertThat(foundPaymentRequest.get("return_url"), is(RETURN_URL));
+        assertThat((Timestamp) foundPaymentRequest.get("created_date"), isDate(CREATED_DATE));
     }
 
     @Test
     public void shouldFindPaymentRequestById() {
+        testPaymentRequest.insert(testContext.getJdbi());
         PaymentRequest paymentRequest = paymentRequestDao.findById(testPaymentRequest.getId()).get();
         assertThat(paymentRequest.getId(), is(notNullValue()));
-        assertThat(paymentRequest.getAmount(), is(testPaymentRequest.getAmount()));
-        assertThat(paymentRequest.getCreatedDate(), is(testPaymentRequest.getCreatedDate()));
-        assertThat(paymentRequest.getDescription(), is(testPaymentRequest.getDescription()));
-        assertThat(paymentRequest.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
-        assertThat(paymentRequest.getReference(), is(testPaymentRequest.getReference()));
-        assertThat(paymentRequest.getReturnUrl(), is(testPaymentRequest.getReturnUrl()));
-        assertThat(paymentRequest.getExternalId(), is(testPaymentRequest.getExternalId()));
+        assertThat(paymentRequest.getAmount(), is(AMOUNT));
+        assertThat(paymentRequest.getCreatedDate(), is(CREATED_DATE));
+        assertThat(paymentRequest.getDescription(), is(DESCRIPTION));
+        assertThat(paymentRequest.getGatewayAccountId(), is(GATEWAY_ACCOUNT_ID));
+        assertThat(paymentRequest.getReference(), is(REFERENCE));
+        assertThat(paymentRequest.getReturnUrl(), is(RETURN_URL));
+        assertThat(paymentRequest.getExternalId(), is(EXTERNAL_ID));
     }
 
     @Test
@@ -86,15 +94,16 @@ public class PaymentRequestDaoIT {
 
     @Test
     public void shouldFindPaymentRequestByExternalId() {
+        testPaymentRequest.insert(testContext.getJdbi());
         PaymentRequest paymentRequest = paymentRequestDao.findByExternalId(testPaymentRequest.getExternalId()).get();
         assertThat(paymentRequest.getId(), is(notNullValue()));
-        assertThat(paymentRequest.getAmount(), is(testPaymentRequest.getAmount()));
-        assertThat(paymentRequest.getCreatedDate(), is(testPaymentRequest.getCreatedDate()));
-        assertThat(paymentRequest.getDescription(), is(testPaymentRequest.getDescription()));
-        assertThat(paymentRequest.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
-        assertThat(paymentRequest.getReference(), is(testPaymentRequest.getReference()));
-        assertThat(paymentRequest.getReturnUrl(), is(testPaymentRequest.getReturnUrl()));
-        assertThat(paymentRequest.getExternalId(), is(testPaymentRequest.getExternalId()));
+        assertThat(paymentRequest.getAmount(), is(AMOUNT));
+        assertThat(paymentRequest.getCreatedDate(), is(CREATED_DATE));
+        assertThat(paymentRequest.getDescription(), is(DESCRIPTION));
+        assertThat(paymentRequest.getGatewayAccountId(), is(GATEWAY_ACCOUNT_ID));
+        assertThat(paymentRequest.getReference(), is(REFERENCE));
+        assertThat(paymentRequest.getReturnUrl(), is(RETURN_URL));
+        assertThat(paymentRequest.getExternalId(), is(EXTERNAL_ID));
     }
 
     @Test

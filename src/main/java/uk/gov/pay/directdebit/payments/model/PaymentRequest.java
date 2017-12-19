@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.model;
 
+
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
 import java.time.ZoneId;

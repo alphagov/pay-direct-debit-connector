@@ -71,7 +71,7 @@ public class PaymentRequestServiceTest {
             .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
     private TransactionFixture transaction = aTransactionFixture()
             .withPaymentRequestId(paymentRequest.getId())
-            .withExternalId(paymentRequest.getExternalId())
+            .withPaymentRequestExternalId(paymentRequest.getExternalId())
             .withAmount(paymentRequest.getAmount());
 
     private final TokenFixture token = TokenFixture.aTokenFixture();

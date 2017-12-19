@@ -22,9 +22,6 @@ proxy:
 links:
   frontendUrl: ${FRONTEND_URL:-}
 
-encryption:
-  encryptDBSalt: ${TOKEN_DB_BCRYPT_SALT}
-
 goCardless:
   # For initial integration we will use sandbox access token.
   # When in live mode: access token should be removed from the config and we should use partner integration instead.

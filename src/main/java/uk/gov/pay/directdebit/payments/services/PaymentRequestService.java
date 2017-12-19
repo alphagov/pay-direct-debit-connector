@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.common.util.URIBuilder;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
@@ -14,9 +13,7 @@ import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +23,10 @@ import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.*;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
-import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGES_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 
 public class PaymentRequestService {
-    private static final Logger logger = PayLoggerFactory.getLogger(PaymentRequestService.class);
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(PaymentRequestService.class);
 
     private final LinksConfig linksConfig;
     private final PaymentRequestDao paymentRequestDao;
@@ -77,7 +73,7 @@ public class PaymentRequestService {
                 accountId,
                 paymentRequestMap.get("description"),
                 paymentRequestMap.get("reference"));
-        logger.info("Creating payment request with external id {}", paymentRequest.getExternalId());
+        LOGGER.info("Creating payment request with external id {}", paymentRequest.getExternalId());
         Long id = paymentRequestDao.insert(paymentRequest);
         paymentRequest.setId(id);
         Transaction createdTransaction = transactionService.createChargeFor(paymentRequest);

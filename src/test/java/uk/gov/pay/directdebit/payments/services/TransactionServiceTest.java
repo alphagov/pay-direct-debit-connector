@@ -54,7 +54,7 @@ public class TransactionServiceTest {
         ArgumentCaptor<PaymentRequestEvent> preCaptor = forClass(PaymentRequestEvent.class);
         Transaction transaction = service.createChargeFor(paymentRequestFixture.toEntity());
         verify(mockedPaymentRequestEventService).insertEventFor(prCaptor.capture(), preCaptor.capture());
-
+        verify(mockedTransactionDao).insert(transaction);
         PaymentRequestEvent createdPaymentRequestEvent = preCaptor.getValue();
 
         assertThat(transaction.getId(), is(notNullValue()));

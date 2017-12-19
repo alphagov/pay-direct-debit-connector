@@ -21,7 +21,7 @@ import static java.lang.String.format;
 public class LoggingFilter implements Filter {
 
     public static final String HEADER_REQUEST_ID = "X-Request-Id";
-    private static final Logger logger = PayLoggerFactory.getLogger(LoggingFilter.class);
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(LoggingFilter.class);
 
     public static String currentRequestId() {
         return MDC.get(HEADER_REQUEST_ID);
@@ -43,13 +43,13 @@ public class LoggingFilter implements Filter {
 
         MDC.put(HEADER_REQUEST_ID, requestId);
 
-        logger.info(format("%s to %s began", requestMethod, requestURL));
+        LOGGER.info(format("%s to %s began", requestMethod, requestURL));
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (Throwable throwable) {
-            logger.error("Exception - direct debit connector request - " + requestURL + " - exception - " + throwable.getMessage(), throwable);
+            LOGGER.error("Exception - direct debit connector request - " + requestURL + " - exception - " + throwable.getMessage(), throwable);
         } finally {
-            logger.info(format("%s to %s ended - total time %dms", requestMethod, requestURL,
+            LOGGER.info(format("%s to %s ended - total time %dms", requestMethod, requestURL,
                     stopwatch.elapsed(TimeUnit.MILLISECONDS)));
             stopwatch.stop();
         }

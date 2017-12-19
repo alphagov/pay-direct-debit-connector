@@ -3,9 +3,7 @@ package uk.gov.pay.directdebit.payments.dao;
 import liquibase.exception.LiquibaseException;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
@@ -22,26 +20,26 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.*;
+import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class TransactionDaoIT {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private static final Transaction.Type TYPE = Transaction.Type.CHARGE;
+    private static final PaymentState STATE = PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+    private static final long AMOUNT = 10L;
+
     @DropwizardTestContext
     private TestContext testContext;
     private TransactionDao transactionDao;
 
     private PaymentRequestFixture testPaymentRequest;
-    private TokenFixture testToken;
     private TransactionFixture testTransaction;
 
     @Before
@@ -50,56 +48,62 @@ public class TransactionDaoIT {
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert(testContext.getJdbi());
-        this.testToken = aTokenFixture()
-                .withPaymentRequestId(testPaymentRequest.getId())
-                .insert(testContext.getJdbi());
         this.testTransaction = aTransactionFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .insert(testContext.getJdbi());
+                .withPaymentRequestExternalId(testPaymentRequest.getExternalId())
+                .withAmount(AMOUNT)
+                .withState(STATE)
+                .withType(TYPE);
     }
 
     @Test
     public void shouldInsertATransaction() {
-        Transaction transaction = aTransactionFixture().withPaymentRequestId(testPaymentRequest.getId()).toEntity();
+        Transaction transaction = testTransaction.toEntity();
         Long id = transactionDao.insert(transaction);
         Map<String, Object> foundTransaction = testContext.getDatabaseTestHelper().getTransactionById(id);
         assertThat(foundTransaction.get("id"), is(id));
         assertThat(foundTransaction.get("payment_request_id"), is(testPaymentRequest.getId()));
-        assertThat((Long) foundTransaction.get("amount"), isNumber(transaction.getAmount()));
-        assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(transaction.getType()));
-        assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(transaction.getState()));
+        assertThat((Long) foundTransaction.get("amount"), isNumber(AMOUNT));
+        assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(TYPE));
+        assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(STATE));
     }
 
     @Test
     public void shouldGetATransactionByPaymentRequestId() {
+        testTransaction.insert(testContext.getJdbi());
         Transaction transaction = transactionDao.findByPaymentRequestId(testPaymentRequest.getId()).get();
         assertThat(transaction.getId(), is(testTransaction.getId()));
-        assertThat(transaction.getPaymentRequestId(), is(testTransaction.getPaymentRequestId()));
+        assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getType(), is(testTransaction.getType()));
-        assertThat(transaction.getAmount(), is(testTransaction.getAmount()));
-        assertThat(transaction.getState(), is(testTransaction.getState()));
+        assertThat(transaction.getType(), is(TYPE));
+        assertThat(transaction.getAmount(), is(AMOUNT));
+        assertThat(transaction.getState(), is(STATE));
     }
 
     @Test
     public void shouldGetATransactionByPaymentRequestExternalId() {
+        testTransaction.insert(testContext.getJdbi());
         Transaction transaction = transactionDao.findByPaymentRequestExternalId(testPaymentRequest.getExternalId()).get();
         assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testTransaction.getPaymentRequestId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getType(), is(testTransaction.getType()));
-        assertThat(transaction.getAmount(), is(testTransaction.getAmount()));
-        assertThat(transaction.getState(), is(testTransaction.getState()));
+        assertThat(transaction.getType(), is(TYPE));
+        assertThat(transaction.getAmount(), is(AMOUNT));
+        assertThat(transaction.getState(), is(STATE));
     }
     @Test
     public void shouldFindATransactionByTokenId() {
-        Transaction transaction = transactionDao.findByTokenId(testToken.getToken()).get();
-        assertThat(transaction.getId(), is(notNullValue()));
+        TokenFixture token = aTokenFixture()
+                .withPaymentRequestId(testPaymentRequest.getId())
+                .insert(testContext.getJdbi());
+        testTransaction.insert(testContext.getJdbi());
+        Transaction transaction = transactionDao.findByTokenId(token.getToken()).get();
+        assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getAmount(), is(testTransaction.getAmount()));
-        assertThat(transaction.getState(), is(testTransaction.getState()));
-        assertThat(transaction.getType(), is(testTransaction.getType()));
+        assertThat(transaction.getType(), is(TYPE));
+        assertThat(transaction.getAmount(), is(AMOUNT));
+        assertThat(transaction.getState(), is(STATE));
     }
 
     @Test
@@ -111,13 +115,15 @@ public class TransactionDaoIT {
     @Test
     public void shouldUpdateStateAndReturnNumberOfAffectedRows() {
         PaymentState newState = PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+        testTransaction.insert(testContext.getJdbi());
         int numOfUpdatedTransactions = transactionDao.updateState(testTransaction.getId(), newState);
         Transaction transactionAfterUpdate = transactionDao.findByPaymentRequestId(testTransaction.getPaymentRequestId()).get();
         assertThat(numOfUpdatedTransactions, is(1));
         assertThat(transactionAfterUpdate.getId(), is(testTransaction.getId()));
+        assertThat(transactionAfterUpdate.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transactionAfterUpdate.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transactionAfterUpdate.getType(), is(testTransaction.getType()));
-        assertThat(transactionAfterUpdate.getAmount(), is(testTransaction.getAmount()));
+        assertThat(transactionAfterUpdate.getType(), is(TYPE));
+        assertThat(transactionAfterUpdate.getAmount(), is(AMOUNT));
         assertThat(transactionAfterUpdate.getState(), is(newState));
     }
 

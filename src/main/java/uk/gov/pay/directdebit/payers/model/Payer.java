@@ -44,10 +44,6 @@ public class Payer {
         this(null, paymentRequestId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, addressLine1, addressLine2, addressPostcode, addressCity, addressCountry, ZonedDateTime.now(ZoneId.of("UTC")));
     }
 
-    public Payer(Long paymentRequestId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation,  String addressLine1, String addressPostcode, String addressCity, String addressCountry) {
-        this(null, paymentRequestId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, addressLine1,  null, addressPostcode, addressCity, addressCountry, ZonedDateTime.now(ZoneId.of("UTC")));
-    }
-
     public void setId(Long id) {
         this.id = id;
     }

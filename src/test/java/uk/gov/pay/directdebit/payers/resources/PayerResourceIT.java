@@ -55,7 +55,7 @@ public class PayerResourceIT {
         aTransactionFixture()
                 .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .withExternalId(testPaymentRequest.getExternalId()).insert(testContext.getJdbi());
+                .withPaymentRequestExternalId(testPaymentRequest.getExternalId()).insert(testContext.getJdbi());
         payerFixture = aPayerFixture().withAccountNumber("12345678");
         requestPath = "/v1/api/payment_requests/{paymentRequestExternalId}/payers"
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
