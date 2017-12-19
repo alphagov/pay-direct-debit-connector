@@ -6,32 +6,36 @@ import com.google.common.graph.ValueGraphBuilder;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_DETAILS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
 
-public class PaymentStatesGraph {
+public class SandboxPaymentStatesGraph {
 
-    private final ImmutableValueGraph<PaymentState, PaymentRequestEvent.SupportedEvent> goCardlessGraphStates;
+    private final ImmutableValueGraph<PaymentState, SupportedEvent> graphStates;
 
-    private PaymentStatesGraph() {
-        this.goCardlessGraphStates = buildGoCardlessStatesGraph();
+    private SandboxPaymentStatesGraph() {
+        this.graphStates = buildGoCardlessStatesGraph();
     }
 
     public static PaymentState initialState() {
         return NEW;
     }
 
-    public static PaymentStatesGraph getStates() {
-        return new PaymentStatesGraph();
+    public static SandboxPaymentStatesGraph getStates() {
+        return new SandboxPaymentStatesGraph();
     }
 
     private ImmutableValueGraph<PaymentState, PaymentRequestEvent.SupportedEvent> buildGoCardlessStatesGraph() {
-        MutableValueGraph<PaymentState, PaymentRequestEvent.SupportedEvent> graph = ValueGraphBuilder
+        MutableValueGraph<PaymentState, SupportedEvent> graph = ValueGraphBuilder
                 .directed()
                 .build();
 
@@ -40,26 +44,26 @@ public class PaymentStatesGraph {
         graph.putEdgeValue(NEW, AWAITING_DIRECT_DEBIT_DETAILS, TOKEN_EXCHANGED);
         graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, PROCESSING_DIRECT_DEBIT_DETAILS, DIRECT_DEBIT_DETAILS_RECEIVED);
         graph.putEdgeValue(PROCESSING_DIRECT_DEBIT_DETAILS, AWAITING_CONFIRMATION, PAYER_CREATED);
-        //PP-2973 --> graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, AWAITING_CONFIRMATION, DIRECT_DEBIT_DETAILS_RECEIVED);
-        //graph.putEdgeValue(AWAITING_CONFIRMATION, SUCCESS, USER_CONFIRMED);
+        graph.putEdgeValue(AWAITING_CONFIRMATION, PROCESSING_DIRECT_DEBIT_PAYMENT, DIRECT_DEBIT_DETAILS_CONFIRMED);
+        graph.putEdgeValue(PROCESSING_DIRECT_DEBIT_PAYMENT, SUCCESS, MANDATE_CREATED);
 
         return ImmutableValueGraph.copyOf(graph);
     }
 
-    public PaymentState getNextStateForEvent(PaymentState from, SupportedEvent event) {
-        return goCardlessGraphStates.successors(from).stream()
+    public PaymentState getNextStateForEvent(PaymentState from, PaymentRequestEvent.SupportedEvent event) {
+        return graphStates.successors(from).stream()
                 .filter(to -> isValidTransition(from, to, event))
                 .findFirst()
                 .orElseThrow(() -> new InvalidStateTransitionException(event.toString(), from.toString()));
     }
 
-    private void addNodes(MutableValueGraph<PaymentState, PaymentRequestEvent.SupportedEvent> graph, PaymentState[] values) {
+    private void addNodes(MutableValueGraph<PaymentState, SupportedEvent> graph, PaymentState[] values) {
         for (PaymentState value : values) {
             graph.addNode(value);
         }
     }
 
     boolean isValidTransition(PaymentState from, PaymentState to, PaymentRequestEvent.SupportedEvent trigger) {
-        return goCardlessGraphStates.edgeValue(from, to).filter(trigger::equals).isPresent();
+        return graphStates.edgeValue(from, to).filter(trigger::equals).isPresent();
     }
 }

@@ -12,6 +12,8 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,16 +33,17 @@ public class MandateDaoIT {
     private TestContext testContext;
 
     private MandateDao mandateDao;
+    private Long payerId;
 
     @Before
     public void setup() throws IOException, LiquibaseException {
+        Long paymentRequestId = PaymentRequestFixture.aPaymentRequestFixture().insert(testContext.getJdbi()).getId();
+        payerId = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestId).insert(testContext.getJdbi()).getId();
         mandateDao = testContext.getJdbi().onDemand(MandateDao.class);
     }
 
     @Test
     public void shouldInsertAMandate() {
-
-        long payerId = 2L;
 
         Long id = mandateDao.insert(new Mandate(payerId));
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(id);

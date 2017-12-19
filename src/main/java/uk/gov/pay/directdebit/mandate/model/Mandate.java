@@ -43,4 +43,24 @@ public class Mandate {
     public void setExternalId(String externalId) {
         this.externalId = externalId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Mandate)) return false;
+
+        Mandate mandate = (Mandate) o;
+
+        if (!id.equals(mandate.id)) return false;
+        if (!payerId.equals(mandate.payerId)) return false;
+        return externalId.equals(mandate.externalId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + payerId.hashCode();
+        result = 31 * result + externalId.hashCode();
+        return result;
+    }
 }

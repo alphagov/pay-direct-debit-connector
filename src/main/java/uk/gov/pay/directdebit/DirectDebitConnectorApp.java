@@ -19,16 +19,16 @@ import uk.gov.pay.directdebit.app.healthcheck.Database;
 import uk.gov.pay.directdebit.app.healthcheck.Ping;
 import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
-import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
+import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
+import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payers.services.PayerParser;
 import uk.gov.pay.directdebit.payers.services.PayerService;
-import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
-import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
@@ -114,11 +114,11 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new PaymentRequestResource(paymentRequestService));
         environment.jersey().register(new SecurityTokensResource(tokenService));
         environment.jersey().register(new PayerResource(payerService));
-        environment.jersey().register(new ConfirmPaymentResource(new PaymentConfirmService(transactionDao, paymentRequestDao, paymentRequestEventDao, mandateDao)));
+        environment.jersey().register(new ConfirmPaymentResource(new PaymentConfirmService(transactionService, payerDao, mandateDao)));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new BadRequestExceptionMapper());
         environment.jersey().register(new NotFoundExceptionMapper());
-        environment.jersey().register(new InternalServerErrorExceptionMapper());
+        environment.jersey().register(new ConflictExceptionMapper());
         setupSSL(configuration);
     }
 

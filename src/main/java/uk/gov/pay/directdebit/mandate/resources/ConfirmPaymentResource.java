@@ -7,9 +7,7 @@ import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import static javax.ws.rs.core.Response.noContent;
 
@@ -25,9 +23,9 @@ public class ConfirmPaymentResource {
 
     @POST
     @Path("/v1/api/accounts/{accountId}/payment-requests/{paymentRequestId}/confirm")
-    public Response confirm(@PathParam("accountId") Long accountId, @PathParam("paymentRequestId") String paymentRequestId, @Context UriInfo uriInfo) {
+    public Response confirm(@PathParam("accountId") Long accountId, @PathParam("paymentRequestId") String paymentRequestId) {
         logger.info("Confirming payment - {}", paymentRequestId);
-        paymentConfirmService.confirm(accountId, paymentRequestId);
+        paymentConfirmService.confirm(paymentRequestId);
         return noContent().build();
     }
 }

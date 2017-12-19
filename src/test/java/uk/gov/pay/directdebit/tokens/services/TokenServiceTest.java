@@ -12,7 +12,6 @@ import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
@@ -27,22 +26,24 @@ import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTrans
 
 @RunWith(MockitoJUnitRunner.class)
 public class TokenServiceTest {
+
+    private static final String TOKEN = "token";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    TransactionFixture transactionFixture = aTransactionFixture().withState(PaymentState.NEW);
-    String token = "token";
     @Mock
     private TokenDao mockedTokenDao;
     @Mock
     private TransactionService mockedTransactionService;
-    @Mock
-    private PaymentRequestEventService mockedPaymentRequestEventService;
+
+    private TransactionFixture transactionFixture;
     private TokenService service;
 
     @Before
     public void setUp() throws Exception {
+        transactionFixture = aTransactionFixture().withState(PaymentState.NEW);
         service = new TokenService(mockedTokenDao, mockedTransactionService);
-        when(mockedTransactionService.findChargeForToken(token))
+        when(mockedTransactionService.findChargeForToken(TOKEN))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
     }
 
@@ -57,9 +58,8 @@ public class TokenServiceTest {
 
     @Test
     public void shouldValidateAPaymentRequestWithAToken() {
-        Transaction charge = service.validateChargeWithToken(token);
+        Transaction charge = service.validateChargeWithToken(TOKEN);
         assertThat(charge.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
-        assertThat(charge.getState(), is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
@@ -70,5 +70,4 @@ public class TokenServiceTest {
         thrown.reportMissingExceptionWithMessage("TokenNotFoundException.class expected");
         service.validateChargeWithToken("not-existing");
     }
-
 }

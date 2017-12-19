@@ -10,8 +10,8 @@ import java.sql.SQLException;
 public class MandateMapper implements ResultSetMapper<Mandate> {
 
     private static final String ID_COLUMN = "id";
-    private static final String PAYER_ID_COLUMN = "payer_id";
     private static final String EXTERNAL_ID_COLUMN = "external_id";
+    private static final String PAYER_ID_COLUMN = "payer_id";
 
     @Override
     public Mandate map(int index, ResultSet resultSet, StatementContext statementContext) throws SQLException {
