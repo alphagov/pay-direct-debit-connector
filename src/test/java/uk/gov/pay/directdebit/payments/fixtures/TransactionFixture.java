@@ -27,7 +27,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withExternalId(String paymentRequestExternalId) {
+    public TransactionFixture withPaymentRequestExternalId(String paymentRequestExternalId) {
         this.paymentRequestExternalId = paymentRequestExternalId;
         return this;
     }

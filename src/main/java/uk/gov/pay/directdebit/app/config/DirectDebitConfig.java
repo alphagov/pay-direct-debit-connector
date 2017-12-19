@@ -25,10 +25,6 @@ public class DirectDebitConfig extends Configuration {
     @NotNull
     private ProxyConfig proxyConfig;
 
-    @Valid
-    @NotNull
-    private EncryptionConfig encryptionConfig;
-
     @JsonProperty("database")
     public DataSourceFactory getDataSourceFactory() {
         return dataSourceFactory;
@@ -47,10 +43,5 @@ public class DirectDebitConfig extends Configuration {
     @JsonProperty("proxy")
     public ProxyConfig getProxyConfig() {
         return proxyConfig;
-    }
-
-    @JsonProperty("encryption")
-    public EncryptionConfig getEncryptionConfig() {
-        return encryptionConfig;
     }
 }

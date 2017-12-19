@@ -19,7 +19,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 
 public class TrustStoreLoader {
-    private static final Logger logger = LoggerFactory.getLogger(TrustStoreLoader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrustStoreLoader.class);
 
     private static final String CERTS_PATH;
     private static final String TRUST_STORE_PASSWORD = "";
@@ -46,16 +46,16 @@ public class TrustStoreLoader {
                             CertificateFactory cf = CertificateFactory.getInstance("X.509");
                             Certificate cert = cf.generateCertificate(new ByteArrayInputStream(Files.readAllBytes(certPath)));
                             TRUST_STORE.setCertificateEntry(certPath.getFileName().toString(), cert);
-                            logger.info("Loaded cert " + certPath);
+                            LOGGER.info("Loaded cert " + certPath);
                         } catch (SecurityException | KeyStoreException | CertificateException | IOException e) {
-                            logger.error("Could not load " + certPath, e);
+                            LOGGER.error("Could not load " + certPath, e);
                         }
                     }
                 });
             } catch (NoSuchFileException nsfe) {
-                logger.warn("Did not find any certificates to load");
+                LOGGER.warn("Did not find any certificates to load");
             } catch (IOException ioe) {
-                logger.error("Error walking certs directory", ioe);
+                LOGGER.error("Error walking certs directory", ioe);
             }
         }
 

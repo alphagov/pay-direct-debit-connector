@@ -26,9 +26,6 @@ goCardless:
   webhookSecret: secret
   environment: sandbox
 
-encryption:
-  encryptDBSalt: $2a$10$IhaXo6LIBhKIWOiGpbtPOu
-
 database:
   driverClass: org.postgresql.Driver
   user:

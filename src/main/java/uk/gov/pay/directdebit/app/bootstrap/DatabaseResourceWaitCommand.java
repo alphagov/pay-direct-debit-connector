@@ -11,7 +11,7 @@ import java.sql.SQLException;
 class DatabaseResourceWaitCommand {
 
     private static final int PROGRESSIVE_SECONDS_TO_WAIT = 5;
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseResourceWaitCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseResourceWaitCommand.class);
 
     private final DirectDebitConfig configuration;
 
@@ -20,17 +20,17 @@ class DatabaseResourceWaitCommand {
     }
 
     void doWait() {
-        logger.info("Checking for database availability >>>");
+        LOGGER.info("Checking for database availability >>>");
         boolean databaseAvailable = isDatabaseAvailable();
 
         long timeToWait = 0;
         while(!databaseAvailable) {
             timeToWait += PROGRESSIVE_SECONDS_TO_WAIT;
-            logger.info("Waiting for "+ timeToWait +" seconds till the database is available ...");
+            LOGGER.info("Waiting for "+ timeToWait +" seconds till the database is available ...");
             sleep(timeToWait * 1000);
             databaseAvailable = isDatabaseAvailable();
         }
-        logger.info("Database available.");
+        LOGGER.info("Database available.");
     }
 
 
@@ -49,7 +49,7 @@ class DatabaseResourceWaitCommand {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    logger.error("Error closing connection acquired for Database check");
+                    LOGGER.error("Error closing connection acquired for Database check");
                 }
             }
         }

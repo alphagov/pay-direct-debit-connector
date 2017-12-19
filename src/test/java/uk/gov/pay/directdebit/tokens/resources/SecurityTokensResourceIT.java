@@ -38,7 +38,7 @@ public class SecurityTokensResourceIT {
         testPaymentRequest = aPaymentRequestFixture().insert(testContext.getJdbi());
         testTransaction = aTransactionFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .withExternalId(testPaymentRequest.getExternalId()).insert(testContext.getJdbi());
+                .withPaymentRequestExternalId(testPaymentRequest.getExternalId()).insert(testContext.getJdbi());
         testToken = aTokenFixture().withPaymentRequestId(testPaymentRequest.getId()).insert(testContext.getJdbi());
     }
 

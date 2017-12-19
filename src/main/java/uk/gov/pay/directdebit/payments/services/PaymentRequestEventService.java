@@ -8,7 +8,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 public class PaymentRequestEventService {
-    private static final Logger logger = PayLoggerFactory.getLogger(PaymentRequestEventService.class);
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(PaymentRequestEventService.class);
 
     private final PaymentRequestEventDao paymentRequestEventDao;
 
@@ -17,14 +17,14 @@ public class PaymentRequestEventService {
     }
 
     private void insertEventFor(Transaction charge, PaymentRequestEvent event) {
-        logger.info("Creating event for {} {}: {} - {}",
+        LOGGER.info("Creating event for {} {}: {} - {}",
                 charge.getType(), charge.getPaymentRequestExternalId(),
                 event.getEventType(), event.getEvent());
         paymentRequestEventDao.insert(event);
     }
 
     void insertEventFor(PaymentRequest paymentRequest, PaymentRequestEvent event) {
-        logger.info("Creating event for payment request {}: {} - {}",
+        LOGGER.info("Creating event for payment request {}: {} - {}",
                 paymentRequest.getExternalId(), event.getEventType(), event.getEvent());
         paymentRequestEventDao.insert(event);
     }

@@ -10,7 +10,7 @@ import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
 
 public class TokenService {
-    private static final Logger logger = PayLoggerFactory.getLogger(TokenService.class);
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(TokenService.class);
 
     private final TokenDao tokenDao;
     private final TransactionService transactionService;
@@ -22,7 +22,7 @@ public class TokenService {
 
     public Token generateNewTokenFor(PaymentRequest paymentRequest) {
         Token token = Token.generateNewTokenFor(paymentRequest.getId());
-        logger.info("Generating new one-time token for payment request {}", paymentRequest.getExternalId());
+        LOGGER.info("Generating new one-time token for payment request {}", paymentRequest.getExternalId());
         Long id = tokenDao.insert(token);
         token.setId(id);
         return token;
@@ -37,7 +37,7 @@ public class TokenService {
     public void deleteToken(String token){
         int numOfDeletedTokens = tokenDao.deleteToken(token);
         if (numOfDeletedTokens == 0) {
-            logger.warn("Tried to delete token which was not in db");
+            LOGGER.warn("Tried to delete token which was not in db");
         }
     }
 

@@ -22,10 +22,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/")
 public class PayerResource {
-    public static final String PAYER_API_PATH = "/v1/api/payment_requests/{paymentRequestExternalId}/payers/{payerExternalId}";
-    public static final String PAYERS_API_PATH = "/v1/api/payment_requests/{paymentRequestExternalId}/payers";
+    private static final String PAYER_API_PATH = "/v1/api/payment_requests/{paymentRequestExternalId}/payers/{payerExternalId}";
+    private static final String PAYERS_API_PATH = "/v1/api/payment_requests/{paymentRequestExternalId}/payers";
 
-    private static final Logger logger = PayLoggerFactory.getLogger(PayerResource.class);
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(PayerResource.class);
     private final PayerService payerService;
     private final CreatePayerValidator createPayerValidator = new CreatePayerValidator();
 
@@ -39,7 +39,7 @@ public class PayerResource {
     @Produces(APPLICATION_JSON)
     public Response createPayer(@PathParam("paymentRequestExternalId") String paymentRequestExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
         createPayerValidator.validate(createPayerRequest);
-        logger.info("Create new payer request received for payment request {} ", paymentRequestExternalId);
+        LOGGER.info("Create new payer request received for payment request {} ", paymentRequestExternalId);
         CreatePayerResponse createPayerResponse = CreatePayerResponse.from(payerService.create(paymentRequestExternalId, createPayerRequest));
         URI newPayerLocation = URIBuilder.selfUriFor(uriInfo, PAYER_API_PATH, paymentRequestExternalId, createPayerResponse.getPayerExternalId());
         return Response.created(newPayerLocation).entity(createPayerResponse).build();

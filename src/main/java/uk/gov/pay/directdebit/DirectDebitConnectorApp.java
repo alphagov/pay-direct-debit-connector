@@ -24,6 +24,7 @@ import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
+import uk.gov.pay.directdebit.payers.services.PayerParser;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
@@ -94,7 +95,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 tokenService,
                 transactionService);
 
-        PayerService payerService = new PayerService(configuration.getEncryptionConfig(), payerDao, transactionService);
+        PayerParser payerParser = new PayerParser();
+        PayerService payerService = new PayerService(payerDao, transactionService, payerParser);
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
 

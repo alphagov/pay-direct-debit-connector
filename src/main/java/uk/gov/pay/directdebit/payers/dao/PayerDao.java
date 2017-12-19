@@ -11,8 +11,6 @@ import org.skife.jdbi.v2.sqlobject.customizers.SingleValueResult;
 import uk.gov.pay.directdebit.common.dao.DateArgumentFactory;
 import uk.gov.pay.directdebit.payers.dao.mapper.PayerMapper;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.dao.mapper.PaymentRequestMapper;
-import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
 import java.util.Optional;
 

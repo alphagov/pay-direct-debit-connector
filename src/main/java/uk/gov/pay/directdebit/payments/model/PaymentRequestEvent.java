@@ -7,7 +7,7 @@ import uk.gov.pay.directdebit.payments.exception.UnsupportedPaymentRequestEventE
 import java.time.ZonedDateTime;
 
 public class PaymentRequestEvent {
-    private static final Logger logger = PayLoggerFactory.getLogger(PaymentRequestEvent.class);
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(PaymentRequestEvent.class);
 
     private Long id;
     private Long paymentRequestId;
@@ -81,7 +81,7 @@ public class PaymentRequestEvent {
             try {
                 return SupportedEvent.valueOf(event);
             } catch (Exception e) {
-                logger.error("Tried to parse unknown event {}", event);
+                LOGGER.error("Tried to parse unknown event {}", event);
                 throw new UnsupportedPaymentRequestEventException(event);
             }
         }
