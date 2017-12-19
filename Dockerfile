@@ -1,6 +1,6 @@
 FROM openjdk:8-jre-alpine
 
-ARG CHAMBER_URL=https://github.com/segmentio/chamber/releases/download/v1.9.0/chamber-v1.9.0-linux-amd64
+ARG CHAMBER_URL=https://github.com/segmentio/chamber/releases/download/v1.13.0/chamber-v1.13.0-linux-amd64
 
 RUN apk update
 RUN apk upgrade
