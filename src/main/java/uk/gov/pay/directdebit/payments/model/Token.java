@@ -21,6 +21,10 @@ public class Token {
         return new Token(UUID.randomUUID().toString(), paymentRequestId);
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

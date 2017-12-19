@@ -6,7 +6,9 @@ import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_
 
 public enum PaymentState {
     NEW(EXTERNAL_STARTED),
-    AWAITING_DIRECT_DEBIT_DETAILS(EXTERNAL_STARTED);
+    AWAITING_DIRECT_DEBIT_DETAILS(EXTERNAL_STARTED),
+    PROCESSING_DIRECT_DEBIT_DETAILS(EXTERNAL_STARTED),
+    AWAITING_CONFIRMATION(EXTERNAL_STARTED);
 
     private ExternalPaymentState externalState;
 

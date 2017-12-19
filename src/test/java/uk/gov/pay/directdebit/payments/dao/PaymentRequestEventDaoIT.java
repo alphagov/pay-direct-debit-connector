@@ -49,17 +49,14 @@ public class PaymentRequestEventDaoIT {
     @Test
     public void shouldInsertAnEvent() {
         Long paymentRequestId = testPaymentRequest.getId();
-        PaymentRequestEvent.Type eventType = PaymentRequestEvent.Type.CHARGE;
-        PaymentRequestEvent.SupportedEvent event = PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
-        ZonedDateTime eventDate = ZonedDateTime.now();
-        PaymentRequestEvent paymentRequestEvent = new PaymentRequestEvent(paymentRequestId, eventType, event, eventDate);
+        PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.payerCreated(paymentRequestId);
         Long id = paymentRequestEventDao.insert(paymentRequestEvent);
         Map<String, Object> foundPaymentRequestEvent = testContext.getDatabaseTestHelper().getPaymentRequestEventById(id);
         assertThat(foundPaymentRequestEvent.get("id"), is(id));
         assertThat(foundPaymentRequestEvent.get("payment_request_id"), is(paymentRequestId));
-        assertThat(foundPaymentRequestEvent.get("event_type"), is(eventType.toString()));
-        assertThat(foundPaymentRequestEvent.get("event"), is(event.toString()));
-        assertThat((Timestamp) foundPaymentRequestEvent.get("event_date"), isDate(eventDate));
+        assertThat(foundPaymentRequestEvent.get("event_type"), is(paymentRequestEvent.getEventType().toString()));
+        assertThat(foundPaymentRequestEvent.get("event"), is(paymentRequestEvent.getEvent().toString()));
+        assertThat((Timestamp) foundPaymentRequestEvent.get("event_date"), isDate(paymentRequestEvent.getEventDate()));
     }
 
 }

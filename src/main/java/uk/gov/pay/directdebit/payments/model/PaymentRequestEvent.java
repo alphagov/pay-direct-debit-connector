@@ -23,8 +23,8 @@ public class PaymentRequestEvent {
         this.eventDate = eventDate;
     }
 
-    public PaymentRequestEvent(Long paymentRequestId, Type eventType, SupportedEvent event, ZonedDateTime eventDate) {
-        this(null, paymentRequestId, eventType, event, eventDate);
+    private PaymentRequestEvent(Long paymentRequestId, Type eventType, SupportedEvent event) {
+        this(null, paymentRequestId, eventType, event, ZonedDateTime.now());
     }
 
     public Long getId() {
@@ -68,12 +68,15 @@ public class PaymentRequestEvent {
     }
 
     public enum Type {
-        CHARGE
+        PAYER, CHARGE
     }
 
     public enum SupportedEvent {
         CHARGE_CREATED,
-        TOKEN_EXCHANGED;
+        TOKEN_EXCHANGED,
+        DIRECT_DEBIT_DETAILS_RECEIVED,
+        PAYER_CREATED;
+
         public static SupportedEvent fromString(String event) throws UnsupportedPaymentRequestEventException {
             try {
                 return SupportedEvent.valueOf(event);
@@ -83,4 +86,21 @@ public class PaymentRequestEvent {
             }
         }
     }
+
+    public static PaymentRequestEvent chargeCreated(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, PaymentRequestEvent.Type.CHARGE, PaymentRequestEvent.SupportedEvent.CHARGE_CREATED);
+    }
+
+    public static PaymentRequestEvent tokenExchanged(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, PaymentRequestEvent.Type.CHARGE, SupportedEvent.TOKEN_EXCHANGED);
+    }
+    public static PaymentRequestEvent directDebitDetailsReceived(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, PaymentRequestEvent.Type.CHARGE, SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED);
+    }
+
+    public static PaymentRequestEvent payerCreated(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, PaymentRequestEvent.Type.PAYER, SupportedEvent.PAYER_CREATED);
+    }
+
+
 }

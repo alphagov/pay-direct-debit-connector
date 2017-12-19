@@ -26,6 +26,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.*;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
 @RunWith(DropwizardJUnitRunner.class)
@@ -48,28 +50,24 @@ public class TransactionDaoIT {
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
                 .insert(testContext.getJdbi());
-        this.testToken = TokenFixture.aTokenFixture()
+        this.testToken = aTokenFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .insert(testContext.getJdbi());
-        this.testTransaction = TransactionFixture.aTransactionFixture()
+        this.testTransaction = aTransactionFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .insert(testContext.getJdbi());
     }
 
     @Test
     public void shouldInsertATransaction() {
-        Long paymentRequestId = testPaymentRequest.getId();
-        Long amount = 13L;
-        Transaction.Type type = Transaction.Type.CHARGE;
-        PaymentState state = PaymentState.NEW;
-        Transaction transaction = new Transaction(paymentRequestId, "externalId", amount, type, state);
+        Transaction transaction = aTransactionFixture().withPaymentRequestId(testPaymentRequest.getId()).toEntity();
         Long id = transactionDao.insert(transaction);
         Map<String, Object> foundTransaction = testContext.getDatabaseTestHelper().getTransactionById(id);
         assertThat(foundTransaction.get("id"), is(id));
-        assertThat(foundTransaction.get("payment_request_id"), is(paymentRequestId));
-        assertThat((Long) foundTransaction.get("amount"), isNumber(amount));
-        assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(type));
-        assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(state));
+        assertThat(foundTransaction.get("payment_request_id"), is(testPaymentRequest.getId()));
+        assertThat((Long) foundTransaction.get("amount"), isNumber(transaction.getAmount()));
+        assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(transaction.getType()));
+        assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(transaction.getState()));
     }
 
     @Test
@@ -83,6 +81,16 @@ public class TransactionDaoIT {
         assertThat(transaction.getState(), is(testTransaction.getState()));
     }
 
+    @Test
+    public void shouldGetATransactionByPaymentRequestExternalId() {
+        Transaction transaction = transactionDao.findByPaymentRequestExternalId(testPaymentRequest.getExternalId()).get();
+        assertThat(transaction.getId(), is(testTransaction.getId()));
+        assertThat(transaction.getPaymentRequestId(), is(testTransaction.getPaymentRequestId()));
+        assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
+        assertThat(transaction.getType(), is(testTransaction.getType()));
+        assertThat(transaction.getAmount(), is(testTransaction.getAmount()));
+        assertThat(transaction.getState(), is(testTransaction.getState()));
+    }
     @Test
     public void shouldFindATransactionByTokenId() {
         Transaction transaction = transactionDao.findByTokenId(testToken.getToken()).get();

@@ -73,4 +73,32 @@ public class Transaction {
     public enum Type {
         CHARGE, REFUND
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Transaction that = (Transaction) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (paymentRequestExternalId != null ? !paymentRequestExternalId.equals(that.paymentRequestExternalId) : that.paymentRequestExternalId != null)
+            return false;
+        if (paymentRequestId != null ? !paymentRequestId.equals(that.paymentRequestId) : that.paymentRequestId != null)
+            return false;
+        if (amount != null ? !amount.equals(that.amount) : that.amount != null) return false;
+        if (type != that.type) return false;
+        return state == that.state;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (paymentRequestExternalId != null ? paymentRequestExternalId.hashCode() : 0);
+        result = 31 * result + (paymentRequestId != null ? paymentRequestId.hashCode() : 0);
+        result = 31 * result + (amount != null ? amount.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (state != null ? state.hashCode() : 0);
+        return result;
+    }
 }

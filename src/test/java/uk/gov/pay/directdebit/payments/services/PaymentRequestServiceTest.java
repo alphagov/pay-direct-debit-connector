@@ -10,23 +10,19 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
-import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
-import uk.gov.pay.directdebit.payments.dao.TransactionDao;
-import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
-import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.Token;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.tokens.dao.TokenDao;
+import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
+import uk.gov.pay.directdebit.tokens.services.TokenService;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -50,7 +46,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentRequestServiceTest {
@@ -78,8 +73,11 @@ public class PaymentRequestServiceTest {
             .withPaymentRequestId(paymentRequest.getId())
             .withExternalId(paymentRequest.getExternalId())
             .withAmount(paymentRequest.getAmount());
+
+    private final TokenFixture token = TokenFixture.aTokenFixture();
+
     @Mock
-    private TokenDao mockedTokenDao;
+    private TokenService mockedTokenService;
     @Mock
     private DirectDebitConfig mockedConfig;
     @Mock
@@ -89,9 +87,7 @@ public class PaymentRequestServiceTest {
     @Mock
     private PaymentRequestDao mockedPaymentRequestDao;
     @Mock
-    private PaymentRequestEventDao mockedPaymentRequestEventDao;
-    @Mock
-    private TransactionDao mockTransactionDao;
+    private TransactionService mockTransactionService;
     @Mock
     private UriInfo uriInfo;
 
@@ -110,13 +106,18 @@ public class PaymentRequestServiceTest {
                 .when(this.mockedUriInfo)
                 .getBaseUriBuilder();
 
-        service = new PaymentRequestService(mockedConfig, mockedPaymentRequestDao, mockedTokenDao, mockedPaymentRequestEventDao, mockTransactionDao);
+        when(mockTransactionService.createChargeFor(Mockito.any(PaymentRequest.class))).thenReturn(transaction.toEntity());
+
+        when(mockedTokenService.generateNewTokenFor(Mockito.any(PaymentRequest.class))).thenReturn(token.toEntity());
+
+        service = new PaymentRequestService(mockedConfig, mockedPaymentRequestDao, mockedTokenService, mockTransactionService);
     }
 
     @Test
     public void serviceCreate_shouldCreateAPaymentRequest() throws Exception {
         Long amount = 100L;
-        service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
+
+                service.createCharge(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
 
         ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
         verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
@@ -133,97 +134,28 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void serviceCreate_shouldCreateAPaymentRequestEvent() throws Exception {
-        service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
-
-        ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
-        verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
-        PaymentRequest createdPaymentRequest = paymentRequestArgumentCaptor.getValue();
-        ArgumentCaptor<PaymentRequestEvent> paymentRequestEventArgumentCaptor = forClass(PaymentRequestEvent.class);
-        verify(mockedPaymentRequestEventDao).insert(paymentRequestEventArgumentCaptor.capture());
-        PaymentRequestEvent createdPaymentRequestEvent = paymentRequestEventArgumentCaptor.getValue();
-        assertThat(createdPaymentRequestEvent.getPaymentRequestId(), is(createdPaymentRequest.getId()));
-        assertThat(createdPaymentRequestEvent.getEventType(), is(PaymentRequestEvent.Type.CHARGE));
-        assertThat(createdPaymentRequestEvent.getEvent(), is(SupportedEvent.CHARGE_CREATED));
-        assertThat(createdPaymentRequestEvent.getEventDate(),
-                is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
-    }
-
-    @Test
     public void serviceCreate_shouldCreateATransaction() throws Exception {
-        Long amount = 100L;
-        service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
+        service.createCharge(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
 
         ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
         verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
         PaymentRequest createdPaymentRequest = paymentRequestArgumentCaptor.getValue();
-
-        ArgumentCaptor<Transaction> transactionArgumentCaptor = forClass(Transaction.class);
-        verify(mockTransactionDao).insert(transactionArgumentCaptor.capture());
-        Transaction createdTransaction = transactionArgumentCaptor.getValue();
-        assertThat(createdTransaction.getPaymentRequestId(), is(createdPaymentRequest.getId()));
-        assertThat(createdTransaction.getAmount(), is(amount));
-        assertThat(createdTransaction.getType(), is(Transaction.Type.CHARGE));
-        assertThat(createdTransaction.getState(), is(PaymentState.NEW));
+        verify(mockTransactionService).createChargeFor(createdPaymentRequest);
     }
 
-    //todo needs proper checking of values when we introduce the gateway accounts dao
-    public void serviceCreate_shouldCreateAToken() throws Exception {
-        service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
-
-        ArgumentCaptor<Token> tokenEntityArgumentCaptor = forClass(Token.class);
-        verify(mockedTokenDao).insert(tokenEntityArgumentCaptor.capture());
-
-        Token tokenEntity = tokenEntityArgumentCaptor.getValue();
-        assertThat(tokenEntity.getPaymentRequestId(), is(notNullValue()));
-        assertThat(tokenEntity.getToken(), is(notNullValue()));
-    }
-
-    @Test
-    public void serviceCreate_shouldPopulateAResponse() throws Exception {
-        PaymentRequestResponse response = service.create(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
-        ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
-        verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
-
-        ArgumentCaptor<Token> tokenEntityArgumentCaptor = forClass(Token.class);
-        verify(mockedTokenDao).insert(tokenEntityArgumentCaptor.capture());
-
-        PaymentRequest createdPaymentRequest = paymentRequestArgumentCaptor.getValue();
-        Token createdToken = tokenEntityArgumentCaptor.getValue();
-
-        assertThat(response.getAmount().toString(), is(AMOUNT));
-        assertThat(response.getDescription(), is(DESCRIPTION));
-        assertThat(response.getReference(), is(REFERENCE));
-        assertThat(response.getReturnUrl(), is(RETURN_URL));
-        assertThat(response.getPaymentExternalId(), is(createdPaymentRequest.getExternalId()));
-        assertThat(response.getDataLinks(), hasItems(
-                ImmutableMap.of("rel", "self", "method", "GET", "href", new URI(SERVICE_HOST + "/v1/api/accounts/1/charges/" + createdPaymentRequest.getExternalId())),
-                ImmutableMap.of("rel", "next_url", "method", "GET", "href", new URI("http://payments.com/secure/" + createdToken.getToken())),
-                ImmutableMap.<String, Object>builder()
-                        .put("rel", "next_url_post")
-                        .put("method", "POST")
-                        .put("href", new URI("http://payments.com/secure"))
-                        .put("type", "application/x-www-form-urlencoded")
-                        .put("params", new HashMap<String, Object>() {{
-                            put("chargeTokenId", createdToken.getToken());
-                        }}).build()
-        ));
-    }
 
     @Test
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndTransactionIsInProgress() throws URISyntaxException {
         when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId()))
                 .thenReturn(Optional.of(paymentRequest.toEntity()));
-        when(mockTransactionDao.findByPaymentRequestId(paymentRequest.getId()))
-                .thenReturn(Optional.of(transaction.toEntity()));
+        when(mockTransactionService.findChargeForExternalId(paymentRequest.getExternalId()))
+                .thenReturn(transaction.toEntity());
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 
 
         PaymentRequestResponse response = service.getPaymentWithExternalId(paymentRequest.getExternalId(), uriInfo);
-        ArgumentCaptor<Token> tokenEntityArgumentCaptor = forClass(Token.class);
-        verify(mockedTokenDao).insert(tokenEntityArgumentCaptor.capture());
-        Token createdToken = tokenEntityArgumentCaptor.getValue();
+        verify(mockedTokenService).generateNewTokenFor(paymentRequest.toEntity());
 
         assertThat(response.getAmount().toString(), is(AMOUNT));
         assertThat(response.getDescription(), is(DESCRIPTION));
@@ -232,14 +164,14 @@ public class PaymentRequestServiceTest {
         assertThat(response.getPaymentExternalId(), is(paymentRequest.getExternalId()));
         assertThat(response.getDataLinks(), hasItems(
                 ImmutableMap.of("rel", "self", "method", "GET", "href", new URI(SERVICE_HOST + "/v1/api/accounts/1/charges/" + paymentRequest.getExternalId())),
-                ImmutableMap.of("rel", "next_url", "method", "GET", "href", new URI("http://payments.com/secure/" + createdToken.getToken())),
+                ImmutableMap.of("rel", "next_url", "method", "GET", "href", new URI("http://payments.com/secure/" + token.getToken())),
                 ImmutableMap.<String, Object>builder()
                         .put("rel", "next_url_post")
                         .put("method", "POST")
                         .put("href", new URI("http://payments.com/secure"))
                         .put("type", "application/x-www-form-urlencoded")
                         .put("params", new HashMap<String, Object>() {{
-                            put("chargeTokenId", createdToken.getToken());
+                            put("chargeTokenId", token.getToken());
                         }}).build()
         ));
     }
@@ -249,13 +181,14 @@ public class PaymentRequestServiceTest {
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndChargeIsInFinalState() throws URISyntaxException {
         transaction.withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
         when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId())).thenReturn(Optional.of(paymentRequest.toEntity()));
-        when(mockTransactionDao.findByPaymentRequestId(paymentRequest.getId())).thenReturn(Optional.of(transaction.toEntity()));
+        when(mockTransactionService.findChargeForExternalId(paymentRequest.getExternalId()))
+                .thenReturn(transaction.toEntity());
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 
 
         PaymentRequestResponse response = service.getPaymentWithExternalId(paymentRequest.getExternalId(), uriInfo);
-        verifyNoMoreInteractions(mockedTokenDao);
+        verifyNoMoreInteractions(mockedTokenService);
 
         assertThat(response.getAmount().toString(), is(AMOUNT));
         assertThat(response.getDescription(), is(DESCRIPTION));
@@ -275,15 +208,5 @@ public class PaymentRequestServiceTest {
         thrown.expectMessage("No payment request found with id: " + externalPaymentId);
         thrown.reportMissingExceptionWithMessage("PaymentNotFoundException expected");
         service.getPaymentWithExternalId(externalPaymentId, uriInfo);
-    }
-
-    @Test
-    public void getPaymentWithExternalId_shouldThrow_ifNoChargeExistsForPayment() throws URISyntaxException {
-        PaymentRequest paymentRequest = new PaymentRequest(Long.parseLong(AMOUNT), RETURN_URL, GATEWAY_ACCOUNT_ID, DESCRIPTION, REFERENCE);
-        when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId())).thenReturn(Optional.of(paymentRequest));
-        thrown.expect(ChargeNotFoundException.class);
-        thrown.expectMessage("No charges found for payment request with id: " + paymentRequest.getExternalId());
-        thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
-        service.getPaymentWithExternalId(paymentRequest.getExternalId(), uriInfo);
     }
 }
