@@ -5,12 +5,13 @@ import com.google.common.collect.ImmutableMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
-public class InternalServerErrorExceptionMapper implements ExceptionMapper<InternalServerErrorException> {
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
+public class ConflictExceptionMapper implements ExceptionMapper<ConflictException> {
 
     @Override
-    public Response toResponse(InternalServerErrorException exception) {
+    public Response toResponse(ConflictException exception) {
         ImmutableMap<String, String> entity = ImmutableMap.of("message", exception.getMessage());
-        return Response.status(500).entity(entity).build();
+        return Response.status(409).entity(entity).type(APPLICATION_JSON).build();
     }
-
 }

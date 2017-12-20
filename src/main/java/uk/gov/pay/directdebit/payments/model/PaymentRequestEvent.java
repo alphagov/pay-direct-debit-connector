@@ -6,6 +6,13 @@ import uk.gov.pay.directdebit.payments.exception.UnsupportedPaymentRequestEventE
 
 import java.time.ZonedDateTime;
 
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
+
 public class PaymentRequestEvent {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(PaymentRequestEvent.class);
 
@@ -25,6 +32,30 @@ public class PaymentRequestEvent {
 
     private PaymentRequestEvent(Long paymentRequestId, Type eventType, SupportedEvent event) {
         this(null, paymentRequestId, eventType, event, ZonedDateTime.now());
+    }
+
+    public static PaymentRequestEvent chargeCreated(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, CHARGE_CREATED);
+    }
+
+    public static PaymentRequestEvent tokenExchanged(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, TOKEN_EXCHANGED);
+    }
+
+    public static PaymentRequestEvent directDebitDetailsReceived(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, DIRECT_DEBIT_DETAILS_RECEIVED);
+    }
+
+    public static PaymentRequestEvent payerCreated(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.PAYER, PAYER_CREATED);
+    }
+
+    public static PaymentRequestEvent directDebitDetailsConfirmed(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, DIRECT_DEBIT_DETAILS_CONFIRMED);
+    }
+
+    public static PaymentRequestEvent mandateCreated(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.MANDATE, MANDATE_CREATED);
     }
 
     public Long getId() {
@@ -68,39 +99,24 @@ public class PaymentRequestEvent {
     }
 
     public enum Type {
-        PAYER, CHARGE
+        PAYER, CHARGE, MANDATE
     }
 
     public enum SupportedEvent {
         CHARGE_CREATED,
         TOKEN_EXCHANGED,
         DIRECT_DEBIT_DETAILS_RECEIVED,
-        PAYER_CREATED;
+        PAYER_CREATED,
+        DIRECT_DEBIT_DETAILS_CONFIRMED,
+        MANDATE_CREATED;
 
         public static SupportedEvent fromString(String event) throws UnsupportedPaymentRequestEventException {
             try {
-                return SupportedEvent.valueOf(event);
+                return valueOf(event);
             } catch (Exception e) {
                 LOGGER.error("Tried to parse unknown event {}", event);
                 throw new UnsupportedPaymentRequestEventException(event);
             }
         }
     }
-
-    public static PaymentRequestEvent chargeCreated(Long paymentRequestId) {
-        return new PaymentRequestEvent(paymentRequestId, PaymentRequestEvent.Type.CHARGE, PaymentRequestEvent.SupportedEvent.CHARGE_CREATED);
-    }
-
-    public static PaymentRequestEvent tokenExchanged(Long paymentRequestId) {
-        return new PaymentRequestEvent(paymentRequestId, PaymentRequestEvent.Type.CHARGE, SupportedEvent.TOKEN_EXCHANGED);
-    }
-    public static PaymentRequestEvent directDebitDetailsReceived(Long paymentRequestId) {
-        return new PaymentRequestEvent(paymentRequestId, PaymentRequestEvent.Type.CHARGE, SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED);
-    }
-
-    public static PaymentRequestEvent payerCreated(Long paymentRequestId) {
-        return new PaymentRequestEvent(paymentRequestId, PaymentRequestEvent.Type.PAYER, SupportedEvent.PAYER_CREATED);
-    }
-
-
 }

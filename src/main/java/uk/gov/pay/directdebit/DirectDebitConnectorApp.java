@@ -19,9 +19,12 @@ import uk.gov.pay.directdebit.app.healthcheck.Database;
 import uk.gov.pay.directdebit.app.healthcheck.Ping;
 import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
-import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
+import uk.gov.pay.directdebit.mandate.dao.MandateDao;
+import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
+import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payers.services.PayerParser;
@@ -86,6 +89,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         PaymentRequestEventDao paymentRequestEventDao = jdbi.onDemand(PaymentRequestEventDao.class);
         TransactionDao transactionDao = jdbi.onDemand(TransactionDao.class);
         PayerDao payerDao = jdbi.onDemand(PayerDao.class);
+        MandateDao mandateDao = jdbi.onDemand(MandateDao.class);
         PaymentRequestEventService paymentRequestEventService = new PaymentRequestEventService(paymentRequestEventDao);
         TransactionService transactionService = new TransactionService(transactionDao, paymentRequestEventService);
         TokenService tokenService = new TokenService(tokenDao, transactionService);
@@ -110,10 +114,11 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new PaymentRequestResource(paymentRequestService));
         environment.jersey().register(new SecurityTokensResource(tokenService));
         environment.jersey().register(new PayerResource(payerService));
+        environment.jersey().register(new ConfirmPaymentResource(new PaymentConfirmService(transactionService, payerDao, mandateDao)));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new BadRequestExceptionMapper());
         environment.jersey().register(new NotFoundExceptionMapper());
-        environment.jersey().register(new InternalServerErrorExceptionMapper());
+        environment.jersey().register(new ConflictExceptionMapper());
         setupSSL(configuration);
     }
 
