@@ -22,8 +22,8 @@ public class ConfirmPaymentResource {
     }
 
     @POST
-    @Path("/v1/api/accounts/{accountId}/payment-requests/{paymentRequestId}/confirm")
-    public Response confirm(@PathParam("accountId") Long accountId, @PathParam("paymentRequestId") String paymentRequestId) {
+    @Path("/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/confirm")
+    public Response confirm(@PathParam("accountId") Long accountId, @PathParam("paymentRequestExternalId") String paymentRequestId) {
         logger.info("Confirming payment - {}", paymentRequestId);
         paymentConfirmService.confirm(paymentRequestId);
         return noContent().build();

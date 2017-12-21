@@ -78,9 +78,9 @@ public class PaymentRequestResourceIT {
 
         String externalPaymentRequestId = response.extract().path(JSON_CHARGE_KEY).toString();
         String documentLocation = expectedPaymentRequestLocationFor(accountId, externalPaymentRequestId);
-        String chargeTokenId = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
+        String token = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
-        String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + chargeTokenId;
+        String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + token;
         String hrefNextUrlPost = "http://Frontend" + FRONTEND_CARD_DETAILS_URL;
 
         response.header("Location", is(documentLocation))
@@ -88,7 +88,7 @@ public class PaymentRequestResourceIT {
                 .body("links", containsLink("self", "GET", documentLocation))
                 .body("links", containsLink("next_url", "GET", hrefNextUrl))
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
-                    put("chargeTokenId", chargeTokenId);
+                    put("token", token);
                 }}));
         String requestPath2 = CHARGE_API_PATH
                 .replace("{accountId}", accountId)
@@ -109,16 +109,16 @@ public class PaymentRequestResourceIT {
 
         // Reload the charge token which as it should have changed
 
-        String newChargeTokenId = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
+        String newChargeToken = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
-        String newHrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + newChargeTokenId;
+        String newHrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + newChargeToken;
 
         getChargeResponse
                 .body("links", hasSize(3))
                 .body("links", containsLink("self", "GET", documentLocation))
                 .body("links", containsLink("next_url", "GET", newHrefNextUrl))
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
-                    put("chargeTokenId", newChargeTokenId);
+                    put("token", newChargeToken);
                 }}));
 
     }
