@@ -1,7 +1,5 @@
 package uk.gov.pay.directdebit.tokens.resources;
 
-import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.tokens.api.TokenResponse;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
@@ -16,10 +14,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/")
 public class SecurityTokensResource {
-    static final String TOKEN_PATH = "/v1/tokens/{chargeTokenId}";
-    private static final String CHARGE_BY_TOKEN_PATH = TOKEN_PATH + "/charge";
+    static final String TOKEN_PATH = "/v1/tokens/{token}";
+    private static final String PAYMENT_REQUEST_BY_TOKEN_PATH = TOKEN_PATH + "/payment-request";
 
-    private final Logger logger = PayLoggerFactory.getLogger(SecurityTokensResource.class);
     private final TokenService tokenService;
 
     public SecurityTokensResource(TokenService tokenService) {
@@ -27,17 +24,17 @@ public class SecurityTokensResource {
     }
 
     @GET
-    @Path(CHARGE_BY_TOKEN_PATH)
+    @Path(PAYMENT_REQUEST_BY_TOKEN_PATH)
     @Produces(APPLICATION_JSON)
-    public Response getPaymentRequestForToken(@PathParam("chargeTokenId") String chargeTokenId) {
-        TokenResponse response = TokenResponse.from(tokenService.validateChargeWithToken(chargeTokenId));
+    public Response getPaymentRequestForToken(@PathParam("token") String token) {
+        TokenResponse response = TokenResponse.from(tokenService.validateChargeWithToken(token));
         return Response.ok().entity(response).build();
     }
 
     @DELETE
     @Path(TOKEN_PATH)
-    public Response deleteToken(@PathParam("chargeTokenId") String chargeTokenId) {
-        tokenService.deleteToken(chargeTokenId);
+    public Response deleteToken(@PathParam("token") String token) {
+        tokenService.deleteToken(token);
         return Response.noContent().build();
     }
 }

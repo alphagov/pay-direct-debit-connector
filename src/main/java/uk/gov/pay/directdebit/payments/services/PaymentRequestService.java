@@ -55,7 +55,7 @@ public class PaymentRequestService {
                     POST,
                     nextUrl(linksConfig.getFrontendUrl(), "secure"),
                     APPLICATION_FORM_URLENCODED,
-                    ImmutableMap.of("chargeTokenId", token.getToken())));
+                    ImmutableMap.of("token", token.getToken())));
         }
         return new PaymentRequestResponse(paymentRequestExternalId,
                 paymentRequest.getAmount(),

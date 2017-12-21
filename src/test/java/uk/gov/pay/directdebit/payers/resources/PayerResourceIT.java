@@ -39,7 +39,7 @@ public class PayerResourceIT {
     private final static String ADDRESS_CITY_KEY = "city";
     private final static String ADDRESS_COUNTRY_KEY = "country_code";
     private final static String ADDRESS_POSTCODE_KEY = "postcode";
-
+    private final String accountId = "20";
     private Gson gson = new Gson();
 
     @DropwizardTestContext
@@ -57,7 +57,8 @@ public class PayerResourceIT {
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .withPaymentRequestExternalId(testPaymentRequest.getExternalId()).insert(testContext.getJdbi());
         payerFixture = aPayerFixture().withAccountNumber("12345678");
-        requestPath = "/v1/api/payment_requests/{paymentRequestExternalId}/payers"
+        requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
+                .replace("{accountId}", accountId)
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
 
     }
@@ -90,7 +91,8 @@ public class PayerResourceIT {
                 .contentType(JSON);
     }
     private String expectedPayerRequestLocationFor(String paymentRequestExternalId, String payerExternalId) {
-        return "http://localhost:" + testContext.getPort() + "/v1/api/payment_requests/{paymentRequestExternalId}/payers/{payerExternalId}"
+        return "http://localhost:" + testContext.getPort() + "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers/{payerExternalId}"
+                .replace("{accountId}", accountId)
                 .replace("{paymentRequestExternalId}", paymentRequestExternalId)
                 .replace("{payerExternalId}", payerExternalId);
     }

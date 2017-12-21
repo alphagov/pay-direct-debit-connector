@@ -44,8 +44,9 @@ public class SecurityTokensResourceIT {
 
     @Test
     public void shouldReturn200WithPaymentRequestForValidToken() {
+        String requestPath = "/v1/tokens/{token}/payment-request".replace("{token}", testToken.getToken());
         givenSetup()
-                .get(tokensUrlFor(testToken.getToken()) + "/charge")
+                .get(requestPath)
                 .then()
                 .statusCode(200)
                 .contentType(JSON)
@@ -57,8 +58,9 @@ public class SecurityTokensResourceIT {
 
     @Test
     public void shouldReturnNoContentWhenDeletingToken() {
+        String requestPath = "/v1/tokens/{token}".replace("{token}", testToken.getToken());
         givenSetup()
-                .delete(tokensUrlFor(testToken.getToken()))
+                .delete(requestPath)
                 .then()
                 .statusCode(204);
     }
@@ -67,9 +69,4 @@ public class SecurityTokensResourceIT {
         return given().port(testContext.getPort())
                 .contentType(JSON);
     }
-
-    private String tokensUrlFor(String id) {
-        return SecurityTokensResource.TOKEN_PATH.replace("{chargeTokenId}", id);
-    }
-
 }
