@@ -88,7 +88,7 @@ public class PaymentRequestResourceIT {
                 .body("links", containsLink("self", "GET", documentLocation))
                 .body("links", containsLink("next_url", "GET", hrefNextUrl))
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
-                    put("token", token);
+                    put("chargeTokenId", token);
                 }}));
         String requestPath2 = CHARGE_API_PATH
                 .replace("{accountId}", accountId)
@@ -118,7 +118,7 @@ public class PaymentRequestResourceIT {
                 .body("links", containsLink("self", "GET", documentLocation))
                 .body("links", containsLink("next_url", "GET", newHrefNextUrl))
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
-                    put("token", newChargeToken);
+                    put("chargeTokenId", newChargeToken);
                 }}));
 
     }
