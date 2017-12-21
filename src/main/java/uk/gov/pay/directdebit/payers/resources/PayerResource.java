@@ -38,7 +38,7 @@ public class PayerResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     public Response createPayer(@PathParam("accountId") Long accountId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
-        createPayerValidator.validate(createPayerRequest);
+        createPayerValidator.validate(paymentRequestExternalId, createPayerRequest);
         LOGGER.info("Create new payer request received for payment request {} ", paymentRequestExternalId);
         CreatePayerResponse createPayerResponse = CreatePayerResponse.from(payerService.create(paymentRequestExternalId, createPayerRequest));
         URI newPayerLocation = URIBuilder.selfUriFor(uriInfo, PAYER_API_PATH, String.valueOf(accountId), paymentRequestExternalId, createPayerResponse.getPayerExternalId());
