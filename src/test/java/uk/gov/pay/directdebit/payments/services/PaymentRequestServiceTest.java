@@ -171,7 +171,8 @@ public class PaymentRequestServiceTest {
                         .put("href", new URI("http://payments.com/secure"))
                         .put("type", "application/x-www-form-urlencoded")
                         .put("params", new HashMap<String, Object>() {{
-                            put("token", token.getToken());
+                            //backward-compatibility with demoservice
+                            put("chargeTokenId", token.getToken());
                         }}).build()
         ));
     }
