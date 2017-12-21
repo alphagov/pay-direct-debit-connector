@@ -3,9 +3,9 @@ package uk.gov.pay.directdebit.common.validation;
 
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.payments.exception.validation.InvalidFieldsException;
-import uk.gov.pay.directdebit.payments.exception.validation.InvalidSizeFieldsException;
-import uk.gov.pay.directdebit.payments.exception.validation.MissingMandatoryFieldsException;
+import uk.gov.pay.directdebit.common.exception.validation.InvalidFieldsException;
+import uk.gov.pay.directdebit.common.exception.validation.InvalidSizeFieldsException;
+import uk.gov.pay.directdebit.common.exception.validation.MissingMandatoryFieldsException;
 
 import java.util.List;
 import java.util.Map;
@@ -55,7 +55,7 @@ public abstract class ApiValidation {
                 .collect(Collectors.toList());
     }
 
-    public void validate(Map<String, String>  request) {
+    public void validate(Map<String, String> request) {
         List<String> missingFields = checkMissingFields(request, requiredFields);
         if (!missingFields.isEmpty()) {
             LOGGER.error("Error validating request {}, missing mandatory fields", request.getOrDefault("external_id", "unknown_id"));
