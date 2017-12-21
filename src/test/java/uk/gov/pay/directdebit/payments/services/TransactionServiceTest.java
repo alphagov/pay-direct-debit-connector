@@ -60,6 +60,7 @@ public class TransactionServiceTest {
         assertThat(transaction.getId(), is(notNullValue()));
         assertThat(transaction.getPaymentRequestId(), is(paymentRequestFixture.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(paymentRequestFixture.getExternalId()));
+        assertThat(transaction.getPaymentRequestReturnUrl(), is(paymentRequestFixture.getReturnUrl()));
         assertThat(transaction.getAmount(), is(paymentRequestFixture.getAmount()));
         assertThat(transaction.getType(), is(Transaction.Type.CHARGE));
         assertThat(transaction.getState(), is(PaymentState.NEW));
@@ -80,6 +81,7 @@ public class TransactionServiceTest {
         assertThat(foundTransaction.getId(), is(notNullValue()));
         assertThat(foundTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(foundTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
+        assertThat(foundTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(foundTransaction.getAmount(), is(transactionFixture.getAmount()));
         assertThat(foundTransaction.getType(), is(transactionFixture.getType()));
         assertThat(foundTransaction.getState(), is(transactionFixture.getState()));
@@ -101,6 +103,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getId(), is(notNullValue()));
         assertThat(newTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
+        assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getAmount(), is(transactionFixture.getAmount()));
         assertThat(newTransaction.getType(), is(transactionFixture.getType()));
         assertThat(newTransaction.getState(), is(PaymentState.AWAITING_CONFIRMATION));
@@ -118,6 +121,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getId(), is(notNullValue()));
         assertThat(newTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
+        assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getAmount(), is(transactionFixture.getAmount()));
         assertThat(newTransaction.getType(), is(transactionFixture.getType()));
         assertThat(newTransaction.getState(), is(PaymentState.PROCESSING_DIRECT_DEBIT_DETAILS));
@@ -136,6 +140,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getId(), is(notNullValue()));
         assertThat(newTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
+        assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getAmount(), is(transactionFixture.getAmount()));
         assertThat(newTransaction.getType(), is(transactionFixture.getType()));
         assertThat(newTransaction.getState(), is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS));

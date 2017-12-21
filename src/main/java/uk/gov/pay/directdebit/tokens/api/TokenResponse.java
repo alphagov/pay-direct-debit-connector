@@ -16,17 +16,21 @@ public class TokenResponse {
     private String type;
     @JsonProperty("state")
     private String state;
+    @JsonProperty("return_url")
+    private String returnUrl;
 
-    private TokenResponse(String paymentExternalId, Long amount, String type, String state) {
+    private TokenResponse(String paymentExternalId, String returnUrl, Long amount, String type, String state) {
         this.paymentExternalId = paymentExternalId;
         this.amount = amount;
         this.type = type;
         this.state = state;
+        this.returnUrl = returnUrl;
     }
 
     public static TokenResponse from(Transaction transaction) {
         return new TokenResponse(
                 transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequestReturnUrl(),
                 transaction.getAmount(),
                 transaction.getType().toString(),
                 transaction.getState().toString()
@@ -39,7 +43,7 @@ public class TokenResponse {
         if (o == null || getClass() != o.getClass()) return false;
 
         TokenResponse that = (TokenResponse) o;
-
+        if (!returnUrl.equals(that.returnUrl)) return false;
         if (!paymentExternalId.equals(that.paymentExternalId)) return false;
         if (!amount.equals(that.amount)) return false;
         if (!type.equals(that.type)) return false;
@@ -50,6 +54,7 @@ public class TokenResponse {
     public int hashCode() {
         int result = paymentExternalId.hashCode();
         result = 31 * result + amount.hashCode();
+        result = 31 * result + returnUrl.hashCode();
         result = 31 * result + type.hashCode();
         result = 31 * result + state.hashCode();
         return result;
@@ -59,6 +64,7 @@ public class TokenResponse {
     public String toString() {
         return "TokenResponse{" +
                 "externalId=" + paymentExternalId +
+                ", return_url=" + returnUrl +
                 ", amount=" + amount +
                 ", type='" + type + '\'' +
                 ", state='" + state + '\'' +

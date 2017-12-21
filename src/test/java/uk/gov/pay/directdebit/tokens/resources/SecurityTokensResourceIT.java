@@ -38,7 +38,9 @@ public class SecurityTokensResourceIT {
         testPaymentRequest = aPaymentRequestFixture().insert(testContext.getJdbi());
         testTransaction = aTransactionFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .withPaymentRequestExternalId(testPaymentRequest.getExternalId()).insert(testContext.getJdbi());
+                .withPaymentRequestExternalId(testPaymentRequest.getExternalId())
+                .withPaymentRequestReturnUrl(testPaymentRequest.getReturnUrl())
+                .insert(testContext.getJdbi());
         testToken = aTokenFixture().withPaymentRequestId(testPaymentRequest.getId()).insert(testContext.getJdbi());
     }
 
@@ -51,6 +53,7 @@ public class SecurityTokensResourceIT {
                 .statusCode(200)
                 .contentType(JSON)
                 .body("external_id", is(testTransaction.getPaymentRequestExternalId()))
+                .body("return_url", is(testTransaction.getPaymentRequestReturnUrl()))
                 .body("state", is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS.toString()))
                 .body("type", is(testTransaction.getType().toString()))
                 .body("amount", isNumber(testTransaction.getAmount()));
