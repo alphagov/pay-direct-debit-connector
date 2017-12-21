@@ -36,8 +36,12 @@ public class PaymentRequestResponse {
     @JsonProperty("created_date")
     private String createdDate;
 
-    public PaymentRequestResponse(String paymentExternalId, Long amount, String returnUrl, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
+    @JsonProperty
+    private ExternalPaymentState state;
+
+    public PaymentRequestResponse(String paymentExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
         this.paymentExternalId = paymentExternalId;
+        this.state = state;
         this.dataLinks = dataLinks;
         this.amount = amount;
         this.returnUrl = returnUrl;
@@ -86,23 +90,25 @@ public class PaymentRequestResponse {
         PaymentRequestResponse that = (PaymentRequestResponse) o;
 
         if (dataLinks != null ? !dataLinks.equals(that.dataLinks) : that.dataLinks != null) return false;
-        if (paymentExternalId != null ? !paymentExternalId.equals(that.paymentExternalId) : that.paymentExternalId != null) return false;
-        if (amount != null ? !amount.equals(that.amount) : that.amount != null) return false;
-        if (returnUrl != null ? !returnUrl.equals(that.returnUrl) : that.returnUrl != null) return false;
+        if (!paymentExternalId.equals(that.paymentExternalId)) return false;
+        if (!amount.equals(that.amount)) return false;
+        if (!returnUrl.equals(that.returnUrl)) return false;
         if (description != null ? !description.equals(that.description) : that.description != null) return false;
         if (reference != null ? !reference.equals(that.reference) : that.reference != null) return false;
-        return createdDate != null ? createdDate.equals(that.createdDate) : that.createdDate == null;
+        if (!createdDate.equals(that.createdDate)) return false;
+        return state == that.state;
     }
 
     @Override
     public int hashCode() {
         int result = dataLinks != null ? dataLinks.hashCode() : 0;
-        result = 31 * result + (paymentExternalId != null ? paymentExternalId.hashCode() : 0);
-        result = 31 * result + (amount != null ? amount.hashCode() : 0);
-        result = 31 * result + (returnUrl != null ? returnUrl.hashCode() : 0);
+        result = 31 * result + paymentExternalId.hashCode();
+        result = 31 * result + amount.hashCode();
+        result = 31 * result + returnUrl.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (reference != null ? reference.hashCode() : 0);
-        result = 31 * result + (createdDate != null ? createdDate.hashCode() : 0);
+        result = 31 * result + createdDate.hashCode();
+        result = 31 * result + state.hashCode();
         return result;
     }
 
@@ -111,6 +117,7 @@ public class PaymentRequestResponse {
         return "PaymentRequestResponse{" +
                 "dataLinks=" + dataLinks +
                 ", paymentRequestId='" + paymentExternalId + '\'' +
+                ", state='" + state.getState() + '\'' +
                 ", amount=" + amount +
                 ", returnUrl='" + returnUrl + '\'' +
                 ", reference='" + reference + '\'' +

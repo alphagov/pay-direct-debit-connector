@@ -20,6 +20,7 @@ public class PaymentRequestResponseTest {
         String createdDate = ZonedDateTime.now().toString();
         PaymentRequestResponse paymentRequestResponse = new PaymentRequestResponse(
                 paymentRequestId,
+                ExternalPaymentState.EXTERNAL_STARTED,
                 amount,
                 returnUrl,
                 description,
