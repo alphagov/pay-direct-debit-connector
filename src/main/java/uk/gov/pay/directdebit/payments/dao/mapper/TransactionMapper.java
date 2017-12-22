@@ -17,6 +17,7 @@ public class TransactionMapper implements ResultSetMapper<Transaction> {
     private static final String PAYMENT_REQUEST_EXTERNAL_ID_COLUMN = "external_id";
     private static final String PAYMENT_REQUEST_RETURN_URL_COLUMN = "return_url";
     private static final String PAYMENT_REQUEST_GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
+    private static final String PAYMENT_REQUEST_DESCRIPTION_COLUMN = "description";
 
     @Override
     public Transaction map(int index, ResultSet resultSet, StatementContext statementContext) throws SQLException {
@@ -24,6 +25,7 @@ public class TransactionMapper implements ResultSetMapper<Transaction> {
                 resultSet.getLong(ID_COLUMN),
                 resultSet.getLong(PAYMENT_REQUEST_ID_COLUMN),
                 resultSet.getString(PAYMENT_REQUEST_EXTERNAL_ID_COLUMN),
+                resultSet.getString(PAYMENT_REQUEST_DESCRIPTION_COLUMN),
                 resultSet.getLong(PAYMENT_REQUEST_GATEWAY_ACCOUNT_ID_COLUMN),
                 resultSet.getString(PAYMENT_REQUEST_RETURN_URL_COLUMN),
                 resultSet.getLong(AMOUNT_COLUMN),

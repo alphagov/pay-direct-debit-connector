@@ -20,20 +20,25 @@ public class TokenResponse {
     private String returnUrl;
     @JsonProperty("gateway_account_id")
     private Long gatewayAccountId;
+    @JsonProperty("description")
+    private String description;
 
-    private TokenResponse(String paymentExternalId, Long gatewayAccountId, String returnUrl, Long amount, String type, String state) {
+
+    private TokenResponse(String paymentExternalId, Long gatewayAccountId, String description, String returnUrl, Long amount, String type, String state) {
         this.paymentExternalId = paymentExternalId;
         this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
         this.type = type;
         this.state = state;
         this.returnUrl = returnUrl;
+        this.description = description;
     }
 
     public static TokenResponse from(Transaction transaction) {
         return new TokenResponse(
                 transaction.getPaymentRequestExternalId(),
                 transaction.getPaymentRequestGatewayAccountId(),
+                transaction.getPaymentRequestDescription(),
                 transaction.getPaymentRequestReturnUrl(),
                 transaction.getAmount(),
                 transaction.getType().toString(),
@@ -49,6 +54,8 @@ public class TokenResponse {
         TokenResponse that = (TokenResponse) o;
         if (!returnUrl.equals(that.returnUrl)) return false;
         if (!paymentExternalId.equals(that.paymentExternalId)) return false;
+        if (!gatewayAccountId.equals(that.gatewayAccountId)) return false;
+        if (!description.equals(that.description)) return false;
         if (!amount.equals(that.amount)) return false;
         if (!type.equals(that.type)) return false;
         return state.equals(that.state);
@@ -59,6 +66,8 @@ public class TokenResponse {
         int result = paymentExternalId.hashCode();
         result = 31 * result + amount.hashCode();
         result = 31 * result + returnUrl.hashCode();
+        result = 31 * result + gatewayAccountId.hashCode();
+        result = 31 * result + description.hashCode();
         result = 31 * result + type.hashCode();
         result = 31 * result + state.hashCode();
         return result;
@@ -68,10 +77,12 @@ public class TokenResponse {
     public String toString() {
         return "TokenResponse{" +
                 "externalId=" + paymentExternalId +
-                ", return_url=" + returnUrl +
+                ", description=" + description +
+                ", gateway_account_id=" + gatewayAccountId +
                 ", amount=" + amount +
                 ", type='" + type + '\'' +
                 ", state='" + state + '\'' +
+                ", return_url=" + returnUrl +
                 '}';
     }
 }

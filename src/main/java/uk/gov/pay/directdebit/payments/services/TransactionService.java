@@ -38,6 +38,7 @@ public class TransactionService {
         Transaction transaction = new Transaction(
                 paymentRequest.getId(),
                 paymentRequest.getExternalId(),
+                paymentRequest.getDescription(),
                 paymentRequest.getGatewayAccountId(),
                 paymentRequest.getReturnUrl(),
                 paymentRequest.getAmount(),
