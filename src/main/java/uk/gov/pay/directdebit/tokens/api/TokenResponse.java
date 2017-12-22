@@ -18,9 +18,12 @@ public class TokenResponse {
     private String state;
     @JsonProperty("return_url")
     private String returnUrl;
+    @JsonProperty("gateway_account_id")
+    private Long gatewayAccountId;
 
-    private TokenResponse(String paymentExternalId, String returnUrl, Long amount, String type, String state) {
+    private TokenResponse(String paymentExternalId, Long gatewayAccountId, String returnUrl, Long amount, String type, String state) {
         this.paymentExternalId = paymentExternalId;
+        this.gatewayAccountId = gatewayAccountId;
         this.amount = amount;
         this.type = type;
         this.state = state;
@@ -30,6 +33,7 @@ public class TokenResponse {
     public static TokenResponse from(Transaction transaction) {
         return new TokenResponse(
                 transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequestGatewayAccountId(),
                 transaction.getPaymentRequestReturnUrl(),
                 transaction.getAmount(),
                 transaction.getType().toString(),

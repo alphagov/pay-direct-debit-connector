@@ -40,6 +40,7 @@ public class SecurityTokensResourceIT {
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .withPaymentRequestExternalId(testPaymentRequest.getExternalId())
                 .withPaymentRequestReturnUrl(testPaymentRequest.getReturnUrl())
+                .withPaymentRequestGatewayAccountId(testPaymentRequest.getGatewayAccountId())
                 .insert(testContext.getJdbi());
         testToken = aTokenFixture().withPaymentRequestId(testPaymentRequest.getId()).insert(testContext.getJdbi());
     }
@@ -54,6 +55,7 @@ public class SecurityTokensResourceIT {
                 .contentType(JSON)
                 .body("external_id", is(testTransaction.getPaymentRequestExternalId()))
                 .body("return_url", is(testTransaction.getPaymentRequestReturnUrl()))
+                .body("gateway_account_id", isNumber(testTransaction.getPaymentRequestGatewayAccountId()))
                 .body("state", is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS.toString()))
                 .body("type", is(testTransaction.getType().toString()))
                 .body("amount", isNumber(testTransaction.getAmount()));

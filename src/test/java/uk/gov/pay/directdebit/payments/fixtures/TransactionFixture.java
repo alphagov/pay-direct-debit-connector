@@ -12,6 +12,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
     private String paymentRequestExternalId = RandomIdGenerator.newId();
+    private Long paymentRequestGatewayAccountId = RandomUtils.nextLong(1, 99999);
     private String paymentRequestReturnUrl = "http://www." + RandomStringUtils.randomAlphabetic(10) + ".com";
     private Long amount = RandomUtils.nextLong(1, 99999);
     private Transaction.Type type = Transaction.Type.CHARGE;
@@ -31,6 +32,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withPaymentRequestExternalId(String paymentRequestExternalId) {
         this.paymentRequestExternalId = paymentRequestExternalId;
+        return this;
+    }
+    public TransactionFixture withPaymentRequestGatewayAccountId(Long paymentRequestGatewayAccountId) {
+        this.paymentRequestGatewayAccountId = paymentRequestGatewayAccountId;
         return this;
     }
 
@@ -82,6 +87,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return paymentRequestReturnUrl;
     }
 
+    public Long getPaymentRequestGatewayAccountId() {
+        return paymentRequestGatewayAccountId;
+    }
+
     @Override
     public TransactionFixture insert(DBI jdbi) {
         jdbi.withHandle(h ->
@@ -107,7 +116,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public Transaction toEntity() {
-        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestReturnUrl, amount, type, state);
+        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestGatewayAccountId, paymentRequestReturnUrl, amount, type, state);
     }
 
 }
