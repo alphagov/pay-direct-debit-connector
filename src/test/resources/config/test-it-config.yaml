@@ -17,6 +17,10 @@ logging:
 links:
   frontendUrl: http://Frontend/
 
+graphite:
+  host: localhost
+  port: 8092
+
 proxy:
   host: localhost
   port: 1234

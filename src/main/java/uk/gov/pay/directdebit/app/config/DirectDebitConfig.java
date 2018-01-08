@@ -23,6 +23,9 @@ public class DirectDebitConfig extends Configuration {
     private LinksConfig links;
 
     @NotNull
+    private GraphiteConfig graphiteConfig;
+
+    @NotNull
     private ProxyConfig proxyConfig;
 
     @JsonProperty("database")
@@ -38,6 +41,11 @@ public class DirectDebitConfig extends Configuration {
 
     public LinksConfig getLinks() {
         return links;
+    }
+
+    @JsonProperty("graphite")
+    public GraphiteConfig getGraphiteConfig() {
+        return graphiteConfig;
     }
 
     @JsonProperty("proxy")
