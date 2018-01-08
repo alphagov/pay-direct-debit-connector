@@ -22,6 +22,10 @@ proxy:
 links:
   frontendUrl: ${FRONTEND_URL:-}
 
+graphite:
+  host: ${METRICS_HOST:-localhost}
+  port: ${METRICS_PORT:-8092}
+
 goCardless:
   # For initial integration we will use sandbox access token.
   # When in live mode: access token should be removed from the config and we should use partner integration instead.

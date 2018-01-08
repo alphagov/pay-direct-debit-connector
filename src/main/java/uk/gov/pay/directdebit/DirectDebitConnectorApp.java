@@ -1,5 +1,8 @@
 package uk.gov.pay.directdebit;
 
+import com.codahale.metrics.graphite.GraphiteReporter;
+import com.codahale.metrics.graphite.GraphiteSender;
+import com.codahale.metrics.graphite.GraphiteUDP;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
@@ -14,6 +17,7 @@ import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.DirectDebitModule;
+import uk.gov.pay.directdebit.app.config.GraphiteConfig;
 import uk.gov.pay.directdebit.app.filters.LoggingFilter;
 import uk.gov.pay.directdebit.app.healthcheck.Database;
 import uk.gov.pay.directdebit.app.healthcheck.Ping;
@@ -44,6 +48,8 @@ import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessReso
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
+
+import java.util.concurrent.TimeUnit;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;
@@ -120,6 +126,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new NotFoundExceptionMapper());
         environment.jersey().register(new ConflictExceptionMapper());
         setupSSL(configuration);
+        initialiseMetrics(configuration, environment);
     }
 
     private void setupSSL(DirectDebitConfig configuration) {
@@ -127,6 +134,16 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory);
         System.setProperty("https.proxyHost", configuration.getProxyConfig().getHost());
         System.setProperty("https.proxyPort", configuration.getProxyConfig().getPort().toString());
+    }
+
+    private void initialiseMetrics(DirectDebitConfig configuration, Environment environment) {
+        GraphiteConfig graphiteConfig = configuration.getGraphiteConfig();
+        GraphiteSender graphiteUDP = new GraphiteUDP(graphiteConfig.getHost(), graphiteConfig.getPort());
+        GraphiteReporter.forRegistry(environment.metrics())
+                .prefixedWith(graphiteConfig.getNode())
+                .build(graphiteUDP)
+                .start(graphiteConfig.getSendingPeriod(), TimeUnit.SECONDS);
+
     }
 }
 
