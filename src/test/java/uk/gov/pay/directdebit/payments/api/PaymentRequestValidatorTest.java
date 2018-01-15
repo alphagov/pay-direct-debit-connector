@@ -5,9 +5,9 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.payments.exception.validation.InvalidFieldsException;
-import uk.gov.pay.directdebit.payments.exception.validation.InvalidSizeFieldsException;
-import uk.gov.pay.directdebit.payments.exception.validation.MissingMandatoryFieldsException;
+import uk.gov.pay.directdebit.common.exception.validation.InvalidFieldsException;
+import uk.gov.pay.directdebit.common.exception.validation.InvalidSizeFieldsException;
+import uk.gov.pay.directdebit.common.exception.validation.MissingMandatoryFieldsException;
 
 import java.util.Map;
 

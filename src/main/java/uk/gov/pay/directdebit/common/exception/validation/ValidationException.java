@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.exception.validation;
+package uk.gov.pay.directdebit.common.exception.validation;
 
 import com.google.common.base.Joiner;
 import uk.gov.pay.directdebit.common.exception.BadRequestException;

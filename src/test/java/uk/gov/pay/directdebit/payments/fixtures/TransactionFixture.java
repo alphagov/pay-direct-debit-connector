@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
@@ -11,6 +12,9 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
     private String paymentRequestExternalId = RandomIdGenerator.newId();
+    private String paymentRequestDescription = RandomStringUtils.randomAlphabetic(20);
+    private Long paymentRequestGatewayAccountId = RandomUtils.nextLong(1, 99999);
+    private String paymentRequestReturnUrl = "http://www." + RandomStringUtils.randomAlphabetic(10) + ".test";
     private Long amount = RandomUtils.nextLong(1, 99999);
     private Transaction.Type type = Transaction.Type.CHARGE;
     private PaymentState state = PaymentState.NEW;
@@ -29,6 +33,20 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withPaymentRequestExternalId(String paymentRequestExternalId) {
         this.paymentRequestExternalId = paymentRequestExternalId;
+        return this;
+    }
+
+    public TransactionFixture withPaymentRequestDescription(String paymentRequestDescription) {
+        this.paymentRequestDescription = paymentRequestDescription;
+        return this;
+    }
+    public TransactionFixture withPaymentRequestGatewayAccountId(Long paymentRequestGatewayAccountId) {
+        this.paymentRequestGatewayAccountId = paymentRequestGatewayAccountId;
+        return this;
+    }
+
+    public TransactionFixture withPaymentRequestReturnUrl(String paymentRequestReturnUrl) {
+        this.paymentRequestReturnUrl = paymentRequestReturnUrl;
         return this;
     }
 
@@ -71,6 +89,18 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return state;
     }
 
+    public String getPaymentRequestReturnUrl() {
+        return paymentRequestReturnUrl;
+    }
+
+    public Long getPaymentRequestGatewayAccountId() {
+        return paymentRequestGatewayAccountId;
+    }
+
+    public String getPaymentRequestDescription() {
+        return paymentRequestDescription;
+    }
+
     @Override
     public TransactionFixture insert(DBI jdbi) {
         jdbi.withHandle(h ->
@@ -96,7 +126,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public Transaction toEntity() {
-        return new Transaction(id, paymentRequestId, paymentRequestExternalId, amount, type, state);
+        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestGatewayAccountId, paymentRequestReturnUrl, amount, type, state);
     }
 
 }

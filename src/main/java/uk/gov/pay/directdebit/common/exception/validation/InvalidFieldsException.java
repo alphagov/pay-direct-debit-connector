@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.exception.validation;
+package uk.gov.pay.directdebit.common.exception.validation;
 
 import java.util.List;
 

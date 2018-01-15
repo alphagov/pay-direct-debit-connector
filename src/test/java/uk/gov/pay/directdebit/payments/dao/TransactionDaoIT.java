@@ -51,6 +51,8 @@ public class TransactionDaoIT {
         this.testTransaction = aTransactionFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .withPaymentRequestExternalId(testPaymentRequest.getExternalId())
+                .withPaymentRequestGatewayAccountId(testPaymentRequest.getGatewayAccountId())
+                .withPaymentRequestDescription(testPaymentRequest.getDescription())
                 .withAmount(AMOUNT)
                 .withState(STATE)
                 .withType(TYPE);
@@ -75,6 +77,8 @@ public class TransactionDaoIT {
         assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
+        assertThat(transaction.getPaymentRequestGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
+        assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
         assertThat(transaction.getType(), is(TYPE));
         assertThat(transaction.getAmount(), is(AMOUNT));
         assertThat(transaction.getState(), is(STATE));
@@ -87,6 +91,8 @@ public class TransactionDaoIT {
         assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testTransaction.getPaymentRequestId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
+        assertThat(transaction.getPaymentRequestGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
+        assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
         assertThat(transaction.getType(), is(TYPE));
         assertThat(transaction.getAmount(), is(AMOUNT));
         assertThat(transaction.getState(), is(STATE));
@@ -101,6 +107,8 @@ public class TransactionDaoIT {
         assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
+        assertThat(transaction.getPaymentRequestGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
+        assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
         assertThat(transaction.getType(), is(TYPE));
         assertThat(transaction.getAmount(), is(AMOUNT));
         assertThat(transaction.getState(), is(STATE));
@@ -122,6 +130,8 @@ public class TransactionDaoIT {
         assertThat(transactionAfterUpdate.getId(), is(testTransaction.getId()));
         assertThat(transactionAfterUpdate.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transactionAfterUpdate.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
+        assertThat(transactionAfterUpdate.getPaymentRequestGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
+        assertThat(transactionAfterUpdate.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
         assertThat(transactionAfterUpdate.getType(), is(TYPE));
         assertThat(transactionAfterUpdate.getAmount(), is(AMOUNT));
         assertThat(transactionAfterUpdate.getState(), is(newState));

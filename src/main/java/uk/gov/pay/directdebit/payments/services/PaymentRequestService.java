@@ -58,6 +58,7 @@ public class PaymentRequestService {
                     ImmutableMap.of("chargeTokenId", token.getToken())));
         }
         return new PaymentRequestResponse(paymentRequestExternalId,
+                charge.getState().toExternal(),
                 paymentRequest.getAmount(),
                 paymentRequest.getReturnUrl(),
                 paymentRequest.getDescription(),

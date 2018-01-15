@@ -12,6 +12,8 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -39,6 +41,7 @@ public class PaymentRequestResourceIT {
     private static final String JSON_GATEWAY_ACC_KEY = "gateway_account_id";
     private static final String JSON_RETURN_URL_KEY = "return_url";
     private static final String JSON_CHARGE_KEY = "charge_id";
+    private static final String JSON_STATE_KEY = "state.status";
     private static final long AMOUNT = 6234L;
     private static final String accountId = "20";
 
@@ -104,6 +107,7 @@ public class PaymentRequestResourceIT {
                 .body(JSON_AMOUNT_KEY, isNumber(AMOUNT))
                 .body(JSON_REFERENCE_KEY, is(expectedReference))
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
+                .body(JSON_STATE_KEY, is(PaymentState.NEW.toExternal().getState()))
                 .body(JSON_RETURN_URL_KEY, is(returnUrl));
 
 
