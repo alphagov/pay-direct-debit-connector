@@ -221,7 +221,7 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
     }
 
     private String generateEmail() {
-        return RandomStringUtils.randomAlphanumeric(20) + "@" + RandomStringUtils.randomAlphanumeric(10) + ".com";
+        return RandomStringUtils.randomAlphanumeric(20) + "@" + RandomStringUtils.randomAlphanumeric(10) + ".test";
     }
 
 }

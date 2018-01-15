@@ -14,7 +14,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String paymentRequestExternalId = RandomIdGenerator.newId();
     private String paymentRequestDescription = RandomStringUtils.randomAlphabetic(20);
     private Long paymentRequestGatewayAccountId = RandomUtils.nextLong(1, 99999);
-    private String paymentRequestReturnUrl = "http://www." + RandomStringUtils.randomAlphabetic(10) + ".com";
+    private String paymentRequestReturnUrl = "http://www." + RandomStringUtils.randomAlphabetic(10) + ".test";
     private Long amount = RandomUtils.nextLong(1, 99999);
     private Transaction.Type type = Transaction.Type.CHARGE;
     private PaymentState state = PaymentState.NEW;
