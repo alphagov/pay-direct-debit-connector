@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 
 set -eu
+RUN_MIGRATION_VALUE=${RUN_MIGRATION:-}
+RUN_APP_VALUE=${RUN_APP:-}
 
-if [ -n "${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI:-}" ]; then
-  # Looks like we're in ECS and we've got access to credentials.
-  # Use Chamber so we can use them to get secrets from Parameter Store
-  AWS_REGION=${ECS_AWS_REGION} bin/chamber exec ${ECS_SERVICE} -- java -jar *-allinone.jar server *.yaml
-else
-  # Do a normal startup
+java -jar *-allinone.jar waitOnDependencies *.yaml
+
+if [ -z "$RUN_MIGRATION_VALUE" && -z "$RUN_APP_VALUE" ]; then
   java -jar *-allinone.jar server *.yaml
+else
+  if [ "$RUN_MIGRATION_VALUE" == "true" ]; then
+    java -jar *-allinone.jar db migrate *.yaml
+  fi
+
+  if [ "$RUN_APP_VALUE" == "true" ]; then
+    java -jar *-allinone.jar server *.yaml
+  fi
 fi
+
+exit 0
