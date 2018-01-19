@@ -1,6 +1,5 @@
 FROM openjdk:8-jre-alpine
 
-ARG CHAMBER_URL=https://github.com/segmentio/chamber/releases/download/v1.13.0/chamber-v1.13.0-linux-amd64
 
 RUN apk update
 RUN apk upgrade
@@ -16,14 +15,11 @@ EXPOSE 8081
 
 WORKDIR /app
 
-ADD chamber.sha256sum /app/chamber.sha256sum
 RUN apk add openssl && \
     mkdir -p bin && \
-    wget -qO bin/chamber $CHAMBER_URL && \
-    sha256sum -c chamber.sha256sum && \
-    chmod 755 bin/chamber && \
     apk del --purge openssl
 
+ADD chamber--linux-amd64 /app/
 ADD target/*.yaml /app/
 ADD target/pay-*-allinone.jar /app/
 ADD docker-startup.sh /app/docker-startup.sh
