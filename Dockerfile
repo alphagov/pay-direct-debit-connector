@@ -25,4 +25,4 @@ ADD target/pay-*-allinone.jar /app/
 ADD docker-startup.sh /app/docker-startup.sh
 ADD run-with-chamber.sh /app/run-with-chamber.sh
 
-CMD bash ./run-with-chamber.sh
+CMD bash ./docker-startup.sh
