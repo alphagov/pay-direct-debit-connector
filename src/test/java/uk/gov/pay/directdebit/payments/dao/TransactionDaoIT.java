@@ -18,7 +18,6 @@ import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -68,6 +67,10 @@ public class TransactionDaoIT {
         assertThat((Long) foundTransaction.get("amount"), isNumber(AMOUNT));
         assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(TYPE));
         assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(STATE));
+        assertThat(foundTransaction.get("payment_request_id"), is(testTransaction.getPaymentRequestId()));
+        assertThat((Long) foundTransaction.get("amount"), isNumber(testTransaction.getAmount()));
+        assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(testTransaction.getType()));
+        assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(testTransaction.getState()));
     }
 
     @Test
@@ -117,7 +120,7 @@ public class TransactionDaoIT {
     @Test
     public void shouldNotFindATransactionByTokenId_ifTokenIdIsInvalid() {
         String tokenId = "non_existing_tokenId";
-        assertThat(transactionDao.findByTokenId(tokenId), is(Optional.empty()));
+        assertThat(transactionDao.findByTokenId(tokenId).isPresent(), is(false));
     }
 
     @Test

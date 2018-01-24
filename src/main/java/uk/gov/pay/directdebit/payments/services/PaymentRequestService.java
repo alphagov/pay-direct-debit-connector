@@ -6,7 +6,9 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
+import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -21,8 +23,9 @@ import java.util.Map;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static uk.gov.pay.directdebit.common.util.URIBuilder.*;
+import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
+import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 
 public class PaymentRequestService {
@@ -32,11 +35,13 @@ public class PaymentRequestService {
     private final PaymentRequestDao paymentRequestDao;
     private final TokenService tokenService;
     private final TransactionService transactionService;
+    private final GatewayAccountDao gatewayAccountDao;
 
-    public PaymentRequestService(DirectDebitConfig config, PaymentRequestDao paymentRequestDao, TokenService tokenService, TransactionService transactionService) {
+    public PaymentRequestService(DirectDebitConfig config, PaymentRequestDao paymentRequestDao, TokenService tokenService, TransactionService transactionService, GatewayAccountDao gatewayAccountDao) {
         this.paymentRequestDao = paymentRequestDao;
         this.tokenService = tokenService;
         this.transactionService = transactionService;
+        this.gatewayAccountDao = gatewayAccountDao;
         this.linksConfig = config.getLinks();
     }
 
@@ -68,17 +73,23 @@ public class PaymentRequestService {
     }
 
     public PaymentRequestResponse createCharge(Map<String, String> paymentRequestMap, Long accountId, UriInfo uriInfo) {
-        //todo when we check the account id, return  notFoundResponse("Unknown gateway account: " + accountId)) if not found
-        PaymentRequest paymentRequest = new PaymentRequest(new Long(paymentRequestMap.get("amount")),
-                paymentRequestMap.get("return_url"),
-                accountId,
-                paymentRequestMap.get("description"),
-                paymentRequestMap.get("reference"));
-        LOGGER.info("Creating payment request with external id {}", paymentRequest.getExternalId());
-        Long id = paymentRequestDao.insert(paymentRequest);
-        paymentRequest.setId(id);
-        Transaction createdTransaction = transactionService.createChargeFor(paymentRequest);
-        return populateResponseWith(paymentRequest, createdTransaction, uriInfo);
+        return gatewayAccountDao.findById(accountId)
+                .map(gatewayAccount -> {
+                    PaymentRequest paymentRequest = new PaymentRequest(new Long(paymentRequestMap.get("amount")),
+                            paymentRequestMap.get("return_url"),
+                            accountId,
+                            paymentRequestMap.get("description"),
+                            paymentRequestMap.get("reference"));
+                    LOGGER.info("Creating payment request with external id {}", paymentRequest.getExternalId());
+                    Long id = paymentRequestDao.insert(paymentRequest);
+                    paymentRequest.setId(id);
+                    Transaction createdTransaction = transactionService.createChargeFor(paymentRequest);
+                    return populateResponseWith(paymentRequest, createdTransaction, uriInfo);
+                })
+                .orElseThrow(() -> {
+                    LOGGER.error("Gateway account with id {} not found", accountId);
+                    return new GatewayAccountNotFoundException(accountId);
+                });
     }
 
 

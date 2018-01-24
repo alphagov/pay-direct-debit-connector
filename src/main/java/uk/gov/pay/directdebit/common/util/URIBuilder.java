@@ -9,7 +9,6 @@ import java.util.Map;
 
 public class URIBuilder {
 
-
     public static URI selfUriFor(UriInfo uriInfo, String path, String... ids) {
         return uriInfo.getBaseUriBuilder()
                 .path(path)

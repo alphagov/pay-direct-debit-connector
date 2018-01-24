@@ -34,6 +34,8 @@ public class PaymentRequestResource {
         this.paymentRequestService = paymentRequestService;
     }
 
+
+    //todo accountId
     @GET
     @Path(CHARGE_API_PATH)
     @Produces(APPLICATION_JSON)

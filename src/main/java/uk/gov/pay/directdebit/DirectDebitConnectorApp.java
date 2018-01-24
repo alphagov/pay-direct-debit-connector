@@ -25,6 +25,8 @@ import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
+import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
+import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
@@ -33,6 +35,7 @@ import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payers.services.PayerParser;
 import uk.gov.pay.directdebit.payers.services.PayerService;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
@@ -96,6 +99,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         TransactionDao transactionDao = jdbi.onDemand(TransactionDao.class);
         PayerDao payerDao = jdbi.onDemand(PayerDao.class);
         MandateDao mandateDao = jdbi.onDemand(MandateDao.class);
+        GatewayAccountDao gatewayAccountDao = jdbi.onDemand(GatewayAccountDao.class);
         PaymentRequestEventService paymentRequestEventService = new PaymentRequestEventService(paymentRequestEventDao);
         TransactionService transactionService = new TransactionService(transactionDao, paymentRequestEventService);
         TokenService tokenService = new TokenService(tokenDao, transactionService);
@@ -103,8 +107,9 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 configuration,
                 paymentRequestDao,
                 tokenService,
-                transactionService);
-
+                transactionService,
+                gatewayAccountDao);
+        GatewayAccountService gatewayAccountService = new GatewayAccountService(gatewayAccountDao);
         PayerParser payerParser = new PayerParser();
         PayerService payerService = new PayerService(payerDao, transactionService, payerParser);
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
@@ -121,6 +126,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new SecurityTokensResource(tokenService));
         environment.jersey().register(new PayerResource(payerService));
         environment.jersey().register(new ConfirmPaymentResource(new PaymentConfirmService(transactionService, payerDao, mandateDao)));
+        environment.jersey().register(new GatewayAccountResource(gatewayAccountService));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new BadRequestExceptionMapper());
         environment.jersey().register(new NotFoundExceptionMapper());
