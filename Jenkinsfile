@@ -51,7 +51,7 @@ pipeline {
     }
     stage('Test') {
       steps {
-        runParameterisedEndToEnd("directdebitconnector", null, "end2end-tagged", false, false, "uk.gov.pay.endtoend.categories.End2EndDirectDebit")
+        runParameterisedEndToEnd("directdebitconnector", null, "end2end-tagged", false, false, "uk.gov.pay.endtoend.categories.End2EndDirectDebit", "run-end-to-end-direct-debit-tests")
       }
     }
     stage('Docker Tag') {
