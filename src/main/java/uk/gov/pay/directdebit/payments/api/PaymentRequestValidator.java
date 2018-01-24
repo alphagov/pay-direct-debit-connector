@@ -14,14 +14,14 @@ public class PaymentRequestValidator extends ApiValidation {
     private final static String RETURN_URL_KEY = "return_url";
     private final static String REFERENCE_KEY = "reference";
 
-    private final static int MIN_AMOUNT = 1;
-    private final static int MAX_AMOUNT = 10000000;
+    private final static int MIN_AMOUNT_IN_PENCE = 1;
+    private final static int MAX_AMOUNT_IN_PENCE = 5000_00;
 
     private final static Map<String, Function<String, Boolean>> validators =
             ImmutableMap.<String, Function<String, Boolean>>builder()
                     .put(AMOUNT_KEY, (amount) -> {
                         Integer amountValue = Integer.valueOf(amount);
-                        return MIN_AMOUNT <= amountValue && MAX_AMOUNT >= amountValue;
+                        return MIN_AMOUNT_IN_PENCE <= amountValue && MAX_AMOUNT_IN_PENCE >= amountValue;
                     })
                     .build();
 
