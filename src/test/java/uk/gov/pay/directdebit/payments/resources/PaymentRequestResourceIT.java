@@ -165,7 +165,7 @@ public class PaymentRequestResourceIT {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("Field(s) are too big: [description]"));
+                .body("message", is("The size of a field(s) is invalid: [description]"));
     }
 
     @Test

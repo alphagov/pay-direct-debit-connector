@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +48,7 @@ public class PayerResourceIT {
     private PayerFixture payerFixture;
 
     String requestPath;
+
     @Before
     public void setUp() {
         testPaymentRequest = aPaymentRequestFixture().insert(testContext.getJdbi());
@@ -62,8 +62,9 @@ public class PayerResourceIT {
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
 
     }
+
     @Test
-    public void shouldCreateAPayer() throws Exception {
+    public void shouldCreateAPayer() {
         String postBody = gson.toJson(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
@@ -90,12 +91,14 @@ public class PayerResourceIT {
                 .body("payer_external_id", is(createdPayerExternalId))
                 .contentType(JSON);
     }
+
     private String expectedPayerRequestLocationFor(String paymentRequestExternalId, String payerExternalId) {
         return "http://localhost:" + testContext.getPort() + "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers/{payerExternalId}"
                 .replace("{accountId}", accountId)
                 .replace("{paymentRequestExternalId}", paymentRequestExternalId)
                 .replace("{payerExternalId}", payerExternalId);
     }
+
     @Test
     public void shouldReturn400IfMandatoryFieldsMissing() {
         String postBody = gson.toJson(ImmutableMap.builder()
@@ -115,50 +118,6 @@ public class PayerResourceIT {
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
                 .body("message", is("Field(s) missing: [account_number, country_code]"));
-    }
-
-    @Test
-    public void shouldReturn400IfFieldsInvalidSize() {
-        String postBody = gson.toJson(ImmutableMap.builder()
-                .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
-                .put(SORTCODE_KEY, payerFixture.getSortCode())
-                .put(NAME_KEY, payerFixture.getName())
-                .put(EMAIL_KEY, RandomStringUtils.randomAlphabetic(255))
-                .put(ADDRESS_LINE1_KEY, payerFixture.getAddressLine1())
-                .put(ADDRESS_CITY_KEY, payerFixture.getAddressCity())
-                .put(ADDRESS_COUNTRY_KEY, payerFixture.getAddressCountry())
-                .put(ADDRESS_POSTCODE_KEY, payerFixture.getAddressPostcode())
-                .build());
-
-        givenSetup()
-                .body(postBody)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .contentType(JSON)
-                .body("message", is("Field(s) are too big: [email]"));
-    }
-
-    @Test
-    public void shouldReturn400IfFieldsInvalid() {
-        String postBody = gson.toJson(ImmutableMap.builder()
-                .put(ACCOUNT_NUMBER_KEY, "123c5678")
-                .put(SORTCODE_KEY, "123a56")
-                .put(NAME_KEY, payerFixture.getName())
-                .put(EMAIL_KEY, payerFixture.getEmail())
-                .put(ADDRESS_LINE1_KEY, payerFixture.getAddressLine1())
-                .put(ADDRESS_CITY_KEY, payerFixture.getAddressCity())
-                .put(ADDRESS_COUNTRY_KEY, payerFixture.getAddressCountry())
-                .put(ADDRESS_POSTCODE_KEY, payerFixture.getAddressPostcode())
-                .build());
-
-        givenSetup()
-                .body(postBody)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .contentType(JSON)
-                .body("message", is("Field(s) are invalid: [account_number, sort_code]"));
     }
 
     private RequestSpecification givenSetup() {

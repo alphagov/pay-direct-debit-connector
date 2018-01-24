@@ -46,12 +46,12 @@ public class PaymentRequestValidatorTest {
     public void shouldThrowIfFieldsAreOfWrongSize() {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "100",
-                "description", RandomStringUtils.random(256),
+                "description", RandomStringUtils.randomAlphabetic(256),
                 "return_url", "bla",
-                "reference", RandomStringUtils.random(256)
+                "reference", RandomStringUtils.randomAlphabetic(256)
         );
         thrown.expect(InvalidSizeFieldsException.class);
-        thrown.expectMessage("Field(s) are too big: [description, reference]");
+        thrown.expectMessage("The size of a field(s) is invalid: [description, reference]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
         paymentRequestValidator.validate(request);
     }
