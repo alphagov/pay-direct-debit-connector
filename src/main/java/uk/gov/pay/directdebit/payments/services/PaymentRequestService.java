@@ -93,7 +93,6 @@ public class PaymentRequestService {
     }
 
 
-    //todo refactor this to get the transaction immediately and put the gateway account id there
     public PaymentRequestResponse getPaymentWithExternalId(String paymentExternalId, UriInfo uriInfo) {
         return paymentRequestDao
                 .findByExternalId(paymentExternalId)

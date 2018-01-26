@@ -14,10 +14,10 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class GatewayAccountResponse {
-    @JsonProperty("service_name")
-    private String serviceName;
     @JsonProperty("gateway_account_id")
     private Long gatewayAccountId;
+    @JsonProperty("service_name")
+    private String serviceName;
     @JsonProperty("payment_provider")
     private String paymentProvider;
     @JsonProperty("description")
@@ -42,7 +42,7 @@ public class GatewayAccountResponse {
         return new GatewayAccountResponse(
                 gatewayAccount.getId(),
                 gatewayAccount.getServiceName(),
-                gatewayAccount.getPaymentProvider(),
+                gatewayAccount.getPaymentProvider().toString(),
                 gatewayAccount.getDescription(),
                 gatewayAccount.getType().toString(),
                 gatewayAccount.getAnalyticsId()

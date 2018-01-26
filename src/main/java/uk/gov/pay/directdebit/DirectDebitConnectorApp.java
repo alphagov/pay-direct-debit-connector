@@ -25,7 +25,9 @@ import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
+import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountParser;
 import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -35,7 +37,6 @@ import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payers.services.PayerParser;
 import uk.gov.pay.directdebit.payers.services.PayerService;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
@@ -51,7 +52,6 @@ import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessReso
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
-
 import java.util.concurrent.TimeUnit;
 
 import static java.util.EnumSet.of;
@@ -109,7 +109,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 tokenService,
                 transactionService,
                 gatewayAccountDao);
-        GatewayAccountService gatewayAccountService = new GatewayAccountService(gatewayAccountDao);
+        GatewayAccountParser gatewayAccountParser = new GatewayAccountParser();
+        GatewayAccountService gatewayAccountService = new GatewayAccountService(gatewayAccountDao, gatewayAccountParser);
         PayerParser payerParser = new PayerParser();
         PayerService payerService = new PayerService(payerDao, transactionService, payerParser);
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())

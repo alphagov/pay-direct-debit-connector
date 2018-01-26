@@ -5,11 +5,12 @@ import org.apache.commons.lang3.RandomUtils;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 
 public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, GatewayAccount> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-    private String paymentProvider = RandomStringUtils.randomAlphabetic(25);
+    private PaymentProvider paymentProvider = PaymentProvider.SANDBOX;
     private GatewayAccount.Type type = GatewayAccount.Type.TEST;
     private String serviceName = RandomStringUtils.randomAlphabetic(25);
     private String description = RandomStringUtils.randomAlphabetic(25);
@@ -22,7 +23,7 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
         return new GatewayAccountFixture();
     }
 
-    public GatewayAccountFixture withPaymentProvider(String paymentProvider) {
+    public GatewayAccountFixture withPaymentProvider(PaymentProvider paymentProvider) {
         this.paymentProvider = paymentProvider;
         return this;
     }
@@ -51,7 +52,7 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
         return id;
     }
 
-    public String getPaymentProvider() {
+    public PaymentProvider getPaymentProvider() {
         return paymentProvider;
     }
 
@@ -86,7 +87,7 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
                                 "    )\n" +
                                 "   VALUES(?, ?, ?, ?, ?, ?)\n",
                         id,
-                        paymentProvider,
+                        paymentProvider.toString(),
                         serviceName,
                         type.toString(),
                         description,

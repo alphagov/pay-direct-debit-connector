@@ -10,10 +10,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -24,7 +27,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 
 @RunWith(MockitoJUnitRunner.class)
 public class GatewayAccountServiceTest {
-    private static final String PAYMENT_PROVIDER = "sandbox";
+    private static final PaymentProvider PAYMENT_PROVIDER = PaymentProvider.SANDBOX;
     private static final String SERVICE_NAME = "alex";
     private static final String DESCRIPTION = "is awesome";
     private static final String ANALYTICS_ID = "DD_234098_BBBLA";
@@ -40,14 +43,18 @@ public class GatewayAccountServiceTest {
     @Mock
     private GatewayAccountDao mockedGatewayAccountDao;
 
+    @Mock
+    private GatewayAccountParser mockedGatewayAccountParser;
+
     private GatewayAccountService service;
 
+    private Map<String, String> createPaymentRequest = new HashMap<>();
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
-        service = new GatewayAccountService(mockedGatewayAccountDao);
+        service = new GatewayAccountService(mockedGatewayAccountDao, mockedGatewayAccountParser);
     }
 
     @Test
@@ -83,6 +90,14 @@ public class GatewayAccountServiceTest {
         List<GatewayAccount> gatewayAccounts = service.getAllGatewayAccounts();
 
         assertThat(gatewayAccounts.size(), is(3));
+    }
+
+    @Test
+    public void shouldStoreAGatewayAccount() {
+        GatewayAccount parsedGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().toEntity();
+        when(mockedGatewayAccountParser.parse(createPaymentRequest)).thenReturn(parsedGatewayAccount);
+        service.create(createPaymentRequest);
+        verify(mockedGatewayAccountDao).insert(parsedGatewayAccount);
     }
 
 }

@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -26,7 +27,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class GatewayAccountDaoIT {
 
-    private static final String PAYMENT_PROVIDER = "sandbox";
+    private static final PaymentProvider PAYMENT_PROVIDER = PaymentProvider.SANDBOX;
     private static final String SERVICE_NAME = "alex";
     private static final String DESCRIPTION = "is awesome";
     private static final String ANALYTICS_ID = "DD_234098_BBBLA";
@@ -54,7 +55,7 @@ public class GatewayAccountDaoIT {
         Long id = gatewayAccountDao.insert(testGatewayAccount.toEntity());
         Map<String, Object> foundGatewayAccount = testContext.getDatabaseTestHelper().getGatewayAccountById(id);
         assertThat(foundGatewayAccount.get("id"), is(id));
-        assertThat(foundGatewayAccount.get("payment_provider"), is(PAYMENT_PROVIDER));
+        assertThat(foundGatewayAccount.get("payment_provider"), is(PAYMENT_PROVIDER.toString()));
         assertThat(foundGatewayAccount.get("service_name"), is(SERVICE_NAME));
         assertThat(foundGatewayAccount.get("analytics_id"), is(ANALYTICS_ID));
         assertThat(foundGatewayAccount.get("type"), is(TYPE.toString()));
@@ -76,7 +77,7 @@ public class GatewayAccountDaoIT {
 
     @Test
     public void shouldFindAllGatewayAccounts() {
-        String paymentProvider2 = "sandbox";
+        PaymentProvider paymentProvider2 = PaymentProvider.GOCARDLESS;
         String serviceName2 = "silvia";
         String description2 = "can't type and is not drunk maybe";
         String analyticsId2 = "DD_234098_BBBLABLA";

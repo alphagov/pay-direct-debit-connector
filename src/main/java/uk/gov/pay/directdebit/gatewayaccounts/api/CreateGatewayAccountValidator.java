@@ -7,7 +7,7 @@ import uk.gov.pay.directdebit.common.validation.FieldSize;
 import java.util.Map;
 import java.util.function.Function;
 
-public class GatewayAccountValidator extends ApiValidation {
+public class CreateGatewayAccountValidator extends ApiValidation {
 
     private static final String PAYMENT_PROVIDER_KEY = "payment_provider";
     private static final String SERVICE_NAME_KEY = "service_name";
@@ -18,10 +18,16 @@ public class GatewayAccountValidator extends ApiValidation {
 
     private final static Map<String, FieldSize> fieldSizes =
             ImmutableMap.<String, FieldSize>builder()
-                    .put(SERVICE_NAME_KEY, new FieldSize(0, SERVICE_NAME_FIELD_LENGTH))
+                    .put(SERVICE_NAME_KEY, new FieldSize(1, SERVICE_NAME_FIELD_LENGTH))
                     .build();
 
-    public GatewayAccountValidator() {
+    private final static Map<String, Function<String, Boolean>> validators =
+            ImmutableMap.<String, Function<String, Boolean>>builder()
+                    .put(SERVICE_NAME_KEY, ApiValidation::isNotNullOrEmpty)
+                    .put(PAYMENT_PROVIDER_KEY, ApiValidation::isNotNullOrEmpty)
+                    .build();
+
+    public CreateGatewayAccountValidator() {
         super(requiredFields, fieldSizes, validators);
     }
 

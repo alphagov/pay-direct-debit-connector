@@ -17,13 +17,13 @@ public class GatewayAccount {
         }
     }
     private Long id;
-    private String paymentProvider;
+    private PaymentProvider paymentProvider;
     private Type type;
     private String serviceName;
     private String description;
     private String analyticsId;
 
-    public GatewayAccount(Long id, String paymentProvider, Type type, String serviceName, String description, String analyticsId) {
+    public GatewayAccount(Long id, PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
         this.id = id;
         this.paymentProvider = paymentProvider;
         this.type = type;
@@ -32,7 +32,7 @@ public class GatewayAccount {
         this.analyticsId = analyticsId;
     }
 
-    public GatewayAccount(String paymentProvider, Type type, String serviceName, String description, String analyticsId) {
+    public GatewayAccount(PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
         this(null, paymentProvider, type, serviceName, description, analyticsId);
     }
 
@@ -44,11 +44,11 @@ public class GatewayAccount {
         this.id = id;
     }
 
-    public String getPaymentProvider() {
+    public PaymentProvider getPaymentProvider() {
         return paymentProvider;
     }
 
-    public void setPaymentProvider(String paymentProvider) {
+    public void setPaymentProvider(PaymentProvider paymentProvider) {
         this.paymentProvider = paymentProvider;
     }
 

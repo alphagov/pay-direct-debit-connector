@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.gatewayaccounts.dao.mapper;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +21,7 @@ public class GatewayAccountMapper implements ResultSetMapper<GatewayAccount> {
     public GatewayAccount map(int index, ResultSet resultSet, StatementContext statementContext) throws SQLException {
         return new GatewayAccount(
                 resultSet.getLong(ID_COLUMN),
-                resultSet.getString(PAYMENT_PROVIDER_COLUMN),
+                PaymentProvider.fromString(resultSet.getString(PAYMENT_PROVIDER_COLUMN)),
                 GatewayAccount.Type.fromString(resultSet.getString(TYPE_COLUMN)),
                 resultSet.getString(SERVICE_NAME_COLUMN),
                 resultSet.getString(DESCRIPTION_COLUMN),
