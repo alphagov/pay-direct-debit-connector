@@ -14,6 +14,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
@@ -44,6 +46,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
@@ -89,19 +92,20 @@ public class PaymentRequestServiceTest {
     @Mock
     private TransactionService mockTransactionService;
     @Mock
+    private GatewayAccountDao mockGatewayAccountDao;
+    @Mock
     private UriInfo uriInfo;
 
     private PaymentRequestService service;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
         when(mockedConfig.getLinks())
                 .thenReturn(mockedLinksConfig);
 
         when(mockedLinksConfig.getFrontendUrl())
                 .thenReturn("http://payments.com");
-
         doAnswer(invocation -> fromUri(SERVICE_HOST))
                 .when(this.mockedUriInfo)
                 .getBaseUriBuilder();
@@ -110,14 +114,16 @@ public class PaymentRequestServiceTest {
 
         when(mockedTokenService.generateNewTokenFor(Mockito.any(PaymentRequest.class))).thenReturn(token.toEntity());
 
-        service = new PaymentRequestService(mockedConfig, mockedPaymentRequestDao, mockedTokenService, mockTransactionService);
+        service = new PaymentRequestService(mockedConfig, mockedPaymentRequestDao, mockedTokenService, mockTransactionService, mockGatewayAccountDao);
+        when(mockGatewayAccountDao.findById(GATEWAY_ACCOUNT_ID)).thenReturn(
+                Optional.of(aGatewayAccountFixture().toEntity()));
     }
 
     @Test
     public void serviceCreate_shouldCreateAPaymentRequest() throws Exception {
         Long amount = 100L;
 
-                service.createCharge(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
+        service.createCharge(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
 
         ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
         verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
@@ -136,13 +142,11 @@ public class PaymentRequestServiceTest {
     @Test
     public void serviceCreate_shouldCreateATransaction() throws Exception {
         service.createCharge(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
-
         ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
         verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
         PaymentRequest createdPaymentRequest = paymentRequestArgumentCaptor.getValue();
         verify(mockTransactionService).createChargeFor(createdPaymentRequest);
     }
-
 
     @Test
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndTransactionIsInProgress() throws URISyntaxException {
@@ -175,6 +179,18 @@ public class PaymentRequestServiceTest {
                             put("chargeTokenId", token.getToken());
                         }}).build()
         ));
+    }
+
+    @Test
+    public void serviceCreate_shouldThrowIfGatewayAccountDoesNotExist() throws Exception {
+        when(mockGatewayAccountDao.findById(GATEWAY_ACCOUNT_ID)).thenReturn(
+                Optional.empty());
+
+        thrown.expect(GatewayAccountNotFoundException.class);
+        thrown.expectMessage("Unknown gateway account: 1");
+        thrown.reportMissingExceptionWithMessage("GatewayAccountNotFoundException expected");
+        service.createCharge(CHARGE_REQUEST, GATEWAY_ACCOUNT_ID, mockedUriInfo);
+
     }
 
     @Test
