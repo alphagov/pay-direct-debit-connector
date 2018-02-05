@@ -36,9 +36,12 @@ public class GatewayAccount {
     }
 
     public GatewayAccount(PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
-        this(null, RandomIdGenerator.newId(), paymentProvider, type, serviceName, description, analyticsId);
+        this(null, generateExternalId(), paymentProvider, type, serviceName, description, analyticsId);
     }
 
+    private static String generateExternalId() {
+        return "DIRECT_DEBIT:" + RandomIdGenerator.newId();
+    }
     public Long getId() {
         return id;
     }

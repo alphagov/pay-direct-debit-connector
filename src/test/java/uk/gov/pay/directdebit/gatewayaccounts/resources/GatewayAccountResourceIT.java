@@ -22,6 +22,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNTS_API_PATH;
 import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNT_API_PATH;
@@ -37,9 +38,10 @@ public class GatewayAccountResourceIT {
     private static final String DESCRIPTION = "is awesome";
     private static final String ANALYTICS_ID = "DD_234098_BBBLA";
     private static final GatewayAccount.Type TYPE = GatewayAccount.Type.TEST;
-
     private static final String EXTERNAL_ID = "osiuoisajd";
+
     private static final String PAYMENT_PROVIDER_KEY = "payment_provider";
+    private static final String EXTERNAL_ID_KEY = "gateway_account_external_id";
     private static final String TYPE_KEY = "type";
     private static final String SERVICE_NAME_KEY = "service_name";
     private static final String DESCRIPTION_KEY = "description";
@@ -75,6 +77,7 @@ public class GatewayAccountResourceIT {
                 .contentType(JSON)
                 .body(PAYMENT_PROVIDER_KEY, is(PAYMENT_PROVIDER.toString()))
                 .body(TYPE_KEY, is(TYPE.toString()))
+                .body(EXTERNAL_ID_KEY, is(EXTERNAL_ID))
                 .body(SERVICE_NAME_KEY, is(SERVICE_NAME))
                 .body(DESCRIPTION_KEY, is(DESCRIPTION))
                 .body(ANALYTICS_ID_KEY, is(ANALYTICS_ID));
@@ -84,6 +87,7 @@ public class GatewayAccountResourceIT {
     public void shouldReturnAGatewayAccountWithMinimalFields() {
         GatewayAccountFixture testGatewayAccount2 = GatewayAccountFixture.aGatewayAccountFixture()
                 .withServiceName("service")
+                .withExternalId("externalId")
                 .withPaymentProvider(PaymentProvider.GOCARDLESS)
                 .withType(GatewayAccount.Type.LIVE)
                 .withDescription(null)
@@ -99,6 +103,7 @@ public class GatewayAccountResourceIT {
                 .body(PAYMENT_PROVIDER_KEY, is(PaymentProvider.GOCARDLESS.toString()))
                 .body(TYPE_KEY, is(GatewayAccount.Type.LIVE.toString()))
                 .body(SERVICE_NAME_KEY, is("service"))
+                .body(EXTERNAL_ID_KEY, is("externalId"))
                 .body("payment_method", is("DIRECT_DEBIT"))
                 .body("containsKey('description')", is(false))
                 .body("containsKey('analytics_id')", is(false));
@@ -114,8 +119,10 @@ public class GatewayAccountResourceIT {
         String serviceName2 = "silvia";
         String description2 = "can't type and is not drunk maybe";
         String analyticsId2 = "DD_234098_BBBLABLA";
+        String externalId2 = "DD_234098_BBBLABLA";
 
         GatewayAccountFixture testGatewayAccount2 = GatewayAccountFixture.aGatewayAccountFixture()
+                .withExternalId(externalId2)
                 .withServiceName(serviceName2)
                 .withDescription(description2)
                 .withPaymentProvider(paymentProvider2)
@@ -133,6 +140,7 @@ public class GatewayAccountResourceIT {
                 .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(SERVICE_NAME))
                 .body(format("accounts[0].%s", DESCRIPTION_KEY), is(DESCRIPTION))
                 .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(ANALYTICS_ID))
+                .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(EXTERNAL_ID))
                 .body(format("accounts[0].%s", TYPE_KEY), is(TYPE.toString()))
                 .body("accounts[0].links", containsLink("self",
                         "GET",
@@ -142,6 +150,7 @@ public class GatewayAccountResourceIT {
                 .body(format("accounts[1].%s", SERVICE_NAME_KEY), is(serviceName2))
                 .body(format("accounts[1].%s", DESCRIPTION_KEY), is(description2))
                 .body(format("accounts[1].%s", ANALYTICS_ID_KEY), is(analyticsId2))
+                .body(format("accounts[1].%s", EXTERNAL_ID_KEY), is(externalId2))
                 .body(format("accounts[1].%s", TYPE_KEY), is(TYPE.toString()))
                 .body("accounts[1].links", containsLink("self",
                         "GET",
@@ -172,6 +181,7 @@ public class GatewayAccountResourceIT {
         response
                 .header("Location", is(documentLocation))
                 .body("service_name", is(SERVICE_NAME))
+                .body("gateway_account_external_id", startsWith("DIRECT_DEBIT:"))
                 .body("payment_provider", is(PAYMENT_PROVIDER.toString()))
                 .body("type", is(TYPE.toString()))
                 .body("description", is(DESCRIPTION))
