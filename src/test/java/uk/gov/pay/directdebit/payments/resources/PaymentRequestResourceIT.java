@@ -57,7 +57,7 @@ public class PaymentRequestResourceIT {
     @Test
     public void shouldCreateAPaymentRequest() throws Exception {
 
-        String accountId = testGatewayAccount.getId().toString();
+        String accountExternalId = testGatewayAccount.getExternalId();
         String expectedReference = "Test reference";
         String expectedDescription = "Test description";
         String returnUrl = "http://service.url/success-page/";
@@ -65,12 +65,12 @@ public class PaymentRequestResourceIT {
                 .put(JSON_AMOUNT_KEY, AMOUNT)
                 .put(JSON_REFERENCE_KEY, expectedReference)
                 .put(JSON_DESCRIPTION_KEY, expectedDescription)
-                .put(JSON_GATEWAY_ACC_KEY, accountId)
+                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
                 .put(JSON_RETURN_URL_KEY, returnUrl)
                 .build());
 
         String requestPath = CHARGES_API_PATH
-                .replace("{accountId}", accountId);
+                .replace("{accountId}", accountExternalId);
 
         ValidatableResponse response = givenSetup()
                 .body(postBody)
@@ -85,7 +85,7 @@ public class PaymentRequestResourceIT {
                 .contentType(JSON);
 
         String externalPaymentRequestId = response.extract().path(JSON_CHARGE_KEY).toString();
-        String documentLocation = expectedPaymentRequestLocationFor(accountId, externalPaymentRequestId);
+        String documentLocation = expectedPaymentRequestLocationFor(accountExternalId, externalPaymentRequestId);
         String token = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
         String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + token;
@@ -99,7 +99,7 @@ public class PaymentRequestResourceIT {
                     put("chargeTokenId", token);
                 }}));
         String requestPath2 = CHARGE_API_PATH
-                .replace("{accountId}", accountId)
+                .replace("{accountId}", accountExternalId)
                 .replace("{paymentRequestExternalId}", externalPaymentRequestId);
 
 

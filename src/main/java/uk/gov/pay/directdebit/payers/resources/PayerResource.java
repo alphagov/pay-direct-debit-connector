@@ -37,11 +37,11 @@ public class PayerResource {
     @Path(PAYERS_API_PATH)
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    public Response createPayer(@PathParam("accountId") Long accountId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
+    public Response createPayer(@PathParam("accountId") String accountExternalId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
         createPayerValidator.validate(paymentRequestExternalId, createPayerRequest);
         LOGGER.info("Create new payer request received for payment request {} ", paymentRequestExternalId);
         CreatePayerResponse createPayerResponse = CreatePayerResponse.from(payerService.create(paymentRequestExternalId, createPayerRequest));
-        URI newPayerLocation = URIBuilder.selfUriFor(uriInfo, PAYER_API_PATH, String.valueOf(accountId), paymentRequestExternalId, createPayerResponse.getPayerExternalId());
+        URI newPayerLocation = URIBuilder.selfUriFor(uriInfo, PAYER_API_PATH, accountExternalId, paymentRequestExternalId, createPayerResponse.getPayerExternalId());
         return Response.created(newPayerLocation).entity(createPayerResponse).build();
     }
 

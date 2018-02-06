@@ -45,11 +45,11 @@ public class PaymentRequestService {
         this.linksConfig = config.getLinks();
     }
 
-    private PaymentRequestResponse populateResponseWith(PaymentRequest paymentRequest, Transaction charge, UriInfo uriInfo) {
+    private PaymentRequestResponse populateResponseWith(PaymentRequest paymentRequest, String accountExternalId, Transaction charge, UriInfo uriInfo) {
         String paymentRequestExternalId = paymentRequest.getExternalId();
         List<Map<String, Object>> dataLinks = new ArrayList<>();
 
-        dataLinks.add(createLink("self", GET, selfUriFor(uriInfo, CHARGE_API_PATH, String.valueOf(paymentRequest.getGatewayAccountId()), paymentRequestExternalId)));
+        dataLinks.add(createLink("self", GET, selfUriFor(uriInfo, CHARGE_API_PATH, accountExternalId, paymentRequestExternalId)));
 
         if (!charge.getState().toExternal().isFinished()) {
             Token token = tokenService.generateNewTokenFor(paymentRequest);
@@ -72,33 +72,33 @@ public class PaymentRequestService {
                 dataLinks);
     }
 
-    public PaymentRequestResponse createCharge(Map<String, String> paymentRequestMap, Long accountId, UriInfo uriInfo) {
-        return gatewayAccountDao.findById(accountId)
+    public PaymentRequestResponse createCharge(Map<String, String> paymentRequestMap, String accountExternalId, UriInfo uriInfo) {
+        return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     PaymentRequest paymentRequest = new PaymentRequest(new Long(paymentRequestMap.get("amount")),
                             paymentRequestMap.get("return_url"),
-                            accountId,
+                            gatewayAccount.getId(),
                             paymentRequestMap.get("description"),
                             paymentRequestMap.get("reference"));
                     LOGGER.info("Creating payment request with external id {}", paymentRequest.getExternalId());
                     Long id = paymentRequestDao.insert(paymentRequest);
                     paymentRequest.setId(id);
                     Transaction createdTransaction = transactionService.createChargeFor(paymentRequest);
-                    return populateResponseWith(paymentRequest, createdTransaction, uriInfo);
+                    return populateResponseWith(paymentRequest, accountExternalId, createdTransaction, uriInfo);
                 })
                 .orElseThrow(() -> {
-                    LOGGER.error("Gateway account with id {} not found", accountId);
-                    return new GatewayAccountNotFoundException(String.valueOf(accountId));
+                    LOGGER.error("Gateway account with id {} not found", accountExternalId);
+                    return new GatewayAccountNotFoundException(accountExternalId);
                 });
     }
 
 
-    public PaymentRequestResponse getPaymentWithExternalId(String paymentExternalId, UriInfo uriInfo) {
+    public PaymentRequestResponse getPaymentWithExternalId(String accountExternalId, String paymentExternalId, UriInfo uriInfo) {
         return paymentRequestDao
                 .findByExternalId(paymentExternalId)
                 .map(paymentRequest ->  {
                     Transaction transaction = transactionService.findChargeForExternalId(paymentExternalId);
-                    return populateResponseWith(paymentRequest, transaction, uriInfo);
+                    return populateResponseWith(paymentRequest, accountExternalId, transaction, uriInfo);
                 })
                 .orElseThrow(() -> new PaymentRequestNotFoundException(paymentExternalId));
     }

@@ -65,7 +65,7 @@ public class GatewayAccountResponse {
         this.links.add(createLink(
                 "self",
                 GET,
-                selfUriFor(uriInfo, GATEWAY_ACCOUNT_API_PATH, gatewayAccountId.toString())));
+                selfUriFor(uriInfo, GATEWAY_ACCOUNT_API_PATH, gatewayAccountExternalId)));
         return this;
     }
 

@@ -22,6 +22,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNTS_API_PATH;
@@ -109,9 +110,9 @@ public class GatewayAccountResourceIT {
                 .body("containsKey('analytics_id')", is(false));
     }
 
-    private String expectedGatewayAccountLocationFor(Long accountId) {
+    private String expectedGatewayAccountLocationFor(String accountId) {
         return "http://localhost:" + testContext.getPort() + GATEWAY_ACCOUNT_API_PATH
-                .replace("{accountId}", accountId.toString());
+                .replace("{accountId}", accountId);
     }
     @Test
     public void shouldReturnAllGatewayAccounts() {
@@ -144,7 +145,7 @@ public class GatewayAccountResourceIT {
                 .body(format("accounts[0].%s", TYPE_KEY), is(TYPE.toString()))
                 .body("accounts[0].links", containsLink("self",
                         "GET",
-                        expectedGatewayAccountLocationFor(testGatewayAccount.getId())))
+                        expectedGatewayAccountLocationFor(testGatewayAccount.getExternalId())))
 
                 .body(format("accounts[1].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider2.toString()))
                 .body(format("accounts[1].%s", SERVICE_NAME_KEY), is(serviceName2))
@@ -154,7 +155,7 @@ public class GatewayAccountResourceIT {
                 .body(format("accounts[1].%s", TYPE_KEY), is(TYPE.toString()))
                 .body("accounts[1].links", containsLink("self",
                         "GET",
-                        expectedGatewayAccountLocationFor(testGatewayAccount2.getId())));
+                        expectedGatewayAccountLocationFor(testGatewayAccount2.getExternalId())));
 
     }
 
@@ -175,13 +176,14 @@ public class GatewayAccountResourceIT {
                 .contentType(JSON)
                 .statusCode(Response.Status.CREATED.getStatusCode());
 
-        Long id = response.extract().body().jsonPath().getLong("gateway_account_id");
-        String documentLocation = expectedGatewayAccountLocationFor(id);
+        String externalId = response.extract().body().jsonPath().getString("gateway_account_external_id");
+        String documentLocation = expectedGatewayAccountLocationFor(externalId);
 
         response
                 .header("Location", is(documentLocation))
-                .body("service_name", is(SERVICE_NAME))
+                .body("gateway_account_id", is(notNullValue()))
                 .body("gateway_account_external_id", startsWith("DIRECT_DEBIT:"))
+                .body("service_name", is(SERVICE_NAME))
                 .body("payment_provider", is(PAYMENT_PROVIDER.toString()))
                 .body("type", is(TYPE.toString()))
                 .body("description", is(DESCRIPTION))
