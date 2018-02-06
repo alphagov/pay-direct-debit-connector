@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
 import com.google.inject.Inject;
-import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
 
 import javax.ws.rs.HeaderParam;
@@ -14,8 +12,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 
 @Path("/v1/webhooks/gocardless")
 public class WebhookGoCardlessResource {
-
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(WebhookGoCardlessResource.class);
 
     private WebhookVerifier webhookVerifier;
 

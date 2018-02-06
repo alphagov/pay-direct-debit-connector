@@ -89,6 +89,12 @@ public class TransactionService {
         return newTransaction;
     }
 
+    public Transaction paidOutFor(Transaction transaction) {
+        Transaction newTransaction = updateStateFor(transaction, PaymentRequestEvent.SupportedEvent.PAID_OUT);
+        paymentRequestEventService.registerPaidOutEventFor(transaction);
+        return newTransaction;
+    }
+
     private Transaction updateStateFor(Transaction charge, SupportedEvent event) {
         PaymentState newState = getStates().getNextStateForEvent(charge.getState(),
                 event);

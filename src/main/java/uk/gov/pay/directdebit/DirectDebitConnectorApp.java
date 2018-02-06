@@ -124,7 +124,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         jdbi.registerContainerFactory(new OptionalContainerFactory());
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
-        environment.jersey().register(injector.getInstance(WebhookSandboxResource.class));
+        environment.jersey().register(new WebhookSandboxResource(transactionService));
         environment.jersey().register(new PaymentRequestResource(paymentRequestService));
         environment.jersey().register(new SecurityTokensResource(tokenService));
         environment.jersey().register(new PayerResource(payerService));

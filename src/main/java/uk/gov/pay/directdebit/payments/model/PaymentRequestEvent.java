@@ -10,6 +10,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 
@@ -56,6 +57,10 @@ public class PaymentRequestEvent {
 
     public static PaymentRequestEvent mandateCreated(Long paymentRequestId) {
         return new PaymentRequestEvent(paymentRequestId, Type.MANDATE, MANDATE_CREATED);
+    }
+
+    public static PaymentRequestEvent paidOut(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAID_OUT);
     }
 
     public Long getId() {
@@ -108,7 +113,8 @@ public class PaymentRequestEvent {
         DIRECT_DEBIT_DETAILS_RECEIVED,
         PAYER_CREATED,
         DIRECT_DEBIT_DETAILS_CONFIRMED,
-        MANDATE_CREATED;
+        MANDATE_CREATED,
+        PAID_OUT;
 
         public static SupportedEvent fromString(String event) throws UnsupportedPaymentRequestEventException {
             try {

@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsConfirmed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsReceived;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateCreated;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paidOut;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.tokenExchanged;
 
@@ -52,6 +53,11 @@ public class PaymentRequestEventService {
 
     public void registerMandateCreatedEventFor(Transaction charge) {
         PaymentRequestEvent event = mandateCreated(charge.getPaymentRequestId());
+        insertEventFor(charge, event);
+    }
+
+    public void registerPaidOutEventFor(Transaction charge) {
+        PaymentRequestEvent event = paidOut(charge.getPaymentRequestId());
         insertEventFor(charge, event);
     }
 

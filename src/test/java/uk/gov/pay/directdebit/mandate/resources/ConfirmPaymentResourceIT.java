@@ -45,7 +45,7 @@ public class ConfirmPaymentResourceIT {
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
         Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionId);
-        assertThat(transaction.get("state"), is("SUCCESS"));
+        assertThat(transaction.get("state"), is("PENDING_DIRECT_DEBIT_PAYMENT"));
     }
 
     @Test
