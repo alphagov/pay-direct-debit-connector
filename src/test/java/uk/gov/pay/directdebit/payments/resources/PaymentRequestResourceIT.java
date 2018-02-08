@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
@@ -12,7 +13,7 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
-import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
@@ -43,16 +44,20 @@ public class PaymentRequestResourceIT {
     private static final String JSON_CHARGE_KEY = "charge_id";
     private static final String JSON_STATE_KEY = "state.status";
     private static final long AMOUNT = 6234L;
-    private static final String accountId = "20";
-
+    private GatewayAccountFixture testGatewayAccount;
     private Gson gson = new Gson();
 
     @DropwizardTestContext
     private TestContext testContext;
 
+    @Before
+    public void setUp() {
+        testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+    }
     @Test
     public void shouldCreateAPaymentRequest() throws Exception {
 
+        String accountExternalId = testGatewayAccount.getExternalId();
         String expectedReference = "Test reference";
         String expectedDescription = "Test description";
         String returnUrl = "http://service.url/success-page/";
@@ -60,12 +65,12 @@ public class PaymentRequestResourceIT {
                 .put(JSON_AMOUNT_KEY, AMOUNT)
                 .put(JSON_REFERENCE_KEY, expectedReference)
                 .put(JSON_DESCRIPTION_KEY, expectedDescription)
-                .put(JSON_GATEWAY_ACC_KEY, accountId)
+                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
                 .put(JSON_RETURN_URL_KEY, returnUrl)
                 .build());
 
         String requestPath = CHARGES_API_PATH
-                .replace("{accountId}", accountId);
+                .replace("{accountId}", accountExternalId);
 
         ValidatableResponse response = givenSetup()
                 .body(postBody)
@@ -80,7 +85,7 @@ public class PaymentRequestResourceIT {
                 .contentType(JSON);
 
         String externalPaymentRequestId = response.extract().path(JSON_CHARGE_KEY).toString();
-        String documentLocation = expectedPaymentRequestLocationFor(accountId, externalPaymentRequestId);
+        String documentLocation = expectedPaymentRequestLocationFor(accountExternalId, externalPaymentRequestId);
         String token = testContext.getDatabaseTestHelper().getTokenByPaymentRequestExternalId(externalPaymentRequestId);
 
         String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + token;
@@ -94,7 +99,7 @@ public class PaymentRequestResourceIT {
                     put("chargeTokenId", token);
                 }}));
         String requestPath2 = CHARGE_API_PATH
-                .replace("{accountId}", accountId)
+                .replace("{accountId}", accountExternalId)
                 .replace("{paymentRequestExternalId}", externalPaymentRequestId);
 
 
@@ -129,6 +134,8 @@ public class PaymentRequestResourceIT {
 
     @Test
     public void shouldReturn400IfMandatoryFieldsMissing() {
+        String accountId = testGatewayAccount.getId().toString();
+
         String postBody = gson.toJson(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, AMOUNT)
                 .put(JSON_DESCRIPTION_KEY, "desc")
@@ -149,6 +156,8 @@ public class PaymentRequestResourceIT {
 
     @Test
     public void shouldReturn400IfFieldsInvalidSize() {
+        String accountId = testGatewayAccount.getId().toString();
+
         String postBody = gson.toJson(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, AMOUNT)
                 .put(JSON_REFERENCE_KEY, "reference")
@@ -170,6 +179,8 @@ public class PaymentRequestResourceIT {
 
     @Test
     public void shouldReturn400IfFieldsInvalid() {
+        String accountId = testGatewayAccount.getId().toString();
+
         String postBody = gson.toJson(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, 10000001)
                 .put(JSON_REFERENCE_KEY, "reference")

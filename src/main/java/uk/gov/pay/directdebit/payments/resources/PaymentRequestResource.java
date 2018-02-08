@@ -28,27 +28,27 @@ public class PaymentRequestResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentRequestResource.class);
     private final PaymentRequestService paymentRequestService;
     private final PaymentRequestValidator paymentRequestValidator = new PaymentRequestValidator();
-    private final String ACCOUNT_ID = "accountId";
 
     public PaymentRequestResource(PaymentRequestService paymentRequestService) {
         this.paymentRequestService = paymentRequestService;
     }
 
+
     @GET
     @Path(CHARGE_API_PATH)
     @Produces(APPLICATION_JSON)
-    public Response getCharge(@PathParam(ACCOUNT_ID) Long accountId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, @Context UriInfo uriInfo) {
-        PaymentRequestResponse response = paymentRequestService.getPaymentWithExternalId(paymentRequestExternalId, uriInfo);
+    public Response getCharge(@PathParam("accountId") String accountExternalId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, @Context UriInfo uriInfo) {
+        PaymentRequestResponse response = paymentRequestService.getPaymentWithExternalId(accountExternalId, paymentRequestExternalId, uriInfo);
         return Response.ok(response).build();
     }
 
     @POST
     @Path(CHARGES_API_PATH)
     @Produces(APPLICATION_JSON)
-    public Response createNewPaymentRequest(@PathParam(ACCOUNT_ID) Long accountId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
+    public Response createNewPaymentRequest(@PathParam("accountId") String accountExternalId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
         paymentRequestValidator.validate(paymentRequest);
         LOGGER.info("Creating new payment request - {}", paymentRequest.toString());
-        PaymentRequestResponse response = paymentRequestService.createCharge(paymentRequest, accountId, uriInfo);
+        PaymentRequestResponse response = paymentRequestService.createCharge(paymentRequest, accountExternalId, uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }
 }
