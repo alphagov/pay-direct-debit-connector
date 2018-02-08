@@ -11,6 +11,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
+import java.util.List;
 import java.util.Optional;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.chargeCreated;
@@ -51,6 +52,10 @@ public class TransactionService {
         return transaction;
     }
 
+    public List<Transaction> findAllByPaymentState(PaymentState paymentState) {
+        return transactionDao.findAllByPaymentState(paymentState);
+    }
+
     public Optional<Transaction> findChargeForToken(String token) {
         return transactionDao
                 .findByTokenId(token).map(charge -> {
@@ -81,6 +86,12 @@ public class TransactionService {
     public Transaction mandateCreatedFor(Transaction transaction) {
         Transaction newTransaction = updateStateFor(transaction, PaymentRequestEvent.SupportedEvent.MANDATE_CREATED);
         paymentRequestEventService.registerMandateCreatedEventFor(transaction);
+        return newTransaction;
+    }
+
+    public Transaction paidOutFor(Transaction transaction) {
+        Transaction newTransaction = updateStateFor(transaction, PaymentRequestEvent.SupportedEvent.PAID_OUT);
+        paymentRequestEventService.registerPaidOutEventFor(transaction);
         return newTransaction;
     }
 

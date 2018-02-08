@@ -11,6 +11,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
@@ -33,6 +34,17 @@ public class PaymentRequestEventTest {
         thrown.expectMessage("Event \"blabla\" is not supported");
         thrown.reportMissingExceptionWithMessage("UnknownPaymentRequestEventException expected");
         PaymentRequestEvent.SupportedEvent.fromString("blabla");
+    }
+
+    @Test
+    public void paidOut_shouldReturnExpectedEvent() {
+
+        long paymentRequestId = 1L;
+        PaymentRequestEvent event = PaymentRequestEvent.paidOut(paymentRequestId);
+
+        assertThat(event.getEvent(), is(PAID_OUT));
+        assertThat(event.getEventType(), is(CHARGE));
+        assertThat(event.getPaymentRequestId(), is(paymentRequestId));
     }
 
     @Test

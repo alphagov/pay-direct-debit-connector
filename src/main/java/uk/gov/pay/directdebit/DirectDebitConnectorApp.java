@@ -49,6 +49,7 @@ import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
+import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -123,6 +124,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         jdbi.registerContainerFactory(new OptionalContainerFactory());
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
+        environment.jersey().register(new WebhookSandboxResource(transactionService));
         environment.jersey().register(new PaymentRequestResource(paymentRequestService));
         environment.jersey().register(new SecurityTokensResource(tokenService));
         environment.jersey().register(new PayerResource(payerService));

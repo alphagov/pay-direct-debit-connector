@@ -22,7 +22,7 @@ public class PaymentConfirmService {
     }
 
     /**
-     * Creates a mandate and updates the transaction to a success (Sandbox) so there are not pending states
+     * Creates a mandate and updates the transaction to a pending (Sandbox)
      * @param paymentExternalId
      */
     public void confirm(String paymentExternalId) {

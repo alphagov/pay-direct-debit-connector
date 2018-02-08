@@ -17,6 +17,7 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,17 +46,8 @@ public class TransactionDaoIT {
     @Before
     public void setup() throws IOException, LiquibaseException {
         transactionDao = testContext.getJdbi().onDemand(TransactionDao.class);
-        this.testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
-                .insert(testContext.getJdbi());
-        this.testTransaction = aTransactionFixture()
-                .withPaymentRequestId(testPaymentRequest.getId())
-                .withPaymentRequestExternalId(testPaymentRequest.getExternalId())
-                .withPaymentRequestGatewayAccountId(testPaymentRequest.getGatewayAccountId())
-                .withPaymentRequestDescription(testPaymentRequest.getDescription())
-                .withAmount(AMOUNT)
-                .withState(STATE)
-                .withType(TYPE);
+        this.testPaymentRequest = generateNewPaymentRequestFixture();
+        this.testTransaction = generateNewTransactionFixture(testPaymentRequest, TYPE, STATE, AMOUNT);
     }
 
     @Test
@@ -97,6 +89,7 @@ public class TransactionDaoIT {
         assertThat(transaction.getAmount(), is(AMOUNT));
         assertThat(transaction.getState(), is(STATE));
     }
+
     @Test
     public void shouldFindATransactionByTokenId() {
         TokenFixture token = aTokenFixture()
@@ -121,6 +114,33 @@ public class TransactionDaoIT {
     }
 
     @Test
+    public void shouldFindAllTransactionsByPaymentState() {
+        PaymentRequestFixture processingDirectDebitPaymentStatePaymentRequestFixture = generateNewPaymentRequestFixture();
+        TransactionFixture processingDirectDebitPaymentStateTransactionFixture =
+                generateNewTransactionFixture(processingDirectDebitPaymentStatePaymentRequestFixture, TYPE, PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT, AMOUNT);
+        processingDirectDebitPaymentStateTransactionFixture.insert(testContext.getJdbi());
+        PaymentRequestFixture successStatePaymentRequestFixture = generateNewPaymentRequestFixture();
+        TransactionFixture successStateTransactionFixture =
+                generateNewTransactionFixture(successStatePaymentRequestFixture, TYPE, PaymentState.SUCCESS, AMOUNT);
+        successStateTransactionFixture.insert(testContext.getJdbi());
+
+        List<Transaction> successTransactionsList = transactionDao.findAllByPaymentState(PaymentState.SUCCESS);
+        assertThat(successTransactionsList.size(), is(1));
+        assertThat(successTransactionsList.get(0).getState(), is(PaymentState.SUCCESS));
+    }
+
+    @Test
+    public void shouldNotFindAnyTransactionByPaymentState_ifPaymentStateIsNotUsed() {
+        PaymentRequestFixture processingDirectDebitPaymentStatePaymentRequestFixture = generateNewPaymentRequestFixture();
+        TransactionFixture processingDirectDebitPaymentStateTransactionFixture =
+                generateNewTransactionFixture(processingDirectDebitPaymentStatePaymentRequestFixture, TYPE, PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT, AMOUNT);
+        processingDirectDebitPaymentStateTransactionFixture.insert(testContext.getJdbi());
+
+        List<Transaction> successTransactionsList = transactionDao.findAllByPaymentState(PaymentState.SUCCESS);
+        assertThat(successTransactionsList.size(), is(0));
+    }
+
+    @Test
     public void shouldUpdateStateAndReturnNumberOfAffectedRows() {
         PaymentState newState = PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
         testTransaction.insert(testContext.getJdbi());
@@ -142,4 +162,25 @@ public class TransactionDaoIT {
         int numOfUpdatedTransactions = transactionDao.updateState(34L, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
         assertThat(numOfUpdatedTransactions, is(0));
     }
+
+    private PaymentRequestFixture generateNewPaymentRequestFixture() {
+        return aPaymentRequestFixture()
+                .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
+                .insert(testContext.getJdbi());
+    }
+
+    private TransactionFixture generateNewTransactionFixture(PaymentRequestFixture paymentRequestFixture,
+                                                             Transaction.Type type,
+                                                             PaymentState paymentState,
+                                                             long amount) {
+        return aTransactionFixture()
+                .withPaymentRequestId(paymentRequestFixture.getId())
+                .withPaymentRequestExternalId(paymentRequestFixture.getExternalId())
+                .withPaymentRequestGatewayAccountId(paymentRequestFixture.getGatewayAccountId())
+                .withPaymentRequestDescription(paymentRequestFixture.getDescription())
+                .withAmount(amount)
+                .withState(paymentState)
+                .withType(type);
+    }
+
 }
