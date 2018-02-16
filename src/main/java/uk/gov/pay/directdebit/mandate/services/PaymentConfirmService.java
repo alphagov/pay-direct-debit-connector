@@ -25,8 +25,8 @@ public class PaymentConfirmService {
      * Creates a mandate and updates the transaction to a pending (Sandbox)
      * @param paymentExternalId
      */
-    public void confirm(String paymentExternalId) {
-        Transaction transaction = transactionService.confirmedDirectDebitDetailsFor(paymentExternalId);
+    public void confirm(Long accountId, String paymentExternalId) {
+        Transaction transaction = transactionService.confirmedDirectDebitDetailsFor(accountId, paymentExternalId);
         payerDao.findByPaymentRequestId(transaction.getPaymentRequestId())
                 .map(payer -> {
                     mandateDao.insert(new Mandate(payer.getId()));

@@ -12,6 +12,7 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
@@ -24,6 +25,7 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.*;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
@@ -38,19 +40,20 @@ public class PaymentRequestDaoIT {
     private static final String DESCRIPTION = "description";
     private static final long AMOUNT = 4L;
     private static final String EXTERNAL_ID = "externalId";
-    private static final long GATEWAY_ACCOUNT_ID = 10L;
 
     @DropwizardTestContext
     private TestContext testContext;
 
     private PaymentRequestDao paymentRequestDao;
+    private GatewayAccountFixture testGatewayAccount;
     private PaymentRequestFixture testPaymentRequest;
 
     @Before
     public void setup() throws IOException, LiquibaseException {
         paymentRequestDao = testContext.getJdbi().onDemand(PaymentRequestDao.class);
+        this.testGatewayAccount = aGatewayAccountFixture();
         this.testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(GATEWAY_ACCOUNT_ID)
+                .withGatewayAccountId(testGatewayAccount.getId())
                 .withExternalId(EXTERNAL_ID)
                 .withAmount(AMOUNT)
                 .withDescription(DESCRIPTION)
@@ -80,7 +83,7 @@ public class PaymentRequestDaoIT {
         assertThat(paymentRequest.getAmount(), is(AMOUNT));
         assertThat(paymentRequest.getCreatedDate(), is(CREATED_DATE));
         assertThat(paymentRequest.getDescription(), is(DESCRIPTION));
-        assertThat(paymentRequest.getGatewayAccountId(), is(GATEWAY_ACCOUNT_ID));
+        assertThat(paymentRequest.getGatewayAccountId(), is(testGatewayAccount.getId()));
         assertThat(paymentRequest.getReference(), is(REFERENCE));
         assertThat(paymentRequest.getReturnUrl(), is(RETURN_URL));
         assertThat(paymentRequest.getExternalId(), is(EXTERNAL_ID));
@@ -93,22 +96,31 @@ public class PaymentRequestDaoIT {
     }
 
     @Test
-    public void shouldFindPaymentRequestByExternalId() {
+    public void shouldFindPaymentRequestByExternalIdAndGatewayAccountExternalId() {
+        testGatewayAccount.insert(testContext.getJdbi());
         testPaymentRequest.insert(testContext.getJdbi());
-        PaymentRequest paymentRequest = paymentRequestDao.findByExternalId(testPaymentRequest.getExternalId()).get();
+        PaymentRequest paymentRequest = paymentRequestDao.findByExternalIdAndAccountExternalId(testPaymentRequest.getExternalId(), testGatewayAccount.getExternalId()).get();
         assertThat(paymentRequest.getId(), is(notNullValue()));
         assertThat(paymentRequest.getAmount(), is(AMOUNT));
         assertThat(paymentRequest.getCreatedDate(), is(CREATED_DATE));
         assertThat(paymentRequest.getDescription(), is(DESCRIPTION));
-        assertThat(paymentRequest.getGatewayAccountId(), is(GATEWAY_ACCOUNT_ID));
+        assertThat(paymentRequest.getGatewayAccountId(), is(testGatewayAccount.getId()));
         assertThat(paymentRequest.getReference(), is(REFERENCE));
         assertThat(paymentRequest.getReturnUrl(), is(RETURN_URL));
         assertThat(paymentRequest.getExternalId(), is(EXTERNAL_ID));
     }
 
     @Test
-    public void shouldNotFindPaymentRequestByExternalId_ifExternalIdIsInvalid() {
+    public void shouldNotFindPaymentRequestByExternalIdAndGatewayAccountExternalId_ifExternalIdIsInvalid() {
+        testGatewayAccount.insert(testContext.getJdbi());
         String externalId = "non_existing_externalId";
-        assertThat(paymentRequestDao.findByExternalId(externalId), is(Optional.empty()));
+        assertThat(paymentRequestDao.findByExternalIdAndAccountExternalId(externalId, testGatewayAccount.getExternalId()), is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldNotFindPaymentRequestByExternalIdAndGatewayAccountExternalId_ifGatewayAccountIsInvalid() {
+        testPaymentRequest.insert(testContext.getJdbi());
+        String gatewayExternalId = "non_existing_externalId";
+        assertThat(paymentRequestDao.findByExternalIdAndAccountExternalId(testPaymentRequest.getExternalId(), gatewayExternalId), is(Optional.empty()));
     }
 }

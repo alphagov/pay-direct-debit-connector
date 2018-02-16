@@ -23,8 +23,8 @@ public class PayerService {
         this.payerParser = payerParser;
     }
 
-    public Payer create(String paymentRequestExternalId, Map<String, String> createPayerMap) {
-        Transaction transaction = transactionService.receiveDirectDebitDetailsFor(paymentRequestExternalId);
+    public Payer create(Long accountId, String paymentRequestExternalId, Map<String, String> createPayerMap) {
+        Transaction transaction = transactionService.receiveDirectDebitDetailsFor(accountId, paymentRequestExternalId);
         Payer payer = payerParser.parse(createPayerMap, transaction);
         Long id = payerDao.insert(payer);
         payer.setId(id);

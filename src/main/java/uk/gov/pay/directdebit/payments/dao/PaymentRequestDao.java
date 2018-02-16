@@ -20,9 +20,9 @@ public interface PaymentRequestDao {
     @SingleValueResult(PaymentRequest.class)
     Optional<PaymentRequest> findById(@Bind("id") Long id);
 
-    @SqlQuery("SELECT * FROM payment_requests p WHERE p.external_id = :externalId")
+    @SqlQuery("SELECT * FROM payment_requests p JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE p.external_id = :externalId AND g.external_id = :accountExternalId" )
     @SingleValueResult(PaymentRequest.class)
-    Optional<PaymentRequest> findByExternalId(@Bind("externalId") String externalId);
+    Optional<PaymentRequest> findByExternalIdAndAccountExternalId(@Bind("externalId") String externalId, @Bind("accountExternalId") String accountExternalId);
 
     @SqlUpdate("INSERT INTO payment_requests(external_id, gateway_account_id, amount, reference, description, return_url, created_date) VALUES (:externalId, :gatewayAccountId, :amount, :reference, :description, :returnUrl, :createdDate)")
     @GetGeneratedKeys

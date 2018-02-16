@@ -8,6 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -32,7 +33,9 @@ public class PayerServiceTest {
     private PayerParser mockedPayerParser;
 
     private PayerService service;
-    private PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture();
+    private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
+    private PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture()
+            .withGatewayAccountId(gatewayAccountFixture.getId());
 
     private TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture()
             .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
@@ -48,10 +51,10 @@ public class PayerServiceTest {
     public void shouldStoreAPayerAndRelativeEvents() {
         Payer parsedPayer = PayerFixture.aPayerFixture().toEntity();
         Transaction transaction = transactionFixture.toEntity();
-        when(mockedTransactionService.receiveDirectDebitDetailsFor(paymentRequestFixture.getExternalId()))
+        when(mockedTransactionService.receiveDirectDebitDetailsFor(gatewayAccountFixture.getId(), paymentRequestFixture.getExternalId()))
                 .thenReturn(transaction);
         when(mockedPayerParser.parse(createPaymentRequest, transaction)).thenReturn(parsedPayer);
-        service.create(paymentRequestFixture.getExternalId(), createPaymentRequest);
+        service.create(gatewayAccountFixture.getId(), paymentRequestFixture.getExternalId(), createPaymentRequest);
         verify(mockedPayerDao).insert(parsedPayer);
         verify(mockedTransactionService).payerCreatedFor(transactionFixture.toEntity());
     }

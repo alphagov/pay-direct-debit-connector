@@ -8,7 +8,9 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -27,36 +29,38 @@ public class ConfirmPaymentResourceIT {
     @DropwizardTestContext
     private TestContext testContext;
 
+    private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
+    private PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture()
+            .withGatewayAccountId(gatewayAccountFixture.getId());
+    private TransactionFixture transactionFixture = aTransactionFixture().withPaymentRequestId(paymentRequestFixture.getId())
+            .withPaymentRequestGatewayAccountId(gatewayAccountFixture.getId())
+            .withState(AWAITING_CONFIRMATION);
     @Test
     public void confirm_shouldCreateAMandateAndUpdateCharge() throws Exception {
-
-        PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture().insert(testContext.getJdbi());
+        gatewayAccountFixture.insert(testContext.getJdbi());
+        paymentRequestFixture.insert(testContext.getJdbi());
+        transactionFixture.insert(testContext.getJdbi());
         String paymentRequestExternalId = paymentRequestFixture.getExternalId();
         PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
-        Long transactionId = aTransactionFixture().withPaymentRequestId(paymentRequestFixture.getId())
-                .withState(AWAITING_CONFIRMATION).insert(testContext.getJdbi()).getId();
 
-        String requestPath = "/v1/api/accounts/20/payment-requests/" + paymentRequestExternalId + "/confirm";
-
+        String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getId().toString(), paymentRequestExternalId);
         given().port(testContext.getPort())
                 .accept(APPLICATION_JSON)
                 .post(requestPath)
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionId);
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
         assertThat(transaction.get("state"), is("PENDING_DIRECT_DEBIT_PAYMENT"));
     }
 
     @Test
     public void confirm_shouldFailWhenPayerDoesNotExist() throws Exception {
+        gatewayAccountFixture.insert(testContext.getJdbi());
+        paymentRequestFixture.insert(testContext.getJdbi());
+        transactionFixture.insert(testContext.getJdbi());
 
-        PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture().insert(testContext.getJdbi());
-        aTransactionFixture().withPaymentRequestId(paymentRequestFixture.getId())
-                .withState(AWAITING_CONFIRMATION).insert(testContext.getJdbi());
-
-        String requestPath = "/v1/api/accounts/20/payment-requests/" + paymentRequestFixture.getExternalId() + "/confirm";
-
+        String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getId().toString(), paymentRequestFixture.getExternalId());
         given().port(testContext.getPort())
                 .accept(APPLICATION_JSON)
                 .post(requestPath)
