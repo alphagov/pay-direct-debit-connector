@@ -3,8 +3,10 @@ package uk.gov.pay.directdebit;
 import com.codahale.metrics.graphite.GraphiteReporter;
 import com.codahale.metrics.graphite.GraphiteSender;
 import com.codahale.metrics.graphite.GraphiteUDP;
+import com.gocardless.GoCardlessClient;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.squareup.okhttp.OkHttpClient;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -13,6 +15,7 @@ import io.dropwizard.jdbi.OptionalContainerFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
@@ -24,6 +27,7 @@ import uk.gov.pay.directdebit.app.healthcheck.Ping;
 import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
@@ -38,12 +42,16 @@ import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payers.services.PayerParser;
 import uk.gov.pay.directdebit.payers.services.PayerService;
+import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderMapper;
 import uk.gov.pay.directdebit.payments.resources.PaymentRequestResource;
+import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
+import uk.gov.pay.directdebit.payments.services.SandboxService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
@@ -94,7 +102,9 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 dataSourceFactory.getPassword()
         );
 
+        SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
 
+        // dao
         PaymentRequestDao paymentRequestDao = jdbi.onDemand(PaymentRequestDao.class);
         TokenDao tokenDao = jdbi.onDemand(TokenDao.class);
         PaymentRequestEventDao paymentRequestEventDao = jdbi.onDemand(PaymentRequestEventDao.class);
@@ -103,6 +113,12 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         MandateDao mandateDao = jdbi.onDemand(MandateDao.class);
         GatewayAccountDao gatewayAccountDao = jdbi.onDemand(GatewayAccountDao.class);
         GoCardlessCustomerDao goCardlessCustomerDao = jdbi.onDemand(GoCardlessCustomerDao.class);
+
+        // clients
+        GoCardlessClient goCardlessClient = hackGoCardlessClient(configuration, socketFactory);
+        GoCardlessClientWrapper goCardlessClientWrapperWrapper = new GoCardlessClientWrapper(goCardlessClient);
+
+        //services
         PaymentRequestEventService paymentRequestEventService = new PaymentRequestEventService(paymentRequestEventDao);
         TransactionService transactionService = new TransactionService(transactionDao, paymentRequestEventService);
         TokenService tokenService = new TokenService(tokenDao, transactionService);
@@ -114,12 +130,16 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 gatewayAccountDao);
         GatewayAccountParser gatewayAccountParser = new GatewayAccountParser();
         GatewayAccountService gatewayAccountService = new GatewayAccountService(gatewayAccountDao, gatewayAccountParser);
+        SandboxService sandboxService = new SandboxService();
+        GoCardlessService goCardlessService = new GoCardlessService(goCardlessClientWrapperWrapper, goCardlessCustomerDao);
+
+        PaymentProviderMapper providers = new PaymentProviderMapper(sandboxService, goCardlessService);
         PayerParser payerParser = new PayerParser();
-        PayerService payerService = new PayerService(payerDao, transactionService, payerParser);
+        PayerService payerService = new PayerService(payerDao, transactionService, payerParser, providers);
+
+
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
-
-
         environment.healthChecks().register("ping", new Ping());
         environment.healthChecks().register("database", injector.getInstance(Database.class));
 
@@ -136,15 +156,24 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new BadRequestExceptionMapper());
         environment.jersey().register(new NotFoundExceptionMapper());
         environment.jersey().register(new ConflictExceptionMapper());
-        setupSSL(configuration);
+        environment.jersey().register(new InternalServerErrorExceptionMapper());
+        setupSSL(configuration, socketFactory);
         initialiseMetrics(configuration, environment);
     }
 
-    private void setupSSL(DirectDebitConfig configuration) {
-        SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
-        HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory);
+    private void setupSSL(DirectDebitConfig configuration, SSLSocketFactory sslSocketFactory) {
+        HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);
         System.setProperty("https.proxyHost", configuration.getProxyConfig().getHost());
         System.setProperty("https.proxyPort", configuration.getProxyConfig().getPort().toString());
+    }
+
+    // Nasty hack alert - gocardless client does not seem to pick up the certificates in our trust store automatically, so we need to inject those. The underlying client (okhttp) supports that, but it's not accessible. So we make it accessible *** godmode ***. Sent an email to gocardless about the issue.
+    private GoCardlessClient hackGoCardlessClient(DirectDebitConfig configuration, SSLSocketFactory sslSocketFactory) throws IllegalAccessException {
+        GoCardlessClient goCardlessClient = configuration.getGoCardless().buildClient();
+        Object httpClient = FieldUtils.readField(goCardlessClient, "httpClient", true);
+        OkHttpClient rawClient = (OkHttpClient) FieldUtils.readField(httpClient, "rawClient", true);
+        rawClient.setSslSocketFactory(sslSocketFactory);
+        return goCardlessClient;
     }
 
     private void initialiseMetrics(DirectDebitConfig configuration, Environment environment) {
