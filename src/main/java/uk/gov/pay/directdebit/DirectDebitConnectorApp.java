@@ -33,6 +33,7 @@ import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
 import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
+import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payers.services.PayerParser;
@@ -101,6 +102,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         PayerDao payerDao = jdbi.onDemand(PayerDao.class);
         MandateDao mandateDao = jdbi.onDemand(MandateDao.class);
         GatewayAccountDao gatewayAccountDao = jdbi.onDemand(GatewayAccountDao.class);
+        GoCardlessCustomerDao goCardlessCustomerDao = jdbi.onDemand(GoCardlessCustomerDao.class);
         PaymentRequestEventService paymentRequestEventService = new PaymentRequestEventService(paymentRequestEventDao);
         TransactionService transactionService = new TransactionService(transactionDao, paymentRequestEventService);
         TokenService tokenService = new TokenService(tokenDao, transactionService);
