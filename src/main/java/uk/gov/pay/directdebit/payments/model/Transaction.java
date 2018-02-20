@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -13,15 +14,17 @@ public class Transaction {
     private String paymentRequestDescription;
     private String paymentRequestReturnUrl;
     private Long paymentRequestGatewayAccountId;
+    private PaymentProvider paymentProvider;
     private Long amount;
     private Type type;
     private PaymentState state;
 
-    public Transaction(Long id, Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, Long paymentRequestGatewayAccountId, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
+    public Transaction(Long id, Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, Long paymentRequestGatewayAccountId, PaymentProvider paymentProvider, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
         this.id = id;
         this.paymentRequestExternalId = paymentRequestExternalId;
         this.paymentRequestId = paymentRequestId;
         this.paymentRequestGatewayAccountId = paymentRequestGatewayAccountId;
+        this.paymentProvider = paymentProvider;
         this.paymentRequestDescription = paymentRequestDescription;
         this.paymentRequestReturnUrl = paymentRequestReturnUrl;
         this.amount = amount;
@@ -29,8 +32,8 @@ public class Transaction {
         this.state = state;
     }
 
-    public Transaction(Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, Long paymentRequestGatewayAccountId, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
-        this(null, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestGatewayAccountId, paymentRequestReturnUrl, amount, type, state);
+    public Transaction(Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, Long paymentRequestGatewayAccountId, PaymentProvider paymentProvider, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
+        this(null, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestGatewayAccountId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
     }
 
     public Long getId() {
@@ -81,6 +84,10 @@ public class Transaction {
         this.paymentRequestDescription = paymentRequestDescription;
     }
 
+    public PaymentProvider getPaymentProvider() {
+        return paymentProvider;
+    }
+
     public Long getAmount() {
         return amount;
     }
@@ -119,6 +126,7 @@ public class Transaction {
         if (!paymentRequestExternalId.equals(that.paymentRequestExternalId)) return false;
         if (!paymentRequestGatewayAccountId.equals(that.paymentRequestGatewayAccountId)) return false;
         if (!paymentRequestDescription.equals(that.paymentRequestDescription)) return false;
+        if (!paymentProvider.equals(that.paymentProvider)) return false;
         if (!paymentRequestId.equals(that.paymentRequestId)) return false;
         if (!paymentRequestReturnUrl.equals(that.paymentRequestReturnUrl)) return false;
         if (!amount.equals(that.amount)) return false;
@@ -132,6 +140,7 @@ public class Transaction {
         result = 31 * result + paymentRequestExternalId.hashCode();
         result = 31 * result + paymentRequestId.hashCode();
         result = 31 * result + paymentRequestGatewayAccountId.hashCode();
+        result = 31 * result + paymentProvider.hashCode();
         result = 31 * result + paymentRequestDescription.hashCode();
         result = 31 * result + paymentRequestReturnUrl.hashCode();
         result = 31 * result + amount.hashCode();

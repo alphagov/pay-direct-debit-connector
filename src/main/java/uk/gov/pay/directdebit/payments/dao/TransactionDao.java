@@ -17,19 +17,20 @@ import java.util.Optional;
 @RegisterMapper(TransactionMapper.class)
 public interface TransactionDao {
 
-    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id WHERE p.external_id = :paymentRequestExternalId AND p.gateway_account_id = :accountId")
-    @SingleValueResult(Transaction.class)
-    Optional<Transaction> findByPaymentRequestExternalIdAndAccountId(@Bind("paymentRequestExternalId") String paymentRequestExternalId, @Bind("accountId") Long accountId);
 
-    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id WHERE t.payment_request_id = :paymentRequestId")
+    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE t.payment_request_id = :paymentRequestId")
     @SingleValueResult(Transaction.class)
     Optional<Transaction> findByPaymentRequestId(@Bind("paymentRequestId") Long paymentRequestId);
 
-    @SqlQuery("SELECT * FROM transactions tr JOIN tokens t ON tr.payment_request_id = t.payment_request_id JOIN payment_requests p ON tr.payment_request_id = p.id WHERE t.secure_redirect_token = :tokenId")
+    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE p.external_id = :paymentRequestExternalId AND p.gateway_account_id = :accountId")
+    @SingleValueResult(Transaction.class)
+    Optional<Transaction> findByPaymentRequestExternalIdAndAccountId(@Bind("paymentRequestExternalId") String paymentRequestExternalId, @Bind("accountId") Long accountId);
+
+    @SqlQuery("SELECT * FROM transactions tr JOIN tokens t ON tr.payment_request_id = t.payment_request_id JOIN payment_requests p ON tr.payment_request_id = p.id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE t.secure_redirect_token = :tokenId")
     @SingleValueResult(Transaction.class)
     Optional<Transaction> findByTokenId(@Bind("tokenId") String tokenId);
 
-    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id WHERE t.state = :state")
+    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE t.state = :state")
     List<Transaction> findAllByPaymentState(@Bind("state") PaymentState paymentState);
 
     @SqlUpdate("UPDATE transactions t SET state = :state WHERE t.id = :id")
