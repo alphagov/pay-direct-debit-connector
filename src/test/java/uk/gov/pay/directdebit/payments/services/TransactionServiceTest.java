@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
@@ -42,7 +43,9 @@ public class TransactionServiceTest {
     @Mock
     private PaymentRequestEventService mockedPaymentRequestEventService;
 
-    private PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture();
+    private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
+    private PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture()
+            .withGatewayAccountId(gatewayAccountFixture.getId());
     @Before
     public void setUp() throws Exception {
         service = new TransactionService(mockedTransactionDao, mockedPaymentRequestEventService);
@@ -77,9 +80,9 @@ public class TransactionServiceTest {
     public void shouldFindATransactionByExternalId() {
         TransactionFixture transactionFixture = TransactionFixture
                 .aTransactionFixture();
-        when(mockedTransactionDao.findByPaymentRequestExternalId(paymentRequestFixture.getExternalId()))
+        when(mockedTransactionDao.findByPaymentRequestExternalIdAndAccountId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getId()))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
-        Transaction foundTransaction = service.findChargeForExternalId(paymentRequestFixture.getExternalId());
+        Transaction foundTransaction = service.findChargeForExternalIdAndGatewayAccountId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getId());
         assertThat(foundTransaction.getId(), is(notNullValue()));
         assertThat(foundTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(foundTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
@@ -95,7 +98,7 @@ public class TransactionServiceTest {
         thrown.expect(ChargeNotFoundException.class);
         thrown.expectMessage("No charges found for payment request with id: not-existing");
         thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
-        service.findChargeForExternalId("not-existing");
+        service.findChargeForExternalIdAndGatewayAccountId("not-existing", gatewayAccountFixture.getId());
     }
 
     @Test
@@ -121,9 +124,9 @@ public class TransactionServiceTest {
         TransactionFixture transactionFixture = TransactionFixture
                 .aTransactionFixture()
                 .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
-        when(mockedTransactionDao.findByPaymentRequestExternalId(transactionFixture.getPaymentRequestExternalId()))
+        when(mockedTransactionDao.findByPaymentRequestExternalIdAndAccountId(transactionFixture.getPaymentRequestExternalId(), gatewayAccountFixture.getId()))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
-        Transaction newTransaction = service.receiveDirectDebitDetailsFor(transactionFixture.getPaymentRequestExternalId());
+        Transaction newTransaction = service.receiveDirectDebitDetailsFor(gatewayAccountFixture.getId(), transactionFixture.getPaymentRequestExternalId());
         assertThat(newTransaction.getId(), is(notNullValue()));
         assertThat(newTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));

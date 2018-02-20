@@ -28,10 +28,10 @@ public class TransactionService {
         this.transactionDao = transactionDao;
     }
 
-    Transaction findChargeForExternalId(String paymentRequestExternalId) {
-        Transaction transaction = transactionDao.findByPaymentRequestExternalId(paymentRequestExternalId)
+    Transaction findChargeForExternalIdAndGatewayAccountId(String paymentRequestExternalId, Long accountId) {
+        Transaction transaction = transactionDao.findByPaymentRequestExternalIdAndAccountId(paymentRequestExternalId, accountId)
                 .orElseThrow(() -> new ChargeNotFoundException(paymentRequestExternalId));
-        LOGGER.info("Found charge for payment request with id: {}", paymentRequestExternalId);
+        LOGGER.info("Found charge for payment request with id: {} for gateway account id: {}", paymentRequestExternalId, accountId);
         return transaction;
     }
 
@@ -65,14 +65,14 @@ public class TransactionService {
                 });
     }
 
-    public Transaction receiveDirectDebitDetailsFor(String paymentRequestExternalId) {
-        Transaction transaction = findChargeForExternalId(paymentRequestExternalId);
+    public Transaction receiveDirectDebitDetailsFor(Long accountId, String paymentRequestExternalId) {
+        Transaction transaction = findChargeForExternalIdAndGatewayAccountId(paymentRequestExternalId, accountId);
         paymentRequestEventService.registerDirectDebitReceivedEventFor(transaction);
         return updateStateFor(transaction, PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED);
     }
 
-    public Transaction confirmedDirectDebitDetailsFor(String paymentRequestExternalId) {
-        Transaction transaction = findChargeForExternalId(paymentRequestExternalId);
+    public Transaction confirmedDirectDebitDetailsFor(Long accountId, String paymentRequestExternalId) {
+        Transaction transaction = findChargeForExternalIdAndGatewayAccountId(paymentRequestExternalId, accountId);
         paymentRequestEventService.registerDirectDebitConfirmedEventFor(transaction);
         return updateStateFor(transaction, PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED);
     }

@@ -95,12 +95,12 @@ public class PaymentRequestService {
 
     public PaymentRequestResponse getPaymentWithExternalId(String accountExternalId, String paymentExternalId, UriInfo uriInfo) {
         return paymentRequestDao
-                .findByExternalId(paymentExternalId)
+                .findByExternalIdAndAccountExternalId(paymentExternalId, accountExternalId)
                 .map(paymentRequest ->  {
-                    Transaction transaction = transactionService.findChargeForExternalId(paymentExternalId);
+                    Transaction transaction = transactionService.findChargeForExternalIdAndGatewayAccountId(paymentExternalId, paymentRequest.getGatewayAccountId());
                     return populateResponseWith(paymentRequest, accountExternalId, transaction, uriInfo);
                 })
-                .orElseThrow(() -> new PaymentRequestNotFoundException(paymentExternalId));
+                .orElseThrow(() -> new PaymentRequestNotFoundException(paymentExternalId, accountExternalId));
     }
 
 }

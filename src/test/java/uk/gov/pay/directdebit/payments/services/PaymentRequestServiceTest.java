@@ -154,9 +154,9 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndTransactionIsInProgress() throws URISyntaxException {
-        when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId()))
+        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccount.getExternalId()))
                 .thenReturn(Optional.of(paymentRequest.toEntity()));
-        when(mockTransactionService.findChargeForExternalId(paymentRequest.getExternalId()))
+        when(mockTransactionService.findChargeForExternalIdAndGatewayAccountId(paymentRequest.getExternalId(), gatewayAccount.getId()))
                 .thenReturn(transaction.toEntity());
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
@@ -201,8 +201,8 @@ public class PaymentRequestServiceTest {
     @Ignore("Not final states defined yet")
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndChargeIsInFinalState() throws URISyntaxException {
         transaction.withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
-        when(mockedPaymentRequestDao.findByExternalId(paymentRequest.getExternalId())).thenReturn(Optional.of(paymentRequest.toEntity()));
-        when(mockTransactionService.findChargeForExternalId(paymentRequest.getExternalId()))
+        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccount.getExternalId())).thenReturn(Optional.of(paymentRequest.toEntity()));
+        when(mockTransactionService.findChargeForExternalIdAndGatewayAccountId(paymentRequest.getExternalId(), gatewayAccount.getId()))
                 .thenReturn(transaction.toEntity());
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
@@ -224,7 +224,7 @@ public class PaymentRequestServiceTest {
     @Test
     public void getPaymentWithExternalId_shouldThrow_ifPaymentDoesNotExist() throws URISyntaxException {
         String externalPaymentId = "not_existing";
-        when(mockedPaymentRequestDao.findByExternalId(externalPaymentId)).thenReturn(Optional.empty());
+        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(externalPaymentId, gatewayAccount.getExternalId())).thenReturn(Optional.empty());
         thrown.expect(PaymentRequestNotFoundException.class);
         thrown.expectMessage("No payment request found with id: " + externalPaymentId);
         thrown.reportMissingExceptionWithMessage("PaymentNotFoundException expected");

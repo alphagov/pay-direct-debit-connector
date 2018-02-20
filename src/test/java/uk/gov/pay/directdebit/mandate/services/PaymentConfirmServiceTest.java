@@ -46,10 +46,11 @@ public class PaymentConfirmServiceTest {
         String paymentRequestExternalId = "test-payment-ext-id";
         long paymentRequestId = 1L;
         Long payerId = 2L;
+        Long accountId = 6L;
         Long mandateId = 3L;
 
         Transaction transaction = aTransactionFixture().withPaymentRequestId(paymentRequestId).toEntity();
-        when(mockTransactionService.confirmedDirectDebitDetailsFor(paymentRequestExternalId))
+        when(mockTransactionService.confirmedDirectDebitDetailsFor(accountId, paymentRequestExternalId))
                 .thenReturn(transaction);
 
         when(mockPayerDao.findByPaymentRequestId(paymentRequestId))
@@ -58,7 +59,7 @@ public class PaymentConfirmServiceTest {
 
         when(mockMandateDao.insert(any(Mandate.class))).thenReturn(mandateId);
 
-        service.confirm(paymentRequestExternalId);
+        service.confirm(accountId, paymentRequestExternalId);
 
         verify(mockMandateDao)
                 .insert(argThat(mandate -> mandate.getId() == null &&
@@ -73,16 +74,17 @@ public class PaymentConfirmServiceTest {
 
         String paymentRequestExternalId = "test-payment-ext-id";
         long paymentRequestId = 1L;
+        long accountId = 2L;
 
         Transaction transaction = aTransactionFixture().withPaymentRequestId(paymentRequestId).toEntity();
-        when(mockTransactionService.confirmedDirectDebitDetailsFor(paymentRequestExternalId))
+        when(mockTransactionService.confirmedDirectDebitDetailsFor(accountId, paymentRequestExternalId))
                 .thenReturn(transaction);
 
         when(mockPayerDao.findByPaymentRequestId(paymentRequestId))
                 .thenReturn(Optional.empty());
 
         try {
-            service.confirm(paymentRequestExternalId);
+            service.confirm(accountId, paymentRequestExternalId);
             fail("Expected PayerConflictException to be thrown");
         } catch (PayerConflictException e) {
             verify(mockMandateDao, never()).insert(any(Mandate.class));

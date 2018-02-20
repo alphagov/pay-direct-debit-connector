@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
@@ -23,6 +24,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.*;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
@@ -38,12 +40,12 @@ public class PayerResourceIT {
     private final static String ADDRESS_CITY_KEY = "city";
     private final static String ADDRESS_COUNTRY_KEY = "country_code";
     private final static String ADDRESS_POSTCODE_KEY = "postcode";
-    private final String accountId = "20";
     private Gson gson = new Gson();
 
     @DropwizardTestContext
     private TestContext testContext;
 
+    private GatewayAccountFixture testGatewayAccount;
     private PaymentRequestFixture testPaymentRequest;
     private PayerFixture payerFixture;
 
@@ -51,14 +53,18 @@ public class PayerResourceIT {
 
     @Before
     public void setUp() {
-        testPaymentRequest = aPaymentRequestFixture().insert(testContext.getJdbi());
+        testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
+        testPaymentRequest = aPaymentRequestFixture()
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .insert(testContext.getJdbi());
         aTransactionFixture()
                 .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .withPaymentRequestId(testPaymentRequest.getId())
+                .withPaymentRequestGatewayAccountId(testGatewayAccount.getId())
                 .withPaymentRequestExternalId(testPaymentRequest.getExternalId()).insert(testContext.getJdbi());
         payerFixture = aPayerFixture().withAccountNumber("12345678");
         requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
-                .replace("{accountId}", accountId)
+                .replace("{accountId}", testGatewayAccount.getId().toString())
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
 
     }
@@ -94,7 +100,7 @@ public class PayerResourceIT {
 
     private String expectedPayerRequestLocationFor(String paymentRequestExternalId, String payerExternalId) {
         return "http://localhost:" + testContext.getPort() + "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers/{payerExternalId}"
-                .replace("{accountId}", accountId)
+                .replace("{accountId}", testGatewayAccount.getId().toString())
                 .replace("{paymentRequestExternalId}", paymentRequestExternalId)
                 .replace("{payerExternalId}", payerExternalId);
     }
