@@ -1,0 +1,16 @@
+{
+  "customer_bank_accounts": {
+    "account_holder_name": "{{account_holder_name}}",
+    "account_number_ending": "11",
+    "bank_name": "BARCLAYS BANK PLC",
+    "country_code": "GB",
+    "created_at": "2018-02-15T15:10:47.811Z",
+    "currency": "GBP",
+    "enabled": true,
+    "id": "{{gocardless_customer_bank_account_id}}",
+    "links": {
+      "customer": "{{gocardless_customer_id}}"
+    },
+    "metadata": {}
+  }
+}

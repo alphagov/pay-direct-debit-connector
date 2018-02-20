@@ -1,0 +1,11 @@
+{
+  "customer_bank_accounts": {
+    "account_holder_name": "{{account_holder_name}}",
+    "account_number": "{{account_number}}",
+    "branch_code": "{{sort_code}}",
+    "country_code": "GB",
+    "links": {
+      "customer": "{{gocardless_customer_id}}"
+    }
+  }
+}

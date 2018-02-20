@@ -1,0 +1,22 @@
+{
+  "customers": {
+    "id": "{{gocardless_customer_id}}",
+    "created_at": "2018-02-19T13:19:18.538Z",
+    "email": "{{email}}",
+    "given_name": "{{given_name}}",
+    "family_name": "{{family_name}}",
+    "company_name": null,
+    "address_line1": null,
+    "address_line2": null,
+    "address_line3": null,
+    "city": null,
+    "region": null,
+    "postal_code": null,
+    "country_code": null,
+    "language": "en",
+    "swedish_identity_number": null,
+    "danish_identity_number": null,
+    "metadata": {}
+  }
+}
+
