@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payers.services;
+package uk.gov.pay.directdebit.payers.api;
 
 import org.mindrot.jbcrypt.BCrypt;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -12,7 +12,7 @@ public class PayerParser {
         return BCrypt.hashpw(toEncrypt, BCrypt.gensalt(12));
     }
 
-    Payer parse(Map<String, String> createPayerMap, Transaction transaction) {
+    public Payer parse(Map<String, String> createPayerMap, Transaction transaction) {
         String accountNumber = createPayerMap.get("account_number");
         String sortCode = createPayerMap.get("sort_code");
         return new Payer(

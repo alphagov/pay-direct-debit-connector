@@ -1,8 +1,9 @@
 package uk.gov.pay.directdebit.payers.resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.junit.After;
@@ -49,7 +50,6 @@ public class PayerResourceIT {
     private final static String ADDRESS_CITY_KEY = "city";
     private final static String ADDRESS_COUNTRY_KEY = "country_code";
     private final static String ADDRESS_POSTCODE_KEY = "postcode";
-    private Gson gson = new Gson();
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -90,10 +90,10 @@ public class PayerResourceIT {
                 .insert(testContext.getJdbi());
     }
     @Test
-    public void shouldCreateAPayer() {
-        testGatewayAccount.insert(testContext.getJdbi());
+    public void shouldCreateAPayer() throws JsonProcessingException {
+        testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
         insertTransactionFixtureWith(SANDBOX);
-        String postBody = gson.toJson(ImmutableMap.builder()
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
@@ -120,7 +120,7 @@ public class PayerResourceIT {
                 .contentType(JSON);
     }
     @Test
-    public void shouldCreateAPayer_forGoCardless() {
+    public void shouldCreateAPayer_forGoCardless() throws JsonProcessingException {
         testGatewayAccount.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         insertTransactionFixtureWith(GOCARDLESS);
         String fakeCustomerId = "CU000358S3A2FP";
@@ -130,7 +130,7 @@ public class PayerResourceIT {
         String requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
                 .replace("{accountId}", testGatewayAccount.getId().toString())
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
-        String postBody = gson.toJson(ImmutableMap.builder()
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
@@ -165,8 +165,9 @@ public class PayerResourceIT {
     }
 
     @Test
-    public void shouldReturn400IfMandatoryFieldsMissing() {
-        String postBody = gson.toJson(ImmutableMap.builder()
+    public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
+        testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
                 .put(EMAIL_KEY, payerFixture.getEmail())

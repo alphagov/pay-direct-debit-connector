@@ -3,7 +3,6 @@
 --changeset uk.gov.pay:add_table-gocardless_customers
 CREATE TABLE gocardless_customers (
     id BIGSERIAL PRIMARY KEY,
-
     payer_id BIGINT NOT NULL,
     customer_id VARCHAR(255),
     customer_bank_account_id VARCHAR(255),

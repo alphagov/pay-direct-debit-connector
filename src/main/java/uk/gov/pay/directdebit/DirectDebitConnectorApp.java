@@ -29,6 +29,7 @@ import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
+import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
 import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountParser;
@@ -37,16 +38,16 @@ import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
 import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
+import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
-import uk.gov.pay.directdebit.payers.services.PayerParser;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
-import uk.gov.pay.directdebit.payments.model.PaymentProviderMapper;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.resources.PaymentRequestResource;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
@@ -116,7 +117,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
 
         // clients
         GoCardlessClient goCardlessClient = hackGoCardlessClient(configuration, socketFactory);
-        GoCardlessClientWrapper goCardlessClientWrapperWrapper = new GoCardlessClientWrapper(goCardlessClient);
+        GoCardlessClientWrapper goCardlessClientWrapper = new GoCardlessClientWrapper(goCardlessClient);
 
         //services
         PaymentRequestEventService paymentRequestEventService = new PaymentRequestEventService(paymentRequestEventDao);
@@ -130,18 +131,19 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 gatewayAccountDao);
         GatewayAccountParser gatewayAccountParser = new GatewayAccountParser();
         GatewayAccountService gatewayAccountService = new GatewayAccountService(gatewayAccountDao, gatewayAccountParser);
-        SandboxService sandboxService = new SandboxService();
-        GoCardlessService goCardlessService = new GoCardlessService(goCardlessClientWrapperWrapper, goCardlessCustomerDao);
 
-        PaymentProviderMapper providers = new PaymentProviderMapper(sandboxService, goCardlessService);
         PayerParser payerParser = new PayerParser();
-        PayerService payerService = new PayerService(payerDao, transactionService, payerParser, providers);
+        PayerService payerService = new PayerService(payerDao, transactionService, payerParser);
+        GoCardlessService goCardlessService = new GoCardlessService(payerService, goCardlessClientWrapper, goCardlessCustomerDao);
+        SandboxService sandboxService = new SandboxService(payerService);
+        PaymentProviderFactory paymentProviderFactory = new PaymentProviderFactory(sandboxService, goCardlessService);
 
 
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
         environment.healthChecks().register("ping", new Ping());
         environment.healthChecks().register("database", injector.getInstance(Database.class));
+        environment.jersey().register(new GatewayAccountParamConverterProvider(gatewayAccountDao));
 
         jdbi.registerContainerFactory(new OptionalContainerFactory());
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
@@ -149,7 +151,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new WebhookSandboxResource(transactionService));
         environment.jersey().register(new PaymentRequestResource(paymentRequestService));
         environment.jersey().register(new SecurityTokensResource(tokenService));
-        environment.jersey().register(new PayerResource(payerService));
+        environment.jersey().register(new PayerResource(paymentProviderFactory));
         environment.jersey().register(new ConfirmPaymentResource(new PaymentConfirmService(transactionService, payerDao, mandateDao)));
         environment.jersey().register(new GatewayAccountResource(gatewayAccountService));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
@@ -183,7 +185,6 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 .prefixedWith(graphiteConfig.getNode())
                 .build(graphiteUDP)
                 .start(graphiteConfig.getSendingPeriod(), TimeUnit.SECONDS);
-
     }
 }
 

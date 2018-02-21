@@ -28,11 +28,11 @@ public class GoCardlessClientWrapper {
                 customer.getId());
     }
 
-    public GoCardlessCustomer createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer customer, String accountHolderName, String sortCode, String accountId){
+    public GoCardlessCustomer createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer customer, String accountHolderName, String sortCode, String accountNumber){
         CustomerBankAccount goCardlessCustomerBankAccount = goCardlessClient.customerBankAccounts()
                 .create()
                 .withAccountHolderName(accountHolderName)
-                .withAccountNumber(accountId)
+                .withAccountNumber(accountNumber)
                 .withBranchCode(sortCode)
                 .withCountryCode("GB")
                 .withLinksCustomer(customer.getCustomerId())

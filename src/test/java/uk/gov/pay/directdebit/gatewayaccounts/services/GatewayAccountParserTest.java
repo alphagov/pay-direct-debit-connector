@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountTypeException;
+import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountException;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidPaymentProviderException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
@@ -66,8 +66,8 @@ public class GatewayAccountParserTest {
           "service_name", "blabla",
           "type", "something"
         );
-        thrown.expect(InvalidGatewayAccountTypeException.class);
-        thrown.expectMessage("Unsupported gateway account type: something");
+        thrown.expect(InvalidGatewayAccountException.class);
+        thrown.expectMessage("Unsupported gateway account: something");
         parser.parse(request);
     }
 
