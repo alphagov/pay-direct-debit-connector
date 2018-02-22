@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.payments.dao;
 
 import liquibase.exception.LiquibaseException;
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,7 @@ import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.*;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
@@ -49,7 +48,7 @@ public class TransactionDaoIT {
     @Before
     public void setup() throws IOException, LiquibaseException {
         transactionDao = testContext.getJdbi().onDemand(TransactionDao.class);
-        this.testGatewayAccount = aGatewayAccountFixture();
+        this.testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testPaymentRequest = generateNewPaymentRequestFixture(testGatewayAccount.getId());
         this.testTransaction = generateNewTransactionFixture(testPaymentRequest, TYPE, STATE, AMOUNT);
     }
@@ -82,7 +81,6 @@ public class TransactionDaoIT {
 
     @Test
     public void shouldGetATransactionByPaymentRequestExternalIdAndGatewayAccountId() {
-        testGatewayAccount.insert(testContext.getJdbi());
         testTransaction.insert(testContext.getJdbi());
         Transaction transaction = transactionDao.findByPaymentRequestExternalIdAndAccountId(testPaymentRequest.getExternalId(), testGatewayAccount.getId()).get();
         assertThat(transaction.getId(), is(testTransaction.getId()));

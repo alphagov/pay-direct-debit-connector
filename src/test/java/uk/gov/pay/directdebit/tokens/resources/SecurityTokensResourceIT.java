@@ -9,6 +9,7 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -17,6 +18,7 @@ import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
@@ -28,6 +30,7 @@ public class SecurityTokensResourceIT {
 
     private TokenFixture testToken;
     private TransactionFixture testTransaction;
+    private GatewayAccountFixture testGatewayAccount;
     private PaymentRequestFixture testPaymentRequest;
 
     @DropwizardTestContext
@@ -35,7 +38,8 @@ public class SecurityTokensResourceIT {
 
     @Before
     public void setUp() {
-        testPaymentRequest = aPaymentRequestFixture().insert(testContext.getJdbi());
+        testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
+        testPaymentRequest = aPaymentRequestFixture().withGatewayAccountId(testGatewayAccount.getId()).insert(testContext.getJdbi());
         testTransaction = aTransactionFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .withPaymentRequestExternalId(testPaymentRequest.getExternalId())

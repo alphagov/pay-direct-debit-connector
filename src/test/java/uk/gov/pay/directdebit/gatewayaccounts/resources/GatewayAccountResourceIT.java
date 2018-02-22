@@ -1,7 +1,8 @@
 package uk.gov.pay.directdebit.gatewayaccounts.resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.junit.Before;
@@ -47,8 +48,6 @@ public class GatewayAccountResourceIT {
     private static final String SERVICE_NAME_KEY = "service_name";
     private static final String DESCRIPTION_KEY = "description";
     private static final String ANALYTICS_ID_KEY = "analytics_id";
-
-    Gson gson = new Gson();
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -160,8 +159,8 @@ public class GatewayAccountResourceIT {
     }
 
     @Test
-    public void shouldCreateAGatewayAccount() {
-        String postBody = gson.toJson(ImmutableMap.builder()
+    public void shouldCreateAGatewayAccount() throws JsonProcessingException {
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(PAYMENT_PROVIDER_KEY, PAYMENT_PROVIDER.toString())
                 .put(TYPE_KEY, TYPE.toString())
                 .put(SERVICE_NAME_KEY, SERVICE_NAME)
@@ -191,8 +190,8 @@ public class GatewayAccountResourceIT {
     }
 
     @Test
-    public void shouldReturnBadRequestIfValidationFails() {
-        String postBody = gson.toJson(ImmutableMap.builder()
+    public void shouldReturnBadRequestIfValidationFails() throws JsonProcessingException {
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(PAYMENT_PROVIDER_KEY, PAYMENT_PROVIDER.toString())
                 .put(TYPE_KEY, TYPE.toString())
                 .put(DESCRIPTION_KEY, DESCRIPTION)

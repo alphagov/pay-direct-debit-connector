@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.gatewayaccounts.model;
 
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountTypeException;
+import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountException;
 
 public class GatewayAccount {
 
@@ -14,7 +14,7 @@ public class GatewayAccount {
                     return typeEnum;
                 }
             }
-            throw new InvalidGatewayAccountTypeException(type);
+            throw new InvalidGatewayAccountException(type);
         }
     }
     private Long id;

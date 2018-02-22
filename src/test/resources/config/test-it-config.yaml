@@ -29,6 +29,7 @@ goCardless:
   accessToken: accesstoken
   webhookSecret: secret
   environment: sandbox
+  clientUrl: http://localhost:10107
 
 database:
   driverClass: org.postgresql.Driver

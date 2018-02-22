@@ -5,6 +5,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
@@ -15,6 +16,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String paymentRequestDescription = RandomStringUtils.randomAlphabetic(20);
     private Long paymentRequestGatewayAccountId = RandomUtils.nextLong(1, 99999);
     private String paymentRequestReturnUrl = "http://www." + RandomStringUtils.randomAlphabetic(10) + ".test";
+    private PaymentProvider paymentProvider = PaymentProvider.SANDBOX;
     private Long amount = RandomUtils.nextLong(1, 99999);
     private Transaction.Type type = Transaction.Type.CHARGE;
     private PaymentState state = PaymentState.NEW;
@@ -50,6 +52,11 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
+    public TransactionFixture withPaymentProvider(PaymentProvider paymentProvider) {
+        this.paymentProvider = paymentProvider;
+        return this;
+    }
+
     public TransactionFixture withAmount(Long amount) {
         this.amount = amount;
         return this;
@@ -63,6 +70,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     public TransactionFixture withState(PaymentState state) {
         this.state = state;
         return this;
+    }
+
+    public PaymentProvider getPaymentProvider() {
+        return paymentProvider;
     }
 
     public Long getPaymentRequestId() {
@@ -126,7 +137,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public Transaction toEntity() {
-        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestGatewayAccountId, paymentRequestReturnUrl, amount, type, state);
+        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestGatewayAccountId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
     }
 
 }

@@ -1,14 +1,12 @@
-package uk.gov.pay.directdebit.payers.services;
+package uk.gov.pay.directdebit.payers.api;
 
 import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
-import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 

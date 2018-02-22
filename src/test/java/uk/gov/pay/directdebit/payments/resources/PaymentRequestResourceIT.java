@@ -1,7 +1,8 @@
 package uk.gov.pay.directdebit.payments.resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
@@ -45,7 +46,6 @@ public class PaymentRequestResourceIT {
     private static final String JSON_STATE_KEY = "state.status";
     private static final long AMOUNT = 6234L;
     private GatewayAccountFixture testGatewayAccount;
-    private Gson gson = new Gson();
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -61,7 +61,7 @@ public class PaymentRequestResourceIT {
         String expectedReference = "Test reference";
         String expectedDescription = "Test description";
         String returnUrl = "http://service.url/success-page/";
-        String postBody = gson.toJson(ImmutableMap.builder()
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, AMOUNT)
                 .put(JSON_REFERENCE_KEY, expectedReference)
                 .put(JSON_DESCRIPTION_KEY, expectedDescription)
@@ -133,10 +133,10 @@ public class PaymentRequestResourceIT {
     }
 
     @Test
-    public void shouldReturn400IfMandatoryFieldsMissing() {
+    public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
         String accountId = testGatewayAccount.getId().toString();
 
-        String postBody = gson.toJson(ImmutableMap.builder()
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, AMOUNT)
                 .put(JSON_DESCRIPTION_KEY, "desc")
                 .put(JSON_GATEWAY_ACC_KEY, accountId)
@@ -155,10 +155,10 @@ public class PaymentRequestResourceIT {
     }
 
     @Test
-    public void shouldReturn400IfFieldsInvalidSize() {
+    public void shouldReturn400IfFieldsInvalidSize() throws JsonProcessingException {
         String accountId = testGatewayAccount.getId().toString();
 
-        String postBody = gson.toJson(ImmutableMap.builder()
+        String postBody =  new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, AMOUNT)
                 .put(JSON_REFERENCE_KEY, "reference")
                 .put(JSON_DESCRIPTION_KEY, RandomStringUtils.randomAlphabetic(256))
@@ -178,10 +178,10 @@ public class PaymentRequestResourceIT {
     }
 
     @Test
-    public void shouldReturn400IfFieldsInvalid() {
+    public void shouldReturn400IfFieldsInvalid() throws JsonProcessingException {
         String accountId = testGatewayAccount.getId().toString();
 
-        String postBody = gson.toJson(ImmutableMap.builder()
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, 10000001)
                 .put(JSON_REFERENCE_KEY, "reference")
                 .put(JSON_DESCRIPTION_KEY, "desc")

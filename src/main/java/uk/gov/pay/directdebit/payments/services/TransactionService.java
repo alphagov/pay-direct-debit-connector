@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.services;
 
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
@@ -28,19 +29,20 @@ public class TransactionService {
         this.transactionDao = transactionDao;
     }
 
-    Transaction findChargeForExternalIdAndGatewayAccountId(String paymentRequestExternalId, Long accountId) {
+    public Transaction findChargeForExternalIdAndGatewayAccountId(String paymentRequestExternalId, Long accountId) {
         Transaction transaction = transactionDao.findByPaymentRequestExternalIdAndAccountId(paymentRequestExternalId, accountId)
                 .orElseThrow(() -> new ChargeNotFoundException(paymentRequestExternalId));
         LOGGER.info("Found charge for payment request with id: {} for gateway account id: {}", paymentRequestExternalId, accountId);
         return transaction;
     }
 
-    Transaction createChargeFor(PaymentRequest paymentRequest) {
+    Transaction createChargeFor(PaymentRequest paymentRequest, GatewayAccount gatewayAccount) {
         Transaction transaction = new Transaction(
                 paymentRequest.getId(),
                 paymentRequest.getExternalId(),
                 paymentRequest.getDescription(),
                 paymentRequest.getGatewayAccountId(),
+                gatewayAccount.getPaymentProvider(),
                 paymentRequest.getReturnUrl(),
                 paymentRequest.getAmount(),
                 Transaction.Type.CHARGE,

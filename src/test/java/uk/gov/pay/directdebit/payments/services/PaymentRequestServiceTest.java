@@ -10,12 +10,12 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
@@ -43,6 +43,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -68,13 +69,14 @@ public class PaymentRequestServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private GatewayAccountFixture gatewayAccount = aGatewayAccountFixture().withExternalId(GATEWAY_ACCOUNT_EXTERNAL_ID);
+    private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withExternalId(GATEWAY_ACCOUNT_EXTERNAL_ID);
+    private GatewayAccount gatewayAccount = gatewayAccountFixture.toEntity();
     private PaymentRequestFixture paymentRequest = aPaymentRequestFixture()
             .withAmount(Long.parseLong(AMOUNT))
             .withDescription(DESCRIPTION)
             .withReference(REFERENCE)
             .withReturnUrl(RETURN_URL)
-            .withGatewayAccountId(gatewayAccount.getId());
+            .withGatewayAccountId(gatewayAccountFixture.getId());
     private TransactionFixture transaction = aTransactionFixture()
             .withPaymentRequestId(paymentRequest.getId())
             .withPaymentRequestExternalId(paymentRequest.getExternalId())
@@ -113,14 +115,14 @@ public class PaymentRequestServiceTest {
                 .when(this.mockedUriInfo)
                 .getBaseUriBuilder();
 
-        when(mockTransactionService.createChargeFor(Mockito.any(PaymentRequest.class))).thenReturn(transaction.toEntity());
+        when(mockTransactionService.createChargeFor(any(PaymentRequest.class), any(GatewayAccount.class))).thenReturn(transaction.toEntity());
 
-        when(mockedTokenService.generateNewTokenFor(Mockito.any(PaymentRequest.class))).thenReturn(token.toEntity());
+        when(mockedTokenService.generateNewTokenFor(any(PaymentRequest.class))).thenReturn(token.toEntity());
 
         service = new PaymentRequestService(mockedConfig, mockedPaymentRequestDao, mockedTokenService, mockTransactionService, mockGatewayAccountDao);
 
         when(mockGatewayAccountDao.findByExternalId(GATEWAY_ACCOUNT_EXTERNAL_ID)).thenReturn(
-                Optional.of(gatewayAccount.toEntity()));
+                Optional.of(gatewayAccount));
     }
 
     @Test
@@ -133,7 +135,7 @@ public class PaymentRequestServiceTest {
         verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
 
         PaymentRequest createdPaymentRequest = paymentRequestArgumentCaptor.getValue();
-        assertThat(createdPaymentRequest.getGatewayAccountId(), is(gatewayAccount.getId()));
+        assertThat(createdPaymentRequest.getGatewayAccountId(), is(gatewayAccountFixture.getId()));
         assertThat(createdPaymentRequest.getExternalId(), is(notNullValue()));
         assertThat(createdPaymentRequest.getReference(), is("Pay reference"));
         assertThat(createdPaymentRequest.getDescription(), is("This is a description"));
@@ -149,20 +151,20 @@ public class PaymentRequestServiceTest {
         ArgumentCaptor<PaymentRequest> paymentRequestArgumentCaptor = forClass(PaymentRequest.class);
         verify(mockedPaymentRequestDao).insert(paymentRequestArgumentCaptor.capture());
         PaymentRequest createdPaymentRequest = paymentRequestArgumentCaptor.getValue();
-        verify(mockTransactionService).createChargeFor(createdPaymentRequest);
+        verify(mockTransactionService).createChargeFor(createdPaymentRequest, gatewayAccount);
     }
 
     @Test
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndTransactionIsInProgress() throws URISyntaxException {
-        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccount.getExternalId()))
+        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of(paymentRequest.toEntity()));
-        when(mockTransactionService.findChargeForExternalIdAndGatewayAccountId(paymentRequest.getExternalId(), gatewayAccount.getId()))
+        when(mockTransactionService.findChargeForExternalIdAndGatewayAccountId(paymentRequest.getExternalId(), gatewayAccountFixture.getId()))
                 .thenReturn(transaction.toEntity());
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 
 
-        PaymentRequestResponse response = service.getPaymentWithExternalId(gatewayAccount.getExternalId(), paymentRequest.getExternalId(), uriInfo);
+        PaymentRequestResponse response = service.getPaymentWithExternalId(gatewayAccountFixture.getExternalId(), paymentRequest.getExternalId(), uriInfo);
         verify(mockedTokenService).generateNewTokenFor(paymentRequest.toEntity());
 
         assertThat(response.getAmount().toString(), is(AMOUNT));
@@ -201,14 +203,14 @@ public class PaymentRequestServiceTest {
     @Ignore("Not final states defined yet")
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndChargeIsInFinalState() throws URISyntaxException {
         transaction.withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
-        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccount.getExternalId())).thenReturn(Optional.of(paymentRequest.toEntity()));
-        when(mockTransactionService.findChargeForExternalIdAndGatewayAccountId(paymentRequest.getExternalId(), gatewayAccount.getId()))
+        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId())).thenReturn(Optional.of(paymentRequest.toEntity()));
+        when(mockTransactionService.findChargeForExternalIdAndGatewayAccountId(paymentRequest.getExternalId(), gatewayAccountFixture.getId()))
                 .thenReturn(transaction.toEntity());
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 
 
-        PaymentRequestResponse response = service.getPaymentWithExternalId(gatewayAccount.getExternalId(), paymentRequest.getExternalId(), uriInfo);
+        PaymentRequestResponse response = service.getPaymentWithExternalId(gatewayAccountFixture.getExternalId(), paymentRequest.getExternalId(), uriInfo);
         verifyNoMoreInteractions(mockedTokenService);
 
         assertThat(response.getAmount().toString(), is(AMOUNT));
@@ -224,10 +226,10 @@ public class PaymentRequestServiceTest {
     @Test
     public void getPaymentWithExternalId_shouldThrow_ifPaymentDoesNotExist() throws URISyntaxException {
         String externalPaymentId = "not_existing";
-        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(externalPaymentId, gatewayAccount.getExternalId())).thenReturn(Optional.empty());
+        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(externalPaymentId, gatewayAccountFixture.getExternalId())).thenReturn(Optional.empty());
         thrown.expect(PaymentRequestNotFoundException.class);
         thrown.expectMessage("No payment request found with id: " + externalPaymentId);
         thrown.reportMissingExceptionWithMessage("PaymentNotFoundException expected");
-        service.getPaymentWithExternalId(gatewayAccount.getExternalId(), externalPaymentId, uriInfo);
+        service.getPaymentWithExternalId(gatewayAccountFixture.getExternalId(), externalPaymentId, uriInfo);
     }
 }

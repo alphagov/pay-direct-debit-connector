@@ -83,7 +83,7 @@ public class PaymentRequestService {
                     LOGGER.info("Creating payment request with external id {}", paymentRequest.getExternalId());
                     Long id = paymentRequestDao.insert(paymentRequest);
                     paymentRequest.setId(id);
-                    Transaction createdTransaction = transactionService.createChargeFor(paymentRequest);
+                    Transaction createdTransaction = transactionService.createChargeFor(paymentRequest, gatewayAccount);
                     return populateResponseWith(paymentRequest, accountExternalId, createdTransaction, uriInfo);
                 })
                 .orElseThrow(() -> {

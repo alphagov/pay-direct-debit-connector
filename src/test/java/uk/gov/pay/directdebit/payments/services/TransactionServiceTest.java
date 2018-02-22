@@ -55,7 +55,7 @@ public class TransactionServiceTest {
     public void shouldCreateATransactionAndEvent() {
         ArgumentCaptor<PaymentRequest> prCaptor = forClass(PaymentRequest.class);
         ArgumentCaptor<PaymentRequestEvent> preCaptor = forClass(PaymentRequestEvent.class);
-        Transaction transaction = service.createChargeFor(paymentRequestFixture.toEntity());
+        Transaction transaction = service.createChargeFor(paymentRequestFixture.toEntity(), gatewayAccountFixture.toEntity());
         verify(mockedPaymentRequestEventService).insertEventFor(prCaptor.capture(), preCaptor.capture());
         verify(mockedTransactionDao).insert(transaction);
         PaymentRequestEvent createdPaymentRequestEvent = preCaptor.getValue();
@@ -77,7 +77,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void shouldFindATransactionByExternalId() {
+    public void shouldFindATransactionByExternalIdAndAccountId() {
         TransactionFixture transactionFixture = TransactionFixture
                 .aTransactionFixture();
         when(mockedTransactionDao.findByPaymentRequestExternalIdAndAccountId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getId()))
