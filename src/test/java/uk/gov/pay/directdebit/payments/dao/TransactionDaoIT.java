@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -117,19 +118,28 @@ public class TransactionDaoIT {
     }
 
     @Test
-    public void shouldFindAllTransactionsByPaymentState() {
-        PaymentRequestFixture processingDirectDebitPaymentStatePaymentRequestFixture = generateNewPaymentRequestFixture(testGatewayAccount.getId());
-        TransactionFixture processingDirectDebitPaymentStateTransactionFixture =
-                generateNewTransactionFixture(processingDirectDebitPaymentStatePaymentRequestFixture, TYPE, PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT, AMOUNT);
-        processingDirectDebitPaymentStateTransactionFixture.insert(testContext.getJdbi());
-        PaymentRequestFixture successStatePaymentRequestFixture = generateNewPaymentRequestFixture(testGatewayAccount.getId());
-        TransactionFixture successStateTransactionFixture =
-                generateNewTransactionFixture(successStatePaymentRequestFixture, TYPE, PaymentState.SUCCESS, AMOUNT);
-        successStateTransactionFixture.insert(testContext.getJdbi());
+    public void shouldFindAllTransactionsByPaymentStateAndProvider() {
+        GatewayAccountFixture goCardlessGatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
 
-        List<Transaction> successTransactionsList = transactionDao.findAllByPaymentState(PaymentState.SUCCESS);
+        PaymentRequestFixture sandboxPaymentRequest = generateNewPaymentRequestFixture(testGatewayAccount.getId());
+        TransactionFixture sandboxCharge =
+                generateNewTransactionFixture(sandboxPaymentRequest, TYPE, PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT, AMOUNT);
+        sandboxCharge.insert(testContext.getJdbi());
+
+        PaymentRequestFixture successSandboxPaymentRequest = generateNewPaymentRequestFixture(testGatewayAccount.getId());
+        TransactionFixture successSandboxCharge =
+                generateNewTransactionFixture(successSandboxPaymentRequest, TYPE, PaymentState.SUCCESS, AMOUNT);
+        successSandboxCharge.insert(testContext.getJdbi());
+
+        PaymentRequestFixture gocardlessPaymentRequest = generateNewPaymentRequestFixture(goCardlessGatewayAccount.getId());
+        TransactionFixture goCardlessSuccessCharge =
+                generateNewTransactionFixture(gocardlessPaymentRequest, TYPE, PaymentState.SUCCESS, AMOUNT);
+        goCardlessSuccessCharge.insert(testContext.getJdbi());
+
+        List<Transaction> successTransactionsList = transactionDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
         assertThat(successTransactionsList.size(), is(1));
         assertThat(successTransactionsList.get(0).getState(), is(PaymentState.SUCCESS));
+        assertThat(successTransactionsList.get(0).getPaymentProvider(), is(PaymentProvider.SANDBOX));
     }
 
     @Test
@@ -139,7 +149,7 @@ public class TransactionDaoIT {
                 generateNewTransactionFixture(processingDirectDebitPaymentStatePaymentRequestFixture, TYPE, PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT, AMOUNT);
         processingDirectDebitPaymentStateTransactionFixture.insert(testContext.getJdbi());
 
-        List<Transaction> successTransactionsList = transactionDao.findAllByPaymentState(PaymentState.SUCCESS);
+        List<Transaction> successTransactionsList = transactionDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
         assertThat(successTransactionsList.size(), is(0));
     }
 

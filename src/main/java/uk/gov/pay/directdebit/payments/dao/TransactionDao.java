@@ -7,6 +7,7 @@ import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import org.skife.jdbi.v2.sqlobject.customizers.SingleValueResult;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.dao.mapper.TransactionMapper;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -30,8 +31,8 @@ public interface TransactionDao {
     @SingleValueResult(Transaction.class)
     Optional<Transaction> findByTokenId(@Bind("tokenId") String tokenId);
 
-    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE t.state = :state")
-    List<Transaction> findAllByPaymentState(@Bind("state") PaymentState paymentState);
+    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE t.state = :state AND g.payment_provider = :paymentProvider")
+    List<Transaction> findAllByPaymentStateAndProvider(@Bind("state") PaymentState paymentState, @Bind("paymentProvider") PaymentProvider paymentProvider);
 
     @SqlUpdate("UPDATE transactions t SET state = :state WHERE t.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") PaymentState paymentState);
