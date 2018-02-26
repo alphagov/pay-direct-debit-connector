@@ -2,42 +2,14 @@ package uk.gov.pay.directdebit.mandate.services;
 
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.PayerConflictException;
+import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
-import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
-import java.util.Optional;
-
 public class PaymentConfirmService {
-
-    public static class ConfirmationDetails {
-        private Transaction transaction;
-        private Mandate mandate;
-
-        public ConfirmationDetails(Transaction transaction, Mandate mandate) {
-            this.transaction = transaction;
-            this.mandate = mandate;
-        }
-
-        public Transaction getTransaction() {
-            return transaction;
-        }
-
-        public void setTransaction(Transaction transaction) {
-            this.transaction = transaction;
-        }
-
-        public Mandate getMandate() {
-            return mandate;
-        }
-
-        public void setMandate(Mandate mandate) {
-            this.mandate = mandate;
-        }
-    }
     private final MandateDao mandateDao;
     private final PayerDao payerDao;
     private final TransactionService transactionService;
@@ -47,7 +19,6 @@ public class PaymentConfirmService {
         this.payerDao = payerDao;
         this.mandateDao = mandateDao;
     }
-
 
     /**
      * Creates a mandate and updates the transaction to a pending (Sandbox)

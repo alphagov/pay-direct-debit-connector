@@ -1,7 +1,5 @@
 package uk.gov.pay.directdebit.mandate.model;
 
-import com.google.common.base.Objects;
-
 public class GoCardlessMandate {
 
     private Long id;
@@ -46,14 +44,19 @@ public class GoCardlessMandate {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         GoCardlessMandate that = (GoCardlessMandate) o;
-        return Objects.equal(id, that.id) &&
-                Objects.equal(mandateId, that.mandateId) &&
-                Objects.equal(goCardlessMandateId, that.goCardlessMandateId);
+
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (!mandateId.equals(that.mandateId)) return false;
+        return goCardlessMandateId.equals(that.goCardlessMandateId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, mandateId, goCardlessMandateId);
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + mandateId.hashCode();
+        result = 31 * result + goCardlessMandateId.hashCode();
+        return result;
     }
 }
