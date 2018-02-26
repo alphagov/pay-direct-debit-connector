@@ -103,4 +103,21 @@ public class DatabaseTestHelper {
                         .first()
         );
     }
+
+    public Map<String, Object> getGoCardlessMandateById(Long id) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from gocardless_mandates g WHERE g.id = :id")
+                        .bind("id", id)
+                        .first()
+        );
+    }
+    public Map<String, Object> getGoCardlessPaymentById(Long id) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from gocardless_payments g WHERE g.id = :id")
+                        .bind("id", id)
+                        .first()
+        );
+    }
 }
