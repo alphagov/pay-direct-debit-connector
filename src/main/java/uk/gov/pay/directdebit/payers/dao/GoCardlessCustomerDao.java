@@ -14,9 +14,9 @@ import java.util.Optional;
 
 @RegisterMapper(GoCardlessCustomerMapper.class)
 public interface GoCardlessCustomerDao {
-    @SqlQuery("SELECT * FROM gocardless_customers g WHERE g.id = :id")
+    @SqlQuery("SELECT * FROM gocardless_customers g WHERE g.payer_id = :id")
     @SingleValueResult(GoCardlessCustomer.class)
-    Optional<GoCardlessCustomer> findById(@Bind("id") Long id);
+    Optional<GoCardlessCustomer> findByPayerId(@Bind("id") Long id);
 
     @SqlUpdate("INSERT INTO gocardless_customers(payer_id, customer_id, customer_bank_account_id) VALUES (:payerId, :customerId, :customerBankAccountId)")
     @GetGeneratedKeys

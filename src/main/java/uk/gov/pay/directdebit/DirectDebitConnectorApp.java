@@ -35,6 +35,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
 import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountParser;
 import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
+import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
+import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
 import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
@@ -114,9 +116,15 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         MandateDao mandateDao = jdbi.onDemand(MandateDao.class);
         GatewayAccountDao gatewayAccountDao = jdbi.onDemand(GatewayAccountDao.class);
         GoCardlessCustomerDao goCardlessCustomerDao = jdbi.onDemand(GoCardlessCustomerDao.class);
+        GoCardlessPaymentDao goCardlessPaymentDao = jdbi.onDemand(GoCardlessPaymentDao.class);
+        GoCardlessMandateDao goCardlessMandateDao = jdbi.onDemand(GoCardlessMandateDao.class);
 
         // clients
-        GoCardlessClient goCardlessClient = hackGoCardlessClient(configuration, socketFactory);
+        GoCardlessClient goCardlessClient = configuration.getGoCardless().buildClient();
+        //fixme there's an ongoing conversation with gocardless to avoid having to do this
+        if (configuration.getGoCardless().isCallingStubs()) {
+            hackGoCardlessClient(configuration, goCardlessClient, socketFactory);
+        }
         GoCardlessClientWrapper goCardlessClientWrapper = new GoCardlessClientWrapper(goCardlessClient);
 
         //services
@@ -131,11 +139,11 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 gatewayAccountDao);
         GatewayAccountParser gatewayAccountParser = new GatewayAccountParser();
         GatewayAccountService gatewayAccountService = new GatewayAccountService(gatewayAccountDao, gatewayAccountParser);
-
+        PaymentConfirmService paymentConfirmService = new PaymentConfirmService(transactionService, payerDao, mandateDao);
         PayerParser payerParser = new PayerParser();
         PayerService payerService = new PayerService(payerDao, transactionService, payerParser);
-        GoCardlessService goCardlessService = new GoCardlessService(payerService, goCardlessClientWrapper, goCardlessCustomerDao);
-        SandboxService sandboxService = new SandboxService(payerService);
+        GoCardlessService goCardlessService = new GoCardlessService(payerService,paymentConfirmService, goCardlessClientWrapper, goCardlessCustomerDao, goCardlessPaymentDao, goCardlessMandateDao);
+        SandboxService sandboxService = new SandboxService(payerService, paymentConfirmService);
         PaymentProviderFactory paymentProviderFactory = new PaymentProviderFactory(sandboxService, goCardlessService);
 
 
@@ -152,7 +160,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new PaymentRequestResource(paymentRequestService));
         environment.jersey().register(new SecurityTokensResource(tokenService));
         environment.jersey().register(new PayerResource(paymentProviderFactory));
-        environment.jersey().register(new ConfirmPaymentResource(new PaymentConfirmService(transactionService, payerDao, mandateDao)));
+        environment.jersey().register(new ConfirmPaymentResource(paymentProviderFactory));
         environment.jersey().register(new GatewayAccountResource(gatewayAccountService));
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new BadRequestExceptionMapper());
@@ -170,12 +178,10 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     }
 
     // Nasty hack alert - gocardless client does not seem to pick up the certificates in our trust store automatically, so we need to inject those. The underlying client (okhttp) supports that, but it's not accessible. So we make it accessible *** godmode ***. Sent an email to gocardless about the issue.
-    private GoCardlessClient hackGoCardlessClient(DirectDebitConfig configuration, SSLSocketFactory sslSocketFactory) throws IllegalAccessException {
-        GoCardlessClient goCardlessClient = configuration.getGoCardless().buildClient();
+    private void hackGoCardlessClient(DirectDebitConfig configuration, GoCardlessClient goCardlessClient, SSLSocketFactory sslSocketFactory) throws IllegalAccessException {
         Object httpClient = FieldUtils.readField(goCardlessClient, "httpClient", true);
         OkHttpClient rawClient = (OkHttpClient) FieldUtils.readField(httpClient, "rawClient", true);
         rawClient.setSslSocketFactory(sslSocketFactory);
-        return goCardlessClient;
     }
 
     private void initialiseMetrics(DirectDebitConfig configuration, Environment environment) {

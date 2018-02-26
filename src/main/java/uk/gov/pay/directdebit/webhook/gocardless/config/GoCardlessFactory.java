@@ -24,8 +24,12 @@ public class GoCardlessFactory extends Configuration {
     @NotNull
     private GoCardlessClient.Environment environment;
 
+    public Boolean isCallingStubs() {
+        return clientUrl != null;
+    }
+
     public GoCardlessClient buildClient() {
-        if (clientUrl != null) {
+        if (isCallingStubs()) {
             return GoCardlessClient.create(accessToken, clientUrl);
         }
         return GoCardlessClient.create(accessToken, environment);

@@ -8,16 +8,14 @@ public class Mandate {
     private Long payerId;
     private String externalId;
 
-    public Mandate(Long payerId) {
-        this.id = id;
-        this.externalId = RandomIdGenerator.newId();
-        this.payerId = payerId;
-    }
-
     public Mandate(Long id, String externalId, Long payerId) {
         this.id = id;
         this.externalId = externalId;
         this.payerId = payerId;
+    }
+
+    public Mandate(Long payerId) {
+        this(null,  RandomIdGenerator.newId(), payerId);
     }
 
     public Long getId() {

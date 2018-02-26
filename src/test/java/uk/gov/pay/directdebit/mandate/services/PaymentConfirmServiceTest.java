@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.mandate.services;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -15,7 +16,13 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.never;
@@ -59,14 +66,18 @@ public class PaymentConfirmServiceTest {
 
         when(mockMandateDao.insert(any(Mandate.class))).thenReturn(mandateId);
 
-        service.confirm(accountId, paymentRequestExternalId);
+        PaymentConfirmService.ConfirmationDetails confirmationDetails = service.confirm(accountId, paymentRequestExternalId);
+        ArgumentCaptor<Mandate> maCaptor = forClass(Mandate.class);
+        verify(mockMandateDao).insert(maCaptor.capture());
 
-        verify(mockMandateDao)
-                .insert(argThat(mandate -> mandate.getId() == null &&
-                        mandate.getPayerId().equals(payerId) &&
-                        mandate.getExternalId() != null));
+        Mandate mandate = maCaptor.getValue();
+        assertThat(mandate.getId(), is(mandateId));
+        assertThat(mandate.getExternalId(), is(notNullValue()));
+        assertThat(mandate.getPayerId(), is(payerId));
 
         verify(mockTransactionService).mandateCreatedFor(transaction);
+        assertThat(confirmationDetails.getMandate(), is(mandate));
+        assertThat(confirmationDetails.getTransaction(), is(transaction));
     }
 
     @Test

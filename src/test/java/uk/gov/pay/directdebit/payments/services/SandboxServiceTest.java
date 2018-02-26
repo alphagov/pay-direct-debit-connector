@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 
 import java.util.Map;
@@ -19,6 +20,8 @@ public class SandboxServiceTest {
 
     @Mock
     PayerService mockedPayerService;
+    @Mock
+    PaymentConfirmService mockedPaymentConfirmService;
 
     private SandboxService service;
     private String paymentRequestExternalId = "sdkfhsdkjfhjdks";
@@ -26,11 +29,11 @@ public class SandboxServiceTest {
     private GatewayAccount gatewayAccount = aGatewayAccountFixture().toEntity();
     @Before
     public void setUp() {
-        service = new SandboxService(mockedPayerService);
+        service = new SandboxService(mockedPayerService, mockedPaymentConfirmService);
     }
 
     @Test
-    public void shouldDelegateToPayerServiceWhenReceivingPayerRequest() {
+    public void shouldCreatePayerWhenReceivingPayerRequest() {
         Map<String, String> createPayerRequest = ImmutableMap.of();
         service.createPayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
         verify(mockedPayerService).create(paymentRequestExternalId, gatewayAccount.getId(), createPayerRequest);

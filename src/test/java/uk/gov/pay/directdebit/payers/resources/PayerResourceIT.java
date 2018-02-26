@@ -35,8 +35,8 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPa
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
-import static uk.gov.pay.directdebit.util.WiremockStubs.stubCreateCustomer;
-import static uk.gov.pay.directdebit.util.WiremockStubs.stubCreateCustomerBankAccount;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -50,6 +50,7 @@ public class PayerResourceIT {
     private final static String ADDRESS_CITY_KEY = "city";
     private final static String ADDRESS_COUNTRY_KEY = "country_code";
     private final static String ADDRESS_POSTCODE_KEY = "postcode";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -93,7 +94,7 @@ public class PayerResourceIT {
     public void shouldCreateAPayer() throws JsonProcessingException {
         testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
         insertTransactionFixtureWith(SANDBOX);
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+        String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
@@ -130,7 +131,7 @@ public class PayerResourceIT {
         String requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
                 .replace("{accountId}", testGatewayAccount.getId().toString())
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+        String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
@@ -167,7 +168,7 @@ public class PayerResourceIT {
     @Test
     public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
         testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+        String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
                 .put(EMAIL_KEY, payerFixture.getEmail())
@@ -190,6 +191,4 @@ public class PayerResourceIT {
         return given().port(testContext.getPort())
                 .contentType(JSON);
     }
-
-
 }

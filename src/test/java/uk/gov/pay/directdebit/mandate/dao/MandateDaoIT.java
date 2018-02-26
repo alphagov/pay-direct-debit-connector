@@ -26,9 +26,6 @@ import static org.junit.Assert.assertThat;
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class MandateDaoIT {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @DropwizardTestContext
     private TestContext testContext;
 
@@ -44,7 +41,6 @@ public class MandateDaoIT {
 
     @Test
     public void shouldInsertAMandate() {
-
         Long id = mandateDao.insert(new Mandate(payerId));
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(id);
         assertThat(mandate.get("id"), is(id));
