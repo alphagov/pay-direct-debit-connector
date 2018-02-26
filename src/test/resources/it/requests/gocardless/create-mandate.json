@@ -1,0 +1,8 @@
+{
+  "mandates": {
+    "links": {
+      "customer_bank_account": "{{customer_bank_account_id}}"
+    }
+  }
+}
+
