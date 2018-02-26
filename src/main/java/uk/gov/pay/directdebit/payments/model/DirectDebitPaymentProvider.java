@@ -8,4 +8,6 @@ import java.util.Map;
 public interface DirectDebitPaymentProvider {
 
     Payer createPayer(String paymentRequestExternalId, GatewayAccount gatewayAccount, Map<String, String> createPayerRequest);
+
+    void confirm(String paymentRequestExternalId, GatewayAccount gatewayAccount);
 }

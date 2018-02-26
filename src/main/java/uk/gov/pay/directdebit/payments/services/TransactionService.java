@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.payments.services;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
@@ -54,8 +55,8 @@ public class TransactionService {
         return transaction;
     }
 
-    public List<Transaction> findAllByPaymentState(PaymentState paymentState) {
-        return transactionDao.findAllByPaymentState(paymentState);
+    public List<Transaction> findAllByPaymentStateAndProvider(PaymentState paymentState, PaymentProvider paymentProvider) {
+        return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);
     }
 
     public Optional<Transaction> findChargeForToken(String token) {

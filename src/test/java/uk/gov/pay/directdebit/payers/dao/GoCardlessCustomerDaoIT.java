@@ -59,9 +59,9 @@ public class GoCardlessCustomerDaoIT {
 
 
     @Test
-    public void shouldGetAGoCardlessCustomerById() {
+    public void shouldGetAGoCardlessCustomerByPayerId() {
         goCardlessCustomerFixture.insert(testContext.getJdbi());
-        GoCardlessCustomer goCardlessCustomer = goCardlessCustomerDao.findById(goCardlessCustomerFixture.getId()).get();
+        GoCardlessCustomer goCardlessCustomer = goCardlessCustomerDao.findByPayerId(payerFixture.getId()).get();
         assertThat(goCardlessCustomer.getId(), is(goCardlessCustomerFixture.getId()));
         assertThat(goCardlessCustomer.getPayerId(), is(payerFixture.getId()));
         assertThat(goCardlessCustomer.getCustomerId(), is(CUSTOMER_ID));
@@ -70,7 +70,7 @@ public class GoCardlessCustomerDaoIT {
 
     @Test
     public void shouldNotFindAPayerById_ifIdIsInvalid() {
-        assertThat(goCardlessCustomerDao.findById(9812L).isPresent(), is(false));
+        assertThat(goCardlessCustomerDao.findByPayerId(9812L).isPresent(), is(false));
     }
 
     @Test

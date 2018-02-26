@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.webhook.sandbox.resources;
 
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
@@ -23,7 +24,7 @@ public class WebhookSandboxResource {
 
     @POST
     public Response handleWebhook() {
-        List<Transaction> pendingTransactions = transactionService.findAllByPaymentState(PaymentState.PENDING_DIRECT_DEBIT_PAYMENT);
+        List<Transaction> pendingTransactions = transactionService.findAllByPaymentStateAndProvider(PaymentState.PENDING_DIRECT_DEBIT_PAYMENT, PaymentProvider.SANDBOX);
 
         pendingTransactions.forEach(transactionService::paidOutFor);
 

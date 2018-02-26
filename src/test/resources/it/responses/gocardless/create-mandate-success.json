@@ -1,0 +1,18 @@
+{
+  "mandates": {
+    "id": "MD123",
+    "created_at": "2014-05-08T17:01:06.000Z",
+    "reference": "REF-123",
+    "status": "pending_submission",
+    "scheme": "bacs",
+    "next_possible_charge_date": "2014-11-10",
+    "metadata": {
+      "contract": "ABCD1234"
+    },
+    "links": {
+      "customer_bank_account": "{{customer_bank_account_id}}",
+      "creditor": "CR123",
+      "customer": "{{customer_id}}"
+    }
+  }
+}
