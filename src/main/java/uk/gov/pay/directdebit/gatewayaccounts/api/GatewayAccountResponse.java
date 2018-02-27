@@ -3,7 +3,6 @@ package uk.gov.pay.directdebit.gatewayaccounts.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 
 import javax.ws.rs.core.UriInfo;
@@ -102,24 +101,6 @@ public class GatewayAccountResponse {
 
     public List<Map<String, Object>> getLinks() {
         return links;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GatewayAccountResponse that = (GatewayAccountResponse) o;
-        return Objects.equal(gatewayAccountId, that.gatewayAccountId) &&
-                Objects.equal(gatewayAccountExternalId, that.gatewayAccountExternalId) &&
-                Objects.equal(paymentProvider, that.paymentProvider) &&
-                Objects.equal(description, that.description) &&
-                Objects.equal(type, that.type) &&
-                Objects.equal(analyticsId, that.analyticsId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(gatewayAccountId, gatewayAccountExternalId, paymentProvider, description, type, analyticsId);
     }
 }
 

@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.PayerConflictException;
+import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -21,10 +22,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,7 +64,7 @@ public class PaymentConfirmServiceTest {
 
         when(mockMandateDao.insert(any(Mandate.class))).thenReturn(mandateId);
 
-        PaymentConfirmService.ConfirmationDetails confirmationDetails = service.confirm(accountId, paymentRequestExternalId);
+        ConfirmationDetails confirmationDetails = service.confirm(accountId, paymentRequestExternalId);
         ArgumentCaptor<Mandate> maCaptor = forClass(Mandate.class);
         verify(mockMandateDao).insert(maCaptor.capture());
 

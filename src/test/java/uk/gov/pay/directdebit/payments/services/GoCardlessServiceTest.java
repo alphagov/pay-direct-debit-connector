@@ -11,9 +11,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
-import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
-import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -28,18 +27,17 @@ import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailed
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
-import uk.gov.pay.directdebit.payments.exception.CustomerNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.util.Map;
 import java.util.Optional;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.*;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.*;
+import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
+import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -81,7 +79,7 @@ public class GoCardlessServiceTest {
     private GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().toEntity();
     private GatewayAccount gatewayAccount = aGatewayAccountFixture().toEntity();
 
-    private PaymentConfirmService.ConfirmationDetails confirmationDetails = new PaymentConfirmService.ConfirmationDetails(transaction, mandate);
+    private ConfirmationDetails confirmationDetails = new ConfirmationDetails(transaction, mandate);
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
