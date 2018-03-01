@@ -123,7 +123,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         GoCardlessClient goCardlessClient = configuration.getGoCardless().buildClient();
         //fixme there's an ongoing conversation with gocardless to avoid having to do this
         if (configuration.getGoCardless().isCallingStubs()) {
-            hackGoCardlessClient(configuration, goCardlessClient, socketFactory);
+            hackGoCardlessClient(goCardlessClient, socketFactory);
         }
         GoCardlessClientWrapper goCardlessClientWrapper = new GoCardlessClientWrapper(goCardlessClient);
 
@@ -178,7 +178,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     }
 
     // Nasty hack alert - gocardless client does not seem to pick up the certificates in our trust store automatically, so we need to inject those. The underlying client (okhttp) supports that, but it's not accessible. So we make it accessible *** godmode ***. Sent an email to gocardless about the issue.
-    private void hackGoCardlessClient(DirectDebitConfig configuration, GoCardlessClient goCardlessClient, SSLSocketFactory sslSocketFactory) throws IllegalAccessException {
+    private void hackGoCardlessClient(GoCardlessClient goCardlessClient, SSLSocketFactory sslSocketFactory) throws IllegalAccessException {
         Object httpClient = FieldUtils.readField(goCardlessClient, "httpClient", true);
         OkHttpClient rawClient = (OkHttpClient) FieldUtils.readField(httpClient, "rawClient", true);
         rawClient.setSslSocketFactory(sslSocketFactory);
