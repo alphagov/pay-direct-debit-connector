@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import com.gocardless.GoCardlessException;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -76,11 +77,10 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             return customer;
 
         } catch (Exception exc) {
-            LOGGER.error("Failed to create a customer in gocardless, payment request id: {}, error: {}", paymentRequestExternalId, exc.getMessage());
+            logException(exc, "customer", paymentRequestExternalId);
             throw new CreateCustomerFailedException(paymentRequestExternalId, payer.getExternalId());
         }
     }
-
 
     private String createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer, Map<String, String> createPayerRequest) {
         try {
@@ -97,7 +97,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             return customerWithBankAccount.getCustomerId();
 
         } catch (Exception exc) {
-            LOGGER.error("Failed to create a customer bank account in gocardless, payment request id: {}, error: {}", paymentRequestExternalId, exc.getMessage());
+            logException(exc, "bank account", paymentRequestExternalId);
             throw new CreateCustomerBankAccountFailedException(paymentRequestExternalId, payer.getExternalId());
         }
     }
@@ -118,7 +118,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             return mandate;
 
         } catch (Exception exc) {
-            LOGGER.error("Failed to create a mandate in gocardless, payment request id: {}, error: {}", paymentRequestExternalId, exc.getMessage());
+            logException(exc, "mandate", paymentRequestExternalId);
             throw new CreateMandateFailedException(paymentRequestExternalId, payMandate.getExternalId());
         }
     }
@@ -134,8 +134,16 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             return goCardlessPaymentDao.insert(goCardlessPayment).toString();
 
         } catch (Exception exc) {
-            LOGGER.error("Failed to create a customer bank account in gocardless, payment request id: {}, error: {}", paymentRequestExternalId, exc.getMessage());
+            logException(exc, "payment", paymentRequestExternalId);
             throw new CreatePaymentFailedException(paymentRequestExternalId);
+        }
+    }
+
+    private void logException(Exception exc, String resource, String paymentRequestExternalId) {
+        if (exc.getCause() != null) {
+            LOGGER.error("Failed to create a {} in gocardless, payment request id: {}, error: {}, cause: {}", resource, paymentRequestExternalId, exc.getMessage(), exc.getCause().getMessage());
+        } else {
+            LOGGER.error("Failed to create a {} in gocardless, payment request id: {}, error: {}", resource, paymentRequestExternalId, exc.getMessage());
         }
     }
 }
