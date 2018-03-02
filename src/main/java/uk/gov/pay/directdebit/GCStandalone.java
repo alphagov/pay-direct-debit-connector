@@ -34,7 +34,7 @@ public class GCStandalone {
             post.addHeader("Authorization", "Bearer " + System.getenv("GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN"));
             post.setEntity(params);
 
-            HttpClientBuilder httpClientBuilder = HttpClientBuilder.create(); //Use this instead
+            HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 
             if (useProxy) {
                 String PROXY_HOST = System.getenv("HTTPS_PROXY_HOST");
