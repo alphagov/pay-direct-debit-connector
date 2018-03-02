@@ -6,22 +6,21 @@ import com.gocardless.resources.RedirectFlow;
 
 import java.util.List;
 import java.util.Arrays;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-//import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 public class GCStandalone {
-/*
-    private static void httpsRequest() {
-        HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
 
+    private static void httpsRequest(boolean useProxy) {
         JSONObject customer = new JSONObject();
-        customer.put("email", "user@example.com");
-        customer.put("given_name", "Frank");
-        customer.put("family_name", "Osborne");
+        customer.put("email", "belinda@example.com");
+        customer.put("given_name", "Belinda");
+        customer.put("family_name", "Testing");
 
         JSONObject customers = new JSONObject();
         customers.put("customers", customer);
@@ -32,10 +31,19 @@ public class GCStandalone {
             post.addHeader("content-type", "application/json");
             post.addHeader("accept", "application/json");
             post.addHeader("GoCardless-Version", "2015-07-06");
-            post.addHeader("authorization", System.getenv("GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN"));
+            post.addHeader("Authorization", "Bearer " + System.getenv("GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN"));
             post.setEntity(params);
 
-	        HttpResponse response = httpClient.execute(post);
+            HttpClientBuilder httpClientBuilder = HttpClientBuilder.create(); //Use this instead
+
+            if (useProxy) {
+                String PROXY_HOST = System.getenv("HTTPS_PROXY_HOST");
+                int PROXY_PORT = Integer.parseInt(System.getenv("HTTP_PROXY_PORT"));
+                httpClientBuilder.setProxy(new HttpHost(PROXY_HOST, PROXY_PORT));
+            }
+
+            HttpClient httpClient = httpClientBuilder.build();
+            HttpResponse response = httpClient.execute(post);
 
             System.out.println("Successfully posted json");
             System.out.println(response.toString());
@@ -44,7 +52,7 @@ public class GCStandalone {
 	        System.out.println(ex.getMessage());
 	    }
     }
-*/
+
     private static void gcRequest() {
         System.out.println("Creating gocardless sandbox client");
 
@@ -59,14 +67,13 @@ public class GCStandalone {
             );
 
             System.out.println("List of clients:");
-            List<Customer> customers = client.customers().list().execute().getItems();
-            customers.forEach (customer-> {
-                System.out.println((com.gocardless.resources.Customer)customer);
-            });
+            //List<Customer> customers = client.customers().list().execute().getItems();
+            //System.out.println(Arrays.toString(customers.toArray()));
 
-            System.out.println(Arrays.toString(customers.toArray()));
+            for (Customer customer : client.customers().all().execute()) {
+                System.out.println(customer.getId() + " " +  customer.getGivenName() + " " + customer.getFamilyName());
+            }
 
-            return;
             /*System.out.println("Before redirect flow implementation");
 
             RedirectFlow redirectFlow = client.redirectFlows().create()
@@ -93,7 +100,7 @@ public class GCStandalone {
 
     public static void main(String[] args) {
         try {
-            //httpsRequest();
+            httpsRequest(args.length == 1);
             gcRequest();
         } catch (Exception e) {
             System.out.println("Failed ....");
