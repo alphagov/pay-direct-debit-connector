@@ -19,6 +19,10 @@ import java.util.Optional;
 public interface TransactionDao {
 
 
+    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE t.id = :id")
+    @SingleValueResult(Transaction.class)
+    Optional<Transaction> findById(@Bind("id") Long id);
+
     @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE t.payment_request_id = :paymentRequestId")
     @SingleValueResult(Transaction.class)
     Optional<Transaction> findByPaymentRequestId(@Bind("paymentRequestId") Long paymentRequestId);
@@ -33,6 +37,11 @@ public interface TransactionDao {
 
     @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE t.state = :state AND g.payment_provider = :paymentProvider")
     List<Transaction> findAllByPaymentStateAndProvider(@Bind("state") PaymentState paymentState, @Bind("paymentProvider") PaymentProvider paymentProvider);
+
+    @SqlQuery("SELECT * FROM transactions t JOIN payers p ON p.payment_request_id = t.payment_request_id JOIN mandates m ON m.payer_id = p.id WHERE m.id = :mandateId")
+    @SingleValueResult(Transaction.class)
+    Optional<Transaction> findByMandateId(@Bind("mandateId") Long mandateId);
+
 
     @SqlUpdate("UPDATE transactions t SET state = :state WHERE t.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") PaymentState paymentState);
