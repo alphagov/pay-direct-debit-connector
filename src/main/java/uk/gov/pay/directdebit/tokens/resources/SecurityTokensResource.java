@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.tokens.resources;
 import uk.gov.pay.directdebit.tokens.api.TokenResponse;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
+import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -19,6 +20,7 @@ public class SecurityTokensResource {
 
     private final TokenService tokenService;
 
+    @Inject
     public SecurityTokensResource(TokenService tokenService) {
         this.tokenService = tokenService;
     }

@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundEx
 import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 
+import javax.inject.Inject;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
@@ -18,6 +19,8 @@ public class GatewayAccountParamConverterProvider implements ParamConverterProvi
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GatewayAccountParamConverterProvider.class);
 
     private GatewayAccountDao gatewayAccountDao;
+
+    @Inject
     public GatewayAccountParamConverterProvider(GatewayAccountDao gatewayAccountDao) {
         this.gatewayAccountDao = gatewayAccountDao;
     }

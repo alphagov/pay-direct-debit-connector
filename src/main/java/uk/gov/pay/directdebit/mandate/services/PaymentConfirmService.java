@@ -9,11 +9,14 @@ import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
+import javax.inject.Inject;
+
 public class PaymentConfirmService {
     private final MandateDao mandateDao;
     private final PayerDao payerDao;
     private final TransactionService transactionService;
 
+    @Inject
     public PaymentConfirmService(TransactionService transactionService, PayerDao payerDao, MandateDao mandateDao) {
         this.transactionService = transactionService;
         this.payerDao = payerDao;

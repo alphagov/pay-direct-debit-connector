@@ -6,6 +6,7 @@ import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestValidator;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -29,6 +30,7 @@ public class PaymentRequestResource {
     private final PaymentRequestService paymentRequestService;
     private final PaymentRequestValidator paymentRequestValidator = new PaymentRequestValidator();
 
+    @Inject
     public PaymentRequestResource(PaymentRequestService paymentRequestService) {
         this.paymentRequestService = paymentRequestService;
     }

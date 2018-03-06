@@ -6,6 +6,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 
+import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -19,6 +20,7 @@ public class ConfirmPaymentResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmPaymentResource.class);
     private final PaymentProviderFactory paymentProviderFactory;
 
+    @Inject
     public ConfirmPaymentResource(PaymentProviderFactory paymentProviderFactory) {
         this.paymentProviderFactory = paymentProviderFactory;
     }

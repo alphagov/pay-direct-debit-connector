@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -32,7 +33,7 @@ public class GatewayAccountResource {
     private GatewayAccountService gatewayAccountService;
     private final CreateGatewayAccountValidator createGatewayAccountValidator = new CreateGatewayAccountValidator();
 
-
+    @Inject
     public GatewayAccountResource(GatewayAccountService gatewayAccountService) {
         this.gatewayAccountService = gatewayAccountService;
     }

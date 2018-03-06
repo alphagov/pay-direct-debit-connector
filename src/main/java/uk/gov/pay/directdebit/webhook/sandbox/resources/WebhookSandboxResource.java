@@ -5,6 +5,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
+import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -18,6 +19,7 @@ public class WebhookSandboxResource {
 
     private final TransactionService transactionService;
 
+    @Inject
     public WebhookSandboxResource(TransactionService transactionService) {
         this.transactionService = transactionService;
     }
@@ -25,7 +27,6 @@ public class WebhookSandboxResource {
     @POST
     public Response handleWebhook() {
         List<Transaction> pendingTransactions = transactionService.findAllByPaymentStateAndProvider(PaymentState.PENDING_DIRECT_DEBIT_PAYMENT, PaymentProvider.SANDBOX);
-
         pendingTransactions.forEach(transactionService::paidOutFor);
 
         return Response.status(OK).build();

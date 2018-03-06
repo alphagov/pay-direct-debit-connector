@@ -5,11 +5,14 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.SandboxService;
 
+import javax.inject.Inject;
+
 public class PaymentProviderFactory {
 
     private SandboxService sandboxService;
     private GoCardlessService goCardlessService;
 
+    @Inject
     public PaymentProviderFactory(SandboxService sandboxService, GoCardlessService goCardlessService) {
         this.goCardlessService = goCardlessService;
         this.sandboxService = sandboxService;
