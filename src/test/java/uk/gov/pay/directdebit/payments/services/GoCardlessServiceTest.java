@@ -27,7 +27,10 @@ import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailed
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
+import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.util.Map;
@@ -39,6 +42,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoCardlessServiceTest {
@@ -99,6 +103,30 @@ public class GoCardlessServiceTest {
         verify(mockedGoCardlessCustomerDao).insert(goCardlessCustomer);
         verify(mockedGoCardlessClientWrapper).createCustomer(paymentRequestExternalId, payer);
         verify(mockedGoCardlessClientWrapper).createCustomerBankAccount(paymentRequestExternalId, goCardlessCustomer, payer.getName(), SORT_CODE, ACCOUNT_NUMBER);
+    }
+
+    @Test
+    public void shouldThrowIfNoPaymentIsFoundForEvent() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().toEntity();
+        String resourceId = "aaa";
+        goCardlessEvent.setResourceId(resourceId);
+        when(mockedGoCardlessPaymentDao.findByEventResourceId(resourceId)).thenReturn(Optional.empty());
+        thrown.expect(GoCardlessPaymentNotFoundException.class);
+        thrown.expectMessage("No gocardless payment found with resource id: aaa");
+        thrown.reportMissingExceptionWithMessage("GoCardlessPaymentNotFoundException expected");
+        service.findPaymentForEvent(goCardlessEvent);
+    }
+
+    @Test
+    public void shouldThrowIfNoMandateIsFoundForEvent() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().toEntity();
+        String resourceId = "aaa";
+        goCardlessEvent.setResourceId(resourceId);
+        when(mockedGoCardlessMandateDao.findByEventResourceId(resourceId)).thenReturn(Optional.empty());
+        thrown.expect(GoCardlessMandateNotFoundException.class);
+        thrown.expectMessage("No gocardless mandate found with resource id: aaa");
+        thrown.reportMissingExceptionWithMessage("GoCardlessMandateNotFoundException expected");
+        service.findMandateForEvent(goCardlessEvent);
     }
 
     @Test

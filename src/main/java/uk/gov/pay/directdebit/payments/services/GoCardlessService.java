@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import com.gocardless.GoCardlessException;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -21,9 +20,13 @@ import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
 import uk.gov.pay.directdebit.payments.exception.CustomerNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
+import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
+import javax.inject.Inject;
 import java.util.Map;
 
 public class GoCardlessService implements DirectDebitPaymentProvider {
@@ -35,6 +38,8 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     private final GoCardlessCustomerDao goCardlessCustomerDao;
     private final GoCardlessMandateDao goCardlessMandateDao;
     private final GoCardlessPaymentDao goCardlessPaymentDao;
+
+    @Inject
     public GoCardlessService(PayerService payerService,
                              PaymentConfirmService paymentConfirmService,
                              GoCardlessClientWrapper goCardlessClientWrapper,
@@ -137,6 +142,18 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             logException(exc, "payment", paymentRequestExternalId);
             throw new CreatePaymentFailedException(paymentRequestExternalId);
         }
+    }
+
+    public GoCardlessPayment findPaymentForEvent(GoCardlessEvent event) {
+        return goCardlessPaymentDao
+                .findByEventResourceId(event.getResourceId())
+                .orElseThrow(() -> new GoCardlessPaymentNotFoundException(event.getResourceId()));
+    }
+
+    public GoCardlessMandate findMandateForEvent(GoCardlessEvent event) {
+       return goCardlessMandateDao
+                .findByEventResourceId(event.getResourceId())
+                .orElseThrow(() -> new GoCardlessMandateNotFoundException(event.getResourceId()));
     }
 
     private void logException(Exception exc, String resource, String paymentRequestExternalId) {
