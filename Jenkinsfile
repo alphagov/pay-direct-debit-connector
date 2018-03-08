@@ -19,6 +19,8 @@ pipeline {
   environment {
     DOCKER_HOST = "unix:///var/run/docker.sock"
     RUN_END_TO_END_ON_PR = "${params.runEndToEndOnPR}"
+    HOSTED_GRAPHITE_ACCOUNT_ID = credentials('graphite_account_id')
+    HOSTED_GRAPHITE_API_KEY = credentials('graphite_api_key')
   }
 
   stages {
@@ -43,9 +45,14 @@ pipeline {
     stage('Docker Build') {
       steps {
         script {
-          buildApp{
+          buildAppWithMetrics {
             app = "directdebit-connector"
           }
+        }
+      }
+      post {
+        failure {
+          postMetric("directdebit-connector.docker-build.failure", 1, "new")
         }
       }
     }
@@ -57,9 +64,14 @@ pipeline {
     stage('Docker Tag') {
       steps {
         script {
-          dockerTag {
+          dockerTagWithMetrics {
             app = "directdebit-connector"
           }
+        }
+      }
+      post {
+        failure {
+          postMetric("directdebit-connector.docker-tag.failure", 1, "new")
         }
       }
     }
@@ -70,6 +82,14 @@ pipeline {
       steps {
         deployEcs("directdebit-connector", "test", null, true, true, "uk.gov.pay.endtoend.categories.SmokeDirectDebitPayments", false)
       }
+    }
+  }
+  post {
+    failure {
+      postMetric("directdebit-connector.failure", 1, "new")
+    }
+    success {
+      postSuccessfulMetrics("directdebit-connector")
     }
   }
 }
