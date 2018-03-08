@@ -15,7 +15,7 @@ import static uk.gov.pay.directdebit.junit.PostgresTestContainer.DB_USERNAME;
 
 final class PostgresTestDocker {
 
-    static final String DB_NAME = "directdebitconnectortests";
+    static final String DB_NAME = "directdebit_connector_tests";
     private static final String DOCKER_HOST = "DOCKER_HOST";
     private static final String DOCKER_CERT_PATH = "DOCKER_CERT_PATH";
     private static final String HOST = dockerHostLocalAware();
