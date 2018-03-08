@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
 
 import javax.inject.Inject;
@@ -12,28 +13,14 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WebhookParser {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(WebhookParser.class);
+public class GoCardlessWebhookParser {
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessWebhookParser.class);
 
     private ObjectMapper objectMapper;
 
     @Inject
-    public WebhookParser(ObjectMapper objectMapper) {
+    public GoCardlessWebhookParser(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-    }
-
-    public enum HandledResourceType {
-        PAYMENTS, MANDATES;
-
-        public static HandledResourceType fromString(String type) {
-            for (HandledResourceType typeEnum : HandledResourceType.values()) {
-                if (typeEnum.toString().equalsIgnoreCase(type)) {
-                    return typeEnum;
-                }
-            }
-            LOGGER.warn("Received webhook from gocardless with unhandled resource_type: {}", type);
-            return null;
-        }
     }
 
     public List<GoCardlessEvent> parse(String webhookPayload) {
@@ -43,33 +30,37 @@ public class WebhookParser {
             JsonNode eventsPayload = webhookJson.get("events");
             for (JsonNode eventNode: eventsPayload) {
                 String resourceType = eventNode.get("resource_type").asText();
-                HandledResourceType handledResourceType = HandledResourceType.fromString(resourceType);
-                String bla = null;
-
-                if (handledResourceType != null) {
-                    switch (handledResourceType) {
-                        case PAYMENTS:
-                            bla = eventNode.get("links").get("payment").asText();
-                            break;
-                        case MANDATES:
-                            bla = eventNode.get("links").get("mandate").asText();
-                            break;
-                    }
-                }
+                GoCardlessResourceType handledGoCardlessResourceType = GoCardlessResourceType.fromString(resourceType);
+                String resourceId = extractResourceIdFrom(eventNode, handledGoCardlessResourceType);
                 GoCardlessEvent event = new GoCardlessEvent(
                         null,
                         eventNode.get("id").asText(),
                         eventNode.get("action").asText(),
-                        resourceType,
+                        handledGoCardlessResourceType,
                         eventNode.toString(),
                         ZonedDateTime.parse(eventNode.get("created_at").asText())
                 );
-                event.setResourceId(bla);
+                event.setResourceId(resourceId);
                 events.add(event);
+                LOGGER.info("Successfully parsed gocardless webhook, event resource type: {}, action: {}, resource id {}",
+                        event.getResourceType(),
+                        event.getAction(),
+                        event.getResourceId());
             }
             return events;
         } catch (Exception exc) {
             throw new WebhookParserException("Failed to parse webhooks, body: " + webhookPayload);
+        }
+    }
+
+    private String extractResourceIdFrom(JsonNode jsonNode, GoCardlessResourceType goCardlessResourceType) {
+        switch (goCardlessResourceType) {
+            case PAYMENTS:
+                return jsonNode.get("links").get("payment").asText();
+            case MANDATES:
+                return jsonNode.get("links").get("mandate").asText();
+            default:
+                return null;
         }
     }
 }

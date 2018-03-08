@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -28,6 +29,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 @RunWith(DropwizardJUnitRunner.class)
@@ -43,10 +45,10 @@ public class GoCardlessEventDaoIT {
     private final static Long PAYMENT_REQUEST_EVENTS_ID = 6L;
     private final static String GOCARDLESS_EVENT_ID = "dhg2342h3kjh";
     private final static String GOCARDLESS_ACTION = "something happened";
-    private final static String GOCARDLESS_RESOURCE_TYPE = "payment";
+    private final static GoCardlessResourceType GOCARDLESS_RESOURCE_TYPE = PAYMENTS;
     ObjectMapper objectMapper = new ObjectMapper();
     JsonNode eventJson;
-    private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2017-12-30T12:30:40Z[UTC]");
+    private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2017-12-30T12:30:40Z");
 
     private GoCardlessEvent goCardlessEvent;
     private PaymentRequestFixture testPaymentRequest;
@@ -78,7 +80,7 @@ public class GoCardlessEventDaoIT {
         assertThat(foundGoCardlessEvent.get("payment_request_events_id"), is(PAYMENT_REQUEST_EVENTS_ID));
         assertThat(foundGoCardlessEvent.get("event_id"), is(GOCARDLESS_EVENT_ID));
         assertThat(foundGoCardlessEvent.get("action"), is(GOCARDLESS_ACTION));
-        assertThat(foundGoCardlessEvent.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE));
+        assertThat(foundGoCardlessEvent.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
         assertThat(objectMapper.readTree(foundGoCardlessEvent.get("json").toString()), is(eventJson));
         assertThat((Timestamp) foundGoCardlessEvent.get("created_at"), isDate(CREATED_AT));
     }

@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.payers.model;
 
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class Payer {
@@ -41,7 +41,7 @@ public class Payer {
     }
 
     public Payer(Long paymentRequestId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation, String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCountry) {
-        this(null, paymentRequestId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, addressLine1, addressLine2, addressPostcode, addressCity, addressCountry, ZonedDateTime.now(ZoneId.of("UTC")));
+        this(null, paymentRequestId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, addressLine1, addressLine2, addressPostcode, addressCity, addressCountry, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     public void setId(Long id) {

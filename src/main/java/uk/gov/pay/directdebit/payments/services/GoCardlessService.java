@@ -15,6 +15,7 @@ import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
+import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
@@ -38,6 +39,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     private final GoCardlessCustomerDao goCardlessCustomerDao;
     private final GoCardlessMandateDao goCardlessMandateDao;
     private final GoCardlessPaymentDao goCardlessPaymentDao;
+    private final GoCardlessEventDao goCardlessEventDao;
 
     @Inject
     public GoCardlessService(PayerService payerService,
@@ -45,13 +47,15 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
                              GoCardlessClientWrapper goCardlessClientWrapper,
                              GoCardlessCustomerDao goCardlessCustomerDao,
                              GoCardlessPaymentDao goCardlessPaymentDao,
-                             GoCardlessMandateDao goCardlessMandateDao) {
+                             GoCardlessMandateDao goCardlessMandateDao,
+                             GoCardlessEventDao goCardlessEventDao) {
         this.payerService = payerService;
         this.paymentConfirmService = paymentConfirmService;
         this.goCardlessClientWrapper = goCardlessClientWrapper;
         this.goCardlessCustomerDao = goCardlessCustomerDao;
         this.goCardlessMandateDao = goCardlessMandateDao;
         this.goCardlessPaymentDao = goCardlessPaymentDao;
+        this.goCardlessEventDao = goCardlessEventDao;
     }
 
     @Override
@@ -144,18 +148,28 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         }
     }
 
+    public void storeEvent(GoCardlessEvent event) {
+        goCardlessEventDao.insert(event);
+        LOGGER.info("inserted gocardless event with id {} ", event.getEventId());
+    }
+
     public GoCardlessPayment findPaymentForEvent(GoCardlessEvent event) {
         return goCardlessPaymentDao
                 .findByEventResourceId(event.getResourceId())
-                .orElseThrow(() -> new GoCardlessPaymentNotFoundException(event.getResourceId()));
+                .orElseThrow(() -> {
+                     LOGGER.error("Couldn't find gocardless payment for event: {}", event.getJson());
+                     return new GoCardlessPaymentNotFoundException(event.getResourceId());
+                });
     }
 
     public GoCardlessMandate findMandateForEvent(GoCardlessEvent event) {
        return goCardlessMandateDao
                 .findByEventResourceId(event.getResourceId())
-                .orElseThrow(() -> new GoCardlessMandateNotFoundException(event.getResourceId()));
+                .orElseThrow(() -> {
+                    LOGGER.error("Couldn't find gocardless mandate for event: {}", event.getJson());
+                    return new GoCardlessMandateNotFoundException(event.getResourceId());
+                });
     }
-
     private void logException(Exception exc, String resource, String paymentRequestExternalId) {
         if (exc.getCause() != null) {
             LOGGER.error("Failed to create a {} in gocardless, payment request id: {}, error: {}, cause: {}", resource, paymentRequestExternalId, exc.getMessage(), exc.getCause().getMessage());

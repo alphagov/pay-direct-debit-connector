@@ -31,7 +31,7 @@ public class GoCardlessMandateDaoIT {
     private GoCardlessMandateDao mandateDao;
     private MandateFixture mandateFixture;
 
-    private final String GOCARDLESS_MANDATE_ID = "NA23434";
+    private final static String GOCARDLESS_MANDATE_ID = "NA23434";
     private GoCardlessMandateFixture testGoCardlessMandate;
 
     @Before
@@ -59,7 +59,7 @@ public class GoCardlessMandateDaoIT {
         testGoCardlessMandate.insert(testContext.getJdbi());
         GoCardlessMandate goCardlessMandate = mandateDao
                 .findByEventResourceId(GOCARDLESS_MANDATE_ID).get();
-        assertThat(goCardlessMandate.getId(), is(goCardlessMandate.getId()));
+        assertThat(goCardlessMandate.getId(), is(testGoCardlessMandate.getId()));
         assertThat(goCardlessMandate.getMandateId(), is(mandateFixture.getId()));
         assertThat(goCardlessMandate.getGoCardlessMandateId(), is(GOCARDLESS_MANDATE_ID));
     }

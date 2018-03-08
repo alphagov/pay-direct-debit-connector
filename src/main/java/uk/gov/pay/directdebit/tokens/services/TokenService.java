@@ -33,7 +33,7 @@ public class TokenService {
 
     public Transaction validateChargeWithToken(String token) {
         return transactionService
-                .findChargeForToken(token)
+                .findTransactionForToken(token)
                 .orElseThrow(TokenNotFoundException::new);
     }
 

@@ -31,7 +31,7 @@ public class GoCardlessPaymentDaoIT {
 
     private TransactionFixture transactionFixture;
 
-    private final String GOCARDLESS_PAYMENT_ID = "NA23434";
+    private final static String GOCARDLESS_PAYMENT_ID = "NA23434";
 
     private GoCardlessPaymentFixture goCardlessPaymentFixture;
     @Before

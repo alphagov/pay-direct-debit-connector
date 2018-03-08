@@ -6,7 +6,7 @@ import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 
 import java.sql.Timestamp;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
@@ -19,7 +19,7 @@ public class PaymentRequestEventFixture implements DbFixture<PaymentRequestEvent
     private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
     private Type eventType = CHARGE;
     private SupportedEvent event = CHARGE_CREATED;
-    private ZonedDateTime eventDate = ZonedDateTime.now(ZoneId.of("UTC"));
+    private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
 
     private PaymentRequestEventFixture() {
     }

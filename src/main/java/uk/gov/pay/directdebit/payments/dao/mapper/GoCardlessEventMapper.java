@@ -3,10 +3,11 @@ package uk.gov.pay.directdebit.payments.dao.mapper;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class GoCardlessEventMapper implements ResultSetMapper<GoCardlessEvent> {
@@ -25,8 +26,8 @@ public class GoCardlessEventMapper implements ResultSetMapper<GoCardlessEvent> {
                 resultSet.getLong(PAYMENT_REQUEST_EVENTS_ID_COLUMN),
                 resultSet.getString(EVENT_ID_COLUMN),
                 resultSet.getString(ACTION_COLUMN),
-                resultSet.getString(RESOURCE_TYPE_COLUMN),
+                GoCardlessResourceType.fromString(resultSet.getString(RESOURCE_TYPE_COLUMN)),
                 resultSet.getString(JSON_COLUMN),
-                ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_AT_COLUMN).toInstant(), ZoneId.of("UTC")));
+                ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_AT_COLUMN).toInstant(), ZoneOffset.UTC));
     }
 }

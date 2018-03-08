@@ -61,12 +61,12 @@ public class WebhookGoCardlessResourceIT {
 
         Map<String, Object> firstEvent = events.get(0);
         assertThat(firstEvent.get("event_id"), is("EV0000ED6V59V1"));
-        assertThat(firstEvent.get("resource_type"), is("payments"));
+        assertThat(firstEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(firstEvent.get("action"), is("submitted"));
 
         Map<String, Object> secondEvent = events.get(1);
         assertThat(secondEvent.get("event_id"), is("EV0000ED6WBEQ0"));
-        assertThat(secondEvent.get("resource_type"), is("payments"));
+        assertThat(secondEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(secondEvent.get("action"), is("paid_out"));
 
         Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());

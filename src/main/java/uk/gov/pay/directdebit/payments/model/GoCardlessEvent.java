@@ -8,12 +8,12 @@ public class GoCardlessEvent {
     private Long paymentRequestEventId;
     private String eventId;
     private String action;
-    private String resourceType;
+    private GoCardlessResourceType resourceType;
     private String json;
     private ZonedDateTime createdAt;
     private String resourceId;
 
-    public GoCardlessEvent(Long id, Long paymentRequestEventId, String eventId, String action, String resourceType, String json, ZonedDateTime createdAt) {
+    public GoCardlessEvent(Long id, Long paymentRequestEventId, String eventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
         this.id = id;
         this.paymentRequestEventId = paymentRequestEventId;
         this.eventId = eventId;
@@ -23,7 +23,7 @@ public class GoCardlessEvent {
         this.createdAt = createdAt;
     }
 
-    public GoCardlessEvent(Long paymentRequestEventId, String eventId, String action, String resourceType, String json, ZonedDateTime createdAt) {
+    public GoCardlessEvent(Long paymentRequestEventId, String eventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
         this(null, paymentRequestEventId, eventId, action,  resourceType, json, createdAt);
     }
 
@@ -63,11 +63,11 @@ public class GoCardlessEvent {
         return this;
     }
 
-    public String getResourceType() {
+    public GoCardlessResourceType getResourceType() {
         return resourceType;
     }
 
-    public GoCardlessEvent setResourceType(String resourceType) {
+    public GoCardlessEvent setResourceType(GoCardlessResourceType resourceType) {
         this.resourceType = resourceType;
         return this;
     }

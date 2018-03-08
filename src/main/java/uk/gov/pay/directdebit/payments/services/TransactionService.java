@@ -61,14 +61,8 @@ public class TransactionService {
         return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);
     }
 
-    public Transaction findChargeForMandateId(Long mandateId) {
-        Transaction transaction = transactionDao.findByMandateId(mandateId)
-                .orElseThrow(() -> new ChargeNotFoundException(mandateId.toString()));
-        LOGGER.info("Found charge for mandate id: {}", mandateId.toString());
-        return transaction;
-    }
 
-    public Optional<Transaction> findChargeForToken(String token) {
+    public Optional<Transaction> findTransactionForToken(String token) {
         return transactionDao
                 .findByTokenId(token).map(charge -> {
                     Transaction newCharge = updateStateFor(charge, SupportedEvent.TOKEN_EXCHANGED);
@@ -76,10 +70,16 @@ public class TransactionService {
                     return newCharge;
                 });
     }
-    public Transaction findChargeFor(Long transactionId) {
+    public Transaction findTransactionFor(Long transactionId) {
         return transactionDao
                 .findById(transactionId)
                 .orElseThrow(() -> new ChargeNotFoundException(transactionId.toString()));
+    }
+    public Transaction findTransactionForMandateId(Long mandateId) {
+        Transaction transaction = transactionDao.findByMandateId(mandateId)
+                .orElseThrow(() -> new ChargeNotFoundException(mandateId.toString()));
+        LOGGER.info("Found transaction {} for mandate {}", transaction.getId(), mandateId.toString());
+        return transaction;
     }
     public Transaction receiveDirectDebitDetailsFor(Long accountId, String paymentRequestExternalId) {
         Transaction transaction = findChargeForExternalIdAndGatewayAccountId(paymentRequestExternalId, accountId);
@@ -109,15 +109,15 @@ public class TransactionService {
         return paymentRequestEventService.registerPaidOutEventFor(newTransaction);
     }
 
-    private Transaction updateStateFor(Transaction charge, SupportedEvent event) {
-        PaymentState newState = getStates().getNextStateForEvent(charge.getState(),
+    private Transaction updateStateFor(Transaction transaction, SupportedEvent event) {
+        PaymentState newState = getStates().getNextStateForEvent(transaction.getState(),
                 event);
-        transactionDao.updateState(charge.getId(), newState);
-        charge.setState(newState);
-        LOGGER.info("Updated charge {} - from {} to {}",
-                charge.getPaymentRequestExternalId(),
-                charge.getState(),
+        transactionDao.updateState(transaction.getId(), newState);
+        transaction.setState(newState);
+        LOGGER.info("Updated transaction {} - from {} to {}",
+                transaction.getPaymentRequestExternalId(),
+                transaction.getState(),
                 newState);
-        return charge;
+        return transaction;
     }
 }

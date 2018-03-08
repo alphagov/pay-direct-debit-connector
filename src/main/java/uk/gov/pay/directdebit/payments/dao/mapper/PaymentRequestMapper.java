@@ -6,7 +6,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class PaymentRequestMapper implements ResultSetMapper<PaymentRequest> {
@@ -29,6 +29,6 @@ public class PaymentRequestMapper implements ResultSetMapper<PaymentRequest> {
                 resultSet.getString(DESCRIPTION_COLUMN),
                 resultSet.getString(REFERENCE_COLUMN),
                 resultSet.getString(EXTERNAL_ID_COLUMN),
-                ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneId.of("UTC")));
+                ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC));
     }
 }

@@ -43,7 +43,7 @@ public class TokenServiceTest {
     public void setUp() throws Exception {
         transactionFixture = aTransactionFixture().withState(PaymentState.NEW);
         service = new TokenService(mockedTokenDao, mockedTransactionService);
-        when(mockedTransactionService.findChargeForToken(TOKEN))
+        when(mockedTransactionService.findTransactionForToken(TOKEN))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
     }
 
@@ -64,7 +64,7 @@ public class TokenServiceTest {
 
     @Test
     public void shouldThrowIfTokenDoesNotExist() {
-        when(mockedTransactionService.findChargeForToken("not-existing")).thenReturn(Optional.empty());
+        when(mockedTransactionService.findTransactionForToken("not-existing")).thenReturn(Optional.empty());
         thrown.expect(TokenNotFoundException.class);
         thrown.expectMessage("No one-time token found for payment request");
         thrown.reportMissingExceptionWithMessage("TokenNotFoundException.class expected");

@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
-import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -25,14 +24,13 @@ import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.a
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.MANDATES;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.UNKNOWN;
 
 @RunWith(MockitoJUnitRunner.class)
 
 public class WebhookGoCardlessServiceTest {
-
-    @Mock
-    GoCardlessEventDao mockedGoCardlessEventDao;
-
     @Mock
     GoCardlessService mockedGoCardlessService;
 
@@ -40,9 +38,13 @@ public class WebhookGoCardlessServiceTest {
     TransactionService mockedTransactionService;
 
     WebhookGoCardlessService webhookGoCardlessService;
+    GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().toEntity();
+    Transaction transaction = aTransactionFixture().toEntity();
+    GoCardlessMandate goCardlessMandate = aGoCardlessMandateFixture().toEntity();
+
     @Before
     public void setUp() {
-        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessEventDao, mockedGoCardlessService, mockedTransactionService);
+        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessService, mockedTransactionService);
     }
 
     @Test
@@ -51,72 +53,57 @@ public class WebhookGoCardlessServiceTest {
         GoCardlessEvent secondGoCardlessEvent = aGoCardlessEventFixture().toEntity();
         List<GoCardlessEvent> events = Arrays.asList(firstGoCardlessEvent, secondGoCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventDao).insert(firstGoCardlessEvent);
-        verify(mockedGoCardlessEventDao).insert(secondGoCardlessEvent);
+        verify(mockedGoCardlessService).storeEvent(firstGoCardlessEvent);
+        verify(mockedGoCardlessService).storeEvent(secondGoCardlessEvent);
     }
 
     @Test
-    public void shouldHandlePaymentEventsWithAValidAction() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType("payments").withAction("paid_out").toEntity();
-        GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().toEntity();
-        Transaction transaction = aTransactionFixture().toEntity();
+    public void shouldStoreEventsWithAnUnhandledResource() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(UNKNOWN).withAction("created").toEntity();
+
+        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
+        webhookGoCardlessService.handleEvents(events);
+        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verifyZeroInteractions(mockedTransactionService);
+    }
+
+    @Test
+    public void shouldStoreButNotHandlePaymentEventsWithAnInvalidAction() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(PAYMENTS).withAction("not_handled").toEntity();
+
+        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
+        webhookGoCardlessService.handleEvents(events);
+        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verifyZeroInteractions(mockedTransactionService);
+    }
+
+    @Test
+    public void shouldStoreAndHandlePaymentEventsWithAValidAction() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(PAYMENTS).withAction("paid_out").toEntity();
+
         PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.paidOut(transaction.getPaymentRequestId());
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPayment);
-        when(mockedTransactionService.findChargeFor(goCardlessPayment.getTransactionId())).thenReturn(transaction);
+        when(mockedTransactionService.findTransactionFor(goCardlessPayment.getTransactionId())).thenReturn(transaction);
         when(mockedTransactionService.paidOutFor(transaction)).thenReturn(paymentRequestEvent);
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventDao).insert(goCardlessEvent);
-        verify(mockedGoCardlessEventDao).updatePaymentRequestEventId(goCardlessEvent.getId(), paymentRequestEvent.getId());
+        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedTransactionService).paidOutFor(transaction);
     }
 
     @Test
-    public void shouldNotHandleMandateEventsWithAnInvalidResource() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType("not_handled").withAction("created").toEntity();
+    public void shouldStoreAndHandleMandateEventsWithAValidAction() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(MANDATES).withAction("created").toEntity();
 
-        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
-        webhookGoCardlessService.handleEvents(events);
-
-        verify(mockedGoCardlessEventDao).insert(goCardlessEvent);
-        verifyZeroInteractions(mockedGoCardlessService);
-        verifyZeroInteractions(mockedTransactionService);
-    }
-
-    @Test
-    public void shouldNotHandlePaymentEventsWithAnInvalidAction() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType("payments").withAction("not_handled").toEntity();
-
-        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
-        webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventDao).insert(goCardlessEvent);
-        verifyZeroInteractions(mockedGoCardlessService);
-        verifyZeroInteractions(mockedTransactionService);
-    }
-
-    @Test
-    public void shouldNotHandleMandateEventsWithAnInvalidAction() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType("mandates").withAction("not_handled").toEntity();
-
-        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
-        webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventDao).insert(goCardlessEvent);
-        verifyZeroInteractions(mockedGoCardlessService);
-        verifyZeroInteractions(mockedTransactionService);
-    }
-    @Test
-    public void shouldHandleMandateEventsWithAValidAction() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType("mandates").withAction("created").toEntity();
-        GoCardlessMandate goCardlessMandate = aGoCardlessMandateFixture().toEntity();
-        Transaction transaction = aTransactionFixture().toEntity();
         PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.mandateCreated(transaction.getPaymentRequestId());
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandate);
-        when(mockedTransactionService.findChargeForMandateId(goCardlessMandate.getMandateId())).thenReturn(transaction);
+        when(mockedTransactionService.findTransactionForMandateId(goCardlessMandate.getMandateId())).thenReturn(transaction);
         when(mockedTransactionService.mandateCreatedFor(transaction)).thenReturn(paymentRequestEvent);
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventDao).insert(goCardlessEvent);
-        verify(mockedGoCardlessEventDao).updatePaymentRequestEventId(goCardlessEvent.getId(), paymentRequestEvent.getId());
+        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedTransactionService).mandateCreatedFor(transaction);
     }
 }
