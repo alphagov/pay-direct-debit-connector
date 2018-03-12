@@ -29,7 +29,18 @@ pipeline {
         }
       }
       steps {
-        sh 'mvn clean verify'
+        script {
+          def long stepBuildTime = System.currentTimeMillis()
+
+          sh 'mvn clean verify'
+
+          postSuccessfulMetrics("directdebit-connector.maven-build", stepBuildTime)
+        }
+      }
+      post {
+        failure {
+          postMetric("directdebit-connector.maven-build.failure", 1, "new")
+        }
       }
     }
     stage('Maven Build Without Tests') {
