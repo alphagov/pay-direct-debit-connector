@@ -6,6 +6,9 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessActionHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -24,13 +27,11 @@ public class WebhookGoCardlessService {
     public void handleEvents(List<GoCardlessEvent> events) {
         events.forEach(event -> {
             GoCardlessActionHandler handler = getHandlerFor(event.getResourceType());
-            if (handler != null) {
-                LOGGER.info("About to handle event of type: {}, action: {}, resource id: {}",
-                        event.getResourceType(),
-                        event.getAction(),
-                        event.getResourceId());
-                handler.handle(event);
-            }
+            LOGGER.info("About to handle event of type: {}, action: {}, resource id: {}",
+                    event.getResourceType(),
+                    event.getAction(),
+                    event.getResourceId());
+            handler.handle(event);
 
         });
     }
@@ -41,8 +42,8 @@ public class WebhookGoCardlessService {
                 return new GoCardlessPaymentHandler(transactionService, goCardlessService);
             case MANDATES:
                 return new GoCardlessMandateHandler(transactionService, goCardlessService);
-                default:
-                    return goCardlessService::storeEvent;
+            default:
+                return goCardlessService::storeEvent;
         }
     }
 }

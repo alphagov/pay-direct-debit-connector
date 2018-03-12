@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class GoCardlessWebhookParser {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessWebhookParser.class);
@@ -31,16 +32,15 @@ public class GoCardlessWebhookParser {
             for (JsonNode eventNode: eventsPayload) {
                 String resourceType = eventNode.get("resource_type").asText();
                 GoCardlessResourceType handledGoCardlessResourceType = GoCardlessResourceType.fromString(resourceType);
-                String resourceId = extractResourceIdFrom(eventNode, handledGoCardlessResourceType);
                 GoCardlessEvent event = new GoCardlessEvent(
-                        null,
                         eventNode.get("id").asText(),
                         eventNode.get("action").asText(),
                         handledGoCardlessResourceType,
                         eventNode.toString(),
                         ZonedDateTime.parse(eventNode.get("created_at").asText())
                 );
-                event.setResourceId(resourceId);
+                extractResourceIdFrom(eventNode, handledGoCardlessResourceType)
+                        .ifPresent(event::setResourceId);
                 events.add(event);
                 LOGGER.info("Successfully parsed gocardless webhook, event resource type: {}, action: {}, resource id {}",
                         event.getResourceType(),
@@ -53,14 +53,14 @@ public class GoCardlessWebhookParser {
         }
     }
 
-    private String extractResourceIdFrom(JsonNode jsonNode, GoCardlessResourceType goCardlessResourceType) {
+    private Optional<String> extractResourceIdFrom(JsonNode jsonNode, GoCardlessResourceType goCardlessResourceType) {
         switch (goCardlessResourceType) {
             case PAYMENTS:
-                return jsonNode.get("links").get("payment").asText();
+                return Optional.of(jsonNode.get("links").get("payment").asText());
             case MANDATES:
-                return jsonNode.get("links").get("mandate").asText();
+                return Optional.of(jsonNode.get("links").get("mandate").asText());
             default:
-                return null;
+                return Optional.empty();
         }
     }
 }

@@ -46,8 +46,8 @@ public class GoCardlessEventDaoIT {
     private final static String GOCARDLESS_EVENT_ID = "dhg2342h3kjh";
     private final static String GOCARDLESS_ACTION = "something happened";
     private final static GoCardlessResourceType GOCARDLESS_RESOURCE_TYPE = PAYMENTS;
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode eventJson;
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private JsonNode eventJson;
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2017-12-30T12:30:40Z");
 
     private GoCardlessEvent goCardlessEvent;

@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.webhook.gocardless.services;
+package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
@@ -8,9 +8,14 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
-public class GoCardlessMandateHandler implements GoCardlessActionHandler {
+public class GoCardlessMandateHandler extends GoCardlessHandler {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessMandateHandler.class);
+
+    public GoCardlessMandateHandler(TransactionService transactionService, GoCardlessService goCardlessService) {
+        super(transactionService, goCardlessService);
+    }
 
     public enum GoCardlessMandateAction implements GoCardlessAction {
         CREATED {
@@ -19,7 +24,6 @@ public class GoCardlessMandateHandler implements GoCardlessActionHandler {
                 return transactionService.mandateCreatedFor(transaction);
             }
         };
-
 
         public static GoCardlessMandateAction fromString(String type) {
             for (GoCardlessMandateAction typeEnum : GoCardlessMandateAction.values()) {
@@ -32,22 +36,14 @@ public class GoCardlessMandateHandler implements GoCardlessActionHandler {
         }
     }
 
-    private final TransactionService transactionService;
-    private final GoCardlessService goCardlessService;
-    public GoCardlessMandateHandler(TransactionService transactionService, GoCardlessService goCardlessService) {
-        this.transactionService = transactionService;
-        this.goCardlessService = goCardlessService;
+    @Override
+    protected GoCardlessAction parseAction(String action) {
+        return GoCardlessMandateAction.fromString(action);
     }
 
-    public void handle(GoCardlessEvent event) {
-        GoCardlessAction goCardlessAction = GoCardlessMandateAction.fromString(event.getAction());
-        if (goCardlessAction != null) {
-            GoCardlessMandate goCardlessMandate = goCardlessService.findMandateForEvent(event);
-            Transaction transaction = transactionService.findTransactionForMandateId(goCardlessMandate.getMandateId());
-            PaymentRequestEvent paymentRequestEvent = goCardlessAction.changeTransactionState(transactionService, transaction);
-            event.setPaymentRequestEventId(paymentRequestEvent.getId());
-            LOGGER.info("handled gocardless mandate event with id {} ", event.getEventId());
-        }
-        goCardlessService.storeEvent(event);
+    @Override
+    protected Transaction getTransactionForEvent(GoCardlessEvent event) {
+        GoCardlessMandate goCardlessMandate = goCardlessService.findMandateForEvent(event);
+        return transactionService.findTransactionForMandateId(goCardlessMandate.getMandateId());
     }
 }

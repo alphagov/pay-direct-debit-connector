@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentCaptor.forClass;
@@ -38,7 +39,7 @@ public class GoCardlessMandateHandlerTest {
     }
 
     @Test
-    public void shouldHandleEventsWithAValidAction() {
+    public void shouldHandleEventsWithAHandledAction() {
         GoCardlessEvent goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture().withAction("created").toEntity();
         PaymentRequestEvent paymentRequestEvent = PaymentRequestEventFixture.aPaymentRequestEventFixture().toEntity();
         Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
@@ -56,7 +57,7 @@ public class GoCardlessMandateHandlerTest {
     }
 
     @Test
-    public void shouldStoreEventsWithAnInvalidAction() {
+    public void shouldStoreEventsWithAnUnhandledAction() {
         GoCardlessEvent goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture().withAction("somethingelse").toEntity();
         goCardlessMandateHandler.handle(goCardlessEvent);
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);

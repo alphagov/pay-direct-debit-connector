@@ -7,6 +7,7 @@ public class GoCardlessEvent {
     private Long id;
     private Long paymentRequestEventId;
     private String eventId;
+    //todo action should be typed (see https://developer.gocardless.com/api-reference/#events-payment-actions and the equivalent for other resource_types
     private String action;
     private GoCardlessResourceType resourceType;
     private String json;
@@ -23,8 +24,8 @@ public class GoCardlessEvent {
         this.createdAt = createdAt;
     }
 
-    public GoCardlessEvent(Long paymentRequestEventId, String eventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
-        this(null, paymentRequestEventId, eventId, action,  resourceType, json, createdAt);
+    public GoCardlessEvent(String eventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
+        this(null, null, eventId, action,  resourceType, json, createdAt);
     }
 
     public Long getId() {

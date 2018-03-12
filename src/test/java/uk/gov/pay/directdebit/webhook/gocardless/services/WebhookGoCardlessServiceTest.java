@@ -26,7 +26,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aG
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.MANDATES;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.UNKNOWN;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.UNHANDLED;
 
 @RunWith(MockitoJUnitRunner.class)
 
@@ -59,7 +59,7 @@ public class WebhookGoCardlessServiceTest {
 
     @Test
     public void shouldStoreEventsWithAnUnhandledResource() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(UNKNOWN).withAction("created").toEntity();
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(UNHANDLED).withAction("created").toEntity();
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
@@ -68,8 +68,18 @@ public class WebhookGoCardlessServiceTest {
     }
 
     @Test
-    public void shouldStoreButNotHandlePaymentEventsWithAnInvalidAction() {
+    public void shouldStoreButNotHandlePaymentEventsWithAnUnhandledAction() {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(PAYMENTS).withAction("not_handled").toEntity();
+
+        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
+        webhookGoCardlessService.handleEvents(events);
+        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verifyZeroInteractions(mockedTransactionService);
+    }
+
+    @Test
+    public void shouldStoreButNotHandleMandateEventsWithAnUnhandledAction() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(MANDATES).withAction("not_handled_again").toEntity();
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);

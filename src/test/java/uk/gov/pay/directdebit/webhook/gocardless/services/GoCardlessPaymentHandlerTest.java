@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture;
@@ -17,6 +16,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentCaptor.forClass;
@@ -39,7 +39,7 @@ public class GoCardlessPaymentHandlerTest {
     }
 
     @Test
-    public void shouldHandleEventsWithAValidAction() {
+    public void shouldHandleEventsWithAHandledAction() {
         GoCardlessEvent goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture().withAction("paid_out").toEntity();
         PaymentRequestEvent paymentRequestEvent = PaymentRequestEventFixture.aPaymentRequestEventFixture().toEntity();
         Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
@@ -57,7 +57,7 @@ public class GoCardlessPaymentHandlerTest {
     }
 
     @Test
-    public void shouldStoreEventsWithAnInvalidAction() {
+    public void shouldStoreEventsWithAnUnhandledAction() {
         GoCardlessEvent goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture().withAction("somethingelse").toEntity();
         goCardlessPaymentHandler.handle(goCardlessEvent);
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);

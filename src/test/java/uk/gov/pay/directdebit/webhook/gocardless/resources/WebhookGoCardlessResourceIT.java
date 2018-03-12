@@ -72,9 +72,9 @@ public class WebhookGoCardlessResourceIT {
         Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
         MatcherAssert.assertThat(transaction.get("state"), is("SUCCESS"));
     }
-    private final String REQUEST_PATH = "/v1/webhooks/gocardless";
+    private final static String REQUEST_PATH = "/v1/webhooks/gocardless";
 
-    private final String WEBHOOK = "{\"events\":[{\"id\":\"EV0000ED6V59V1\",\"created_at\":\"2015-04-17T15:24:26.817Z\",\"resource_type\":\"payments\",\"action\":\"submitted\",\"links\":{\"payment\":\"PM00008Q30R2BR\"},\"details\":{\"origin\":\"gocardless\",\"cause\":\"payment_submitted\",\"description\":\"The payment has now been submitted to the banks, and cannot be cancelled. [SANDBOX TRANSITION]\"},\"metadata\":{}},{\"id\":\"EV0000ED6WBEQ0\",\"created_at\":\"2015-04-17T15:24:26.848Z\",\"resource_type\":\"payments\",\"action\":\"paid_out\",\"links\":{\"payment\":\"PM00008Q30R2BR\"},\"details\":{\"origin\":\"gocardless\",\"cause\":\"paid_out\",\"description\":\"Enough time has passed since the payment was submitted for the banks to return an error, so this payment is now confirmed. [SANDBOX TRANSITION]\"},\"metadata\":{}}]}";
+    private final static String WEBHOOK = "{\"events\":[{\"id\":\"EV0000ED6V59V1\",\"created_at\":\"2015-04-17T15:24:26.817Z\",\"resource_type\":\"payments\",\"action\":\"submitted\",\"links\":{\"payment\":\"PM00008Q30R2BR\"},\"details\":{\"origin\":\"gocardless\",\"cause\":\"payment_submitted\",\"description\":\"The payment has now been submitted to the banks, and cannot be cancelled. [SANDBOX TRANSITION]\"},\"metadata\":{}},{\"id\":\"EV0000ED6WBEQ0\",\"created_at\":\"2015-04-17T15:24:26.848Z\",\"resource_type\":\"payments\",\"action\":\"paid_out\",\"links\":{\"payment\":\"PM00008Q30R2BR\"},\"details\":{\"origin\":\"gocardless\",\"cause\":\"paid_out\",\"description\":\"Enough time has passed since the payment was submitted for the banks to return an error, so this payment is now confirmed. [SANDBOX TRANSITION]\"},\"metadata\":{}}]}";
 
     private final String WEBHOOK_SIGNATURE = "0d7cd9d11ad20814124f35dfa3aa9e24fbbbcfaf16b1cd09f04ebe0ca0a47c40";
 

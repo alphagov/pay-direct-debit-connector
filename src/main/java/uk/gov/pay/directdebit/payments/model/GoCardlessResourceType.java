@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 
 public enum GoCardlessResourceType {
-    PAYMENTS, MANDATES, UNKNOWN;
+    PAYMENTS, MANDATES, UNHANDLED;
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessResourceType.class);
 
     public static GoCardlessResourceType fromString(String type) {
@@ -14,6 +14,6 @@ public enum GoCardlessResourceType {
             }
         }
         LOGGER.warn("Unhandled resource type received in a GoCardless Webhook: {}", type);
-        return UNKNOWN;
+        return UNHANDLED;
     }
 }

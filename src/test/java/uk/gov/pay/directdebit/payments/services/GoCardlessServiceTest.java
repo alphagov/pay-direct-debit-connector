@@ -30,7 +30,6 @@ import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
-import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -62,7 +61,7 @@ public class GoCardlessServiceTest {
     @Mock
     PaymentConfirmService mockedPaymentConfirmService;
     @Mock
-    GoCardlessEventDao mockegGoCardlessEventDao;
+    GoCardlessEventDao mockedGoCardlessEventDao;
     GoCardlessCustomer goCardlessCustomer;
 
     private GoCardlessService service;
@@ -93,7 +92,7 @@ public class GoCardlessServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        service = new GoCardlessService(mockedPayerService, mockedPaymentConfirmService, mockedGoCardlessClientWrapper, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao, mockegGoCardlessEventDao);
+        service = new GoCardlessService(mockedPayerService, mockedPaymentConfirmService, mockedGoCardlessClientWrapper, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao, mockedGoCardlessEventDao);
         goCardlessCustomer = new GoCardlessCustomer(null, payer.getId(), CUSTOMER_ID, BANK_ACCOUNT_ID);
         when(mockedPayerService.create(PAYMENT_REQUEST_EXTERNAL_ID, gatewayAccount.getId(), CREATE_PAYER_REQUEST)).thenReturn(payer);
         when(mockedGoCardlessClientWrapper.createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer)).thenReturn(goCardlessCustomer);
@@ -113,7 +112,7 @@ public class GoCardlessServiceTest {
     public void shouldStoreAGoCardlessEvent() {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().toEntity();
         service.storeEvent(goCardlessEvent);
-        verify(mockegGoCardlessEventDao).insert(goCardlessEvent);
+        verify(mockedGoCardlessEventDao).insert(goCardlessEvent);
     }
 
     @Test
