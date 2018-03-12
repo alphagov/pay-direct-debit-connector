@@ -6,12 +6,9 @@ import org.skife.jdbi.v2.DBI;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.sql.Timestamp;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class PayerFixture implements DbFixture<PayerFixture, Payer> {
@@ -29,7 +26,7 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
     private String addressPostcode = RandomStringUtils.randomAlphanumeric(6);
     private String addressCity = RandomStringUtils.randomAlphabetic(10);
     private String addressCountry = RandomStringUtils.randomAlphabetic(10);;
-    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneId.of("UTC"));
+    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
 
     private PayerFixture() { }
 

@@ -7,7 +7,7 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
 import java.sql.Timestamp;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, PaymentRequest> {
@@ -19,7 +19,7 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
     private String returnUrl = "http://service.com/success-page";
     private String reference = "Test reference";
 
-    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneId.of("UTC"));
+    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
 
     private PaymentRequestFixture() {
     }

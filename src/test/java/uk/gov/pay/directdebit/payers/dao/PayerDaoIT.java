@@ -2,9 +2,7 @@ package uk.gov.pay.directdebit.payers.dao;
 
 import liquibase.exception.LiquibaseException;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
@@ -20,7 +18,6 @@ import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
@@ -39,7 +36,7 @@ public class PayerDaoIT {
     private static final String ADDRESS_CITY = "london";
     private static final String ADDRESS_POSTCODE = "a postcode";
     private static final String ADDRESS_COUNTRY = "italy";
-    private static final ZonedDateTime CREATED_DATE = ZonedDateTime.parse("2017-12-30T12:30:40Z[UTC]");
+    private static final ZonedDateTime CREATED_DATE = ZonedDateTime.parse("2017-12-30T12:30:40Z");
     private static final String EMAIL = "aaa@bb.com";
     private static final String EXTERNAL_ID = "ablijfslkj234";
 

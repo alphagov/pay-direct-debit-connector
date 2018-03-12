@@ -6,6 +6,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ public class GatewayAccountService {
 
     private GatewayAccountParser gatewayAccountParser;
 
+    @Inject
     public GatewayAccountService(GatewayAccountDao gatewayAccountDao, GatewayAccountParser gatewayAccountParser) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.gatewayAccountParser = gatewayAccountParser;

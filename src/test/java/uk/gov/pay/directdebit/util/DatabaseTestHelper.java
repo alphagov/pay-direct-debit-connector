@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.util;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.util.StringColumnMapper;
 
+import java.util.List;
 import java.util.Map;
 
 public class DatabaseTestHelper {
@@ -118,6 +119,23 @@ public class DatabaseTestHelper {
                         .createQuery("SELECT * from gocardless_payments g WHERE g.id = :id")
                         .bind("id", id)
                         .first()
+        );
+    }
+
+    public Map<String, Object> getGoCardlessEventById(Long id) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from gocardless_events g WHERE g.id = :id")
+                        .bind("id", id)
+                        .first()
+        );
+    }
+
+    public List<Map<String, Object>> getAllGoCardlessEvents() {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from gocardless_events g")
+                        .list()
         );
     }
 }

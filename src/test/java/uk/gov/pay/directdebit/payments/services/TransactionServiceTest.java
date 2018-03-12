@@ -147,7 +147,7 @@ public class TransactionServiceTest {
                 .withState(PaymentState.NEW);
         when(mockedTransactionDao.findByTokenId(token))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
-        Transaction newTransaction = service.findChargeForToken(token).get();
+        Transaction newTransaction = service.findTransactionForToken(token).get();
         assertThat(newTransaction.getId(), is(notNullValue()));
         assertThat(newTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
@@ -164,7 +164,7 @@ public class TransactionServiceTest {
     public void shouldNotReturnATransactionIfNoTransactionExistsForToken() throws Exception {
         when(mockedTransactionDao.findByTokenId("not-existing"))
                 .thenReturn(Optional.empty());
-        assertThat(service.findChargeForToken("not-existing").isPresent(), is(false));
+        assertThat(service.findTransactionForToken("not-existing").isPresent(), is(false));
         verifyNoMoreInteractions(mockedPaymentRequestEventService);
     }
 }

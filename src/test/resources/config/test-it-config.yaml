@@ -27,7 +27,7 @@ proxy:
 
 goCardless:
   accessToken: accesstoken
-  webhookSecret: secret
+  webhookSecret: ElfJ-3tF9I_zutNVK2lBABQrw-BgAhkZKIlvmbgk
   environment: sandbox
   clientUrl: http://localhost:10107
 

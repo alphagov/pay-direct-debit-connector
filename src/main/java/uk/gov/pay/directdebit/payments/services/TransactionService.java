@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,7 @@ public class TransactionService {
     private final TransactionDao transactionDao;
     private final PaymentRequestEventService paymentRequestEventService;
 
+    @Inject
     public TransactionService(TransactionDao transactionDao, PaymentRequestEventService paymentRequestEventService) {
         this.paymentRequestEventService = paymentRequestEventService;
         this.transactionDao = transactionDao;
@@ -59,7 +61,8 @@ public class TransactionService {
         return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);
     }
 
-    public Optional<Transaction> findChargeForToken(String token) {
+
+    public Optional<Transaction> findTransactionForToken(String token) {
         return transactionDao
                 .findByTokenId(token).map(charge -> {
                     Transaction newCharge = updateStateFor(charge, SupportedEvent.TOKEN_EXCHANGED);
@@ -67,7 +70,17 @@ public class TransactionService {
                     return newCharge;
                 });
     }
-
+    public Transaction findTransactionFor(Long transactionId) {
+        return transactionDao
+                .findById(transactionId)
+                .orElseThrow(() -> new ChargeNotFoundException(transactionId.toString()));
+    }
+    public Transaction findTransactionForMandateId(Long mandateId) {
+        Transaction transaction = transactionDao.findByMandateId(mandateId)
+                .orElseThrow(() -> new ChargeNotFoundException(mandateId.toString()));
+        LOGGER.info("Found transaction {} for mandate {}", transaction.getId(), mandateId.toString());
+        return transaction;
+    }
     public Transaction receiveDirectDebitDetailsFor(Long accountId, String paymentRequestExternalId) {
         Transaction transaction = findChargeForExternalIdAndGatewayAccountId(paymentRequestExternalId, accountId);
         paymentRequestEventService.registerDirectDebitReceivedEventFor(transaction);
@@ -86,27 +99,25 @@ public class TransactionService {
         return newTransaction;
     }
 
-    public Transaction mandateCreatedFor(Transaction transaction) {
+    public PaymentRequestEvent mandateCreatedFor(Transaction transaction) {
         Transaction newTransaction = updateStateFor(transaction, PaymentRequestEvent.SupportedEvent.MANDATE_CREATED);
-        paymentRequestEventService.registerMandateCreatedEventFor(transaction);
-        return newTransaction;
+        return paymentRequestEventService.registerMandateCreatedEventFor(newTransaction);
     }
 
-    public Transaction paidOutFor(Transaction transaction) {
+    public PaymentRequestEvent paidOutFor(Transaction transaction) {
         Transaction newTransaction = updateStateFor(transaction, PaymentRequestEvent.SupportedEvent.PAID_OUT);
-        paymentRequestEventService.registerPaidOutEventFor(transaction);
-        return newTransaction;
+        return paymentRequestEventService.registerPaidOutEventFor(newTransaction);
     }
 
-    private Transaction updateStateFor(Transaction charge, SupportedEvent event) {
-        PaymentState newState = getStates().getNextStateForEvent(charge.getState(),
+    private Transaction updateStateFor(Transaction transaction, SupportedEvent event) {
+        PaymentState newState = getStates().getNextStateForEvent(transaction.getState(),
                 event);
-        transactionDao.updateState(charge.getId(), newState);
-        charge.setState(newState);
-        LOGGER.info("Updated charge {} - from {} to {}",
-                charge.getPaymentRequestExternalId(),
-                charge.getState(),
+        transactionDao.updateState(transaction.getId(), newState);
+        transaction.setState(newState);
+        LOGGER.info("Updated transaction {} - from {} to {}",
+                transaction.getPaymentRequestExternalId(),
+                transaction.getState(),
                 newState);
-        return charge;
+        return transaction;
     }
 }

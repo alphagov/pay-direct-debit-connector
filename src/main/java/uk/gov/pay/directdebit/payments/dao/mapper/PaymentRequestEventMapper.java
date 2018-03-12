@@ -6,7 +6,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class PaymentRequestEventMapper implements ResultSetMapper<PaymentRequestEvent> {
@@ -23,6 +23,6 @@ public class PaymentRequestEventMapper implements ResultSetMapper<PaymentRequest
                 resultSet.getLong(PAYMENT_REQUEST_ID_COLUMN),
                 PaymentRequestEvent.Type.valueOf(resultSet.getString(EVENT_TYPE_COLUMN)),
                 PaymentRequestEvent.SupportedEvent.valueOf(resultSet.getString(EVENT_COLUMN)),
-                ZonedDateTime.ofInstant(resultSet.getTimestamp(EVENT_DATE_COLUMN).toInstant(), ZoneId.of("UTC")));
+                ZonedDateTime.ofInstant(resultSet.getTimestamp(EVENT_DATE_COLUMN).toInstant(), ZoneOffset.UTC));
     }
 }

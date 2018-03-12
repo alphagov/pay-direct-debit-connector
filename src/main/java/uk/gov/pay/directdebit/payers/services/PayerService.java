@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
+import javax.inject.Inject;
 import java.util.Map;
 
 public class PayerService {
@@ -17,6 +18,7 @@ public class PayerService {
     private final TransactionService transactionService;
     private final PayerParser payerParser;
 
+    @Inject
     public PayerService(PayerDao payerDao,
                         TransactionService transactionService,
                         PayerParser payerParser) {

@@ -9,12 +9,15 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
 
+import javax.inject.Inject;
+
 public class TokenService {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(TokenService.class);
 
     private final TokenDao tokenDao;
     private final TransactionService transactionService;
 
+    @Inject
     public TokenService(TokenDao tokenDao, TransactionService transactionService) {
         this.tokenDao = tokenDao;
         this.transactionService = transactionService;
@@ -30,7 +33,7 @@ public class TokenService {
 
     public Transaction validateChargeWithToken(String token) {
         return transactionService
-                .findChargeForToken(token)
+                .findTransactionForToken(token)
                 .orElseThrow(TokenNotFoundException::new);
     }
 

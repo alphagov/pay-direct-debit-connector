@@ -15,6 +15,7 @@ import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class PaymentRequestService {
     private final TransactionService transactionService;
     private final GatewayAccountDao gatewayAccountDao;
 
+    @Inject
     public PaymentRequestService(DirectDebitConfig config, PaymentRequestDao paymentRequestDao, TokenService tokenService, TransactionService transactionService, GatewayAccountDao gatewayAccountDao) {
         this.paymentRequestDao = paymentRequestDao;
         this.tokenService = tokenService;

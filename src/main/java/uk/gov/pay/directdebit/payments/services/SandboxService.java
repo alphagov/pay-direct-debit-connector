@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 
+import javax.inject.Inject;
 import java.util.Map;
 
 public class SandboxService implements DirectDebitPaymentProvider {
@@ -16,6 +17,7 @@ public class SandboxService implements DirectDebitPaymentProvider {
     private final PayerService payerService;
     private final PaymentConfirmService paymentConfirmService;
 
+    @Inject
     public SandboxService(PayerService payerService,
                           PaymentConfirmService paymentConfirmService) {
         this.payerService = payerService;

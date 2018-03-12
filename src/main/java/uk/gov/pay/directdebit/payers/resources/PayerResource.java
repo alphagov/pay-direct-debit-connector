@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,6 +31,7 @@ public class PayerResource {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(PayerResource.class);
     private final PaymentProviderFactory paymentProviderFactory;
     private final CreatePayerValidator createPayerValidator = new CreatePayerValidator();
+    @Inject
     public PayerResource(PaymentProviderFactory paymentProviderFactory) {
         this.paymentProviderFactory = paymentProviderFactory;
     }

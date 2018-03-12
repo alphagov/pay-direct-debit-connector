@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.payments.model;
 
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class PaymentRequest {
@@ -29,7 +29,7 @@ public class PaymentRequest {
     }
 
     public PaymentRequest(Long amount, String returnUrl, Long gatewayAccountId, String description, String reference) {
-        this(null, amount, returnUrl, gatewayAccountId, description, reference, RandomIdGenerator.newId(), ZonedDateTime.now(ZoneId.of("UTC")));
+        this(null, amount, returnUrl, gatewayAccountId, description, reference, RandomIdGenerator.newId(), ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     public String getExternalId() {

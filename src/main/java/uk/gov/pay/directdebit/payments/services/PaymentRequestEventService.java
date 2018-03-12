@@ -7,6 +7,8 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
+import javax.inject.Inject;
+
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsConfirmed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsReceived;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateCreated;
@@ -20,15 +22,18 @@ public class PaymentRequestEventService {
 
     private final PaymentRequestEventDao paymentRequestEventDao;
 
+    @Inject
     public PaymentRequestEventService(PaymentRequestEventDao paymentRequestEventDao) {
         this.paymentRequestEventDao = paymentRequestEventDao;
     }
 
-    private void insertEventFor(Transaction charge, PaymentRequestEvent event) {
+    private PaymentRequestEvent insertEventFor(Transaction charge, PaymentRequestEvent event) {
         LOGGER.info("Creating event for {} {}: {} - {}",
                 charge.getType(), charge.getPaymentRequestExternalId(),
                 event.getEventType(), event.getEvent());
-        paymentRequestEventDao.insert(event);
+        Long id = paymentRequestEventDao.insert(event);
+        event.setId(id);
+        return event;
     }
 
     void insertEventFor(PaymentRequest paymentRequest, PaymentRequestEvent event) {
@@ -51,14 +56,15 @@ public class PaymentRequestEventService {
         insertEventFor(charge, event);
     }
 
-    public void registerMandateCreatedEventFor(Transaction charge) {
+    public PaymentRequestEvent registerMandateCreatedEventFor(Transaction charge) {
         PaymentRequestEvent event = mandateCreated(charge.getPaymentRequestId());
         insertEventFor(charge, event);
+        return event;
     }
 
-    public void registerPaidOutEventFor(Transaction charge) {
+    public PaymentRequestEvent registerPaidOutEventFor(Transaction charge) {
         PaymentRequestEvent event = paidOut(charge.getPaymentRequestId());
-        insertEventFor(charge, event);
+        return insertEventFor(charge, event);
     }
 
     public void registerTokenExchangedEventFor(Transaction charge) {
