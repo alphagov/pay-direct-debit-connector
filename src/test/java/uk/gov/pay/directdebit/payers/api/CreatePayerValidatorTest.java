@@ -35,10 +35,6 @@ public class CreatePayerValidatorTest {
                 CreatePayerValidator.NAME_KEY + ", " +
                 CreatePayerValidator.SORTCODE_KEY + ", " +
                 CreatePayerValidator.ACCOUNT_NUMBER_KEY + ", " +
-                CreatePayerValidator.ADDRESS_COUNTRY_KEY + ", " +
-                CreatePayerValidator.ADDRESS_LINE1_KEY + ", " +
-                CreatePayerValidator.ADDRESS_CITY_KEY + ", " +
-                CreatePayerValidator.ADDRESS_POSTCODE_KEY + ", " +
                 CreatePayerValidator.EMAIL_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
@@ -228,18 +224,6 @@ public class CreatePayerValidatorTest {
     }
 
     @Test
-    public void shouldThrowMissingMandatoryFieldsExceptionIfAddressCountryFieldIsMissing() {
-        Map<String, String> request = generateValidRequest();
-        request.remove(CreatePayerValidator.ADDRESS_COUNTRY_KEY);
-        thrown.expect(MissingMandatoryFieldsException.class);
-        thrown.expectMessage("Field(s) missing: [" +
-                CreatePayerValidator.ADDRESS_COUNTRY_KEY +
-                "]");
-        thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
-        createPayerValidator.validate(request);
-    }
-
-    @Test
     public void shouldThrowInvalidFieldsExceptionIfAddressCountryFieldIsEmptyString() {
         Map<String, String> request = generateValidRequest();
         request.put(CreatePayerValidator.ADDRESS_COUNTRY_KEY, "");
@@ -260,18 +244,6 @@ public class CreatePayerValidatorTest {
                 CreatePayerValidator.ADDRESS_COUNTRY_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
-        createPayerValidator.validate(request);
-    }
-
-    @Test
-    public void shouldThrowMissingMandatoryFieldsExceptionIfAddressLine1FieldIsMissing() {
-        Map<String, String> request = generateValidRequest();
-        request.remove(CreatePayerValidator.ADDRESS_LINE1_KEY);
-        thrown.expect(MissingMandatoryFieldsException.class);
-        thrown.expectMessage("Field(s) missing: [" +
-                CreatePayerValidator.ADDRESS_LINE1_KEY +
-                "]");
-        thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
         createPayerValidator.validate(request);
     }
 
@@ -300,18 +272,6 @@ public class CreatePayerValidatorTest {
     }
 
     @Test
-    public void shouldThrowMissingMandatoryFieldsExceptionIfAddressCityFieldIsMissing() {
-        Map<String, String> request = generateValidRequest();
-        request.remove(CreatePayerValidator.ADDRESS_CITY_KEY);
-        thrown.expect(MissingMandatoryFieldsException.class);
-        thrown.expectMessage("Field(s) missing: [" +
-                CreatePayerValidator.ADDRESS_CITY_KEY +
-                "]");
-        thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
-        createPayerValidator.validate(request);
-    }
-
-    @Test
     public void shouldThrowInvalidFieldsExceptionIfAddressCityFieldIsEmptyString() {
         Map<String, String> request = generateValidRequest();
         request.put(CreatePayerValidator.ADDRESS_CITY_KEY, "");
@@ -332,18 +292,6 @@ public class CreatePayerValidatorTest {
                 CreatePayerValidator.ADDRESS_CITY_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
-        createPayerValidator.validate(request);
-    }
-
-    @Test
-    public void shouldThrowMissingMandatoryFieldsExceptionIfAddressPostcodeFieldIsMissing() {
-        Map<String, String> request = generateValidRequest();
-        request.remove(CreatePayerValidator.ADDRESS_POSTCODE_KEY);
-        thrown.expect(MissingMandatoryFieldsException.class);
-        thrown.expectMessage("Field(s) missing: [" +
-                CreatePayerValidator.ADDRESS_POSTCODE_KEY +
-                "]");
-        thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
         createPayerValidator.validate(request);
     }
 
