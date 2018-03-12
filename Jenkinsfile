@@ -19,8 +19,6 @@ pipeline {
   environment {
     DOCKER_HOST = "unix:///var/run/docker.sock"
     RUN_END_TO_END_ON_PR = "${params.runEndToEndOnPR}"
-    HOSTED_GRAPHITE_ACCOUNT_ID = credentials('graphite_account_id')
-    HOSTED_GRAPHITE_API_KEY = credentials('graphite_api_key')
   }
 
   stages {
