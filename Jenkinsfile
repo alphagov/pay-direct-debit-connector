@@ -33,13 +33,12 @@ pipeline {
           def long stepBuildTime = System.currentTimeMillis()
 
           sh 'mvn clean verify'
-
           postSuccessfulMetrics("directdebit-connector.maven-build", stepBuildTime)
         }
       }
       post {
         failure {
-          postMetric("directdebit-connector.maven-build.failure", 1, "new")
+          postMetric("directdebit-connector.maven-build.failure", 1)
         }
       }
     }
@@ -61,7 +60,7 @@ pipeline {
       }
       post {
         failure {
-          postMetric("directdebit-connector.docker-build.failure", 1, "new")
+          postMetric("directdebit-connector.docker-build.failure", 1)
         }
       }
     }
@@ -80,7 +79,7 @@ pipeline {
       }
       post {
         failure {
-          postMetric("directdebit-connector.docker-tag.failure", 1, "new")
+          postMetric("directdebit-connector.docker-tag.failure", 1)
         }
       }
     }
@@ -95,10 +94,10 @@ pipeline {
   }
   post {
     failure {
-      postMetric("directdebit-connector.failure", 1, "new")
+      postMetric(appendBranchSuffix("directdebit-connector") + ".failure", 1)
     }
     success {
-      postSuccessfulMetrics("directdebit-connector")
+      postSuccessfulMetrics(appendBranchSuffix("directdebit-connector"))
     }
   }
 }
