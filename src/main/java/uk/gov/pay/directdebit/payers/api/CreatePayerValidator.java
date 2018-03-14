@@ -30,7 +30,7 @@ public class CreatePayerValidator extends ApiValidation {
                     .put(EMAIL_KEY, ApiValidation::isNotNullOrEmpty)
                     .build();
 
-    private final static String[] requiredFields = {NAME_KEY, SORTCODE_KEY, ACCOUNT_NUMBER_KEY, ADDRESS_COUNTRY_KEY, ADDRESS_LINE1_KEY, ADDRESS_CITY_KEY, ADDRESS_POSTCODE_KEY, EMAIL_KEY};
+    private final static String[] requiredFields = {NAME_KEY, SORTCODE_KEY, ACCOUNT_NUMBER_KEY, EMAIL_KEY};
 
     private final static Map<String, FieldSize> fieldSizes =
             ImmutableMap.<String, FieldSize>builder()

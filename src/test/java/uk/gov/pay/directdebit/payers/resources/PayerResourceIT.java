@@ -90,6 +90,7 @@ public class PayerResourceIT {
                 .withPaymentRequestExternalId(testPaymentRequest.getExternalId())
                 .insert(testContext.getJdbi());
     }
+
     @Test
     public void shouldCreateAPayer() throws JsonProcessingException {
         testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
@@ -120,6 +121,35 @@ public class PayerResourceIT {
                 .body("payer_external_id", is(createdPayerExternalId))
                 .contentType(JSON);
     }
+
+    @Test
+    public void shouldCreateAPayer_withoutAddress() throws JsonProcessingException {
+
+        testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
+        insertTransactionFixtureWith(SANDBOX);
+        String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
+                .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
+                .put(SORTCODE_KEY, payerFixture.getSortCode())
+                .put(NAME_KEY, payerFixture.getName())
+                .put(EMAIL_KEY, payerFixture.getEmail())
+                .build());
+
+        ValidatableResponse response = givenSetup()
+                .body(postBody)
+                .post(requestPath)
+                .then()
+                .statusCode(Response.Status.CREATED.getStatusCode());
+
+        Map<String, Object> createdPayer = testContext.getDatabaseTestHelper().getPayerByPaymentRequestExternalId(testPaymentRequest.getExternalId());
+        String createdPayerExternalId = (String) createdPayer.get("external_id");
+        String documentLocation = expectedPayerRequestLocationFor(testPaymentRequest.getExternalId(), createdPayerExternalId);
+
+        response
+                .header("Location", is(documentLocation))
+                .body("payer_external_id", is(createdPayerExternalId))
+                .contentType(JSON);
+    }
+
     @Test
     public void shouldCreateAPayer_forGoCardless() throws JsonProcessingException {
         testGatewayAccount.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
@@ -172,10 +202,6 @@ public class PayerResourceIT {
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
                 .put(EMAIL_KEY, payerFixture.getEmail())
-                .put(ADDRESS_LINE1_KEY, payerFixture.getAddressLine1())
-                .put(ADDRESS_LINE2_KEY, payerFixture.getAddressLine2())
-                .put(ADDRESS_CITY_KEY, payerFixture.getAddressCity())
-                .put(ADDRESS_POSTCODE_KEY, payerFixture.getAddressPostcode())
                 .build());
 
         givenSetup()
@@ -184,7 +210,7 @@ public class PayerResourceIT {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("Field(s) missing: [account_number, country_code]"));
+                .body("message", is("Field(s) missing: [account_number]"));
     }
 
     private RequestSpecification givenSetup() {
