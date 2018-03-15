@@ -18,21 +18,33 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     }
 
     public enum GoCardlessPaymentAction implements GoCardlessAction {
-        //todo add more supported payment actions (https://developer.gocardless.com/api-reference/#events-payment-actions)
+        CREATED {
+            @Override
+            public PaymentRequestEvent process(TransactionService transactionService, Transaction transaction) {
+                return transactionService.paymentPendingFor(transaction);
+            }
+        },
+        SUBMITTED,
+        CONFIRMED,
         PAID_OUT {
             @Override
-            public PaymentRequestEvent changeTransactionState(TransactionService transactionService, Transaction transaction) {
-                return transactionService.paidOutFor(transaction);
+            public PaymentRequestEvent process(TransactionService transactionService, Transaction transaction) {
+                return transactionService.paymentPaidOutFor(transaction);
             }
         };
 
+        @Override
+        public PaymentRequestEvent process(TransactionService transactionService, Transaction transaction) {
+            return transactionService.findPaymentPendingEventFor(transaction);
+        }
+
         public static GoCardlessPaymentAction fromString(String type) {
-            for (GoCardlessPaymentAction typeEnum : GoCardlessPaymentAction.values()) {
+            for (GoCardlessPaymentAction typeEnum : values()) {
                 if (typeEnum.toString().equalsIgnoreCase(type)) {
                     return typeEnum;
                 }
             }
-            LOGGER.warn("Received webhook from gocardless with unhandled payment action: {}", type);
+            LOGGER.warn("Webhook from GoCardless with unrecognised payment action: {}", type);
             return null;
         }
     }
@@ -47,5 +59,4 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
         GoCardlessPayment goCardlessPayment = goCardlessService.findPaymentForEvent(event);
         return transactionService.findTransactionFor(goCardlessPayment.getTransactionId());
     }
-
 }

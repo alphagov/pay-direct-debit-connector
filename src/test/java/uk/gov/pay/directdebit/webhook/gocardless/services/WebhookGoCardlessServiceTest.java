@@ -94,26 +94,26 @@ public class WebhookGoCardlessServiceTest {
         PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.paidOut(transaction.getPaymentRequestId());
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPayment);
         when(mockedTransactionService.findTransactionFor(goCardlessPayment.getTransactionId())).thenReturn(transaction);
-        when(mockedTransactionService.paidOutFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.paymentPaidOutFor(transaction)).thenReturn(paymentRequestEvent);
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
-        verify(mockedTransactionService).paidOutFor(transaction);
+        verify(mockedTransactionService).paymentPaidOutFor(transaction);
     }
 
     @Test
     public void shouldStoreAndHandleMandateEventsWithAValidAction() {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(MANDATES).withAction("created").toEntity();
 
-        PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.mandateCreated(transaction.getPaymentRequestId());
+        PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.paymentCreated(transaction.getPaymentRequestId());
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandate);
         when(mockedTransactionService.findTransactionForMandateId(goCardlessMandate.getMandateId())).thenReturn(transaction);
-        when(mockedTransactionService.mandateCreatedFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.findPaymentPendingEventFor(transaction)).thenReturn(paymentRequestEvent);
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
-        verify(mockedTransactionService).mandateCreatedFor(transaction);
+        verify(mockedTransactionService).findPaymentPendingEventFor(transaction);
     }
 }

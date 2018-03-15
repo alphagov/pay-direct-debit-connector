@@ -34,6 +34,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessService.class);
 
     private final PayerService payerService;
+    private final TransactionService transactionService;
     private final PaymentConfirmService paymentConfirmService;
     private final GoCardlessClientWrapper goCardlessClientWrapper;
     private final GoCardlessCustomerDao goCardlessCustomerDao;
@@ -43,13 +44,14 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     @Inject
     public GoCardlessService(PayerService payerService,
-                             PaymentConfirmService paymentConfirmService,
+                             TransactionService transactionService, PaymentConfirmService paymentConfirmService,
                              GoCardlessClientWrapper goCardlessClientWrapper,
                              GoCardlessCustomerDao goCardlessCustomerDao,
                              GoCardlessPaymentDao goCardlessPaymentDao,
                              GoCardlessMandateDao goCardlessMandateDao,
                              GoCardlessEventDao goCardlessEventDao) {
         this.payerService = payerService;
+        this.transactionService = transactionService;
         this.paymentConfirmService = paymentConfirmService;
         this.goCardlessClientWrapper = goCardlessClientWrapper;
         this.goCardlessCustomerDao = goCardlessCustomerDao;
@@ -71,6 +73,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId);
         GoCardlessMandate goCardlessMandate = createMandate(paymentRequestExternalId, confirmationDetails.getMandate());
         createPayment(paymentRequestExternalId, confirmationDetails.getTransaction(), goCardlessMandate);
+        transactionService.paymentCreatedFor(confirmationDetails.getTransaction());
     }
 
     private GoCardlessCustomer createCustomer(String paymentRequestExternalId, Payer payer) {

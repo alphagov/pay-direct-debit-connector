@@ -14,14 +14,18 @@ import javax.inject.Inject;
 import java.util.List;
 
 public class WebhookGoCardlessService {
+
     private static final Logger LOGGER = PayLoggerFactory.getLogger(WebhookGoCardlessService.class);
-    private final TransactionService transactionService;
+
     private final GoCardlessService goCardlessService;
+    private final GoCardlessPaymentHandler goCardlessPaymentHandler;
+    private final GoCardlessMandateHandler goCardlessMandateHandler;
 
     @Inject
     public WebhookGoCardlessService(GoCardlessService goCardlessService, TransactionService transactionService) {
         this.goCardlessService = goCardlessService;
-        this.transactionService = transactionService;
+        goCardlessPaymentHandler = new GoCardlessPaymentHandler(transactionService, goCardlessService);
+        goCardlessMandateHandler = new GoCardlessMandateHandler(transactionService, goCardlessService);
     }
 
     public void handleEvents(List<GoCardlessEvent> events) {
@@ -39,9 +43,9 @@ public class WebhookGoCardlessService {
     private GoCardlessActionHandler getHandlerFor(GoCardlessResourceType goCardlessResourceType) {
         switch (goCardlessResourceType) {
             case PAYMENTS:
-                return new GoCardlessPaymentHandler(transactionService, goCardlessService);
+                return goCardlessPaymentHandler;
             case MANDATES:
-                return new GoCardlessMandateHandler(transactionService, goCardlessService);
+                return goCardlessMandateHandler;
             default:
                 return goCardlessService::storeEvent;
         }

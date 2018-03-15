@@ -27,7 +27,7 @@ public class WebhookSandboxResource {
     @POST
     public Response handleWebhook() {
         List<Transaction> pendingTransactions = transactionService.findAllByPaymentStateAndProvider(PaymentState.PENDING_DIRECT_DEBIT_PAYMENT, PaymentProvider.SANDBOX);
-        pendingTransactions.forEach(transactionService::paidOutFor);
+        pendingTransactions.forEach(transactionService::paymentPaidOutFor);
 
         return Response.status(OK).build();
     }

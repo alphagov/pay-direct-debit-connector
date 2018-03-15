@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.payments.services;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
@@ -16,12 +17,15 @@ public class SandboxService implements DirectDebitPaymentProvider {
 
     private final PayerService payerService;
     private final PaymentConfirmService paymentConfirmService;
+    private final TransactionService transactionService;
 
     @Inject
     public SandboxService(PayerService payerService,
-                          PaymentConfirmService paymentConfirmService) {
+                          PaymentConfirmService paymentConfirmService,
+                          TransactionService transactionService) {
         this.payerService = payerService;
         this.paymentConfirmService = paymentConfirmService;
+        this.transactionService = transactionService;
     }
 
     @Override
@@ -33,6 +37,7 @@ public class SandboxService implements DirectDebitPaymentProvider {
     @Override
     public void confirm(String paymentRequestExternalId, GatewayAccount gatewayAccount) {
         LOGGER.info("Confirming payment for SANDBOX, payment with id: {}", paymentRequestExternalId);
-        paymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId);
+        ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId);
+        transactionService.paymentCreatedFor(confirmationDetails.getTransaction());
     }
 }

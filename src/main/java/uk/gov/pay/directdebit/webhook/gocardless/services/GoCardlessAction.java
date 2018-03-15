@@ -6,5 +6,5 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
 public interface GoCardlessAction {
-    PaymentRequestEvent changeTransactionState(TransactionService transactionService, Transaction transaction);
+    PaymentRequestEvent process(TransactionService transactionService, Transaction transaction);
 }

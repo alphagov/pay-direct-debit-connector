@@ -17,33 +17,39 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
         super(transactionService, goCardlessService);
     }
 
-    public enum GoCardlessMandateAction implements GoCardlessAction {
-        CREATED {
-            @Override
-            public PaymentRequestEvent changeTransactionState(TransactionService transactionService, Transaction transaction) {
-                return transactionService.mandateCreatedFor(transaction);
-            }
-        };
-
-        public static GoCardlessMandateAction fromString(String type) {
-            for (GoCardlessMandateAction typeEnum : GoCardlessMandateAction.values()) {
-                if (typeEnum.toString().equalsIgnoreCase(type)) {
-                    return typeEnum;
-                }
-            }
-            LOGGER.warn("Received webhook from gocardless with unhandled mandate action: {}", type);
-            return null;
-        }
-    }
-
     @Override
     protected GoCardlessAction parseAction(String action) {
-        return GoCardlessMandateAction.fromString(action);
+        GoCardlessMandateAction mandateAction = GoCardlessMandateAction.fromString(action);
+        if (mandateAction != null) {
+            return (transactionService, transaction) -> {
+                PaymentRequestEvent paymentPendingEvent = null;
+                if (mandateAction != null) {
+                    paymentPendingEvent = transactionService.findPaymentPendingEventFor(transaction);
+                }
+                return paymentPendingEvent;
+            };
+        }
+        return null;
     }
 
     @Override
     protected Transaction getTransactionForEvent(GoCardlessEvent event) {
         GoCardlessMandate goCardlessMandate = goCardlessService.findMandateForEvent(event);
         return transactionService.findTransactionForMandateId(goCardlessMandate.getMandateId());
+    }
+
+    public enum GoCardlessMandateAction {
+        CREATED, SUBMITTED, ACTIVE;
+
+        public static GoCardlessMandateAction fromString(String type) {
+            for (GoCardlessMandateAction typeEnum : GoCardlessMandateAction.values()) {
+                if (typeEnum.toString().equalsIgnoreCase(type)) {
+                    LOGGER.info("Webhook from GoCardless with mandate action: {}", type);
+                    return typeEnum;
+                }
+            }
+            LOGGER.warn("Webhook from GoCardless with unrecognised mandate action: {}", type);
+            return null;
+        }
     }
 }
