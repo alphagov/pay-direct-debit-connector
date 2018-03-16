@@ -2,10 +2,8 @@ package uk.gov.pay.directdebit;
 
 import com.gocardless.GoCardlessClient;
 import com.gocardless.resources.Customer;
-import com.gocardless.resources.RedirectFlow;
-
-import java.util.List;
-import java.util.Arrays;
+import com.squareup.okhttp.OkHttpClient;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -13,6 +11,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONObject;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 
 public class GCStandalone {
 
@@ -65,10 +66,15 @@ public class GCStandalone {
                     // Change me to LIVE when you're ready to go live
                     GoCardlessClient.Environment.SANDBOX
             );
-
-            System.out.println("List of clients:");
-            //List<Customer> customers = client.customers().list().execute().getItems();
-            //System.out.println(Arrays.toString(customers.toArray()));
+            Object httpClient = FieldUtils.readField(client, "httpClient", true);
+            OkHttpClient rawClient = (OkHttpClient) FieldUtils.readField(httpClient, "rawClient", true);
+            String PROXY_HOST = System.getenv("HTTPS_PROXY_HOST");
+            int PROXY_PORT = Integer.parseInt(System.getenv("HTTP_PROXY_PORT"));
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST, PROXY_PORT));
+            rawClient.setProxy(proxy);
+            System.out.println("Creating customer:");
+            Customer execute = client.customers().create().withGivenName("a").withFamilyName("b").execute();
+            System.out.println("Created customer " + execute.getId());
 
             for (Customer customer : client.customers().all().execute()) {
                 System.out.println(customer.getId() + " " +  customer.getGivenName() + " " + customer.getFamilyName());
@@ -100,7 +106,7 @@ public class GCStandalone {
 
     public static void main(String[] args) {
         try {
-            httpsRequest(args.length == 1);
+//            httpsRequest(args.length == 1);
             gcRequest();
         } catch (Exception e) {
             System.out.println("Failed ....");
