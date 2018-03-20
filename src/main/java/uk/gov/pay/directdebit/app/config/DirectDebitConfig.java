@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.app.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
+import uk.gov.pay.directdebit.notifications.config.NotifyClientFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 
 import javax.validation.Valid;
@@ -28,6 +29,17 @@ public class DirectDebitConfig extends Configuration {
     @NotNull
     private ProxyConfig proxyConfig;
 
+    @NotNull
+    private NotifyClientFactory notifyConfig;
+
+    @NotNull
+    private ExecutorServiceConfig executorServiceConfig;
+
+    @JsonProperty("notify")
+    public NotifyClientFactory getNotifyConfig() {
+        return notifyConfig;
+    }
+
     @JsonProperty("database")
     public DataSourceFactory getDataSourceFactory() {
         return dataSourceFactory;
@@ -41,6 +53,11 @@ public class DirectDebitConfig extends Configuration {
 
     public LinksConfig getLinks() {
         return links;
+    }
+
+    @JsonProperty("executorService")
+    public ExecutorServiceConfig getExecutorServiceConfig() {
+        return executorServiceConfig;
     }
 
     @JsonProperty("graphite")
