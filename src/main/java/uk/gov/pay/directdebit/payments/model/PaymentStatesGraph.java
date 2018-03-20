@@ -11,13 +11,15 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
 
 public class PaymentStatesGraph {
@@ -48,6 +50,7 @@ public class PaymentStatesGraph {
         graph.putEdgeValue(PROCESSING_DIRECT_DEBIT_DETAILS, AWAITING_CONFIRMATION, PAYER_CREATED);
         graph.putEdgeValue(AWAITING_CONFIRMATION, PROCESSING_DIRECT_DEBIT_PAYMENT, DIRECT_DEBIT_DETAILS_CONFIRMED);
         graph.putEdgeValue(PROCESSING_DIRECT_DEBIT_PAYMENT, PENDING_DIRECT_DEBIT_PAYMENT, PAYMENT_CREATED);
+        graph.putEdgeValue(PENDING_DIRECT_DEBIT_PAYMENT, FAILED, PAYMENT_FAILED);
         graph.putEdgeValue(PENDING_DIRECT_DEBIT_PAYMENT, SUCCESS, PAID_OUT);
 
         return ImmutableValueGraph.copyOf(graph);

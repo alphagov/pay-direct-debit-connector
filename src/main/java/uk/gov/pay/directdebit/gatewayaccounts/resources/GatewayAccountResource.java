@@ -43,7 +43,7 @@ public class GatewayAccountResource {
     @Produces(APPLICATION_JSON)
     public Response getGatewayAccount(@PathParam("accountId") String accountExternalId) {
         LOGGER.debug("Getting gateway account for account external id {}", accountExternalId);
-        GatewayAccountResponse gatewayAccountResponse = GatewayAccountResponse.from(gatewayAccountService.getGatewayAccount(accountExternalId));
+        GatewayAccountResponse gatewayAccountResponse = GatewayAccountResponse.from(gatewayAccountService.getGatewayAccountForId(accountExternalId));
         return Response.ok().entity(gatewayAccountResponse).build();
     }
 

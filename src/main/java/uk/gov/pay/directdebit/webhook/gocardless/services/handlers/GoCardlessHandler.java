@@ -9,15 +9,18 @@ import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
-public abstract class GoCardlessHandler implements GoCardlessActionHandler {
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
+public abstract class GoCardlessHandler implements GoCardlessActionHandler {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessHandler.class);
 
     protected TransactionService transactionService;
     GoCardlessService goCardlessService;
 
-    protected abstract GoCardlessAction parseAction(String action);
-    protected abstract Transaction getTransactionForEvent(GoCardlessEvent event);
+    protected abstract Map<GoCardlessAction, Function<Transaction, PaymentRequestEvent>> getHandledActions();
+    protected abstract Optional<PaymentRequestEvent> process(GoCardlessEvent event);
 
     GoCardlessHandler(TransactionService transactionService, GoCardlessService goCardlessService) {
         this.transactionService = transactionService;
@@ -25,13 +28,10 @@ public abstract class GoCardlessHandler implements GoCardlessActionHandler {
     }
 
     public void handle(GoCardlessEvent event) {
-        GoCardlessAction goCardlessAction = parseAction(event.getAction());
-        if (goCardlessAction != null) {
-            Transaction transaction = getTransactionForEvent(event);
-            PaymentRequestEvent paymentRequestEvent = goCardlessAction.process(transactionService, transaction);
+        process(event).ifPresent((paymentRequestEvent) -> {
             event.setPaymentRequestEventId(paymentRequestEvent.getId());
-            LOGGER.info("Handled GoCardless event with id: {}, resource type: {}", event.getEventId(), event.getResourceType().toString());
-        }
+            LOGGER.info("handled gocardless event with id: {}, resource type: {}", event.getEventId(), event.getResourceType().toString());
+        });
         goCardlessService.storeEvent(event);
     }
 }

@@ -9,10 +9,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
@@ -31,9 +33,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.*;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.*;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.*;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
@@ -50,6 +53,11 @@ public class TransactionServiceTest {
     @Mock
     private TransactionDao mockedTransactionDao;
 
+    @Mock
+    private UserNotificationService mockedUserNotificationService;
+
+    private Payer payer = PayerFixture.aPayerFixture().toEntity();
+
     private TransactionService service;
     @Mock
     private PaymentRequestEventService mockedPaymentRequestEventService;
@@ -60,7 +68,7 @@ public class TransactionServiceTest {
 
     @Before
     public void setUp() {
-        service = new TransactionService(mockedTransactionDao, mockedPaymentRequestEventService);
+        service = new TransactionService(mockedTransactionDao, mockedPaymentRequestEventService, mockedUserNotificationService);
     }
 
     @Test
@@ -150,6 +158,17 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getType(), is(transactionFixture.getType()));
         assertThat(newTransaction.getState(), is(PROCESSING_DIRECT_DEBIT_DETAILS));
         verify(mockedPaymentRequestEventService).registerDirectDebitReceivedEventFor(newTransaction);
+    }
+
+    @Test
+    public void shouldUpdateTransactionStateRegisterEventAndSendEmail_whenMandateFails() throws Exception {
+        TransactionFixture transactionFixture = TransactionFixture
+                .aTransactionFixture()
+                .withState(PENDING_DIRECT_DEBIT_PAYMENT);
+        Transaction transaction = transactionFixture.toEntity();
+        service.mandateFailedFor(transaction, payer);
+        verify(mockedPaymentRequestEventService).registerMandateFailedEventFor(transaction);
+        verify(mockedUserNotificationService).sendMandateFailedEmail(payer, transaction);
     }
 
     @Test

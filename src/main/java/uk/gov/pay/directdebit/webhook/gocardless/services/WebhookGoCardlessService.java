@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.webhook.gocardless.services;
 
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
@@ -22,10 +23,10 @@ public class WebhookGoCardlessService {
     private final GoCardlessMandateHandler goCardlessMandateHandler;
 
     @Inject
-    public WebhookGoCardlessService(GoCardlessService goCardlessService, TransactionService transactionService) {
+    public WebhookGoCardlessService(GoCardlessService goCardlessService, TransactionService transactionService, PayerService payerService) {
         this.goCardlessService = goCardlessService;
-        goCardlessPaymentHandler = new GoCardlessPaymentHandler(transactionService, goCardlessService);
-        goCardlessMandateHandler = new GoCardlessMandateHandler(transactionService, goCardlessService);
+        this.goCardlessPaymentHandler = new GoCardlessPaymentHandler(transactionService, goCardlessService);
+        this.goCardlessMandateHandler = new GoCardlessMandateHandler(transactionService, goCardlessService, payerService);
     }
 
     public void handleEvents(List<GoCardlessEvent> events) {

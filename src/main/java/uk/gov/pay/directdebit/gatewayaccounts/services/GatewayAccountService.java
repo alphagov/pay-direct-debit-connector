@@ -5,6 +5,7 @@ import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -23,10 +24,16 @@ public class GatewayAccountService {
         this.gatewayAccountParser = gatewayAccountParser;
     }
 
-    public GatewayAccount getGatewayAccount(String accountExternalId) {
+    public GatewayAccount getGatewayAccountForId(String accountExternalId) {
         return gatewayAccountDao
                 .findByExternalId(accountExternalId)
                 .orElseThrow(() -> new GatewayAccountNotFoundException(accountExternalId));
+    }
+
+    public GatewayAccount getGatewayAccountFor(Transaction transaction) {
+        return gatewayAccountDao
+                .findById(transaction.getPaymentRequestGatewayAccountId())
+                .orElseThrow(() -> new GatewayAccountNotFoundException(transaction.getPaymentRequestGatewayAccountId().toString()));
     }
 
     public List<GatewayAccount> getAllGatewayAccounts() {

@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
+import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -36,6 +37,9 @@ public class WebhookGoCardlessServiceTest {
     private GoCardlessService mockedGoCardlessService;
     @Mock
     private TransactionService mockedTransactionService;
+    @Mock
+    private PayerService mockedPayerService;
+
     private WebhookGoCardlessService webhookGoCardlessService;
     private GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().toEntity();
     private Transaction transaction = aTransactionFixture().toEntity();
@@ -43,7 +47,7 @@ public class WebhookGoCardlessServiceTest {
 
     @Before
     public void setUp() {
-        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessService, mockedTransactionService);
+        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessService, mockedTransactionService, mockedPayerService);
     }
 
     @Test

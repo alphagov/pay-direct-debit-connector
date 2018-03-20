@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -17,7 +18,10 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
 import java.util.Map;
+import java.util.Optional;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -47,7 +51,7 @@ public class PayerServiceTest {
             .withName("mr payment").toEntity();
     private GatewayAccount gatewayAccount = aGatewayAccountFixture().toEntity();
 
-    private Transaction transaction = aTransactionFixture().toEntity();
+    private Transaction transaction = aTransactionFixture().withPaymentRequestExternalId(paymentRequestExternalId).toEntity();
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -64,5 +68,22 @@ public class PayerServiceTest {
         service.create(paymentRequestExternalId, gatewayAccount.getId(), createPayerRequest);
         verify(mockedPayerDao).insert(payer);
         verify(mockedTransactionService).payerCreatedFor(transaction);
+    }
+
+    @Test
+    public void shouldReturnPayerForTransactionIfItExists() {
+        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequestId())).thenReturn(Optional.of(payer));
+        Payer payer = service.getPayerFor(transaction);
+        assertThat(payer.getId(), is(payer.getId()));
+        assertThat(payer.getExternalId(), is(payer.getExternalId()));
+    }
+
+    @Test
+    public void shouldThrowIfGatewayAccountDoesNotExist() {
+        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequestId())).thenReturn(Optional.empty());
+        thrown.expect(PayerNotFoundException.class);
+        thrown.expectMessage("Couldn't find payer for payment request with external id: sdkfhsdkjfhjdks");
+        thrown.reportMissingExceptionWithMessage("PayerNotFoundException expected");
+        service.getPayerFor(transaction);
     }
 }
