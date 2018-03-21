@@ -19,12 +19,14 @@ import java.util.Optional;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.chargeCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
 
@@ -105,26 +107,28 @@ public class TransactionService {
     }
 
     public Transaction payerCreatedFor(Transaction transaction) {
-        Transaction newTransaction = updateStateFor(transaction, PAYER_CREATED);
+        Transaction updatedTransaction = updateStateFor(transaction, PAYER_CREATED);
         paymentRequestEventService.registerPayerCreatedEventFor(transaction);
-        return newTransaction;
+        return updatedTransaction;
     }
 
     public PaymentRequestEvent paymentCreatedFor(Transaction transaction) {
         transactionDao.findById(transaction.getId());
-        Transaction newTransaction = updateStateFor(transaction, PAYMENT_CREATED);
-        return paymentRequestEventService.registerPaymentCreatedEventFor(newTransaction);
+        Transaction updatedTransaction = updateStateFor(transaction, PAYMENT_CREATED);
+        return paymentRequestEventService.registerPaymentCreatedEventFor(updatedTransaction);
     }
 
     public PaymentRequestEvent paymentPendingFor(Transaction transaction) {
-        transactionDao.findById(transaction.getId());
-        Transaction newTransaction = updateStateFor(transaction, PAYMENT_PENDING);
-        return paymentRequestEventService.registerPaymentPendingEventFor(newTransaction);
+        return paymentRequestEventService.registerPaymentPendingEventFor(transaction);
     }
 
     public PaymentRequestEvent paymentPaidOutFor(Transaction transaction) {
-        Transaction newTransaction = updateStateFor(transaction, PAID_OUT);
-        return paymentRequestEventService.registerPaymentPaidOutEventFor(newTransaction);
+        Transaction updatedTransaction = updateStateFor(transaction, PAID_OUT);
+        return paymentRequestEventService.registerPaymentPaidOutEventFor(updatedTransaction);
+    }
+
+    public PaymentRequestEvent mandatePendingFor(Transaction transaction) {
+        return paymentRequestEventService.registerMandatePendingEventFor(transaction);
     }
 
     private Transaction updateStateFor(Transaction transaction, SupportedEvent event) {
@@ -141,5 +145,9 @@ public class TransactionService {
 
     public PaymentRequestEvent findPaymentPendingEventFor(Transaction transaction) {
         return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_PENDING).get();
+    }
+
+    public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {
+        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), MANDATE, MANDATE_PENDING);
     }
 }

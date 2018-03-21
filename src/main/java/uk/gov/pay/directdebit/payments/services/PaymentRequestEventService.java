@@ -8,11 +8,11 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
-
 import java.util.Optional;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsConfirmed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsReceived;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandatePending;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paidOut;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCreated;
@@ -80,6 +80,11 @@ public class PaymentRequestEventService {
     }
 
     public Optional<PaymentRequestEvent> findBy(Long paymentRequestId, PaymentRequestEvent.Type type, PaymentRequestEvent.SupportedEvent event) {
-        return paymentRequestEventDao.findByPaymentRequestIdAndEvent(paymentRequestId, type.toString(), event.toString());
+        return paymentRequestEventDao.findByPaymentRequestIdAndEvent(paymentRequestId, type, event);
+    }
+
+    public PaymentRequestEvent registerMandatePendingEventFor(Transaction transaction) {
+        PaymentRequestEvent event = mandatePending(transaction.getPaymentRequestId());
+        return insertEventFor(transaction, event);
     }
 }

@@ -19,17 +19,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
 
     @Override
     protected GoCardlessAction parseAction(String action) {
-        GoCardlessMandateAction mandateAction = GoCardlessMandateAction.fromString(action);
-        if (mandateAction != null) {
-            return (transactionService, transaction) -> {
-                PaymentRequestEvent paymentPendingEvent = null;
-                if (mandateAction != null) {
-                    paymentPendingEvent = transactionService.findPaymentPendingEventFor(transaction);
-                }
-                return paymentPendingEvent;
-            };
-        }
-        return null;
+       return GoCardlessMandateAction.fromString(action);
     }
 
     @Override
@@ -38,8 +28,14 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
         return transactionService.findTransactionForMandateId(goCardlessMandate.getMandateId());
     }
 
-    public enum GoCardlessMandateAction {
+    public enum GoCardlessMandateAction implements GoCardlessAction {
         CREATED, SUBMITTED, ACTIVE;
+
+        @Override
+        public PaymentRequestEvent process(TransactionService transactionService, Transaction transaction) {
+            return transactionService.findMandatePendingEventFor(transaction)
+                    .orElseGet(() -> transactionService.mandatePendingFor(transaction));
+        }
 
         public static GoCardlessMandateAction fromString(String type) {
             for (GoCardlessMandateAction typeEnum : GoCardlessMandateAction.values()) {

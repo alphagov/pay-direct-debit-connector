@@ -71,7 +71,7 @@ public class PaymentRequestEventDaoIT {
                 .withEvent(PAYMENT_PENDING)
                 .insert(testContext.getJdbi());
 
-        Optional<PaymentRequestEvent> event = paymentRequestEventDao.findByPaymentRequestIdAndEvent(testPaymentRequest.getId(), "CHARGE", "PAYMENT_PENDING");
+        Optional<PaymentRequestEvent> event = paymentRequestEventDao.findByPaymentRequestIdAndEvent(testPaymentRequest.getId(), CHARGE, PAYMENT_PENDING);
 
         assertThat(event.isPresent(), is(true));
     }

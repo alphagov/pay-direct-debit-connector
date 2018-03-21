@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -32,15 +33,13 @@ import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.UNHAN
 
 public class WebhookGoCardlessServiceTest {
     @Mock
-    GoCardlessService mockedGoCardlessService;
-
+    private GoCardlessService mockedGoCardlessService;
     @Mock
-    TransactionService mockedTransactionService;
-
-    WebhookGoCardlessService webhookGoCardlessService;
-    GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().toEntity();
-    Transaction transaction = aTransactionFixture().toEntity();
-    GoCardlessMandate goCardlessMandate = aGoCardlessMandateFixture().toEntity();
+    private TransactionService mockedTransactionService;
+    private WebhookGoCardlessService webhookGoCardlessService;
+    private GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().toEntity();
+    private Transaction transaction = aTransactionFixture().toEntity();
+    private GoCardlessMandate goCardlessMandate = aGoCardlessMandateFixture().toEntity();
 
     @Before
     public void setUp() {
@@ -109,11 +108,11 @@ public class WebhookGoCardlessServiceTest {
         PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.paymentCreated(transaction.getPaymentRequestId());
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandate);
         when(mockedTransactionService.findTransactionForMandateId(goCardlessMandate.getMandateId())).thenReturn(transaction);
-        when(mockedTransactionService.findPaymentPendingEventFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.findMandatePendingEventFor(transaction)).thenReturn(Optional.of(paymentRequestEvent));
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
-        verify(mockedTransactionService).findPaymentPendingEventFor(transaction);
+        verify(mockedTransactionService).findMandatePendingEventFor(transaction);
     }
 }

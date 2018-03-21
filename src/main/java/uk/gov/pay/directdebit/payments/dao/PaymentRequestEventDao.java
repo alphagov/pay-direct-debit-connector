@@ -14,6 +14,8 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 
 import java.util.Optional;
 
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.*;
+
 @RegisterMapper(PaymentRequestEventMapper.class)
 public interface PaymentRequestEventDao {
 
@@ -24,5 +26,5 @@ public interface PaymentRequestEventDao {
 
     @SqlQuery("SELECT * FROM payment_request_events e WHERE e.payment_request_id = :paymentRequestId and e.event_type = :eventType and e.event = :event")
     @SingleValueResult(PaymentRequestEvent.class)
-    Optional<PaymentRequestEvent> findByPaymentRequestIdAndEvent(@Bind("paymentRequestId") Long paymentRequestId, @Bind("eventType") String eventType, @Bind("event") String event);
+    Optional<PaymentRequestEvent> findByPaymentRequestIdAndEvent(@Bind("paymentRequestId") Long paymentRequestId, @Bind("eventType") Type eventType, @Bind("event") SupportedEvent event);
 }
