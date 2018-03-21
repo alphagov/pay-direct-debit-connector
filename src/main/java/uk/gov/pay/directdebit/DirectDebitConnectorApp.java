@@ -98,17 +98,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.healthChecks().register("database", injector.getInstance(Database.class));
         environment.jersey().register(injector.getInstance(GatewayAccountParamConverterProvider.class));
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
-        environment.jersey().register(injector.getInstance(PaymentRequestEventService.class));
-        environment.jersey().register(injector.getInstance(TransactionService.class));
-        environment.jersey().register(injector.getInstance(TokenService.class));
-        environment.jersey().register(injector.getInstance(PaymentRequestService.class));
-        environment.jersey().register(injector.getInstance(GatewayAccountParser.class));
-        environment.jersey().register(injector.getInstance(PaymentConfirmService.class));
-        environment.jersey().register(injector.getInstance(PayerParser.class));
-        environment.jersey().register(injector.getInstance(PayerService.class));
         environment.jersey().register(injector.getInstance(WebhookSandboxResource.class));
-        environment.jersey().register(injector.getInstance(GoCardlessClientWrapper.class));
-        environment.jersey().register(injector.getInstance(WebhookGoCardlessService.class));
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
         environment.jersey().register(injector.getInstance(SecurityTokensResource.class));
         environment.jersey().register(injector.getInstance(PayerResource.class));

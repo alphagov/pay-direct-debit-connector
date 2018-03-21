@@ -27,7 +27,7 @@
         <jackson.version>2.9.2</jackson.version>
         <guice.version>4.1.0</guice.version>
         <guava.version>23.4-jre</guava.version>
-        <gocardless.version>2.9.0</gocardless.version>
+        <gocardless.version>3.0.0-rc1</gocardless.version>
         <hamcrest.version>1.3</hamcrest.version>
         <rest-assured.version>3.0.5</rest-assured.version>
         <mockito.version>2.15.0</mockito.version>
@@ -108,10 +108,37 @@
             <artifactId>guice</artifactId>
             <version>${guice.version}</version>
         </dependency>
+            <!--<dependency>-->
+                <!--<groupId>com.gocardless</groupId>-->
+                <!--<artifactId>gocardless-pro</artifactId>-->
+                <!--<version>${gocardless.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.gocardless</groupId>
             <artifactId>gocardless-pro</artifactId>
             <version>${gocardless.version}</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/gocardless-pro-3.0.0-rc1.jar</systemPath>
+	</dependency>
+        <dependency>
+            <groupId>com.github.rholder</groupId>
+            <artifactId>guava-retrying</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>2.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
         </dependency>
         <dependency>
             <groupId>org.mindrot</groupId>

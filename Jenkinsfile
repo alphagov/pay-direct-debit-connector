@@ -88,7 +88,36 @@ pipeline {
         branch 'master'
       }
       steps {
-        deployEcs("directdebit-connector", "test", null, true, true, "uk.gov.pay.endtoend.categories.SmokeDirectDebitPayments", false)
+        deployEcs("directdebit-connector", "test", null, false, false, "dummy", false)
+      }
+    }
+    stage('Smoke Tests') {
+      when {
+        branch 'master'
+      }
+      steps {
+        runDirectDebitSmokeTest()
+      }
+    }
+    stage('Complete') {
+      failFast true
+      parallel {
+        stage('Tag Build') {
+          when {
+            branch 'master'
+          }
+          steps {
+            tagDeployment("direct-debit-connector")
+          }
+        }
+        stage('Trigger Deploy Notification') {
+          when {
+            branch 'master'
+          }
+          steps {
+            triggerGraphiteDeployEvent("direct-debit-connector")
+          }
+        }
       }
     }
   }
