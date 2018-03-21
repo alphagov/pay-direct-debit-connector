@@ -31,6 +31,7 @@ public class PayerResource {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(PayerResource.class);
     private final PaymentProviderFactory paymentProviderFactory;
     private final CreatePayerValidator createPayerValidator = new CreatePayerValidator();
+
     @Inject
     public PayerResource(PaymentProviderFactory paymentProviderFactory) {
         this.paymentProviderFactory = paymentProviderFactory;

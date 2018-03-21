@@ -28,11 +28,16 @@ public class GoCardlessFactory extends Configuration {
         return clientUrl != null;
     }
 
-    public GoCardlessClient buildClient() {
-        if (isCallingStubs()) {
-            return GoCardlessClient.create(accessToken, clientUrl);
-        }
-        return GoCardlessClient.create(accessToken, environment);
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getClientUrl() {
+        return clientUrl;
+    }
+
+    public GoCardlessClient.Environment getEnvironment() {
+        return environment;
     }
 
     public WebhookVerifier buildSignatureVerifier() {
