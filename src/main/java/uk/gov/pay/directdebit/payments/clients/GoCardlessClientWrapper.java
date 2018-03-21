@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.payments.clients;
 
 
+import com.gocardless.GoCardlessClient;
 import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Payment;
@@ -19,6 +20,12 @@ public class GoCardlessClientWrapper {
 
     public GoCardlessClientWrapper(com.gocardless.GoCardlessClient goCardlessClient) {
         this.goCardlessClient = goCardlessClient;
+    }
+
+    public void listCustomers() {
+        for (Customer customer : goCardlessClient.customers().all().execute()) {
+            System.out.println(customer.getId() + " " +  customer.getGivenName() + " " + customer.getFamilyName());
+        }
     }
 
     public GoCardlessCustomer createCustomer(String paymentRequestExternalId, Payer payer) {

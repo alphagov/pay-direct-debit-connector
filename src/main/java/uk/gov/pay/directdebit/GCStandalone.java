@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
 
 public class GCStandalone {
 
@@ -54,7 +55,8 @@ public class GCStandalone {
 	    }
     }
 
-    private static void gcRequest() {
+/*
+    private static void gcRequest_old() {
         System.out.println("Creating gocardless sandbox client");
 
         try {
@@ -98,7 +100,24 @@ public class GCStandalone {
             // Hold on to this ID - you'll need it when you
             // "confirm" the redirect flow later
             System.out.println(redirectFlow.getId());
-            System.out.println(redirectFlow.getRedirectUrl());*/
+            System.out.println(redirectFlow.getRedirectUrl());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+*/
+    private static void gcRequest() {
+        System.out.println("Creating gocardless sandbox client with new client");
+
+        try {
+            GoCardlessClient.Builder builder = GoCardlessClient.newBuilder(System.getenv("GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN"))
+                    .withEnvironment(GoCardlessClient.Environment.SANDBOX);
+            builder.withProxy(new Proxy(Proxy.Type.HTTP,
+                    new InetSocketAddress(System.getenv("HTTPS_PROXY_HOST"), Integer.parseInt(System.getenv("HTTP_PROXY_PORT")))));
+
+            GoCardlessClientWrapper clientWrapper = new GoCardlessClientWrapper(builder.build());
+            clientWrapper.listCustomers();
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
