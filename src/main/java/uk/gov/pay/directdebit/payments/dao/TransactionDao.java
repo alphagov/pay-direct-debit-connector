@@ -38,7 +38,7 @@ public interface TransactionDao {
     @SqlQuery("SELECT * FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE t.state = :state AND g.payment_provider = :paymentProvider")
     List<Transaction> findAllByPaymentStateAndProvider(@Bind("state") PaymentState paymentState, @Bind("paymentProvider") PaymentProvider paymentProvider);
 
-    @SqlQuery("SELECT * FROM transactions t JOIN payers p ON p.payment_request_id = t.payment_request_id JOIN mandates m ON m.payer_id = p.id WHERE m.id = :mandateId")
+    @SqlQuery("SELECT * FROM transactions t JOIN payment_requests r ON r.id = t.payment_request_id JOIN gateway_accounts g ON r.gateway_account_id = g.id JOIN payers p ON p.payment_request_id = t.payment_request_id JOIN mandates m ON m.payer_id = p.id WHERE m.id = :mandateId")
     @SingleValueResult(Transaction.class)
     Optional<Transaction> findByMandateId(@Bind("mandateId") Long mandateId);
 
