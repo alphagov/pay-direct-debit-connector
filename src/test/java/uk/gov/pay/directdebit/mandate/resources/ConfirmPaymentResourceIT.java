@@ -49,7 +49,7 @@ public class ConfirmPaymentResourceIT {
             .withPaymentRequestDescription(paymentRequestFixture.getDescription())
             .withState(AWAITING_CONFIRMATION);
     @Test
-    public void confirm_shouldCreateAMandateAndUpdateCharge() throws Exception {
+    public void confirm_shouldCreateAMandateAndUpdateCharge() {
         gatewayAccountFixture.insert(testContext.getJdbi());
         paymentRequestFixture.insert(testContext.getJdbi());
         transactionFixture.insert(testContext.getJdbi());
@@ -68,7 +68,7 @@ public class ConfirmPaymentResourceIT {
     }
 
     @Test
-    public void confirm_shouldCreateAMandateAndUpdateCharge_ForGoCardless() throws Exception {
+    public void confirm_shouldCreateAMandateAndUpdateCharge_ForGoCardless() {
         paymentRequestFixture.insert(testContext.getJdbi());
         PayerFixture payerFixture = PayerFixture.aPayerFixture()
                 .withPaymentRequestId(paymentRequestFixture.getId())
@@ -97,7 +97,7 @@ public class ConfirmPaymentResourceIT {
     }
 
     @Test
-    public void confirm_shouldFailWhenPayerDoesNotExist() throws Exception {
+    public void confirm_shouldFailWhenPayerDoesNotExist() {
         gatewayAccountFixture.insert(testContext.getJdbi());
         paymentRequestFixture.insert(testContext.getJdbi());
         transactionFixture.insert(testContext.getJdbi());

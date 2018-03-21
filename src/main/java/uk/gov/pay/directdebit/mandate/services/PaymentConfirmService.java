@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.mandate.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.PayerConflictException;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
@@ -12,9 +14,10 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 import javax.inject.Inject;
 
 public class PaymentConfirmService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentConfirmService.class);
+    private final TransactionService transactionService;
     private final MandateDao mandateDao;
     private final PayerDao payerDao;
-    private final TransactionService transactionService;
 
     @Inject
     public PaymentConfirmService(TransactionService transactionService, PayerDao payerDao, MandateDao mandateDao) {
@@ -25,6 +28,7 @@ public class PaymentConfirmService {
 
     /**
      * Creates a mandate and updates the transaction to a pending (Sandbox)
+     *
      * @param paymentExternalId
      */
     public ConfirmationDetails confirm(Long accountId, String paymentExternalId) {
@@ -32,7 +36,7 @@ public class PaymentConfirmService {
         Mandate createdMandate = payerDao.findByPaymentRequestId(transaction.getPaymentRequestId())
                 .map(this::createMandateFor)
                 .orElseThrow(() -> new PayerConflictException(String.format("Expected payment request %s to be already associated with a payer", paymentExternalId)));
-        transactionService.mandateCreatedFor(transaction);
+        LOGGER.info("Mandate created for payment request {}", transaction.getPaymentRequestId());
         return new ConfirmationDetails(transaction, createdMandate);
     }
 

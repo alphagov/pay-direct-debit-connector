@@ -8,9 +8,9 @@ import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
@@ -20,23 +20,23 @@ import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRE
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
 
-public class SandboxPaymentStatesGraph {
+public class PaymentStatesGraph {
 
     private final ImmutableValueGraph<PaymentState, SupportedEvent> graphStates;
 
-    private SandboxPaymentStatesGraph() {
-        this.graphStates = buildSandboxStatesGraph();
+    private PaymentStatesGraph() {
+        this.graphStates = buildStatesGraph();
     }
 
     public static PaymentState initialState() {
         return NEW;
     }
 
-    public static SandboxPaymentStatesGraph getStates() {
-        return new SandboxPaymentStatesGraph();
+    public static PaymentStatesGraph getStates() {
+        return new PaymentStatesGraph();
     }
 
-    private ImmutableValueGraph<PaymentState, PaymentRequestEvent.SupportedEvent> buildSandboxStatesGraph() {
+    private ImmutableValueGraph<PaymentState, PaymentRequestEvent.SupportedEvent> buildStatesGraph() {
         MutableValueGraph<PaymentState, SupportedEvent> graph = ValueGraphBuilder
                 .directed()
                 .build();
@@ -47,7 +47,7 @@ public class SandboxPaymentStatesGraph {
         graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, PROCESSING_DIRECT_DEBIT_DETAILS, DIRECT_DEBIT_DETAILS_RECEIVED);
         graph.putEdgeValue(PROCESSING_DIRECT_DEBIT_DETAILS, AWAITING_CONFIRMATION, PAYER_CREATED);
         graph.putEdgeValue(AWAITING_CONFIRMATION, PROCESSING_DIRECT_DEBIT_PAYMENT, DIRECT_DEBIT_DETAILS_CONFIRMED);
-        graph.putEdgeValue(PROCESSING_DIRECT_DEBIT_PAYMENT, PENDING_DIRECT_DEBIT_PAYMENT, MANDATE_CREATED);
+        graph.putEdgeValue(PROCESSING_DIRECT_DEBIT_PAYMENT, PENDING_DIRECT_DEBIT_PAYMENT, PAYMENT_CREATED);
         graph.putEdgeValue(PENDING_DIRECT_DEBIT_PAYMENT, SUCCESS, PAID_OUT);
 
         return ImmutableValueGraph.copyOf(graph);

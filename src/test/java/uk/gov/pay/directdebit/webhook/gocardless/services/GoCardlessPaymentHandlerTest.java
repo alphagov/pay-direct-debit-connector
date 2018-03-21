@@ -27,28 +27,91 @@ import static org.mockito.Mockito.when;
 public class GoCardlessPaymentHandlerTest {
 
     @Mock
-    TransactionService mockedTransactionService;
+    private TransactionService mockedTransactionService;
     @Mock
-    GoCardlessService mockedGoCardlessService;
+    private GoCardlessService mockedGoCardlessService;
 
     private GoCardlessPaymentFixture goCardlessPaymentFixture = GoCardlessPaymentFixture.aGoCardlessPaymentFixture();
     private GoCardlessPaymentHandler goCardlessPaymentHandler;
+
     @Before
     public void setUp() {
         goCardlessPaymentHandler = new GoCardlessPaymentHandler(mockedTransactionService, mockedGoCardlessService);
     }
 
     @Test
-    public void shouldHandleEventsWithAHandledAction() {
+    public void handle_onPaidOutPaymentGoCardlessEvent_shouldSetAPayEventAsPaidOut() {
         GoCardlessEvent goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture().withAction("paid_out").toEntity();
         PaymentRequestEvent paymentRequestEvent = PaymentRequestEventFixture.aPaymentRequestEventFixture().toEntity();
         Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
+
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
         when(mockedTransactionService.findTransactionFor(goCardlessPaymentFixture.getTransactionId())).thenReturn(transaction);
-        when(mockedTransactionService.paidOutFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.paymentPaidOutFor(transaction)).thenReturn(paymentRequestEvent);
+
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
-        verify(mockedTransactionService).paidOutFor(transaction);
+        verify(mockedTransactionService).paymentPaidOutFor(transaction);
+        ArgumentCaptor<GoCardlessEvent> geCaptor = forClass(GoCardlessEvent.class);
+
+        verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
+        GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
+        Assert.assertThat(storedGoCardlessEvent.getPaymentRequestEventId(), is(paymentRequestEvent.getId()));
+    }
+
+    @Test
+    public void handle_onCreatePaymentGoCardlessEvent_shouldSetAPayEventAsPaymentPending() {
+        GoCardlessEvent goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture().withAction("created").toEntity();
+        PaymentRequestEvent paymentRequestEvent = PaymentRequestEventFixture.aPaymentRequestEventFixture().toEntity();
+        Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
+
+        when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
+        when(mockedTransactionService.findTransactionFor(goCardlessPaymentFixture.getTransactionId())).thenReturn(transaction);
+        when(mockedTransactionService.paymentPendingFor(transaction)).thenReturn(paymentRequestEvent);
+
+        goCardlessPaymentHandler.handle(goCardlessEvent);
+
+        verify(mockedTransactionService).paymentPendingFor(transaction);
+        ArgumentCaptor<GoCardlessEvent> geCaptor = forClass(GoCardlessEvent.class);
+
+        verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
+        GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
+        Assert.assertThat(storedGoCardlessEvent.getPaymentRequestEventId(), is(paymentRequestEvent.getId()));
+    }
+
+    @Test
+    public void handle_onSubmittedPaymentGoCardlessEvent_shouldLinkTheEventToAnExistingPaymentPendingPayEvent() {
+        GoCardlessEvent goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture().withAction("submitted").toEntity();
+        PaymentRequestEvent paymentRequestEvent = PaymentRequestEventFixture.aPaymentRequestEventFixture().toEntity();
+        Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
+
+        when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
+        when(mockedTransactionService.findTransactionFor(goCardlessPaymentFixture.getTransactionId())).thenReturn(transaction);
+        when(mockedTransactionService.findPaymentPendingEventFor(transaction)).thenReturn(paymentRequestEvent);
+
+        goCardlessPaymentHandler.handle(goCardlessEvent);
+
+        verify(mockedTransactionService).findPaymentPendingEventFor(transaction);
+        ArgumentCaptor<GoCardlessEvent> geCaptor = forClass(GoCardlessEvent.class);
+
+        verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
+        GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
+        Assert.assertThat(storedGoCardlessEvent.getPaymentRequestEventId(), is(paymentRequestEvent.getId()));
+    }
+
+    @Test
+    public void handle_onConfirmedPaymentGoCardlessEvent_shouldLinkTheEventToAnExistingPaymentPendingPayEvent() {
+        GoCardlessEvent goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture().withAction("confirmed").toEntity();
+        PaymentRequestEvent paymentRequestEvent = PaymentRequestEventFixture.aPaymentRequestEventFixture().toEntity();
+        Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
+
+        when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
+        when(mockedTransactionService.findTransactionFor(goCardlessPaymentFixture.getTransactionId())).thenReturn(transaction);
+        when(mockedTransactionService.findPaymentPendingEventFor(transaction)).thenReturn(paymentRequestEvent);
+
+        goCardlessPaymentHandler.handle(goCardlessEvent);
+
+        verify(mockedTransactionService).findPaymentPendingEventFor(transaction);
         ArgumentCaptor<GoCardlessEvent> geCaptor = forClass(GoCardlessEvent.class);
 
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());

@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import liquibase.exception.LiquibaseException;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -15,14 +14,18 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 
-import java.io.IOException;
 import java.sql.Timestamp;
-import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 @RunWith(DropwizardJUnitRunner.class)
@@ -39,7 +42,7 @@ public class PaymentRequestEventDaoIT {
     private TestContext testContext;
 
     @Before
-    public void setup() throws IOException, LiquibaseException {
+    public void setup() {
         paymentRequestEventDao = testContext.getJdbi().onDemand(PaymentRequestEventDao.class);
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
@@ -49,7 +52,7 @@ public class PaymentRequestEventDaoIT {
     @Test
     public void shouldInsertAnEvent() {
         Long paymentRequestId = testPaymentRequest.getId();
-        PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.payerCreated(paymentRequestId);
+        PaymentRequestEvent paymentRequestEvent = payerCreated(paymentRequestId);
         Long id = paymentRequestEventDao.insert(paymentRequestEvent);
         Map<String, Object> foundPaymentRequestEvent = testContext.getDatabaseTestHelper().getPaymentRequestEventById(id);
         assertThat(foundPaymentRequestEvent.get("id"), is(id));
@@ -59,4 +62,17 @@ public class PaymentRequestEventDaoIT {
         assertThat((Timestamp) foundPaymentRequestEvent.get("event_date"), isDate(paymentRequestEvent.getEventDate()));
     }
 
+    @Test
+    public void shouldFindByPaymentRequestIdAndEvent() {
+
+        aPaymentRequestEventFixture()
+                .withPaymentRequestId(testPaymentRequest.getId())
+                .withEventType(CHARGE)
+                .withEvent(PAYMENT_PENDING)
+                .insert(testContext.getJdbi());
+
+        Optional<PaymentRequestEvent> event = paymentRequestEventDao.findByPaymentRequestIdAndEvent(testPaymentRequest.getId(), CHARGE, PAYMENT_PENDING);
+
+        assertThat(event.isPresent(), is(true));
+    }
 }

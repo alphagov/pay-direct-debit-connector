@@ -12,25 +12,25 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 
-public class SandboxPaymentStatesGraphTest {
+public class PaymentStatesGraphTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    private SandboxPaymentStatesGraph sandboxPaymentStatesGraph;
+    private PaymentStatesGraph paymentStatesGraph;
 
     @Before
     public void setup() {
-        sandboxPaymentStatesGraph = SandboxPaymentStatesGraph.getStates();
+        paymentStatesGraph = PaymentStatesGraph.getStates();
     }
 
     @Test
     public void initialState_shouldReturnInitialState() {
-        assertThat(SandboxPaymentStatesGraph.initialState(), is(NEW));
+        assertThat(PaymentStatesGraph.initialState(), is(NEW));
     }
 
     @Test
     public void getNextStateForEvent_shouldGiveTheNextStateIfEventIsValid() {
-        assertThat(sandboxPaymentStatesGraph.getNextStateForEvent(NEW, TOKEN_EXCHANGED), is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS));
+        assertThat(paymentStatesGraph.getNextStateForEvent(NEW, TOKEN_EXCHANGED), is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
@@ -38,17 +38,17 @@ public class SandboxPaymentStatesGraphTest {
         thrown.expect(InvalidStateTransitionException.class);
         thrown.expectMessage("Transition CHARGE_CREATED from state NEW is not valid");
         thrown.reportMissingExceptionWithMessage("InvalidStateTransitionException expected");
-        sandboxPaymentStatesGraph.getNextStateForEvent(NEW, CHARGE_CREATED);
+        paymentStatesGraph.getNextStateForEvent(NEW, CHARGE_CREATED);
     }
 
     @Test
     public void isValidTransition_shouldReturnTrueFromWhenTransitionIsExpected() {
-        assertThat(sandboxPaymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS, TOKEN_EXCHANGED), is(true));
+        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS, TOKEN_EXCHANGED), is(true));
     }
 
     @Test
     public void isValidTransition_shouldReturnFalseWhenTransitionIsInvalid() {
-        assertThat(sandboxPaymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS, CHARGE_CREATED), is(false));
+        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS, CHARGE_CREATED), is(false));
     }
 }
 

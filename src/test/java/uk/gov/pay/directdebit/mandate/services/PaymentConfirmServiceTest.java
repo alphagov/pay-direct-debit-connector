@@ -73,7 +73,6 @@ public class PaymentConfirmServiceTest {
         assertThat(mandate.getExternalId(), is(notNullValue()));
         assertThat(mandate.getPayerId(), is(payerId));
 
-        verify(mockTransactionService).mandateCreatedFor(transaction);
         assertThat(confirmationDetails.getMandate(), is(mandate));
         assertThat(confirmationDetails.getTransaction(), is(transaction));
     }
@@ -97,7 +96,6 @@ public class PaymentConfirmServiceTest {
             fail("Expected PayerConflictException to be thrown");
         } catch (PayerConflictException e) {
             verify(mockMandateDao, never()).insert(any(Mandate.class));
-            verify(mockTransactionService, never()).mandateCreatedFor(any(Transaction.class));
         }
     }
 }

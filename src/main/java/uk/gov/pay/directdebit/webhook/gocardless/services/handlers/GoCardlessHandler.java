@@ -10,15 +10,16 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
 public abstract class GoCardlessHandler implements GoCardlessActionHandler {
+
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessHandler.class);
+
     protected TransactionService transactionService;
     GoCardlessService goCardlessService;
 
     protected abstract GoCardlessAction parseAction(String action);
     protected abstract Transaction getTransactionForEvent(GoCardlessEvent event);
 
-
-    public GoCardlessHandler(TransactionService transactionService, GoCardlessService goCardlessService) {
+    GoCardlessHandler(TransactionService transactionService, GoCardlessService goCardlessService) {
         this.transactionService = transactionService;
         this.goCardlessService = goCardlessService;
     }
@@ -27,9 +28,9 @@ public abstract class GoCardlessHandler implements GoCardlessActionHandler {
         GoCardlessAction goCardlessAction = parseAction(event.getAction());
         if (goCardlessAction != null) {
             Transaction transaction = getTransactionForEvent(event);
-            PaymentRequestEvent paymentRequestEvent = goCardlessAction.changeTransactionState(transactionService, transaction);
+            PaymentRequestEvent paymentRequestEvent = goCardlessAction.process(transactionService, transaction);
             event.setPaymentRequestEventId(paymentRequestEvent.getId());
-            LOGGER.info("handled gocardless event with id: {}, resource type: {}", event.getEventId(), event.getResourceType().toString());
+            LOGGER.info("Handled GoCardless event with id: {}, resource type: {}", event.getEventId(), event.getResourceType().toString());
         }
         goCardlessService.storeEvent(event);
     }
