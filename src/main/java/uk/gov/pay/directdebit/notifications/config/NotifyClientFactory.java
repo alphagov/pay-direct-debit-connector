@@ -3,16 +3,24 @@ package uk.gov.pay.directdebit.notifications.config;
 import io.dropwizard.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.service.notify.NotificationClient;
+
+import javax.validation.constraints.NotNull;
 
 import static uk.gov.pay.directdebit.app.ssl.TrustStoreLoader.getSSLContext;
 
 public class NotifyClientFactory extends Configuration {
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
-    private String mandateFailedTemplateId;
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(NotifyClientFactory.class);
+
+    @NotNull
     private String apiKey;
+    @NotNull
     private String notificationBaseURL;
+    @NotNull
     private boolean emailNotifyEnabled;
+    @NotNull
+    private String mandateFailedTemplateId;
 
     public String getMandateFailedTemplateId() {
         return mandateFailedTemplateId;
@@ -27,6 +35,9 @@ public class NotifyClientFactory extends Configuration {
     }
 
     public boolean isEmailNotifyEnabled() {
+        if (!emailNotifyEnabled) {
+            LOGGER.warn("Email notifications are globally disabled by configuration");
+        }
         return emailNotifyEnabled;
     }
 

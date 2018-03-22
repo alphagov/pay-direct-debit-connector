@@ -106,18 +106,6 @@ public class UserNotificationServiceTest {
     }
 
     @Test
-    public void testEmailSendingThrowsExceptionForMissingTemplate() throws Exception {
-        try {
-            reset(mockNotifyClientFactory);
-            when(mockNotifyClientFactory.isEmailNotifyEnabled()).thenReturn(true);
-            userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
-            fail("this method should throw an ex");
-        } catch (Exception e) {
-            assertEquals("Please check the notify configuration", e.getMessage());
-        }
-    }
-
-    @Test
     public void testEmailSendWhenEmailsNotifyDisabled() throws Exception {
         when(mockNotifyClientFactory.isEmailNotifyEnabled()).thenReturn(false);
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);

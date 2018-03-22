@@ -29,8 +29,8 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
     @Override
     protected Map<GoCardlessAction, Function<Transaction, PaymentRequestEvent>> getHandledActions() {
         return ImmutableMap.of(
-                GoCardlessMandateAction.CREATED, this::upsertMandatePendingEvent,
-                GoCardlessMandateAction.SUBMITTED, this::upsertMandatePendingEvent,
+                GoCardlessMandateAction.CREATED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
+                GoCardlessMandateAction.SUBMITTED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
                 GoCardlessMandateAction.ACTIVE, transactionService::mandateActiveFor,
                 GoCardlessMandateAction.FAILED, (Transaction transaction) -> {
                     Payer payer = payerService.getPayerFor(transaction);
@@ -49,7 +49,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 }));
     }
 
-    private PaymentRequestEvent upsertMandatePendingEvent(Transaction transaction) {
+    private PaymentRequestEvent findMandatePendingEventOrInsertOneIfItDoesNotExist(Transaction transaction) {
         return transactionService.findMandatePendingEventFor(transaction)
                 .orElseGet(() -> transactionService.mandatePendingFor(transaction));
     }

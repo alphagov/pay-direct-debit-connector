@@ -30,7 +30,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class UserNotificationService {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(UserNotificationService.class);
 
-    private String mandateFailedTemplateId;
     private boolean emailNotifyGloballyEnabled;
     private ExecutorService executorService;
     private final MetricRegistry metricRegistry;
@@ -43,7 +42,7 @@ public class UserNotificationService {
                                    NotificationClient notificationClient,
                                    MetricRegistry metricRegistry,
                                    GatewayAccountService gatewayAccountService) {
-        readMandateFailedEmailConfig(directDebitConfig.getNotifyConfig());
+        this.emailNotifyGloballyEnabled = directDebitConfig.getNotifyConfig().isEmailNotifyEnabled();
         if (emailNotifyGloballyEnabled) {
             int numberOfThreads = directDebitConfig.getExecutorServiceConfig().getThreadsPerCpu() * getRuntime().availableProcessors();
             executorService = Executors.newFixedThreadPool(numberOfThreads);
@@ -56,6 +55,7 @@ public class UserNotificationService {
 
     public Future<Optional<String>> sendMandateFailedEmail(Payer payer, Transaction transaction) {
         if (emailNotifyGloballyEnabled) {
+            String mandateFailedTemplateId = directDebitConfig.getNotifyConfig().getMandateFailedTemplateId();
             Stopwatch responseTimeStopwatch = Stopwatch.createStarted();
             return executorService.submit(() -> {
                 try {
@@ -88,17 +88,5 @@ public class UserNotificationService {
         map.put("dd guarantee link", directDebitConfig.getLinks().getFrontendUrl() + "/direct-debit-guarantee");
 
         return map;
-    }
-
-    private void readMandateFailedEmailConfig(NotifyClientFactory notifyClientFactory) {
-        emailNotifyGloballyEnabled = notifyClientFactory.isEmailNotifyEnabled();
-        mandateFailedTemplateId = notifyClientFactory.getMandateFailedTemplateId();
-
-        if (!emailNotifyGloballyEnabled) {
-            LOGGER.warn("Email notifications are globally disabled by configuration");
-        }
-        if (emailNotifyGloballyEnabled && isBlank(mandateFailedTemplateId)) {
-            throw new RuntimeException("Please check the notify configuration");
-        }
     }
 }
