@@ -64,12 +64,10 @@ public class GoCardlessStubs {
 
     public static void stubCreatePayment(String paymentRequestExternalId, TransactionFixture transactionFixture) {
         String paymentRequestExpectedBody = load(GOCARDLESS_CREATE_PAYMENT_REQUEST)
-                .replace("{{amount}}", String.valueOf(transactionFixture.getAmount()))
-                .replace("{{reference}}", transactionFixture.getPaymentRequestDescription());
+                .replace("{{amount}}", String.valueOf(transactionFixture.getAmount()));
 
         String paymentResponseBody = load(GOCARDLESS_CREATE_PAYMENT_SUCCESS_RESPONSE)
-                .replace("{{amount}}", String.valueOf(transactionFixture.getAmount()))
-                .replace("{{reference}}", transactionFixture.getPaymentRequestDescription());
+                .replace("{{amount}}", String.valueOf(transactionFixture.getAmount()));
         stubCallsFor("/payments", 200, paymentRequestExternalId, paymentRequestExpectedBody, paymentResponseBody);
     }
     private static void stubCallsFor(String url, int statusCode, String idempotencyKey, String requestBody, String responseBody) {

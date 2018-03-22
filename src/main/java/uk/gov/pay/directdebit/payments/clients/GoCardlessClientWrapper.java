@@ -60,12 +60,10 @@ public class GoCardlessClientWrapper {
     }
 
     public GoCardlessPayment createPayment(String paymentRequestExternalId, GoCardlessMandate mandate, Transaction transaction) {
-        //todo check which reference we want to send
         Payment goCardlessPayment = goCardlessClient.payments()
                 .create()
                 .withAmount(Math.toIntExact(transaction.getAmount()))
                 .withCurrency(PaymentService.PaymentCreateRequest.Currency.GBP)
-                .withReference(transaction.getPaymentRequestDescription())
                 .withLinksMandate(mandate.getGoCardlessMandateId())
                 .withIdempotencyKey(paymentRequestExternalId)
                 .execute();
