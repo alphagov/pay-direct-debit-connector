@@ -7,7 +7,7 @@
     "description": null,
     "currency": "GBP",
     "status": "pending_submission",
-    "reference": "{{reference}}",
+    "reference": "reference",
     "amount_refunded": 0,
     "links": {
       "mandate": "MD123",

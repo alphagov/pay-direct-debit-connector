@@ -2,7 +2,6 @@
   "payments": {
     "amount": {{amount}},
     "currency": "GBP",
-    "reference": "{{reference}}",
     "links": {
       "mandate": "MD123"
     }
