@@ -135,11 +135,11 @@ public class TransactionService {
         PaymentState newState = getStates().getNextStateForEvent(transaction.getState(),
                 event);
         transactionDao.updateState(transaction.getId(), newState);
-        transaction.setState(newState);
-        LOGGER.info("Updated transaction {} - from {} to {}",
+        LOGGER.info("Updating transaction {} - from {} to {}",
                 transaction.getPaymentRequestExternalId(),
                 transaction.getState(),
                 newState);
+        transaction.setState(newState);
         return transaction;
     }
 

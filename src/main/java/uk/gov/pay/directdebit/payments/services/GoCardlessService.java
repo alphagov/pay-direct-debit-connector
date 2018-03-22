@@ -70,6 +70,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     @Override
     public void confirm(String paymentRequestExternalId, GatewayAccount gatewayAccount) {
+        LOGGER.info("Confirming payment, payment request id: {}", paymentRequestExternalId);
         ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId);
         GoCardlessMandate goCardlessMandate = createMandate(paymentRequestExternalId, confirmationDetails.getMandate());
         createPayment(paymentRequestExternalId, confirmationDetails.getTransaction(), goCardlessMandate);
