@@ -131,6 +131,10 @@ public class TransactionService {
         return paymentRequestEventService.registerMandatePendingEventFor(transaction);
     }
 
+    public PaymentRequestEvent mandateActiveFor(Transaction transaction) {
+        return paymentRequestEventService.registerMandateActiveEventFor(transaction);
+    }
+
     private Transaction updateStateFor(Transaction transaction, SupportedEvent event) {
         PaymentState newState = getStates().getNextStateForEvent(transaction.getState(),
                 event);

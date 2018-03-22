@@ -29,7 +29,13 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
     }
 
     public enum GoCardlessMandateAction implements GoCardlessAction {
-        CREATED, SUBMITTED, ACTIVE;
+        CREATED, SUBMITTED,
+        ACTIVE {
+            @Override
+            public PaymentRequestEvent process(TransactionService transactionService, Transaction transaction) {
+                return transactionService.mandateActiveFor(transaction);
+            }
+        };
 
         @Override
         public PaymentRequestEvent process(TransactionService transactionService, Transaction transaction) {

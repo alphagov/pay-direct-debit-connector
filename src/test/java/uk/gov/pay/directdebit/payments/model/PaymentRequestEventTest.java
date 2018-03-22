@@ -10,6 +10,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
@@ -130,6 +131,16 @@ public class PaymentRequestEventTest {
         PaymentRequestEvent event = PaymentRequestEvent.mandatePending(paymentRequestId);
 
         assertThat(event.getEvent(), is(MANDATE_PENDING));
+        assertThat(event.getEventType(), is(MANDATE));
+        assertThat(event.getPaymentRequestId(), is(paymentRequestId));
+    }
+
+    @Test
+    public void mandateActive_shouldReturnExpectedEvent() {
+        long paymentRequestId = 1L;
+        PaymentRequestEvent event = PaymentRequestEvent.mandateActive(paymentRequestId);
+
+        assertThat(event.getEvent(), is(MANDATE_ACTIVE));
         assertThat(event.getEventType(), is(MANDATE));
         assertThat(event.getPaymentRequestId(), is(paymentRequestId));
     }

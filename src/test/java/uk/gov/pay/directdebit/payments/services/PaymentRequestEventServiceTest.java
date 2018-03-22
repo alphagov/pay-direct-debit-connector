@@ -21,6 +21,7 @@ import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
@@ -109,6 +110,18 @@ public class PaymentRequestEventServiceTest {
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(paymentRequestEvent.getEvent(), is(MANDATE_PENDING));
+        assertThat(paymentRequestEvent.getEventType(), is(MANDATE));
+        assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
+    }
+
+    @Test
+    public void registerMandateActiveEventFor_shouldCreateExpectedEvent() {
+        service.registerMandateActiveEventFor(transactionFixture.toEntity());
+        ArgumentCaptor<PaymentRequestEvent> prCaptor = forClass(PaymentRequestEvent.class);
+        verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
+        PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
+        assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(paymentRequestEvent.getEvent(), is(MANDATE_ACTIVE));
         assertThat(paymentRequestEvent.getEventType(), is(MANDATE));
         assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }

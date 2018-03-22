@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
@@ -69,6 +70,10 @@ public class PaymentRequestEvent {
         return new PaymentRequestEvent(paymentRequestId, Type.MANDATE, MANDATE_PENDING);
     }
 
+    public static PaymentRequestEvent mandateActive(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.MANDATE, MANDATE_ACTIVE);
+    }
+
     public static PaymentRequestEvent paidOut(Long paymentRequestId) {
         return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAID_OUT);
     }
@@ -124,6 +129,7 @@ public class PaymentRequestEvent {
         PAYER_CREATED,
         DIRECT_DEBIT_DETAILS_CONFIRMED,
         MANDATE_PENDING,
+        MANDATE_ACTIVE,
         PAYMENT_CREATED,
         PAYMENT_PENDING,
         PAID_OUT;
