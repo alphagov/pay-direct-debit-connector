@@ -182,7 +182,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void paymentCreatedFor_shouldUpdateTransaction_andRegisterAPaymentCreatedEvent() {
+    public void paymentCreatedFor_shouldUpdateTransactionAsPending_andRegisterAPaymentCreatedEvent() {
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
                 .withState(PROCESSING_DIRECT_DEBIT_PAYMENT)
@@ -198,7 +198,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void paymentPendingFor_shouldRegisterAPaymentPendingEvent_butTheTransactionRemainsAsPaymentCreated() {
+    public void paymentPendingFor_shouldRegisterAPaymentPendingEvent() {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
@@ -213,7 +213,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void paymentPaidOutFor_shouldRegisterAPaymentPendingEvent_andRegisterAPaidOutEvent() {
+    public void paymentPaidOutFor_shouldSetPaymentAsSucceeded_andRegisterAPaidOutEvent() {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
@@ -228,7 +228,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void mandatePendingFor_shouldRegisterAPaymentPendingEvent_butTheTransactionRemainsAsPaymentCreated() {
+    public void mandatePendingFor_shouldRegisterAMandatePendingEvent() {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
@@ -238,6 +238,21 @@ public class TransactionServiceTest {
         service.mandatePendingFor(transaction);
 
         verify(mockedPaymentRequestEventService).registerMandatePendingEventFor(transaction);
+        verifyZeroInteractions(mockedTransactionDao);
+        assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
+    }
+
+    @Test
+    public void mandateActiveFor_shouldRegisterAMandateActiveEvent() {
+
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(PENDING_DIRECT_DEBIT_PAYMENT)
+                .toEntity();
+
+        service.mandateActiveFor(transaction);
+
+        verify(mockedPaymentRequestEventService).registerMandateActiveEventFor(transaction);
         verifyZeroInteractions(mockedTransactionDao);
         assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
     }

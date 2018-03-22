@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsConfirmed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsReceived;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateActive;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandatePending;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paidOut;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
@@ -85,6 +86,11 @@ public class PaymentRequestEventService {
 
     public PaymentRequestEvent registerMandatePendingEventFor(Transaction transaction) {
         PaymentRequestEvent event = mandatePending(transaction.getPaymentRequestId());
+        return insertEventFor(transaction, event);
+    }
+
+    public PaymentRequestEvent registerMandateActiveEventFor(Transaction transaction) {
+        PaymentRequestEvent event = mandateActive(transaction.getPaymentRequestId());
         return insertEventFor(transaction, event);
     }
 }
