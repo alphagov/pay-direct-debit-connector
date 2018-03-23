@@ -12,6 +12,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundEx
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,6 +51,8 @@ public class GatewayAccountServiceTest {
     private GatewayAccountService service;
 
     private Map<String, String> createPaymentRequest = new HashMap<>();
+
+    private Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -61,7 +65,7 @@ public class GatewayAccountServiceTest {
     public void shouldReturnGatewayAccountIfItExists() {
         String accountId = "10sadsadsadL";
         when(mockedGatewayAccountDao.findByExternalId(accountId)).thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
-        GatewayAccount gatewayAccount = service.getGatewayAccount(accountId);
+        GatewayAccount gatewayAccount = service.getGatewayAccountForId(accountId);
         assertThat(gatewayAccount.getId(), is(gatewayAccountFixture.getId()));
         assertThat(gatewayAccount.getPaymentProvider(), is(PAYMENT_PROVIDER));
         assertThat(gatewayAccount.getAnalyticsId(), is(ANALYTICS_ID));
@@ -77,7 +81,30 @@ public class GatewayAccountServiceTest {
         thrown.expect(GatewayAccountNotFoundException.class);
         thrown.expectMessage("Unknown gateway account: 10");
         thrown.reportMissingExceptionWithMessage("GatewayAccountNotFoundException expected");
-        service.getGatewayAccount(accountId);
+        service.getGatewayAccountForId(accountId);
+    }
+
+    @Test
+    public void shouldReturnGatewayAccountForTransactionIfItExists() {
+        when(mockedGatewayAccountDao.findById(transaction.getPaymentRequestGatewayAccountId()))
+                .thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
+        GatewayAccount gatewayAccount = service.getGatewayAccountFor(transaction);
+        assertThat(gatewayAccount.getId(), is(gatewayAccountFixture.getId()));
+        assertThat(gatewayAccount.getPaymentProvider(), is(PAYMENT_PROVIDER));
+        assertThat(gatewayAccount.getAnalyticsId(), is(ANALYTICS_ID));
+        assertThat(gatewayAccount.getDescription(), is(DESCRIPTION));
+        assertThat(gatewayAccount.getServiceName(), is(SERVICE_NAME));
+        assertThat(gatewayAccount.getType(), is(TYPE));
+    }
+
+    @Test
+    public void shouldThrowIfGatewayAccountForTransactionDoesNotExist() {
+        when(mockedGatewayAccountDao.findById(transaction.getPaymentRequestGatewayAccountId()))
+                .thenReturn(Optional.empty());
+        thrown.expect(GatewayAccountNotFoundException.class);
+        thrown.expectMessage("Unknown gateway account: " + transaction.getPaymentRequestGatewayAccountId().toString());
+        thrown.reportMissingExceptionWithMessage("GatewayAccountNotFoundException expected");
+        service.getGatewayAccountFor(transaction);
     }
 
     @Test

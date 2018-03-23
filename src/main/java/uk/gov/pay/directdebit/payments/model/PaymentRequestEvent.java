@@ -9,11 +9,13 @@ import java.time.ZonedDateTime;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 
@@ -66,8 +68,16 @@ public class PaymentRequestEvent {
         return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_CREATED);
     }
 
+    public static PaymentRequestEvent paymentFailed(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_FAILED);
+    }
+
     public static PaymentRequestEvent mandatePending(Long paymentRequestId) {
         return new PaymentRequestEvent(paymentRequestId, Type.MANDATE, MANDATE_PENDING);
+    }
+
+    public static PaymentRequestEvent mandateFailed(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.MANDATE, MANDATE_FAILED);
     }
 
     public static PaymentRequestEvent mandateActive(Long paymentRequestId) {
@@ -128,10 +138,12 @@ public class PaymentRequestEvent {
         DIRECT_DEBIT_DETAILS_RECEIVED,
         PAYER_CREATED,
         DIRECT_DEBIT_DETAILS_CONFIRMED,
+        MANDATE_FAILED,
         MANDATE_PENDING,
         MANDATE_ACTIVE,
         PAYMENT_CREATED,
         PAYMENT_PENDING,
+        PAYMENT_FAILED,
         PAID_OUT;
 
         public static SupportedEvent fromString(String event) throws UnsupportedPaymentRequestEventException {

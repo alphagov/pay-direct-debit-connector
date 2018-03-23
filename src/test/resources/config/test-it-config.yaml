@@ -31,6 +31,16 @@ goCardless:
   environment: sandbox
   clientUrl: http://localhost:10107
 
+executorService:
+  timeoutInSeconds: ${AUTH_READ_TIMEOUT_SECONDS:-1}
+  threadsPerCpu: ${NUMBER_OF_THREADS_PER_CPU:-100}
+
+notify:
+  mandateFailedTemplateId: test-template-id
+  apiKey: ${NOTIFY_API_KEY:-pay-notify-api-key}
+  notificationBaseURL: https://stubs.pymnt.localdomain
+  emailNotifyEnabled: false
+
 database:
   driverClass: org.postgresql.Driver
   user:

@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payers.services;
 
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -25,6 +26,11 @@ public class PayerService {
         this.payerDao = payerDao;
         this.transactionService = transactionService;
         this.payerParser = payerParser;
+    }
+    public Payer getPayerFor(Transaction transaction) {
+        return payerDao
+                .findByPaymentRequestId(transaction.getPaymentRequestId())
+                .orElseThrow(() -> new PayerNotFoundException(transaction.getPaymentRequestExternalId()));
     }
 
     public Payer create(String paymentRequestExternalId, Long accountId, Map<String, String> createPayerRequest) {

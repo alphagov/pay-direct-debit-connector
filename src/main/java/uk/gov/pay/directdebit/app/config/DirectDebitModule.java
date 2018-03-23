@@ -5,7 +5,6 @@ import com.gocardless.GoCardlessClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.squareup.okhttp.OkHttpClient;
-import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.setup.Environment;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.skife.jdbi.v2.DBI;
@@ -22,6 +21,7 @@ import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
+import uk.gov.service.notify.NotificationClient;
 
 import javax.net.ssl.SSLSocketFactory;
 import java.net.InetSocketAddress;
@@ -60,12 +60,17 @@ public class DirectDebitModule extends AbstractModule {
         }
         return goCardlessClient;
     }
+
     @Provides
     public GoCardlessClientWrapper provideGoCardlessClientWrapper() throws IllegalAccessException {
         GoCardlessClient goCardlessClient =  hackedGoCardlessClient(configuration, sslSocketFactory);
         return new GoCardlessClientWrapper(goCardlessClient);
     }
 
+    @Provides
+    public NotificationClient provideNotifyClient() {
+        return configuration.getNotifyConfig().getInstance();
+    }
 
     @Provides
     public WebhookVerifier provideWebhookVerifier() {

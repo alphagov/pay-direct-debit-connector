@@ -124,7 +124,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             LOGGER.info("Attempting to call gocardless to create a mandate, payment request id: {}", paymentRequestExternalId);
 
             GoCardlessMandate mandate = goCardlessClientWrapper.createMandate(paymentRequestExternalId, payMandate, goCardlessCustomer);
-            LOGGER.info("Created mandate in gocardless, payment request id: {}", paymentRequestExternalId);
+            LOGGER.info("Created mandate in gocardless, payment request id: {}, mandate id: {}", paymentRequestExternalId, mandate.getGoCardlessMandateId());
 
             Long id = goCardlessMandateDao.insert(mandate);
             mandate.setId(id);
@@ -142,7 +142,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
             GoCardlessPayment goCardlessPayment = goCardlessClientWrapper.createPayment(paymentRequestExternalId, goCardlessMandate, transaction);
 
-            LOGGER.info("Created payment in gocardless, payment request id: {}", paymentRequestExternalId);
+            LOGGER.info("Created payment in gocardless, payment request id: {}, gocardless payment id: {} ", paymentRequestExternalId, goCardlessPayment.getPaymentId());
 
             return goCardlessPaymentDao.insert(goCardlessPayment).toString();
 

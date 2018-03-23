@@ -4,8 +4,11 @@ import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
+import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
@@ -17,6 +20,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
@@ -35,11 +39,12 @@ public class TransactionService {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(TransactionService.class);
     private final TransactionDao transactionDao;
     private final PaymentRequestEventService paymentRequestEventService;
-
+    private final UserNotificationService userNotificationService;
     @Inject
-    public TransactionService(TransactionDao transactionDao, PaymentRequestEventService paymentRequestEventService) {
+    public TransactionService(TransactionDao transactionDao, PaymentRequestEventService paymentRequestEventService, UserNotificationService userNotificationService) {
         this.paymentRequestEventService = paymentRequestEventService;
         this.transactionDao = transactionDao;
+        this.userNotificationService = userNotificationService;
     }
 
     public Transaction findChargeForExternalIdAndGatewayAccountId(String paymentRequestExternalId, Long accountId) {
@@ -118,8 +123,18 @@ public class TransactionService {
         return paymentRequestEventService.registerPaymentCreatedEventFor(updatedTransaction);
     }
 
+    public PaymentRequestEvent mandateFailedFor(Transaction transaction, Payer payer) {
+        userNotificationService.sendMandateFailedEmail(payer, transaction);
+        return paymentRequestEventService.registerMandateFailedEventFor(transaction);
+    }
+
     public PaymentRequestEvent paymentPendingFor(Transaction transaction) {
         return paymentRequestEventService.registerPaymentPendingEventFor(transaction);
+    }
+
+    public PaymentRequestEvent paymentFailedFor(Transaction transaction) {
+        Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_FAILED);
+        return paymentRequestEventService.registerPaymentFailedEventFor(newTransaction);
     }
 
     public PaymentRequestEvent paymentPaidOutFor(Transaction transaction) {
@@ -148,7 +163,9 @@ public class TransactionService {
     }
 
     public PaymentRequestEvent findPaymentPendingEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_PENDING).get();
+        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_PENDING)
+                .orElseThrow(() -> new InvalidStateException(format("Could not find payment pending event for payment request with id: {}",
+                        transaction.getPaymentRequestExternalId())));
     }
 
     public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {

@@ -12,11 +12,13 @@ import java.util.Optional;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsConfirmed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsReceived;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateFailed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateActive;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandatePending;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paidOut;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCreated;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentFailed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentPending;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.tokenExchanged;
 
@@ -62,6 +64,16 @@ public class PaymentRequestEventService {
 
     public PaymentRequestEvent registerPaymentCreatedEventFor(Transaction charge) {
         PaymentRequestEvent event = paymentCreated(charge.getPaymentRequestId());
+        return insertEventFor(charge, event);
+    }
+
+    public PaymentRequestEvent registerMandateFailedEventFor(Transaction charge) {
+        PaymentRequestEvent event = mandateFailed(charge.getPaymentRequestId());
+        return insertEventFor(charge, event);
+    }
+
+    public PaymentRequestEvent registerPaymentFailedEventFor(Transaction charge) {
+        PaymentRequestEvent event = paymentFailed(charge.getPaymentRequestId());
         return insertEventFor(charge, event);
     }
 
