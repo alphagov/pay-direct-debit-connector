@@ -17,6 +17,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +60,7 @@ public class TransactionService {
                 paymentRequest.getId(),
                 paymentRequest.getExternalId(),
                 paymentRequest.getDescription(),
+                paymentRequest.getReference(),
                 paymentRequest.getGatewayAccountId(),
                 gatewayAccount.getPaymentProvider(),
                 paymentRequest.getReturnUrl(),
@@ -117,10 +119,15 @@ public class TransactionService {
         return updatedTransaction;
     }
 
-    public PaymentRequestEvent paymentCreatedFor(Transaction transaction) {
-        transactionDao.findById(transaction.getId());
+    public PaymentRequestEvent paymentCreatedFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
+        userNotificationService.sendPaymentConfirmedEmailFor(transaction, payer, earliestChargeDate);
         Transaction updatedTransaction = updateStateFor(transaction, PAYMENT_CREATED);
         return paymentRequestEventService.registerPaymentCreatedEventFor(updatedTransaction);
+    }
+
+    public PaymentRequestEvent mandateFailedFor(Transaction transaction, Payer payer) {
+        userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        return paymentRequestEventService.registerMandateFailedEventFor(transaction);
     }
 
     public PaymentRequestEvent paymentFailedFor(Transaction transaction) {
@@ -131,11 +138,6 @@ public class TransactionService {
     public PaymentRequestEvent paymentPaidOutFor(Transaction transaction) {
         Transaction updatedTransaction = updateStateFor(transaction, PAID_OUT);
         return paymentRequestEventService.registerPaymentPaidOutEventFor(updatedTransaction);
-    }
-
-    public PaymentRequestEvent mandateFailedFor(Transaction transaction, Payer payer) {
-        userNotificationService.sendMandateFailedEmail(payer, transaction);
-        return paymentRequestEventService.registerMandateFailedEventFor(transaction);
     }
 
     public PaymentRequestEvent paymentPendingFor(Transaction transaction) {

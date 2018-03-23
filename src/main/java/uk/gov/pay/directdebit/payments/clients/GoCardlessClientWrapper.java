@@ -12,6 +12,8 @@ import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
+import java.time.LocalDate;
+
 //thin abstraction over the client provided in the SDK
 public class GoCardlessClientWrapper {
 
@@ -69,6 +71,7 @@ public class GoCardlessClientWrapper {
                 .execute();
         return new GoCardlessPayment(
                 transaction.getId(),
-                goCardlessPayment.getId());
+                goCardlessPayment.getId(),
+                LocalDate.parse(goCardlessPayment.getChargeDate()));
     }
 }

@@ -9,8 +9,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import static org.mockito.Mockito.verify;
@@ -34,6 +38,7 @@ public class SandboxServiceTest {
     private String paymentRequestExternalId = "sdkfhsdkjfhjdks";
 
     private GatewayAccount gatewayAccount = aGatewayAccountFixture().toEntity();
+    private Payer payer = PayerFixture.aPayerFixture().toEntity();
     @Before
     public void setUp() {
         service = new SandboxService(mockedPayerService, mockedPaymentConfirmService, mockedTransactionService);
@@ -48,17 +53,17 @@ public class SandboxServiceTest {
 
     @Test
     public void confirm_shouldRegisterAPaymentCreatedEventWhenSuccessfullyConfirmed() {
-
+        TransactionFixture transactionFixture = aTransactionFixture();
         ConfirmationDetails confirmationDetails = confirmationDetails()
-                .withTransaction(aTransactionFixture())
+                .withTransaction(transactionFixture)
                 .withMandate(aMandateFixture())
                 .build();
 
         when(mockedPaymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId))
                 .thenReturn(confirmationDetails);
+        when(mockedPayerService.getPayerFor(transactionFixture.toEntity())).thenReturn(payer);
 
         service.confirm(paymentRequestExternalId, gatewayAccount);
-
-        verify(mockedTransactionService).paymentCreatedFor(confirmationDetails.getTransaction());
+        verify(mockedTransactionService).paymentCreatedFor(confirmationDetails.getTransaction(), payer, LocalDate.now().plusDays(4));
     }
 }

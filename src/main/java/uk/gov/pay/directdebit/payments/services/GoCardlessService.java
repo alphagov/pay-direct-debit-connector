@@ -73,8 +73,9 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         LOGGER.info("Confirming payment, payment request id: {}", paymentRequestExternalId);
         ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId);
         GoCardlessMandate goCardlessMandate = createMandate(paymentRequestExternalId, confirmationDetails.getMandate());
-        createPayment(paymentRequestExternalId, confirmationDetails.getTransaction(), goCardlessMandate);
-        transactionService.paymentCreatedFor(confirmationDetails.getTransaction());
+        GoCardlessPayment payment = createPayment(paymentRequestExternalId, confirmationDetails.getTransaction(), goCardlessMandate);
+        Payer payer = payerService.getPayerFor(confirmationDetails.getTransaction());
+        transactionService.paymentCreatedFor(confirmationDetails.getTransaction(), payer, payment.getChargeDate());
     }
 
     private GoCardlessCustomer createCustomer(String paymentRequestExternalId, Payer payer) {
@@ -88,7 +89,6 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             Long id = goCardlessCustomerDao.insert(customer);
             customer.setId(id);
             return customer;
-
         } catch (Exception exc) {
             logException(exc, "customer", paymentRequestExternalId);
             throw new CreateCustomerFailedException(paymentRequestExternalId, payer.getExternalId());
@@ -108,7 +108,6 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
             goCardlessCustomerDao.updateBankAccountId(customerWithBankAccount.getId(), customerWithBankAccount.getCustomerBankAccountId());
             return customerWithBankAccount.getCustomerId();
-
         } catch (Exception exc) {
             logException(exc, "bank account", paymentRequestExternalId);
             throw new CreateCustomerBankAccountFailedException(paymentRequestExternalId, payer.getExternalId());
@@ -129,23 +128,22 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             Long id = goCardlessMandateDao.insert(mandate);
             mandate.setId(id);
             return mandate;
-
         } catch (Exception exc) {
             logException(exc, "mandate", paymentRequestExternalId);
             throw new CreateMandateFailedException(paymentRequestExternalId, payMandate.getExternalId());
         }
     }
 
-    private String createPayment(String paymentRequestExternalId, Transaction transaction, GoCardlessMandate goCardlessMandate) {
+    private GoCardlessPayment createPayment(String paymentRequestExternalId, Transaction transaction, GoCardlessMandate goCardlessMandate) {
         try {
             LOGGER.info("Attempting to call gocardless to create a payment, payment request id: {}", paymentRequestExternalId);
 
             GoCardlessPayment goCardlessPayment = goCardlessClientWrapper.createPayment(paymentRequestExternalId, goCardlessMandate, transaction);
 
             LOGGER.info("Created payment in gocardless, payment request id: {}, gocardless payment id: {} ", paymentRequestExternalId, goCardlessPayment.getPaymentId());
-
-            return goCardlessPaymentDao.insert(goCardlessPayment).toString();
-
+            Long id = goCardlessPaymentDao.insert(goCardlessPayment);
+            goCardlessPayment.setId(id);
+            return goCardlessPayment;
         } catch (Exception exc) {
             logException(exc, "payment", paymentRequestExternalId);
             throw new CreatePaymentFailedException(paymentRequestExternalId);

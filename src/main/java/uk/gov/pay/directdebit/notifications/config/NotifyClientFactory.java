@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.notifications.config;
 
 import io.dropwizard.Configuration;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.service.notify.NotificationClient;
 
@@ -21,9 +20,15 @@ public class NotifyClientFactory extends Configuration {
     private boolean emailNotifyEnabled;
     @NotNull
     private String mandateFailedTemplateId;
+    @NotNull
+    private String paymentConfirmedTemplateId;
 
     public String getMandateFailedTemplateId() {
         return mandateFailedTemplateId;
+    }
+
+    public String getPaymentConfirmedTemplateId() {
+        return paymentConfirmedTemplateId;
     }
 
     public String getApiKey() {

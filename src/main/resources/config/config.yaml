@@ -37,6 +37,7 @@ goCardless:
 notify:
   apiKey: ${GDS_DIRECTDEBIT_CONNECTOR_NOTIFY_API_KEY:-api_key-pay-notify-service-id-pay-notify-secret-needs-to-be-32-chars-fsghdngfhmhfkrgsfs}
   mandateFailedTemplateId: ${NOTIFY_MANDATE_FAILED_EMAIL_TEMPLATE_ID}
+  paymentConfirmedTemplateId: ${NOTIFY_PAYMENT_CONFIRMATION_EMAIL_TEMPLATE_ID}
   notificationBaseURL: ${NOTIFY_BASE_URL:-https://api.notifications.service.gov.uk}
   emailNotifyEnabled: ${NOTIFY_EMAIL_ENABLED:-false}
 
