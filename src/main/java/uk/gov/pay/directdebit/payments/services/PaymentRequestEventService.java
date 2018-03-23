@@ -12,14 +12,15 @@ import java.util.Optional;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsConfirmed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsReceived;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateFailed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateActive;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateFailed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandatePending;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paidOut;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentFailed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentPending;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payoutPaid;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.tokenExchanged;
 
 public class PaymentRequestEventService {
@@ -62,6 +63,11 @@ public class PaymentRequestEventService {
         insertEventFor(charge, event);
     }
 
+    public void registerTokenExchangedEventFor(Transaction charge) {
+        PaymentRequestEvent event = tokenExchanged(charge.getPaymentRequestId());
+        insertEventFor(charge, event);
+    }
+
     public PaymentRequestEvent registerPaymentCreatedEventFor(Transaction charge) {
         PaymentRequestEvent event = paymentCreated(charge.getPaymentRequestId());
         return insertEventFor(charge, event);
@@ -87,13 +93,9 @@ public class PaymentRequestEventService {
         return insertEventFor(charge, event);
     }
 
-    public void registerTokenExchangedEventFor(Transaction charge) {
-        PaymentRequestEvent event = tokenExchanged(charge.getPaymentRequestId());
-        insertEventFor(charge, event);
-    }
-
-    public Optional<PaymentRequestEvent> findBy(Long paymentRequestId, PaymentRequestEvent.Type type, PaymentRequestEvent.SupportedEvent event) {
-        return paymentRequestEventDao.findByPaymentRequestIdAndEvent(paymentRequestId, type, event);
+    public PaymentRequestEvent registerPayoutPaidEventFor(Transaction charge) {
+        PaymentRequestEvent event = payoutPaid(charge.getPaymentRequestId());
+        return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerMandatePendingEventFor(Transaction transaction) {
@@ -104,5 +106,9 @@ public class PaymentRequestEventService {
     public PaymentRequestEvent registerMandateActiveEventFor(Transaction transaction) {
         PaymentRequestEvent event = mandateActive(transaction.getPaymentRequestId());
         return insertEventFor(transaction, event);
+    }
+
+    public Optional<PaymentRequestEvent> findBy(Long paymentRequestId, PaymentRequestEvent.Type type, PaymentRequestEvent.SupportedEvent event) {
+        return paymentRequestEventDao.findByPaymentRequestIdAndEvent(paymentRequestId, type, event);
     }
 }

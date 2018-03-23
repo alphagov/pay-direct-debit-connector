@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
@@ -22,7 +23,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_ACTIVE;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
@@ -32,6 +37,9 @@ public class PaymentRequestEventServiceTest {
 
     @Mock
     private PaymentRequestEventDao mockedPaymentRequestEventDao;
+
+    @Captor
+    ArgumentCaptor<PaymentRequestEvent> prCaptor;
 
     private PaymentRequestEventService service;
 
@@ -45,7 +53,7 @@ public class PaymentRequestEventServiceTest {
     @Test
     public void registerTokenExchangedEventFor_shouldInsertAnEventWhenTokenIsExchanged() {
         service.registerTokenExchangedEventFor(transactionFixture.toEntity());
-        ArgumentCaptor<PaymentRequestEvent> prCaptor = forClass(PaymentRequestEvent.class);
+
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
@@ -57,7 +65,7 @@ public class PaymentRequestEventServiceTest {
     @Test
     public void registerDirectDebitReceivedEventFor_shouldInsertAnEventWhenDDDetailsAreReceived() {
         service.registerDirectDebitReceivedEventFor(transactionFixture.toEntity());
-        ArgumentCaptor<PaymentRequestEvent> prCaptor = forClass(PaymentRequestEvent.class);
+
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
@@ -69,7 +77,7 @@ public class PaymentRequestEventServiceTest {
     @Test
     public void registerPayerCreatedEventFor_shouldInsertAnEventWhenPayerIsCreated() {
         service.registerPayerCreatedEventFor(transactionFixture.toEntity());
-        ArgumentCaptor<PaymentRequestEvent> prCaptor = forClass(PaymentRequestEvent.class);
+
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
@@ -81,7 +89,7 @@ public class PaymentRequestEventServiceTest {
     @Test
     public void registerPaymentCreatedEventFor_shouldCreateExpectedEvent() {
         service.registerPaymentCreatedEventFor(transactionFixture.toEntity());
-        ArgumentCaptor<PaymentRequestEvent> prCaptor = forClass(PaymentRequestEvent.class);
+
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
@@ -93,7 +101,7 @@ public class PaymentRequestEventServiceTest {
     @Test
     public void registerPaymentPendingEventFor_shouldCreateExpectedEvent() {
         service.registerPaymentPendingEventFor(transactionFixture.toEntity());
-        ArgumentCaptor<PaymentRequestEvent> prCaptor = forClass(PaymentRequestEvent.class);
+
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
@@ -103,9 +111,45 @@ public class PaymentRequestEventServiceTest {
     }
 
     @Test
+    public void registerPaymentPaidOutEventFor_shouldCreateExpectedEvent() {
+        service.registerPaymentPaidOutEventFor(transactionFixture.toEntity());
+
+        verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
+        PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
+        assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(paymentRequestEvent.getEvent(), is(PAID_OUT));
+        assertThat(paymentRequestEvent.getEventType(), is(CHARGE));
+        assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
+    }
+
+    @Test
+    public void registerPaymentFailedEventFor_shouldCreateExpectedEvent() {
+        service.registerPaymentFailedEventFor(transactionFixture.toEntity());
+
+        verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
+        PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
+        assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(paymentRequestEvent.getEvent(), is(PAYMENT_FAILED));
+        assertThat(paymentRequestEvent.getEventType(), is(CHARGE));
+        assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
+    }
+
+    @Test
+    public void registerPayoutPaidEventFor_shouldCreateExpectedEvent() {
+        service.registerPayoutPaidEventFor(transactionFixture.toEntity());
+
+        verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
+        PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
+        assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(paymentRequestEvent.getEvent(), is(PAID));
+        assertThat(paymentRequestEvent.getEventType(), is(CHARGE));
+        assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
+    }
+
+    @Test
     public void registerMandatePendingEventFor_shouldCreateExpectedEvent() {
         service.registerMandatePendingEventFor(transactionFixture.toEntity());
-        ArgumentCaptor<PaymentRequestEvent> prCaptor = forClass(PaymentRequestEvent.class);
+
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
@@ -117,11 +161,23 @@ public class PaymentRequestEventServiceTest {
     @Test
     public void registerMandateActiveEventFor_shouldCreateExpectedEvent() {
         service.registerMandateActiveEventFor(transactionFixture.toEntity());
-        ArgumentCaptor<PaymentRequestEvent> prCaptor = forClass(PaymentRequestEvent.class);
+
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(paymentRequestEvent.getEvent(), is(MANDATE_ACTIVE));
+        assertThat(paymentRequestEvent.getEventType(), is(MANDATE));
+        assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
+    }
+
+    @Test
+    public void registerMandateFailedEventFor_shouldCreateExpectedEvent() {
+        service.registerMandateFailedEventFor(transactionFixture.toEntity());
+
+        verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
+        PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
+        assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(paymentRequestEvent.getEvent(), is(MANDATE_FAILED));
         assertThat(paymentRequestEvent.getEventType(), is(MANDATE));
         assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }

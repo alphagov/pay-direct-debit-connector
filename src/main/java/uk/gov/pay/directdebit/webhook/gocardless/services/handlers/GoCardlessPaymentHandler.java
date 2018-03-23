@@ -23,7 +23,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     }
 
     public enum GoCardlessPaymentAction implements GoCardlessAction {
-        CREATED, SUBMITTED, CONFIRMED, PAID_OUT;
+        CREATED, SUBMITTED, CONFIRMED, PAID_OUT, PAID;
 
         public static GoCardlessPaymentAction fromString(String type) {
             for (GoCardlessPaymentAction typeEnum : values()) {
@@ -52,8 +52,8 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 GoCardlessPaymentAction.CREATED, transactionService::paymentPendingFor,
                 GoCardlessPaymentAction.SUBMITTED, transactionService::findPaymentPendingEventFor,
                 GoCardlessPaymentAction.CONFIRMED, transactionService::findPaymentPendingEventFor,
-                GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor
+                GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor,
+                GoCardlessPaymentAction.PAID, transactionService::payoutPaidFor
         );
     }
-
 }

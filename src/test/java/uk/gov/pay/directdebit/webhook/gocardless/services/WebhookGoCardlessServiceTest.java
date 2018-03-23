@@ -28,6 +28,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aG
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.MANDATES;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYOUTS;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.UNHANDLED;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -103,6 +104,21 @@ public class WebhookGoCardlessServiceTest {
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
         verify(mockedTransactionService).paymentPaidOutFor(transaction);
+    }
+
+    @Test
+    public void shouldStoreAndHandlePayoutPaidEvents() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(PAYOUTS).withAction("paid").toEntity();
+
+        PaymentRequestEvent paymentRequestEvent = PaymentRequestEvent.payoutPaid(transaction.getPaymentRequestId());
+        when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPayment);
+        when(mockedTransactionService.findTransactionFor(goCardlessPayment.getTransactionId())).thenReturn(transaction);
+        when(mockedTransactionService.payoutPaidFor(transaction)).thenReturn(paymentRequestEvent);
+
+        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
+        webhookGoCardlessService.handleEvents(events);
+        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedTransactionService).payoutPaidFor(transaction);
     }
 
     @Test

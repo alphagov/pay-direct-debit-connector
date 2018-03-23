@@ -9,9 +9,10 @@ import java.time.ZonedDateTime;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_ACTIVE;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
@@ -88,6 +89,10 @@ public class PaymentRequestEvent {
         return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAID_OUT);
     }
 
+    public static PaymentRequestEvent payoutPaid(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAID);
+    }
+
     public Long getId() {
         return id;
     }
@@ -144,7 +149,8 @@ public class PaymentRequestEvent {
         PAYMENT_CREATED,
         PAYMENT_PENDING,
         PAYMENT_FAILED,
-        PAID_OUT;
+        PAID_OUT,
+        PAID;
 
         public static SupportedEvent fromString(String event) throws UnsupportedPaymentRequestEventException {
             try {

@@ -20,7 +20,6 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
 import static org.hamcrest.core.Is.is;
-import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -101,6 +100,22 @@ public class GoCardlessPaymentHandlerTest {
 
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
         when(mockedTransactionService.findPaymentPendingEventFor(transaction)).thenReturn(paymentRequestEvent);
+
+        goCardlessPaymentHandler.handle(goCardlessEvent);
+
+        verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
+        verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
+        GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
+        Assert.assertThat(storedGoCardlessEvent.getPaymentRequestEventId(), is(paymentRequestEvent.getId()));
+    }
+
+
+    @Test
+    public void handle_onPayoutPaidGoCardlessEvent_shouldLinkTheEventToAnExistingPaymentPaidOutPayEvent() {
+        GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("paid").toEntity());
+
+        when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
+        when(mockedTransactionService.payoutPaidFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
