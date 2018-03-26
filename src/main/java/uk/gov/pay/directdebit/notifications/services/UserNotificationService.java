@@ -124,6 +124,7 @@ public class UserNotificationService {
         map.put("SUN", "THE-CAKE-IS-A-LIE");
         map.put("merchant address", "123 Rainbow Road, EC125Y, London");
         map.put("merchant phone number", "+44 000-CAKE-000");
+        map.put("dd guarantee link", directDebitConfig.getLinks().getFrontendUrl() + "/direct-debit-guarantee");
         return map;
     }
 

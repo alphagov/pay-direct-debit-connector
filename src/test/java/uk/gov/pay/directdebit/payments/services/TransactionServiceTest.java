@@ -214,9 +214,6 @@ public class TransactionServiceTest {
                 .aTransactionFixture()
                 .withState(PROCESSING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
-        when(mockedTransactionDao.findById(transaction.getId()))
-                .thenReturn(Optional.of(transaction));
-
         service.paymentCreatedFor(transaction, payer, LocalDate.now());
 
         verify(mockedTransactionDao).updateState(transaction.getId(), PENDING_DIRECT_DEBIT_PAYMENT);

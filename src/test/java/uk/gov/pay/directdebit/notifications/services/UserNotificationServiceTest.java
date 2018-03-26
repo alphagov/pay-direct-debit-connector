@@ -126,6 +126,7 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("SUN", "THE-CAKE-IS-A-LIE");
         emailPersonalisation.put("merchant address", "123 Rainbow Road, EC125Y, London");
         emailPersonalisation.put("merchant phone number", "+44 000-CAKE-000");
+        emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
         verify(mockNotifyClient).sendEmail(
                 PAYMENT_CONFIRMATION_TEMPLATE,
