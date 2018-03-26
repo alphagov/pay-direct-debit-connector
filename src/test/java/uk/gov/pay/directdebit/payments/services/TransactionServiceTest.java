@@ -36,9 +36,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_DETAILS;
@@ -243,6 +245,36 @@ public class TransactionServiceTest {
 
         verify(mockedTransactionDao).updateState(transaction.getId(), SUCCESS);
         verify(mockedPaymentRequestEventService).registerPaymentPaidOutEventFor(transaction);
+        assertThat(transaction.getState(), is(SUCCESS));
+    }
+
+    @Test
+    public void paymentFailedFor_shouldSetPaymentAsFailed_andRegisterAPaymentFailedEvent() {
+
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(PENDING_DIRECT_DEBIT_PAYMENT)
+                .toEntity();
+
+        service.paymentFailedFor(transaction);
+
+        verify(mockedTransactionDao).updateState(transaction.getId(), FAILED);
+        verify(mockedPaymentRequestEventService).registerPaymentFailedEventFor(transaction);
+        assertThat(transaction.getState(), is(FAILED));
+    }
+
+    @Test
+    public void payoutPaid_shouldRegisterAPayoutPaidEvent() {
+
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(SUCCESS)
+                .toEntity();
+
+        service.payoutPaidFor(transaction);
+
+        verify(mockedPaymentRequestEventService).registerPayoutPaidEventFor(transaction);
+        verifyZeroInteractions(mockedTransactionDao);
         assertThat(transaction.getState(), is(SUCCESS));
     }
 

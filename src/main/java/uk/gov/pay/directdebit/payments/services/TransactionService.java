@@ -123,15 +123,6 @@ public class TransactionService {
         return paymentRequestEventService.registerPaymentCreatedEventFor(updatedTransaction);
     }
 
-    public PaymentRequestEvent mandateFailedFor(Transaction transaction, Payer payer) {
-        userNotificationService.sendMandateFailedEmail(payer, transaction);
-        return paymentRequestEventService.registerMandateFailedEventFor(transaction);
-    }
-
-    public PaymentRequestEvent paymentPendingFor(Transaction transaction) {
-        return paymentRequestEventService.registerPaymentPendingEventFor(transaction);
-    }
-
     public PaymentRequestEvent paymentFailedFor(Transaction transaction) {
         Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_FAILED);
         return paymentRequestEventService.registerPaymentFailedEventFor(newTransaction);
@@ -142,12 +133,25 @@ public class TransactionService {
         return paymentRequestEventService.registerPaymentPaidOutEventFor(updatedTransaction);
     }
 
+    public PaymentRequestEvent mandateFailedFor(Transaction transaction, Payer payer) {
+        userNotificationService.sendMandateFailedEmail(payer, transaction);
+        return paymentRequestEventService.registerMandateFailedEventFor(transaction);
+    }
+
+    public PaymentRequestEvent paymentPendingFor(Transaction transaction) {
+        return paymentRequestEventService.registerPaymentPendingEventFor(transaction);
+    }
+
     public PaymentRequestEvent mandatePendingFor(Transaction transaction) {
         return paymentRequestEventService.registerMandatePendingEventFor(transaction);
     }
 
     public PaymentRequestEvent mandateActiveFor(Transaction transaction) {
         return paymentRequestEventService.registerMandateActiveEventFor(transaction);
+    }
+
+    public PaymentRequestEvent payoutPaidFor(Transaction transaction) {
+        return paymentRequestEventService.registerPayoutPaidEventFor(transaction);
     }
 
     private Transaction updateStateFor(Transaction transaction, SupportedEvent event) {

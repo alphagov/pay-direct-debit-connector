@@ -44,6 +44,7 @@ public class WebhookGoCardlessService {
     private GoCardlessActionHandler getHandlerFor(GoCardlessResourceType goCardlessResourceType) {
         switch (goCardlessResourceType) {
             case PAYMENTS:
+            case PAYOUTS:
                 return goCardlessPaymentHandler;
             case MANDATES:
                 return goCardlessMandateHandler;
