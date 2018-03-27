@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
+import uk.gov.pay.directdebit.app.ssl.TrustStoreLoader;
 
 public class GCStandalone {
 
@@ -106,14 +107,43 @@ public class GCStandalone {
         }
     }
 */
-    private static void gcRequest() {
+    private static void gcTestConnectivity(boolean useProxy) {
         System.out.println("Creating gocardless sandbox client with new client");
 
         try {
-            GoCardlessClient.Builder builder = GoCardlessClient.newBuilder(System.getenv("GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN"))
+            GoCardlessClient.Builder builder = GoCardlessClient.newBuilder(
+                    System.getenv("GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN"))
                     .withEnvironment(GoCardlessClient.Environment.SANDBOX);
-            builder.withProxy(new Proxy(Proxy.Type.HTTP,
-                    new InetSocketAddress(System.getenv("HTTPS_PROXY_HOST"), Integer.parseInt(System.getenv("HTTP_PROXY_PORT")))));
+
+            if (useProxy) {
+                builder.withProxy(new Proxy(Proxy.Type.HTTP,
+                        new InetSocketAddress(System.getenv("HTTPS_PROXY_HOST"),
+                                Integer.parseInt(System.getenv("HTTP_PROXY_PORT")))));
+            }
+
+            GoCardlessClientWrapper clientWrapper = new GoCardlessClientWrapper(builder.build());
+            clientWrapper.listCustomers();
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private static void gcTestStubs(boolean useProxy) {
+        System.out.println("Creating gocardless sandbox client with new client");
+
+        try {
+            GoCardlessClient.Builder builder = GoCardlessClient.newBuilder(
+                    System.getenv("GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN"))
+                    .withEnvironment(GoCardlessClient.Environment.SANDBOX)
+                    .withBaseUrl("https://gds-pay-stubs.herokuapp.com")
+                    .withSslSocketFactory(TrustStoreLoader.getSSLContext().getSocketFactory());
+
+            if (useProxy) {
+                builder.withProxy(new Proxy(Proxy.Type.HTTP,
+                        new InetSocketAddress(System.getenv("HTTPS_PROXY_HOST"),
+                                Integer.parseInt(System.getenv("HTTP_PROXY_PORT")))));
+            }
 
             GoCardlessClientWrapper clientWrapper = new GoCardlessClientWrapper(builder.build());
             clientWrapper.listCustomers();
@@ -126,7 +156,8 @@ public class GCStandalone {
     public static void main(String[] args) {
         try {
 //            httpsRequest(args.length == 1);
-            gcRequest();
+//            gcTestConnectivity(args.length == 1);
+            gcTestStubs(args.length == 1);
         } catch (Exception e) {
             System.out.println("Failed ....");
             System.out.println(e.getMessage());
