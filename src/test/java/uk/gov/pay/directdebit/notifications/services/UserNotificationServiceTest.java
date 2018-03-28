@@ -145,8 +145,8 @@ public class UserNotificationServiceTest {
         when(mockNotifyClientFactory.isEmailNotifyEnabled()).thenReturn(false);
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
 
-        Future<Optional<String>> idF = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
-        idF.get(1000, TimeUnit.SECONDS);
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        maybeNotificationId.get(1000, TimeUnit.SECONDS);
 
         verifyZeroInteractions(mockNotifyClient);
     }

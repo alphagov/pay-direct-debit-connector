@@ -35,6 +35,18 @@ public class UserNotificationService {
     private static final String PLACEHOLDER_SUN = "THE-CAKE-IS-A-LIE";
     private static final String PLACEHOLDER_MERCHANT_ADDRESS = "123 Rainbow Road, EC125Y, London";
 
+    private static final String DD_GUARANTEE_KEY = "dd guarantee link";
+    private static final String ORG_NAME_KEY = "org name";
+    private static final String SERVICE_NAME_KEY = "service name";
+    private static final String SUN_KEY = "SUN";
+    private static final String COLLECTION_DATE_KEY = "collection date";
+    private static final String AMOUNT_KEY = "amount";
+    private static final String PAYMENT_REFERENCE_KEY = "payment reference";
+    private static final String MERCHANT_ADDRESS_KEY = "merchant address";
+    private static final String ORG_PHONE_KEY = "org phone";
+    private static final String MERCHANT_PHONE_NUMBER_KEY = "merchant phone number";
+    private static final String BANK_ACCOUNT_LAST_DIGITS_KEY = "bank account last 2 digits";
+
     private boolean emailNotifyGloballyEnabled;
     private ExecutorService executorService;
     private final MetricRegistry metricRegistry;
@@ -112,9 +124,9 @@ public class UserNotificationService {
         GatewayAccount gatewayAccount = gatewayAccountService.getGatewayAccountFor(transaction);
 
         HashMap<String, String> map = new HashMap<>();
-        map.put("org name", gatewayAccount.getServiceName());
-        map.put("org phone", PLACEHOLDER_PHONE_NUMBER);
-        map.put("dd guarantee link", buildDirectDebitGuaranteeUrl());
+        map.put(ORG_NAME_KEY, gatewayAccount.getServiceName());
+        map.put(ORG_PHONE_KEY, PLACEHOLDER_PHONE_NUMBER);
+        map.put(DD_GUARANTEE_KEY, buildDirectDebitGuaranteeUrl());
 
         return map;
     }
@@ -123,15 +135,15 @@ public class UserNotificationService {
         GatewayAccount gatewayAccount = gatewayAccountService.getGatewayAccountFor(transaction);
 
         HashMap<String, String> map = new HashMap<>();
-        map.put("service name", gatewayAccount.getServiceName());
-        map.put("amount", formatToPounds(transaction.getAmount()));
-        map.put("payment reference", transaction.getPaymentRequestReference());
-        map.put("bank account last 2 digits", "******" + payer.getAccountNumberLastTwoDigits());
-        map.put("collection date", DATE_TIME_FORMATTER.format(earliestChargeDate));
-        map.put("SUN", PLACEHOLDER_SUN);
-        map.put("merchant address", PLACEHOLDER_MERCHANT_ADDRESS);
-        map.put("merchant phone number", PLACEHOLDER_PHONE_NUMBER);
-        map.put("dd guarantee link", buildDirectDebitGuaranteeUrl());
+        map.put(SERVICE_NAME_KEY, gatewayAccount.getServiceName());
+        map.put(AMOUNT_KEY, formatToPounds(transaction.getAmount()));
+        map.put(PAYMENT_REFERENCE_KEY, transaction.getPaymentRequestReference());
+        map.put(BANK_ACCOUNT_LAST_DIGITS_KEY, "******" + payer.getAccountNumberLastTwoDigits());
+        map.put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate));
+        map.put(SUN_KEY, PLACEHOLDER_SUN);
+        map.put(MERCHANT_ADDRESS_KEY, PLACEHOLDER_MERCHANT_ADDRESS);
+        map.put(MERCHANT_PHONE_NUMBER_KEY, PLACEHOLDER_PHONE_NUMBER);
+        map.put(DD_GUARANTEE_KEY, buildDirectDebitGuaranteeUrl());
         return map;
     }
 
