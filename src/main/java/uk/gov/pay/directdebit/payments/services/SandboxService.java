@@ -15,6 +15,7 @@ import java.util.Map;
 
 public class SandboxService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(SandboxService.class);
+    private static final LocalDate DAYS_UNTIL_COLLECTION = LocalDate.now().plusDays(4);
 
     private final PayerService payerService;
     private final PaymentConfirmService paymentConfirmService;
@@ -40,6 +41,6 @@ public class SandboxService implements DirectDebitPaymentProvider {
         LOGGER.info("Confirming payment for SANDBOX, payment with id: {}", paymentRequestExternalId);
         ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId);
         Payer payer = payerService.getPayerFor(confirmationDetails.getTransaction());
-        transactionService.paymentCreatedFor(confirmationDetails.getTransaction(), payer, LocalDate.now().plusDays(4));
+        transactionService.paymentCreatedFor(confirmationDetails.getTransaction(), payer, DAYS_UNTIL_COLLECTION);
     }
 }

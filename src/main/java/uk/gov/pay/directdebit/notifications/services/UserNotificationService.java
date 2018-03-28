@@ -31,6 +31,9 @@ import static java.lang.Runtime.getRuntime;
 
 public class UserNotificationService {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(UserNotificationService.class);
+    private static final String PLACEHOLDER_PHONE_NUMBER = "+44 000-CAKE-000";
+    private static final String PLACEHOLDER_SUN = "THE-CAKE-IS-A-LIE";
+    private static final String PLACEHOLDER_MERCHANT_ADDRESS = "123 Rainbow Road, EC125Y, London";
 
     private boolean emailNotifyGloballyEnabled;
     private ExecutorService executorService;
@@ -38,7 +41,7 @@ public class UserNotificationService {
     private final NotificationClient notificationClient;
     private final DirectDebitConfig directDebitConfig;
     private final GatewayAccountService gatewayAccountService;
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     @Inject
     public UserNotificationService(DirectDebitConfig directDebitConfig,
                                    NotificationClient notificationClient,
@@ -71,7 +74,7 @@ public class UserNotificationService {
                                     null);
                     return Optional.of(response.getNotificationId().toString());
                 } catch (NotificationClientException e) {
-                    LOGGER.error("Failed to send email, payment request id: {}, error {}", paymentRequestExternalId, e);
+                    LOGGER.error("Failed to send email, payment request id: {}, error from notify {}", paymentRequestExternalId, e);
                     metricRegistry.counter("notify-operations.failures").inc();
                     return Optional.empty();
                 } finally {
@@ -85,7 +88,9 @@ public class UserNotificationService {
 
     public Future<Optional<String>> sendMandateFailedEmailFor(Transaction transaction, Payer payer) {
         String mandateFailedTemplateId = directDebitConfig.getNotifyConfig().getMandateFailedTemplateId();
-        LOGGER.info("Sending mandate failed email, payment request id: {}", transaction.getPaymentRequestExternalId());
+        LOGGER.info("Sending mandate failed email, payment request id: {}, gateway account id: {}",
+                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequestGatewayAccountId());
         return sendEmail(buildMandateFailedPersonalisation(transaction),
                 mandateFailedTemplateId,
                 payer.getEmail(),
@@ -94,7 +99,9 @@ public class UserNotificationService {
 
     public Future<Optional<String>> sendPaymentConfirmedEmailFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
         String paymentConfirmedTemplateId = directDebitConfig.getNotifyConfig().getPaymentConfirmedTemplateId();
-        LOGGER.info("Sending payment confirmed email, payment request id: {}", transaction.getPaymentRequestExternalId());
+        LOGGER.info("Sending payment confirmed email, payment request id: {}, gateway account id: {}",
+                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequestGatewayAccountId());
         return sendEmail(buildPaymentConfirmedPersonalisation(transaction, payer,earliestChargeDate),
                 paymentConfirmedTemplateId,
                 payer.getEmail(),
@@ -106,8 +113,8 @@ public class UserNotificationService {
 
         HashMap<String, String> map = new HashMap<>();
         map.put("org name", gatewayAccount.getServiceName());
-        map.put("org phone", "000-CAKE-000");
-        map.put("dd guarantee link", directDebitConfig.getLinks().getFrontendUrl() + "/direct-debit-guarantee");
+        map.put("org phone", PLACEHOLDER_PHONE_NUMBER);
+        map.put("dd guarantee link", buildDirectDebitGuaranteeUrl());
 
         return map;
     }
@@ -120,14 +127,17 @@ public class UserNotificationService {
         map.put("amount", formatToPounds(transaction.getAmount()));
         map.put("payment reference", transaction.getPaymentRequestReference());
         map.put("bank account last 2 digits", "******" + payer.getAccountNumberLastTwoDigits());
-        map.put("collection date", dateTimeFormatter.format(earliestChargeDate));
-        map.put("SUN", "THE-CAKE-IS-A-LIE");
-        map.put("merchant address", "123 Rainbow Road, EC125Y, London");
-        map.put("merchant phone number", "+44 000-CAKE-000");
-        map.put("dd guarantee link", directDebitConfig.getLinks().getFrontendUrl() + "/direct-debit-guarantee");
+        map.put("collection date", DATE_TIME_FORMATTER.format(earliestChargeDate));
+        map.put("SUN", PLACEHOLDER_SUN);
+        map.put("merchant address", PLACEHOLDER_MERCHANT_ADDRESS);
+        map.put("merchant phone number", PLACEHOLDER_PHONE_NUMBER);
+        map.put("dd guarantee link", buildDirectDebitGuaranteeUrl());
         return map;
     }
 
+    private String buildDirectDebitGuaranteeUrl() {
+        return directDebitConfig.getLinks().getFrontendUrl() + "/direct-debit-guarantee";
+    }
     private String formatToPounds(long amountInPence) {
         return BigDecimal.valueOf(amountInPence, 2).toString();
     }

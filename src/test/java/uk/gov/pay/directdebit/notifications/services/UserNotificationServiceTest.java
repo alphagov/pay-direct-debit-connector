@@ -90,16 +90,19 @@ public class UserNotificationServiceTest {
     @Test
     public void shouldSendMandateFailedEmailIfEmailNotifyIsEnabled() throws Exception {
         when(mockNotifyClientFactory.isEmailNotifyEnabled()).thenReturn(true);
-        when(mockNotifyClient.sendEmail(any(), any(), any(), any())).thenReturn(mockNotificationCreatedResponse);
 
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
-        Future<Optional<String>> idF = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
-        idF.get(1000, TimeUnit.SECONDS);
 
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("org name", gatewayAccount.getServiceName());
-        emailPersonalisation.put("org phone", "000-CAKE-000");
+        emailPersonalisation.put("org phone", "+44 000-CAKE-000");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
+
+        when(mockNotifyClient.sendEmail(MANDATE_FAILED_TEMPLATE, EMAIL, emailPersonalisation, null)).thenReturn(mockNotificationCreatedResponse);
+
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        maybeNotificationId.get(1000, TimeUnit.SECONDS);
+
         verify(mockNotifyClient).sendEmail(
                 MANDATE_FAILED_TEMPLATE,
                 EMAIL,
@@ -111,11 +114,8 @@ public class UserNotificationServiceTest {
     @Test
     public void shouldSendPaymentConfirmedEmailIfEmailNotifyIsEnabled() throws Exception {
         when(mockNotifyClientFactory.isEmailNotifyEnabled()).thenReturn(true);
-        when(mockNotifyClient.sendEmail(any(), any(), any(), any())).thenReturn(mockNotificationCreatedResponse);
 
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
-        Future<Optional<String>> idF = userNotificationService.sendPaymentConfirmedEmailFor(transaction, payer, LocalDate.parse("2018-05-21"));
-        idF.get(1000, TimeUnit.SECONDS);
 
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("service name", gatewayAccount.getServiceName());
@@ -127,6 +127,11 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("merchant address", "123 Rainbow Road, EC125Y, London");
         emailPersonalisation.put("merchant phone number", "+44 000-CAKE-000");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
+
+        when(mockNotifyClient.sendEmail(PAYMENT_CONFIRMATION_TEMPLATE, EMAIL, emailPersonalisation, null)).thenReturn(mockNotificationCreatedResponse);
+
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendPaymentConfirmedEmailFor(transaction, payer, LocalDate.parse("2018-05-21"));
+        maybeNotificationId.get(1000, TimeUnit.SECONDS);
 
         verify(mockNotifyClient).sendEmail(
                 PAYMENT_CONFIRMATION_TEMPLATE,
@@ -153,8 +158,8 @@ public class UserNotificationServiceTest {
 
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
 
-        Future<Optional<String>> idF = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
-        idF.get(1000, TimeUnit.SECONDS);
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        maybeNotificationId.get(1000, TimeUnit.SECONDS);
         verify(mockMetricRegistry).histogram("notify-operations.response_time");
         verify(mockHistogram).update(anyLong());
         verifyNoMoreInteractions(mockCounter);
@@ -167,8 +172,8 @@ public class UserNotificationServiceTest {
 
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
 
-        Future<Optional<String>> idF = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
-        idF.get(1000, TimeUnit.SECONDS);
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        maybeNotificationId.get(1000, TimeUnit.SECONDS);
         verify(mockMetricRegistry).histogram("notify-operations.response_time");
         verify(mockHistogram).update(anyLong());
         verify(mockCounter).inc();
