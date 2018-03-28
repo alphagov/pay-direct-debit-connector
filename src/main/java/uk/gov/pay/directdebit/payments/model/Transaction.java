@@ -9,31 +9,34 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 public class Transaction {
 
     private Long id;
+    //todo refactor this to contain a PaymentRequest
     private String paymentRequestExternalId;
     private Long paymentRequestId;
     private String paymentRequestDescription;
     private String paymentRequestReturnUrl;
+    private String paymentRequestReference;
     private Long paymentRequestGatewayAccountId;
     private PaymentProvider paymentProvider;
     private Long amount;
     private Type type;
     private PaymentState state;
 
-    public Transaction(Long id, Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, Long paymentRequestGatewayAccountId, PaymentProvider paymentProvider, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
+    public Transaction(Long id, Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, String paymentRequestReference, Long paymentRequestGatewayAccountId, PaymentProvider paymentProvider, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
         this.id = id;
         this.paymentRequestExternalId = paymentRequestExternalId;
         this.paymentRequestId = paymentRequestId;
         this.paymentRequestGatewayAccountId = paymentRequestGatewayAccountId;
         this.paymentProvider = paymentProvider;
         this.paymentRequestDescription = paymentRequestDescription;
+        this.paymentRequestReference = paymentRequestReference;
         this.paymentRequestReturnUrl = paymentRequestReturnUrl;
         this.amount = amount;
         this.type = type;
         this.state = state;
     }
 
-    public Transaction(Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, Long paymentRequestGatewayAccountId, PaymentProvider paymentProvider, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
-        this(null, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestGatewayAccountId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
+    public Transaction(Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, String paymentRequestReference,  Long paymentRequestGatewayAccountId, PaymentProvider paymentProvider, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
+        this(null, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestReference, paymentRequestGatewayAccountId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
     }
 
     public Long getId() {
@@ -84,6 +87,15 @@ public class Transaction {
         this.paymentRequestDescription = paymentRequestDescription;
     }
 
+    public String getPaymentRequestReference() {
+        return paymentRequestReference;
+    }
+
+    public Transaction setPaymentRequestReference(String paymentRequestReference) {
+        this.paymentRequestReference = paymentRequestReference;
+        return this;
+    }
+
     public PaymentProvider getPaymentProvider() {
         return paymentProvider;
     }
@@ -129,6 +141,7 @@ public class Transaction {
         if (!paymentProvider.equals(that.paymentProvider)) return false;
         if (!paymentRequestId.equals(that.paymentRequestId)) return false;
         if (!paymentRequestReturnUrl.equals(that.paymentRequestReturnUrl)) return false;
+        if (!paymentRequestReference.equals(that.paymentRequestReference)) return false;
         if (!amount.equals(that.amount)) return false;
         if (type != that.type) return false;
         return state == that.state;
@@ -143,6 +156,7 @@ public class Transaction {
         result = 31 * result + paymentProvider.hashCode();
         result = 31 * result + paymentRequestDescription.hashCode();
         result = 31 * result + paymentRequestReturnUrl.hashCode();
+        result = 31 * result + paymentRequestReference.hashCode();
         result = 31 * result + amount.hashCode();
         result = 31 * result + type.hashCode();
         result = 31 * result + state.hashCode();

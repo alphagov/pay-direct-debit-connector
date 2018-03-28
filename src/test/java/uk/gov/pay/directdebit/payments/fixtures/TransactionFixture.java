@@ -14,6 +14,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
     private String paymentRequestExternalId = RandomIdGenerator.newId();
     private String paymentRequestDescription = RandomStringUtils.randomAlphabetic(20);
+    private String paymentRequestReference = RandomStringUtils.randomAlphabetic(20);
     private Long paymentRequestGatewayAccountId = RandomUtils.nextLong(1, 99999);
     private String paymentRequestReturnUrl = "http://www." + RandomStringUtils.randomAlphabetic(10) + ".test";
     private PaymentProvider paymentProvider = PaymentProvider.SANDBOX;
@@ -40,6 +41,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     public TransactionFixture withPaymentRequestDescription(String paymentRequestDescription) {
         this.paymentRequestDescription = paymentRequestDescription;
+        return this;
+    }
+    public TransactionFixture withPaymentRequestReference(String paymentRequestReference) {
+        this.paymentRequestReference = paymentRequestReference;
         return this;
     }
     public TransactionFixture withPaymentRequestGatewayAccountId(Long paymentRequestGatewayAccountId) {
@@ -100,6 +105,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return state;
     }
 
+    public String getPaymentRequestReference() {
+        return paymentRequestReference;
+    }
+
     public String getPaymentRequestReturnUrl() {
         return paymentRequestReturnUrl;
     }
@@ -137,7 +146,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public Transaction toEntity() {
-        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestGatewayAccountId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
+        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestReference, paymentRequestGatewayAccountId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
     }
 
 }

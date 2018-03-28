@@ -166,12 +166,13 @@ public class GoCardlessServiceTest {
         when(mockedPaymentConfirmService.confirm(gatewayAccount.getId(), PAYMENT_REQUEST_EXTERNAL_ID)).thenReturn(confirmationDetails);
         when(mockedGoCardlessClientWrapper.createMandate(PAYMENT_REQUEST_EXTERNAL_ID, mandate, goCardlessCustomer)).thenReturn(goCardlessMandate);
         when(mockedGoCardlessClientWrapper.createPayment(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessMandate, transaction)).thenReturn(goCardlessPayment);
+        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
         service.confirm(PAYMENT_REQUEST_EXTERNAL_ID, gatewayAccount);
         verify(mockedGoCardlessMandateDao).insert(goCardlessMandate);
         verify(mockedGoCardlessPaymentDao).insert(goCardlessPayment);
         verify(mockedGoCardlessClientWrapper).createMandate(PAYMENT_REQUEST_EXTERNAL_ID, mandate, goCardlessCustomer);
         verify(mockedGoCardlessClientWrapper).createPayment(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessMandate, transaction);
-        verify(mockedTransactionService).paymentCreatedFor(transaction);
+        verify(mockedTransactionService).paymentCreatedFor(transaction, payer, goCardlessPayment.getChargeDate());
     }
 
     @Test

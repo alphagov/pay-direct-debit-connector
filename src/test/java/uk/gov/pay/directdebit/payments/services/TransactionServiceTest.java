@@ -21,6 +21,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -88,6 +89,7 @@ public class TransactionServiceTest {
         assertThat(transaction.getPaymentRequestReturnUrl(), is(paymentRequestFixture.getReturnUrl()));
         assertThat(transaction.getPaymentRequestGatewayAccountId(), is(paymentRequestFixture.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(paymentRequestFixture.getDescription()));
+        assertThat(transaction.getPaymentRequestReference(), is(paymentRequestFixture.getReference()));
         assertThat(transaction.getAmount(), is(paymentRequestFixture.getAmount()));
         assertThat(transaction.getType(), is(Transaction.Type.CHARGE));
         assertThat(transaction.getState(), is(NEW));
@@ -111,6 +113,7 @@ public class TransactionServiceTest {
         assertThat(foundTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(foundTransaction.getPaymentRequestGatewayAccountId(), is(transactionFixture.getPaymentRequestGatewayAccountId()));
         assertThat(foundTransaction.getPaymentRequestDescription(), is(transactionFixture.getPaymentRequestDescription()));
+        assertThat(foundTransaction.getPaymentRequestReference(), is(transactionFixture.getPaymentRequestReference()));
         assertThat(foundTransaction.getAmount(), is(transactionFixture.getAmount()));
         assertThat(foundTransaction.getType(), is(transactionFixture.getType()));
         assertThat(foundTransaction.getState(), is(transactionFixture.getState()));
@@ -136,6 +139,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getPaymentRequestGatewayAccountId(), is(transactionFixture.getPaymentRequestGatewayAccountId()));
         assertThat(newTransaction.getPaymentRequestDescription(), is(transactionFixture.getPaymentRequestDescription()));
+        assertThat(newTransaction.getPaymentRequestReference(), is(transactionFixture.getPaymentRequestReference()));
         assertThat(newTransaction.getAmount(), is(transactionFixture.getAmount()));
         assertThat(newTransaction.getType(), is(transactionFixture.getType()));
         assertThat(newTransaction.getState(), is(AWAITING_CONFIRMATION));
@@ -156,6 +160,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getPaymentRequestGatewayAccountId(), is(transactionFixture.getPaymentRequestGatewayAccountId()));
         assertThat(newTransaction.getPaymentRequestDescription(), is(transactionFixture.getPaymentRequestDescription()));
+        assertThat(newTransaction.getPaymentRequestReference(), is(transactionFixture.getPaymentRequestReference()));
         assertThat(newTransaction.getAmount(), is(transactionFixture.getAmount()));
         assertThat(newTransaction.getType(), is(transactionFixture.getType()));
         assertThat(newTransaction.getState(), is(PROCESSING_DIRECT_DEBIT_DETAILS));
@@ -170,7 +175,7 @@ public class TransactionServiceTest {
         Transaction transaction = transactionFixture.toEntity();
         service.mandateFailedFor(transaction, payer);
         verify(mockedPaymentRequestEventService).registerMandateFailedEventFor(transaction);
-        verify(mockedUserNotificationService).sendMandateFailedEmail(payer, transaction);
+        verify(mockedUserNotificationService).sendMandateFailedEmailFor(transaction, payer);
     }
 
     @Test
@@ -188,6 +193,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getPaymentRequestGatewayAccountId(), is(transactionFixture.getPaymentRequestGatewayAccountId()));
         assertThat(newTransaction.getPaymentRequestDescription(), is(transactionFixture.getPaymentRequestDescription()));
+        assertThat(newTransaction.getPaymentRequestReference(), is(transactionFixture.getPaymentRequestReference()));
         assertThat(newTransaction.getAmount(), is(transactionFixture.getAmount()));
         assertThat(newTransaction.getType(), is(transactionFixture.getType()));
         assertThat(newTransaction.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
@@ -208,10 +214,7 @@ public class TransactionServiceTest {
                 .aTransactionFixture()
                 .withState(PROCESSING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
-        when(mockedTransactionDao.findById(transaction.getId()))
-                .thenReturn(Optional.of(transaction));
-
-        service.paymentCreatedFor(transaction);
+        service.paymentCreatedFor(transaction, payer, LocalDate.now());
 
         verify(mockedTransactionDao).updateState(transaction.getId(), PENDING_DIRECT_DEBIT_PAYMENT);
         verify(mockedPaymentRequestEventService).registerPaymentCreatedEventFor(transaction);

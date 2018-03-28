@@ -6,11 +6,15 @@ import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
 public class GoCardlessPaymentFixture implements DbFixture<GoCardlessPaymentFixture, GoCardlessPayment> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long transactionId = RandomUtils.nextLong(1, 99999);
     private String paymentId = RandomIdGenerator.newId();
+    private LocalDate chargeDate = LocalDate.now().plusDays(5);
 
     private GoCardlessPaymentFixture() {
 
@@ -47,6 +51,15 @@ public class GoCardlessPaymentFixture implements DbFixture<GoCardlessPaymentFixt
         return this;
     }
 
+    public LocalDate getChargeDate() {
+        return chargeDate;
+    }
+
+    public GoCardlessPaymentFixture setChargeDate(LocalDate chargeDate) {
+        this.chargeDate = chargeDate;
+        return this;
+    }
+
     @Override
     public GoCardlessPaymentFixture insert(DBI jdbi) {
         jdbi.withHandle(h ->
@@ -55,12 +68,14 @@ public class GoCardlessPaymentFixture implements DbFixture<GoCardlessPaymentFixt
                                 "    gocardless_payments(\n" +
                                 "        id,\n" +
                                 "        transaction_id,\n" +
-                                "        payment_id\n" +
+                                "        payment_id,\n" +
+                                "        charge_date\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?)\n",
                         id,
                         transactionId,
-                        paymentId
+                        paymentId,
+                        Date.valueOf(chargeDate)
                 )
         );
         return this;
@@ -68,6 +83,6 @@ public class GoCardlessPaymentFixture implements DbFixture<GoCardlessPaymentFixt
 
     @Override
     public GoCardlessPayment toEntity() {
-        return new GoCardlessPayment(id, transactionId, paymentId);
+        return new GoCardlessPayment(id, transactionId, paymentId, chargeDate);
     }
 }

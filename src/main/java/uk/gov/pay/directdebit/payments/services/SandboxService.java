@@ -10,11 +10,12 @@ import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 
 import javax.inject.Inject;
+import java.time.LocalDate;
 import java.util.Map;
 
 public class SandboxService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(SandboxService.class);
-
+    private static final int DAYS_TO_COLLECTION = 4;
     private final PayerService payerService;
     private final PaymentConfirmService paymentConfirmService;
     private final TransactionService transactionService;
@@ -38,6 +39,7 @@ public class SandboxService implements DirectDebitPaymentProvider {
     public void confirm(String paymentRequestExternalId, GatewayAccount gatewayAccount) {
         LOGGER.info("Confirming payment for SANDBOX, payment with id: {}", paymentRequestExternalId);
         ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId);
-        transactionService.paymentCreatedFor(confirmationDetails.getTransaction());
+        Payer payer = payerService.getPayerFor(confirmationDetails.getTransaction());
+        transactionService.paymentCreatedFor(confirmationDetails.getTransaction(), payer, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
     }
 }
