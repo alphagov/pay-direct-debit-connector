@@ -126,7 +126,7 @@ public class UserNotificationService {
         HashMap<String, String> map = new HashMap<>();
         map.put(ORG_NAME_KEY, gatewayAccount.getServiceName());
         map.put(ORG_PHONE_KEY, PLACEHOLDER_PHONE_NUMBER);
-        map.put(DD_GUARANTEE_KEY, buildDirectDebitGuaranteeUrl());
+        map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
 
         return map;
     }
@@ -143,13 +143,10 @@ public class UserNotificationService {
         map.put(SUN_KEY, PLACEHOLDER_SUN);
         map.put(MERCHANT_ADDRESS_KEY, PLACEHOLDER_MERCHANT_ADDRESS);
         map.put(MERCHANT_PHONE_NUMBER_KEY, PLACEHOLDER_PHONE_NUMBER);
-        map.put(DD_GUARANTEE_KEY, buildDirectDebitGuaranteeUrl());
+        map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
         return map;
     }
 
-    private String buildDirectDebitGuaranteeUrl() {
-        return directDebitConfig.getLinks().getFrontendUrl() + "/direct-debit-guarantee";
-    }
     private String formatToPounds(long amountInPence) {
         return BigDecimal.valueOf(amountInPence, 2).toString();
     }

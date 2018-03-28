@@ -80,7 +80,7 @@ public class UserNotificationServiceTest {
         when(mockNotifyClientFactory.getPaymentConfirmedTemplateId()).thenReturn(PAYMENT_CONFIRMATION_TEMPLATE);
         when(mockExecutorConfiguration.getThreadsPerCpu()).thenReturn(2);
         when(mockGatewayAccountService.getGatewayAccountFor(transaction)).thenReturn(gatewayAccount);
-        when(mockLinksConfig.getFrontendUrl()).thenReturn("https://frontend.url.test");
+        when(mockLinksConfig.getDirectDebitGuaranteeUrl()).thenReturn("https://frontend.url.test/direct-debit-guarantee");
         when(mockMetricRegistry.histogram(anyString())).thenReturn(mockHistogram);
         when(mockMetricRegistry.counter(anyString())).thenReturn(mockCounter);
         when(mockNotificationCreatedResponse.getNotificationId()).thenReturn(randomUUID());
