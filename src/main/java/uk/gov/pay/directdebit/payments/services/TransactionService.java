@@ -170,8 +170,8 @@ public class TransactionService {
 
     public PaymentRequestEvent findPaymentPendingEventFor(Transaction transaction) {
         return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_PENDING)
-                .orElseThrow(() -> new InvalidStateException(format("Could not find payment pending event for payment request with id: {}",
-                        transaction.getPaymentRequestExternalId())));
+                .orElseThrow(() -> new InvalidStateException("Could not find payment pending event for payment request with id: "
+                        + transaction.getPaymentRequestExternalId()));
     }
 
     public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {
