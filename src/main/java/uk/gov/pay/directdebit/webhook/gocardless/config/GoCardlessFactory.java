@@ -5,11 +5,7 @@ import com.gocardless.GoCardlessClient;
 import io.dropwizard.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
-import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import javax.net.ssl.SSLSocketFactory;
 import javax.validation.constraints.NotNull;
 
 public class GoCardlessFactory extends Configuration {
@@ -32,16 +28,11 @@ public class GoCardlessFactory extends Configuration {
         return clientUrl != null;
     }
 
-    public GoCardlessClient buildClient(DirectDebitConfig config, SSLSocketFactory sslSocketFactory) {
-        GoCardlessClient.Builder builder = GoCardlessClient.newBuilder(accessToken);
+    public GoCardlessClient buildClient() {
         if (isCallingStubs()) {
-            builder.withBaseUrl(clientUrl)
-                    .withSslSocketFactory(sslSocketFactory);
-        } else {
-            builder.withProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(config.getProxyConfig().getHost(), config.getProxyConfig().getPort())));
+            return GoCardlessClient.create(accessToken, clientUrl);
         }
-
-        return builder.build();
+        return GoCardlessClient.create(accessToken, environment);
     }
 
     public WebhookVerifier buildSignatureVerifier() {
