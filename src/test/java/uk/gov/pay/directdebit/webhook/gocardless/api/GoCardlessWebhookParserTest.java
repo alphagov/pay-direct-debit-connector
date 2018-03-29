@@ -18,6 +18,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.*;
 
 public class GoCardlessWebhookParserTest {
 
@@ -34,13 +35,13 @@ public class GoCardlessWebhookParserTest {
     public ExpectedException thrown = ExpectedException.none();
 
     private final String EVENT_ID = "AAA345";
-    private final GoCardlessResourceType RESOURCE_TYPE = GoCardlessResourceType.PAYMENTS;
+    private final GoCardlessResourceType RESOURCE_TYPE = PAYMENTS;
     private final String ACTION = "action";
     private final ZonedDateTime CREATED_AT = ZonedDateTime.now();
 
     @Test
     public void shouldParseASingleEvent() throws IOException {
-        String validEvent = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, CREATED_AT);
+        String validEvent = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, "payment", CREATED_AT);
         String payload = buildEvents(validEvent);
 
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
@@ -56,12 +57,19 @@ public class GoCardlessWebhookParserTest {
     @Test
     public void shouldParseMultipleEvents() throws IOException {
         String secondEventId = "AAA345";
-        GoCardlessResourceType secondEventResourceType = GoCardlessResourceType.PAYMENTS;
+        GoCardlessResourceType secondEventResourceType = MANDATES;
         String secondEventAction = "action";
-        ZonedDateTime secondEventCreatedAt = ZonedDateTime.now();
-        String firstEventPayload = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, CREATED_AT);
-        String secondEventPayload = buildValidEvent(secondEventId, secondEventAction, secondEventResourceType, secondEventCreatedAt);
-        String payload = buildEvents(firstEventPayload, secondEventPayload);
+
+        String thirdEventId = "BBB345";
+        GoCardlessResourceType thirdEventResourceType = PAYOUTS;
+        String thirdEventAction = "action";
+
+        ZonedDateTime eventCreatedAt = ZonedDateTime.now();
+
+        String firstEventPayload = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, "payment", CREATED_AT);
+        String secondEventPayload = buildValidEvent(secondEventId, secondEventAction, secondEventResourceType, "mandate", eventCreatedAt);
+        String thirdEventPayload = buildValidEvent(thirdEventId, thirdEventAction, thirdEventResourceType, "payout", eventCreatedAt);
+        String payload = buildEvents(firstEventPayload, secondEventPayload, thirdEventPayload);
 
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
 
@@ -78,8 +86,16 @@ public class GoCardlessWebhookParserTest {
         assertThat(secondEvent.getId(), is(nullValue()));
         assertThat(secondEvent.getAction(), is(secondEventAction));
         assertThat(secondEvent.getResourceType(), is(secondEventResourceType));
-        assertThat(secondEvent.getCreatedAt(), is(secondEventCreatedAt));
+        assertThat(secondEvent.getCreatedAt(), is(eventCreatedAt));
         assertThat(secondEvent.getJson(), is(objectMapper.readTree(secondEventPayload).toString()));
+
+        GoCardlessEvent thirdEvent = parsedEvents.get(2);
+        assertThat(thirdEvent.getPaymentRequestEventId(), is(nullValue()));
+        assertThat(thirdEvent.getId(), is(nullValue()));
+        assertThat(thirdEvent.getAction(), is(thirdEventAction));
+        assertThat(thirdEvent.getResourceType(), is(thirdEventResourceType));
+        assertThat(thirdEvent.getCreatedAt(), is(eventCreatedAt));
+        assertThat(thirdEvent.getJson(), is(objectMapper.readTree(thirdEventPayload).toString()));
     }
 
     @Test
@@ -96,21 +112,21 @@ public class GoCardlessWebhookParserTest {
         thrown.reportMissingExceptionWithMessage("WebhookParserException expected");
         parser.parse("");
     }
-    private String buildValidEvent(String eventId, String action, GoCardlessResourceType resourceType, ZonedDateTime createdAt) {
+    private String buildValidEvent(String eventId, String action, GoCardlessResourceType resourceType, String linkKey, ZonedDateTime createdAt) {
         return String.format("{\n" +
                 "      \"id\": \"%s\",\n" +
                 "      \"created_at\": \"%s\",\n" +
                 "      \"action\": \"%s\",\n" +
                 "      \"resource_type\": \"%s\",\n" +
                 "      \"links\": {\n" +
-                "        \"payment\": \"PM123\"\n" +
+                "        \"%s\": \"PM123\"\n" +
                 "      },\n" +
                 "      \"details\": {\n" +
                 "        \"origin\": \"gocardless\",\n" +
                 "        \"cause\": \"payment_confirmed\",\n" +
                 "        \"description\": \"Payment was confirmed as collected\"\n" +
                 "      }\n" +
-                "    }", eventId, createdAt.toString(), action, resourceType.toString().toLowerCase());
+                "    }", eventId, createdAt.toString(), action, resourceType.toString().toLowerCase(), linkKey);
     }
 
     private String buildEvents(String... events) throws IOException {
