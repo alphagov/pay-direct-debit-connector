@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
@@ -72,6 +73,22 @@ public class GoCardlessPaymentHandlerTest {
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
         verify(mockedTransactionService).paymentPendingFor(transaction);
+        verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
+        verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
+        GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
+        Assert.assertThat(storedGoCardlessEvent.getPaymentRequestEventId(), is(paymentRequestEvent.getId()));
+    }
+
+    @Test
+    public void handle_onPayoutPaidGoCardlessEvent_shouldSetRegisterPayoutPaidEvent() {
+        GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("paid").withResourceType(GoCardlessResourceType.PAYOUTS).toEntity());
+
+        when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
+        when(mockedTransactionService.payoutPaidFor(transaction)).thenReturn(paymentRequestEvent);
+
+        goCardlessPaymentHandler.handle(goCardlessEvent);
+
+        verify(mockedTransactionService).payoutPaidFor(transaction);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();

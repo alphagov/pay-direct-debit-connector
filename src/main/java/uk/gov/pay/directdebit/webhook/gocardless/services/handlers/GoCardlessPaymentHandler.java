@@ -11,6 +11,7 @@ import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -18,6 +19,7 @@ import java.util.function.Function;
 public class GoCardlessPaymentHandler extends GoCardlessHandler {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessPaymentHandler.class);
 
+    @Inject
     public GoCardlessPaymentHandler(TransactionService transactionService, GoCardlessService goCardlessService) {
         super(transactionService, goCardlessService);
     }
