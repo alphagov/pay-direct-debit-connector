@@ -59,6 +59,8 @@ public class GoCardlessWebhookParser {
                 return Optional.of(jsonNode.get("links").get("payment").asText());
             case MANDATES:
                 return Optional.of(jsonNode.get("links").get("mandate").asText());
+            case PAYOUTS:
+                return Optional.of(jsonNode.get("links").get("payout").asText());
             default:
                 return Optional.empty();
         }
