@@ -20,6 +20,7 @@ import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
+import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
 import uk.gov.service.notify.NotificationClient;
 
@@ -47,24 +48,24 @@ public class DirectDebitModule extends AbstractModule {
         bind(Environment.class).toInstance(environment);
     }
 
-    // Nasty hack alert - gocardless client does not seem to pick up the certificates in our trust store automatically, so we need to inject those. The underlying client (okhttp) supports that, but it's not accessible. So we make it accessible *** godmode ***. Sent an email to gocardless about the issue.
-    //fixme there's an ongoing conversation with gocardless to avoid having to do this
-    private GoCardlessClient hackedGoCardlessClient(DirectDebitConfig config, SSLSocketFactory sslSocketFactory) throws IllegalAccessException {
-        GoCardlessClient goCardlessClient = configuration.getGoCardless().buildClient();
-        Object httpClient = FieldUtils.readField(goCardlessClient, "httpClient", true);
-        OkHttpClient rawClient = (OkHttpClient) FieldUtils.readField(httpClient, "rawClient", true);
-        if (configuration.getGoCardless().isCallingStubs()) {
-            rawClient.setSslSocketFactory(sslSocketFactory);
-        } else {
-            rawClient.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(config.getProxyConfig().getHost(), config.getProxyConfig().getPort())));
+    private GoCardlessClient createGoCardlessClient() {
+        GoCardlessFactory goCardlessFactory = configuration.getGoCardless();
+        GoCardlessClient.Builder builder = GoCardlessClient.newBuilder(
+                goCardlessFactory.getAccessToken());
+
+        if (goCardlessFactory.isCallingStubs()) {
+            return builder.withBaseUrl(goCardlessFactory.getClientUrl())
+                    .withSslSocketFactory(sslSocketFactory)
+                    .build();
         }
-        return goCardlessClient;
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(configuration.getProxyConfig().getHost(), configuration.getProxyConfig().getPort()));
+        return builder.withEnvironment(goCardlessFactory.getEnvironment())
+                .withProxy(proxy).build();
     }
 
     @Provides
     public GoCardlessClientWrapper provideGoCardlessClientWrapper() throws IllegalAccessException {
-        GoCardlessClient goCardlessClient =  hackedGoCardlessClient(configuration, sslSocketFactory);
-        return new GoCardlessClientWrapper(goCardlessClient);
+        return new GoCardlessClientWrapper(createGoCardlessClient());
     }
 
     @Provides
