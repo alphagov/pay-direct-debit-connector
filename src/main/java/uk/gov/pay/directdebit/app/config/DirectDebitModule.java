@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gocardless.GoCardlessClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.squareup.okhttp.OkHttpClient;
 import io.dropwizard.setup.Environment;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.skife.jdbi.v2.DBI;
@@ -47,23 +46,10 @@ public class DirectDebitModule extends AbstractModule {
         bind(Environment.class).toInstance(environment);
     }
 
-    // Nasty hack alert - gocardless client does not seem to pick up the certificates in our trust store automatically, so we need to inject those. The underlying client (okhttp) supports that, but it's not accessible. So we make it accessible *** godmode ***. Sent an email to gocardless about the issue.
-    //fixme there's an ongoing conversation with gocardless to avoid having to do this
-    private GoCardlessClient hackedGoCardlessClient(DirectDebitConfig config, SSLSocketFactory sslSocketFactory) throws IllegalAccessException {
-        GoCardlessClient goCardlessClient = configuration.getGoCardless().buildClient();
-        Object httpClient = FieldUtils.readField(goCardlessClient, "httpClient", true);
-        OkHttpClient rawClient = (OkHttpClient) FieldUtils.readField(httpClient, "rawClient", true);
-        if (configuration.getGoCardless().isCallingStubs()) {
-            rawClient.setSslSocketFactory(sslSocketFactory);
-        } else {
-            rawClient.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(config.getProxyConfig().getHost(), config.getProxyConfig().getPort())));
-        }
-        return goCardlessClient;
-    }
-
     @Provides
     public GoCardlessClientWrapper provideGoCardlessClientWrapper() throws IllegalAccessException {
-        GoCardlessClient goCardlessClient =  hackedGoCardlessClient(configuration, sslSocketFactory);
+        GoCardlessClient goCardlessClient =  configuration.getGoCardless()
+                .buildClient(configuration, sslSocketFactory);
         return new GoCardlessClientWrapper(goCardlessClient);
     }
 
