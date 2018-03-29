@@ -23,13 +23,18 @@ public class WebhookGoCardlessService {
     private final GoCardlessMandateHandler goCardlessMandateHandler;
 
     @Inject
-    public WebhookGoCardlessService(GoCardlessService goCardlessService, TransactionService transactionService, PayerService payerService) {
+    public WebhookGoCardlessService(GoCardlessService goCardlessService,
+                                    TransactionService transactionService,
+                                    PayerService payerService,
+                                    GoCardlessPaymentHandler goCardlessPaymentHandler,
+                                    GoCardlessMandateHandler goCardlessMandateHandler) {
         this.goCardlessService = goCardlessService;
-        this.goCardlessPaymentHandler = new GoCardlessPaymentHandler(transactionService, goCardlessService);
-        this.goCardlessMandateHandler = new GoCardlessMandateHandler(transactionService, goCardlessService, payerService);
+        this.goCardlessPaymentHandler = goCardlessPaymentHandler;
+        this.goCardlessMandateHandler = goCardlessMandateHandler;
     }
 
     public void handleEvents(List<GoCardlessEvent> events) {
+        events.forEach(goCardlessService::storeEvent);
         events.forEach(event -> {
             GoCardlessActionHandler handler = getHandlerFor(event.getResourceType());
             LOGGER.info("About to handle event of type: {}, action: {}, resource id: {}",
@@ -37,8 +42,11 @@ public class WebhookGoCardlessService {
                     event.getAction(),
                     event.getResourceId());
             handler.handle(event);
-
         });
+    }
+
+    private void logUnknownResourceTypeForEvent(GoCardlessEvent event) {
+        LOGGER.info("unhandled resource type for event with id {} ", event.getEventId());
     }
 
     private GoCardlessActionHandler getHandlerFor(GoCardlessResourceType goCardlessResourceType) {
@@ -49,7 +57,7 @@ public class WebhookGoCardlessService {
             case MANDATES:
                 return goCardlessMandateHandler;
             default:
-                return goCardlessService::storeEvent;
+                return this::logUnknownResourceTypeForEvent;
         }
     }
 }
