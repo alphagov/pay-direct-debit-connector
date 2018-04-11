@@ -20,6 +20,8 @@ import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
+import java.util.Optional;
+
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -116,7 +118,7 @@ public class GoCardlessPaymentHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("confirmed").toEntity());
 
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
-        when(mockedTransactionService.findPaymentSubmittedEventFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.findPaymentSubmittedEventFor(transaction)).thenReturn(Optional.of(paymentRequestEvent));
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 

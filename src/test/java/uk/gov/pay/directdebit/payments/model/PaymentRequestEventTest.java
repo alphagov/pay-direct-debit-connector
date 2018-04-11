@@ -11,6 +11,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_ACTIVE;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID;
@@ -171,6 +172,16 @@ public class PaymentRequestEventTest {
         PaymentRequestEvent event = PaymentRequestEvent.mandateFailed(paymentRequestId);
 
         assertThat(event.getEvent(), is(MANDATE_FAILED));
+        assertThat(event.getEventType(), is(MANDATE));
+        assertThat(event.getPaymentRequestId(), is(paymentRequestId));
+    }
+
+    @Test
+    public void mandateCancelled_shouldReturnExpectedEvent() {
+        long paymentRequestId = 1L;
+        PaymentRequestEvent event = PaymentRequestEvent.mandateCancelled(paymentRequestId);
+
+        assertThat(event.getEvent(), is(MANDATE_CANCELLED));
         assertThat(event.getEventType(), is(MANDATE));
         assertThat(event.getPaymentRequestId(), is(paymentRequestId));
     }

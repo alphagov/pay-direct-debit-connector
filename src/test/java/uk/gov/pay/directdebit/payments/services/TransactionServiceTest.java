@@ -182,6 +182,17 @@ public class TransactionServiceTest {
     }
 
     @Test
+    public void shouldUpdateTransactionStateRegisterEventAndSendEmail_whenMandateIsCancelled() throws Exception {
+        TransactionFixture transactionFixture = TransactionFixture
+                .aTransactionFixture()
+                .withState(PENDING_DIRECT_DEBIT_PAYMENT);
+        Transaction transaction = transactionFixture.toEntity();
+        service.mandateCancelledFor(transaction);
+        verify(mockedPaymentRequestEventService).registerMandateCancelledEventFor(transaction);
+      // todo  verify(mockedUserNotificationService).sendMandateFailedEmailFor(transaction, payer);
+    }
+
+    @Test
     public void findTransactionForToken_shouldUpdateTransactionStateAndRegisterEventWhenExchangingTokens() throws Exception {
         String token = "token";
         TransactionFixture transactionFixture = TransactionFixture
@@ -328,7 +339,7 @@ public class TransactionServiceTest {
         when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequestId(), Type.CHARGE, PAYMENT_SUBMITTED))
                 .thenReturn(Optional.of(event));
 
-        PaymentRequestEvent foundEvent = service.findPaymentSubmittedEventFor(transaction);
+        PaymentRequestEvent foundEvent = service.findPaymentSubmittedEventFor(transaction).get();
 
         assertThat(foundEvent, is(event));
     }

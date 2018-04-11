@@ -131,6 +131,11 @@ public class TransactionService {
         return paymentRequestEventService.registerMandateFailedEventFor(transaction);
     }
 
+    public PaymentRequestEvent mandateCancelledFor(Transaction transaction) {
+        // todo userNotificationService.sendMandateCancelledEmailFor(transaction, payer);
+        return paymentRequestEventService.registerMandateCancelledEventFor(transaction);
+    }
+
     public PaymentRequestEvent paymentFailedFor(Transaction transaction) {
         Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_FAILED);
         return paymentRequestEventService.registerPaymentFailedEventFor(newTransaction);
@@ -173,10 +178,8 @@ public class TransactionService {
         return transaction;
     }
 
-    public PaymentRequestEvent findPaymentSubmittedEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_SUBMITTED)
-                .orElseThrow(() -> new InvalidStateException("Could not find payment submitted event for payment request with id: "
-                        + transaction.getPaymentRequestExternalId()));
+    public Optional<PaymentRequestEvent> findPaymentSubmittedEventFor(Transaction transaction) {
+        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_SUBMITTED);
     }
 
     public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {

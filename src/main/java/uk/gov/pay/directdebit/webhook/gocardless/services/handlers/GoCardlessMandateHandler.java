@@ -34,6 +34,12 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 GoCardlessMandateAction.CREATED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
                 GoCardlessMandateAction.SUBMITTED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
                 GoCardlessMandateAction.ACTIVE, transactionService::mandateActiveFor,
+                GoCardlessMandateAction.CANCELLED, (Transaction transaction) -> {
+                    if (!transactionService.findPaymentSubmittedEventFor(transaction).isPresent()) {
+                        transactionService.paymentFailedFor(transaction);
+                    }
+                    return transactionService.mandateCancelledFor(transaction);
+                },
                 GoCardlessMandateAction.FAILED, (Transaction transaction) -> {
                     Payer payer = payerService.getPayerFor(transaction);
                     transactionService.mandateFailedFor(transaction, payer);
@@ -57,7 +63,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
     }
 
     public enum GoCardlessMandateAction implements GoCardlessAction {
-        CREATED, SUBMITTED, ACTIVE, FAILED;
+        CREATED, SUBMITTED, ACTIVE, FAILED, CANCELLED;
 
 
         public static GoCardlessMandateAction fromString(String type) {
