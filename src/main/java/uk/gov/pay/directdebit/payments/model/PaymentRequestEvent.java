@@ -18,6 +18,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 
 public class PaymentRequestEvent {
@@ -67,6 +68,10 @@ public class PaymentRequestEvent {
 
     public static PaymentRequestEvent paymentCreated(Long paymentRequestId) {
         return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_CREATED);
+    }
+
+    public static PaymentRequestEvent paymentSubmitted(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_SUBMITTED);
     }
 
     public static PaymentRequestEvent paymentFailed(Long paymentRequestId) {
@@ -148,6 +153,7 @@ public class PaymentRequestEvent {
         MANDATE_ACTIVE,
         PAYMENT_CREATED,
         PAYMENT_PENDING,
+        PAYMENT_SUBMITTED,
         PAYMENT_FAILED,
         PAID_OUT,
         PAID;

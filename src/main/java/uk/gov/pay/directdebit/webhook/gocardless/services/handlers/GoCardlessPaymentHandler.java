@@ -52,8 +52,8 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     protected Map<GoCardlessAction, Function<Transaction, PaymentRequestEvent>> getHandledActions() {
         return ImmutableMap.of(
                 GoCardlessPaymentAction.CREATED, transactionService::paymentPendingFor,
-                GoCardlessPaymentAction.SUBMITTED, transactionService::findPaymentPendingEventFor,
-                GoCardlessPaymentAction.CONFIRMED, transactionService::findPaymentPendingEventFor,
+                GoCardlessPaymentAction.SUBMITTED, transactionService::paymentSubmittedFor,
+                GoCardlessPaymentAction.CONFIRMED, transactionService::findPaymentSubmittedEventFor,
                 GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor,
                 GoCardlessPaymentAction.PAID, transactionService::payoutPaidFor
         );

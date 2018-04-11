@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
@@ -312,6 +313,24 @@ public class TransactionServiceTest {
         verify(mockedPaymentRequestEventService).registerMandateActiveEventFor(transaction);
         verifyZeroInteractions(mockedTransactionDao);
         assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
+    }
+
+    @Test
+    public void findPaymentSubmittedEventFor_shouldFindEvent() {
+
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(PENDING_DIRECT_DEBIT_PAYMENT)
+                .toEntity();
+
+        PaymentRequestEvent event = aPaymentRequestEventFixture().toEntity();
+
+        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequestId(), Type.CHARGE, PAYMENT_SUBMITTED))
+                .thenReturn(Optional.of(event));
+
+        PaymentRequestEvent foundEvent = service.findPaymentSubmittedEventFor(transaction);
+
+        assertThat(foundEvent, is(event));
     }
 
     @Test

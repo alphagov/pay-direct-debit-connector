@@ -27,7 +27,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
@@ -145,6 +145,10 @@ public class TransactionService {
         return paymentRequestEventService.registerPaymentPendingEventFor(transaction);
     }
 
+    public PaymentRequestEvent paymentSubmittedFor(Transaction transaction) {
+        return paymentRequestEventService.registerPaymentSubmittedEventFor(transaction);
+    }
+
     public PaymentRequestEvent mandatePendingFor(Transaction transaction) {
         return paymentRequestEventService.registerMandatePendingEventFor(transaction);
     }
@@ -169,9 +173,9 @@ public class TransactionService {
         return transaction;
     }
 
-    public PaymentRequestEvent findPaymentPendingEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_PENDING)
-                .orElseThrow(() -> new InvalidStateException("Could not find payment pending event for payment request with id: "
+    public PaymentRequestEvent findPaymentSubmittedEventFor(Transaction transaction) {
+        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_SUBMITTED)
+                .orElseThrow(() -> new InvalidStateException("Could not find payment submitted event for payment request with id: "
                         + transaction.getPaymentRequestExternalId()));
     }
 

@@ -96,15 +96,15 @@ public class GoCardlessPaymentHandlerTest {
     }
 
     @Test
-    public void handle_onSubmittedPaymentGoCardlessEvent_shouldLinkTheEventToAnExistingPaymentPendingPayEvent() {
+    public void handle_onSubmittedPaymentGoCardlessEvent_shouldSetRegisterPaymentSubmittedEvent() {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("submitted").toEntity());
 
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
-        when(mockedTransactionService.findPaymentPendingEventFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.paymentSubmittedFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
-        verify(mockedTransactionService).findPaymentPendingEventFor(transaction);
+        verify(mockedTransactionService).paymentSubmittedFor(transaction);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
@@ -112,11 +112,11 @@ public class GoCardlessPaymentHandlerTest {
     }
 
     @Test
-    public void handle_onConfirmedPaymentGoCardlessEvent_shouldLinkTheEventToAnExistingPaymentPendingPayEvent() {
+    public void handle_onConfirmedPaymentGoCardlessEvent_shouldLinkTheEventToAnExistingPaymentSubmittedPayEvent() {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("confirmed").toEntity());
 
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
-        when(mockedTransactionService.findPaymentPendingEventFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.findPaymentSubmittedEventFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 

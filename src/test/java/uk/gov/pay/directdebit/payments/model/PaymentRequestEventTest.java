@@ -19,6 +19,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
@@ -120,6 +121,16 @@ public class PaymentRequestEventTest {
         PaymentRequestEvent event = PaymentRequestEvent.paymentPending(paymentRequestId);
 
         assertThat(event.getEvent(), is(PAYMENT_PENDING));
+        assertThat(event.getEventType(), is(CHARGE));
+        assertThat(event.getPaymentRequestId(), is(paymentRequestId));
+    }
+
+    @Test
+    public void paymentSubmitted_shouldReturnExpectedEvent() {
+        long paymentRequestId = 1L;
+        PaymentRequestEvent event = PaymentRequestEvent.paymentSubmitted(paymentRequestId);
+
+        assertThat(event.getEvent(), is(PAYMENT_SUBMITTED));
         assertThat(event.getEventType(), is(CHARGE));
         assertThat(event.getPaymentRequestId(), is(paymentRequestId));
     }
