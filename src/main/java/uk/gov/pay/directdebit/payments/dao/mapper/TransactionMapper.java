@@ -19,8 +19,9 @@ public class TransactionMapper implements ResultSetMapper<Transaction> {
     private static final String PAYMENT_REQUEST_EXTERNAL_ID_COLUMN = "payment_request_external_id";
     private static final String PAYMENT_REQUEST_REFERENCE_COLUMN = "payment_request_reference";
     private static final String PAYMENT_REQUEST_RETURN_URL_COLUMN = "payment_request_return_url";
-    private static final String PAYMENT_REQUEST_GATEWAY_ACCOUNT_ID_COLUMN = "payment_request_gateway_account_id";
     private static final String PAYMENT_REQUEST_DESCRIPTION_COLUMN = "payment_request_description";
+    private static final String GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
+    private static final String GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN = "gateway_account_external_id";
     private static final String GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN = "gateway_account_payment_provider";
 
     @Override
@@ -31,7 +32,8 @@ public class TransactionMapper implements ResultSetMapper<Transaction> {
                 resultSet.getString(PAYMENT_REQUEST_EXTERNAL_ID_COLUMN),
                 resultSet.getString(PAYMENT_REQUEST_DESCRIPTION_COLUMN),
                 resultSet.getString(PAYMENT_REQUEST_REFERENCE_COLUMN),
-                resultSet.getLong(PAYMENT_REQUEST_GATEWAY_ACCOUNT_ID_COLUMN),
+                resultSet.getLong(GATEWAY_ACCOUNT_ID_COLUMN),
+                resultSet.getString(GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN),
                 PaymentProvider.fromString(resultSet.getString(GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN)),
                 resultSet.getString(PAYMENT_REQUEST_RETURN_URL_COLUMN),
                 resultSet.getLong(TRANSACTION_AMOUNT_COLUMN),

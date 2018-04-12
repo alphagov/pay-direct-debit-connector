@@ -85,7 +85,7 @@ public class PayerResourceIT {
         return  aTransactionFixture()
                 .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .withPaymentRequestId(testPaymentRequest.getId())
-                .withPaymentRequestGatewayAccountId(testGatewayAccount.getId())
+                .withGatewayAccountId(testGatewayAccount.getId())
                 .withPaymentProvider(paymentProvider)
                 .withPaymentRequestExternalId(testPaymentRequest.getExternalId())
                 .insert(testContext.getJdbi());

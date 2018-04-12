@@ -5,7 +5,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -15,7 +14,6 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.util.GoCardlessStubs;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -45,7 +43,7 @@ public class ConfirmPaymentResourceIT {
     private PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture()
             .withGatewayAccountId(gatewayAccountFixture.getId());
     private TransactionFixture transactionFixture = aTransactionFixture().withPaymentRequestId(paymentRequestFixture.getId())
-            .withPaymentRequestGatewayAccountId(gatewayAccountFixture.getId())
+            .withGatewayAccountId(gatewayAccountFixture.getId())
             .withPaymentRequestDescription(paymentRequestFixture.getDescription())
             .withState(AWAITING_CONFIRMATION);
     @Test

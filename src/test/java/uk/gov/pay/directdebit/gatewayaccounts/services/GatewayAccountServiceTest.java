@@ -86,7 +86,7 @@ public class GatewayAccountServiceTest {
 
     @Test
     public void shouldReturnGatewayAccountForTransactionIfItExists() {
-        when(mockedGatewayAccountDao.findById(transaction.getPaymentRequestGatewayAccountId()))
+        when(mockedGatewayAccountDao.findById(transaction.getGatewayAccountId()))
                 .thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
         GatewayAccount gatewayAccount = service.getGatewayAccountFor(transaction);
         assertThat(gatewayAccount.getId(), is(gatewayAccountFixture.getId()));
@@ -99,10 +99,10 @@ public class GatewayAccountServiceTest {
 
     @Test
     public void shouldThrowIfGatewayAccountForTransactionDoesNotExist() {
-        when(mockedGatewayAccountDao.findById(transaction.getPaymentRequestGatewayAccountId()))
+        when(mockedGatewayAccountDao.findById(transaction.getGatewayAccountId()))
                 .thenReturn(Optional.empty());
         thrown.expect(GatewayAccountNotFoundException.class);
-        thrown.expectMessage("Unknown gateway account: " + transaction.getPaymentRequestGatewayAccountId().toString());
+        thrown.expectMessage("Unknown gateway account: " + transaction.getGatewayAccountId().toString());
         thrown.reportMissingExceptionWithMessage("GatewayAccountNotFoundException expected");
         service.getGatewayAccountFor(transaction);
     }

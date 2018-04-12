@@ -10,16 +10,29 @@ import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, Transaction> {
+
     private Long id = RandomUtils.nextLong(1, 99999);
+
     private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
+
     private String paymentRequestExternalId = RandomIdGenerator.newId();
+
     private String paymentRequestDescription = RandomStringUtils.randomAlphabetic(20);
+
     private String paymentRequestReference = RandomStringUtils.randomAlphabetic(20);
-    private Long paymentRequestGatewayAccountId = RandomUtils.nextLong(1, 99999);
+
+    private Long gatewayAccountId = RandomUtils.nextLong(1, 99999);
+
+    private String gatewayAccountExternalId = RandomIdGenerator.newId();
+
     private String paymentRequestReturnUrl = "http://www." + RandomStringUtils.randomAlphabetic(10) + ".test";
+
     private PaymentProvider paymentProvider = PaymentProvider.SANDBOX;
+
     private Long amount = RandomUtils.nextLong(1, 99999);
+
     private Transaction.Type type = Transaction.Type.CHARGE;
+
     private PaymentState state = PaymentState.NEW;
 
     private TransactionFixture() {
@@ -43,12 +56,19 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         this.paymentRequestDescription = paymentRequestDescription;
         return this;
     }
+
     public TransactionFixture withPaymentRequestReference(String paymentRequestReference) {
         this.paymentRequestReference = paymentRequestReference;
         return this;
     }
-    public TransactionFixture withPaymentRequestGatewayAccountId(Long paymentRequestGatewayAccountId) {
-        this.paymentRequestGatewayAccountId = paymentRequestGatewayAccountId;
+
+    public TransactionFixture withGatewayAccountId(Long gatewayAccountId) {
+        this.gatewayAccountId = gatewayAccountId;
+        return this;
+    }
+
+    public TransactionFixture withGatewayAccountExternalId(String gatewayAccountExternalId) {
+        this.gatewayAccountExternalId = gatewayAccountExternalId;
         return this;
     }
 
@@ -113,8 +133,12 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return paymentRequestReturnUrl;
     }
 
-    public Long getPaymentRequestGatewayAccountId() {
-        return paymentRequestGatewayAccountId;
+    public Long getGatewayAccountId() {
+        return gatewayAccountId;
+    }
+
+    public String getGatewayAccountExternalId() {
+        return gatewayAccountExternalId;
     }
 
     public String getPaymentRequestDescription() {
@@ -146,7 +170,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public Transaction toEntity() {
-        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestReference, paymentRequestGatewayAccountId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
+        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestReference, gatewayAccountId, gatewayAccountExternalId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
     }
 
 }
