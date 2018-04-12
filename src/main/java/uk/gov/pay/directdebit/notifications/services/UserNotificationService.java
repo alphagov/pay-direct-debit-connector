@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.service.notify.NotificationClient;
@@ -36,6 +37,7 @@ public class UserNotificationService {
     private static final String PLACEHOLDER_MERCHANT_ADDRESS = "123 Rainbow Road, EC125Y, London";
 
     private static final String DD_GUARANTEE_KEY = "dd guarantee link";
+    private static final String MANDATE_REFERENCE_KEY = "mandate reference";
     private static final String ORG_NAME_KEY = "org name";
     private static final String SERVICE_NAME_KEY = "service name";
     private static final String SUN_KEY = "SUN";
@@ -102,18 +104,27 @@ public class UserNotificationService {
         String mandateFailedTemplateId = directDebitConfig.getNotifyConfig().getMandateFailedTemplateId();
         LOGGER.info("Sending mandate failed email, payment request id: {}, gateway account id: {}",
                 transaction.getPaymentRequestExternalId(),
-                transaction.getGatewayAccountId());
+                transaction.getGatewayAccountExternalId());
         return sendEmail(buildMandateFailedPersonalisation(transaction),
                 mandateFailedTemplateId,
                 payer.getEmail(),
                 transaction.getPaymentRequestExternalId());
     }
-
+    public Future<Optional<String>> sendMandateCancelledEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
+        String mandateCancelledTemplateId = directDebitConfig.getNotifyConfig().getMandateCancelledTemplateId();
+        LOGGER.info("Sending mandate cancelled email, payment request id: {}, gateway account id: {}",
+                transaction.getPaymentRequestExternalId(),
+                transaction.getGatewayAccountExternalId());
+        return sendEmail(buildMandateCancelledPersonalisation(transaction, mandate),
+                mandateCancelledTemplateId,
+                payer.getEmail(),
+                transaction.getPaymentRequestExternalId());
+    }
     public Future<Optional<String>> sendPaymentConfirmedEmailFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
         String paymentConfirmedTemplateId = directDebitConfig.getNotifyConfig().getPaymentConfirmedTemplateId();
         LOGGER.info("Sending payment confirmed email, payment request id: {}, gateway account id: {}",
                 transaction.getPaymentRequestExternalId(),
-                transaction.getGatewayAccountId());
+                transaction.getGatewayAccountExternalId());
         return sendEmail(buildPaymentConfirmedPersonalisation(transaction, payer,earliestChargeDate),
                 paymentConfirmedTemplateId,
                 payer.getEmail(),
@@ -124,6 +135,19 @@ public class UserNotificationService {
         GatewayAccount gatewayAccount = gatewayAccountService.getGatewayAccountFor(transaction);
 
         HashMap<String, String> map = new HashMap<>();
+        map.put(ORG_NAME_KEY, gatewayAccount.getServiceName());
+        map.put(ORG_PHONE_KEY, PLACEHOLDER_PHONE_NUMBER);
+        map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
+
+        return map;
+    }
+
+    private HashMap<String, String> buildMandateCancelledPersonalisation(Transaction transaction, Mandate mandate) {
+        GatewayAccount gatewayAccount = gatewayAccountService.getGatewayAccountFor(transaction);
+
+        HashMap<String, String> map = new HashMap<>();
+        // fixme use the right reference once we play the story
+        map.put(MANDATE_REFERENCE_KEY, mandate.getExternalId());
         map.put(ORG_NAME_KEY, gatewayAccount.getServiceName());
         map.put(ORG_PHONE_KEY, PLACEHOLDER_PHONE_NUMBER);
         map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());

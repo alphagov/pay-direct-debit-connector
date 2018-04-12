@@ -1,9 +1,11 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 
+import com.gocardless.services.MandateService;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
@@ -35,10 +37,11 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 GoCardlessMandateAction.SUBMITTED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
                 GoCardlessMandateAction.ACTIVE, transactionService::mandateActiveFor,
                 GoCardlessMandateAction.CANCELLED, (Transaction transaction) -> {
+                    Payer payer = payerService.getPayerFor(transaction);
                     if (!transactionService.findPaymentSubmittedEventFor(transaction).isPresent()) {
                         transactionService.paymentFailedFor(transaction);
                     }
-                    return transactionService.mandateCancelledFor(transaction);
+                    return transactionService.mandateCancelledFor(transaction, payer);
                 },
                 GoCardlessMandateAction.FAILED, (Transaction transaction) -> {
                     Payer payer = payerService.getPayerFor(transaction);

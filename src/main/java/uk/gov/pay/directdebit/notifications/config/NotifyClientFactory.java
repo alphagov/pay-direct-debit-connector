@@ -22,11 +22,16 @@ public class NotifyClientFactory extends Configuration {
     private String mandateFailedTemplateId;
     @NotNull
     private String paymentConfirmedTemplateId;
+    @NotNull
+    private String mandateCancelledTemplateId;
 
     public String getMandateFailedTemplateId() {
         return mandateFailedTemplateId;
     }
 
+    public String getMandateCancelledTemplateId() {
+        return mandateCancelledTemplateId;
+    }
     public String getPaymentConfirmedTemplateId() {
         return paymentConfirmedTemplateId;
     }

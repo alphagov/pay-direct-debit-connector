@@ -13,6 +13,8 @@ import uk.gov.pay.directdebit.app.config.ExecutorServiceConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.config.NotifyClientFactory;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -64,6 +66,7 @@ public class UserNotificationServiceTest {
 
     private static final String EMAIL = "ksdfhkjsdh@sdjkfh.test";
     private static final String MANDATE_FAILED_TEMPLATE = "mandate-failed-template";
+    private static final String MANDATE_CANCELLED_TEMPLATE = "mandate-cancelled-template";
     private static final String PAYMENT_CONFIRMATION_TEMPLATE = "payment-confirmation-template";
     private Payer payer = aPayerFixture().withEmail(EMAIL).toEntity();
     private Transaction transaction = aTransactionFixture()
@@ -77,6 +80,7 @@ public class UserNotificationServiceTest {
         when(mockDirectDebitConfig.getExecutorServiceConfig()).thenReturn(mockExecutorConfiguration);
         when(mockDirectDebitConfig.getLinks()).thenReturn(mockLinksConfig);
         when(mockNotifyClientFactory.getMandateFailedTemplateId()).thenReturn(MANDATE_FAILED_TEMPLATE);
+        when(mockNotifyClientFactory.getMandateCancelledTemplateId()).thenReturn(MANDATE_CANCELLED_TEMPLATE);
         when(mockNotifyClientFactory.getPaymentConfirmedTemplateId()).thenReturn(PAYMENT_CONFIRMATION_TEMPLATE);
         when(mockExecutorConfiguration.getThreadsPerCpu()).thenReturn(2);
         when(mockGatewayAccountService.getGatewayAccountFor(transaction)).thenReturn(gatewayAccount);
@@ -105,6 +109,31 @@ public class UserNotificationServiceTest {
 
         verify(mockNotifyClient).sendEmail(
                 MANDATE_FAILED_TEMPLATE,
+                EMAIL,
+                emailPersonalisation,
+                null
+        );
+    }
+
+    @Test
+    public void shouldSendMandateCancelledEmailIfEmailNotifyIsEnabled() throws Exception {
+        when(mockNotifyClientFactory.isEmailNotifyEnabled()).thenReturn(true);
+        userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
+
+        Mandate mandate = MandateFixture.aMandateFixture().toEntity();
+        HashMap<String, String> emailPersonalisation = new HashMap<>();
+        emailPersonalisation.put("mandate reference", mandate.getExternalId());
+        emailPersonalisation.put("org name", gatewayAccount.getServiceName());
+        emailPersonalisation.put("org phone", "+44 000-CAKE-000");
+        emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
+
+        when(mockNotifyClient.sendEmail(MANDATE_CANCELLED_TEMPLATE, EMAIL, emailPersonalisation, null)).thenReturn(mockNotificationCreatedResponse);
+
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateCancelledEmailFor(transaction, mandate, payer);
+        maybeNotificationId.get(1000, TimeUnit.SECONDS);
+
+        verify(mockNotifyClient).sendEmail(
+                MANDATE_CANCELLED_TEMPLATE,
                 EMAIL,
                 emailPersonalisation,
                 null
