@@ -73,7 +73,7 @@ public class TransactionDaoIT {
         assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getPaymentRequestGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
+        assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
         assertThat(transaction.getType(), is(TYPE));
         assertThat(transaction.getAmount(), is(AMOUNT));
@@ -87,7 +87,7 @@ public class TransactionDaoIT {
         assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getPaymentRequestGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
+        assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
         assertThat(transaction.getType(), is(TYPE));
         assertThat(transaction.getAmount(), is(AMOUNT));
@@ -101,7 +101,7 @@ public class TransactionDaoIT {
         assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testTransaction.getPaymentRequestId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getPaymentRequestGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
+        assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
         assertThat(transaction.getType(), is(TYPE));
         assertThat(transaction.getAmount(), is(AMOUNT));
@@ -118,7 +118,7 @@ public class TransactionDaoIT {
         assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getPaymentRequestGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
+        assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
         assertThat(transaction.getType(), is(TYPE));
         assertThat(transaction.getAmount(), is(AMOUNT));
@@ -177,7 +177,7 @@ public class TransactionDaoIT {
         assertThat(transactionAfterUpdate.getId(), is(testTransaction.getId()));
         assertThat(transactionAfterUpdate.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(transactionAfterUpdate.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transactionAfterUpdate.getPaymentRequestGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
+        assertThat(transactionAfterUpdate.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transactionAfterUpdate.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
         assertThat(transactionAfterUpdate.getType(), is(TYPE));
         assertThat(transactionAfterUpdate.getAmount(), is(AMOUNT));
@@ -203,7 +203,7 @@ public class TransactionDaoIT {
         return aTransactionFixture()
                 .withPaymentRequestId(paymentRequestFixture.getId())
                 .withPaymentRequestExternalId(paymentRequestFixture.getExternalId())
-                .withPaymentRequestGatewayAccountId(paymentRequestFixture.getGatewayAccountId())
+                .withGatewayAccountId(paymentRequestFixture.getGatewayAccountId())
                 .withPaymentRequestDescription(paymentRequestFixture.getDescription())
                 .withAmount(amount)
                 .withState(paymentState)

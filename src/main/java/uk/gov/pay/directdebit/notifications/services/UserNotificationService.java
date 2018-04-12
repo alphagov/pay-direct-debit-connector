@@ -102,7 +102,7 @@ public class UserNotificationService {
         String mandateFailedTemplateId = directDebitConfig.getNotifyConfig().getMandateFailedTemplateId();
         LOGGER.info("Sending mandate failed email, payment request id: {}, gateway account id: {}",
                 transaction.getPaymentRequestExternalId(),
-                transaction.getPaymentRequestGatewayAccountId());
+                transaction.getGatewayAccountId());
         return sendEmail(buildMandateFailedPersonalisation(transaction),
                 mandateFailedTemplateId,
                 payer.getEmail(),
@@ -113,7 +113,7 @@ public class UserNotificationService {
         String paymentConfirmedTemplateId = directDebitConfig.getNotifyConfig().getPaymentConfirmedTemplateId();
         LOGGER.info("Sending payment confirmed email, payment request id: {}, gateway account id: {}",
                 transaction.getPaymentRequestExternalId(),
-                transaction.getPaymentRequestGatewayAccountId());
+                transaction.getGatewayAccountId());
         return sendEmail(buildPaymentConfirmedPersonalisation(transaction, payer,earliestChargeDate),
                 paymentConfirmedTemplateId,
                 payer.getEmail(),

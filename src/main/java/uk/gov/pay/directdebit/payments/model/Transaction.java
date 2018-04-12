@@ -15,17 +15,30 @@ public class Transaction {
     private String paymentRequestDescription;
     private String paymentRequestReturnUrl;
     private String paymentRequestReference;
-    private Long paymentRequestGatewayAccountId;
+    private Long gatewayAccountId;
+    private String gatewayAccountExternalId;
     private PaymentProvider paymentProvider;
     private Long amount;
     private Type type;
     private PaymentState state;
 
-    public Transaction(Long id, Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, String paymentRequestReference, Long paymentRequestGatewayAccountId, PaymentProvider paymentProvider, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
+    public Transaction(Long id,
+                       Long paymentRequestId,
+                       String paymentRequestExternalId,
+                       String paymentRequestDescription,
+                       String paymentRequestReference,
+                       Long gatewayAccountId,
+                       String gatewayAccountExternalId,
+                       PaymentProvider paymentProvider,
+                       String paymentRequestReturnUrl,
+                       Long amount,
+                       Type type,
+                       PaymentState state) {
         this.id = id;
         this.paymentRequestExternalId = paymentRequestExternalId;
         this.paymentRequestId = paymentRequestId;
-        this.paymentRequestGatewayAccountId = paymentRequestGatewayAccountId;
+        this.gatewayAccountId = gatewayAccountId;
+        this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.paymentProvider = paymentProvider;
         this.paymentRequestDescription = paymentRequestDescription;
         this.paymentRequestReference = paymentRequestReference;
@@ -35,8 +48,30 @@ public class Transaction {
         this.state = state;
     }
 
-    public Transaction(Long paymentRequestId, String paymentRequestExternalId, String paymentRequestDescription, String paymentRequestReference,  Long paymentRequestGatewayAccountId, PaymentProvider paymentProvider, String paymentRequestReturnUrl, Long amount, Type type, PaymentState state) {
-        this(null, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestReference, paymentRequestGatewayAccountId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
+    public Transaction(Long paymentRequestId,
+                       String paymentRequestExternalId,
+                       String paymentRequestDescription,
+                       String paymentRequestReference,
+                       Long gatewayAccountId,
+                       String gatewayAccountExternalId,
+                       PaymentProvider paymentProvider,
+                       String paymentRequestReturnUrl,
+                       Long amount,
+                       Type type,
+                       PaymentState state) {
+        this(null,
+                paymentRequestId,
+                paymentRequestExternalId,
+                paymentRequestDescription,
+                paymentRequestReference,
+                gatewayAccountId,
+                gatewayAccountExternalId,
+                paymentProvider,
+                paymentRequestReturnUrl,
+                amount,
+                type,
+                state
+        );
     }
 
     public Long getId() {
@@ -71,12 +106,20 @@ public class Transaction {
         this.paymentRequestReturnUrl = paymentRequestReturnUrl;
     }
 
-    public Long getPaymentRequestGatewayAccountId() {
-        return paymentRequestGatewayAccountId;
+    public Long getGatewayAccountId() {
+        return gatewayAccountId;
     }
 
-    public void setPaymentRequestGatewayAccountId(Long paymentRequestGatewayAccountId) {
-        this.paymentRequestGatewayAccountId = paymentRequestGatewayAccountId;
+    public void setGatewayAccountId(Long gatewayAccountId) {
+        this.gatewayAccountId = gatewayAccountId;
+    }
+
+    public String getGatewayAccountExternalId() {
+        return gatewayAccountExternalId;
+    }
+
+    public void setGatewayAccountExternalId(String gatewayAccountExternalId) {
+        this.gatewayAccountExternalId = gatewayAccountExternalId;
     }
 
     public String getPaymentRequestDescription() {
@@ -123,6 +166,7 @@ public class Transaction {
     public void setState(PaymentState state) {
         this.state = state;
     }
+
     public enum Type {
         CHARGE
     }
@@ -136,7 +180,8 @@ public class Transaction {
 
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (!paymentRequestExternalId.equals(that.paymentRequestExternalId)) return false;
-        if (!paymentRequestGatewayAccountId.equals(that.paymentRequestGatewayAccountId)) return false;
+        if (!gatewayAccountId.equals(that.gatewayAccountId)) return false;
+        if (!gatewayAccountExternalId.equals(that.gatewayAccountExternalId)) return false;
         if (!paymentRequestDescription.equals(that.paymentRequestDescription)) return false;
         if (!paymentProvider.equals(that.paymentProvider)) return false;
         if (!paymentRequestId.equals(that.paymentRequestId)) return false;
@@ -152,7 +197,8 @@ public class Transaction {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + paymentRequestExternalId.hashCode();
         result = 31 * result + paymentRequestId.hashCode();
-        result = 31 * result + paymentRequestGatewayAccountId.hashCode();
+        result = 31 * result + gatewayAccountId.hashCode();
+        result = 31 * result + gatewayAccountExternalId.hashCode();
         result = 31 * result + paymentProvider.hashCode();
         result = 31 * result + paymentRequestDescription.hashCode();
         result = 31 * result + paymentRequestReturnUrl.hashCode();
@@ -162,4 +208,5 @@ public class Transaction {
         result = 31 * result + state.hashCode();
         return result;
     }
+
 }

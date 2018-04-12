@@ -32,8 +32,8 @@ public class GatewayAccountService {
 
     public GatewayAccount getGatewayAccountFor(Transaction transaction) {
         return gatewayAccountDao
-                .findById(transaction.getPaymentRequestGatewayAccountId())
-                .orElseThrow(() -> new GatewayAccountNotFoundException(transaction.getPaymentRequestGatewayAccountId().toString()));
+                .findById(transaction.getGatewayAccountId())
+                .orElseThrow(() -> new GatewayAccountNotFoundException(transaction.getGatewayAccountId().toString()));
     }
 
     public List<GatewayAccount> getAllGatewayAccounts() {

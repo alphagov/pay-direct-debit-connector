@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static java.lang.String.format;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
@@ -41,6 +40,7 @@ public class TransactionService {
     private final TransactionDao transactionDao;
     private final PaymentRequestEventService paymentRequestEventService;
     private final UserNotificationService userNotificationService;
+
     @Inject
     public TransactionService(TransactionDao transactionDao, PaymentRequestEventService paymentRequestEventService, UserNotificationService userNotificationService) {
         this.paymentRequestEventService = paymentRequestEventService;
@@ -61,7 +61,8 @@ public class TransactionService {
                 paymentRequest.getExternalId(),
                 paymentRequest.getDescription(),
                 paymentRequest.getReference(),
-                paymentRequest.getGatewayAccountId(),
+                gatewayAccount.getId(),
+                gatewayAccount.getExternalId(),
                 gatewayAccount.getPaymentProvider(),
                 paymentRequest.getReturnUrl(),
                 paymentRequest.getAmount(),

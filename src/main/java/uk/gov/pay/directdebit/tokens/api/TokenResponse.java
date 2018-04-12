@@ -8,25 +8,43 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class TokenResponse {
+
     @JsonProperty("external_id")
     private String paymentExternalId;
+
     @JsonProperty("amount")
     private Long amount;
+
     @JsonProperty("type")
     private String type;
+
     @JsonProperty("state")
     private String state;
+
     @JsonProperty("return_url")
     private String returnUrl;
+
     @JsonProperty("gateway_account_id")
     private Long gatewayAccountId;
+
+    @JsonProperty("gateway_account_external_id")
+    private String gatewayAccountExternalId;
+
     @JsonProperty("description")
     private String description;
 
 
-    private TokenResponse(String paymentExternalId, Long gatewayAccountId, String description, String returnUrl, Long amount, String type, String state) {
+    private TokenResponse(String paymentExternalId,
+                          Long gatewayAccountId,
+                          String gatewayAccountExternalId,
+                          String description,
+                          String returnUrl,
+                          Long amount,
+                          String type,
+                          String state) {
         this.paymentExternalId = paymentExternalId;
         this.gatewayAccountId = gatewayAccountId;
+        this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.amount = amount;
         this.type = type;
         this.state = state;
@@ -37,7 +55,8 @@ public class TokenResponse {
     public static TokenResponse from(Transaction transaction) {
         return new TokenResponse(
                 transaction.getPaymentRequestExternalId(),
-                transaction.getPaymentRequestGatewayAccountId(),
+                transaction.getGatewayAccountId(),
+                transaction.getGatewayAccountExternalId(),
                 transaction.getPaymentRequestDescription(),
                 transaction.getPaymentRequestReturnUrl(),
                 transaction.getAmount(),
@@ -55,6 +74,7 @@ public class TokenResponse {
         if (!returnUrl.equals(that.returnUrl)) return false;
         if (!paymentExternalId.equals(that.paymentExternalId)) return false;
         if (!gatewayAccountId.equals(that.gatewayAccountId)) return false;
+        if (!gatewayAccountExternalId.equals(that.gatewayAccountExternalId)) return false;
         if (!description.equals(that.description)) return false;
         if (!amount.equals(that.amount)) return false;
         if (!type.equals(that.type)) return false;
@@ -67,6 +87,7 @@ public class TokenResponse {
         result = 31 * result + amount.hashCode();
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + gatewayAccountId.hashCode();
+        result = 31 * result + gatewayAccountExternalId.hashCode();
         result = 31 * result + description.hashCode();
         result = 31 * result + type.hashCode();
         result = 31 * result + state.hashCode();
@@ -79,10 +100,12 @@ public class TokenResponse {
                 "externalId=" + paymentExternalId +
                 ", description=" + description +
                 ", gateway_account_id=" + gatewayAccountId +
+                ", gateway_account_external_id=" + gatewayAccountExternalId +
                 ", amount=" + amount +
                 ", type='" + type + '\'' +
                 ", state='" + state + '\'' +
                 ", return_url=" + returnUrl +
                 '}';
     }
+
 }

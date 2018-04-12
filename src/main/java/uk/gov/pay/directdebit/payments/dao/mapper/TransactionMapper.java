@@ -10,31 +10,35 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class TransactionMapper implements ResultSetMapper<Transaction> {
-    private static final String ID_COLUMN = "id";
-    private static final String AMOUNT_COLUMN = "amount";
-    private static final String TYPE_COLUMN = "type";
-    private static final String STATE_COLUMN = "state";
+
+    private static final String TRANSACTION_ID_COLUMN = "transaction_id";
+    private static final String TRANSACTION_AMOUNT_COLUMN = "transaction_amount";
+    private static final String TRANSACTION_TYPE_COLUMN = "transaction_type";
+    private static final String TRANSACTION_STATE_COLUMN = "transaction_state";
     private static final String PAYMENT_REQUEST_ID_COLUMN = "payment_request_id";
-    private static final String PAYMENT_REQUEST_EXTERNAL_ID_COLUMN = "external_id";
-    private static final String PAYMENT_REQUEST_REFERENCE_COLUMN = "reference";
-    private static final String PAYMENT_REQUEST_RETURN_URL_COLUMN = "return_url";
-    private static final String PAYMENT_REQUEST_GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
-    private static final String PAYMENT_REQUEST_DESCRIPTION_COLUMN = "description";
-    private static final String GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN = "payment_provider";
+    private static final String PAYMENT_REQUEST_EXTERNAL_ID_COLUMN = "payment_request_external_id";
+    private static final String PAYMENT_REQUEST_REFERENCE_COLUMN = "payment_request_reference";
+    private static final String PAYMENT_REQUEST_RETURN_URL_COLUMN = "payment_request_return_url";
+    private static final String PAYMENT_REQUEST_DESCRIPTION_COLUMN = "payment_request_description";
+    private static final String GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
+    private static final String GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN = "gateway_account_external_id";
+    private static final String GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN = "gateway_account_payment_provider";
 
     @Override
     public Transaction map(int index, ResultSet resultSet, StatementContext statementContext) throws SQLException {
         return new Transaction(
-                resultSet.getLong(ID_COLUMN),
+                resultSet.getLong(TRANSACTION_ID_COLUMN),
                 resultSet.getLong(PAYMENT_REQUEST_ID_COLUMN),
                 resultSet.getString(PAYMENT_REQUEST_EXTERNAL_ID_COLUMN),
                 resultSet.getString(PAYMENT_REQUEST_DESCRIPTION_COLUMN),
                 resultSet.getString(PAYMENT_REQUEST_REFERENCE_COLUMN),
-                resultSet.getLong(PAYMENT_REQUEST_GATEWAY_ACCOUNT_ID_COLUMN),
+                resultSet.getLong(GATEWAY_ACCOUNT_ID_COLUMN),
+                resultSet.getString(GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN),
                 PaymentProvider.fromString(resultSet.getString(GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN)),
                 resultSet.getString(PAYMENT_REQUEST_RETURN_URL_COLUMN),
-                resultSet.getLong(AMOUNT_COLUMN),
-                Transaction.Type.valueOf(resultSet.getString(TYPE_COLUMN)),
-                PaymentState.valueOf(resultSet.getString(STATE_COLUMN)));
+                resultSet.getLong(TRANSACTION_AMOUNT_COLUMN),
+                Transaction.Type.valueOf(resultSet.getString(TRANSACTION_TYPE_COLUMN)),
+                PaymentState.valueOf(resultSet.getString(TRANSACTION_STATE_COLUMN)));
     }
+
 }
