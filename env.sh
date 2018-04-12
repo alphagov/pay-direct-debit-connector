@@ -1,5 +1,5 @@
 #!/bin/bash
-ENV_FILE="$WORKSPACE/pay-scripts/services/directdebit-connector.env"
+ENV_FILE="$WORKSPACE/pay-scripts/services/directdebitconnector.env"
 if [ -f $ENV_FILE ]
 then
   set -a
