@@ -67,7 +67,7 @@ public class PayerResourceIT {
 
     @Before
     public void setUp() {
-        testGatewayAccount = aGatewayAccountFixture();
+        testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
         testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(testGatewayAccount.getId())
                 .insert(testContext.getJdbi());
@@ -81,6 +81,7 @@ public class PayerResourceIT {
     public void tearDown() {
         wireMockRule.shutdown();
     }
+
     private TransactionFixture insertTransactionFixtureWith(PaymentProvider paymentProvider) {
         return  aTransactionFixture()
                 .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
@@ -93,7 +94,6 @@ public class PayerResourceIT {
 
     @Test
     public void shouldCreateAPayer() throws JsonProcessingException {
-        testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
         insertTransactionFixtureWith(SANDBOX);
         String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
@@ -124,8 +124,6 @@ public class PayerResourceIT {
 
     @Test
     public void shouldCreateAPayer_withoutAddress() throws JsonProcessingException {
-
-        testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
         insertTransactionFixtureWith(SANDBOX);
         String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
@@ -152,7 +150,6 @@ public class PayerResourceIT {
 
     @Test
     public void shouldCreateAPayer_forGoCardless() throws JsonProcessingException {
-        testGatewayAccount.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         insertTransactionFixtureWith(GOCARDLESS);
         String fakeCustomerId = "CU000358S3A2FP";
         String fakeBankAccountId = "BA0002WR3Z193A";
@@ -197,7 +194,6 @@ public class PayerResourceIT {
 
     @Test
     public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
-        testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
         String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())

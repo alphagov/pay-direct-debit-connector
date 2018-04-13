@@ -12,6 +12,7 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
@@ -36,6 +37,7 @@ public class TokenDaoIT {
 
     private PaymentRequestFixture testPaymentRequest;
     private TokenFixture testToken;
+    private GatewayAccountFixture gatewayAccountFixture;
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -43,8 +45,9 @@ public class TokenDaoIT {
     @Before
     public void setup() throws IOException, LiquibaseException {
         tokenDao = testContext.getJdbi().onDemand(TokenDao.class);
+        this.gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
+                .withGatewayAccountId(gatewayAccountFixture.getId())
                 .insert(testContext.getJdbi());
         this.testToken = aTokenFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
