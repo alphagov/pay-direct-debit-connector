@@ -6,7 +6,7 @@ import static java.lang.String.format;
 
 public class ChargeNotFoundException extends NotFoundException {
 
-    public ChargeNotFoundException(String paymentRequestExternalId) {
-        super(format("No charges found for payment request with id: %s", paymentRequestExternalId));
+    public ChargeNotFoundException(String key, String id) {
+        super(format("No charges found for %s: %s", key, id));
     }
 }

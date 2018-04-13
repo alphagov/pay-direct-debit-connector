@@ -37,6 +37,7 @@ executorService:
 
 notify:
   mandateFailedTemplateId: test-template-id
+  mandateCancelledTemplateId: test-template-id
   paymentConfirmedTemplateId: test-template-id
   apiKey: ${NOTIFY_API_KEY:-pay-notify-api-key}
   notificationBaseURL: https://stubs.pymnt.localdomain

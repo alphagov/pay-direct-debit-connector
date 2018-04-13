@@ -1,22 +1,21 @@
 package uk.gov.pay.directdebit.mandate.dao;
 
-import liquibase.exception.LiquibaseException;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
-import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
@@ -31,10 +30,11 @@ public class MandateDaoIT {
 
     private MandateDao mandateDao;
     private Long payerId;
+    private Long paymentRequestId;
 
     @Before
-    public void setup() throws IOException, LiquibaseException {
-        Long paymentRequestId = PaymentRequestFixture.aPaymentRequestFixture().insert(testContext.getJdbi()).getId();
+    public void setup() {
+        paymentRequestId = PaymentRequestFixture.aPaymentRequestFixture().insert(testContext.getJdbi()).getId();
         payerId = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestId).insert(testContext.getJdbi()).getId();
         mandateDao = testContext.getJdbi().onDemand(MandateDao.class);
     }
@@ -46,5 +46,21 @@ public class MandateDaoIT {
         assertThat(mandate.get("id"), is(id));
         assertThat(mandate.get("payer_id"), is(payerId));
         assertThat(mandate.get("external_id"), is(notNullValue()));
+    }
+
+    @Test
+    public void shouldFindAMandateByTransactionId() {
+        TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withPaymentRequestId(paymentRequestId).insert(testContext.getJdbi());
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture().withPayerId(payerId).insert(testContext.getJdbi());
+        Mandate mandate = mandateDao.findByTransactionId(transactionFixture.getId()).get();
+        assertThat(mandate.getId(), is(mandateFixture.getId()));
+        assertThat(mandate.getPayerId(), is(payerId));
+        assertThat(mandate.getExternalId(), is(notNullValue()));
+    }
+
+    @Test
+    public void shouldNotFindAMandateByTransactionId_ifTransactionIdIsInvalid() {
+        Long invalidTransactionId = 29L;
+        assertThat(mandateDao.findByTransactionId(invalidTransactionId), is(Optional.empty()));
     }
 }

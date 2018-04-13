@@ -24,8 +24,6 @@ public class WebhookGoCardlessService {
 
     @Inject
     public WebhookGoCardlessService(GoCardlessService goCardlessService,
-                                    TransactionService transactionService,
-                                    PayerService payerService,
                                     GoCardlessPaymentHandler goCardlessPaymentHandler,
                                     GoCardlessMandateHandler goCardlessMandateHandler) {
         this.goCardlessService = goCardlessService;
