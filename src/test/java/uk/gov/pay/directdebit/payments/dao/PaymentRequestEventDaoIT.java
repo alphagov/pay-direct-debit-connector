@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,6 +10,7 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 
@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
@@ -37,6 +37,7 @@ public class PaymentRequestEventDaoIT {
     private PaymentRequestEventDao paymentRequestEventDao;
 
     private PaymentRequestFixture testPaymentRequest;
+    private GatewayAccountFixture gatewayAccountFixture;
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -44,8 +45,9 @@ public class PaymentRequestEventDaoIT {
     @Before
     public void setup() {
         paymentRequestEventDao = testContext.getJdbi().onDemand(PaymentRequestEventDao.class);
+        this.gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(RandomUtils.nextLong(1, 99999))
+                .withGatewayAccountId(gatewayAccountFixture.getId())
                 .insert(testContext.getJdbi());
     }
 

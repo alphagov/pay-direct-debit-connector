@@ -22,11 +22,12 @@ import static io.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.*;
-import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.*;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
-import static uk.gov.pay.directdebit.util.GoCardlessStubs.*;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateMandate;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -42,8 +43,10 @@ public class ConfirmPaymentResourceIT {
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture()
             .withGatewayAccountId(gatewayAccountFixture.getId());
-    private TransactionFixture transactionFixture = aTransactionFixture().withPaymentRequestId(paymentRequestFixture.getId())
+    private TransactionFixture transactionFixture = aTransactionFixture()
+            .withPaymentRequestId(paymentRequestFixture.getId())
             .withGatewayAccountId(gatewayAccountFixture.getId())
+            .withGatewayAccountExternalId(gatewayAccountFixture.getExternalId())
             .withPaymentRequestDescription(paymentRequestFixture.getDescription())
             .withState(AWAITING_CONFIRMATION);
     @Test
@@ -67,6 +70,7 @@ public class ConfirmPaymentResourceIT {
 
     @Test
     public void confirm_shouldCreateAMandateAndUpdateCharge_ForGoCardless() {
+        gatewayAccountFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         paymentRequestFixture.insert(testContext.getJdbi());
         PayerFixture payerFixture = PayerFixture.aPayerFixture()
                 .withPaymentRequestId(paymentRequestFixture.getId())
@@ -78,7 +82,6 @@ public class ConfirmPaymentResourceIT {
         stubCreateMandate(paymentRequestFixture.getExternalId(), goCardlessCustomerFixture);
         stubCreatePayment(paymentRequestFixture.getExternalId(), transactionFixture);
 
-        gatewayAccountFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         transactionFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         String paymentRequestExternalId = paymentRequestFixture.getExternalId();
         PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
