@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
@@ -52,12 +54,16 @@ public class GoCardlessEventDaoIT {
 
     private GoCardlessEvent goCardlessEvent;
     private PaymentRequestFixture testPaymentRequest;
+    private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
     public void setup() throws IOException, LiquibaseException {
         eventJson = objectMapper.readTree("{\"id\": \"somejson\"}");
         goCardlessEventDao = testContext.getJdbi().onDemand(GoCardlessEventDao.class);
-        testPaymentRequest = aPaymentRequestFixture().insert(testContext.getJdbi());
+        gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
+        testPaymentRequest = aPaymentRequestFixture()
+                .withGatewayAccountId(gatewayAccountFixture.getId())
+                .insert(testContext.getJdbi());
         aPaymentRequestEventFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .withId(PAYMENT_REQUEST_EVENTS_ID)

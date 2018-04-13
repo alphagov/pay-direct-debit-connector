@@ -12,6 +12,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 
 import java.io.IOException;
@@ -35,10 +36,15 @@ public class GoCardlessCustomerDaoIT {
     private GoCardlessCustomerFixture goCardlessCustomerFixture;
     private PaymentRequestFixture paymentRequestFixture;
     private PayerFixture payerFixture;
+    private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
     public void setup() throws IOException, LiquibaseException {
-        paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture().insert(testContext.getJdbi());
+        gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        paymentRequestFixture = PaymentRequestFixture
+                .aPaymentRequestFixture()
+                .withGatewayAccountId(gatewayAccountFixture.getId())
+                .insert(testContext.getJdbi());
         payerFixture = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
         goCardlessCustomerDao = testContext.getJdbi().onDemand(GoCardlessCustomerDao.class);
         goCardlessCustomerFixture = aGoCardlessCustomerFixture()

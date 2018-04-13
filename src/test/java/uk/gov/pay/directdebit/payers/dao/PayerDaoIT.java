@@ -11,6 +11,7 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 
 import java.io.IOException;
@@ -47,11 +48,14 @@ public class PayerDaoIT {
 
     private PaymentRequestFixture testPaymentRequest;
     private PayerFixture testPayer;
+    private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
     public void setup() throws IOException, LiquibaseException {
         payerDao = testContext.getJdbi().onDemand(PayerDao.class);
+        this.gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testPaymentRequest = aPaymentRequestFixture()
+                .withGatewayAccountId(gatewayAccountFixture.getId())
                 .insert(testContext.getJdbi());
         this.testPayer = PayerFixture.aPayerFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())

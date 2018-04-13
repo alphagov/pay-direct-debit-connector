@@ -47,7 +47,7 @@ public class PaymentRequestDaoIT {
     @Before
     public void setup() throws IOException, LiquibaseException {
         paymentRequestDao = testContext.getJdbi().onDemand(PaymentRequestDao.class);
-        this.testGatewayAccount = aGatewayAccountFixture();
+        this.testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testPaymentRequest = aPaymentRequestFixture()
                 .withGatewayAccountId(testGatewayAccount.getId())
                 .withExternalId(EXTERNAL_ID)
@@ -93,7 +93,6 @@ public class PaymentRequestDaoIT {
 
     @Test
     public void shouldFindPaymentRequestByExternalIdAndGatewayAccountExternalId() {
-        testGatewayAccount.insert(testContext.getJdbi());
         testPaymentRequest.insert(testContext.getJdbi());
         PaymentRequest paymentRequest = paymentRequestDao.findByExternalIdAndAccountExternalId(testPaymentRequest.getExternalId(), testGatewayAccount.getExternalId()).get();
         assertThat(paymentRequest.getId(), is(notNullValue()));
@@ -108,7 +107,6 @@ public class PaymentRequestDaoIT {
 
     @Test
     public void shouldNotFindPaymentRequestByExternalIdAndGatewayAccountExternalId_ifExternalIdIsInvalid() {
-        testGatewayAccount.insert(testContext.getJdbi());
         String externalId = "non_existing_externalId";
         assertThat(paymentRequestDao.findByExternalIdAndAccountExternalId(externalId, testGatewayAccount.getExternalId()), is(Optional.empty()));
     }

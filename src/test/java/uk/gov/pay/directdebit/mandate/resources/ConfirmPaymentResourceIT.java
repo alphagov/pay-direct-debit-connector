@@ -69,6 +69,7 @@ public class ConfirmPaymentResourceIT {
 
     @Test
     public void confirm_shouldCreateAMandateAndUpdateCharge_ForGoCardless() {
+        gatewayAccountFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         paymentRequestFixture.insert(testContext.getJdbi());
         PayerFixture payerFixture = PayerFixture.aPayerFixture()
                 .withPaymentRequestId(paymentRequestFixture.getId())
@@ -80,7 +81,6 @@ public class ConfirmPaymentResourceIT {
         stubCreateMandate(paymentRequestFixture.getExternalId(), goCardlessCustomerFixture);
         stubCreatePayment(paymentRequestFixture.getExternalId(), transactionFixture);
 
-        gatewayAccountFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         transactionFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         String paymentRequestExternalId = paymentRequestFixture.getExternalId();
         PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());

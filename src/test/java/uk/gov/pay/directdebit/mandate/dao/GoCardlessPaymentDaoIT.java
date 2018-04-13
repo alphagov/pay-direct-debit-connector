@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
@@ -34,9 +35,16 @@ public class GoCardlessPaymentDaoIT {
     private final static String GOCARDLESS_PAYMENT_ID = "NA23434";
 
     private GoCardlessPaymentFixture goCardlessPaymentFixture;
+
+    private GatewayAccountFixture gatewayAccountFixture;
+
     @Before
     public void setup()  {
-        PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture().insert(testContext.getJdbi());
+        gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture
+                .aPaymentRequestFixture()
+                .withGatewayAccountId(gatewayAccountFixture.getId())
+                .insert(testContext.getJdbi());
         transactionFixture = TransactionFixture.aTransactionFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
         goCardlessPaymentDao = testContext.getJdbi().onDemand(GoCardlessPaymentDao.class);
         goCardlessPaymentFixture = aGoCardlessPaymentFixture()
