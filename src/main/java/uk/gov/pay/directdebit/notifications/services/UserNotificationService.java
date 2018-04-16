@@ -147,7 +147,7 @@ public class UserNotificationService {
 
         HashMap<String, String> map = new HashMap<>();
         // fixme use the right reference once we play the story
-        map.put(MANDATE_REFERENCE_KEY, mandate.getExternalId());
+        map.put(MANDATE_REFERENCE_KEY, mandate.getReference());
         map.put(ORG_NAME_KEY, gatewayAccount.getServiceName());
         map.put(ORG_PHONE_KEY, PLACEHOLDER_PHONE_NUMBER);
         map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());

@@ -7,15 +7,19 @@ public class Mandate {
     private Long id;
     private Long payerId;
     private String externalId;
+    private MandateState state;
+    private String reference;
 
-    public Mandate(Long id, String externalId, Long payerId) {
+    public Mandate(Long id, String externalId, Long payerId, String reference, MandateState state) {
         this.id = id;
         this.externalId = externalId;
         this.payerId = payerId;
+        this.reference = reference;
+        this.state = state;
     }
 
-    public Mandate(Long payerId) {
-        this(null,  RandomIdGenerator.newId(), payerId);
+    public Mandate(Long payerId, String reference) {
+        this(null, RandomIdGenerator.newId(), payerId, reference, MandateState.PENDING);
     }
 
     public Long getId() {
@@ -40,6 +44,22 @@ public class Mandate {
 
     public void setExternalId(String externalId) {
         this.externalId = externalId;
+    }
+
+    public MandateState getState() {
+        return state;
+    }
+
+    public void setState(MandateState state) {
+        this.state = state;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
     }
 
     @Override

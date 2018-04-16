@@ -122,7 +122,7 @@ public class UserNotificationServiceTest {
 
         Mandate mandate = MandateFixture.aMandateFixture().toEntity();
         HashMap<String, String> emailPersonalisation = new HashMap<>();
-        emailPersonalisation.put("mandate reference", mandate.getExternalId());
+        emailPersonalisation.put("mandate reference", mandate.getReference());
         emailPersonalisation.put("org name", gatewayAccount.getServiceName());
         emailPersonalisation.put("org phone", "+44 000-CAKE-000");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");

@@ -4,9 +4,6 @@ import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.mandate.dao.MandateDao;
-import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
@@ -40,15 +37,13 @@ public class TransactionService {
 
     private static final Logger LOGGER = PayLoggerFactory.getLogger(TransactionService.class);
     private final TransactionDao transactionDao;
-    private final MandateDao mandateDao;
     private final PaymentRequestEventService paymentRequestEventService;
     private final UserNotificationService userNotificationService;
 
     @Inject
-    public TransactionService(TransactionDao transactionDao, MandateDao mandateDao, PaymentRequestEventService paymentRequestEventService, UserNotificationService userNotificationService) {
+    public TransactionService(TransactionDao transactionDao, PaymentRequestEventService paymentRequestEventService, UserNotificationService userNotificationService) {
         this.paymentRequestEventService = paymentRequestEventService;
         this.transactionDao = transactionDao;
-        this.mandateDao = mandateDao;
         this.userNotificationService = userNotificationService;
     }
 
@@ -92,12 +87,6 @@ public class TransactionService {
                     return newCharge;
                 });
     }
-
-    public Mandate findMandateForTransactionId(Long transactionId) {
-        return mandateDao
-                .findByTransactionId(transactionId)
-                .orElseThrow(() -> new MandateNotFoundException(transactionId.toString()));
-    }
     public Transaction findTransactionFor(Long transactionId) {
         return transactionDao
                 .findById(transactionId)
@@ -135,17 +124,6 @@ public class TransactionService {
         return paymentRequestEventService.registerPaymentCreatedEventFor(updatedTransaction);
     }
 
-    public PaymentRequestEvent mandateFailedFor(Transaction transaction, Payer payer) {
-        userNotificationService.sendMandateFailedEmailFor(transaction, payer);
-        return paymentRequestEventService.registerMandateFailedEventFor(transaction);
-    }
-
-    public PaymentRequestEvent mandateCancelledFor(Transaction transaction, Payer payer) {
-        Mandate mandate = findMandateForTransactionId(transaction.getId());
-        userNotificationService.sendMandateCancelledEmailFor(transaction, mandate, payer);
-        return paymentRequestEventService.registerMandateCancelledEventFor(transaction);
-    }
-
     public PaymentRequestEvent paymentFailedFor(Transaction transaction) {
         Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_FAILED);
         return paymentRequestEventService.registerPaymentFailedEventFor(newTransaction);
@@ -162,14 +140,6 @@ public class TransactionService {
 
     public PaymentRequestEvent paymentSubmittedFor(Transaction transaction) {
         return paymentRequestEventService.registerPaymentSubmittedEventFor(transaction);
-    }
-
-    public PaymentRequestEvent mandatePendingFor(Transaction transaction) {
-        return paymentRequestEventService.registerMandatePendingEventFor(transaction);
-    }
-
-    public PaymentRequestEvent mandateActiveFor(Transaction transaction) {
-        return paymentRequestEventService.registerMandateActiveEventFor(transaction);
     }
 
     public PaymentRequestEvent payoutPaidFor(Transaction transaction) {

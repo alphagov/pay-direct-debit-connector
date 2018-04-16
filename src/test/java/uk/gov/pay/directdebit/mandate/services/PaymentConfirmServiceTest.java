@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.PayerConflictException;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -72,6 +73,8 @@ public class PaymentConfirmServiceTest {
         assertThat(mandate.getId(), is(mandateId));
         assertThat(mandate.getExternalId(), is(notNullValue()));
         assertThat(mandate.getPayerId(), is(payerId));
+        assertThat(mandate.getReference(), is("TEMP_REFERENCE"));
+        assertThat(mandate.getState(), is(MandateState.PENDING));
 
         assertThat(confirmationDetails.getMandate(), is(mandate));
         assertThat(confirmationDetails.getTransaction(), is(transaction));
