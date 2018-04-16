@@ -13,6 +13,7 @@ import java.util.Optional;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsConfirmed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsReceived;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateActive;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateCancelled;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateFailed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandatePending;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paidOut;
@@ -20,6 +21,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCre
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentFailed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentPending;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentSubmitted;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payoutPaid;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.tokenExchanged;
 
@@ -78,6 +80,11 @@ public class PaymentRequestEventService {
         return insertEventFor(charge, event);
     }
 
+    public PaymentRequestEvent registerMandateCancelledEventFor(Transaction charge) {
+        PaymentRequestEvent event = mandateCancelled(charge.getPaymentRequestId());
+        return insertEventFor(charge, event);
+    }
+
     public PaymentRequestEvent registerPaymentFailedEventFor(Transaction charge) {
         PaymentRequestEvent event = paymentFailed(charge.getPaymentRequestId());
         return insertEventFor(charge, event);
@@ -85,6 +92,11 @@ public class PaymentRequestEventService {
 
     public PaymentRequestEvent registerPaymentPendingEventFor(Transaction charge) {
         PaymentRequestEvent event = paymentPending(charge.getPaymentRequestId());
+        return insertEventFor(charge, event);
+    }
+
+    public PaymentRequestEvent registerPaymentSubmittedEventFor(Transaction charge) {
+        PaymentRequestEvent event = paymentSubmitted(charge.getPaymentRequestId());
         return insertEventFor(charge, event);
     }
 

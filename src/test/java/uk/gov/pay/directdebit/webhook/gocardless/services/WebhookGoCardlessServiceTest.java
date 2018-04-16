@@ -39,10 +39,6 @@ public class WebhookGoCardlessServiceTest {
     @Mock
     private GoCardlessService mockedGoCardlessService;
     @Mock
-    private TransactionService mockedTransactionService;
-    @Mock
-    private PayerService mockedPayerService;
-    @Mock
     private GoCardlessPaymentHandler mockedGoCardlessPaymentHandler;
     @Mock
     private GoCardlessMandateHandler mockedGoCardlessMandateHandler;
@@ -51,7 +47,7 @@ public class WebhookGoCardlessServiceTest {
 
     @Before
     public void setUp() {
-        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessService, mockedTransactionService, mockedPayerService, mockedGoCardlessPaymentHandler, mockedGoCardlessMandateHandler);
+        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessService, mockedGoCardlessPaymentHandler, mockedGoCardlessMandateHandler);
     }
 
     @Test
@@ -71,7 +67,6 @@ public class WebhookGoCardlessServiceTest {
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
-        verifyZeroInteractions(mockedTransactionService);
     }
 
     @Test
@@ -81,7 +76,6 @@ public class WebhookGoCardlessServiceTest {
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
-        verifyZeroInteractions(mockedTransactionService);
     }
 
     @Test
@@ -91,7 +85,6 @@ public class WebhookGoCardlessServiceTest {
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
-        verifyZeroInteractions(mockedTransactionService);
     }
 
     @Test
@@ -106,7 +99,6 @@ public class WebhookGoCardlessServiceTest {
             fail("Expected GoCardlessPaymentNotFoundException.");
         } catch (GoCardlessPaymentNotFoundException expected) { }
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
-        verifyZeroInteractions(mockedTransactionService);
     }
 
     @Test
@@ -121,7 +113,6 @@ public class WebhookGoCardlessServiceTest {
             fail("Expected GoCardlessMandateNotFoundException.");
         } catch (GoCardlessMandateNotFoundException expected) { }
         verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
-        verifyZeroInteractions(mockedTransactionService);
     }
 
     @Test

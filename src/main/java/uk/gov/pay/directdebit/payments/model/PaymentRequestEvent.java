@@ -10,6 +10,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_ACTIVE;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID;
@@ -18,6 +19,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 
 public class PaymentRequestEvent {
@@ -69,6 +71,10 @@ public class PaymentRequestEvent {
         return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_CREATED);
     }
 
+    public static PaymentRequestEvent paymentSubmitted(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_SUBMITTED);
+    }
+
     public static PaymentRequestEvent paymentFailed(Long paymentRequestId) {
         return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_FAILED);
     }
@@ -79,6 +85,10 @@ public class PaymentRequestEvent {
 
     public static PaymentRequestEvent mandateFailed(Long paymentRequestId) {
         return new PaymentRequestEvent(paymentRequestId, Type.MANDATE, MANDATE_FAILED);
+    }
+
+    public static PaymentRequestEvent mandateCancelled(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.MANDATE, MANDATE_CANCELLED);
     }
 
     public static PaymentRequestEvent mandateActive(Long paymentRequestId) {
@@ -144,10 +154,12 @@ public class PaymentRequestEvent {
         PAYER_CREATED,
         DIRECT_DEBIT_DETAILS_CONFIRMED,
         MANDATE_FAILED,
+        MANDATE_CANCELLED,
         MANDATE_PENDING,
         MANDATE_ACTIVE,
         PAYMENT_CREATED,
         PAYMENT_PENDING,
+        PAYMENT_SUBMITTED,
         PAYMENT_FAILED,
         PAID_OUT,
         PAID;

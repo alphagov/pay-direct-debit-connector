@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
+import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -52,8 +53,10 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     protected Map<GoCardlessAction, Function<Transaction, PaymentRequestEvent>> getHandledActions() {
         return ImmutableMap.of(
                 GoCardlessPaymentAction.CREATED, transactionService::paymentPendingFor,
-                GoCardlessPaymentAction.SUBMITTED, transactionService::findPaymentPendingEventFor,
-                GoCardlessPaymentAction.CONFIRMED, transactionService::findPaymentPendingEventFor,
+                GoCardlessPaymentAction.SUBMITTED, transactionService::paymentSubmittedFor,
+                GoCardlessPaymentAction.CONFIRMED, (Transaction transaction) ->
+                        transactionService.findPaymentSubmittedEventFor(transaction)
+                                .orElseThrow(() -> new InvalidStateException("Could not find payment submitted event for payment request with id: " + transaction.getPaymentRequestExternalId())),
                 GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor,
                 GoCardlessPaymentAction.PAID, transactionService::payoutPaidFor
         );
