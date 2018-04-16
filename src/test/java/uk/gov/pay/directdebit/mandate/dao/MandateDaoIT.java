@@ -11,6 +11,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
@@ -34,7 +35,11 @@ public class MandateDaoIT {
 
     @Before
     public void setup() {
-        paymentRequestId = PaymentRequestFixture.aPaymentRequestFixture().insert(testContext.getJdbi()).getId();
+        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        paymentRequestId = PaymentRequestFixture
+                .aPaymentRequestFixture()
+                .withGatewayAccountId(gatewayAccountFixture.getId())
+                .insert(testContext.getJdbi()).getId();
         payerId = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestId).insert(testContext.getJdbi()).getId();
         mandateDao = testContext.getJdbi().onDemand(MandateDao.class);
     }

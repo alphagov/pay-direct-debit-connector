@@ -67,20 +67,14 @@ public class PayerResourceIT {
 
     @Before
     public void setUp() {
-        testGatewayAccount = aGatewayAccountFixture();
-        testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(testGatewayAccount.getId())
-                .insert(testContext.getJdbi());
         payerFixture = aPayerFixture().withAccountNumber("12345678");
-        requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
-                .replace("{accountId}", testGatewayAccount.getId().toString())
-                .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
     }
 
     @After
     public void tearDown() {
         wireMockRule.shutdown();
     }
+
     private TransactionFixture insertTransactionFixtureWith(PaymentProvider paymentProvider) {
         return  aTransactionFixture()
                 .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
@@ -93,7 +87,7 @@ public class PayerResourceIT {
 
     @Test
     public void shouldCreateAPayer() throws JsonProcessingException {
-        testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
+        createGatewayAccountWithPaymentRequestAndRequestPath(SANDBOX);
         insertTransactionFixtureWith(SANDBOX);
         String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
@@ -124,8 +118,7 @@ public class PayerResourceIT {
 
     @Test
     public void shouldCreateAPayer_withoutAddress() throws JsonProcessingException {
-
-        testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
+        createGatewayAccountWithPaymentRequestAndRequestPath(SANDBOX);
         insertTransactionFixtureWith(SANDBOX);
         String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
@@ -152,7 +145,7 @@ public class PayerResourceIT {
 
     @Test
     public void shouldCreateAPayer_forGoCardless() throws JsonProcessingException {
-        testGatewayAccount.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
+        createGatewayAccountWithPaymentRequestAndRequestPath(GOCARDLESS);
         insertTransactionFixtureWith(GOCARDLESS);
         String fakeCustomerId = "CU000358S3A2FP";
         String fakeBankAccountId = "BA0002WR3Z193A";
@@ -197,7 +190,7 @@ public class PayerResourceIT {
 
     @Test
     public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
-        testGatewayAccount.withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
+        createGatewayAccountWithPaymentRequestAndRequestPath(SANDBOX);
         String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
@@ -216,5 +209,17 @@ public class PayerResourceIT {
     private RequestSpecification givenSetup() {
         return given().port(testContext.getPort())
                 .contentType(JSON);
+    }
+
+    private void createGatewayAccountWithPaymentRequestAndRequestPath(PaymentProvider paymentProvider) {
+        testGatewayAccount = aGatewayAccountFixture()
+                .withPaymentProvider(paymentProvider)
+                .insert(testContext.getJdbi());
+        testPaymentRequest = aPaymentRequestFixture()
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .insert(testContext.getJdbi());
+        requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
+                .replace("{accountId}", testGatewayAccount.getId().toString())
+                .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
     }
 }

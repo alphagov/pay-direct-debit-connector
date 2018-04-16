@@ -12,6 +12,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 
 import java.util.Map;
@@ -37,7 +38,11 @@ public class GoCardlessMandateDaoIT {
     @Before
     public void setup()  {
         mandateDao = testContext.getJdbi().onDemand(GoCardlessMandateDao.class);
-        PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture().insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture
+                .aPaymentRequestFixture()
+                .withGatewayAccountId(gatewayAccountFixture.getId())
+                .insert(testContext.getJdbi());
         PayerFixture payerFixture = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
         mandateFixture = MandateFixture.aMandateFixture().withPayerId(payerFixture.getId()).insert(testContext.getJdbi());
         testGoCardlessMandate = aGoCardlessMandateFixture()
