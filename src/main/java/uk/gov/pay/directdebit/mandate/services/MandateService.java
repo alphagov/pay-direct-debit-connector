@@ -47,8 +47,8 @@ public class MandateService {
 
     public PaymentRequestEvent mandateFailedFor(Transaction transaction, Payer payer) {
         Mandate oldMandate = findMandateForTransactionId(transaction.getId());
-        updateStateFor(oldMandate, MANDATE_FAILED);
-        userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        Mandate newMandate = updateStateFor(oldMandate, MANDATE_FAILED);
+        userNotificationService.sendMandateFailedEmailFor(transaction, newMandate, payer);
         return paymentRequestEventService.registerMandateFailedEventFor(transaction);
     }
 

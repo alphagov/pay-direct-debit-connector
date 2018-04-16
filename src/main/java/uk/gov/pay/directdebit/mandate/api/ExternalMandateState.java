@@ -7,24 +7,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum ExternalMandateState {
-    EXTERNAL_PENDING("pending", false),
-    EXTERNAL_ACTIVE("active", false),
-    EXTERNAL_INACTIVE("inactive", true);
+    EXTERNAL_PENDING("pending"),
+    EXTERNAL_ACTIVE("active"),
+    EXTERNAL_INACTIVE("inactive");
 
     private final String value;
-    private final boolean finished;
 
-    ExternalMandateState(String value, boolean finished) {
+    ExternalMandateState(String value) {
         this.value = value;
-        this.finished = finished;
     }
 
     @JsonProperty("status")
     public String getState() {
         return value;
-    }
-
-    public boolean isFinished() {
-        return finished;
     }
 }

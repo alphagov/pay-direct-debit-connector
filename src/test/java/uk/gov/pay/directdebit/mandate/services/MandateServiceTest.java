@@ -62,7 +62,7 @@ public class MandateServiceTest {
         when(mockedMandateDao.findByTransactionId(transaction.getId())).thenReturn(Optional.of(mandate));
         service.mandateFailedFor(transaction, payer);
         verify(mockedPaymentRequestEventService).registerMandateFailedEventFor(transaction);
-        verify(mockedUserNotificationService).sendMandateFailedEmailFor(transaction, payer);
+        verify(mockedUserNotificationService).sendMandateFailedEmailFor(transaction, mandate, payer);
     }
 
     @Test

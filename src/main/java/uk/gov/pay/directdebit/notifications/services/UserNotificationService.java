@@ -100,26 +100,28 @@ public class UserNotificationService {
         return CompletableFuture.completedFuture(Optional.empty());
     }
 
-    public Future<Optional<String>> sendMandateFailedEmailFor(Transaction transaction, Payer payer) {
+    private Future<Optional<String>> sendMandateProblemEmailFor(String templateId, Transaction transaction, Mandate mandate, Payer payer) {
+        return sendEmail(buildMandateProblemPersonalisation(transaction, mandate),
+                templateId,
+                payer.getEmail(),
+                transaction.getPaymentRequestExternalId());
+    }
+
+    public Future<Optional<String>> sendMandateFailedEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
         String mandateFailedTemplateId = directDebitConfig.getNotifyConfig().getMandateFailedTemplateId();
         LOGGER.info("Sending mandate failed email, payment request id: {}, gateway account id: {}",
                 transaction.getPaymentRequestExternalId(),
                 transaction.getGatewayAccountExternalId());
-        return sendEmail(buildMandateFailedPersonalisation(transaction),
-                mandateFailedTemplateId,
-                payer.getEmail(),
-                transaction.getPaymentRequestExternalId());
+        return sendMandateProblemEmailFor(mandateFailedTemplateId, transaction, mandate, payer);
     }
     public Future<Optional<String>> sendMandateCancelledEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
         String mandateCancelledTemplateId = directDebitConfig.getNotifyConfig().getMandateCancelledTemplateId();
         LOGGER.info("Sending mandate cancelled email, payment request id: {}, gateway account id: {}",
                 transaction.getPaymentRequestExternalId(),
                 transaction.getGatewayAccountExternalId());
-        return sendEmail(buildMandateCancelledPersonalisation(transaction, mandate),
-                mandateCancelledTemplateId,
-                payer.getEmail(),
-                transaction.getPaymentRequestExternalId());
+        return sendMandateProblemEmailFor(mandateCancelledTemplateId, transaction, mandate, payer);
     }
+
     public Future<Optional<String>> sendPaymentConfirmedEmailFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
         String paymentConfirmedTemplateId = directDebitConfig.getNotifyConfig().getPaymentConfirmedTemplateId();
         LOGGER.info("Sending payment confirmed email, payment request id: {}, gateway account id: {}",
@@ -131,22 +133,11 @@ public class UserNotificationService {
                 transaction.getPaymentRequestExternalId());
     }
 
-    private HashMap<String, String> buildMandateFailedPersonalisation(Transaction transaction) {
+    private HashMap<String, String> buildMandateProblemPersonalisation(Transaction transaction, Mandate mandate) {
         GatewayAccount gatewayAccount = gatewayAccountService.getGatewayAccountFor(transaction);
 
         HashMap<String, String> map = new HashMap<>();
-        map.put(ORG_NAME_KEY, gatewayAccount.getServiceName());
-        map.put(ORG_PHONE_KEY, PLACEHOLDER_PHONE_NUMBER);
-        map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
-
-        return map;
-    }
-
-    private HashMap<String, String> buildMandateCancelledPersonalisation(Transaction transaction, Mandate mandate) {
-        GatewayAccount gatewayAccount = gatewayAccountService.getGatewayAccountFor(transaction);
-
-        HashMap<String, String> map = new HashMap<>();
-        // fixme use the right reference once we play the story
+        // fixme use the right reference once we play PP-3547
         map.put(MANDATE_REFERENCE_KEY, mandate.getReference());
         map.put(ORG_NAME_KEY, gatewayAccount.getServiceName());
         map.put(ORG_PHONE_KEY, PLACEHOLDER_PHONE_NUMBER);
