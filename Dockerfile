@@ -15,10 +15,6 @@ EXPOSE 8081
 
 WORKDIR /app
 
-RUN apk add openssl && \
-    mkdir -p bin && \
-    apk del --purge openssl
-
 ADD target/*.yaml /app/
 ADD target/pay-*-allinone.jar /app/
 ADD docker-startup.sh /app/docker-startup.sh
