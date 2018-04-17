@@ -69,6 +69,8 @@ public class UserNotificationServiceTest {
     private static final String MANDATE_CANCELLED_TEMPLATE = "mandate-cancelled-template";
     private static final String PAYMENT_CONFIRMATION_TEMPLATE = "payment-confirmation-template";
     private Payer payer = aPayerFixture().withEmail(EMAIL).toEntity();
+    private Mandate mandate = MandateFixture.aMandateFixture().toEntity();
+
     private Transaction transaction = aTransactionFixture()
             .withAmount(12345L)
             .toEntity();
@@ -96,15 +98,15 @@ public class UserNotificationServiceTest {
         when(mockNotifyClientFactory.isEmailNotifyEnabled()).thenReturn(true);
 
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
-
         HashMap<String, String> emailPersonalisation = new HashMap<>();
+        emailPersonalisation.put("mandate reference", mandate.getReference());
         emailPersonalisation.put("org name", gatewayAccount.getServiceName());
         emailPersonalisation.put("org phone", "+44 000-CAKE-000");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
         when(mockNotifyClient.sendEmail(MANDATE_FAILED_TEMPLATE, EMAIL, emailPersonalisation, null)).thenReturn(mockNotificationCreatedResponse);
 
-        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, mandate, payer);
         maybeNotificationId.get(1000, TimeUnit.SECONDS);
 
         verify(mockNotifyClient).sendEmail(
@@ -120,9 +122,8 @@ public class UserNotificationServiceTest {
         when(mockNotifyClientFactory.isEmailNotifyEnabled()).thenReturn(true);
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
 
-        Mandate mandate = MandateFixture.aMandateFixture().toEntity();
         HashMap<String, String> emailPersonalisation = new HashMap<>();
-        emailPersonalisation.put("mandate reference", mandate.getExternalId());
+        emailPersonalisation.put("mandate reference", mandate.getReference());
         emailPersonalisation.put("org name", gatewayAccount.getServiceName());
         emailPersonalisation.put("org phone", "+44 000-CAKE-000");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
@@ -174,7 +175,7 @@ public class UserNotificationServiceTest {
         when(mockNotifyClientFactory.isEmailNotifyEnabled()).thenReturn(false);
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
 
-        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, mandate, payer);
         maybeNotificationId.get(1000, TimeUnit.SECONDS);
 
         verifyZeroInteractions(mockNotifyClient);
@@ -187,7 +188,7 @@ public class UserNotificationServiceTest {
 
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
 
-        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, mandate, payer);
         maybeNotificationId.get(1000, TimeUnit.SECONDS);
         verify(mockMetricRegistry).histogram("notify-operations.response_time");
         verify(mockHistogram).update(anyLong());
@@ -201,7 +202,7 @@ public class UserNotificationServiceTest {
 
         userNotificationService = new UserNotificationService(mockDirectDebitConfig, mockNotifyClient, mockMetricRegistry, mockGatewayAccountService);
 
-        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, payer);
+        Future<Optional<String>> maybeNotificationId = userNotificationService.sendMandateFailedEmailFor(transaction, mandate, payer);
         maybeNotificationId.get(1000, TimeUnit.SECONDS);
         verify(mockMetricRegistry).histogram("notify-operations.response_time");
         verify(mockHistogram).update(anyLong());

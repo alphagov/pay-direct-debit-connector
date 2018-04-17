@@ -41,7 +41,8 @@ public class PaymentConfirmService {
     }
 
     private Mandate createMandateFor(Payer payer) {
-        Mandate mandate = new Mandate(payer.getId());
+        //todo use a real reference when playing PP-3547
+        Mandate mandate = new Mandate(payer.getId(), "TEMP_REFERENCE");
         Long id = mandateDao.insert(mandate);
         mandate.setId(id);
         return mandate;

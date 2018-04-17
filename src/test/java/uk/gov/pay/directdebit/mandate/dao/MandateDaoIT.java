@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
@@ -46,26 +47,51 @@ public class MandateDaoIT {
 
     @Test
     public void shouldInsertAMandate() {
-        Long id = mandateDao.insert(new Mandate(payerId));
+        Long id = mandateDao.insert(new Mandate(payerId, "bla"));
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(id);
         assertThat(mandate.get("id"), is(id));
         assertThat(mandate.get("payer_id"), is(payerId));
         assertThat(mandate.get("external_id"), is(notNullValue()));
+        assertThat(mandate.get("reference"), is("bla"));
+        assertThat(mandate.get("state"), is("PENDING"));
     }
 
     @Test
     public void shouldFindAMandateByTransactionId() {
         TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withPaymentRequestId(paymentRequestId).insert(testContext.getJdbi());
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture().withPayerId(payerId).insert(testContext.getJdbi());
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture().withReference("ref").withPayerId(payerId).insert(testContext.getJdbi());
         Mandate mandate = mandateDao.findByTransactionId(transactionFixture.getId()).get();
         assertThat(mandate.getId(), is(mandateFixture.getId()));
         assertThat(mandate.getPayerId(), is(payerId));
         assertThat(mandate.getExternalId(), is(notNullValue()));
+        assertThat(mandate.getReference(), is("ref"));
+        assertThat(mandate.getState(), is(MandateState.PENDING));
     }
 
     @Test
     public void shouldNotFindAMandateByTransactionId_ifTransactionIdIsInvalid() {
         Long invalidTransactionId = 29L;
         assertThat(mandateDao.findByTransactionId(invalidTransactionId), is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldUpdateStateAndReturnNumberOfAffectedRows() {
+        Mandate testMandate = MandateFixture.aMandateFixture().withPayerId(payerId).insert(testContext.getJdbi()).toEntity();
+        MandateState newState = MandateState.FAILED;
+        int numOfUpdatedMandates = mandateDao.updateState(testMandate.getId(), newState);
+
+        Map<String, Object> mandateAfterUpdate =  testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
+        assertThat(numOfUpdatedMandates, is(1));
+        assertThat(mandateAfterUpdate.get("id"), is(testMandate.getId()));
+        assertThat(mandateAfterUpdate.get("external_id"), is(testMandate.getExternalId()));
+        assertThat(mandateAfterUpdate.get("reference"), is(testMandate.getReference()));
+        assertThat(mandateAfterUpdate.get("payer_id"), is(testMandate.getPayerId()));
+        assertThat(mandateAfterUpdate.get("state"), is(newState.toString()));
+    }
+
+    @Test
+    public void shouldNotUpdateAnythingIfTransactionDoesNotExist() {
+        int numOfUpdatedMandates = mandateDao.updateState(34L, MandateState.FAILED);
+        assertThat(numOfUpdatedMandates, is(0));
     }
 }

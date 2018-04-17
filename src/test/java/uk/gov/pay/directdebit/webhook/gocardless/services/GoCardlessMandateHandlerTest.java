@@ -9,6 +9,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
@@ -38,6 +39,9 @@ public class GoCardlessMandateHandlerTest {
     private TransactionService mockedTransactionService;
 
     @Mock
+    private MandateService mockedMandateService;
+
+    @Mock
     private GoCardlessService mockedGoCardlessService;
 
     @Mock
@@ -54,7 +58,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Before
     public void setUp() {
-        goCardlessMandateHandler = new GoCardlessMandateHandler(mockedTransactionService, mockedGoCardlessService, mockedPayerService);
+        goCardlessMandateHandler = new GoCardlessMandateHandler(mockedTransactionService, mockedGoCardlessService, mockedPayerService, mockedMandateService);
         when(mockedTransactionService.findTransactionForMandateId(goCardlessMandateFixture.getMandateId())).thenReturn(transaction);
     }
 
@@ -66,7 +70,7 @@ public class GoCardlessMandateHandlerTest {
         when(mockedTransactionService.findTransactionForMandateId(goCardlessMandateFixture.getMandateId())).thenReturn(transaction);
 
         when(mockedTransactionService.findMandatePendingEventFor(transaction)).thenReturn(Optional.empty());
-        when(mockedTransactionService.mandatePendingFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedMandateService.mandatePendingFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
@@ -86,7 +90,7 @@ public class GoCardlessMandateHandlerTest {
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(mockedTransactionService, never()).mandatePendingFor(transaction);
+        verify(mockedMandateService, never()).mandatePendingFor(transaction);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
@@ -99,7 +103,7 @@ public class GoCardlessMandateHandlerTest {
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedTransactionService.findTransactionForMandateId(goCardlessMandateFixture.getMandateId())).thenReturn(transaction);
-        when(mockedTransactionService.mandateActiveFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedMandateService.mandateActiveFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
@@ -116,12 +120,12 @@ public class GoCardlessMandateHandlerTest {
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedTransactionService.findTransactionForMandateId(goCardlessMandateFixture.getMandateId())).thenReturn(transaction);
 
-        when(mockedTransactionService.mandateActiveFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedMandateService.mandateActiveFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
-        verify(mockedTransactionService, never()).mandatePendingFor(transaction);
+        verify(mockedMandateService, never()).mandatePendingFor(transaction);
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
         Assert.assertThat(storedGoCardlessEvent.getPaymentRequestEventId(), is(paymentRequestEvent.getId()));
@@ -133,7 +137,7 @@ public class GoCardlessMandateHandlerTest {
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedTransactionService.findTransactionForMandateId(goCardlessMandateFixture.getMandateId())).thenReturn(transaction);
-        when(mockedTransactionService.mandatePendingFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedMandateService.mandatePendingFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
@@ -156,7 +160,7 @@ public class GoCardlessMandateHandlerTest {
         goCardlessMandateHandler.handle(goCardlessEvent);
 
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
-        verify(mockedTransactionService, never()).mandatePendingFor(transaction);
+        verify(mockedMandateService, never()).mandatePendingFor(transaction);
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
 
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
@@ -169,13 +173,13 @@ public class GoCardlessMandateHandlerTest {
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
-        when(mockedTransactionService.mandateFailedFor(transaction, payer)).thenReturn(paymentRequestEvent);
+        when(mockedMandateService.mandateFailedFor(transaction, payer)).thenReturn(paymentRequestEvent);
         when(mockedTransactionService.paymentFailedFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
         verify(mockedTransactionService).paymentFailedFor(transaction);
-        verify(mockedTransactionService).mandateFailedFor(transaction, payer);
+        verify(mockedMandateService).mandateFailedFor(transaction, payer);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
@@ -188,13 +192,13 @@ public class GoCardlessMandateHandlerTest {
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
         when(mockedTransactionService.findPaymentSubmittedEventFor(transaction)).thenReturn(Optional.empty());
-        when(mockedTransactionService.mandateCancelledFor(transaction, payer)).thenReturn(paymentRequestEvent);
+        when(mockedMandateService.mandateCancelledFor(transaction, payer)).thenReturn(paymentRequestEvent);
         when(mockedTransactionService.paymentFailedFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
         verify(mockedTransactionService).paymentFailedFor(transaction);
-        verify(mockedTransactionService).mandateCancelledFor(transaction, payer);
+        verify(mockedMandateService).mandateCancelledFor(transaction, payer);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
@@ -207,12 +211,12 @@ public class GoCardlessMandateHandlerTest {
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
         when(mockedTransactionService.findPaymentSubmittedEventFor(transaction)).thenReturn(Optional.of(paymentRequestEvent));
-        when(mockedTransactionService.mandateCancelledFor(transaction, payer)).thenReturn(paymentRequestEvent);
+        when(mockedMandateService.mandateCancelledFor(transaction, payer)).thenReturn(paymentRequestEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
         verify(mockedTransactionService, never()).paymentFailedFor(transaction);
-        verify(mockedTransactionService).mandateCancelledFor(transaction, payer);
+        verify(mockedMandateService).mandateCancelledFor(transaction, payer);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();

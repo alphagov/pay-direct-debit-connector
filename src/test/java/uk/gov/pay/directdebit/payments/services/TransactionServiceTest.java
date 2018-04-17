@@ -9,10 +9,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.mandate.dao.MandateDao;
-import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
-import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -61,15 +57,9 @@ public class TransactionServiceTest {
     private TransactionDao mockedTransactionDao;
 
     @Mock
-    private MandateDao mockedMandateDao;
-
-    @Mock
     private UserNotificationService mockedUserNotificationService;
 
     private Payer payer = PayerFixture.aPayerFixture().toEntity();
-    private Mandate mandate = MandateFixture.aMandateFixture()
-            .withPayerId(payer.getId())
-            .toEntity();
     private TransactionService service;
     @Mock
     private PaymentRequestEventService mockedPaymentRequestEventService;
@@ -80,7 +70,7 @@ public class TransactionServiceTest {
 
     @Before
     public void setUp() {
-        service = new TransactionService(mockedTransactionDao, mockedMandateDao, mockedPaymentRequestEventService, mockedUserNotificationService);
+        service = new TransactionService(mockedTransactionDao, mockedPaymentRequestEventService, mockedUserNotificationService);
     }
 
     @Test
@@ -177,39 +167,6 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getType(), is(transactionFixture.getType()));
         assertThat(newTransaction.getState(), is(PROCESSING_DIRECT_DEBIT_DETAILS));
         verify(mockedPaymentRequestEventService).registerDirectDebitReceivedEventFor(newTransaction);
-    }
-
-    @Test
-    public void shouldUpdateTransactionStateRegisterEventAndSendEmail_whenMandateFails() throws Exception {
-        Transaction transaction = TransactionFixture
-                .aTransactionFixture()
-                .withState(PENDING_DIRECT_DEBIT_PAYMENT).toEntity();
-        service.mandateFailedFor(transaction, payer);
-        verify(mockedPaymentRequestEventService).registerMandateFailedEventFor(transaction);
-        verify(mockedUserNotificationService).sendMandateFailedEmailFor(transaction, payer);
-    }
-
-    @Test
-    public void shouldUpdateTransactionStateRegisterEventAndSendEmail_whenMandateIsCancelled() {
-        Transaction transaction = TransactionFixture
-                .aTransactionFixture()
-                .withState(PENDING_DIRECT_DEBIT_PAYMENT).toEntity();
-        when(mockedMandateDao.findByTransactionId(transaction.getId())).thenReturn(Optional.of(mandate));
-        service.mandateCancelledFor(transaction, payer);
-        verify(mockedPaymentRequestEventService).registerMandateCancelledEventFor(transaction);
-        verify(mockedUserNotificationService).sendMandateCancelledEmailFor(transaction, mandate, payer);
-    }
-
-    @Test
-    public void shouldThrow_whenCantFindMandateForTransaction() {
-        Transaction transaction = TransactionFixture
-                .aTransactionFixture()
-                .withState(PENDING_DIRECT_DEBIT_PAYMENT).toEntity();
-        when(mockedMandateDao.findByTransactionId(transaction.getId())).thenReturn(Optional.empty());
-        thrown.expect(MandateNotFoundException.class);
-        thrown.expectMessage("Couldn't find mandate for transaction with id: " + transaction.getId());
-        thrown.reportMissingExceptionWithMessage("MandateNotFoundException expected");
-        service.mandateCancelledFor(transaction, payer);
     }
 
     @Test
@@ -316,35 +273,6 @@ public class TransactionServiceTest {
         assertThat(transaction.getState(), is(SUCCESS));
     }
 
-    @Test
-    public void mandatePendingFor_shouldRegisterAMandatePendingEvent() {
-
-        Transaction transaction = TransactionFixture
-                .aTransactionFixture()
-                .withState(PENDING_DIRECT_DEBIT_PAYMENT)
-                .toEntity();
-
-        service.mandatePendingFor(transaction);
-
-        verify(mockedPaymentRequestEventService).registerMandatePendingEventFor(transaction);
-        verifyZeroInteractions(mockedTransactionDao);
-        assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
-    }
-
-    @Test
-    public void mandateActiveFor_shouldRegisterAMandateActiveEvent() {
-
-        Transaction transaction = TransactionFixture
-                .aTransactionFixture()
-                .withState(PENDING_DIRECT_DEBIT_PAYMENT)
-                .toEntity();
-
-        service.mandateActiveFor(transaction);
-
-        verify(mockedPaymentRequestEventService).registerMandateActiveEventFor(transaction);
-        verifyZeroInteractions(mockedTransactionDao);
-        assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
-    }
 
     @Test
     public void findPaymentSubmittedEventFor_shouldFindEvent() {
