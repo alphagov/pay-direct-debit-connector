@@ -1,10 +1,9 @@
 FROM govukpay/openjdk:8-jre-alpine
 
 
-RUN apk update
-RUN apk upgrade
+RUN apk --no-cache upgrade
 
-RUN apk add bash
+RUN apk add --no-cache bash
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-*/
 ENV PORT 8080
