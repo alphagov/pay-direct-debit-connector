@@ -62,7 +62,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     @Override
     public Payer createPayer(String paymentRequestExternalId, GatewayAccount gatewayAccount, Map<String, String> createPayerRequest) {
-        Payer payer = payerService.create(paymentRequestExternalId, gatewayAccount.getId(), createPayerRequest);
+        Payer payer = payerService.create(paymentRequestExternalId, gatewayAccount.getExternalId(), createPayerRequest);
         GoCardlessCustomer customer = createCustomer(paymentRequestExternalId, payer);
         createCustomerBankAccount(paymentRequestExternalId, customer, payer, createPayerRequest);
         return payer;
@@ -71,7 +71,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     @Override
     public void confirm(String paymentRequestExternalId, GatewayAccount gatewayAccount) {
         LOGGER.info("Confirming payment, payment request id: {}", paymentRequestExternalId);
-        ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId);
+        ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId);
         GoCardlessMandate goCardlessMandate = createMandate(paymentRequestExternalId, confirmationDetails.getMandate());
         GoCardlessPayment payment = createPayment(paymentRequestExternalId, confirmationDetails.getTransaction(), goCardlessMandate);
         Payer payer = payerService.getPayerFor(confirmationDetails.getTransaction());

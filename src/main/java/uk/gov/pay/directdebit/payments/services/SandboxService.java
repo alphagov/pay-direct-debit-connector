@@ -32,13 +32,13 @@ public class SandboxService implements DirectDebitPaymentProvider {
     @Override
     public Payer createPayer(String paymentRequestExternalId, GatewayAccount gatewayAccount, Map<String, String> createPayerRequest) {
         LOGGER.info("Creating payer for SANDBOX, payment with id: {}", paymentRequestExternalId);
-        return payerService.create(paymentRequestExternalId, gatewayAccount.getId(), createPayerRequest);
+        return payerService.create(paymentRequestExternalId, gatewayAccount.getExternalId(), createPayerRequest);
     }
 
     @Override
     public void confirm(String paymentRequestExternalId, GatewayAccount gatewayAccount) {
         LOGGER.info("Confirming payment for SANDBOX, payment with id: {}", paymentRequestExternalId);
-        ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getId(), paymentRequestExternalId);
+        ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId);
         Payer payer = payerService.getPayerFor(confirmationDetails.getTransaction());
         transactionService.paymentCreatedFor(confirmationDetails.getTransaction(), payer, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
     }

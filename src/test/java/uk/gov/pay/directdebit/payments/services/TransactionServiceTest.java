@@ -103,9 +103,9 @@ public class TransactionServiceTest {
     public void findByPaymentRequestExternalIdAndAccountId_shouldFindATransaction() {
         TransactionFixture transactionFixture = TransactionFixture
                 .aTransactionFixture();
-        when(mockedTransactionDao.findByPaymentRequestExternalIdAndAccountId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getId()))
+        when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
-        Transaction foundTransaction = service.findChargeForExternalIdAndGatewayAccountId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getId());
+        Transaction foundTransaction = service.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getExternalId());
         assertThat(foundTransaction.getId(), is(notNullValue()));
         assertThat(foundTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(foundTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
@@ -124,7 +124,7 @@ public class TransactionServiceTest {
         thrown.expect(ChargeNotFoundException.class);
         thrown.expectMessage("No charges found for payment request external id: not-existing");
         thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
-        service.findChargeForExternalIdAndGatewayAccountId("not-existing", gatewayAccountFixture.getId());
+        service.findTransactionForExternalIdAndGatewayAccountExternalId("not-existing", gatewayAccountFixture.getExternalId());
     }
 
     @Test
@@ -152,9 +152,9 @@ public class TransactionServiceTest {
         TransactionFixture transactionFixture = TransactionFixture
                 .aTransactionFixture()
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS);
-        when(mockedTransactionDao.findByPaymentRequestExternalIdAndAccountId(transactionFixture.getPaymentRequestExternalId(), gatewayAccountFixture.getId()))
+        when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(transactionFixture.getPaymentRequestExternalId(), gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
-        Transaction newTransaction = service.receiveDirectDebitDetailsFor(gatewayAccountFixture.getId(), transactionFixture.getPaymentRequestExternalId());
+        Transaction newTransaction = service.receiveDirectDebitDetailsFor(gatewayAccountFixture.getExternalId(), transactionFixture.getPaymentRequestExternalId());
         assertThat(newTransaction.getId(), is(notNullValue()));
         assertThat(newTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));

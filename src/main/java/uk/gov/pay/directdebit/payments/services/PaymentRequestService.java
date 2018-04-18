@@ -47,13 +47,13 @@ public class PaymentRequestService {
         this.linksConfig = config.getLinks();
     }
 
-    private PaymentRequestResponse populateResponseWith(PaymentRequest paymentRequest, String accountExternalId, Transaction charge, UriInfo uriInfo) {
+    private PaymentRequestResponse populateResponseWith(PaymentRequest paymentRequest, String accountExternalId, Transaction transaction, UriInfo uriInfo) {
         String paymentRequestExternalId = paymentRequest.getExternalId();
         List<Map<String, Object>> dataLinks = new ArrayList<>();
 
         dataLinks.add(createLink("self", GET, selfUriFor(uriInfo, CHARGE_API_PATH, accountExternalId, paymentRequestExternalId)));
 
-        if (!charge.getState().toExternal().isFinished()) {
+        if (!transaction.getState().toExternal().isFinished()) {
             Token token = tokenService.generateNewTokenFor(paymentRequest);
             dataLinks.add(createLink("next_url",
                     GET,
@@ -65,7 +65,7 @@ public class PaymentRequestService {
                     ImmutableMap.of("chargeTokenId", token.getToken())));
         }
         return new PaymentRequestResponse(paymentRequestExternalId,
-                charge.getState().toExternal(),
+                transaction.getState().toExternal(),
                 paymentRequest.getAmount(),
                 paymentRequest.getReturnUrl(),
                 paymentRequest.getDescription(),
@@ -74,7 +74,7 @@ public class PaymentRequestService {
                 dataLinks);
     }
 
-    public PaymentRequestResponse createCharge(Map<String, String> paymentRequestMap, String accountExternalId, UriInfo uriInfo) {
+    public PaymentRequestResponse createTransaction(Map<String, String> paymentRequestMap, String accountExternalId, UriInfo uriInfo) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     PaymentRequest paymentRequest = new PaymentRequest(new Long(paymentRequestMap.get("amount")),
@@ -99,7 +99,7 @@ public class PaymentRequestService {
         return paymentRequestDao
                 .findByExternalIdAndAccountExternalId(paymentExternalId, accountExternalId)
                 .map(paymentRequest ->  {
-                    Transaction transaction = transactionService.findChargeForExternalIdAndGatewayAccountId(paymentExternalId, paymentRequest.getGatewayAccountId());
+                    Transaction transaction = transactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentExternalId, accountExternalId);
                     return populateResponseWith(paymentRequest, accountExternalId, transaction, uriInfo);
                 })
                 .orElseThrow(() -> new PaymentRequestNotFoundException(paymentExternalId, accountExternalId));

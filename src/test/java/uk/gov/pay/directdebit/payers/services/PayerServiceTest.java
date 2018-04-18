@@ -56,16 +56,16 @@ public class PayerServiceTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         service = new PayerService(mockedPayerDao, mockedTransactionService, mockedPayerParser);
 
-        when(mockedTransactionService.receiveDirectDebitDetailsFor(gatewayAccount.getId(), paymentRequestExternalId)).thenReturn(transaction);
+        when(mockedTransactionService.receiveDirectDebitDetailsFor(gatewayAccount.getExternalId(), paymentRequestExternalId)).thenReturn(transaction);
         when(mockedPayerParser.parse(createPayerRequest, transaction)).thenReturn(payer);
     }
 
     @Test
     public void shouldStoreAPayerWhenReceivingCreatePayerRequest() {
-        service.create(paymentRequestExternalId, gatewayAccount.getId(), createPayerRequest);
+        service.create(paymentRequestExternalId, gatewayAccount.getExternalId(), createPayerRequest);
         verify(mockedPayerDao).insert(payer);
         verify(mockedTransactionService).payerCreatedFor(transaction);
     }

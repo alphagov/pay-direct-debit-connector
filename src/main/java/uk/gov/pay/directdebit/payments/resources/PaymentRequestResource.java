@@ -50,7 +50,7 @@ public class PaymentRequestResource {
     public Response createNewPaymentRequest(@PathParam("accountId") String accountExternalId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
         paymentRequestValidator.validate(paymentRequest);
         LOGGER.info("Creating new payment request - {}", paymentRequest.toString());
-        PaymentRequestResponse response = paymentRequestService.createCharge(paymentRequest, accountExternalId, uriInfo);
+        PaymentRequestResponse response = paymentRequestService.createTransaction(paymentRequest, accountExternalId, uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }
 }

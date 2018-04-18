@@ -97,7 +97,7 @@ public class TransactionDaoIT {
     @Test
     public void shouldGetATransactionByPaymentRequestExternalIdAndGatewayAccountId() {
         testTransaction.insert(testContext.getJdbi());
-        Transaction transaction = transactionDao.findByPaymentRequestExternalIdAndAccountId(testPaymentRequest.getExternalId(), testGatewayAccount.getId()).get();
+        Transaction transaction = transactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(testPaymentRequest.getExternalId(), testGatewayAccount.getExternalId()).get();
         assertThat(transaction.getId(), is(testTransaction.getId()));
         assertThat(transaction.getPaymentRequestId(), is(testTransaction.getPaymentRequestId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));

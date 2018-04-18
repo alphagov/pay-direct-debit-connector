@@ -31,8 +31,8 @@ public class PaymentConfirmService {
      *
      * @param paymentExternalId
      */
-    public ConfirmationDetails confirm(Long accountId, String paymentExternalId) {
-        Transaction transaction = transactionService.confirmedDirectDebitDetailsFor(accountId, paymentExternalId);
+    public ConfirmationDetails confirm(String accountExternalId, String paymentExternalId) {
+        Transaction transaction = transactionService.confirmedDirectDebitDetailsFor(accountExternalId, paymentExternalId);
         Mandate createdMandate = payerDao.findByPaymentRequestId(transaction.getPaymentRequestId())
                 .map(this::createMandateFor)
                 .orElseThrow(() -> new PayerConflictException(String.format("Expected payment request %s to be already associated with a payer", paymentExternalId)));

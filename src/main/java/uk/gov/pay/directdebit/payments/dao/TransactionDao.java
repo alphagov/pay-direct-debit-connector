@@ -95,9 +95,9 @@ public interface TransactionDao {
             "  g.analytics_id AS gateway_account_analytics_id\n" +
             "FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id\n" +
             "  JOIN gateway_accounts g ON p.gateway_account_id = g.id\n" +
-            "WHERE p.external_id = :paymentRequestExternalId AND p.gateway_account_id = :accountId")
+            "WHERE p.external_id = :paymentRequestExternalId AND g.external_id = :accountExternalId")
     @SingleValueResult(Transaction.class)
-    Optional<Transaction> findByPaymentRequestExternalIdAndAccountId(@Bind("paymentRequestExternalId") String paymentRequestExternalId, @Bind("accountId") Long accountId);
+    Optional<Transaction> findTransactionForExternalIdAndGatewayAccountExternalId(@Bind("paymentRequestExternalId") String paymentRequestExternalId, @Bind("accountExternalId") String accountExternalId);
 
     @SqlQuery("SELECT\n" +
             "  tr.id AS transaction_id,\n" +
