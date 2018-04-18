@@ -94,6 +94,10 @@ public class PaymentRequestService {
                 });
     }
 
+    public void cancelTransaction(String accountExternalId, String paymentRequestExternalId) {
+        Transaction transaction = transactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
+        transactionService.paymentCancelledFor(transaction);
+    }
 
     public PaymentRequestResponse getPaymentWithExternalId(String accountExternalId, String paymentExternalId, UriInfo uriInfo) {
         return paymentRequestDao

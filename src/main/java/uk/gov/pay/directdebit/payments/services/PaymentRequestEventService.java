@@ -18,6 +18,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateF
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandatePending;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paidOut;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCancelled;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentFailed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentPending;
@@ -72,6 +73,11 @@ public class PaymentRequestEventService {
 
     public PaymentRequestEvent registerPaymentCreatedEventFor(Transaction charge) {
         PaymentRequestEvent event = paymentCreated(charge.getPaymentRequestId());
+        return insertEventFor(charge, event);
+    }
+
+    public PaymentRequestEvent registerPaymentCancelledEventFor(Transaction charge) {
+        PaymentRequestEvent event = paymentCancelled(charge.getPaymentRequestId());
         return insertEventFor(charge, event);
     }
 

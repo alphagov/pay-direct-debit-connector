@@ -23,6 +23,7 @@ import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
@@ -45,7 +46,6 @@ import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
@@ -76,7 +76,8 @@ public class PaymentRequestServiceTest {
             .withReference(REFERENCE)
             .withReturnUrl(RETURN_URL)
             .withGatewayAccountId(gatewayAccountFixture.getId());
-    private TransactionFixture transaction = aTransactionFixture()
+    private TransactionFixture transactionFixture = aTransactionFixture()
+            .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
             .withPaymentRequestId(paymentRequest.getId())
             .withPaymentRequestExternalId(paymentRequest.getExternalId())
             .withAmount(paymentRequest.getAmount());
@@ -114,7 +115,7 @@ public class PaymentRequestServiceTest {
                 .when(this.mockedUriInfo)
                 .getBaseUriBuilder();
 
-        when(mockTransactionService.createChargeFor(any(PaymentRequest.class), any(GatewayAccount.class))).thenReturn(transaction.toEntity());
+        when(mockTransactionService.createChargeFor(any(PaymentRequest.class), any(GatewayAccount.class))).thenReturn(transactionFixture.toEntity());
 
         when(mockedTokenService.generateNewTokenFor(any(PaymentRequest.class))).thenReturn(token.toEntity());
 
@@ -158,7 +159,7 @@ public class PaymentRequestServiceTest {
         when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of(paymentRequest.toEntity()));
         when(mockTransactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId()))
-                .thenReturn(transaction.toEntity());
+                .thenReturn(transactionFixture.toEntity());
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 
@@ -199,17 +200,26 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
+    public void shouldDelegateToTheTransactionServiceToCancelACharge() {
+        Transaction transaction = transactionFixture.toEntity();
+        when(mockTransactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId()))
+                .thenReturn(transaction);
+
+        service.cancelTransaction(gatewayAccountFixture.getExternalId(), paymentRequest.getExternalId());
+        verify(mockTransactionService).paymentCancelledFor(transaction);
+    }
+
+    @Test
     public void getPaymentWithExternalId_shouldPopulateAResponse_ifPaymentExistsAndChargeIsInFinalState() throws URISyntaxException {
-        transaction.withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
         when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId())).thenReturn(Optional.of(paymentRequest.toEntity()));
         when(mockTransactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId()))
-                .thenReturn(transaction.toEntity());
+                .thenReturn(transactionFixture.toEntity());
         when(uriInfo.getBaseUriBuilder())
                 .thenReturn(UriBuilder.fromUri(SERVICE_HOST));
 
 
         PaymentRequestResponse response = service.getPaymentWithExternalId(gatewayAccountFixture.getExternalId(), paymentRequest.getExternalId(), uriInfo);
-        verifyNoMoreInteractions(mockedTokenService);
+        verify(mockedTokenService).generateNewTokenFor(paymentRequest.toEntity());
 
         assertThat(response.getAmount().toString(), is(AMOUNT));
         assertThat(response.getDescription(), is(DESCRIPTION));
@@ -217,7 +227,7 @@ public class PaymentRequestServiceTest {
         assertThat(response.getReturnUrl(), is(RETURN_URL));
         assertThat(response.getPaymentExternalId(), is(paymentRequest.getExternalId()));
         assertThat(response.getDataLinks(), hasItems(
-                ImmutableMap.of("rel", "self", "method", "GET", "href", new URI(SERVICE_HOST + "/v1/api/accounts/1/charges/" + paymentRequest.getExternalId()))
+                ImmutableMap.of("rel", "self", "method", "GET", "href", new URI(SERVICE_HOST + "/v1/api/accounts/DIRECT_DEBIT:accountExternalId/charges/" + paymentRequest.getExternalId()))
         ));
     }
 

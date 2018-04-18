@@ -43,7 +43,7 @@ public class PayerResource {
     public Response createPayer(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
         createPayerValidator.validate(paymentRequestExternalId, createPayerRequest);
 
-        LOGGER.info("Received createPayerInProvider request for payment request with id: {}", paymentRequestExternalId);
+        LOGGER.info("Received create payer request for payment request with id: {}", paymentRequestExternalId);
 
         DirectDebitPaymentProvider payerService = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
         Payer payer = payerService.createPayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);

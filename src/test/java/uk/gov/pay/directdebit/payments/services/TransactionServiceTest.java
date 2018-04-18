@@ -19,6 +19,7 @@ import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.time.LocalDate;
@@ -37,8 +38,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.*;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
@@ -226,6 +229,21 @@ public class TransactionServiceTest {
         verify(mockedPaymentRequestEventService).registerPaymentPendingEventFor(transaction);
         verifyZeroInteractions(mockedTransactionDao);
         assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
+    }
+
+    @Test
+    public void paymentCancelledFor_shouldUpdateTransactionAsCancelled_shouldRegisterAPaymentCancelledEvent() {
+
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(AWAITING_CONFIRMATION)
+                .toEntity();
+
+        service.paymentCancelledFor(transaction);
+
+        verify(mockedPaymentRequestEventService).registerPaymentCancelledEventFor(transaction);
+        verify(mockedTransactionDao).updateState(transaction.getId(), CANCELLED);
+        assertThat(transaction.getState(), is(CANCELLED));
     }
 
     @Test

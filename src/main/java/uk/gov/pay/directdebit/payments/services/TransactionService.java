@@ -25,7 +25,6 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
@@ -137,6 +136,11 @@ public class TransactionService {
 
     public PaymentRequestEvent paymentPendingFor(Transaction transaction) {
         return paymentRequestEventService.registerPaymentPendingEventFor(transaction);
+    }
+
+    public PaymentRequestEvent paymentCancelledFor(Transaction transaction) {
+        Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_CANCELLED_BY_USER);
+        return paymentRequestEventService.registerPaymentCancelledEventFor(newTransaction);
     }
 
     public PaymentRequestEvent paymentSubmittedFor(Transaction transaction) {
