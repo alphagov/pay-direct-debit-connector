@@ -56,6 +56,7 @@ public class TransactionService {
 
     Transaction createChargeFor(PaymentRequest paymentRequest, GatewayAccount gatewayAccount) {
         Transaction transaction = new Transaction(
+                null,
                 paymentRequest.getId(),
                 paymentRequest.getExternalId(),
                 paymentRequest.getDescription(),
@@ -66,7 +67,8 @@ public class TransactionService {
                 paymentRequest.getReturnUrl(),
                 paymentRequest.getAmount(),
                 Transaction.Type.CHARGE,
-                PaymentStatesGraph.initialState());
+                PaymentStatesGraph.initialState()
+        );
         LOGGER.info("Created transaction for payment request {}", paymentRequest.getExternalId());
         Long id = transactionDao.insert(transaction);
         transaction.setId(id);
@@ -87,6 +89,7 @@ public class TransactionService {
                     return newCharge;
                 });
     }
+
     public Transaction findTransactionFor(Long transactionId) {
         return transactionDao
                 .findById(transactionId)

@@ -1,11 +1,7 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class Transaction {
 
     private Long id;
@@ -46,32 +42,6 @@ public class Transaction {
         this.amount = amount;
         this.type = type;
         this.state = state;
-    }
-
-    public Transaction(Long paymentRequestId,
-                       String paymentRequestExternalId,
-                       String paymentRequestDescription,
-                       String paymentRequestReference,
-                       Long gatewayAccountId,
-                       String gatewayAccountExternalId,
-                       PaymentProvider paymentProvider,
-                       String paymentRequestReturnUrl,
-                       Long amount,
-                       Type type,
-                       PaymentState state) {
-        this(null,
-                paymentRequestId,
-                paymentRequestExternalId,
-                paymentRequestDescription,
-                paymentRequestReference,
-                gatewayAccountId,
-                gatewayAccountExternalId,
-                paymentProvider,
-                paymentRequestReturnUrl,
-                amount,
-                type,
-                state
-        );
     }
 
     public Long getId() {
