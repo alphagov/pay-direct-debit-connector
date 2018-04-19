@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,10 +16,14 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -26,6 +31,10 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.*;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.*;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.*;
+import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CANCEL_CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGES_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
@@ -129,7 +138,30 @@ public class PaymentRequestResourceIT {
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
                     put("chargeTokenId", newChargeToken);
                 }}));
+    }
 
+    @Test
+    public void shouldCancelATransaction() {
+        PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .insert(testContext.getJdbi());
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .withState(PaymentState.AWAITING_CONFIRMATION)
+                .withPaymentRequestId(paymentRequestFixture.getId())
+                .insert(testContext.getJdbi());
+
+        String requestPath = CANCEL_CHARGE_API_PATH
+                .replace("{accountId}", testGatewayAccount.getExternalId())
+                .replace("{paymentRequestExternalId}", paymentRequestFixture.getExternalId());
+
+        givenSetup()
+                .post(requestPath)
+                .then()
+                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
+
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
+        assertThat(transaction.get("state"), is("CANCELLED"));
     }
 
     @Test

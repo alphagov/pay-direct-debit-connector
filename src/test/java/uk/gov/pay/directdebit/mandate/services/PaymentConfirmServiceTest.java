@@ -52,11 +52,11 @@ public class PaymentConfirmServiceTest {
         String paymentRequestExternalId = "test-payment-ext-id";
         long paymentRequestId = 1L;
         Long payerId = 2L;
-        Long accountId = 6L;
+        String accountExternalId = "account-external-id";
         Long mandateId = 3L;
 
         Transaction transaction = aTransactionFixture().withPaymentRequestId(paymentRequestId).toEntity();
-        when(mockTransactionService.confirmedDirectDebitDetailsFor(accountId, paymentRequestExternalId))
+        when(mockTransactionService.confirmedDirectDebitDetailsFor(accountExternalId, paymentRequestExternalId))
                 .thenReturn(transaction);
 
         when(mockPayerDao.findByPaymentRequestId(paymentRequestId))
@@ -65,7 +65,7 @@ public class PaymentConfirmServiceTest {
 
         when(mockMandateDao.insert(any(Mandate.class))).thenReturn(mandateId);
 
-        ConfirmationDetails confirmationDetails = service.confirm(accountId, paymentRequestExternalId);
+        ConfirmationDetails confirmationDetails = service.confirm(accountExternalId, paymentRequestExternalId);
         ArgumentCaptor<Mandate> maCaptor = forClass(Mandate.class);
         verify(mockMandateDao).insert(maCaptor.capture());
 
@@ -85,17 +85,17 @@ public class PaymentConfirmServiceTest {
 
         String paymentRequestExternalId = "test-payment-ext-id";
         long paymentRequestId = 1L;
-        long accountId = 2L;
+        String accountExternalId = "account-external-id";
 
         Transaction transaction = aTransactionFixture().withPaymentRequestId(paymentRequestId).toEntity();
-        when(mockTransactionService.confirmedDirectDebitDetailsFor(accountId, paymentRequestExternalId))
+        when(mockTransactionService.confirmedDirectDebitDetailsFor(accountExternalId, paymentRequestExternalId))
                 .thenReturn(transaction);
 
         when(mockPayerDao.findByPaymentRequestId(paymentRequestId))
                 .thenReturn(Optional.empty());
 
         try {
-            service.confirm(accountId, paymentRequestExternalId);
+            service.confirm(accountExternalId, paymentRequestExternalId);
             fail("Expected PayerConflictException to be thrown");
         } catch (PayerConflictException e) {
             verify(mockMandateDao, never()).insert(any(Mandate.class));

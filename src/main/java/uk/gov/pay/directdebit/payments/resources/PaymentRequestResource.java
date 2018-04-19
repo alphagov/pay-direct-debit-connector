@@ -25,6 +25,7 @@ public class PaymentRequestResource {
     //have to be /charges unless we change public api
     public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{paymentRequestExternalId}";
     public static final String CHARGES_API_PATH = "/v1/api/accounts/{accountId}/charges";
+    public static final String CANCEL_CHARGE_API_PATH = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/cancel";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentRequestResource.class);
     private final PaymentRequestService paymentRequestService;
@@ -34,7 +35,6 @@ public class PaymentRequestResource {
     public PaymentRequestResource(PaymentRequestService paymentRequestService) {
         this.paymentRequestService = paymentRequestService;
     }
-
 
     @GET
     @Path(CHARGE_API_PATH)
@@ -50,7 +50,17 @@ public class PaymentRequestResource {
     public Response createNewPaymentRequest(@PathParam("accountId") String accountExternalId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
         paymentRequestValidator.validate(paymentRequest);
         LOGGER.info("Creating new payment request - {}", paymentRequest.toString());
-        PaymentRequestResponse response = paymentRequestService.createCharge(paymentRequest, accountExternalId, uriInfo);
+        PaymentRequestResponse response = paymentRequestService.createTransaction(paymentRequest, accountExternalId, uriInfo);
         return created(response.getLink("self")).entity(response).build();
+    }
+
+
+    @POST
+    @Path(CANCEL_CHARGE_API_PATH)
+    @Produces(APPLICATION_JSON)
+    public Response userCancel(@PathParam("accountId") String accountExternalId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId) {
+        LOGGER.info("User wants to cancel payment request - {}", paymentRequestExternalId);
+        paymentRequestService.cancelTransaction(accountExternalId, paymentRequestExternalId);
+        return Response.noContent().build();
     }
 }

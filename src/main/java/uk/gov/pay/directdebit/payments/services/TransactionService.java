@@ -47,10 +47,10 @@ public class TransactionService {
         this.userNotificationService = userNotificationService;
     }
 
-    public Transaction findChargeForExternalIdAndGatewayAccountId(String paymentRequestExternalId, Long accountId) {
-        Transaction transaction = transactionDao.findByPaymentRequestExternalIdAndAccountId(paymentRequestExternalId, accountId)
+    public Transaction findTransactionForExternalIdAndGatewayAccountExternalId(String paymentRequestExternalId, String accountExternalId) {
+        Transaction transaction = transactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId)
                 .orElseThrow(() -> new ChargeNotFoundException("payment request external id", paymentRequestExternalId));
-        LOGGER.info("Found charge for payment request with id: {} for gateway account id: {}", paymentRequestExternalId, accountId);
+        LOGGER.info("Found charge for payment request with id: {} for gateway account id: {}", paymentRequestExternalId, accountExternalId);
         return transaction;
     }
 
@@ -100,14 +100,14 @@ public class TransactionService {
         return transaction;
     }
 
-    public Transaction receiveDirectDebitDetailsFor(Long accountId, String paymentRequestExternalId) {
-        Transaction transaction = findChargeForExternalIdAndGatewayAccountId(paymentRequestExternalId, accountId);
+    public Transaction receiveDirectDebitDetailsFor(String accountExternalId, String paymentRequestExternalId) {
+        Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
         paymentRequestEventService.registerDirectDebitReceivedEventFor(transaction);
         return updateStateFor(transaction, DIRECT_DEBIT_DETAILS_RECEIVED);
     }
 
-    public Transaction confirmedDirectDebitDetailsFor(Long accountId, String paymentRequestExternalId) {
-        Transaction transaction = findChargeForExternalIdAndGatewayAccountId(paymentRequestExternalId, accountId);
+    public Transaction confirmedDirectDebitDetailsFor(String accountExternalId, String paymentRequestExternalId) {
+        Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
         paymentRequestEventService.registerDirectDebitConfirmedEventFor(transaction);
         return updateStateFor(transaction, DIRECT_DEBIT_DETAILS_CONFIRMED);
     }
@@ -136,6 +136,11 @@ public class TransactionService {
 
     public PaymentRequestEvent paymentPendingFor(Transaction transaction) {
         return paymentRequestEventService.registerPaymentPendingEventFor(transaction);
+    }
+
+    public PaymentRequestEvent paymentCancelledFor(Transaction transaction) {
+        Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_CANCELLED_BY_USER);
+        return paymentRequestEventService.registerPaymentCancelledEventFor(newTransaction);
     }
 
     public PaymentRequestEvent paymentSubmittedFor(Transaction transaction) {

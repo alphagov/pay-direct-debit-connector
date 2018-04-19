@@ -33,8 +33,8 @@ public class PayerService {
                 .orElseThrow(() -> new PayerNotFoundException(transaction.getPaymentRequestExternalId()));
     }
 
-    public Payer create(String paymentRequestExternalId, Long accountId, Map<String, String> createPayerRequest) {
-        Transaction transaction = transactionService.receiveDirectDebitDetailsFor(accountId, paymentRequestExternalId);
+    public Payer create(String paymentRequestExternalId, String accountExternalId, Map<String, String> createPayerRequest) {
+        Transaction transaction = transactionService.receiveDirectDebitDetailsFor(accountExternalId, paymentRequestExternalId);
         Payer payer = payerParser.parse(createPayerRequest, transaction);
         Long id = payerDao.insert(payer);
         payer.setId(id);
