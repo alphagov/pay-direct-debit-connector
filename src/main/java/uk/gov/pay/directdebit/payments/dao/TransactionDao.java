@@ -179,7 +179,7 @@ public interface TransactionDao {
     @SqlUpdate("UPDATE transactions t SET state = :state WHERE t.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") PaymentState paymentState);
 
-    @SqlUpdate("INSERT INTO transactions(payment_request_id, amount, type, state) VALUES (:paymentRequestId, :amount, :type, :state)")
+    @SqlUpdate("INSERT INTO transactions(payment_request_id, amount, type, state) VALUES (:paymentRequest.id, :amount, :type, :state)")
     @GetGeneratedKeys
     Long insert(@BindBean Transaction transaction);
 

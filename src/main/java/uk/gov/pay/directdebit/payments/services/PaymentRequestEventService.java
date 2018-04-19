@@ -54,76 +54,76 @@ public class PaymentRequestEventService {
     }
 
     public void registerDirectDebitReceivedEventFor(Transaction charge) {
-        insertEventFor(charge, directDebitDetailsReceived(charge.getPaymentRequestId()));
+        insertEventFor(charge, directDebitDetailsReceived(charge.getPaymentRequest().getId()));
     }
 
     public void registerDirectDebitConfirmedEventFor(Transaction charge) {
-        PaymentRequestEvent event = directDebitDetailsConfirmed(charge.getPaymentRequestId());
+        PaymentRequestEvent event = directDebitDetailsConfirmed(charge.getPaymentRequest().getId());
         insertEventFor(charge, event);
     }
 
     public void registerPayerCreatedEventFor(Transaction charge) {
-        PaymentRequestEvent event = payerCreated(charge.getPaymentRequestId());
+        PaymentRequestEvent event = payerCreated(charge.getPaymentRequest().getId());
         insertEventFor(charge, event);
     }
 
     public void registerTokenExchangedEventFor(Transaction charge) {
-        PaymentRequestEvent event = tokenExchanged(charge.getPaymentRequestId());
+        PaymentRequestEvent event = tokenExchanged(charge.getPaymentRequest().getId());
         insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerPaymentCreatedEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentCreated(charge.getPaymentRequestId());
+        PaymentRequestEvent event = paymentCreated(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerPaymentCancelledEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentCancelled(charge.getPaymentRequestId());
+        PaymentRequestEvent event = paymentCancelled(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerMandateFailedEventFor(Transaction charge) {
-        PaymentRequestEvent event = mandateFailed(charge.getPaymentRequestId());
+        PaymentRequestEvent event = mandateFailed(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerMandateCancelledEventFor(Transaction charge) {
-        PaymentRequestEvent event = mandateCancelled(charge.getPaymentRequestId());
+        PaymentRequestEvent event = mandateCancelled(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerPaymentFailedEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentFailed(charge.getPaymentRequestId());
+        PaymentRequestEvent event = paymentFailed(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerPaymentPendingEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentPending(charge.getPaymentRequestId());
+        PaymentRequestEvent event = paymentPending(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerPaymentSubmittedEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentSubmitted(charge.getPaymentRequestId());
+        PaymentRequestEvent event = paymentSubmitted(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerPaymentPaidOutEventFor(Transaction charge) {
-        PaymentRequestEvent event = paidOut(charge.getPaymentRequestId());
+        PaymentRequestEvent event = paidOut(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerPayoutPaidEventFor(Transaction charge) {
-        PaymentRequestEvent event = payoutPaid(charge.getPaymentRequestId());
+        PaymentRequestEvent event = payoutPaid(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
     public PaymentRequestEvent registerMandatePendingEventFor(Transaction transaction) {
-        PaymentRequestEvent event = mandatePending(transaction.getPaymentRequestId());
+        PaymentRequestEvent event = mandatePending(transaction.getPaymentRequest().getId());
         return insertEventFor(transaction, event);
     }
 
     public PaymentRequestEvent registerMandateActiveEventFor(Transaction transaction) {
-        PaymentRequestEvent event = mandateActive(transaction.getPaymentRequestId());
+        PaymentRequestEvent event = mandateActive(transaction.getPaymentRequest().getId());
         return insertEventFor(transaction, event);
     }
 
@@ -132,7 +132,7 @@ public class PaymentRequestEventService {
     }
 
     public PaymentRequestEvent registerPaymentMethodChangedEventFor(Transaction transaction) {
-        PaymentRequestEvent event = paymentMethodChanged(transaction.getPaymentRequestId());
+        PaymentRequestEvent event = paymentMethodChanged(transaction.getPaymentRequest().getId());
         return insertEventFor(transaction, event);
     }
 }

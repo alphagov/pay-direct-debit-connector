@@ -12,7 +12,7 @@ import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -39,6 +39,7 @@ public class SandboxServiceTest {
 
     private GatewayAccount gatewayAccount = aGatewayAccountFixture().toEntity();
     private Payer payer = PayerFixture.aPayerFixture().toEntity();
+
     @Before
     public void setUp() {
         service = new SandboxService(mockedPayerService, mockedPaymentConfirmService, mockedTransactionService);
@@ -53,17 +54,17 @@ public class SandboxServiceTest {
 
     @Test
     public void confirm_shouldRegisterAPaymentCreatedEventWhenSuccessfullyConfirmed() {
-        TransactionFixture transactionFixture = aTransactionFixture();
         ConfirmationDetails confirmationDetails = confirmationDetails()
-                .withTransaction(transactionFixture)
+                .withTransaction(aTransactionFixture())
                 .withMandate(aMandateFixture())
                 .build();
+        Transaction transaction = confirmationDetails.getTransaction();
 
         when(mockedPaymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId))
                 .thenReturn(confirmationDetails);
-        when(mockedPayerService.getPayerFor(transactionFixture.toEntity())).thenReturn(payer);
+        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
 
         service.confirm(paymentRequestExternalId, gatewayAccount);
-        verify(mockedTransactionService).paymentCreatedFor(confirmationDetails.getTransaction(), payer, LocalDate.now().plusDays(4));
+        verify(mockedTransactionService).paymentCreatedFor(transaction, payer, LocalDate.now().plusDays(4));
     }
 }

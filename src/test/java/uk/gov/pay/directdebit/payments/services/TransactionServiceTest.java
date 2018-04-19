@@ -85,7 +85,7 @@ public class TransactionServiceTest {
         PaymentRequestEvent createdPaymentRequestEvent = preCaptor.getValue();
 
         assertThat(transaction.getId(), is(notNullValue()));
-        assertThat(transaction.getPaymentRequestId(), is(paymentRequestFixture.getId()));
+        assertThat(transaction.getPaymentRequest().getId(), is(paymentRequestFixture.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(paymentRequestFixture.getExternalId()));
         assertThat(transaction.getPaymentRequestReturnUrl(), is(paymentRequestFixture.getReturnUrl()));
         assertThat(transaction.getGatewayAccountId(), is(paymentRequestFixture.getGatewayAccountId()));
@@ -109,7 +109,7 @@ public class TransactionServiceTest {
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
         Transaction foundTransaction = service.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getExternalId());
         assertThat(foundTransaction.getId(), is(notNullValue()));
-        assertThat(foundTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(foundTransaction.getPaymentRequest().getId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(foundTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
         assertThat(foundTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(foundTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
@@ -136,7 +136,7 @@ public class TransactionServiceTest {
                 .withState(PROCESSING_DIRECT_DEBIT_DETAILS);
         Transaction newTransaction = service.payerCreatedFor(transactionFixture.toEntity());
         assertThat(newTransaction.getId(), is(notNullValue()));
-        assertThat(newTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(newTransaction.getPaymentRequest().getId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
         assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
@@ -158,7 +158,7 @@ public class TransactionServiceTest {
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
         Transaction newTransaction = service.receiveDirectDebitDetailsFor(gatewayAccountFixture.getExternalId(), transactionFixture.getPaymentRequestExternalId());
         assertThat(newTransaction.getId(), is(notNullValue()));
-        assertThat(newTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(newTransaction.getPaymentRequest().getId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
         assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
@@ -181,7 +181,7 @@ public class TransactionServiceTest {
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
         Transaction newTransaction = service.findTransactionForToken(token).get();
         assertThat(newTransaction.getId(), is(notNullValue()));
-        assertThat(newTransaction.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(newTransaction.getPaymentRequest().getId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequestExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
         assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
@@ -301,7 +301,7 @@ public class TransactionServiceTest {
 
         PaymentRequestEvent event = aPaymentRequestEventFixture().toEntity();
 
-        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequestId(), Type.CHARGE, PAYMENT_SUBMITTED))
+        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), Type.CHARGE, PAYMENT_SUBMITTED))
                 .thenReturn(Optional.of(event));
 
         PaymentRequestEvent foundEvent = service.findPaymentSubmittedEventFor(transaction).get();
@@ -319,7 +319,7 @@ public class TransactionServiceTest {
 
         PaymentRequestEvent event = aPaymentRequestEventFixture().toEntity();
 
-        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequestId(), Type.MANDATE, MANDATE_PENDING))
+        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), Type.MANDATE, MANDATE_PENDING))
                 .thenReturn(Optional.of(event));
 
         PaymentRequestEvent foundEvent = service.findMandatePendingEventFor(transaction).get();

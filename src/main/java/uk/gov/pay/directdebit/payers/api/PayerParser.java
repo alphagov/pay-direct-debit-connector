@@ -16,7 +16,7 @@ public class PayerParser {
         String accountNumber = createPayerMap.get("account_number");
         String sortCode = createPayerMap.get("sort_code");
         return new Payer(
-                transaction.getPaymentRequestId(),
+                transaction.getPaymentRequest().getId(),
                 createPayerMap.get("account_holder_name"),
                 createPayerMap.get("email"),
                 encrypt(sortCode),

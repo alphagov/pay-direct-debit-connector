@@ -72,7 +72,7 @@ public class PayerServiceTest {
 
     @Test
     public void shouldReturnPayerForTransactionIfItExists() {
-        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequestId())).thenReturn(Optional.of(payer));
+        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequest().getId())).thenReturn(Optional.of(payer));
         Payer payer = service.getPayerFor(transaction);
         assertThat(payer.getId(), is(payer.getId()));
         assertThat(payer.getExternalId(), is(payer.getExternalId()));
@@ -80,7 +80,7 @@ public class PayerServiceTest {
 
     @Test
     public void shouldThrowIfGatewayAccountDoesNotExist() {
-        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequestId())).thenReturn(Optional.empty());
+        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequest().getId())).thenReturn(Optional.empty());
         thrown.expect(PayerNotFoundException.class);
         thrown.expectMessage("Couldn't find payer for payment request with external id: sdkfhsdkjfhjdks");
         thrown.reportMissingExceptionWithMessage("PayerNotFoundException expected");

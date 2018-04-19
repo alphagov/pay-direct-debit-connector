@@ -167,11 +167,11 @@ public class TransactionService {
     }
 
     public Optional<PaymentRequestEvent> findPaymentSubmittedEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_SUBMITTED);
+        return paymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), CHARGE, PAYMENT_SUBMITTED);
     }
 
     public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), MANDATE, MANDATE_PENDING);
+        return paymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), MANDATE, MANDATE_PENDING);
     }
 
     public PaymentRequestEvent paymentMethodChangedFor(Transaction transaction) {

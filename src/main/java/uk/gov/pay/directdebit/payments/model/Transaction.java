@@ -16,6 +16,10 @@ public class Transaction {
     private Type type;
     private PaymentState state;
 
+    public enum Type {
+        CHARGE
+    }
+
     public Transaction(Long id,
                        Long paymentRequestId,
                        String paymentRequestExternalId,
@@ -63,61 +67,28 @@ public class Transaction {
         this.paymentProvider = paymentProvider;
     }
 
-    public Long getPaymentRequestId() {
-        return this.paymentRequest.getId();
-    }
-
-    public void setPaymentRequestId(Long paymentRequestId) {
-        this.paymentRequest.setId(paymentRequestId);
-    }
-
     public String getPaymentRequestExternalId() {
         return this.paymentRequest.getExternalId();
-    }
-
-    public void setPaymentRequestExternalId(String paymentRequestExternalId) {
-        this.paymentRequest.setExternalId(paymentRequestExternalId);
     }
 
     public String getPaymentRequestReturnUrl() {
         return this.paymentRequest.getReturnUrl();
     }
 
-    public void setPaymentRequestReturnUrl(String paymentRequestReturnUrl) {
-        this.paymentRequest.setReturnUrl(paymentRequestReturnUrl);
-    }
-
     public Long getGatewayAccountId() {
         return gatewayAccountId;
-    }
-
-    public void setGatewayAccountId(Long gatewayAccountId) {
-        this.gatewayAccountId = gatewayAccountId;
     }
 
     public String getGatewayAccountExternalId() {
         return gatewayAccountExternalId;
     }
 
-    public void setGatewayAccountExternalId(String gatewayAccountExternalId) {
-        this.gatewayAccountExternalId = gatewayAccountExternalId;
-    }
-
     public String getPaymentRequestDescription() {
         return this.paymentRequest.getDescription();
     }
 
-    public void setPaymentRequestDescription(String paymentRequestDescription) {
-        this.paymentRequest.setDescription(paymentRequestDescription);
-    }
-
     public String getPaymentRequestReference() {
         return this.paymentRequest.getReference();
-    }
-
-    public Transaction setPaymentRequestReference(String paymentRequestReference) {
-        this.paymentRequest.setReference(paymentRequestReference);
-        return this;
     }
 
     public PaymentProvider getPaymentProvider() {
@@ -146,10 +117,6 @@ public class Transaction {
 
     public void setState(PaymentState state) {
         this.state = state;
-    }
-
-    public enum Type {
-        CHARGE
     }
 
     @Override

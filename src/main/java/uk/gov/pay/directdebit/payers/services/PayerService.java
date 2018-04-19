@@ -29,7 +29,7 @@ public class PayerService {
     }
     public Payer getPayerFor(Transaction transaction) {
         return payerDao
-                .findByPaymentRequestId(transaction.getPaymentRequestId())
+                .findByPaymentRequestId(transaction.getPaymentRequest().getId())
                 .orElseThrow(() -> new PayerNotFoundException(transaction.getPaymentRequestExternalId()));
     }
 

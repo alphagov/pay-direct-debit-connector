@@ -59,7 +59,7 @@ public class TokenServiceTest {
     @Test
     public void shouldValidateAPaymentRequestWithAToken() {
         Transaction charge = service.validateChargeWithToken(TOKEN);
-        assertThat(charge.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(charge.getPaymentRequest().getId(), is(transactionFixture.getPaymentRequestId()));
     }
 
     @Test

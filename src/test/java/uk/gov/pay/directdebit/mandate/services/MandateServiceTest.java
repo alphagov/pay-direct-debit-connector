@@ -126,7 +126,7 @@ public class MandateServiceTest {
 
         PaymentRequestEvent event = PaymentRequestEventFixture.aPaymentRequestEventFixture().toEntity();
 
-        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequestId(), PaymentRequestEvent.Type.MANDATE, MANDATE_PENDING))
+        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), PaymentRequestEvent.Type.MANDATE, MANDATE_PENDING))
                 .thenReturn(Optional.of(event));
 
         PaymentRequestEvent foundEvent = service.findMandatePendingEventFor(transaction).get();

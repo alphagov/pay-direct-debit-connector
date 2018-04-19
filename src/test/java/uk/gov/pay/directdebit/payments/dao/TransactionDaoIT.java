@@ -71,7 +71,7 @@ public class TransactionDaoIT {
         testTransaction.insert(testContext.getJdbi());
         Transaction transaction = transactionDao.findById(testTransaction.getId()).get();
         assertThat(transaction.getId(), is(testTransaction.getId()));
-        assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
+        assertThat(transaction.getPaymentRequest().getId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
         assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
@@ -85,7 +85,7 @@ public class TransactionDaoIT {
         testTransaction.insert(testContext.getJdbi());
         Transaction transaction = transactionDao.findByPaymentRequestId(testPaymentRequest.getId()).get();
         assertThat(transaction.getId(), is(testTransaction.getId()));
-        assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
+        assertThat(transaction.getPaymentRequest().getId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
         assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
@@ -99,7 +99,7 @@ public class TransactionDaoIT {
         testTransaction.insert(testContext.getJdbi());
         Transaction transaction = transactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(testPaymentRequest.getExternalId(), testGatewayAccount.getExternalId()).get();
         assertThat(transaction.getId(), is(testTransaction.getId()));
-        assertThat(transaction.getPaymentRequestId(), is(testTransaction.getPaymentRequestId()));
+        assertThat(transaction.getPaymentRequest().getId(), is(testTransaction.getPaymentRequestId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
         assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
@@ -116,7 +116,7 @@ public class TransactionDaoIT {
         testTransaction.insert(testContext.getJdbi());
         Transaction transaction = transactionDao.findByTokenId(token.getToken()).get();
         assertThat(transaction.getId(), is(testTransaction.getId()));
-        assertThat(transaction.getPaymentRequestId(), is(testPaymentRequest.getId()));
+        assertThat(transaction.getPaymentRequest().getId(), is(testPaymentRequest.getId()));
         assertThat(transaction.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
         assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
@@ -175,7 +175,7 @@ public class TransactionDaoIT {
         Transaction transactionAfterUpdate = transactionDao.findByPaymentRequestId(testTransaction.getPaymentRequestId()).get();
         assertThat(numOfUpdatedTransactions, is(1));
         assertThat(transactionAfterUpdate.getId(), is(testTransaction.getId()));
-        assertThat(transactionAfterUpdate.getPaymentRequestId(), is(testPaymentRequest.getId()));
+        assertThat(transactionAfterUpdate.getPaymentRequest().getId(), is(testPaymentRequest.getId()));
         assertThat(transactionAfterUpdate.getPaymentRequestExternalId(), is(testPaymentRequest.getExternalId()));
         assertThat(transactionAfterUpdate.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
         assertThat(transactionAfterUpdate.getPaymentRequestDescription(), is(testPaymentRequest.getDescription()));
