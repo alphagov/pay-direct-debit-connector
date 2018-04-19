@@ -2,15 +2,13 @@ package uk.gov.pay.directdebit.payments.model;
 
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+
 public class Transaction {
 
     private Long id;
-    //todo refactor this to contain a PaymentRequest
-    private String paymentRequestExternalId;
-    private Long paymentRequestId;
-    private String paymentRequestDescription;
-    private String paymentRequestReturnUrl;
-    private String paymentRequestReference;
+    private PaymentRequest paymentRequest;
     private Long gatewayAccountId;
     private String gatewayAccountExternalId;
     private PaymentProvider paymentProvider;
@@ -31,14 +29,19 @@ public class Transaction {
                        Type type,
                        PaymentState state) {
         this.id = id;
-        this.paymentRequestExternalId = paymentRequestExternalId;
-        this.paymentRequestId = paymentRequestId;
+        this.paymentRequest = new PaymentRequest(
+                paymentRequestId,
+                amount,
+                paymentRequestReturnUrl,
+                gatewayAccountId,
+                paymentRequestDescription,
+                paymentRequestReference,
+                paymentRequestExternalId,
+                ZonedDateTime.now(ZoneOffset.UTC)
+        );
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.paymentProvider = paymentProvider;
-        this.paymentRequestDescription = paymentRequestDescription;
-        this.paymentRequestReference = paymentRequestReference;
-        this.paymentRequestReturnUrl = paymentRequestReturnUrl;
         this.amount = amount;
         this.type = type;
         this.state = state;
@@ -52,28 +55,36 @@ public class Transaction {
         this.id = id;
     }
 
+    public PaymentRequest getPaymentRequest() {
+        return paymentRequest;
+    }
+
+    public void setPaymentProvider(PaymentProvider paymentProvider) {
+        this.paymentProvider = paymentProvider;
+    }
+
     public Long getPaymentRequestId() {
-        return paymentRequestId;
+        return this.paymentRequest.getId();
     }
 
     public void setPaymentRequestId(Long paymentRequestId) {
-        this.paymentRequestId = paymentRequestId;
+        this.paymentRequest.setId(paymentRequestId);
     }
 
     public String getPaymentRequestExternalId() {
-        return paymentRequestExternalId;
+        return this.paymentRequest.getExternalId();
     }
 
     public void setPaymentRequestExternalId(String paymentRequestExternalId) {
-        this.paymentRequestExternalId = paymentRequestExternalId;
+        this.paymentRequest.setExternalId(paymentRequestExternalId);
     }
 
     public String getPaymentRequestReturnUrl() {
-        return paymentRequestReturnUrl;
+        return this.paymentRequest.getReturnUrl();
     }
 
     public void setPaymentRequestReturnUrl(String paymentRequestReturnUrl) {
-        this.paymentRequestReturnUrl = paymentRequestReturnUrl;
+        this.paymentRequest.setReturnUrl(paymentRequestReturnUrl);
     }
 
     public Long getGatewayAccountId() {
@@ -93,19 +104,19 @@ public class Transaction {
     }
 
     public String getPaymentRequestDescription() {
-        return paymentRequestDescription;
+        return this.paymentRequest.getDescription();
     }
 
     public void setPaymentRequestDescription(String paymentRequestDescription) {
-        this.paymentRequestDescription = paymentRequestDescription;
+        this.paymentRequest.setDescription(paymentRequestDescription);
     }
 
     public String getPaymentRequestReference() {
-        return paymentRequestReference;
+        return this.paymentRequest.getReference();
     }
 
     public Transaction setPaymentRequestReference(String paymentRequestReference) {
-        this.paymentRequestReference = paymentRequestReference;
+        this.paymentRequest.setReference(paymentRequestReference);
         return this;
     }
 
@@ -149,14 +160,10 @@ public class Transaction {
         Transaction that = (Transaction) o;
 
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (!paymentRequestExternalId.equals(that.paymentRequestExternalId)) return false;
+        if (!paymentRequest.equals(that.paymentRequest)) return false;
         if (!gatewayAccountId.equals(that.gatewayAccountId)) return false;
         if (!gatewayAccountExternalId.equals(that.gatewayAccountExternalId)) return false;
-        if (!paymentRequestDescription.equals(that.paymentRequestDescription)) return false;
-        if (!paymentProvider.equals(that.paymentProvider)) return false;
-        if (!paymentRequestId.equals(that.paymentRequestId)) return false;
-        if (!paymentRequestReturnUrl.equals(that.paymentRequestReturnUrl)) return false;
-        if (!paymentRequestReference.equals(that.paymentRequestReference)) return false;
+        if (paymentProvider != that.paymentProvider) return false;
         if (!amount.equals(that.amount)) return false;
         if (type != that.type) return false;
         return state == that.state;
@@ -165,14 +172,10 @@ public class Transaction {
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + paymentRequestExternalId.hashCode();
-        result = 31 * result + paymentRequestId.hashCode();
+        result = 31 * result + paymentRequest.hashCode();
         result = 31 * result + gatewayAccountId.hashCode();
         result = 31 * result + gatewayAccountExternalId.hashCode();
         result = 31 * result + paymentProvider.hashCode();
-        result = 31 * result + paymentRequestDescription.hashCode();
-        result = 31 * result + paymentRequestReturnUrl.hashCode();
-        result = 31 * result + paymentRequestReference.hashCode();
         result = 31 * result + amount.hashCode();
         result = 31 * result + type.hashCode();
         result = 31 * result + state.hashCode();

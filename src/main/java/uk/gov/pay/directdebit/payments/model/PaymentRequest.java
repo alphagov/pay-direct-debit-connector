@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payments.model;
 
-
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
 import java.time.ZoneOffset;
@@ -9,15 +8,29 @@ import java.time.ZonedDateTime;
 public class PaymentRequest {
 
     private Long id;
+
     private String externalId;
+
     private Long amount;
+
     private String returnUrl;
+
     private Long gatewayAccountId;
+
     private String description;
+
     private String reference;
+
     private ZonedDateTime createdDate;
 
-    public PaymentRequest(Long id, Long amount, String returnUrl, Long gatewayAccountId, String description, String reference, String externalId, ZonedDateTime createdDate) {
+    public PaymentRequest(Long id,
+                          Long amount,
+                          String returnUrl,
+                          Long gatewayAccountId,
+                          String description,
+                          String reference,
+                          String externalId,
+                          ZonedDateTime createdDate) {
         this.id = id;
         this.amount = amount;
         this.returnUrl = returnUrl;
@@ -28,8 +41,21 @@ public class PaymentRequest {
         this.externalId = externalId;
     }
 
-    public PaymentRequest(Long amount, String returnUrl, Long gatewayAccountId, String description, String reference) {
-        this(null, amount, returnUrl, gatewayAccountId, description, reference, RandomIdGenerator.newId(), ZonedDateTime.now(ZoneOffset.UTC));
+    public PaymentRequest(Long amount,
+                          String returnUrl,
+                          Long gatewayAccountId,
+                          String description,
+                          String reference) {
+        this(
+                null,
+                amount,
+                returnUrl,
+                gatewayAccountId,
+                description,
+                reference,
+                RandomIdGenerator.newId(),
+                ZonedDateTime.now(ZoneOffset.UTC)
+        );
     }
 
     public String getExternalId() {
