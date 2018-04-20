@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
-import static junit.framework.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
 
 
 public class PaymentRequestResponseTest {
