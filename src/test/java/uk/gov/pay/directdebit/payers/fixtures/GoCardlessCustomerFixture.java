@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.payers.fixtures;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
@@ -11,7 +11,9 @@ public class GoCardlessCustomerFixture implements DbFixture<GoCardlessCustomerFi
     private Long payerId = RandomUtils.nextLong(1, 99999);
     private String customerId = RandomIdGenerator.newId();
     private String customerBankAccountId = RandomIdGenerator.newId();
-    private GoCardlessCustomerFixture() { }
+
+    private GoCardlessCustomerFixture() {
+    }
 
     public static GoCardlessCustomerFixture aGoCardlessCustomerFixture() {
         return new GoCardlessCustomerFixture();
@@ -54,9 +56,9 @@ public class GoCardlessCustomerFixture implements DbFixture<GoCardlessCustomerFi
     }
 
     @Override
-    public GoCardlessCustomerFixture insert(DBI jdbi) {
+    public GoCardlessCustomerFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
-                h.update(
+                h.execute(
                         "INSERT INTO" +
                                 "    gocardless_customers(\n" +
                                 "        id,\n" +
@@ -75,7 +77,7 @@ public class GoCardlessCustomerFixture implements DbFixture<GoCardlessCustomerFi
 
     @Override
     public GoCardlessCustomer toEntity() {
-        return new GoCardlessCustomer(id,  payerId, customerId, customerBankAccountId);
+        return new GoCardlessCustomer(id, payerId, customerId, customerBankAccountId);
     }
 
 }

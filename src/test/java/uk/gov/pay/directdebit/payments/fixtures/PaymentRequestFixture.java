@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
@@ -42,10 +42,12 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
         this.reference = reference;
         return this;
     }
+
     public PaymentRequestFixture withReturnUrl(String returnUrl) {
         this.returnUrl = returnUrl;
         return this;
     }
+
     public PaymentRequestFixture withGatewayAccountId(Long gatewayAccountId) {
         this.gatewayAccountId = gatewayAccountId;
         return this;
@@ -100,9 +102,9 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
     }
 
     @Override
-    public PaymentRequestFixture insert(DBI jdbi) {
+    public PaymentRequestFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
-                h.update(
+                h.execute(
                         "INSERT INTO" +
                                 "    payment_requests(\n" +
                                 "        id,\n" +

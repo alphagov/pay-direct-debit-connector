@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.mandate.fixtures;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
@@ -48,9 +48,9 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
     }
 
     @Override
-    public GoCardlessMandateFixture insert(DBI jdbi) {
+    public GoCardlessMandateFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
-                h.update(
+                h.execute(
                         "INSERT INTO" +
                                 "    gocardless_mandates(\n" +
                                 "        id,\n" +

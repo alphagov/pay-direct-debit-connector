@@ -1,20 +1,26 @@
 package uk.gov.pay.directdebit.common.dao;
 
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.Argument;
-import org.skife.jdbi.v2.tweak.ArgumentFactory;
+import org.jdbi.v3.core.argument.AbstractArgumentFactory;
+import org.jdbi.v3.core.argument.Argument;
+import org.jdbi.v3.core.config.ConfigRegistry;
 
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.ZonedDateTime;
 
-public class DateArgumentFactory implements ArgumentFactory<ZonedDateTime> {
-    public boolean accepts(Class<?> expectedType, Object value, StatementContext ctx)
-    {
-        return value instanceof ZonedDateTime;
+public class DateArgumentFactory extends AbstractArgumentFactory<ZonedDateTime> {
+
+    /**
+     * Constructs an {@link ArgumentFactory} for type {@code T}.
+     *
+     * @param sqlType the {@link Types} constant to use when the argument value is {@code null}.
+     */
+    protected DateArgumentFactory(int sqlType) {
+        super(sqlType);
     }
 
     @Override
-    public Argument build(Class<?> aClass, ZonedDateTime zonedDateTime, StatementContext statementContext) {
+    protected Argument build(ZonedDateTime zonedDateTime, ConfigRegistry config) {
         return (position, preparedStatement, statementContext1) ->
                 preparedStatement.setTimestamp(position, Timestamp.from(zonedDateTime.toInstant()));
     }

@@ -10,11 +10,11 @@ import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.jdbi.OptionalContainerFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.DirectDebitModule;
@@ -29,24 +29,13 @@ import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMappe
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
-import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountParser;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
-import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
-import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
-import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
-import uk.gov.pay.directdebit.payers.services.PayerService;
-import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
 import uk.gov.pay.directdebit.payments.resources.PaymentRequestResource;
-import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
-import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
-import uk.gov.pay.directdebit.tokens.services.TokenService;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
-import uk.gov.pay.directdebit.webhook.gocardless.services.WebhookGoCardlessService;
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -83,12 +72,12 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     @Override
     public void run(DirectDebitConfig configuration, Environment environment) throws Exception {
         DataSourceFactory dataSourceFactory = configuration.getDataSourceFactory();
-        final DBI jdbi = new DBI(
+        final Jdbi jdbi = Jdbi.create(
                 dataSourceFactory.getUrl(),
                 dataSourceFactory.getUser(),
                 dataSourceFactory.getPassword()
         );
-        jdbi.registerContainerFactory(new OptionalContainerFactory());
+        jdbi.installPlugin(new SqlObjectPlugin());
 
         SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
         final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment, jdbi, socketFactory));
