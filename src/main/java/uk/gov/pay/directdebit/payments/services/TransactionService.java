@@ -159,7 +159,7 @@ public class TransactionService {
                 event);
         transactionDao.updateState(transaction.getId(), newState);
         LOGGER.info("Updating transaction {} - from {} to {}",
-                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequest().getExternalId(),
                 transaction.getState(),
                 newState);
         transaction.setState(newState);

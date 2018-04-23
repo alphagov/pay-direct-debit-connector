@@ -104,20 +104,20 @@ public class UserNotificationService {
         return sendEmail(buildMandateProblemPersonalisation(transaction, mandate),
                 templateId,
                 payer.getEmail(),
-                transaction.getPaymentRequestExternalId());
+                transaction.getPaymentRequest().getExternalId());
     }
 
     public Future<Optional<String>> sendMandateFailedEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
         String mandateFailedTemplateId = directDebitConfig.getNotifyConfig().getMandateFailedTemplateId();
         LOGGER.info("Sending mandate failed email, payment request id: {}, gateway account id: {}",
-                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequest().getExternalId(),
                 transaction.getGatewayAccountExternalId());
         return sendMandateProblemEmailFor(mandateFailedTemplateId, transaction, mandate, payer);
     }
     public Future<Optional<String>> sendMandateCancelledEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
         String mandateCancelledTemplateId = directDebitConfig.getNotifyConfig().getMandateCancelledTemplateId();
         LOGGER.info("Sending mandate cancelled email, payment request id: {}, gateway account id: {}",
-                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequest().getExternalId(),
                 transaction.getGatewayAccountExternalId());
         return sendMandateProblemEmailFor(mandateCancelledTemplateId, transaction, mandate, payer);
     }
@@ -125,12 +125,12 @@ public class UserNotificationService {
     public Future<Optional<String>> sendPaymentConfirmedEmailFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
         String paymentConfirmedTemplateId = directDebitConfig.getNotifyConfig().getPaymentConfirmedTemplateId();
         LOGGER.info("Sending payment confirmed email, payment request id: {}, gateway account id: {}",
-                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequest().getExternalId(),
                 transaction.getGatewayAccountExternalId());
         return sendEmail(buildPaymentConfirmedPersonalisation(transaction, payer,earliestChargeDate),
                 paymentConfirmedTemplateId,
                 payer.getEmail(),
-                transaction.getPaymentRequestExternalId());
+                transaction.getPaymentRequest().getExternalId());
     }
 
     private HashMap<String, String> buildMandateProblemPersonalisation(Transaction transaction, Mandate mandate) {

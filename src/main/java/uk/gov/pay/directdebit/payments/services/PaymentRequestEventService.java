@@ -40,7 +40,7 @@ public class PaymentRequestEventService {
 
     private PaymentRequestEvent insertEventFor(Transaction charge, PaymentRequestEvent event) {
         LOGGER.info("Creating event for {} {}: {} - {}",
-                charge.getType(), charge.getPaymentRequestExternalId(),
+                charge.getType(), charge.getPaymentRequest().getExternalId(),
                 event.getEventType(), event.getEvent());
         Long id = paymentRequestEventDao.insert(event);
         event.setId(id);

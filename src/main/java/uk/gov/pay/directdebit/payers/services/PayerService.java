@@ -30,7 +30,7 @@ public class PayerService {
     public Payer getPayerFor(Transaction transaction) {
         return payerDao
                 .findByPaymentRequestId(transaction.getPaymentRequest().getId())
-                .orElseThrow(() -> new PayerNotFoundException(transaction.getPaymentRequestExternalId()));
+                .orElseThrow(() -> new PayerNotFoundException(transaction.getPaymentRequest().getExternalId()));
     }
 
     public Payer create(String paymentRequestExternalId, String accountExternalId, Map<String, String> createPayerRequest) {

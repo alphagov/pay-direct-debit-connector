@@ -54,7 +54,7 @@ public class TokenResponse {
 
     public static TokenResponse from(Transaction transaction) {
         return new TokenResponse(
-                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequest().getExternalId(),
                 transaction.getGatewayAccountId(),
                 transaction.getGatewayAccountExternalId(),
                 transaction.getPaymentRequestDescription(),

@@ -67,10 +67,6 @@ public class Transaction {
         this.paymentProvider = paymentProvider;
     }
 
-    public String getPaymentRequestExternalId() {
-        return this.paymentRequest.getExternalId();
-    }
-
     public String getPaymentRequestReturnUrl() {
         return this.paymentRequest.getReturnUrl();
     }
