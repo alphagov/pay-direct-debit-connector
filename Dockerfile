@@ -5,6 +5,8 @@ RUN apk --no-cache upgrade
 
 RUN apk add --no-cache bash
 
+RUN apk add --no-cache curl
+
 ENV JAVA_HOME /usr/lib/jvm/java-8-*/
 ENV PORT 8080
 ENV ADMIN_PORT 8081
