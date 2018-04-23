@@ -12,7 +12,7 @@ logging:
       - type: console
         threshold: ALL
         timeZone: UTC
-        target: stdout
+        target: stdout1
         logFormat: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %highlight(%-5level) %cyan(%logger{15}) [requestID=%X{X-Request-Id}] - %msg %n"
 
 proxy:
@@ -21,6 +21,9 @@ proxy:
 
 links:
   frontendUrl: ${FRONTEND_URL:-}
+
+adminusers:
+  adminUsersUrl: ${ADMINUSERS_URL:-}
 
 graphite:
   host: ${METRICS_HOST:-localhost}
@@ -78,3 +81,30 @@ database:
 
   # the minimum amount of time an connection must sit idle in the pool before it is eligible for eviction
   minIdleTime: 1 minute
+
+jerseyClient:
+  # Defines the socket timeout (SO_TIMEOUT), which is the
+  # timeout for waiting for data or, put differently, a maximum period inactivity
+  # between two consecutive data packets).
+  timeout: 2000ms
+
+  # Determines the timeout until a connection is established
+  connectionTimeout: 2000ms
+
+  timeToLive: 1h
+  cookiesEnabled: false
+  maxConnections: 1024
+  maxConnectionsPerRoute: 1024
+  keepAlive: 0ms
+  retries: 0
+  userAgent: directdebit-connector
+  gzipEnabledForRequests: false
+
+customJerseyClient:
+  # Sets the read timeout to a specified timeout, in
+  # milliseconds. A non-zero value specifies the timeout when
+  # reading from Input stream when a connection is established to a
+  # resource. If the timeout expires before there is data available
+  # for read, a java.net.SocketTimeoutException is raised. A
+  # timeout of zero is interpreted as an infinite timeout.
+  readTimeout: 9000ms
