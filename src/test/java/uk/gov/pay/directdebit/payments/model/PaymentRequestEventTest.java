@@ -23,6 +23,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.PAYER;
@@ -204,6 +205,16 @@ public class PaymentRequestEventTest {
 
         assertThat(event.getEvent(), is(MANDATE_CANCELLED));
         assertThat(event.getEventType(), is(MANDATE));
+        assertThat(event.getPaymentRequestId(), is(paymentRequestId));
+    }
+
+    @Test
+    public void paymentMethodChanged_shouldReturnExpectedEvent() {
+        long paymentRequestId = 1L;
+        PaymentRequestEvent event = PaymentRequestEvent.paymentMethodChanged(paymentRequestId);
+
+        assertThat(event.getEvent(), is(PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE));
+        assertThat(event.getEventType(), is(CHARGE));
         assertThat(event.getPaymentRequestId(), is(paymentRequestId));
     }
 }

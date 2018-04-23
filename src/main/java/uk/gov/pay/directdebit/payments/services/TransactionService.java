@@ -170,4 +170,9 @@ public class TransactionService {
     public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {
         return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), MANDATE, MANDATE_PENDING);
     }
+
+    public PaymentRequestEvent paymentMethodChangedFor(Transaction transaction) {
+        Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
+        return paymentRequestEventService.registerPaymentMethodChangedEventFor(newTransaction);
+    }
 }

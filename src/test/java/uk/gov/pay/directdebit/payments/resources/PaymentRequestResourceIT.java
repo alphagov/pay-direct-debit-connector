@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang.RandomStringUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +18,6 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -31,9 +29,9 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.*;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.*;
+import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CANCEL_CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGES_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
@@ -142,14 +140,8 @@ public class PaymentRequestResourceIT {
 
     @Test
     public void shouldCancelATransaction() {
-        PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                .withGatewayAccountId(testGatewayAccount.getId())
-                .insert(testContext.getJdbi());
-        TransactionFixture transactionFixture = aTransactionFixture()
-                .withGatewayAccountId(testGatewayAccount.getId())
-                .withState(PaymentState.AWAITING_CONFIRMATION)
-                .withPaymentRequestId(paymentRequestFixture.getId())
-                .insert(testContext.getJdbi());
+        PaymentRequestFixture paymentRequestFixture = getPaymentRequestFixture();
+        TransactionFixture transactionFixture = getTransactionFixture(paymentRequestFixture.getId(), PaymentState.AWAITING_CONFIRMATION);
 
         String requestPath = CANCEL_CHARGE_API_PATH
                 .replace("{accountId}", testGatewayAccount.getExternalId())
@@ -230,6 +222,38 @@ public class PaymentRequestResourceIT {
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
                 .body("message", is("Field(s) are invalid: [amount]"));
+    }
+
+    @Test
+    public void shouldChangePaymentType() {
+        PaymentRequestFixture paymentRequestFixture = getPaymentRequestFixture();
+        TransactionFixture transactionFixture = getTransactionFixture(paymentRequestFixture.getId(), PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
+
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/change-payment-method"
+                .replace("{accountId}", testGatewayAccount.getExternalId())
+                .replace("{paymentRequestExternalId}", paymentRequestFixture.getExternalId());
+
+        givenSetup()
+                .post(requestPath)
+                .then()
+                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
+
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
+        assertThat(transaction.get("state"), is("USER_CANCEL_NOT_ELIGIBLE"));
+    }
+
+    private PaymentRequestFixture getPaymentRequestFixture() {
+        return aPaymentRequestFixture()
+                    .withGatewayAccountId(testGatewayAccount.getId())
+                    .insert(testContext.getJdbi());
+    }
+
+    private TransactionFixture getTransactionFixture(long paymentRequestId, PaymentState paymentState) {
+        return aTransactionFixture()
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .withState(paymentState)
+                .withPaymentRequestId(paymentRequestId)
+                .insert(testContext.getJdbi());
     }
 
     private String expectedPaymentRequestLocationFor(String accountId, String chargeId) {
