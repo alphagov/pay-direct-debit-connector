@@ -87,7 +87,7 @@ public class TransactionServiceTest {
         assertThat(transaction.getId(), is(notNullValue()));
         assertThat(transaction.getPaymentRequest().getId(), is(paymentRequestFixture.getId()));
         assertThat(transaction.getPaymentRequest().getExternalId(), is(paymentRequestFixture.getExternalId()));
-        assertThat(transaction.getPaymentRequestReturnUrl(), is(paymentRequestFixture.getReturnUrl()));
+        assertThat(transaction.getPaymentRequest().getReturnUrl(), is(paymentRequestFixture.getReturnUrl()));
         assertThat(transaction.getGatewayAccountId(), is(paymentRequestFixture.getGatewayAccountId()));
         assertThat(transaction.getPaymentRequestDescription(), is(paymentRequestFixture.getDescription()));
         assertThat(transaction.getPaymentRequestReference(), is(paymentRequestFixture.getReference()));
@@ -111,7 +111,7 @@ public class TransactionServiceTest {
         assertThat(foundTransaction.getId(), is(notNullValue()));
         assertThat(foundTransaction.getPaymentRequest().getId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(foundTransaction.getPaymentRequest().getExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
-        assertThat(foundTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
+        assertThat(foundTransaction.getPaymentRequest().getReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(foundTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
         assertThat(foundTransaction.getGatewayAccountExternalId(), is(transactionFixture.getGatewayAccountExternalId()));
         assertThat(foundTransaction.getPaymentRequestDescription(), is(transactionFixture.getPaymentRequestDescription()));
@@ -138,7 +138,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getId(), is(notNullValue()));
         assertThat(newTransaction.getPaymentRequest().getId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequest().getExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
-        assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
+        assertThat(newTransaction.getPaymentRequest().getReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
         assertThat(newTransaction.getGatewayAccountExternalId(), is(transactionFixture.getGatewayAccountExternalId()));
         assertThat(newTransaction.getPaymentRequestDescription(), is(transactionFixture.getPaymentRequestDescription()));
@@ -160,7 +160,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getId(), is(notNullValue()));
         assertThat(newTransaction.getPaymentRequest().getId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequest().getExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
-        assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
+        assertThat(newTransaction.getPaymentRequest().getReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
         assertThat(newTransaction.getGatewayAccountExternalId(), is(transactionFixture.getGatewayAccountExternalId()));
         assertThat(newTransaction.getPaymentRequestDescription(), is(transactionFixture.getPaymentRequestDescription()));
@@ -183,7 +183,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getId(), is(notNullValue()));
         assertThat(newTransaction.getPaymentRequest().getId(), is(transactionFixture.getPaymentRequestId()));
         assertThat(newTransaction.getPaymentRequest().getExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
-        assertThat(newTransaction.getPaymentRequestReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
+        assertThat(newTransaction.getPaymentRequest().getReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
         assertThat(newTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
         assertThat(newTransaction.getGatewayAccountExternalId(), is(transactionFixture.getGatewayAccountExternalId()));
         assertThat(newTransaction.getPaymentRequestDescription(), is(transactionFixture.getPaymentRequestDescription()));

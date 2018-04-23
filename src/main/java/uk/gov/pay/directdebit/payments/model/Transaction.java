@@ -67,10 +67,6 @@ public class Transaction {
         this.paymentProvider = paymentProvider;
     }
 
-    public String getPaymentRequestReturnUrl() {
-        return this.paymentRequest.getReturnUrl();
-    }
-
     public Long getGatewayAccountId() {
         return gatewayAccountId;
     }
