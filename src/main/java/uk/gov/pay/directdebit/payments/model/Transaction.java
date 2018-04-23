@@ -75,10 +75,6 @@ public class Transaction {
         return gatewayAccountExternalId;
     }
 
-    public String getPaymentRequestDescription() {
-        return this.paymentRequest.getDescription();
-    }
-
     public String getPaymentRequestReference() {
         return this.paymentRequest.getReference();
     }

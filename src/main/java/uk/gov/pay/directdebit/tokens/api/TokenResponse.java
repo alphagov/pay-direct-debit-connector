@@ -57,7 +57,7 @@ public class TokenResponse {
                 transaction.getPaymentRequest().getExternalId(),
                 transaction.getGatewayAccountId(),
                 transaction.getGatewayAccountExternalId(),
-                transaction.getPaymentRequestDescription(),
+                transaction.getPaymentRequest().getDescription(),
                 transaction.getPaymentRequest().getReturnUrl(),
                 transaction.getAmount(),
                 transaction.getType().toString(),
