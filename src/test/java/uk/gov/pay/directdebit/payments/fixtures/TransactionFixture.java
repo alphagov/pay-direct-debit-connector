@@ -6,8 +6,12 @@ import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, Transaction> {
 
@@ -170,7 +174,18 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public Transaction toEntity() {
-        return new Transaction(id, paymentRequestId, paymentRequestExternalId, paymentRequestDescription, paymentRequestReference, gatewayAccountId, gatewayAccountExternalId, paymentProvider, paymentRequestReturnUrl, amount, type, state);
+        PaymentRequest paymentRequest = new PaymentRequest(
+                paymentRequestId,
+                amount,
+                paymentRequestReturnUrl,
+                gatewayAccountId,
+                paymentRequestDescription,
+                paymentRequestReference,
+                paymentRequestExternalId,
+                ZonedDateTime.now(ZoneOffset.UTC)
+        );
+
+        return new Transaction(id, paymentRequest, gatewayAccountId, gatewayAccountExternalId, paymentProvider, amount, type, state);
     }
 
 }

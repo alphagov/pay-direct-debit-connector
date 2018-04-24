@@ -57,14 +57,10 @@ public class TransactionService {
     Transaction createChargeFor(PaymentRequest paymentRequest, GatewayAccount gatewayAccount) {
         Transaction transaction = new Transaction(
                 null,
-                paymentRequest.getId(),
-                paymentRequest.getExternalId(),
-                paymentRequest.getDescription(),
-                paymentRequest.getReference(),
+                paymentRequest,
                 gatewayAccount.getId(),
                 gatewayAccount.getExternalId(),
                 gatewayAccount.getPaymentProvider(),
-                paymentRequest.getReturnUrl(),
                 paymentRequest.getAmount(),
                 Transaction.Type.CHARGE,
                 PaymentStatesGraph.initialState()

@@ -2,9 +2,6 @@ package uk.gov.pay.directdebit.payments.model;
 
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-
 public class Transaction {
 
     private Long id;
@@ -21,28 +18,15 @@ public class Transaction {
     }
 
     public Transaction(Long id,
-                       Long paymentRequestId,
-                       String paymentRequestExternalId,
-                       String paymentRequestDescription,
-                       String paymentRequestReference,
+                       PaymentRequest paymentRequest,
                        Long gatewayAccountId,
                        String gatewayAccountExternalId,
                        PaymentProvider paymentProvider,
-                       String paymentRequestReturnUrl,
                        Long amount,
                        Type type,
                        PaymentState state) {
         this.id = id;
-        this.paymentRequest = new PaymentRequest(
-                paymentRequestId,
-                amount,
-                paymentRequestReturnUrl,
-                gatewayAccountId,
-                paymentRequestDescription,
-                paymentRequestReference,
-                paymentRequestExternalId,
-                ZonedDateTime.now(ZoneOffset.UTC)
-        );
+        this.paymentRequest = paymentRequest;
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.paymentProvider = paymentProvider;
