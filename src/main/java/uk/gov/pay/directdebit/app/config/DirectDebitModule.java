@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gocardless.GoCardlessClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.squareup.okhttp.OkHttpClient;
 import io.dropwizard.setup.Environment;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
@@ -32,13 +30,13 @@ public class DirectDebitModule extends AbstractModule {
 
     private final DirectDebitConfig configuration;
     private final Environment environment;
-    private final DBI dbi;
+    private final Jdbi jdbi;
     private final SSLSocketFactory sslSocketFactory;
 
-    public DirectDebitModule(final DirectDebitConfig configuration, final Environment environment, final DBI dbi, final SSLSocketFactory socketFactory) {
+    public DirectDebitModule(final DirectDebitConfig configuration, final Environment environment, final Jdbi jdbi, final SSLSocketFactory socketFactory) {
         this.configuration = configuration;
         this.environment = environment;
-        this.dbi = dbi;
+        this.jdbi = jdbi;
         this.sslSocketFactory = socketFactory;
     }
 
@@ -85,46 +83,56 @@ public class DirectDebitModule extends AbstractModule {
 
     @Provides
     public TransactionDao provideTransactionDao() {
-        return dbi.onDemand(TransactionDao.class);
+        return jdbi.onDemand(TransactionDao.class);
     }
+
     @Provides
     public PaymentRequestEventDao providePaymentRequestEventDao() {
-        return dbi.onDemand(PaymentRequestEventDao.class);
+        return jdbi.onDemand(PaymentRequestEventDao.class);
     }
+
     @Provides
     public TokenDao provideTokenDao() {
-        return dbi.onDemand(TokenDao.class);
+        return jdbi.onDemand(TokenDao.class);
     }
+
     @Provides
     public PaymentRequestDao providePaymentRequestDao() {
-        return dbi.onDemand(PaymentRequestDao.class);
+        return jdbi.onDemand(PaymentRequestDao.class);
     }
+
     @Provides
     public GatewayAccountDao provideGatewayAccountDao() {
-        return dbi.onDemand(GatewayAccountDao.class);
+        return jdbi.onDemand(GatewayAccountDao.class);
     }
+
     @Provides
     public PayerDao providePayerDao() {
-        return dbi.onDemand(PayerDao.class);
+        return jdbi.onDemand(PayerDao.class);
     }
+
     @Provides
     public MandateDao provideMandateDao() {
-        return dbi.onDemand(MandateDao.class);
+        return jdbi.onDemand(MandateDao.class);
     }
+
     @Provides
     public GoCardlessCustomerDao provideGoCardlessCustomerDao() {
-        return dbi.onDemand(GoCardlessCustomerDao.class);
+        return jdbi.onDemand(GoCardlessCustomerDao.class);
     }
+
     @Provides
     public GoCardlessPaymentDao provideGoCardlessPaymentDao() {
-        return dbi.onDemand(GoCardlessPaymentDao.class);
+        return jdbi.onDemand(GoCardlessPaymentDao.class);
     }
+
     @Provides
     public GoCardlessMandateDao provideGoCardlessMandateDao() {
-        return dbi.onDemand(GoCardlessMandateDao.class);
+        return jdbi.onDemand(GoCardlessMandateDao.class);
     }
+
     @Provides
     public GoCardlessEventDao provideGoCardlessEventDao() {
-        return dbi.onDemand(GoCardlessEventDao.class);
+        return jdbi.onDemand(GoCardlessEventDao.class);
     }
 }

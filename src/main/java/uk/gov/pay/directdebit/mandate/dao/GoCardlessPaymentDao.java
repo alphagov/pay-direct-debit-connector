@@ -1,22 +1,20 @@
 package uk.gov.pay.directdebit.mandate.dao;
 
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.BindBean;
-import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
-import org.skife.jdbi.v2.sqlobject.SqlQuery;
-import org.skife.jdbi.v2.sqlobject.SqlUpdate;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
-import org.skife.jdbi.v2.sqlobject.customizers.SingleValueResult;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.mandate.dao.mapper.GoCardlessPaymentMapper;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 
 import java.util.Optional;
 
-@RegisterMapper(GoCardlessPaymentMapper.class)
+@RegisterRowMapper(GoCardlessPaymentMapper.class)
 public interface GoCardlessPaymentDao {
 
-    @SqlQuery("SELECT * FROM gocardless_payments p WHERE p.payment_id = :entityId" )
-    @SingleValueResult(GoCardlessPayment.class)
+    @SqlQuery("SELECT * FROM gocardless_payments p WHERE p.payment_id = :entityId")
     Optional<GoCardlessPayment> findByEventResourceId(@Bind("entityId") String entityId);
 
     @SqlUpdate("INSERT INTO gocardless_payments(transaction_id, payment_id) VALUES (:transactionId, :paymentId)")

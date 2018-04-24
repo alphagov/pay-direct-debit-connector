@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.mandate.fixtures;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -17,7 +17,6 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     private MandateState state = MandateState.PENDING;
 
     private MandateFixture() {
-
     }
 
     public static MandateFixture aMandateFixture() {
@@ -70,9 +69,9 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     }
 
     @Override
-    public MandateFixture insert(DBI jdbi) {
+    public MandateFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
-                h.update(
+                h.execute(
                         "INSERT INTO" +
                                 "    mandates(\n" +
                                 "        id,\n" +

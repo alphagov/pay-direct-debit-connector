@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.payers.fixtures;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -19,16 +19,17 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
     private String email = generateEmail();
     private String sortCode = RandomStringUtils.randomNumeric(6);
     private String accountNumber = RandomStringUtils.randomNumeric(8);
-    private String accountNumberLastTwoDigits = accountNumber.substring(accountNumber.length()-2);
+    private String accountNumberLastTwoDigits = accountNumber.substring(accountNumber.length() - 2);
     private boolean accountRequiresAuthorisation = true;
     private String addressLine1 = RandomStringUtils.randomAlphanumeric(10);
     private String addressLine2 = RandomStringUtils.randomAlphanumeric(10);
     private String addressPostcode = RandomStringUtils.randomAlphanumeric(6);
     private String addressCity = RandomStringUtils.randomAlphabetic(10);
-    private String addressCountry = RandomStringUtils.randomAlphabetic(10);;
+    private String addressCountry = RandomStringUtils.randomAlphabetic(10);
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
 
-    private PayerFixture() { }
+    private PayerFixture() {
+    }
 
     public static PayerFixture aPayerFixture() {
         return new PayerFixture();
@@ -170,9 +171,9 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
     }
 
     @Override
-    public PayerFixture insert(DBI jdbi) {
+    public PayerFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
-                h.update(
+                h.execute(
                         "INSERT INTO" +
                                 "    payers(\n" +
                                 "        id,\n" +

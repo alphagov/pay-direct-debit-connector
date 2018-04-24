@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.payments.dao.mapper;
 
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.mapper.RowMapper;
+import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
 import java.sql.ResultSet;
@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-public class PaymentRequestMapper implements ResultSetMapper<PaymentRequest> {
+public class PaymentRequestMapper implements RowMapper<PaymentRequest> {
     private static final String ID_COLUMN = "id";
     private static final String EXTERNAL_ID_COLUMN = "external_id";
     private static final String GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
@@ -20,7 +20,7 @@ public class PaymentRequestMapper implements ResultSetMapper<PaymentRequest> {
     private static final String CREATED_DATE_COLUMN = "created_date";
 
     @Override
-    public PaymentRequest map(int index, ResultSet resultSet, StatementContext statementContext) throws SQLException {
+    public PaymentRequest map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         return new PaymentRequest(
                 resultSet.getLong(ID_COLUMN),
                 resultSet.getLong(AMOUNT_COLUMN),

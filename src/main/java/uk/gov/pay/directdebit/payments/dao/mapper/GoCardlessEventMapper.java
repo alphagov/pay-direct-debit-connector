@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.payments.dao.mapper;
 
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.mapper.RowMapper;
+import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-public class GoCardlessEventMapper implements ResultSetMapper<GoCardlessEvent> {
+public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
     private static final String ID_COLUMN = "id";
     private static final String PAYMENT_REQUEST_EVENTS_ID_COLUMN = "payment_request_events_id";
     private static final String EVENT_ID_COLUMN = "event_id";
@@ -20,7 +20,7 @@ public class GoCardlessEventMapper implements ResultSetMapper<GoCardlessEvent> {
     private static final String CREATED_AT_COLUMN = "created_at";
 
     @Override
-    public GoCardlessEvent map(int index, ResultSet resultSet, StatementContext statementContext) throws SQLException {
+    public GoCardlessEvent map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         return new GoCardlessEvent(
                 resultSet.getLong(ID_COLUMN),
                 resultSet.getLong(PAYMENT_REQUEST_EVENTS_ID_COLUMN),

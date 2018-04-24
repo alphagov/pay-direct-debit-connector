@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 
@@ -74,9 +74,9 @@ public class PaymentRequestEventFixture implements DbFixture<PaymentRequestEvent
     }
 
     @Override
-    public PaymentRequestEventFixture insert(DBI jdbi) {
+    public PaymentRequestEventFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
-                h.update(
+                h.execute(
                         "INSERT INTO" +
                                 "    payment_request_events(\n" +
                                 "        id,\n" +

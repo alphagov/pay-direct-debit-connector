@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.payments.dao.mapper;
 
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.mapper.RowMapper;
+import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -9,7 +9,7 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class TransactionMapper implements ResultSetMapper<Transaction> {
+public class TransactionMapper implements RowMapper<Transaction> {
 
     private static final String TRANSACTION_ID_COLUMN = "transaction_id";
     private static final String TRANSACTION_AMOUNT_COLUMN = "transaction_amount";
@@ -25,7 +25,7 @@ public class TransactionMapper implements ResultSetMapper<Transaction> {
     private static final String GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN = "gateway_account_payment_provider";
 
     @Override
-    public Transaction map(int index, ResultSet resultSet, StatementContext statementContext) throws SQLException {
+    public Transaction map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         return new Transaction(
                 resultSet.getLong(TRANSACTION_ID_COLUMN),
                 resultSet.getLong(PAYMENT_REQUEST_ID_COLUMN),

@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.payments.fixtures;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
@@ -21,6 +21,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     private String resourceId = RandomStringUtils.randomAlphabetic(20);
     private String json = "{\"id\": \"somejson\"}";
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
+
     private GoCardlessEventFixture() {
     }
 
@@ -101,9 +102,9 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     }
 
     @Override
-    public GoCardlessEventFixture insert(DBI jdbi) {
+    public GoCardlessEventFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
-                h.update(
+                h.execute(
                         "INSERT INTO" +
                                 "    gocardless_events(\n" +
                                 "        id,\n" +

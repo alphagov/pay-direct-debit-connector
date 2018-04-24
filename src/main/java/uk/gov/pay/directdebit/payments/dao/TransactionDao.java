@@ -1,12 +1,11 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.BindBean;
-import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
-import org.skife.jdbi.v2.sqlobject.SqlQuery;
-import org.skife.jdbi.v2.sqlobject.SqlUpdate;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
-import org.skife.jdbi.v2.sqlobject.customizers.SingleValueResult;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.dao.mapper.TransactionMapper;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -15,7 +14,7 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 import java.util.List;
 import java.util.Optional;
 
-@RegisterMapper(TransactionMapper.class)
+@RegisterRowMapper(TransactionMapper.class)
 public interface TransactionDao {
 
     @SqlQuery("SELECT\n" +
@@ -42,7 +41,6 @@ public interface TransactionDao {
             "FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id\n" +
             "  JOIN gateway_accounts g ON p.gateway_account_id = g.id\n" +
             "WHERE t.id = :id")
-    @SingleValueResult(Transaction.class)
     Optional<Transaction> findById(@Bind("id") Long id);
 
     @SqlQuery("SELECT\n" +
@@ -69,7 +67,6 @@ public interface TransactionDao {
             "FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id\n" +
             "  JOIN gateway_accounts g ON p.gateway_account_id = g.id\n" +
             "WHERE t.payment_request_id = :paymentRequestId")
-    @SingleValueResult(Transaction.class)
     Optional<Transaction> findByPaymentRequestId(@Bind("paymentRequestId") Long paymentRequestId);
 
     @SqlQuery("SELECT\n" +
@@ -96,7 +93,6 @@ public interface TransactionDao {
             "FROM transactions t JOIN payment_requests p ON p.id = t.payment_request_id\n" +
             "  JOIN gateway_accounts g ON p.gateway_account_id = g.id\n" +
             "WHERE p.external_id = :paymentRequestExternalId AND g.external_id = :accountExternalId")
-    @SingleValueResult(Transaction.class)
     Optional<Transaction> findTransactionForExternalIdAndGatewayAccountExternalId(@Bind("paymentRequestExternalId") String paymentRequestExternalId, @Bind("accountExternalId") String accountExternalId);
 
     @SqlQuery("SELECT\n" +
@@ -124,7 +120,6 @@ public interface TransactionDao {
             "  JOIN payment_requests p ON tr.payment_request_id = p.id\n" +
             "  JOIN gateway_accounts g ON p.gateway_account_id = g.id\n" +
             "WHERE t.secure_redirect_token = :tokenId")
-    @SingleValueResult(Transaction.class)
     Optional<Transaction> findByTokenId(@Bind("tokenId") String tokenId);
 
     @SqlQuery("SELECT\n" +
@@ -179,7 +174,6 @@ public interface TransactionDao {
             "  JOIN payers p ON p.payment_request_id = t.payment_request_id\n" +
             "  JOIN mandates m ON m.payer_id = p.id\n" +
             "WHERE m.id = :mandateId")
-    @SingleValueResult(Transaction.class)
     Optional<Transaction> findByMandateId(@Bind("mandateId") Long mandateId);
 
     @SqlUpdate("UPDATE transactions t SET state = :state WHERE t.id = :id")
