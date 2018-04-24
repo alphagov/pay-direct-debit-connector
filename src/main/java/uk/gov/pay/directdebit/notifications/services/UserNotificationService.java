@@ -56,6 +56,7 @@ public class UserNotificationService {
     private final DirectDebitConfig directDebitConfig;
     private final GatewayAccountService gatewayAccountService;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     @Inject
     public UserNotificationService(DirectDebitConfig directDebitConfig,
                                    NotificationClient notificationClient,
@@ -114,6 +115,7 @@ public class UserNotificationService {
                 transaction.getGatewayAccountExternalId());
         return sendMandateProblemEmailFor(mandateFailedTemplateId, transaction, mandate, payer);
     }
+
     public Future<Optional<String>> sendMandateCancelledEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
         String mandateCancelledTemplateId = directDebitConfig.getNotifyConfig().getMandateCancelledTemplateId();
         LOGGER.info("Sending mandate cancelled email, payment request id: {}, gateway account id: {}",
@@ -124,13 +126,14 @@ public class UserNotificationService {
 
     public Future<Optional<String>> sendPaymentConfirmedEmailFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
         String paymentConfirmedTemplateId = directDebitConfig.getNotifyConfig().getPaymentConfirmedTemplateId();
+        String paymentRequestExternalId = transaction.getPaymentRequest().getExternalId();
         LOGGER.info("Sending payment confirmed email, payment request id: {}, gateway account id: {}",
-                transaction.getPaymentRequest().getExternalId(),
+                paymentRequestExternalId,
                 transaction.getGatewayAccountExternalId());
-        return sendEmail(buildPaymentConfirmedPersonalisation(transaction, payer,earliestChargeDate),
+        return sendEmail(buildPaymentConfirmedPersonalisation(transaction, payer, earliestChargeDate),
                 paymentConfirmedTemplateId,
                 payer.getEmail(),
-                transaction.getPaymentRequest().getExternalId());
+                paymentRequestExternalId);
     }
 
     private HashMap<String, String> buildMandateProblemPersonalisation(Transaction transaction, Mandate mandate) {

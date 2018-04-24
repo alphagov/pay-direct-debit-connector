@@ -33,10 +33,11 @@ public class PaymentConfirmService {
      */
     public ConfirmationDetails confirm(String accountExternalId, String paymentExternalId) {
         Transaction transaction = transactionService.confirmedDirectDebitDetailsFor(accountExternalId, paymentExternalId);
-        Mandate createdMandate = payerDao.findByPaymentRequestId(transaction.getPaymentRequest().getId())
+        Long paymentRequestId = transaction.getPaymentRequest().getId();
+        Mandate createdMandate = payerDao.findByPaymentRequestId(paymentRequestId)
                 .map(this::createMandateFor)
                 .orElseThrow(() -> new PayerConflictException(String.format("Expected payment request %s to be already associated with a payer", paymentExternalId)));
-        LOGGER.info("Mandate created for payment request {}", transaction.getPaymentRequest().getId());
+        LOGGER.info("Mandate created for payment request {}", paymentRequestId);
         return new ConfirmationDetails(transaction, createdMandate);
     }
 
