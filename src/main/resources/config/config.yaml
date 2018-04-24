@@ -12,7 +12,7 @@ logging:
       - type: console
         threshold: ALL
         timeZone: UTC
-        target: stdout1
+        target: stdout
         logFormat: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %highlight(%-5level) %cyan(%logger{15}) [requestID=%X{X-Request-Id}] - %msg %n"
 
 proxy:
@@ -36,14 +36,6 @@ goCardless:
   clientUrl: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_URL:-}
   webhookSecret: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_WEBHOOK_SECRET:-change-me}
   environment: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ENVIRONMENT:-sandbox}
-
-notify:
-  apiKey: ${GDS_DIRECTDEBIT_CONNECTOR_NOTIFY_API_KEY:-api_key-pay-notify-service-id-pay-notify-secret-needs-to-be-32-chars-fsghdngfhmhfkrgsfs}
-  mandateFailedTemplateId: ${NOTIFY_MANDATE_FAILED_EMAIL_TEMPLATE_ID}
-  mandateCancelledTemplateId: ${NOTIFY_MANDATE_CANCELLED_EMAIL_TEMPLATE_ID}
-  paymentConfirmedTemplateId: ${NOTIFY_PAYMENT_CONFIRMATION_EMAIL_TEMPLATE_ID}
-  notificationBaseURL: ${NOTIFY_BASE_URL:-https://api.notifications.service.gov.uk}
-  emailNotifyEnabled: ${NOTIFY_EMAIL_ENABLED:-false}
 
 executorService:
   timeoutInSeconds: ${AUTH_READ_TIMEOUT_SECONDS:-1}
