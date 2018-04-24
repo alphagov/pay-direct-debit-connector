@@ -23,6 +23,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
     private static final String PAYMENT_REQUEST_REFERENCE_COLUMN = "payment_request_reference";
     private static final String PAYMENT_REQUEST_RETURN_URL_COLUMN = "payment_request_return_url";
     private static final String PAYMENT_REQUEST_DESCRIPTION_COLUMN = "payment_request_description";
+    private static final String PAYMENT_REQUEST_AMOUNT_COLUMN = "payment_request_amount";
     private static final String GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
     private static final String GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN = "gateway_account_external_id";
     private static final String GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN = "gateway_account_payment_provider";
@@ -31,7 +32,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
     public Transaction map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         PaymentRequest paymentRequest = new PaymentRequest(
                 resultSet.getLong(PAYMENT_REQUEST_ID_COLUMN),
-                resultSet.getLong(TRANSACTION_AMOUNT_COLUMN),
+                resultSet.getLong(PAYMENT_REQUEST_AMOUNT_COLUMN),
                 resultSet.getString(PAYMENT_REQUEST_RETURN_URL_COLUMN),
                 resultSet.getLong(GATEWAY_ACCOUNT_ID_COLUMN),
                 resultSet.getString(PAYMENT_REQUEST_DESCRIPTION_COLUMN),
