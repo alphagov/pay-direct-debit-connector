@@ -22,8 +22,6 @@ import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
-import uk.gov.service.notify.NotificationClient;
-
 import javax.net.ssl.SSLSocketFactory;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -64,13 +62,8 @@ public class DirectDebitModule extends AbstractModule {
     }
 
     @Provides
-    public GoCardlessClientWrapper provideGoCardlessClientWrapper() throws IllegalAccessException {
+    public GoCardlessClientWrapper provideGoCardlessClientWrapper()  {
         return new GoCardlessClientWrapper(createGoCardlessClient());
-    }
-
-    @Provides
-    public NotificationClient provideNotifyClient() {
-        return configuration.getNotifyConfig().getInstance();
     }
 
     @Provides

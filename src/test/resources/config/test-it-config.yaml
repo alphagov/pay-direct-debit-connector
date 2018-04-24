@@ -38,14 +38,6 @@ executorService:
 adminusers:
   adminUsersUrl: http://localhost:10110
 
-notify:
-  mandateFailedTemplateId: test-template-id
-  mandateCancelledTemplateId: test-template-id
-  paymentConfirmedTemplateId: test-template-id
-  apiKey: ${NOTIFY_API_KEY:-pay-notify-api-key}
-  notificationBaseURL: https://stubs.pymnt.localdomain
-  emailNotifyEnabled: false
-
 jerseyClient:
   timeout: 500ms
   connectionTimeout: 500ms

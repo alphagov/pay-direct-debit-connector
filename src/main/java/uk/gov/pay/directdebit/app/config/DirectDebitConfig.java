@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
-import uk.gov.pay.directdebit.notifications.clients.ClientFactory;
-import uk.gov.pay.directdebit.notifications.config.NotifyClientFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 
 import javax.validation.Valid;
@@ -31,8 +29,6 @@ public class DirectDebitConfig extends Configuration {
     @NotNull
     private ProxyConfig proxyConfig;
 
-    @NotNull
-    private NotifyClientFactory notifyConfig;
 
     @NotNull
     private AdminUsersConfig adminUsersConfig;
@@ -46,11 +42,6 @@ public class DirectDebitConfig extends Configuration {
 
     @NotNull
     private CustomJerseyClientConfiguration customJerseyClient;
-
-    @JsonProperty("notify")
-    public NotifyClientFactory getNotifyConfig() {
-        return notifyConfig;
-    }
 
     @JsonProperty("adminusers")
     public AdminUsersConfig getAdminUsersConfig() {

@@ -49,7 +49,7 @@ public class UserNotificationServiceTest {
     }
 
     @Test
-    public void shouldSendMandateFailedEmailIfEmailNotifyIsEnabled() {
+    public void shouldSendMandateFailedEmail() {
         userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("mandate reference", mandate.getReference());
@@ -61,7 +61,7 @@ public class UserNotificationServiceTest {
     }
 
     @Test
-    public void shouldSendMandateCancelledEmailIfEmailNotifyIsEnabled() {
+    public void shouldSendMandateCancelledEmail() {
         userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("mandate reference", mandate.getReference());
@@ -73,7 +73,7 @@ public class UserNotificationServiceTest {
     }
 
     @Test
-    public void shouldSendPaymentConfirmedEmailIfEmailNotifyIsEnabled() {
+    public void shouldSendPaymentConfirmedEmail() {
         userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
 
         HashMap<String, String> emailPersonalisation = new HashMap<>();
