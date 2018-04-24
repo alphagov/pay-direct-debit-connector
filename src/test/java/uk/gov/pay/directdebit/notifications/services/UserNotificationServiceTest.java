@@ -150,7 +150,7 @@ public class UserNotificationServiceTest {
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("service name", gatewayAccount.getServiceName());
         emailPersonalisation.put("amount", "123.45");
-        emailPersonalisation.put("payment reference", transaction.getPaymentRequestReference());
+        emailPersonalisation.put("payment reference", transaction.getPaymentRequest().getReference());
         emailPersonalisation.put("collection date", "21/05/2018");
         emailPersonalisation.put("bank account last 2 digits", "******" + payer.getAccountNumberLastTwoDigits());
         emailPersonalisation.put("SUN", "THE-CAKE-IS-A-LIE");

@@ -152,7 +152,7 @@ public class UserNotificationService {
         HashMap<String, String> map = new HashMap<>();
         map.put(SERVICE_NAME_KEY, gatewayAccount.getServiceName());
         map.put(AMOUNT_KEY, formatToPounds(transaction.getAmount()));
-        map.put(PAYMENT_REFERENCE_KEY, transaction.getPaymentRequestReference());
+        map.put(PAYMENT_REFERENCE_KEY, transaction.getPaymentRequest().getReference());
         map.put(BANK_ACCOUNT_LAST_DIGITS_KEY, "******" + payer.getAccountNumberLastTwoDigits());
         map.put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate));
         map.put(SUN_KEY, PLACEHOLDER_SUN);
