@@ -21,6 +21,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCre
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCancelled;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentFailed;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentMethodChanged;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentPending;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentSubmitted;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payoutPaid;
@@ -128,5 +129,10 @@ public class PaymentRequestEventService {
 
     public Optional<PaymentRequestEvent> findBy(Long paymentRequestId, PaymentRequestEvent.Type type, PaymentRequestEvent.SupportedEvent event) {
         return paymentRequestEventDao.findByPaymentRequestIdAndEvent(paymentRequestId, type, event);
+    }
+
+    public PaymentRequestEvent registerPaymentMethodChangedEventFor(Transaction transaction) {
+        PaymentRequestEvent event = paymentMethodChanged(transaction.getPaymentRequestId());
+        return insertEventFor(transaction, event);
     }
 }

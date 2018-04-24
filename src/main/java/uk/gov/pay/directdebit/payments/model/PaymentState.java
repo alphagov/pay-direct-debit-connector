@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.model;
 
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_FAILED;
 import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_PENDING;
 import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_STARTED;
@@ -20,6 +21,7 @@ public enum PaymentState {
     PENDING_DIRECT_DEBIT_PAYMENT(EXTERNAL_PENDING),
     FAILED(EXTERNAL_FAILED),
     CANCELLED(EXTERNAL_FAILED),
+    USER_CANCEL_NOT_ELIGIBLE(EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE),
 
     SUCCESS(EXTERNAL_SUCCESS);
 

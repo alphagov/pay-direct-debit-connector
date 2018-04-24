@@ -240,4 +240,14 @@ public class PaymentRequestServiceTest {
         thrown.reportMissingExceptionWithMessage("PaymentNotFoundException expected");
         service.getPaymentWithExternalId(gatewayAccountFixture.getExternalId(), externalPaymentId, uriInfo);
     }
+
+    @Test
+    public void shouldDelegateToTheTransactionServiceToChangeAPaymentMethod() {
+        Transaction transaction = transactionFixture.toEntity();
+        when(mockTransactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId()))
+                .thenReturn(transaction);
+
+        service.changePaymentMethod(gatewayAccountFixture.getExternalId(), paymentRequest.getExternalId());
+        verify(mockTransactionService).paymentMethodChangedFor(transaction);
+    }
 }

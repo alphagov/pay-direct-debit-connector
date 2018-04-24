@@ -63,4 +63,13 @@ public class PaymentRequestResource {
         paymentRequestService.cancelTransaction(accountExternalId, paymentRequestExternalId);
         return Response.noContent().build();
     }
+
+    @POST
+    @Path("/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/change-payment-method")
+    @Produces(APPLICATION_JSON)
+    public Response userChangePaymentMethod(@PathParam("accountId") String accountExternalId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId) {
+        LOGGER.info("User wants to change payment method for - {}", paymentRequestExternalId);
+        paymentRequestService.changePaymentMethod(accountExternalId, paymentRequestExternalId);
+        return Response.noContent().build();
+    }
 }

@@ -109,4 +109,9 @@ public class PaymentRequestService {
                 .orElseThrow(() -> new PaymentRequestNotFoundException(paymentExternalId, accountExternalId));
     }
 
+    public void changePaymentMethod(String accountExternalId, String paymentRequestExternalId) {
+        Transaction transaction = transactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
+        transactionService.paymentMethodChangedFor(transaction);
+    }
+
 }

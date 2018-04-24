@@ -14,15 +14,17 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
 
 public class PaymentStatesGraph {
 
@@ -51,6 +53,7 @@ public class PaymentStatesGraph {
 
         graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, PROCESSING_DIRECT_DEBIT_DETAILS, DIRECT_DEBIT_DETAILS_RECEIVED);
         graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, CANCELLED, PAYMENT_CANCELLED_BY_USER);
+        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, USER_CANCEL_NOT_ELIGIBLE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
 
         graph.putEdgeValue(PROCESSING_DIRECT_DEBIT_DETAILS, AWAITING_CONFIRMATION, PAYER_CREATED);
         graph.putEdgeValue(PROCESSING_DIRECT_DEBIT_DETAILS, CANCELLED, PAYMENT_CANCELLED_BY_USER);

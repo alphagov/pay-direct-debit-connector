@@ -31,6 +31,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
 
@@ -230,5 +231,17 @@ public class PaymentRequestEventServiceTest {
         Optional<PaymentRequestEvent> event = service.findBy(paymentRequestId, CHARGE, PAYMENT_PENDING);
 
         assertThat(event.get(), is(expectedEvent));
+    }
+
+    @Test
+    public void registerPaymentMethodChangedEventFor_shouldCreateExpectedEvent() {
+        service.registerPaymentMethodChangedEventFor(transactionFixture.toEntity());
+
+        verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
+        PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
+        assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(paymentRequestEvent.getEvent(), is(PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE));
+        assertThat(paymentRequestEvent.getEventType(), is(CHARGE));
+        assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }
 }

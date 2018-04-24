@@ -19,7 +19,6 @@ import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
-import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.time.LocalDate;
@@ -38,18 +37,18 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.*;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionServiceTest {
@@ -326,5 +325,20 @@ public class TransactionServiceTest {
         PaymentRequestEvent foundEvent = service.findMandatePendingEventFor(transaction).get();
 
         assertThat(foundEvent, is(event));
+    }
+
+    @Test
+    public void userNotEligibleFor_shouldUpdateTransactionAsCancelled_shouldRegisterAUserNotEligibledEvent() {
+
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .toEntity();
+
+        service.paymentMethodChangedFor(transaction);
+
+        verify(mockedPaymentRequestEventService).registerPaymentMethodChangedEventFor(transaction);
+        verify(mockedTransactionDao).updateState(transaction.getId(), USER_CANCEL_NOT_ELIGIBLE);
+        assertThat(transaction.getState(), is(USER_CANCEL_NOT_ELIGIBLE));
     }
 }
