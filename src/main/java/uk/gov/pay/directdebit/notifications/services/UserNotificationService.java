@@ -56,6 +56,7 @@ public class UserNotificationService {
     private final DirectDebitConfig directDebitConfig;
     private final GatewayAccountService gatewayAccountService;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     @Inject
     public UserNotificationService(DirectDebitConfig directDebitConfig,
                                    NotificationClient notificationClient,
@@ -104,33 +105,35 @@ public class UserNotificationService {
         return sendEmail(buildMandateProblemPersonalisation(transaction, mandate),
                 templateId,
                 payer.getEmail(),
-                transaction.getPaymentRequestExternalId());
+                transaction.getPaymentRequest().getExternalId());
     }
 
     public Future<Optional<String>> sendMandateFailedEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
         String mandateFailedTemplateId = directDebitConfig.getNotifyConfig().getMandateFailedTemplateId();
         LOGGER.info("Sending mandate failed email, payment request id: {}, gateway account id: {}",
-                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequest().getExternalId(),
                 transaction.getGatewayAccountExternalId());
         return sendMandateProblemEmailFor(mandateFailedTemplateId, transaction, mandate, payer);
     }
+
     public Future<Optional<String>> sendMandateCancelledEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
         String mandateCancelledTemplateId = directDebitConfig.getNotifyConfig().getMandateCancelledTemplateId();
         LOGGER.info("Sending mandate cancelled email, payment request id: {}, gateway account id: {}",
-                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequest().getExternalId(),
                 transaction.getGatewayAccountExternalId());
         return sendMandateProblemEmailFor(mandateCancelledTemplateId, transaction, mandate, payer);
     }
 
     public Future<Optional<String>> sendPaymentConfirmedEmailFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
         String paymentConfirmedTemplateId = directDebitConfig.getNotifyConfig().getPaymentConfirmedTemplateId();
+        String paymentRequestExternalId = transaction.getPaymentRequest().getExternalId();
         LOGGER.info("Sending payment confirmed email, payment request id: {}, gateway account id: {}",
-                transaction.getPaymentRequestExternalId(),
+                paymentRequestExternalId,
                 transaction.getGatewayAccountExternalId());
-        return sendEmail(buildPaymentConfirmedPersonalisation(transaction, payer,earliestChargeDate),
+        return sendEmail(buildPaymentConfirmedPersonalisation(transaction, payer, earliestChargeDate),
                 paymentConfirmedTemplateId,
                 payer.getEmail(),
-                transaction.getPaymentRequestExternalId());
+                paymentRequestExternalId);
     }
 
     private HashMap<String, String> buildMandateProblemPersonalisation(Transaction transaction, Mandate mandate) {
@@ -152,7 +155,7 @@ public class UserNotificationService {
         HashMap<String, String> map = new HashMap<>();
         map.put(SERVICE_NAME_KEY, gatewayAccount.getServiceName());
         map.put(AMOUNT_KEY, formatToPounds(transaction.getAmount()));
-        map.put(PAYMENT_REFERENCE_KEY, transaction.getPaymentRequestReference());
+        map.put(PAYMENT_REFERENCE_KEY, transaction.getPaymentRequest().getReference());
         map.put(BANK_ACCOUNT_LAST_DIGITS_KEY, "******" + payer.getAccountNumberLastTwoDigits());
         map.put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate));
         map.put(SUN_KEY, PLACEHOLDER_SUN);

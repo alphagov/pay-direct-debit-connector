@@ -56,17 +56,15 @@ public class TransactionService {
 
     Transaction createChargeFor(PaymentRequest paymentRequest, GatewayAccount gatewayAccount) {
         Transaction transaction = new Transaction(
-                paymentRequest.getId(),
-                paymentRequest.getExternalId(),
-                paymentRequest.getDescription(),
-                paymentRequest.getReference(),
+                null,
+                paymentRequest,
                 gatewayAccount.getId(),
                 gatewayAccount.getExternalId(),
                 gatewayAccount.getPaymentProvider(),
-                paymentRequest.getReturnUrl(),
                 paymentRequest.getAmount(),
                 Transaction.Type.CHARGE,
-                PaymentStatesGraph.initialState());
+                PaymentStatesGraph.initialState()
+        );
         LOGGER.info("Created transaction for payment request {}", paymentRequest.getExternalId());
         Long id = transactionDao.insert(transaction);
         transaction.setId(id);
@@ -87,6 +85,7 @@ public class TransactionService {
                     return newCharge;
                 });
     }
+
     public Transaction findTransactionFor(Long transactionId) {
         return transactionDao
                 .findById(transactionId)
@@ -156,7 +155,7 @@ public class TransactionService {
                 event);
         transactionDao.updateState(transaction.getId(), newState);
         LOGGER.info("Updating transaction {} - from {} to {}",
-                transaction.getPaymentRequestExternalId(),
+                transaction.getPaymentRequest().getExternalId(),
                 transaction.getState(),
                 newState);
         transaction.setState(newState);
@@ -164,11 +163,11 @@ public class TransactionService {
     }
 
     public Optional<PaymentRequestEvent> findPaymentSubmittedEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), CHARGE, PAYMENT_SUBMITTED);
+        return paymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), CHARGE, PAYMENT_SUBMITTED);
     }
 
     public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), MANDATE, MANDATE_PENDING);
+        return paymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), MANDATE, MANDATE_PENDING);
     }
 
     public PaymentRequestEvent paymentMethodChangedFor(Transaction transaction) {

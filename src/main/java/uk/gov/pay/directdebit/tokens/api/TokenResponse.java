@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.tokens.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -53,12 +54,13 @@ public class TokenResponse {
     }
 
     public static TokenResponse from(Transaction transaction) {
+        PaymentRequest paymentRequest = transaction.getPaymentRequest();
         return new TokenResponse(
-                transaction.getPaymentRequestExternalId(),
+                paymentRequest.getExternalId(),
                 transaction.getGatewayAccountId(),
                 transaction.getGatewayAccountExternalId(),
-                transaction.getPaymentRequestDescription(),
-                transaction.getPaymentRequestReturnUrl(),
+                paymentRequest.getDescription(),
+                paymentRequest.getReturnUrl(),
                 transaction.getAmount(),
                 transaction.getType().toString(),
                 transaction.getState().toString()

@@ -83,6 +83,6 @@ public class MandateService {
     }
 
     public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequestId(), MANDATE, MANDATE_PENDING);
+        return paymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), MANDATE, MANDATE_PENDING);
     }
 }

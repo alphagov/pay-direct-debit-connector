@@ -6,6 +6,7 @@ import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
@@ -27,10 +28,12 @@ public class PayerService {
         this.transactionService = transactionService;
         this.payerParser = payerParser;
     }
+
     public Payer getPayerFor(Transaction transaction) {
+        PaymentRequest paymentRequest = transaction.getPaymentRequest();
         return payerDao
-                .findByPaymentRequestId(transaction.getPaymentRequestId())
-                .orElseThrow(() -> new PayerNotFoundException(transaction.getPaymentRequestExternalId()));
+                .findByPaymentRequestId(paymentRequest.getId())
+                .orElseThrow(() -> new PayerNotFoundException(paymentRequest.getExternalId()));
     }
 
     public Payer create(String paymentRequestExternalId, String accountExternalId, Map<String, String> createPayerRequest) {
