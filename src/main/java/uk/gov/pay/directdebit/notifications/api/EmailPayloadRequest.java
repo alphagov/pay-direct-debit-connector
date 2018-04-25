@@ -17,8 +17,8 @@ public class EmailPayloadRequest {
     @JsonProperty
     private String address;
 
-    @JsonProperty("gateway_account_id")
-    private String gatewayAccountId;
+    @JsonProperty("gateway_account_external_id")
+    private String gatewayAccountExternalId;
 
     @JsonProperty
     private EmailTemplate template;
@@ -27,14 +27,14 @@ public class EmailPayloadRequest {
     private Map<String, String> personalisation;
 
     public static EmailPayloadRequest from(EmailPayload emailPayload) {
-        return new EmailPayloadRequest(emailPayload.getAddress(), emailPayload.getGatewayAccountId(),
+        return new EmailPayloadRequest(emailPayload.getAddress(), emailPayload.getGatewayAccountExternalId(),
                 emailPayload.getTemplate(), emailPayload.getPersonalisation());
     }
 
-    public EmailPayloadRequest(String address, String gatewayAccountId, EmailTemplate template,
-                                Map<String, String> personalisation) {
+    public EmailPayloadRequest(String address, String gatewayAccountExternalId, EmailTemplate template,
+                               Map<String, String> personalisation) {
         this.address = address;
-        this.gatewayAccountId = gatewayAccountId;
+        this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.template = template;
         this.personalisation = personalisation;
     }

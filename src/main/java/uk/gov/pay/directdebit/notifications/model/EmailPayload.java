@@ -8,7 +8,7 @@ import java.util.Map;
 public class EmailPayload {
 
     private String address;
-    private String gatewayAccountId;
+    private String gatewayAccountExternalId;
     private EmailTemplate template;
     private Map<String, String> personalisation;
 
@@ -16,8 +16,8 @@ public class EmailPayload {
         return address;
     }
 
-    public String getGatewayAccountId() {
-        return gatewayAccountId;
+    public String getGatewayAccountExternalId() {
+        return gatewayAccountExternalId;
     }
 
     public EmailTemplate getTemplate() {

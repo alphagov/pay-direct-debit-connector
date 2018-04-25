@@ -85,7 +85,7 @@ public class ConfirmPaymentResourceIT {
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
         String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-                "\"gateway_account_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
+                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
                 "\"template\": \"PAYMENT_CONFIRMED\"," +
                 "\"personalisation\": " +
                 "{" +
@@ -131,7 +131,7 @@ public class ConfirmPaymentResourceIT {
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-                "\"gateway_account_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
+                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
                 "\"template\": \"PAYMENT_CONFIRMED\"," +
                 "\"personalisation\": " +
                 "{" +
