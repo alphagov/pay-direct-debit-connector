@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Map;
 
 public class AdminUsersClient {
@@ -31,9 +32,15 @@ public class AdminUsersClient {
                 transaction.getPaymentRequest().getExternalId(),
                 transaction.getGatewayAccountExternalId());
         EmailPayloadRequest emailPayloadRequest = new EmailPayloadRequest(email, transaction.getGatewayAccountExternalId(), template, personalisation);
-        client.target(config.getAdminUsersUrl())
-                .path("/v1/emails/send")
-                .request()
-                .post(Entity.entity(emailPayloadRequest, MediaType.APPLICATION_JSON_TYPE));
+        Response response = null;
+        try {
+             response = client.target(config.getAdminUsersUrl())
+                    .path("/v1/emails/send")
+                    .request()
+                    .post(Entity.entity(emailPayloadRequest, MediaType.APPLICATION_JSON_TYPE));
+            response.readEntity(String.class);
+        } catch (Exception exc) {
+            LOGGER.error("Making call to adminusers failed with exception {}", exc.getMessage());
+        }
     }
 }

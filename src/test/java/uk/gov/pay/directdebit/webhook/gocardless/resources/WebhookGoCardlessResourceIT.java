@@ -115,7 +115,7 @@ public class WebhookGoCardlessResourceIT {
                 .insert(testContext.getJdbi());
 
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-                "\"gateway_account_id\": \"" + testGatewayAccount.getExternalId() + "\"," +
+                "\"gateway_account_external_id\": \"" + testGatewayAccount.getExternalId() + "\"," +
                 "\"template\": \"MANDATE_FAILED\"," +
                 "\"personalisation\": " +
                     "{" +
