@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.notifications.clients;
 
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.AdminUsersConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
