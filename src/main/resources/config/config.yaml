@@ -22,9 +22,6 @@ proxy:
 links:
   frontendUrl: ${FRONTEND_URL:-}
 
-adminusers:
-  adminUsersUrl: ${ADMINUSERS_URL:-}
-
 graphite:
   host: ${METRICS_HOST:-localhost}
   port: ${METRICS_PORT:-8092}
@@ -36,6 +33,14 @@ goCardless:
   clientUrl: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_URL:-}
   webhookSecret: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_WEBHOOK_SECRET:-change-me}
   environment: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ENVIRONMENT:-sandbox}
+
+notify:
+  apiKey: ${GDS_DIRECTDEBIT_CONNECTOR_NOTIFY_API_KEY:-api_key-pay-notify-service-id-pay-notify-secret-needs-to-be-32-chars-fsghdngfhmhfkrgsfs}
+  mandateFailedTemplateId: ${NOTIFY_MANDATE_FAILED_EMAIL_TEMPLATE_ID}
+  mandateCancelledTemplateId: ${NOTIFY_MANDATE_CANCELLED_EMAIL_TEMPLATE_ID}
+  paymentConfirmedTemplateId: ${NOTIFY_PAYMENT_CONFIRMATION_EMAIL_TEMPLATE_ID}
+  notificationBaseURL: ${NOTIFY_BASE_URL:-https://api.notifications.service.gov.uk}
+  emailNotifyEnabled: ${NOTIFY_EMAIL_ENABLED:-false}
 
 executorService:
   timeoutInSeconds: ${AUTH_READ_TIMEOUT_SECONDS:-1}
@@ -73,30 +78,3 @@ database:
 
   # the minimum amount of time an connection must sit idle in the pool before it is eligible for eviction
   minIdleTime: 1 minute
-
-jerseyClient:
-  # Defines the socket timeout (SO_TIMEOUT), which is the
-  # timeout for waiting for data or, put differently, a maximum period inactivity
-  # between two consecutive data packets).
-  timeout: 2000ms
-
-  # Determines the timeout until a connection is established
-  connectionTimeout: 2000ms
-
-  timeToLive: 1h
-  cookiesEnabled: false
-  maxConnections: 1024
-  maxConnectionsPerRoute: 1024
-  keepAlive: 0ms
-  retries: 0
-  userAgent: directdebit-connector
-  gzipEnabledForRequests: false
-
-customJerseyClient:
-  # Sets the read timeout to a specified timeout, in
-  # milliseconds. A non-zero value specifies the timeout when
-  # reading from Input stream when a connection is established to a
-  # resource. If the timeout expires before there is data available
-  # for read, a java.net.SocketTimeoutException is raised. A
-  # timeout of zero is interpreted as an infinite timeout.
-  readTimeout: 9000ms

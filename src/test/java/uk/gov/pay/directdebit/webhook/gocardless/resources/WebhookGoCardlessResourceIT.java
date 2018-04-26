@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.hamcrest.MatcherAssert;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
@@ -10,8 +8,10 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -21,16 +21,11 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static io.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
+import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.*;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
@@ -49,9 +44,6 @@ public class WebhookGoCardlessResourceIT {
 
     @DropwizardTestContext
     private TestContext testContext;
-
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(10110);
 
     @Test
     public void handleWebhook_whenAPaidOutWebhookArrives_shouldInsertGoCardlessEventsUpdatePaymentToSuccessAndReturn200() {
@@ -113,23 +105,6 @@ public class WebhookGoCardlessResourceIT {
                 .withGoCardlessMandateId("MD00008Q30R2BR")
                 .withMandateId(mandateFixture.getId())
                 .insert(testContext.getJdbi());
-
-        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-                "\"gateway_account_external_id\": \"" + testGatewayAccount.getExternalId() + "\"," +
-                "\"template\": \"MANDATE_FAILED\"," +
-                "\"personalisation\": " +
-                    "{" +
-                    "\"mandate reference\": \"" + mandateFixture.getReference() + "\", " +
-                    "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
-                    "}" +
-                "}";
-
-        stubFor(post(urlPathEqualTo("/v1/emails/send"))
-                .withRequestBody(equalToJson(emailPayloadBody))
-                .willReturn(
-                        aResponse().withStatus(200))
-        );
-
 
         given().port(testContext.getPort())
                 .body(WEBHOOK_FAILED)
