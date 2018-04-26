@@ -6,12 +6,12 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -20,6 +20,7 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
@@ -28,12 +29,12 @@ import java.util.Map;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
-import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
 
@@ -45,6 +46,7 @@ public class PayerResourceIT {
     private final static String NAME_KEY = "account_holder_name";
     private final static String EMAIL_KEY = "email";
     private final static String ADDRESS_LINE1_KEY = "address_line1";
+    private final static String ADDRESS_LINE2_KEY = "address_line2";
     private final static String ADDRESS_CITY_KEY = "city";
     private final static String ADDRESS_COUNTRY_KEY = "country_code";
     private final static String ADDRESS_POSTCODE_KEY = "postcode";
@@ -66,6 +68,11 @@ public class PayerResourceIT {
     @Before
     public void setUp() {
         payerFixture = aPayerFixture().withAccountNumber("12345678");
+    }
+
+    @After
+    public void tearDown() {
+        wireMockRule.shutdown();
     }
 
     private TransactionFixture insertTransactionFixtureWith(PaymentProvider paymentProvider) {

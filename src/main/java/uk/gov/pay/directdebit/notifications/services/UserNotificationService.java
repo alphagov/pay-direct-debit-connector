@@ -1,74 +1,171 @@
 package uk.gov.pay.directdebit.notifications.services;
 
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.base.Stopwatch;
+import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
-import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.service.notify.NotificationClient;
+import uk.gov.service.notify.NotificationClientException;
+import uk.gov.service.notify.SendEmailResponse;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import static java.lang.Runtime.getRuntime;
 
 
 public class UserNotificationService {
-
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(UserNotificationService.class);
+    private static final String PLACEHOLDER_PHONE_NUMBER = "+44 000-CAKE-000";
     private static final String PLACEHOLDER_SUN = "THE-CAKE-IS-A-LIE";
+    private static final String PLACEHOLDER_MERCHANT_ADDRESS = "123 Rainbow Road, EC125Y, London";
 
     private static final String DD_GUARANTEE_KEY = "dd guarantee link";
     private static final String MANDATE_REFERENCE_KEY = "mandate reference";
+    private static final String ORG_NAME_KEY = "org name";
+    private static final String SERVICE_NAME_KEY = "service name";
     private static final String SUN_KEY = "SUN";
     private static final String COLLECTION_DATE_KEY = "collection date";
     private static final String AMOUNT_KEY = "amount";
     private static final String PAYMENT_REFERENCE_KEY = "payment reference";
+    private static final String MERCHANT_ADDRESS_KEY = "merchant address";
+    private static final String ORG_PHONE_KEY = "org phone";
+    private static final String MERCHANT_PHONE_NUMBER_KEY = "merchant phone number";
     private static final String BANK_ACCOUNT_LAST_DIGITS_KEY = "bank account last 2 digits";
 
-    private AdminUsersClient adminUsersClient;
+    private boolean emailNotifyGloballyEnabled;
+    private ExecutorService executorService;
+    private final MetricRegistry metricRegistry;
+    private final NotificationClient notificationClient;
     private final DirectDebitConfig directDebitConfig;
+    private final GatewayAccountService gatewayAccountService;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Inject
-    public UserNotificationService(AdminUsersClient adminUsersClient, DirectDebitConfig directDebitConfig) {
-        this.adminUsersClient = adminUsersClient;
+    public UserNotificationService(DirectDebitConfig directDebitConfig,
+                                   NotificationClient notificationClient,
+                                   MetricRegistry metricRegistry,
+                                   GatewayAccountService gatewayAccountService) {
+        this.emailNotifyGloballyEnabled = directDebitConfig.getNotifyConfig().isEmailNotifyEnabled();
+        if (emailNotifyGloballyEnabled) {
+            int numberOfThreads = directDebitConfig.getExecutorServiceConfig().getThreadsPerCpu() * getRuntime().availableProcessors();
+            executorService = Executors.newFixedThreadPool(numberOfThreads);
+        }
         this.directDebitConfig = directDebitConfig;
+        this.notificationClient = notificationClient;
+        this.metricRegistry = metricRegistry;
+        this.gatewayAccountService = gatewayAccountService;
     }
 
-    public void sendMandateFailedEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
-        adminUsersClient.sendEmail(EmailTemplate.MANDATE_FAILED, transaction, payer.getEmail(), buildMandateProblemPersonalisation(mandate));
+    public Future<Optional<String>> sendEmail(Map<String, String> personalisation,
+                                              String templateId,
+                                              String emailAddress,
+                                              String paymentRequestExternalId) {
+        if (emailNotifyGloballyEnabled) {
+            Stopwatch responseTimeStopwatch = Stopwatch.createStarted();
+            return executorService.submit(() -> {
+                try {
+                    SendEmailResponse response = notificationClient
+                            .sendEmail(
+                                    templateId,
+                                    emailAddress,
+                                    personalisation,
+                                    null);
+                    return Optional.of(response.getNotificationId().toString());
+                } catch (NotificationClientException e) {
+                    LOGGER.error("Failed to send email, payment request id: {}, error from notify {}", paymentRequestExternalId, e);
+                    metricRegistry.counter("notify-operations.failures").inc();
+                    return Optional.empty();
+                } finally {
+                    responseTimeStopwatch.stop();
+                    metricRegistry.histogram("notify-operations.response_time").update(responseTimeStopwatch.elapsed(TimeUnit.MILLISECONDS));
+                }
+            });
+        }
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 
-    public void sendMandateCancelledEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
-        adminUsersClient.sendEmail(EmailTemplate.MANDATE_CANCELLED, transaction, payer.getEmail(), buildMandateProblemPersonalisation(mandate));
+    private Future<Optional<String>> sendMandateProblemEmailFor(String templateId, Transaction transaction, Mandate mandate, Payer payer) {
+        return sendEmail(buildMandateProblemPersonalisation(transaction, mandate),
+                templateId,
+                payer.getEmail(),
+                transaction.getPaymentRequest().getExternalId());
     }
 
-    public void sendPaymentConfirmedEmailFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
-        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_CONFIRMED, transaction, payer.getEmail(),
-                buildPaymentConfirmedPersonalisation(transaction, payer, earliestChargeDate));
+    public Future<Optional<String>> sendMandateFailedEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
+        String mandateFailedTemplateId = directDebitConfig.getNotifyConfig().getMandateFailedTemplateId();
+        LOGGER.info("Sending mandate failed email, payment request id: {}, gateway account id: {}",
+                transaction.getPaymentRequest().getExternalId(),
+                transaction.getGatewayAccountExternalId());
+        return sendMandateProblemEmailFor(mandateFailedTemplateId, transaction, mandate, payer);
     }
 
-    private HashMap<String, String> buildMandateProblemPersonalisation(Mandate mandate) {
+    public Future<Optional<String>> sendMandateCancelledEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
+        String mandateCancelledTemplateId = directDebitConfig.getNotifyConfig().getMandateCancelledTemplateId();
+        LOGGER.info("Sending mandate cancelled email, payment request id: {}, gateway account id: {}",
+                transaction.getPaymentRequest().getExternalId(),
+                transaction.getGatewayAccountExternalId());
+        return sendMandateProblemEmailFor(mandateCancelledTemplateId, transaction, mandate, payer);
+    }
+
+    public Future<Optional<String>> sendPaymentConfirmedEmailFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
+        String paymentConfirmedTemplateId = directDebitConfig.getNotifyConfig().getPaymentConfirmedTemplateId();
+        String paymentRequestExternalId = transaction.getPaymentRequest().getExternalId();
+        LOGGER.info("Sending payment confirmed email, payment request id: {}, gateway account id: {}",
+                paymentRequestExternalId,
+                transaction.getGatewayAccountExternalId());
+        return sendEmail(buildPaymentConfirmedPersonalisation(transaction, payer, earliestChargeDate),
+                paymentConfirmedTemplateId,
+                payer.getEmail(),
+                paymentRequestExternalId);
+    }
+
+    private HashMap<String, String> buildMandateProblemPersonalisation(Transaction transaction, Mandate mandate) {
+        GatewayAccount gatewayAccount = gatewayAccountService.getGatewayAccountFor(transaction);
+
         HashMap<String, String> map = new HashMap<>();
         // fixme use the right reference once we play PP-3547
         map.put(MANDATE_REFERENCE_KEY, mandate.getReference());
+        map.put(ORG_NAME_KEY, gatewayAccount.getServiceName());
+        map.put(ORG_PHONE_KEY, PLACEHOLDER_PHONE_NUMBER);
         map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
+
         return map;
     }
 
     private HashMap<String, String> buildPaymentConfirmedPersonalisation(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
+        GatewayAccount gatewayAccount = gatewayAccountService.getGatewayAccountFor(transaction);
+
         HashMap<String, String> map = new HashMap<>();
+        map.put(SERVICE_NAME_KEY, gatewayAccount.getServiceName());
         map.put(AMOUNT_KEY, formatToPounds(transaction.getAmount()));
         map.put(PAYMENT_REFERENCE_KEY, transaction.getPaymentRequest().getReference());
         map.put(BANK_ACCOUNT_LAST_DIGITS_KEY, "******" + payer.getAccountNumberLastTwoDigits());
         map.put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate));
         map.put(SUN_KEY, PLACEHOLDER_SUN);
+        map.put(MERCHANT_ADDRESS_KEY, PLACEHOLDER_MERCHANT_ADDRESS);
+        map.put(MERCHANT_PHONE_NUMBER_KEY, PLACEHOLDER_PHONE_NUMBER);
         map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
         return map;
     }
 
-    private static String formatToPounds(long amountInPence) {
+    private String formatToPounds(long amountInPence) {
         return BigDecimal.valueOf(amountInPence, 2).toString();
     }
 
