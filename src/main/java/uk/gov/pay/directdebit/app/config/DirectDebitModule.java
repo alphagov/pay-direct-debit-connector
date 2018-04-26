@@ -10,8 +10,6 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
-import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
-import uk.gov.pay.directdebit.notifications.clients.ClientFactory;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
@@ -22,6 +20,8 @@ import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
+import uk.gov.service.notify.NotificationClient;
+
 import javax.net.ssl.SSLSocketFactory;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -62,14 +62,13 @@ public class DirectDebitModule extends AbstractModule {
     }
 
     @Provides
-    public GoCardlessClientWrapper provideGoCardlessClientWrapper()  {
+    public GoCardlessClientWrapper provideGoCardlessClientWrapper() throws IllegalAccessException {
         return new GoCardlessClientWrapper(createGoCardlessClient());
     }
 
     @Provides
-    public AdminUsersClient provideAdminusersClient(ClientFactory clientFactory) {
-        AdminUsersConfig config = configuration.getAdminUsersConfig();
-        return new AdminUsersClient(config, clientFactory.createWithDropwizardClient("adminusers-client"));
+    public NotificationClient provideNotifyClient() {
+        return configuration.getNotifyConfig().getInstance();
     }
 
     @Provides
@@ -136,5 +135,4 @@ public class DirectDebitModule extends AbstractModule {
     public GoCardlessEventDao provideGoCardlessEventDao() {
         return jdbi.onDemand(GoCardlessEventDao.class);
     }
-
 }
