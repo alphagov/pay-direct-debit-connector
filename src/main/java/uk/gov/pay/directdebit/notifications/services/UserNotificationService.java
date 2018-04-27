@@ -7,7 +7,6 @@ import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
