@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gocardless.GoCardlessClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
@@ -62,77 +63,92 @@ public class DirectDebitModule extends AbstractModule {
     }
 
     @Provides
+    @Singleton
     public GoCardlessClientWrapper provideGoCardlessClientWrapper()  {
         return new GoCardlessClientWrapper(createGoCardlessClient());
     }
 
     @Provides
+    @Singleton
     public AdminUsersClient provideAdminusersClient(ClientFactory clientFactory) {
         AdminUsersConfig config = configuration.getAdminUsersConfig();
         return new AdminUsersClient(config, clientFactory.createWithDropwizardClient("adminusers-client"));
     }
 
     @Provides
+    @Singleton
     public WebhookVerifier provideWebhookVerifier() {
         return configuration.getGoCardless().buildSignatureVerifier();
     }
 
     @Provides
+    @Singleton
     public ObjectMapper provideObjectMapper() {
         return environment.getObjectMapper();
     }
 
     @Provides
+    @Singleton
     public TransactionDao provideTransactionDao() {
         return jdbi.onDemand(TransactionDao.class);
     }
 
     @Provides
+    @Singleton
     public PaymentRequestEventDao providePaymentRequestEventDao() {
         return jdbi.onDemand(PaymentRequestEventDao.class);
     }
 
     @Provides
+    @Singleton
     public TokenDao provideTokenDao() {
         return jdbi.onDemand(TokenDao.class);
     }
 
     @Provides
+    @Singleton
     public PaymentRequestDao providePaymentRequestDao() {
         return jdbi.onDemand(PaymentRequestDao.class);
     }
 
     @Provides
+    @Singleton
     public GatewayAccountDao provideGatewayAccountDao() {
         return jdbi.onDemand(GatewayAccountDao.class);
     }
 
     @Provides
+    @Singleton
     public PayerDao providePayerDao() {
         return jdbi.onDemand(PayerDao.class);
     }
 
     @Provides
+    @Singleton
     public MandateDao provideMandateDao() {
         return jdbi.onDemand(MandateDao.class);
     }
 
     @Provides
+    @Singleton
     public GoCardlessCustomerDao provideGoCardlessCustomerDao() {
         return jdbi.onDemand(GoCardlessCustomerDao.class);
     }
 
     @Provides
+    @Singleton
     public GoCardlessPaymentDao provideGoCardlessPaymentDao() {
         return jdbi.onDemand(GoCardlessPaymentDao.class);
     }
 
     @Provides
+    @Singleton
     public GoCardlessMandateDao provideGoCardlessMandateDao() {
         return jdbi.onDemand(GoCardlessMandateDao.class);
     }
 
     @Provides
+    @Singleton
     public GoCardlessEventDao provideGoCardlessEventDao() {
         return jdbi.onDemand(GoCardlessEventDao.class);
     }

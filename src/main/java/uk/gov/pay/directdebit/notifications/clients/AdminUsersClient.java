@@ -32,9 +32,8 @@ public class AdminUsersClient {
                 transaction.getPaymentRequest().getExternalId(),
                 transaction.getGatewayAccountExternalId());
         EmailPayloadRequest emailPayloadRequest = new EmailPayloadRequest(email, transaction.getGatewayAccountExternalId(), template, personalisation);
-        Response response = null;
         try {
-             response = client.target(config.getAdminUsersUrl())
+             Response response = client.target(config.getAdminUsersUrl())
                     .path("/v1/emails/send")
                     .request()
                     .post(Entity.entity(emailPayloadRequest, MediaType.APPLICATION_JSON_TYPE));
