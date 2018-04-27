@@ -2,8 +2,8 @@ package uk.gov.pay.directdebit.app.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
-import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
+import uk.gov.pay.directdebit.notifications.config.NotifyClientFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 
 import javax.validation.Valid;
@@ -29,23 +29,15 @@ public class DirectDebitConfig extends Configuration {
     @NotNull
     private ProxyConfig proxyConfig;
 
-
     @NotNull
-    private AdminUsersConfig adminUsersConfig;
+    private NotifyClientFactory notifyConfig;
 
     @NotNull
     private ExecutorServiceConfig executorServiceConfig;
 
-    @NotNull
-    @JsonProperty("jerseyClient")
-    private JerseyClientConfiguration jerseyClientConfig;
-
-    @NotNull
-    private CustomJerseyClientConfiguration customJerseyClient;
-
-    @JsonProperty("adminusers")
-    public AdminUsersConfig getAdminUsersConfig() {
-        return adminUsersConfig;
+    @JsonProperty("notify")
+    public NotifyClientFactory getNotifyConfig() {
+        return notifyConfig;
     }
 
     @JsonProperty("database")
@@ -57,6 +49,7 @@ public class DirectDebitConfig extends Configuration {
     public GoCardlessFactory getGoCardless() {
         return goCardless;
     }
+
 
     public LinksConfig getLinks() {
         return links;
@@ -75,13 +68,5 @@ public class DirectDebitConfig extends Configuration {
     @JsonProperty("proxy")
     public ProxyConfig getProxyConfig() {
         return proxyConfig;
-    }
-
-    public JerseyClientConfiguration getClientConfiguration() {
-        return jerseyClientConfig;
-    }
-
-    public CustomJerseyClientConfiguration getCustomJerseyClient() {
-        return customJerseyClient;
     }
 }
