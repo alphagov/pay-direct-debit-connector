@@ -45,6 +45,11 @@ public class DirectDebitModule extends AbstractModule {
     protected void configure() {
         bind(DirectDebitConfig.class).toInstance(configuration);
         bind(Environment.class).toInstance(environment);
+        AdminUsersConfig config = configuration.getAdminUsersConfig();
+        AdminUsersClient adminUsersClient = new AdminUsersClient(config, RestClientFactory.buildClient());
+        bind(AdminUsersClient.class).toInstance(adminUsersClient);
+
+
     }
 
     private GoCardlessClient createGoCardlessClient() {
@@ -66,13 +71,6 @@ public class DirectDebitModule extends AbstractModule {
     @Singleton
     public GoCardlessClientWrapper provideGoCardlessClientWrapper()  {
         return new GoCardlessClientWrapper(createGoCardlessClient());
-    }
-
-    @Provides
-    @Singleton
-    public AdminUsersClient provideAdminusersClient() {
-        AdminUsersConfig config = configuration.getAdminUsersConfig();
-        return new AdminUsersClient(config, RestClientFactory.buildClient());
     }
 
     @Provides
