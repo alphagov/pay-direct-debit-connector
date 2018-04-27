@@ -16,6 +16,7 @@ import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
+import uk.gov.pay.directdebit.app.config.AdminUsersConfig;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.DirectDebitModule;
 import uk.gov.pay.directdebit.app.config.GraphiteConfig;
@@ -31,6 +32,9 @@ import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvid
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
+import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
+import uk.gov.pay.directdebit.notifications.clients.RestClientFactory;
+import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payments.resources.PaymentRequestResource;
 import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
@@ -70,7 +74,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     }
 
     @Override
-    public void run(DirectDebitConfig configuration, Environment environment) throws Exception {
+    public void run(DirectDebitConfig configuration, Environment environment) {
         DataSourceFactory dataSourceFactory = configuration.getDataSourceFactory();
         final Jdbi jdbi = Jdbi.create(
                 dataSourceFactory.getUrl(),
@@ -81,11 +85,11 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
 
         SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
         final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment, jdbi, socketFactory));
-
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
         environment.healthChecks().register("ping", new Ping());
         environment.healthChecks().register("database", injector.getInstance(Database.class));
+        environment.jersey().register(injector.getInstance(UserNotificationService.class));
         environment.jersey().register(injector.getInstance(GatewayAccountParamConverterProvider.class));
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.jersey().register(injector.getInstance(WebhookSandboxResource.class));

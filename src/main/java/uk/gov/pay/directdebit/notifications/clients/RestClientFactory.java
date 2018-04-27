@@ -1,4 +1,4 @@
-package uk.gov.pay.api.app;
+package uk.gov.pay.directdebit.notifications.clients;
 
 import org.glassfish.jersey.SslConfigurator;
 import uk.gov.pay.directdebit.app.filters.LoggingFilter;

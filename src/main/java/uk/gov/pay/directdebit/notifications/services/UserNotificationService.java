@@ -29,7 +29,6 @@ public class UserNotificationService {
     private final DirectDebitConfig directDebitConfig;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    @Inject
     public UserNotificationService(AdminUsersClient adminUsersClient, DirectDebitConfig directDebitConfig) {
         this.adminUsersClient = adminUsersClient;
         this.directDebitConfig = directDebitConfig;

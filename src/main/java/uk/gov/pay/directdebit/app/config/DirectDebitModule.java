@@ -11,6 +11,9 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
+import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
+import uk.gov.pay.directdebit.notifications.clients.RestClientFactory;
+import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
@@ -43,6 +46,10 @@ public class DirectDebitModule extends AbstractModule {
     protected void configure() {
         bind(DirectDebitConfig.class).toInstance(configuration);
         bind(Environment.class).toInstance(environment);
+        AdminUsersConfig config = configuration.getAdminUsersConfig();
+        AdminUsersClient adminUsersClient = new AdminUsersClient(config, RestClientFactory.buildClient());
+        UserNotificationService userNotificationService = new UserNotificationService(adminUsersClient, configuration);
+        bind(UserNotificationService.class).toInstance(userNotificationService);
     }
 
     private GoCardlessClient createGoCardlessClient() {
@@ -64,13 +71,6 @@ public class DirectDebitModule extends AbstractModule {
     @Singleton
     public GoCardlessClientWrapper provideGoCardlessClientWrapper()  {
         return new GoCardlessClientWrapper(createGoCardlessClient());
-    }
-
-    @Provides
-    @Singleton
-    public AdminUsersClient provideAdminusersClient() {
-        AdminUsersConfig config = configuration.getAdminUsersConfig();
-        return new AdminUsersClient(config, RestClientFactory.buildClient());
     }
 
     @Provides
