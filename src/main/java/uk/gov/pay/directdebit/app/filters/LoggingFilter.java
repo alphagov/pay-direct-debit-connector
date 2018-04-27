@@ -13,7 +13,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
@@ -32,9 +31,7 @@ public class LoggingFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws
-            IOException,
-            ServletException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
         String requestURL = ((HttpServletRequest) servletRequest).getRequestURI();

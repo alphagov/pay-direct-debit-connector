@@ -5,6 +5,7 @@ import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Payment;
 import com.gocardless.services.PaymentService;
+import com.google.inject.Inject;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -19,6 +20,7 @@ public class GoCardlessClientWrapper {
 
     private com.gocardless.GoCardlessClient goCardlessClient;
 
+    @Inject
     public GoCardlessClientWrapper(com.gocardless.GoCardlessClient goCardlessClient) {
         this.goCardlessClient = goCardlessClient;
     }

@@ -15,7 +15,7 @@ logging:
         target: stdout
         logFormat: "[%thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n"
 links:
-  frontendUrl: http://Frontend/
+  frontendUrl: http://Frontend
 
 graphite:
   host: localhost
@@ -35,13 +35,23 @@ executorService:
   timeoutInSeconds: ${AUTH_READ_TIMEOUT_SECONDS:-1}
   threadsPerCpu: ${NUMBER_OF_THREADS_PER_CPU:-100}
 
-notify:
-  mandateFailedTemplateId: test-template-id
-  mandateCancelledTemplateId: test-template-id
-  paymentConfirmedTemplateId: test-template-id
-  apiKey: ${NOTIFY_API_KEY:-pay-notify-api-key}
-  notificationBaseURL: https://stubs.pymnt.localdomain
-  emailNotifyEnabled: false
+adminusers:
+  adminUsersUrl: http://localhost:10110
+
+jerseyClient:
+  timeout: 500ms
+  connectionTimeout: 500ms
+  timeToLive: 1h
+  cookiesEnabled: false
+  maxConnections: 1024
+  maxConnectionsPerRoute: 1024
+  keepAlive: 0ms
+  retries: 0
+  userAgent: connector
+  gzipEnabledForRequests: false
+
+customJerseyClient:
+  readTimeout: 9000ms
 
 database:
   driverClass: org.postgresql.Driver
