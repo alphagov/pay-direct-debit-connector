@@ -19,6 +19,7 @@ import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
+import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
@@ -153,4 +154,9 @@ public class DirectDebitModule extends AbstractModule {
         return jdbi.onDemand(GoCardlessEventDao.class);
     }
 
+    @Provides
+    @Singleton
+    public PaymentViewDao providePaymentViewDao() {
+        return new PaymentViewDao(jdbi);
+    }
 }
