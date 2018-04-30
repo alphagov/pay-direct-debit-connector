@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
-import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
@@ -29,6 +29,26 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
         super(transactionService, goCardlessService);
         this.payerService = payerService;
         this.mandateService = mandateService;
+    }
+
+    /**
+     * GoCardless mandate actions
+     *
+     * @see <a href="https://developer.gocardless.com/api-reference/#events-mandate-actions">https://developer.gocardless.com/api-reference/#events-mandate-actions</a>
+     */
+    public enum GoCardlessMandateAction implements GoCardlessAction {
+        CREATED, SUBMITTED, ACTIVE, FAILED, CANCELLED;
+
+        public static GoCardlessMandateAction fromString(String type) {
+            for (GoCardlessMandateAction typeEnum : values()) {
+                if (typeEnum.toString().equalsIgnoreCase(type)) {
+                    LOGGER.info("Webhook from GoCardless with mandate action: {}", type);
+                    return typeEnum;
+                }
+            }
+            LOGGER.warn("Webhook from GoCardless with unhandled mandate action: {}", type);
+            return null;
+        }
     }
 
     @Override
@@ -50,6 +70,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                     return transactionService.paymentFailedFor(transaction);
                 });
     }
+
     @Override
     protected Optional<PaymentRequestEvent> process(GoCardlessEvent event) {
         return Optional.ofNullable(GoCardlessMandateAction.fromString(event.getAction()))
@@ -64,21 +85,5 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
     private PaymentRequestEvent findMandatePendingEventOrInsertOneIfItDoesNotExist(Transaction transaction) {
         return transactionService.findMandatePendingEventFor(transaction)
                 .orElseGet(() -> mandateService.mandatePendingFor(transaction));
-    }
-
-    public enum GoCardlessMandateAction implements GoCardlessAction {
-        CREATED, SUBMITTED, ACTIVE, FAILED, CANCELLED;
-
-
-        public static GoCardlessMandateAction fromString(String type) {
-            for (GoCardlessMandateAction typeEnum : values()) {
-                if (typeEnum.toString().equalsIgnoreCase(type)) {
-                    LOGGER.info("Webhook from GoCardless with mandate action: {}", type);
-                    return typeEnum;
-                }
-            }
-            LOGGER.warn("Webhook from GoCardless with unhandled mandate action: {}", type);
-            return null;
-        }
     }
 }
