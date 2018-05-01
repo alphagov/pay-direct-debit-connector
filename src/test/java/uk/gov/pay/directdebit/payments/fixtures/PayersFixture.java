@@ -74,6 +74,26 @@ public class PayersFixture implements DbFixture<PayersFixture, Payer> {
         return this;
     }
 
+    public Long getId() { return id; }
+
+    public Long getPaymentRequestId() { return paymentRequestId; }
+
+    public String getExternalId() { return externalId; }
+
+    public String getName() { return name; }
+
+    public String getEmail() { return email; }
+
+    public String getBankAccountNumberLastTwoDigits() { return bankAccountNumberLastTwoDigits; }
+
+    public Boolean getBankAccountRequiresAuthorisation() { return bankAccountRequiresAuthorisation; }
+
+    public String getBankAccountNumber() { return bankAccountNumber; }
+
+    public String getBankAccountSortCode() { return bankAccountSortCode; }
+
+    public ZonedDateTime getCreatedDate() { return createdDate; }
+
     @Override
     public PayersFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
