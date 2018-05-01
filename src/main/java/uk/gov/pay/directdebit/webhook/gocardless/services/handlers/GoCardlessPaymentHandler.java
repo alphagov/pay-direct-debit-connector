@@ -25,8 +25,13 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
         super(transactionService, goCardlessService);
     }
 
+    /**
+     * GoCardless payment actions
+     *
+     * @see <a href="https://developer.gocardless.com/api-reference/#events-payment-actions">https://developer.gocardless.com/api-reference/#events-payment-actions</a>
+     */
     public enum GoCardlessPaymentAction implements GoCardlessAction {
-        CREATED, SUBMITTED, CONFIRMED, PAID_OUT, PAID;
+        CREATED, SUBMITTED, CONFIRMED, FAILED, PAID_OUT, PAID;
 
         public static GoCardlessPaymentAction fromString(String type) {
             for (GoCardlessPaymentAction typeEnum : values()) {
@@ -38,27 +43,29 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
             return null;
         }
     }
+
     @Override
     protected Optional<PaymentRequestEvent> process(GoCardlessEvent event) {
         return Optional.ofNullable(GoCardlessPaymentAction.fromString(event.getAction()))
                 .map((action) -> getHandledActions().get(action))
                 .map((handledAction) -> {
                     GoCardlessPayment goCardlessPayment = goCardlessService.findPaymentForEvent(event);
-                    Transaction transactionForMandateId = transactionService.findTransactionFor(goCardlessPayment.getTransactionId());
-                    return handledAction.apply(transactionForMandateId);
+                    Transaction transaction = transactionService.findTransactionFor(goCardlessPayment.getTransactionId());
+                    return handledAction.apply(transaction);
                 });
     }
 
     @Override
     protected Map<GoCardlessAction, Function<Transaction, PaymentRequestEvent>> getHandledActions() {
-        return ImmutableMap.of(
-                GoCardlessPaymentAction.CREATED, transactionService::paymentPendingFor,
-                GoCardlessPaymentAction.SUBMITTED, transactionService::paymentSubmittedFor,
-                GoCardlessPaymentAction.CONFIRMED, (Transaction transaction) ->
+        return ImmutableMap.<GoCardlessAction, Function<Transaction, PaymentRequestEvent>>builder()
+                .put(GoCardlessPaymentAction.CREATED, transactionService::paymentPendingFor)
+                .put(GoCardlessPaymentAction.SUBMITTED, transactionService::paymentSubmittedFor)
+                .put(GoCardlessPaymentAction.CONFIRMED, (Transaction transaction) ->
                         transactionService.findPaymentSubmittedEventFor(transaction)
-                                .orElseThrow(() -> new InvalidStateException("Could not find payment submitted event for payment request with id: " + transaction.getPaymentRequest().getExternalId())),
-                GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor,
-                GoCardlessPaymentAction.PAID, transactionService::payoutPaidFor
-        );
+                                .orElseThrow(() -> new InvalidStateException("Could not find payment submitted event for payment request with id: " + transaction.getPaymentRequest().getExternalId())))
+                .put(GoCardlessPaymentAction.FAILED, transactionService::paymentFailedFor)
+                .put(GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor)
+                .put(GoCardlessPaymentAction.PAID, transactionService::payoutPaidFor)
+                .build();
     }
 }

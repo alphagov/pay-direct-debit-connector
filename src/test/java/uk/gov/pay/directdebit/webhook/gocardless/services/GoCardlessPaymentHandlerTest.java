@@ -128,6 +128,21 @@ public class GoCardlessPaymentHandlerTest {
         Assert.assertThat(storedGoCardlessEvent.getPaymentRequestEventId(), is(paymentRequestEvent.getId()));
     }
 
+    @Test
+    public void handle_onFailedPaymentGoCardlessEvent_shouldSetAPayEventAsFailed() {
+        GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("failed").toEntity());
+
+        when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
+        when(mockedTransactionService.paymentFailedFor(transaction)).thenReturn(paymentRequestEvent);
+
+        goCardlessPaymentHandler.handle(goCardlessEvent);
+
+        verify(mockedTransactionService).paymentFailedFor(transaction);
+        verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
+        verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
+        GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
+        Assert.assertThat(storedGoCardlessEvent.getPaymentRequestEventId(), is(paymentRequestEvent.getId()));
+    }
 
     @Test
     public void handle_onPayoutPaidGoCardlessEvent_shouldLinkTheEventToAnExistingPaymentPaidOutPayEvent() {
