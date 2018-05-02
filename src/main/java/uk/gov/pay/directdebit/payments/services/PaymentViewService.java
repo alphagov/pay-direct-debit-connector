@@ -1,32 +1,36 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
+import org.apache.commons.lang3.tuple.Pair;
+import uk.gov.pay.directdebit.payments.api.PaymentViewListResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
+import uk.gov.pay.directdebit.payments.dao.PaymentViewSearchParams;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static uk.gov.pay.directdebit.payments.api.PaymentViewValidator.validatePagination;
+
 public class PaymentViewService {
 
     private final PaymentViewDao paymentViewDao;
-    
+
     @Inject
     public PaymentViewService(PaymentViewDao paymentViewDao) {
         this.paymentViewDao = paymentViewDao;
     }
-    
-    public List<PaymentViewResponse> getPaymentViewResponse(String gatewayAccountId, Long offset, Long pageSize) {
-        return paymentViewDao.searchPaymentView(gatewayAccountId, offset, pageSize)
+
+    public List<PaymentViewListResponse> getPaymentViewListResponse(String gatewayAccountId, PaymentViewSearchParams paymentViewSearchParams) {
+        Pair<Long, Long> pagination = validatePagination(paymentViewSearchParams.getPaginationParams());
+        return paymentViewDao.searchPaymentView(gatewayAccountId, pagination.getLeft(), pagination.getRight())
                 .stream()
                 .map(paymentView -> populateResponseWith(paymentView))
                 .collect(Collectors.toList());
     }
-    
-    private PaymentViewResponse populateResponseWith(PaymentView paymentView) {
-        return new PaymentViewResponse(
-                paymentView.getGatewayExternalId(),
+
+    private PaymentViewListResponse populateResponseWith(PaymentView paymentView) {
+        return new PaymentViewListResponse(
                 paymentView.getPaymentRequestExternalId(),
                 paymentView.getAmount(),
                 paymentView.getReference(),

@@ -40,7 +40,7 @@ public class PaymentViewDaoIT {
 
     @Test
     public void shouldReturnAllPaymentViews() throws Exception {
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             PaymentRequestFixture paymentRequest = aPaymentRequestFixture()
                     .withGatewayAccountId(gatewayAccountFixture.getId())
                     .withReference("important reference " + i)
@@ -64,7 +64,7 @@ public class PaymentViewDaoIT {
 
     @Test
     public void shouldReturnOnePaymentViewOnly() throws Exception {
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             PaymentRequestFixture paymentRequest = aPaymentRequestFixture()
                     .withGatewayAccountId(gatewayAccountFixture.getId())
                     .withReference("important reference " + i)
