@@ -38,13 +38,9 @@ import uk.gov.pay.directdebit.payments.model.PaymentState;
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class PayerResourceIT {
     private final static String ACCOUNT_NUMBER_KEY = "account_number";
-    private final static String SORTCODE_KEY = "sort_code";
+    private final static String SORT_CODE_KEY = "sort_code";
     private final static String NAME_KEY = "account_holder_name";
     private final static String EMAIL_KEY = "email";
-    private final static String ADDRESS_LINE1_KEY = "address_line1";
-    private final static String ADDRESS_CITY_KEY = "city";
-    private final static String ADDRESS_COUNTRY_KEY = "country_code";
-    private final static String ADDRESS_POSTCODE_KEY = "postcode";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @DropwizardTestContext
@@ -81,38 +77,7 @@ public class PayerResourceIT {
         insertTransactionFixtureWith(SANDBOX);
         String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
-                .put(SORTCODE_KEY, payerFixture.getSortCode())
-                .put(NAME_KEY, payerFixture.getName())
-                .put(EMAIL_KEY, payerFixture.getEmail())
-                .put(ADDRESS_LINE1_KEY, payerFixture.getAddressLine1())
-                .put(ADDRESS_CITY_KEY, payerFixture.getAddressCity())
-                .put(ADDRESS_COUNTRY_KEY, payerFixture.getAddressCountry())
-                .put(ADDRESS_POSTCODE_KEY, payerFixture.getAddressPostcode())
-                .build());
-
-        ValidatableResponse response = givenSetup()
-                .body(putBody)
-                .put(requestPath)
-                .then()
-                .statusCode(Response.Status.CREATED.getStatusCode());
-
-        Map<String, Object> createdPayer = testContext.getDatabaseTestHelper().getPayerByPaymentRequestExternalId(testPaymentRequest.getExternalId());
-        String createdPayerExternalId = (String) createdPayer.get("external_id");
-        String documentLocation = expectedPayerRequestLocationFor(testPaymentRequest.getExternalId(), createdPayerExternalId);
-
-        response
-                .header("Location", is(documentLocation))
-                .body("payer_external_id", is(createdPayerExternalId))
-                .contentType(JSON);
-    }
-
-    @Test
-    public void shouldCreateAPayer_withoutAddress() throws JsonProcessingException {
-        createGatewayAccountWithPaymentRequestAndRequestPath(SANDBOX);
-        insertTransactionFixtureWith(SANDBOX);
-        String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
-                .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
-                .put(SORTCODE_KEY, payerFixture.getSortCode())
+                .put(SORT_CODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
                 .put(EMAIL_KEY, payerFixture.getEmail())
                 .build());
@@ -142,13 +107,9 @@ public class PayerResourceIT {
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
         String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
-                .put(SORTCODE_KEY, payerFixture.getSortCode())
+                .put(SORT_CODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
                 .put(EMAIL_KEY, payerFixture.getEmail())
-                .put(ADDRESS_LINE1_KEY, payerFixture.getAddressLine1())
-                .put(ADDRESS_CITY_KEY, payerFixture.getAddressCity())
-                .put(ADDRESS_COUNTRY_KEY, payerFixture.getAddressCountry())
-                .put(ADDRESS_POSTCODE_KEY, payerFixture.getAddressPostcode())
                 .build());
 
         ValidatableResponse response = givenSetup()
@@ -178,7 +139,7 @@ public class PayerResourceIT {
     public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
         createGatewayAccountWithPaymentRequestAndRequestPath(SANDBOX);
         String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
-                .put(SORTCODE_KEY, payerFixture.getSortCode())
+                .put(SORT_CODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
                 .put(EMAIL_KEY, payerFixture.getEmail())
                 .build());

@@ -22,12 +22,6 @@ public class PayerParser {
                 encrypt(sortCode),
                 encrypt(accountNumber),
                 accountNumber.substring(accountNumber.length()-2),
-                Boolean.parseBoolean(createPayerMap.get("requires_authorisation")),
-                createPayerMap.get("address_line1"),
-                createPayerMap.get("address_line2"),
-                createPayerMap.get("postcode"),
-                createPayerMap.get("city"),
-                createPayerMap.get("country_code")
-        );
+                Boolean.parseBoolean(createPayerMap.get("requires_authorisation")));
     }
 }

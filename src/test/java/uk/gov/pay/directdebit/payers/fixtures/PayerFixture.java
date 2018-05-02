@@ -21,11 +21,6 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
     private String accountNumber = RandomStringUtils.randomNumeric(8);
     private String accountNumberLastTwoDigits = accountNumber.substring(accountNumber.length() - 2);
     private boolean accountRequiresAuthorisation = true;
-    private String addressLine1 = RandomStringUtils.randomAlphanumeric(10);
-    private String addressLine2 = RandomStringUtils.randomAlphanumeric(10);
-    private String addressPostcode = RandomStringUtils.randomAlphanumeric(6);
-    private String addressCity = RandomStringUtils.randomAlphabetic(10);
-    private String addressCountry = RandomStringUtils.randomAlphabetic(10);
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
 
     private PayerFixture() {
@@ -80,31 +75,6 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
         return this;
     }
 
-    public PayerFixture withAddressLine1(String addressLine1) {
-        this.addressLine1 = addressLine1;
-        return this;
-    }
-
-    public PayerFixture withAddressLine2(String addressLine2) {
-        this.addressLine2 = addressLine2;
-        return this;
-    }
-
-    public PayerFixture withAddressPostcode(String addressPostcode) {
-        this.addressPostcode = addressPostcode;
-        return this;
-    }
-
-    public PayerFixture withAddressCity(String addressCity) {
-        this.addressCity = addressCity;
-        return this;
-    }
-
-    public PayerFixture withAddressCountry(String addressCountry) {
-        this.addressCountry = addressCountry;
-        return this;
-    }
-
     public PayerFixture withCreatedDate(ZonedDateTime createdDate) {
         this.createdDate = createdDate;
         return this;
@@ -146,26 +116,6 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
         return accountNumber;
     }
 
-    public String getAddressLine1() {
-        return addressLine1;
-    }
-
-    public String getAddressLine2() {
-        return addressLine2;
-    }
-
-    public String getAddressPostcode() {
-        return addressPostcode;
-    }
-
-    public String getAddressCity() {
-        return addressCity;
-    }
-
-    public String getAddressCountry() {
-        return addressCountry;
-    }
-
     public ZonedDateTime getCreatedDate() {
         return createdDate;
     }
@@ -185,14 +135,9 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
                                 "        bank_account_requires_authorisation,\n" +
                                 "        bank_account_number,\n" +
                                 "        bank_account_sort_code,\n" +
-                                "        address_line1,\n" +
-                                "        address_line2,\n" +
-                                "        address_postcode,\n" +
-                                "        address_city,\n" +
-                                "        address_country,\n" +
                                 "        created_date\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         paymentRequestId,
                         externalId,
@@ -202,11 +147,6 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
                         accountRequiresAuthorisation,
                         accountNumber,
                         sortCode,
-                        addressLine1,
-                        addressLine2,
-                        addressPostcode,
-                        addressCity,
-                        addressCountry,
                         Timestamp.from(createdDate.toInstant())
                 )
         );
@@ -215,7 +155,7 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
 
     @Override
     public Payer toEntity() {
-        return new Payer(id, paymentRequestId, externalId, name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, addressLine1, addressLine2, addressPostcode, addressCity, addressCountry, createdDate);
+        return new Payer(id, paymentRequestId, externalId, name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, createdDate);
     }
 
     private String generateEmail() {

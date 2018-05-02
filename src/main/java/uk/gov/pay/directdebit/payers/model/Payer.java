@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payers.model;
 
-import org.jdbi.v3.core.mapper.reflect.ColumnName;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
 import java.time.ZoneOffset;
@@ -16,14 +15,9 @@ public class Payer {
     private String accountNumber;
     private String accountNumberLastTwoDigits;
     private boolean accountRequiresAuthorisation;
-    private String addressLine1;
-    private String addressLine2;
-    private String addressPostcode;
-    private String addressCity;
-    private String addressCountry;
     private ZonedDateTime createdDate;
 
-    public Payer(Long id, Long paymentRequestId, String externalId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation, String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCountry, ZonedDateTime createdDate) {
+    public Payer(Long id, Long paymentRequestId, String externalId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation, ZonedDateTime createdDate) {
         this.id = id;
         this.paymentRequestId = paymentRequestId;
         this.externalId = externalId;
@@ -33,16 +27,11 @@ public class Payer {
         this.accountRequiresAuthorisation = accountRequiresAuthorisation;
         this.sortCode = sortCode;
         this.accountNumber = accountNumber;
-        this.addressLine1 = addressLine1;
-        this.addressLine2 = addressLine2;
-        this.addressPostcode = addressPostcode;
-        this.addressCity = addressCity;
-        this.addressCountry = addressCountry;
         this.createdDate = createdDate;
     }
 
-    public Payer(Long paymentRequestId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation, String addressLine1, String addressLine2, String addressPostcode, String addressCity, String addressCountry) {
-        this(null, paymentRequestId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, addressLine1, addressLine2, addressPostcode, addressCity, addressCountry, ZonedDateTime.now(ZoneOffset.UTC));
+    public Payer(Long paymentRequestId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation) {
+        this(null, paymentRequestId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     public void setId(Long id) {
@@ -83,26 +72,6 @@ public class Payer {
 
     public String getAccountNumber() {
         return accountNumber;
-    }
-
-    public String getAddressLine1() {
-        return addressLine1;
-    }
-
-    public String getAddressLine2() {
-        return addressLine2;
-    }
-
-    public String getAddressPostcode() {
-        return addressPostcode;
-    }
-
-    public String getAddressCity() {
-        return addressCity;
-    }
-
-    public String getAddressCountry() {
-        return addressCountry;
     }
 
     public ZonedDateTime getCreatedDate() {
@@ -147,26 +116,6 @@ public class Payer {
         if (!accountNumber.equals(payer.accountNumber)) {
             return false;
         }
-        if (addressLine1 != null ? !addressLine1.equals(payer.addressLine1)
-                : payer.addressLine1 != null) {
-            return false;
-        }
-        if (addressLine2 != null ? !addressLine2.equals(payer.addressLine2)
-                : payer.addressLine2 != null) {
-            return false;
-        }
-        if (addressPostcode != null ? !addressPostcode.equals(payer.addressPostcode)
-                : payer.addressPostcode != null) {
-            return false;
-        }
-        if (addressCity != null ? !addressCity.equals(payer.addressCity)
-                : payer.addressCity != null) {
-            return false;
-        }
-        if (addressCountry != null ? !addressCountry.equals(payer.addressCountry)
-                : payer.addressCountry != null) {
-            return false;
-        }
         return createdDate.equals(payer.createdDate);
     }
 
@@ -181,11 +130,6 @@ public class Payer {
         result = 31 * result + accountNumberLastTwoDigits.hashCode();
         result = 31 * result + (accountRequiresAuthorisation ? 1 : 0);
         result = 31 * result + accountNumber.hashCode();
-        result = 31 * result + (addressLine1 != null ? addressLine1.hashCode() : 0);
-        result = 31 * result + (addressLine2 != null ? addressLine2.hashCode() : 0);
-        result = 31 * result + (addressPostcode != null ? addressPostcode.hashCode() : 0);
-        result = 31 * result + (addressCity != null ? addressCity.hashCode() : 0);
-        result = 31 * result + (addressCountry != null ? addressCountry.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
         return result;
     }

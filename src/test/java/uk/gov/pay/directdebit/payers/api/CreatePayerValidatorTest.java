@@ -33,7 +33,7 @@ public class CreatePayerValidatorTest {
         thrown.expect(MissingMandatoryFieldsException.class);
         thrown.expectMessage("Field(s) missing: [" +
                 CreatePayerValidator.NAME_KEY + ", " +
-                CreatePayerValidator.SORTCODE_KEY + ", " +
+                CreatePayerValidator.SORT_CODE_KEY + ", " +
                 CreatePayerValidator.ACCOUNT_NUMBER_KEY + ", " +
                 CreatePayerValidator.EMAIL_KEY +
                 "]");
@@ -80,10 +80,10 @@ public class CreatePayerValidatorTest {
     @Test
     public void shouldThrowMissingMandatoryFieldsExceptionIfSortCodeFieldIsMissing() {
         Map<String, String> request = generateValidRequest();
-        request.remove(CreatePayerValidator.SORTCODE_KEY);
+        request.remove(CreatePayerValidator.SORT_CODE_KEY);
         thrown.expect(MissingMandatoryFieldsException.class);
         thrown.expectMessage("Field(s) missing: [" +
-                CreatePayerValidator.SORTCODE_KEY +
+                CreatePayerValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
         createPayerValidator.validate(request);
@@ -92,10 +92,10 @@ public class CreatePayerValidatorTest {
     @Test
     public void shouldThrowInvalidSizeFieldsExceptionIfSortCodeFieldIsEmptyString() {
         Map<String, String> request = generateValidRequest();
-        request.put(CreatePayerValidator.SORTCODE_KEY, "");
+        request.put(CreatePayerValidator.SORT_CODE_KEY, "");
         thrown.expect(InvalidSizeFieldsException.class);
         thrown.expectMessage("The size of a field(s) is invalid: [" +
-                CreatePayerValidator.SORTCODE_KEY +
+                CreatePayerValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
         createPayerValidator.validate(request);
@@ -104,10 +104,10 @@ public class CreatePayerValidatorTest {
     @Test
     public void shouldThrowInvalidFieldsExceptionIfSortCodeFieldIsNull() {
         Map<String, String> request = generateValidRequest();
-        request.put(CreatePayerValidator.SORTCODE_KEY, null);
+        request.put(CreatePayerValidator.SORT_CODE_KEY, null);
         thrown.expect(InvalidFieldsException.class);
         thrown.expectMessage("Field(s) are invalid: [" +
-                CreatePayerValidator.SORTCODE_KEY +
+                CreatePayerValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
         createPayerValidator.validate(request);
@@ -116,10 +116,10 @@ public class CreatePayerValidatorTest {
     @Test
     public void shouldThrowInvalidFieldsExceptionIfSortCodeFieldIsNonNumeric() {
         Map<String, String> request = generateValidRequest();
-        request.put(CreatePayerValidator.SORTCODE_KEY, "123abc");
+        request.put(CreatePayerValidator.SORT_CODE_KEY, "123abc");
         thrown.expect(InvalidFieldsException.class);
         thrown.expectMessage("Field(s) are invalid: [" +
-                CreatePayerValidator.SORTCODE_KEY +
+                CreatePayerValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
         createPayerValidator.validate(request);
@@ -128,10 +128,10 @@ public class CreatePayerValidatorTest {
     @Test
     public void shouldThrowInvalidSizeFieldsExceptionIfSortCodeFieldHasInvalidSize() {
         Map<String, String> request = generateValidRequest();
-        request.put(CreatePayerValidator.SORTCODE_KEY, "1234560");
+        request.put(CreatePayerValidator.SORT_CODE_KEY, "1234560");
         thrown.expect(InvalidSizeFieldsException.class);
         thrown.expectMessage("The size of a field(s) is invalid: [" +
-                CreatePayerValidator.SORTCODE_KEY +
+                CreatePayerValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
         createPayerValidator.validate(request);
@@ -140,7 +140,7 @@ public class CreatePayerValidatorTest {
     @Test
     public void shouldNotThrowExceptionIfSortCodeStartsWithZeros() {
         Map<String, String> request = generateValidRequest();
-        request.put(CreatePayerValidator.SORTCODE_KEY, "012345");
+        request.put(CreatePayerValidator.SORT_CODE_KEY, "012345");
         createPayerValidator.validate(request);
     }
 
@@ -371,12 +371,8 @@ public class CreatePayerValidatorTest {
         PayerFixture payerFixture = aPayerFixture();
         Map<String, String> request = new HashMap<>();
         request.put(CreatePayerValidator.NAME_KEY, payerFixture.getName());
-        request.put(CreatePayerValidator.SORTCODE_KEY, payerFixture.getSortCode());
+        request.put(CreatePayerValidator.SORT_CODE_KEY, payerFixture.getSortCode());
         request.put(CreatePayerValidator.ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber());
-        request.put(CreatePayerValidator.ADDRESS_COUNTRY_KEY, payerFixture.getAddressCountry());
-        request.put(CreatePayerValidator.ADDRESS_LINE1_KEY, payerFixture.getAddressLine1());
-        request.put(CreatePayerValidator.ADDRESS_CITY_KEY, payerFixture.getAddressCity());
-        request.put(CreatePayerValidator.ADDRESS_POSTCODE_KEY, payerFixture.getAddressPostcode());
         request.put(CreatePayerValidator.EMAIL_KEY, payerFixture.getEmail());
         return request;
     }

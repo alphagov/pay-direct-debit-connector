@@ -5,6 +5,7 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import uk.gov.pay.directdebit.payers.model.Payer;
 
 public class PaymentRequest {
 
