@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -266,15 +267,32 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void paymentFailedFor_shouldSetPaymentAsFailed_andRegisterAPaymentFailedEvent() {
+    public void paymentFailedFor_shouldSetPaymentAsFailed_andRegisterAPaymentFailedEvent_andDoNotSendEmail() {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
                 .withState(PENDING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
 
-        service.paymentFailedFor(transaction);
+        service.paymentFailedFor(transaction, payer, false);
 
+        verify(mockedUserNotificationService, times(0)).sendPaymentFailedEmailFor(transaction, payer);
+        verify(mockedTransactionDao).updateState(transaction.getId(), FAILED);
+        verify(mockedPaymentRequestEventService).registerPaymentFailedEventFor(transaction);
+        assertThat(transaction.getState(), is(FAILED));
+    }
+
+    @Test
+    public void paymentFailedFor_shouldSetPaymentAsFailed_andRegisterAPaymentFailedEvent_andSendEmail() {
+
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(PENDING_DIRECT_DEBIT_PAYMENT)
+                .toEntity();
+
+        service.paymentFailedFor(transaction, payer, true);
+
+        verify(mockedUserNotificationService, times(1)).sendPaymentFailedEmailFor(transaction, payer);
         verify(mockedTransactionDao).updateState(transaction.getId(), FAILED);
         verify(mockedPaymentRequestEventService).registerPaymentFailedEventFor(transaction);
         assertThat(transaction.getState(), is(FAILED));

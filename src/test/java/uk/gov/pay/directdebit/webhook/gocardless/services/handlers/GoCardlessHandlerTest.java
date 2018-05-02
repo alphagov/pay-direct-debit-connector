@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
@@ -32,6 +33,9 @@ public class GoCardlessHandlerTest {
     TransactionService mockedTransactionService;
 
     @Mock
+    PayerService mockedPayerService;
+
+    @Mock
     GoCardlessService mockedGoCardlessService;
 
     @Spy
@@ -41,7 +45,7 @@ public class GoCardlessHandlerTest {
 
     @Test
     public void shouldLinkToPaymentRequestEventAndStoreEventIfActionIsHandled() {
-        goCardlessHandler = new GoCardlessHandler(mockedTransactionService, mockedGoCardlessService) {
+        goCardlessHandler = new GoCardlessHandler(mockedTransactionService, mockedPayerService, mockedGoCardlessService) {
             @Override
             protected Map<GoCardlessAction, Function<Transaction, PaymentRequestEvent>> getHandledActions() {
                 return ImmutableMap.of(
@@ -61,7 +65,7 @@ public class GoCardlessHandlerTest {
 
     @Test
     public void shouldNotLinkToPaymentRequestEventButStillStoreEventIfActionIsNotHandled() {
-        goCardlessHandler = new GoCardlessHandler(mockedTransactionService, mockedGoCardlessService) {
+        goCardlessHandler = new GoCardlessHandler(mockedTransactionService, mockedPayerService, mockedGoCardlessService) {
             @Override
             protected Map<GoCardlessAction, Function<Transaction, PaymentRequestEvent>> getHandledActions() {
                 return ImmutableMap.of();

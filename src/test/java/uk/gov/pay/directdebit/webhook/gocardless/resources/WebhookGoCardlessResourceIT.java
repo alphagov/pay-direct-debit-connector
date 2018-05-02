@@ -40,12 +40,80 @@ import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTrans
 public class WebhookGoCardlessResourceIT {
 
     private final static String REQUEST_PATH = "/v1/webhooks/gocardless";
-    private final static String WEBHOOK_SUCCESS = "{\"events\":[{\"id\":\"EV0000ED6V59V1\",\"created_at\":\"2015-04-17T15:24:26.817Z\",\"resource_type\":\"payments\",\"action\":\"status_unhandled_in_our_side\",\"links\":{\"payment\":\"PM00008Q30R2BR\"},\"details\":{\"origin\":\"gocardless\",\"cause\":\"payment_submitted\",\"description\":\"The payment has now been submitted to the banks, and cannot be cancelled. [SANDBOX TRANSITION]\"},\"metadata\":{}},{\"id\":\"EV0000ED6WBEQ0\",\"created_at\":\"2015-04-17T15:24:26.848Z\",\"resource_type\":\"payments\",\"action\":\"paid_out\",\"links\":{\"payment\":\"PM00008Q30R2BR\"},\"details\":{\"origin\":\"gocardless\",\"cause\":\"paid_out\",\"description\":\"Enough time has passed since the payment was submitted for the banks to return an error, so this payment is now confirmed. [SANDBOX TRANSITION]\"},\"metadata\":{}}]}";
-    private final static String WEBHOOK_SUCCESS_SIGNATURE = "0daa8acb3ea7e5f42bab6ddb0daabeae985cb793b07850e1387be209c1d40001";
 
-    private final static String WEBHOOK_FAILED = "{\"events\":[{\"id\":\"EV0000ED6V59V1\",\"created_at\":\"2015-04-17T15:24:26.817Z\",\"resource_type\":\"payments\",\"action\":\"status_unhandled_in_our_side\",\"links\":{\"payment\":\"PM00008Q30R2BR\"},\"details\":{\"origin\":\"gocardless\",\"cause\":\"payment_submitted\",\"description\":\"The payment has now been submitted to the banks, and cannot be cancelled. [SANDBOX TRANSITION]\"},\"metadata\":{}},{\"id\":\"EV0000ED6WBEQ0\",\"created_at\":\"2015-04-17T15:24:26.848Z\",\"resource_type\":\"mandates\",\"action\":\"failed\",\"links\":{\"mandate\":\"MD00008Q30R2BR\"},\"details\":{\"origin\":\"gocardless\",\"cause\":\"failed\",\"description\":\"Enough time has passed since the payment was submitted for the banks to return an error, so this payment is now confirmed. [SANDBOX TRANSITION]\"},\"metadata\":{}}]}";
+    // language=JSON
+    private final static String WEBHOOK_SUCCESS = "{\n" +
+            "  \"events\": [\n" +
+            "    {\n" +
+            "      \"id\": \"EV0000ED6V59V1\",\n" +
+            "      \"created_at\": \"2015-04-17T15:24:26.817Z\",\n" +
+            "      \"resource_type\": \"payments\",\n" +
+            "      \"action\": \"submitted\",\n" +
+            "      \"links\": {\n" +
+            "        \"payment\": \"PM00008Q30R2BR\"\n" +
+            "      },\n" +
+            "      \"details\": {\n" +
+            "        \"origin\": \"gocardless\",\n" +
+            "        \"cause\": \"payment_submitted\",\n" +
+            "        \"description\": \"The payment has now been submitted to the banks, and cannot be cancelled. [SANDBOX TRANSITION]\"\n" +
+            "      },\n" +
+            "      \"metadata\": {}\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"id\": \"EV0000ED6WBEQ0\",\n" +
+            "      \"created_at\": \"2015-04-17T15:24:26.848Z\",\n" +
+            "      \"resource_type\": \"payments\",\n" +
+            "      \"action\": \"paid_out\",\n" +
+            "      \"links\": {\n" +
+            "        \"payment\": \"PM00008Q30R2BR\"\n" +
+            "      },\n" +
+            "      \"details\": {\n" +
+            "        \"origin\": \"gocardless\",\n" +
+            "        \"cause\": \"paid_out\",\n" +
+            "        \"description\": \"Enough time has passed since the payment was submitted for the banks to return an error, so this payment is now confirmed. [SANDBOX TRANSITION]\"\n" +
+            "      },\n" +
+            "      \"metadata\": {}\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
+    private final static String WEBHOOK_SUCCESS_SIGNATURE = "2ee77401450fdd31490079c0fb0abf19bd1863f98108a67a18968e7eeac1c902";
 
-    private final static String WEBHOOK_FAILED_SIGNATURE = "eeaad0baef683cf610469efad9fe09809192876d547b22e59249ade8f7ee08b9";
+    // language=JSON
+    private final static String WEBHOOK_FAILED = "{\n" +
+            "  \"events\": [\n" +
+            "    {\n" +
+            "      \"id\": \"EV0000ED6V59V1\",\n" +
+            "      \"created_at\": \"2015-04-17T15:24:26.817Z\",\n" +
+            "      \"resource_type\": \"payments\",\n" +
+            "      \"action\": \"submitted\",\n" +
+            "      \"links\": {\n" +
+            "        \"payment\": \"PM00008Q30R2BR\"\n" +
+            "      },\n" +
+            "      \"details\": {\n" +
+            "        \"origin\": \"gocardless\",\n" +
+            "        \"cause\": \"payment_submitted\",\n" +
+            "        \"description\": \"The payment has now been submitted to the banks, and cannot be cancelled. [SANDBOX TRANSITION]\"\n" +
+            "      },\n" +
+            "      \"metadata\": {}\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"id\": \"EV0000ED6WBEQ0\",\n" +
+            "      \"created_at\": \"2015-04-17T15:24:26.848Z\",\n" +
+            "      \"resource_type\": \"mandates\",\n" +
+            "      \"action\": \"failed\",\n" +
+            "      \"links\": {\n" +
+            "        \"mandate\": \"MD00008Q30R2BR\"\n" +
+            "      },\n" +
+            "      \"details\": {\n" +
+            "        \"origin\": \"gocardless\",\n" +
+            "        \"cause\": \"failed\",\n" +
+            "        \"description\": \"Enough time has passed since the payment was submitted for the banks to return an error, so this payment is now confirmed. [SANDBOX TRANSITION]\"\n" +
+            "      },\n" +
+            "      \"metadata\": {}\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
+    private final static String WEBHOOK_FAILED_SIGNATURE = "f0b956da5de3d69ea7ad078e57d1f9d7c7fabe9848e079d399d84c8adb7c0a36";
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -81,7 +149,7 @@ public class WebhookGoCardlessResourceIT {
         Map<String, Object> firstEvent = events.get(0);
         assertThat(firstEvent.get("event_id"), is("EV0000ED6V59V1"));
         assertThat(firstEvent.get("resource_type"), is("PAYMENTS"));
-        assertThat(firstEvent.get("action"), is("status_unhandled_in_our_side"));
+        assertThat(firstEvent.get("action"), is("submitted"));
 
         Map<String, Object> secondEvent = events.get(1);
         assertThat(secondEvent.get("event_id"), is("EV0000ED6WBEQ0"));
@@ -114,14 +182,15 @@ public class WebhookGoCardlessResourceIT {
                 .withMandateId(mandateFixture.getId())
                 .insert(testContext.getJdbi());
 
-        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-                "\"gateway_account_external_id\": \"" + testGatewayAccount.getExternalId() + "\"," +
-                "\"template\": \"MANDATE_FAILED\"," +
-                "\"personalisation\": " +
-                    "{" +
-                    "\"mandate reference\": \"" + mandateFixture.getReference() + "\", " +
-                    "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
-                    "}" +
+        // language=JSON
+        String emailPayloadBody = "{\n" +
+                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
+                "  \"gateway_account_external_id\": \"" + testGatewayAccount.getExternalId() + "\",\n" +
+                "  \"template\": \"MANDATE_FAILED\",\n" +
+                "  \"personalisation\": {\n" +
+                "    \"mandate reference\": \"" + mandateFixture.getReference() + "\",\n" +
+                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
+                "  }\n" +
                 "}";
 
         stubFor(post(urlPathEqualTo("/v1/emails/send"))
@@ -144,7 +213,7 @@ public class WebhookGoCardlessResourceIT {
         Map<String, Object> firstEvent = events.get(0);
         assertThat(firstEvent.get("event_id"), is("EV0000ED6V59V1"));
         assertThat(firstEvent.get("resource_type"), is("PAYMENTS"));
-        assertThat(firstEvent.get("action"), is("status_unhandled_in_our_side"));
+        assertThat(firstEvent.get("action"), is("submitted"));
 
         Map<String, Object> secondEvent = events.get(1);
         assertThat(secondEvent.get("event_id"), is("EV0000ED6WBEQ0"));

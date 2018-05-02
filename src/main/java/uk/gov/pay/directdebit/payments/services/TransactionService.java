@@ -123,9 +123,12 @@ public class TransactionService {
         return paymentRequestEventService.registerPaymentCreatedEventFor(updatedTransaction);
     }
 
-    public PaymentRequestEvent paymentFailedFor(Transaction transaction) {
-        Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_FAILED);
-        return paymentRequestEventService.registerPaymentFailedEventFor(newTransaction);
+    public PaymentRequestEvent paymentFailedFor(Transaction transaction, Payer payer, boolean sendEmail) {
+        if (sendEmail) {
+            userNotificationService.sendPaymentFailedEmailFor(transaction, payer);
+        }
+        Transaction updatedTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_FAILED);
+        return paymentRequestEventService.registerPaymentFailedEventFor(updatedTransaction);
     }
 
     public PaymentRequestEvent paymentPaidOutFor(Transaction transaction) {
