@@ -38,7 +38,7 @@ public class PayerDaoIT {
     private static final String ADDRESS_POSTCODE = "a postcode";
     private static final String ADDRESS_COUNTRY = "italy";
     private static final ZonedDateTime CREATED_DATE = ZonedDateTime.parse("2017-12-30T12:30:40Z");
-    private static final String EMAIL = "aaa@bb.com";
+    private static final String EMAIL = "aaa@bb.test";
     private static final String EXTERNAL_ID = "ablijfslkj234";
 
     @DropwizardTestContext
@@ -172,5 +172,58 @@ public class PayerDaoIT {
     @Test
     public void shouldNotFindAPayerByRequestId_ifIdIsInvalid() {
         assertThat(payerDao.findByPaymentRequestId(154L).isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldUpdatePayerDetailsAndReturnNumberOfAffectedRows() {
+        testPayer.insert(testContext.getJdbi());
+
+        String newName = "coffee";
+        String newAccountNumber = "87654321";
+        String newSortCode = "123456";
+        String newEmail = "aaa@bbb.test";
+        boolean newRequiresAuthorisation = true;
+        Payer newPayerDetails = PayerFixture
+                .aPayerFixture()
+                .withName(newName)
+                .withAccountNumber(newAccountNumber)
+                .withSortCode(newSortCode)
+                .withEmail(newEmail)
+                .withAccountRequiresAuthorisation(newRequiresAuthorisation)
+                .withAccountNumberLastTwoDigits("21")
+                .withAddressLine1(ADDRESS_LINE_1)
+                .withAddressLine2(ADDRESS_LINE_2)
+                .withAddressCity(ADDRESS_CITY)
+                .withAddressPostcode(ADDRESS_POSTCODE)
+                .withAddressCountry(ADDRESS_COUNTRY)
+                .withExternalId("this_should_not_be_updated")
+                .withCreatedDate(ZonedDateTime.now())
+                .toEntity();
+        int numOfUpdatedPayers = payerDao.updatePayerDetails(testPayer.getId(), newPayerDetails);
+        Map<String, Object> payerAfterUpdate = testContext.getDatabaseTestHelper().getPayerById(testPayer.getId());
+
+        assertThat(numOfUpdatedPayers, is(1));
+        assertThat(payerAfterUpdate.get("id"), is(testPayer.getId()));
+        assertThat(payerAfterUpdate.get("payment_request_id"), is(testPaymentRequest.getId()));
+        assertThat(payerAfterUpdate.get("external_id"), is(EXTERNAL_ID)); //old external id
+        assertThat(payerAfterUpdate.get("name"), is(newName));
+        assertThat(payerAfterUpdate.get("email"), is(newEmail));
+        assertThat(payerAfterUpdate.get("bank_account_number_last_two_digits"), is("21"));
+        assertThat(payerAfterUpdate.get("bank_account_requires_authorisation"), is(newRequiresAuthorisation));
+        assertThat(payerAfterUpdate.get("bank_account_number"), is(newAccountNumber));
+        assertThat(payerAfterUpdate.get("bank_account_sort_code"), is(newSortCode));
+        assertThat(payerAfterUpdate.get("address_line1"), is(ADDRESS_LINE_1));
+        assertThat(payerAfterUpdate.get("address_line2"), is(ADDRESS_LINE_2));
+        assertThat(payerAfterUpdate.get("address_postcode"), is(ADDRESS_POSTCODE));
+        assertThat(payerAfterUpdate.get("address_city"), is(ADDRESS_CITY));
+        assertThat(payerAfterUpdate.get("address_country"), is(ADDRESS_COUNTRY));
+        assertThat((Timestamp) payerAfterUpdate.get("created_date"), isDate(CREATED_DATE)); //old date
+
+    }
+
+    @Test
+    public void shouldNotUpdateAnythingIfPayerDoesNotExist() {
+        int numOfUpdatedPayers = payerDao.updatePayerDetails(34L, testPayer.toEntity());
+        assertThat(numOfUpdatedPayers, is(0));
     }
 }

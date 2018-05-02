@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -36,7 +37,27 @@ public class PayerResource {
         this.paymentProviderFactory = paymentProviderFactory;
     }
 
+
+    // fixme backward compatibility, will remove the POST after frontend is updated
     @POST
+    @Path("/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers")
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    public Response createPayerOld(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
+        createPayerValidator.validate(paymentRequestExternalId, createPayerRequest);
+
+        LOGGER.info("Received create payer request for payment request with id: {}", paymentRequestExternalId);
+
+        DirectDebitPaymentProvider payerService = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
+        Payer payer = payerService.createPayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
+
+        CreatePayerResponse createPayerResponse = CreatePayerResponse.from(payer);
+
+        URI newPayerLocation = URIBuilder.selfUriFor(uriInfo, PAYER_API_PATH, gatewayAccount.getId().toString(), paymentRequestExternalId, createPayerResponse.getPayerExternalId());
+        return Response.created(newPayerLocation).entity(createPayerResponse).build();
+    }
+
+    @PUT
     @Path("/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)

@@ -62,25 +62,24 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     @Override
     public Payer createPayer(String paymentRequestExternalId, GatewayAccount gatewayAccount, Map<String, String> createPayerRequest) {
-        Payer payer = payerService.create(paymentRequestExternalId, gatewayAccount.getExternalId(), createPayerRequest);
-        GoCardlessCustomer customer = createCustomer(paymentRequestExternalId, payer);
-        createCustomerBankAccount(paymentRequestExternalId, customer, payer, createPayerRequest);
-        return payer;
+        return payerService.createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
     }
 
     @Override
     public void confirm(String paymentRequestExternalId, GatewayAccount gatewayAccount) {
-        LOGGER.info("Confirming payment, payment request id: {}", paymentRequestExternalId);
         ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId);
+        Payer payer = payerService.getPayerFor(confirmationDetails.getTransaction());
+        LOGGER.info("Confirming payment, payment request id: {}", paymentRequestExternalId);
+        GoCardlessCustomer customer = createCustomer(paymentRequestExternalId, payer);
+        createCustomerBankAccount(paymentRequestExternalId, customer, payer);
         GoCardlessMandate goCardlessMandate = createMandate(paymentRequestExternalId, confirmationDetails.getMandate());
         GoCardlessPayment payment = createPayment(paymentRequestExternalId, confirmationDetails.getTransaction(), goCardlessMandate);
-        Payer payer = payerService.getPayerFor(confirmationDetails.getTransaction());
+
         transactionService.paymentCreatedFor(confirmationDetails.getTransaction(), payer, payment.getChargeDate());
     }
 
     private GoCardlessCustomer createCustomer(String paymentRequestExternalId, Payer payer) {
         try {
-
             LOGGER.info("Attempting to call gocardless to create a customer, payment request id: {}", paymentRequestExternalId);
 
             GoCardlessCustomer customer = goCardlessClientWrapper.createCustomer(paymentRequestExternalId, payer);
@@ -95,19 +94,18 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         }
     }
 
-    private String createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer, Map<String, String> createPayerRequest) {
+    private void createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer) {
         try {
             LOGGER.info("Attempting to call gocardless to create a customer bank account, payment request id: {}", paymentRequestExternalId);
 
-            String sortCode = createPayerRequest.get("sort_code");
-            String accountNumber = createPayerRequest.get("account_number");
+            String sortCode = payer.getSortCode();
+            String accountNumber = payer.getAccountNumber();
 
             GoCardlessCustomer customerWithBankAccount = goCardlessClientWrapper.createCustomerBankAccount(paymentRequestExternalId, goCardlessCustomer, payer.getName(), sortCode, accountNumber);
 
             LOGGER.info("Created customer bank account in gocardless, payment request id: {}", paymentRequestExternalId);
 
             goCardlessCustomerDao.updateBankAccountId(customerWithBankAccount.getId(), customerWithBankAccount.getCustomerBankAccountId());
-            return customerWithBankAccount.getCustomerId();
         } catch (Exception exc) {
             logException(exc, "bank account", paymentRequestExternalId);
             throw new CreateCustomerBankAccountFailedException(paymentRequestExternalId, payer.getExternalId());

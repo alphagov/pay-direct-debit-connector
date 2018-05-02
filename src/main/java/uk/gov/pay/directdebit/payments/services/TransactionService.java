@@ -102,7 +102,7 @@ public class TransactionService {
     public Transaction receiveDirectDebitDetailsFor(String accountExternalId, String paymentRequestExternalId) {
         Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
         paymentRequestEventService.registerDirectDebitReceivedEventFor(transaction);
-        return updateStateFor(transaction, DIRECT_DEBIT_DETAILS_RECEIVED);
+        return transaction;
     }
 
     public Transaction confirmedDirectDebitDetailsFor(String accountExternalId, String paymentRequestExternalId) {
@@ -112,9 +112,12 @@ public class TransactionService {
     }
 
     public Transaction payerCreatedFor(Transaction transaction) {
-        Transaction updatedTransaction = updateStateFor(transaction, PAYER_CREATED);
         paymentRequestEventService.registerPayerCreatedEventFor(transaction);
-        return updatedTransaction;
+        return transaction;
+    }
+
+    public PaymentRequestEvent payerEditedFor(Transaction transaction) {
+        return paymentRequestEventService.registerPayerEditedEventFor(transaction);
     }
 
     public PaymentRequestEvent paymentCreatedFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
@@ -183,4 +186,5 @@ public class TransactionService {
         Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
         return paymentRequestEventService.registerPaymentMethodChangedEventFor(newTransaction);
     }
+
 }

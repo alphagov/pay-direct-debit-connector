@@ -49,7 +49,7 @@ public class SandboxServiceTest {
     public void createPayer_shouldCreatePayerWhenReceivingPayerRequest() {
         Map<String, String> createPayerRequest = ImmutableMap.of();
         service.createPayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
-        verify(mockedPayerService).create(paymentRequestExternalId, gatewayAccount.getExternalId(), createPayerRequest);
+        verify(mockedPayerService).createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
     }
 
     @Test

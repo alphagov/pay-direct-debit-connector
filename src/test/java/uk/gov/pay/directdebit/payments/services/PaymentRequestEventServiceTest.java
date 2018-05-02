@@ -90,6 +90,18 @@ public class PaymentRequestEventServiceTest {
     }
 
     @Test
+    public void registerPayerEditedEventFor_shouldInsertAnEventWhenPayerIsEdited() {
+        service.registerPayerEditedEventFor(transactionFixture.toEntity());
+
+        verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
+        PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
+        assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
+        assertThat(paymentRequestEvent.getEvent(), is(PaymentRequestEvent.SupportedEvent.PAYER_EDITED));
+        assertThat(paymentRequestEvent.getEventType(), is(PaymentRequestEvent.Type.PAYER));
+        assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
+    }
+
+    @Test
     public void registerPaymentCreatedEventFor_shouldCreateExpectedEvent() {
         service.registerPaymentCreatedEventFor(transactionFixture.toEntity());
 

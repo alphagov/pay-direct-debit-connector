@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
@@ -22,6 +23,8 @@ import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -64,10 +67,22 @@ public class PayerServiceTest {
     }
 
     @Test
-    public void shouldStoreAPayerWhenReceivingCreatePayerRequest() {
-        service.create(paymentRequestExternalId, gatewayAccount.getExternalId(), createPayerRequest);
+    public void shouldCreateAndStoreAPayerWhenReceivingCreatePayerRequest() {
+        service.createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
         verify(mockedPayerDao).insert(payer);
         verify(mockedTransactionService).payerCreatedFor(transaction);
+        verify(mockedTransactionService, never()).payerEditedFor(transaction);
+    }
+    @Test
+    public void shouldUpdateAndStoreAPayerWhenReceivingCreatePayerRequest_ifAPayerAlreadyExists() {
+        Payer payer = PayerFixture.aPayerFixture()
+                .withName("mr payment").toEntity();
+        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequest().getId()))
+                .thenReturn(Optional.of(payer));
+        service.createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
+        verify(mockedPayerDao).updatePayerDetails(eq(payer.getId()), any(Payer.class));
+        verify(mockedTransactionService).payerEditedFor(transaction);
+        verify(mockedTransactionService, never()).payerCreatedFor(transaction);
     }
 
     @Test

@@ -32,7 +32,7 @@ public class SandboxService implements DirectDebitPaymentProvider {
     @Override
     public Payer createPayer(String paymentRequestExternalId, GatewayAccount gatewayAccount, Map<String, String> createPayerRequest) {
         LOGGER.info("Creating payer for SANDBOX, payment with id: {}", paymentRequestExternalId);
-        return payerService.create(paymentRequestExternalId, gatewayAccount.getExternalId(), createPayerRequest);
+        return payerService.createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
     }
 
     @Override

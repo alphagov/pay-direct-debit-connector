@@ -142,8 +142,6 @@ public class PayerResourceIT {
         insertTransactionFixtureWith(GOCARDLESS);
         String fakeCustomerId = "CU000358S3A2FP";
         String fakeBankAccountId = "BA0002WR3Z193A";
-        stubCreateCustomer(testPaymentRequest.getExternalId(), payerFixture, fakeCustomerId);
-        stubCreateCustomerBankAccount(testPaymentRequest.getExternalId(), payerFixture, fakeCustomerId, fakeBankAccountId);
         String requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
                 .replace("{accountId}", testGatewayAccount.getId().toString())
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
