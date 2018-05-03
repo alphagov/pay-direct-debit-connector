@@ -90,4 +90,15 @@ public class UserNotificationServiceTest {
         verify(mockAdminUsersClient).sendEmail(EmailTemplate.PAYMENT_CONFIRMED, transaction, EMAIL, emailPersonalisation);
     }
 
+    @Test
+    public void shouldSendPaymentFailedEmail() {
+        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
+        HashMap<String, String> emailPersonalisation = new HashMap<>();
+        emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
+
+        userNotificationService.sendPaymentFailedEmailFor(transaction, payer);
+
+        verify(mockAdminUsersClient).sendEmail(EmailTemplate.PAYMENT_FAILED, transaction, EMAIL, emailPersonalisation);
+    }
+
 }

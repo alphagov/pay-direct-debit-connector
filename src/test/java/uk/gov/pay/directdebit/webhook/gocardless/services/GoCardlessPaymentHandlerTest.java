@@ -9,6 +9,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -34,6 +37,8 @@ public class GoCardlessPaymentHandlerTest {
     @Mock
     private TransactionService mockedTransactionService;
     @Mock
+    private PayerService mockedPayerService;
+    @Mock
     private GoCardlessService mockedGoCardlessService;
     @Captor
     private ArgumentCaptor<GoCardlessEvent> geCaptor;
@@ -41,12 +46,14 @@ public class GoCardlessPaymentHandlerTest {
     private GoCardlessPaymentFixture goCardlessPaymentFixture = GoCardlessPaymentFixture.aGoCardlessPaymentFixture();
     private GoCardlessPaymentHandler goCardlessPaymentHandler;
     private PaymentRequestEvent paymentRequestEvent = PaymentRequestEventFixture.aPaymentRequestEventFixture().toEntity();
+    private Payer payer = PayerFixture.aPayerFixture().toEntity();
     private Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
 
     @Before
     public void setUp() {
-        goCardlessPaymentHandler = new GoCardlessPaymentHandler(mockedTransactionService, mockedGoCardlessService);
+        goCardlessPaymentHandler = new GoCardlessPaymentHandler(mockedTransactionService, mockedPayerService, mockedGoCardlessService);
         when(mockedTransactionService.findTransactionFor(goCardlessPaymentFixture.getTransactionId())).thenReturn(transaction);
+        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
     }
 
     @Test
@@ -133,11 +140,11 @@ public class GoCardlessPaymentHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("failed").toEntity());
 
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
-        when(mockedTransactionService.paymentFailedFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.paymentFailedWithEmailFor(transaction, payer)).thenReturn(paymentRequestEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
-        verify(mockedTransactionService).paymentFailedFor(transaction);
+        verify(mockedTransactionService).paymentFailedWithEmailFor(transaction, payer);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();

@@ -21,13 +21,14 @@ import java.util.function.Function;
 
 public class GoCardlessMandateHandler extends GoCardlessHandler {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessMandateHandler.class);
-    private final PayerService payerService;
     private final MandateService mandateService;
 
     @Inject
-    public GoCardlessMandateHandler(TransactionService transactionService, GoCardlessService goCardlessService, PayerService payerService, MandateService mandateService) {
-        super(transactionService, goCardlessService);
-        this.payerService = payerService;
+    public GoCardlessMandateHandler(TransactionService transactionService,
+                                    GoCardlessService goCardlessService,
+                                    PayerService payerService,
+                                    MandateService mandateService) {
+        super(transactionService, payerService, goCardlessService);
         this.mandateService = mandateService;
     }
 
@@ -60,14 +61,14 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 GoCardlessMandateAction.CANCELLED, (Transaction transaction) -> {
                     Payer payer = payerService.getPayerFor(transaction);
                     if (!transactionService.findPaymentSubmittedEventFor(transaction).isPresent()) {
-                        transactionService.paymentFailedFor(transaction);
+                        transactionService.paymentFailedWithoutEmailFor(transaction, payer);
                     }
                     return mandateService.mandateCancelledFor(transaction, payer);
                 },
                 GoCardlessMandateAction.FAILED, (Transaction transaction) -> {
                     Payer payer = payerService.getPayerFor(transaction);
                     mandateService.mandateFailedFor(transaction, payer);
-                    return transactionService.paymentFailedFor(transaction);
+                    return transactionService.paymentFailedWithoutEmailFor(transaction, payer);
                 });
     }
 

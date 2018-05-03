@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
+import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
@@ -21,8 +22,10 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessPaymentHandler.class);
 
     @Inject
-    public GoCardlessPaymentHandler(TransactionService transactionService, GoCardlessService goCardlessService) {
-        super(transactionService, goCardlessService);
+    public GoCardlessPaymentHandler(TransactionService transactionService,
+                                    PayerService payerService,
+                                    GoCardlessService goCardlessService) {
+        super(transactionService, payerService, goCardlessService);
     }
 
     /**
@@ -63,7 +66,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 .put(GoCardlessPaymentAction.CONFIRMED, (Transaction transaction) ->
                         transactionService.findPaymentSubmittedEventFor(transaction)
                                 .orElseThrow(() -> new InvalidStateException("Could not find payment submitted event for payment request with id: " + transaction.getPaymentRequest().getExternalId())))
-                .put(GoCardlessPaymentAction.FAILED, transactionService::paymentFailedFor)
+                .put(GoCardlessPaymentAction.FAILED, (Transaction transaction) -> transactionService.paymentFailedWithEmailFor(transaction, payerService.getPayerFor(transaction)))
                 .put(GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor)
                 .put(GoCardlessPaymentAction.PAID, transactionService::payoutPaidFor)
                 .build();

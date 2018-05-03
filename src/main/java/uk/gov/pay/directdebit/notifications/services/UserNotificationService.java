@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
-
 public class UserNotificationService {
 
     private static final String PLACEHOLDER_SUN = "THE-CAKE-IS-A-LIE";
@@ -49,6 +48,10 @@ public class UserNotificationService {
                 buildPaymentConfirmedPersonalisation(transaction, payer, earliestChargeDate));
     }
 
+    public void sendPaymentFailedEmailFor(Transaction transaction, Payer payer) {
+        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_FAILED, transaction, payer.getEmail(), buildPersonalisation());
+    }
+
     private HashMap<String, String> buildMandateProblemPersonalisation(Mandate mandate) {
         HashMap<String, String> map = new HashMap<>();
         // fixme use the right reference once we play PP-3547
@@ -64,6 +67,12 @@ public class UserNotificationService {
         map.put(BANK_ACCOUNT_LAST_DIGITS_KEY, "******" + payer.getAccountNumberLastTwoDigits());
         map.put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate));
         map.put(SUN_KEY, PLACEHOLDER_SUN);
+        map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
+        return map;
+    }
+
+    private HashMap<String, String> buildPersonalisation() {
+        HashMap<String, String> map = new HashMap<>();
         map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
         return map;
     }

@@ -31,7 +31,8 @@ public class EmailPayload {
     public enum EmailTemplate {
         MANDATE_CANCELLED,
         MANDATE_FAILED,
-        PAYMENT_CONFIRMED;
+        PAYMENT_CONFIRMED,
+        PAYMENT_FAILED;
 
         private static final Logger LOGGER = PayLoggerFactory.getLogger(EmailTemplate.class);
 
