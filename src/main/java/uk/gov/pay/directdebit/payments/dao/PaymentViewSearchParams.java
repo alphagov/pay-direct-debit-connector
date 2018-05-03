@@ -1,18 +1,29 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import org.apache.commons.lang3.tuple.Pair;
+import uk.gov.pay.directdebit.payments.params.PaginationParams;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PaymentViewSearchParams {
 
+    private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "gatewayAccountExternalId";
+    private static final String PAGE_NUMBER_FIELD = "offset";
+    private static final String PAGE_SIZE_FIELD = "limit";
+    private String gatewayExternalId;
     private Long page;
     private Long displaySize;
-    private Optional<Pair<Long, Long>> paginationParams;
+    private PaginationParams paginationParams;
+    private Map<String, Object> queryMap;
 
-    public PaymentViewSearchParams(Long page, Long displaySize) {
+    public PaymentViewSearchParams(String gatewayExternalId, Long page, Long displaySize) {
+        this.gatewayExternalId = gatewayExternalId;
         this.page = page;
         this.displaySize = displaySize;
+    }
+
+    public String getGatewayExternalId() {
+        return gatewayExternalId;
     }
 
     public Long getPage() {
@@ -23,13 +34,28 @@ public class PaymentViewSearchParams {
         return displaySize;
     }
 
-    public Optional<Pair<Long, Long>> getPaginationParams() {
+    public PaginationParams getPaginationParams() {
         if (paginationParams == null) {
-            if (page == null || displaySize == null) {
-                paginationParams = Optional.empty();
-            }
-            paginationParams = Optional.of(Pair.of(page, displaySize));
+            return new PaginationParams(page, displaySize);
         }
         return paginationParams;
+    }
+
+    public void setPaginationParams(PaginationParams paginationParams) {
+        this.paginationParams = paginationParams;
+    }
+
+    public String generateQuery() {
+        return "";
+    }
+
+    public Map<String, Object> getQueryMap() {
+        if (queryMap == null) {
+            queryMap = new HashMap<>();
+            queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, gatewayExternalId);
+            queryMap.put(PAGE_NUMBER_FIELD, getPaginationParams().getPageNumber());
+            queryMap.put(PAGE_SIZE_FIELD, getPaginationParams().getDisplaySize());
+        }
+        return queryMap;
     }
 }

@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payments.resources;
 
-import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +20,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.pay.directdebit.payments.fixtures.PayersFixture.aPayersFixture;
+import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
@@ -53,7 +52,7 @@ public class PaymentViewResourceTest {
             aTransactionFixture()
                     .withPaymentRequestId(paymentRequestFixture.getId())
                     .insert(testContext.getJdbi());
-            aPayersFixture()
+            aPayerFixture()
                     .withPaymentRequestId(paymentRequestFixture.getId())
                     .withName("J. Doe" + i)
                     .insert(testContext.getJdbi());
@@ -91,7 +90,7 @@ public class PaymentViewResourceTest {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message[0]", is("query param 'page' should be a non zero positive integer"));
+                .body("message", is("Query param 'page' should be a non zero positive integer"));
     }
 
     @Test
@@ -106,7 +105,7 @@ public class PaymentViewResourceTest {
                 .then()
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("account with id non-existent-id not found"));
+                .body("message", is("Unknown gateway account: non-existent-id"));
     }
 
     @Test
@@ -118,7 +117,7 @@ public class PaymentViewResourceTest {
             aTransactionFixture()
                     .withPaymentRequestId(paymentRequestFixture.getId())
                     .insert(testContext.getJdbi());
-            aPayersFixture()
+            aPayerFixture()
                     .withPaymentRequestId(paymentRequestFixture.getId())
                     .insert(testContext.getJdbi());
         }
@@ -134,7 +133,7 @@ public class PaymentViewResourceTest {
                 .then()
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("found no records with page size 2 and display_size 2"));
+                .body("message", is("Found no records with page size 2 and display_size 2"));
     }
 
     @Test
@@ -151,7 +150,7 @@ public class PaymentViewResourceTest {
             aTransactionFixture()
                     .withPaymentRequestId(paymentRequestFixture.getId())
                     .insert(testContext.getJdbi());
-            aPayersFixture()
+            aPayerFixture()
                     .withPaymentRequestId(paymentRequestFixture.getId())
                     .withName("J. Doe" + i)
                     .insert(testContext.getJdbi());

@@ -29,6 +29,10 @@ public class PaymentViewResponse {
         this.paymentViewResponses = paymentViewResponses;
     }
 
+    public List<PaymentViewListResponse> getPaymentViewResponses() {
+        return paymentViewResponses;
+    }
+
     @Override
     public int hashCode() {
         int result = gatewayExternalId.hashCode();

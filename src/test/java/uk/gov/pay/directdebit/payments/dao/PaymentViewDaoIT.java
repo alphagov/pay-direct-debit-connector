@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.PayersFixture.aPayersFixture;
+import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
@@ -47,7 +47,7 @@ public class PaymentViewDaoIT {
                     .withDescription("description " + i)
                     .insert(testContext.getJdbi());
 
-            aPayersFixture()
+            aPayerFixture()
                     .withPaymentRequestId(paymentRequest.getId())
                     .withName("Joe Bog" + i)
                     .insert(testContext.getJdbi());
@@ -57,8 +57,8 @@ public class PaymentViewDaoIT {
                     .withAmount(1000l + i)
                     .insert(testContext.getJdbi());
         }
-
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(gatewayAccountFixture.getExternalId(), 0l, 100l);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(), 0l, 100l);
+        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(3));
     }
 
@@ -71,7 +71,7 @@ public class PaymentViewDaoIT {
                     .withDescription("description " + i)
                     .insert(testContext.getJdbi());
 
-            aPayersFixture()
+            aPayerFixture()
                     .withPaymentRequestId(paymentRequest.getId())
                     .withName("Joe Bog" + i)
                     .insert(testContext.getJdbi());
@@ -81,14 +81,15 @@ public class PaymentViewDaoIT {
                     .withAmount(1000l + i)
                     .insert(testContext.getJdbi());
         }
-
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(gatewayAccountFixture.getExternalId(), 2l, 100l);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(), 2l, 100l);
+        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
     }
 
     @Test
     public void shouldReturnAnEmptyList_whenNoMatchingGatewayAccounts() throws Exception {
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView("invalid-external-id", 0l, 100l);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams("invalid-external-id", 1l, 100l);
+        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.isEmpty(), is(true));
     }
 }

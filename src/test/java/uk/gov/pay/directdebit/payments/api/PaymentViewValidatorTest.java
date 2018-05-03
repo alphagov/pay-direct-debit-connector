@@ -1,38 +1,47 @@
 package uk.gov.pay.directdebit.payments.api;
 
-import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Rule;
 import org.junit.Test;
-
-import java.util.List;
-import java.util.Optional;
+import org.junit.rules.ExpectedException;
+import uk.gov.pay.directdebit.payments.dao.PaymentViewSearchParams;
+import uk.gov.pay.directdebit.payments.exception.NegativeSearchParamException;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 public class PaymentViewValidatorTest {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
     private PaymentViewValidator validator = new PaymentViewValidator();
 
     @Test
     public void shouldReturnNoErrors() {
-        List<Pair<String, Long>> pairList = ImmutableList.of(Pair.of("page", 2l), Pair.of("display_size", 50l));
-        Optional<List> errors = validator.validateQueryParams(pairList);
-        assertThat(errors.isPresent(), is(false));
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account", 3l, 256l);
+        validator.validateParams(searchParams);
+
     }
 
     @Test
-    public void shouldReturnAnError_whenPageisZero() {
-        List<Pair<String, Long>> pairList = ImmutableList.of(Pair.of("page", 0l), Pair.of("display_size", 50l));
-        Optional<List> errors = validator.validateQueryParams(pairList);
-        assertThat(errors.isPresent(), is(true));
-        assertThat(errors.get().get(0), is("query param 'page' should be a non zero positive integer"));
+    public void shouldReturnAnError_whenPageIsZero() {
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account", 0l, 256l);
+        thrown.expect(NegativeSearchParamException.class);
+        thrown.expectMessage("Query param 'page' should be a non zero positive integer");
+        validator.validateParams(searchParams);
     }
 
     @Test
     public void shouldResetDisplaySizeTo500() {
-        Pair<Long, Long> paginator = Pair.of(4l, 501l);
-        Pair<Long, Long> result = PaymentViewValidator.validatePagination(Optional.of(paginator));
-        assertThat(result.getRight(), is(500l));
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account", 2l, 600l);
+        validator.validateParams(searchParams);
+        assertThat(searchParams.getPaginationParams().getDisplaySize(), is(500l));
+    }
+
+    @Test
+    public void shouldSetPaginationWithDefaultValues() {
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account", null, null);
+        validator.validateParams(searchParams);
+        assertThat(searchParams.getPaginationParams().getDisplaySize(), is(500l));
+        assertThat(searchParams.getPaginationParams().getPageNumber(), is(1l));
     }
 }

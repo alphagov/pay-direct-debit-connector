@@ -36,6 +36,6 @@ public class PaymentViewMapper implements RowMapper<PaymentView> {
                 rs.getString(NAME_COLUMN),
                 rs.getString(EMAIL_COLUMN),
                 PaymentState.valueOf(rs.getString(STATE_COLUMN)
-        ));
+                ));
     }
 }
