@@ -9,6 +9,7 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.payments.dao.mapper.PaymentRequestMapper;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
+import java.util.List;
 import java.util.Optional;
 
 @RegisterRowMapper(PaymentRequestMapper.class)
@@ -22,4 +23,7 @@ public interface PaymentRequestDao {
     @SqlUpdate("INSERT INTO payment_requests(external_id, gateway_account_id, amount, reference, description, return_url, created_date) VALUES (:externalId, :gatewayAccountId, :amount, :reference, :description, :returnUrl, :createdDate)")
     @GetGeneratedKeys
     Long insert(@BindBean PaymentRequest paymentRequest);
+
+    @SqlQuery("SELECT * FROM payment_requests p JOIN gateway_accounts g ON p.gateway_account_id = g.id WHERE g.external_id = :accountExternalId ORDER BY p.id DESC LIMIT :pageSize")
+    List<PaymentRequest> findByAccountExternalId(@Bind("accountExternalId") String accountExternalId, @Bind("pageSize") Integer pageSize);
 }

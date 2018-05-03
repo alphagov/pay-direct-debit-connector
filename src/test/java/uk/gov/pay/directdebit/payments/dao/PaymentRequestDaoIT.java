@@ -16,12 +16,14 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.common.util.RandomIdGenerator.newId;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
@@ -116,5 +118,79 @@ public class PaymentRequestDaoIT {
         testPaymentRequest.insert(testContext.getJdbi());
         String gatewayExternalId = "non_existing_externalId";
         assertThat(paymentRequestDao.findByExternalIdAndAccountExternalId(testPaymentRequest.getExternalId(), gatewayExternalId), is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldFindAListOfPaymentRequestsByGatewayAccountExternalId_withPageSizeSetTo5() {
+        aPaymentRequestFixture()
+                .withId(23)
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .withExternalId(newId())
+                .withAmount(AMOUNT)
+                .withDescription(DESCRIPTION)
+                .withReference("M00001")
+                .withReturnUrl(RETURN_URL)
+                .withCreatedDate(CREATED_DATE)
+                .insert(testContext.getJdbi());
+        aPaymentRequestFixture()
+                .withId(24)
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .withExternalId(newId())
+                .withAmount(AMOUNT)
+                .withDescription(DESCRIPTION)
+                .withReference("M00002")
+                .withReturnUrl(RETURN_URL)
+                .withCreatedDate(CREATED_DATE)
+                .insert(testContext.getJdbi());
+
+        List<PaymentRequest> paymentRequests = paymentRequestDao.findByAccountExternalId(testGatewayAccount.getExternalId(), 100);
+        assertThat(paymentRequests.size(), is(2));
+        assertThat(paymentRequests.get(0).getReference(), is("M00002"));
+        assertThat(paymentRequests.get(1).getReference(), is("M00001"));
+    }
+
+    @Test
+    public void shouldFindAListOfPaymentRequestsByGatewayAccountExternalId_withPageSizeSetTo2_andLIFO() {
+        aPaymentRequestFixture()
+                .withId(2)
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .withExternalId(newId())
+                .withAmount(AMOUNT)
+                .withDescription(DESCRIPTION)
+                .withReference("M00001")
+                .withReturnUrl(RETURN_URL)
+                .withCreatedDate(CREATED_DATE)
+                .insert(testContext.getJdbi());
+        aPaymentRequestFixture()
+                .withId(3)
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .withExternalId(newId())
+                .withAmount(AMOUNT)
+                .withDescription(DESCRIPTION)
+                .withReference("M00002")
+                .withReturnUrl(RETURN_URL)
+                .withCreatedDate(CREATED_DATE)
+                .insert(testContext.getJdbi());
+        aPaymentRequestFixture()
+                .withId(4)
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .withExternalId(newId())
+                .withAmount(AMOUNT)
+                .withDescription(DESCRIPTION)
+                .withReference("M00003")
+                .withReturnUrl(RETURN_URL)
+                .withCreatedDate(CREATED_DATE)
+                .insert(testContext.getJdbi());
+
+        List<PaymentRequest> paymentRequests = paymentRequestDao.findByAccountExternalId(testGatewayAccount.getExternalId(), 2);
+        assertThat(paymentRequests.size(), is(2));
+        assertThat(paymentRequests.get(0).getReference(), is("M00003"));
+        assertThat(paymentRequests.get(1).getReference(), is("M00002"));
+    }
+
+    @Test
+    public void shouldNotFindPaymentRequestByAccountExternalId_ifExternalIdIsInvalid() {
+        String externalId = "non_existing_externalId";
+        assertThat(paymentRequestDao.findByAccountExternalId(externalId, 200).size(), is(0));
     }
 }
