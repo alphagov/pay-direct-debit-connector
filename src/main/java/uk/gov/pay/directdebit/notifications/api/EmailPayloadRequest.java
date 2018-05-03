@@ -8,7 +8,7 @@ import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 
 import java.util.Map;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.*;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

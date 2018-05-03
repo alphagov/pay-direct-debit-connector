@@ -1,10 +1,21 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import static java.lang.String.format;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
+import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
+
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -32,16 +43,6 @@ import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundExcept
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import java.util.Optional;
-
-import static java.lang.String.format;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoCardlessServiceTest {
@@ -89,6 +90,7 @@ public class GoCardlessServiceTest {
         when(mockedGoCardlessClientWrapper.createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer)).thenReturn(goCardlessCustomer);
         when(mockedGoCardlessClientWrapper.createCustomerBankAccount(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessCustomer, payer.getName(), payer.getSortCode(), payer.getAccountNumber())).thenReturn(goCardlessCustomer);
         when(mockedPaymentConfirmService.confirm(gatewayAccount.getExternalId(), PAYMENT_REQUEST_EXTERNAL_ID)).thenReturn(confirmationDetails);
+        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
 
     }
 
@@ -136,9 +138,6 @@ public class GoCardlessServiceTest {
 
     @Test
     public void  confirm_shouldThrow_ifFailingToCreateCustomerBankAccountInGoCardless() {
-        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
-        when(mockedGoCardlessClientWrapper.createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer))
-                .thenReturn(goCardlessCustomer);
         when(mockedGoCardlessClientWrapper.createCustomerBankAccount(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessCustomer, payer.getName(), payer.getSortCode(), payer.getAccountNumber()))
                 .thenThrow(new RuntimeException("oops"));
         thrown.expect(CreateCustomerBankAccountFailedException.class);
@@ -150,28 +149,27 @@ public class GoCardlessServiceTest {
     @Test
     public void confirm_shouldStoreAGoCardlessCustomerBankAccountMandateAndPaymentWhenReceivingConfirmPaymentRequest() {
         when(mockedGoCardlessCustomerDao.findByPayerId(payer.getId())).thenReturn(Optional.of(goCardlessCustomer));
-        when(mockedGoCardlessClientWrapper.createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer)).thenReturn(goCardlessCustomer);
-        when(mockedGoCardlessClientWrapper.createCustomerBankAccount(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessCustomer, payer.getName(), payer.getSortCode(), payer.getAccountNumber())).thenReturn(goCardlessCustomer);
         when(mockedGoCardlessClientWrapper.createMandate(PAYMENT_REQUEST_EXTERNAL_ID, mandate, goCardlessCustomer)).thenReturn(goCardlessMandate);
         when(mockedGoCardlessClientWrapper.createPayment(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessMandate, transaction)).thenReturn(goCardlessPayment);
-        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
+
         service.confirm(PAYMENT_REQUEST_EXTERNAL_ID, gatewayAccount);
         verify(mockedGoCardlessCustomerDao).insert(goCardlessCustomer);
         verify(mockedGoCardlessMandateDao).insert(goCardlessMandate);
         verify(mockedGoCardlessPaymentDao).insert(goCardlessPayment);
-        verify(mockedGoCardlessClientWrapper).createMandate(PAYMENT_REQUEST_EXTERNAL_ID, mandate, goCardlessCustomer);
-        verify(mockedGoCardlessClientWrapper).createPayment(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessMandate, transaction);
-        verify(mockedGoCardlessClientWrapper).createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer);
-        verify(mockedGoCardlessClientWrapper).createCustomerBankAccount(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessCustomer, payer.getName(), payer.getSortCode(), payer.getAccountNumber());
+
+        InOrder orderedCalls = inOrder(mockedGoCardlessClientWrapper);
+
+        orderedCalls.verify(mockedGoCardlessClientWrapper).createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer);
+        orderedCalls.verify(mockedGoCardlessClientWrapper).createCustomerBankAccount(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessCustomer, payer.getName(), payer.getSortCode(), payer.getAccountNumber());
+        orderedCalls.verify(mockedGoCardlessClientWrapper).createMandate(PAYMENT_REQUEST_EXTERNAL_ID, mandate, goCardlessCustomer);
+        orderedCalls.verify(mockedGoCardlessClientWrapper).createPayment(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessMandate, transaction);
+
         verify(mockedTransactionService).paymentCreatedFor(transaction, payer, goCardlessPayment.getChargeDate());
     }
 
     @Test
     public void confirm_shouldThrow_ifFailingToFindCustomerInGoCardless() {
         when(mockedGoCardlessCustomerDao.findByPayerId(payer.getId())).thenReturn(Optional.empty());
-        when(mockedGoCardlessClientWrapper.createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer)).thenReturn(goCardlessCustomer);;
-        when(mockedGoCardlessClientWrapper.createCustomerBankAccount(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessCustomer, payer.getName(), payer.getSortCode(), payer.getAccountNumber())).thenReturn(goCardlessCustomer);
-        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
         thrown.expectMessage(format("Customer not found in gocardless, payment request id: %s, mandate id: %s", PAYMENT_REQUEST_EXTERNAL_ID, mandate.getExternalId()));
         thrown.reportMissingExceptionWithMessage("CustomerNotFoundException expected");
         service.confirm(PAYMENT_REQUEST_EXTERNAL_ID, gatewayAccount);
@@ -179,9 +177,6 @@ public class GoCardlessServiceTest {
 
     @Test
     public void confirm_shouldThrow_ifFailingToCreateMandateInGoCardless() {
-        when(mockedGoCardlessClientWrapper.createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer)).thenReturn(goCardlessCustomer);;
-        when(mockedGoCardlessClientWrapper.createCustomerBankAccount(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessCustomer, payer.getName(), payer.getSortCode(), payer.getAccountNumber())).thenReturn(goCardlessCustomer);
-        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
         when(mockedGoCardlessCustomerDao.findByPayerId(payer.getId())).thenReturn(Optional.of(goCardlessCustomer));
         when(mockedGoCardlessClientWrapper.createMandate(PAYMENT_REQUEST_EXTERNAL_ID, mandate, goCardlessCustomer)).thenThrow(new RuntimeException("gocardless said no"));
         thrown.expect(CreateMandateFailedException.class);
@@ -192,9 +187,6 @@ public class GoCardlessServiceTest {
 
     @Test
     public void confirm_shouldThrow_ifFailingToCreatePaymentInGoCardless() {
-        when(mockedGoCardlessClientWrapper.createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer)).thenReturn(goCardlessCustomer);;
-        when(mockedGoCardlessClientWrapper.createCustomerBankAccount(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessCustomer, payer.getName(), payer.getSortCode(), payer.getAccountNumber())).thenReturn(goCardlessCustomer);
-        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
         when(mockedGoCardlessCustomerDao.findByPayerId(payer.getId())).thenReturn(Optional.of(goCardlessCustomer));
         when(mockedGoCardlessClientWrapper.createMandate(PAYMENT_REQUEST_EXTERNAL_ID, mandate, goCardlessCustomer)).thenReturn(goCardlessMandate);
         when(mockedGoCardlessClientWrapper.createPayment(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessMandate, transaction)).thenThrow(new RuntimeException("gocardless said no"));

@@ -108,7 +108,7 @@ public class PaymentRequestEventServiceTest {
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
-        assertThat(paymentRequestEvent.getEvent(), is(PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED));
+        assertThat(paymentRequestEvent.getEvent(), is(PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING_WAITING_FOR_PROVIDER));
         assertThat(paymentRequestEvent.getEventType(), is(CHARGE));
         assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }

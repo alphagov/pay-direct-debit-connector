@@ -9,11 +9,10 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING_WAITING_FOR_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.*;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
@@ -44,7 +43,7 @@ public class PaymentStatesGraph {
                 .directed()
                 .build();
 
-        addNodes(graph, values());
+        addNodes(graph, PaymentState.values());
 
         graph.putEdgeValue(NEW, AWAITING_DIRECT_DEBIT_DETAILS, TOKEN_EXCHANGED);
 
@@ -52,8 +51,8 @@ public class PaymentStatesGraph {
         graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, CANCELLED, PAYMENT_CANCELLED_BY_USER);
         graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, USER_CANCEL_NOT_ELIGIBLE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
 
-        // transition after we send things to the payment provider
-        graph.putEdgeValue(SUBMITTING_DIRECT_DEBIT_PAYMENT, PENDING_DIRECT_DEBIT_PAYMENT, PAYMENT_CREATED);
+        graph.putEdgeValue(SUBMITTING_DIRECT_DEBIT_PAYMENT, PENDING_DIRECT_DEBIT_PAYMENT,
+                PAYMENT_PENDING_WAITING_FOR_PROVIDER);
 
         graph.putEdgeValue(PENDING_DIRECT_DEBIT_PAYMENT, FAILED, PAYMENT_FAILED);
         graph.putEdgeValue(PENDING_DIRECT_DEBIT_PAYMENT, SUCCESS, PAID_OUT);

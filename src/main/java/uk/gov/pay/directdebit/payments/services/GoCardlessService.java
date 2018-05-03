@@ -98,10 +98,12 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         try {
             LOGGER.info("Attempting to call gocardless to create a customer bank account, payment request id: {}", paymentRequestExternalId);
 
-            String sortCode = payer.getSortCode();
-            String accountNumber = payer.getAccountNumber();
-
-            GoCardlessCustomer customerWithBankAccount = goCardlessClientWrapper.createCustomerBankAccount(paymentRequestExternalId, goCardlessCustomer, payer.getName(), sortCode, accountNumber);
+            GoCardlessCustomer customerWithBankAccount = goCardlessClientWrapper.createCustomerBankAccount(
+                    paymentRequestExternalId,
+                    goCardlessCustomer,
+                    payer.getName(),
+                    payer.getSortCode(),
+                    payer.getAccountNumber());
 
             LOGGER.info("Created customer bank account in gocardless, payment request id: {}", paymentRequestExternalId);
 

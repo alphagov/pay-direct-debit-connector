@@ -105,6 +105,7 @@ public class TransactionServiceTest {
     @Test
     public void findByPaymentRequestExternalIdAndAccountId_shouldFindATransaction() {
         TransactionFixture transactionFixture = TransactionFixture
+
                 .aTransactionFixture();
         when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
@@ -160,7 +161,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void findByPaymentRequestExternalIdAndAccountId_shouldRegisterEventWhenReceivingDDDetails() {
+    public void findByPaymentRequestExternalIdAndAccountId_shouldRegisterEventWhenReceivingDirectDebitDetails() {
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
@@ -197,7 +198,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void shouldUpdateTransactionStateAndRegisterEventWhenConfirmingDDDetails() {
+    public void shouldUpdateTransactionStateAndRegisterEventWhenConfirmingDirectDebitDetails() {
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)

@@ -51,7 +51,7 @@ public class PayerDaoIT {
     private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
-    public void setup() throws IOException, LiquibaseException {
+    public void setup() {
         payerDao = testContext.getJdbi().onDemand(PayerDao.class);
         this.gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testPaymentRequest = aPaymentRequestFixture()
@@ -203,9 +203,6 @@ public class PayerDaoIT {
         Map<String, Object> payerAfterUpdate = testContext.getDatabaseTestHelper().getPayerById(testPayer.getId());
 
         assertThat(numOfUpdatedPayers, is(1));
-        assertThat(payerAfterUpdate.get("id"), is(testPayer.getId()));
-        assertThat(payerAfterUpdate.get("payment_request_id"), is(testPaymentRequest.getId()));
-        assertThat(payerAfterUpdate.get("external_id"), is(EXTERNAL_ID)); //old external id
         assertThat(payerAfterUpdate.get("name"), is(newName));
         assertThat(payerAfterUpdate.get("email"), is(newEmail));
         assertThat(payerAfterUpdate.get("bank_account_number_last_two_digits"), is("21"));
@@ -217,7 +214,12 @@ public class PayerDaoIT {
         assertThat(payerAfterUpdate.get("address_postcode"), is(ADDRESS_POSTCODE));
         assertThat(payerAfterUpdate.get("address_city"), is(ADDRESS_CITY));
         assertThat(payerAfterUpdate.get("address_country"), is(ADDRESS_COUNTRY));
-        assertThat((Timestamp) payerAfterUpdate.get("created_date"), isDate(CREATED_DATE)); //old date
+
+        // These properties should not be updated
+        assertThat(payerAfterUpdate.get("id"), is(testPayer.getId()));
+        assertThat(payerAfterUpdate.get("payment_request_id"), is(testPaymentRequest.getId()));
+        assertThat(payerAfterUpdate.get("external_id"), is(EXTERNAL_ID));
+        assertThat((Timestamp) payerAfterUpdate.get("created_date"), isDate(CREATED_DATE));
 
     }
 

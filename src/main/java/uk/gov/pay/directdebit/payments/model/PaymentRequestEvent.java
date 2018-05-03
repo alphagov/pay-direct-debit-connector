@@ -18,7 +18,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_EDITED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING_WAITING_FOR_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
@@ -75,7 +75,8 @@ public class PaymentRequestEvent {
     }
 
     public static PaymentRequestEvent paymentCreated(Long paymentRequestId) {
-        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_CREATED);
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE,
+                PAYMENT_PENDING_WAITING_FOR_PROVIDER);
     }
 
     public static PaymentRequestEvent paymentSubmitted(Long paymentRequestId) {
@@ -174,7 +175,7 @@ public class PaymentRequestEvent {
         MANDATE_ACTIVE,
         MANDATE_FAILED,
         MANDATE_CANCELLED,
-        PAYMENT_CREATED,
+        PAYMENT_PENDING_WAITING_FOR_PROVIDER,
         PAYMENT_CANCELLED_BY_USER,
         PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE,
         PAYMENT_PENDING,

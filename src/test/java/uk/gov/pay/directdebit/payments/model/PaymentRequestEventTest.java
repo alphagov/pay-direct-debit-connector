@@ -18,7 +18,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING_WAITING_FOR_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
@@ -113,7 +113,7 @@ public class PaymentRequestEventTest {
         long paymentRequestId = 1L;
         PaymentRequestEvent event = PaymentRequestEvent.paymentCreated(paymentRequestId);
 
-        assertThat(event.getEvent(), is(PAYMENT_CREATED));
+        assertThat(event.getEvent(), is(PAYMENT_PENDING_WAITING_FOR_PROVIDER));
         assertThat(event.getEventType(), is(CHARGE));
         assertThat(event.getPaymentRequestId(), is(paymentRequestId));
     }
