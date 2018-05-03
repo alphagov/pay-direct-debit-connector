@@ -49,8 +49,7 @@ public class UserNotificationService {
     }
 
     public void sendPaymentFailedEmailFor(Transaction transaction, Payer payer) {
-        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_FAILED, transaction, payer.getEmail(),
-                buildPaymentProblemPersonalisation());
+        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_FAILED, transaction, payer.getEmail(), buildPersonalisation());
     }
 
     private HashMap<String, String> buildMandateProblemPersonalisation(Mandate mandate) {
@@ -72,7 +71,7 @@ public class UserNotificationService {
         return map;
     }
 
-    private HashMap<String, String> buildPaymentProblemPersonalisation() {
+    private HashMap<String, String> buildPersonalisation() {
         HashMap<String, String> map = new HashMap<>();
         map.put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
         return map;

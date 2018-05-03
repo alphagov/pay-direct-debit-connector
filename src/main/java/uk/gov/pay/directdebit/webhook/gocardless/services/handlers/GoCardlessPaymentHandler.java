@@ -66,7 +66,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 .put(GoCardlessPaymentAction.CONFIRMED, (Transaction transaction) ->
                         transactionService.findPaymentSubmittedEventFor(transaction)
                                 .orElseThrow(() -> new InvalidStateException("Could not find payment submitted event for payment request with id: " + transaction.getPaymentRequest().getExternalId())))
-                .put(GoCardlessPaymentAction.FAILED, (Transaction transaction) -> transactionService.paymentFailedFor(transaction, payerService.getPayerFor(transaction), true))
+                .put(GoCardlessPaymentAction.FAILED, (Transaction transaction) -> transactionService.paymentFailedWithEmailFor(transaction, payerService.getPayerFor(transaction)))
                 .put(GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor)
                 .put(GoCardlessPaymentAction.PAID, transactionService::payoutPaidFor)
                 .build();

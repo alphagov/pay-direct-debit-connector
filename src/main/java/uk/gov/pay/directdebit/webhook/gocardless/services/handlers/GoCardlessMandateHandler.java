@@ -61,14 +61,14 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 GoCardlessMandateAction.CANCELLED, (Transaction transaction) -> {
                     Payer payer = payerService.getPayerFor(transaction);
                     if (!transactionService.findPaymentSubmittedEventFor(transaction).isPresent()) {
-                        transactionService.paymentFailedFor(transaction, payer, false);
+                        transactionService.paymentFailedWithoutEmailFor(transaction, payer);
                     }
                     return mandateService.mandateCancelledFor(transaction, payer);
                 },
                 GoCardlessMandateAction.FAILED, (Transaction transaction) -> {
                     Payer payer = payerService.getPayerFor(transaction);
                     mandateService.mandateFailedFor(transaction, payer);
-                    return transactionService.paymentFailedFor(transaction, payer, false);
+                    return transactionService.paymentFailedWithoutEmailFor(transaction, payer);
                 });
     }
 

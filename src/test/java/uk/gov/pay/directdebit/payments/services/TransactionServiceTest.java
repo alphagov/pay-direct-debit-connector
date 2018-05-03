@@ -274,7 +274,7 @@ public class TransactionServiceTest {
                 .withState(PENDING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
 
-        service.paymentFailedFor(transaction, payer, false);
+        service.paymentFailedWithoutEmailFor(transaction, payer);
 
         verify(mockedUserNotificationService, times(0)).sendPaymentFailedEmailFor(transaction, payer);
         verify(mockedTransactionDao).updateState(transaction.getId(), FAILED);
@@ -290,7 +290,7 @@ public class TransactionServiceTest {
                 .withState(PENDING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
 
-        service.paymentFailedFor(transaction, payer, true);
+        service.paymentFailedWithEmailFor(transaction, payer);
 
         verify(mockedUserNotificationService, times(1)).sendPaymentFailedEmailFor(transaction, payer);
         verify(mockedTransactionDao).updateState(transaction.getId(), FAILED);

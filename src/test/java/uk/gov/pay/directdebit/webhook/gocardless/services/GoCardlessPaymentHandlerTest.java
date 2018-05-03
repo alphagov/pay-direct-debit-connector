@@ -140,11 +140,11 @@ public class GoCardlessPaymentHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("failed").toEntity());
 
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
-        when(mockedTransactionService.paymentFailedFor(transaction, payer, true)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.paymentFailedWithEmailFor(transaction, payer)).thenReturn(paymentRequestEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
-        verify(mockedTransactionService).paymentFailedFor(transaction, payer, true);
+        verify(mockedTransactionService).paymentFailedWithEmailFor(transaction, payer);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
