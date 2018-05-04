@@ -42,7 +42,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                     return typeEnum;
                 }
             }
-            LOGGER.warn("Webhook from GoCardless with unrecognised payment action: {}", type);
+            LOGGER.error("Webhook from GoCardless with unrecognised payment action: {}", type);
             return null;
         }
     }

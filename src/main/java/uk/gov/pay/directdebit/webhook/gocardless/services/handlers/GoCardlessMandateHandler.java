@@ -47,7 +47,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                     return typeEnum;
                 }
             }
-            LOGGER.warn("Webhook from GoCardless with unhandled mandate action: {}", type);
+            LOGGER.error("Webhook from GoCardless with unhandled mandate action: {}", type);
             return null;
         }
     }
