@@ -62,6 +62,9 @@ public class ConfirmPaymentResourceIT {
     @Before
     public void setUp() {
         wireMockAdminUsers.start();
+        gatewayAccountFixture.insert(testContext.getJdbi());
+        paymentRequestFixture.insert(testContext.getJdbi());
+        transactionFixture.insert(testContext.getJdbi());
     }
 
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
@@ -73,11 +76,9 @@ public class ConfirmPaymentResourceIT {
             .withGatewayAccountExternalId(gatewayAccountFixture.getExternalId())
             .withPaymentRequestDescription(paymentRequestFixture.getDescription())
             .withState(AWAITING_DIRECT_DEBIT_DETAILS);
+    
     @Test
     public void confirm_shouldCreateAMandateAndUpdateCharge() {
-        gatewayAccountFixture.insert(testContext.getJdbi());
-        paymentRequestFixture.insert(testContext.getJdbi());
-        transactionFixture.insert(testContext.getJdbi());
         String paymentRequestExternalId = paymentRequestFixture.getExternalId();
         PayerFixture payerFixture = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
 
@@ -119,11 +120,22 @@ public class ConfirmPaymentResourceIT {
 
     @Test
     public void confirm_shouldCreateACustomerBankAccountMandateAndUpdateCharge_ForGoCardless() {
-        gatewayAccountFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
-        paymentRequestFixture.insert(testContext.getJdbi());
-        PayerFixture payerFixture = PayerFixture.aPayerFixture()
-                .withPaymentRequestId(paymentRequestFixture.getId())
+        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+                .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
+        PayerFixture payerFixture = PayerFixture.aPayerFixture();
+        PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture()
+                .withPayerFixture(payerFixture)
+                .withGatewayAccountId(gatewayAccountFixture.getId())
                 .insert(testContext.getJdbi());
+        TransactionFixture transactionFixture = aTransactionFixture()
+                .withPaymentRequestId(paymentRequestFixture.getId())
+                .withGatewayAccountId(gatewayAccountFixture.getId())
+                .withGatewayAccountExternalId(gatewayAccountFixture.getExternalId())
+                .withPaymentRequestDescription(paymentRequestFixture.getDescription())
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .withPaymentProvider(GOCARDLESS)
+                .insert(testContext.getJdbi());
+        
         String customerId = "CU000358S3A2FP";
         String customerBankAccountId = "BA0002WR3Z193A";
         GoCardlessCustomerFixture goCardlessCustomerFixture = aGoCardlessCustomerFixture().
@@ -162,25 +174,22 @@ public class ConfirmPaymentResourceIT {
         transactionFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         String paymentRequestExternalId = paymentRequestFixture.getExternalId();
         PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
+            String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm",
+                    gatewayAccountFixture.getId().toString(), paymentRequestExternalId);
+            given().port(testContext.getPort())
+                    .accept(APPLICATION_JSON)
+                    .body(confirmDetails)
+                    .post(requestPath)
+                    .then()
+                    .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getId().toString(), paymentRequestExternalId);
-        given().port(testContext.getPort())
-                .body(confirmDetails)
-                .contentType(APPLICATION_JSON)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
-
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
-        assertThat(transaction.get("state"), is("PENDING_DIRECT_DEBIT_PAYMENT"));
+            Map<String, Object> transaction = testContext.getDatabaseTestHelper()
+                    .getTransactionById(transactionFixture.getId());
+            assertThat(transaction.get("state"), is("PENDING_DIRECT_DEBIT_PAYMENT"));
     }
-
+    
     @Test
     public void confirm_shouldFailWhenPayerDoesNotExist() {
-        gatewayAccountFixture.insert(testContext.getJdbi());
-        paymentRequestFixture.insert(testContext.getJdbi());
-        transactionFixture.insert(testContext.getJdbi());
-
         String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getId().toString(), paymentRequestFixture.getExternalId());
 
         String confirmDetails = "{\"sort_code\": \"123456\", " +

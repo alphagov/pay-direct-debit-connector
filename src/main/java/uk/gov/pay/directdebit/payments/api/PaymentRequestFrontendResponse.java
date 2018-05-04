@@ -11,8 +11,54 @@ import uk.gov.pay.directdebit.payers.model.Payer;
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class PaymentRequestFrontendResponse {
-    @JsonProperty
-    private Payer payer;
+
+    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
+    public static class PayerDetails {
+        @JsonProperty("payer_external_id")
+        private String externalId;
+        
+        @JsonProperty("account_holder_name")
+        private String name;
+        
+        @JsonProperty
+        private String email;
+
+        @JsonProperty("requires_authorisation")
+        private boolean accountRequiresAuthorisation;
+
+        PayerDetails(String externalId, String name, String email, boolean accountRequiresAuthorisation) {
+            this.externalId = externalId;
+            this.name = name;
+            this.email = email;
+            this.accountRequiresAuthorisation = accountRequiresAuthorisation;
+        }
+
+        public String getExternalId() {
+            return externalId;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public boolean getAccountRequiresAuthorisation() {
+            return accountRequiresAuthorisation;
+        }
+
+        @Override
+        public String toString() {
+            return "PayerDetails{" +
+                    "externalId='" + externalId + '\'' +
+                    '}';
+        }
+    }
+
+    @JsonProperty("payer")
+    private PayerDetails payer;
     
     @JsonProperty("external_id")
     private String paymentExternalId;
@@ -51,10 +97,20 @@ public class PaymentRequestFrontendResponse {
         this.description = description;
         this.reference = reference;
         this.createdDate = createdDate;
-        this.payer = payer;
+        this.payer = initPayer(payer);
     }
 
-    public Payer getPayer() {
+    private PayerDetails initPayer(Payer payer) {
+        if (payer != null ) {
+            return new PayerDetails(
+                    payer.getExternalId(),
+                    payer.getName(),
+                    payer.getEmail(),
+                    payer.getAccountRequiresAuthorisation());
+        } 
+        return null;
+    }
+    public PayerDetails getPayerDetails() {
         return payer;
     }
 

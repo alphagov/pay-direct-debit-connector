@@ -40,17 +40,13 @@ public class PayerDaoIT {
 
     private PaymentRequestFixture testPaymentRequest;
     private PayerFixture testPayer;
-    private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
     public void setup() {
         payerDao = testContext.getJdbi().onDemand(PayerDao.class);
-        this.gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
-        this.testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(gatewayAccountFixture.getId())
+        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .insert(testContext.getJdbi());
         this.testPayer = PayerFixture.aPayerFixture()
-                .withPaymentRequestId(testPaymentRequest.getId())
                 .withEmail(EMAIL)
                 .withExternalId(EXTERNAL_ID)
                 .withName(PAYER_NAME)
@@ -59,6 +55,10 @@ public class PayerDaoIT {
                 .withAccountNumberLastTwoDigits(ACCOUNT_NUMBER_LAST_TWO_DIGITS)
                 .withAccountRequiresAuthorisation(ACCOUNT_REQUIRES_AUTHORISATION)
                 .withCreatedDate(CREATED_DATE);
+        this.testPaymentRequest = aPaymentRequestFixture()
+                .withGatewayAccountId(gatewayAccountFixture.getId())
+                .withPayerFixture(testPayer)
+                .insert(testContext.getJdbi());
     }
 
     @Test
@@ -80,7 +80,6 @@ public class PayerDaoIT {
 
     @Test
     public void shouldGetAPayerById() {
-        testPayer.insert(testContext.getJdbi());
         Payer payer = payerDao.findById(testPayer.getId()).get();
         assertThat(payer.getId(), is(testPayer.getId()));
         assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
@@ -101,7 +100,6 @@ public class PayerDaoIT {
 
     @Test
     public void shouldGetAPayerByExternalId() {
-        testPayer.insert(testContext.getJdbi());
         Payer payer = payerDao.findByExternalId(testPayer.getExternalId()).get();
         assertThat(payer.getId(), is(testPayer.getId()));
         assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
@@ -122,7 +120,6 @@ public class PayerDaoIT {
 
     @Test
     public void shouldGetAPayerByPaymentRequestId() {
-        testPayer.insert(testContext.getJdbi());
         Payer payer = payerDao.findByPaymentRequestId(testPaymentRequest.getId()).get();
         assertThat(payer.getId(), is(testPayer.getId()));
         assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
@@ -143,8 +140,6 @@ public class PayerDaoIT {
 
     @Test
     public void shouldUpdatePayerDetailsAndReturnNumberOfAffectedRows() {
-        testPayer.insert(testContext.getJdbi());
-
         String newName = "coffee";
         String newAccountNumber = "87654321";
         String newSortCode = "123456";

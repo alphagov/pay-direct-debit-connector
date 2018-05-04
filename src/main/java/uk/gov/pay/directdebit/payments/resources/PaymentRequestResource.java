@@ -23,7 +23,7 @@ import static javax.ws.rs.core.Response.created;
 
 @Path("/")
 public class PaymentRequestResource {
-    //have to be /charges unless we change public api
+    //has to be /charges unless we change public api
     public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{paymentRequestExternalId}";
     public static final String CHARGES_API_PATH = "/v1/api/accounts/{accountId}/charges";
     public static final String CANCEL_CHARGE_API_PATH = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/cancel";

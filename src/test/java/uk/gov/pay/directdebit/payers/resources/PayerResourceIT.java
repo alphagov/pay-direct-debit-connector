@@ -51,15 +51,10 @@ public class PayerResourceIT {
     public WireMockRule wireMockRule = new WireMockRule(10107);
 
     private GatewayAccountFixture testGatewayAccount;
+    private PayerFixture payerFixture = aPayerFixture().withAccountNumber("12345678");
     private PaymentRequestFixture testPaymentRequest;
-    private PayerFixture payerFixture;
 
     String requestPath;
-
-    @Before
-    public void setUp() {
-        payerFixture = aPayerFixture().withAccountNumber("12345678");
-    }
 
     private TransactionFixture insertTransactionFixtureWith(PaymentProvider paymentProvider) {
         return  aTransactionFixture()

@@ -4,6 +4,8 @@ import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 
 import java.sql.Timestamp;
@@ -18,7 +20,7 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
     private long amount = 101L;
     private String returnUrl = "http://service.com/success-page";
     private String reference = "Test reference";
-
+    private PayerFixture payerFixture = null;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
 
     private PaymentRequestFixture() {
@@ -63,6 +65,10 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
         return this;
     }
 
+    public PaymentRequestFixture withPayerFixture(PayerFixture payer) {
+        this.payerFixture = payer.withPaymentRequestId(id);
+        return this;
+    }
 
     public PaymentRequestFixture withDescription(String description) {
         this.description = description;
@@ -101,6 +107,10 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
         return gatewayAccountId;
     }
 
+    public PayerFixture getPayerFixture() {
+        return payerFixture;
+    }
+
     @Override
     public PaymentRequestFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -127,12 +137,16 @@ public class PaymentRequestFixture implements DbFixture<PaymentRequestFixture, P
                         reference
                 )
         );
+        if (payerFixture != null) {
+            payerFixture.insert(jdbi);
+        }
         return this;
     }
 
     @Override
     public PaymentRequest toEntity() {
-        return new PaymentRequest(id, amount, returnUrl, gatewayAccountId, description, reference, externalId, createdDate);
+        Payer payer = payerFixture != null ? payerFixture.toEntity() : null;
+        return new PaymentRequest(id, amount, returnUrl, gatewayAccountId, description, reference, externalId, payer, createdDate);
     }
 
 }

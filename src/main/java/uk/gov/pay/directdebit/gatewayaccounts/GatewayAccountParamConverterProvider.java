@@ -35,11 +35,14 @@ public class GatewayAccountParamConverterProvider implements ParamConverterProvi
         public GatewayAccount fromString(String externalAccountId) {
             //backward compatibility - this will be removed once frontend is in
             if (ApiValidation.isNumeric(externalAccountId)) {
+                System.out.println("AAAAAAAAAAA?????????");
                 Long accountId = convertAccountId(externalAccountId);
                 return gatewayAccountDao
                         .findById(accountId)
-                        .orElseThrow(() -> new GatewayAccountNotFoundException(accountId.toString()));
+                        .orElseThrow(
+                                () -> new GatewayAccountNotFoundException(accountId.toString()));
             }
+            System.out.println("BBBBBBBBBB?????????");
             return gatewayAccountDao
                     .findByExternalId(externalAccountId)
                     .orElseThrow(() -> new GatewayAccountNotFoundException(externalAccountId));

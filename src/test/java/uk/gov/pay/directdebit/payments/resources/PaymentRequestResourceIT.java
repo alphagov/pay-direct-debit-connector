@@ -33,6 +33,7 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -46,7 +47,6 @@ public class PaymentRequestResourceIT {
     private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
     private static final String JSON_AMOUNT_KEY = "amount";
     private static final String JSON_REFERENCE_KEY = "reference";
-    private static final String JSON_PAYER_KEY = "payer";
     private static final String JSON_DESCRIPTION_KEY = "description";
     private static final String JSON_GATEWAY_ACC_KEY = "gateway_account_id";
     private static final String JSON_RETURN_URL_KEY = "return_url";
@@ -203,8 +203,10 @@ public class PaymentRequestResourceIT {
 
         String accountExternalId = testGatewayAccount.getExternalId();
 
+        PayerFixture payerFixture = PayerFixture.aPayerFixture();
         PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture()
                 .withGatewayAccountId(testGatewayAccount.getId())
+                .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
 
         TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture()
@@ -229,7 +231,10 @@ public class PaymentRequestResourceIT {
                 .body(JSON_DESCRIPTION_KEY, is(paymentRequestFixture.getDescription()))
                 .body(JSON_STATE_KEY, is(transactionFixture.getState().toExternal().getState()))
                 .body(JSON_RETURN_URL_KEY, is(paymentRequestFixture.getReturnUrl()))
-                .body(JSON_PAYER_KEY, is(nullValue()));
+                .body("payer.payer_external_id", is(payerFixture.getExternalId()))
+                .body("payer.account_holder_name", is(payerFixture.getName()))
+                .body("payer.email", is(payerFixture.getEmail()))
+                .body("payer.requires_authorisation", is(payerFixture.getAccountRequiresAuthorisation()));
     }
     
     @Test

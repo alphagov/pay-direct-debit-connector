@@ -182,6 +182,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                 paymentRequestDescription,
                 paymentRequestReference,
                 paymentRequestExternalId,
+                null,
                 ZonedDateTime.now(ZoneOffset.UTC)
         );
 

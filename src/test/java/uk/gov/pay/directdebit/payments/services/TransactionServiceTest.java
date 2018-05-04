@@ -218,35 +218,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getState(), is(SUBMITTING_DIRECT_DEBIT_PAYMENT));
         verify(mockedPaymentRequestEventService).registerDirectDebitConfirmedEventFor(newTransaction);
     }
-
-
-
-    @Test
-    public void findTransactionForToken_shouldNotReturnATransactionIfNoTransactionExistsForToken() {
-    public void shouldUpdateTransactionStateAndRegisterEventWhenConfirmingDDDetails() {
-        Transaction transaction = TransactionFixture
-                .aTransactionFixture()
-                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
-                .toEntity();
-        when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(transaction.getPaymentRequest().getExternalId(), gatewayAccountFixture.getExternalId()))
-                .thenReturn(Optional.of(transaction));
-        Transaction newTransaction = service.confirmedDirectDebitDetailsFor(gatewayAccountFixture.getExternalId(), transaction.getPaymentRequest().getExternalId());
-        PaymentRequest paymentRequest = newTransaction.getPaymentRequest();
-        assertThat(newTransaction.getId(), is(notNullValue()));
-        assertThat(paymentRequest.getId(), is(transaction.getPaymentRequest().getId()));
-        assertThat(paymentRequest.getExternalId(), is(transaction.getPaymentRequest().getExternalId()));
-        assertThat(paymentRequest.getReturnUrl(), is(transaction.getPaymentRequest().getReturnUrl()));
-        assertThat(newTransaction.getGatewayAccountId(), is(transaction.getGatewayAccountId()));
-        assertThat(newTransaction.getGatewayAccountExternalId(), is(transaction.getGatewayAccountExternalId()));
-        assertThat(paymentRequest.getDescription(), is(transaction.getPaymentRequest().getDescription()));
-        assertThat(paymentRequest.getReference(), is(transaction.getPaymentRequest().getReference()));
-        assertThat(newTransaction.getAmount(), is(transaction.getAmount()));
-        assertThat(newTransaction.getType(), is(transaction.getType()));
-        assertThat(newTransaction.getState(), is(SUBMITTING_DIRECT_DEBIT_PAYMENT));
-        verify(mockedPaymentRequestEventService).registerDirectDebitConfirmedEventFor(newTransaction);
-    }
-
-
+    
 
     @Test
     public void findTransactionForToken_shouldNotReturnATransactionIfNoTransactionExistsForToken() {
@@ -290,7 +262,7 @@ public class TransactionServiceTest {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
-                .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .toEntity();
 
         service.paymentCancelledFor(transaction);
