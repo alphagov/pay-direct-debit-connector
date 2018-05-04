@@ -164,7 +164,7 @@ public class GoCardlessServiceTest {
         orderedCalls.verify(mockedGoCardlessClientWrapper).createMandate(PAYMENT_REQUEST_EXTERNAL_ID, mandate, goCardlessCustomer);
         orderedCalls.verify(mockedGoCardlessClientWrapper).createPayment(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessMandate, transaction);
 
-        verify(mockedTransactionService).paymentCreatedFor(transaction, payer, goCardlessPayment.getChargeDate());
+        verify(mockedTransactionService).paymentSubmittedToProviderFor(transaction, payer, goCardlessPayment.getChargeDate());
     }
 
     @Test

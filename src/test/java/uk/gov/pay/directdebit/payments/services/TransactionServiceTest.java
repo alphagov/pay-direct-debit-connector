@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
@@ -232,30 +232,30 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void paymentCreatedFor_shouldUpdateTransactionAsPending_andRegisterAPaymentCreatedEvent() {
+    public void paymentSubmittedToProvider_shouldUpdateTransactionAsPending_andRegisterAPaymentSubmittedEvent() {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
                 .withState(SUBMITTING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
-        service.paymentCreatedFor(transaction, payer, LocalDate.now());
+        service.paymentSubmittedToProviderFor(transaction, payer, LocalDate.now());
 
         verify(mockedTransactionDao).updateState(transaction.getId(), PENDING_DIRECT_DEBIT_PAYMENT);
-        verify(mockedPaymentRequestEventService).registerPaymentCreatedEventFor(transaction);
+        verify(mockedPaymentRequestEventService).registerPaymentSubmittedToProviderEventFor(transaction);
         assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
     }
 
     @Test
-    public void paymentPendingFor_shouldRegisterAPaymentPendingEvent() {
+    public void paymentAcknowledgedFor_shouldRegisterAPaymentPendingEvent() {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
                 .withState(PENDING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
 
-        service.paymentPendingFor(transaction);
+        service.paymentAcknowledgedFor(transaction);
 
-        verify(mockedPaymentRequestEventService).registerPaymentPendingEventFor(transaction);
+        verify(mockedPaymentRequestEventService).registerPaymentAcknowledgedEventFor(transaction);
         verifyZeroInteractions(mockedTransactionDao);
         assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
     }
@@ -339,7 +339,7 @@ public class TransactionServiceTest {
 
 
     @Test
-    public void findPaymentSubmittedEventFor_shouldFindEvent() {
+    public void findPaymentSubmittedToBankEventFor_shouldFindEvent() {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
@@ -348,7 +348,8 @@ public class TransactionServiceTest {
 
         PaymentRequestEvent event = aPaymentRequestEventFixture().toEntity();
 
-        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), Type.CHARGE, PAYMENT_SUBMITTED))
+        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), Type.CHARGE,
+                PAYMENT_SUBMITTED_TO_BANK))
                 .thenReturn(Optional.of(event));
 
         PaymentRequestEvent foundEvent = service.findPaymentSubmittedEventFor(transaction).get();

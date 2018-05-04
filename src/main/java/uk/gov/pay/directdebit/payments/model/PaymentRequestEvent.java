@@ -18,11 +18,11 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_EDITED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING_WAITING_FOR_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_ACKNOWLEDGED_BY_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 
 public class PaymentRequestEvent {
@@ -70,17 +70,18 @@ public class PaymentRequestEvent {
         return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, DIRECT_DEBIT_DETAILS_CONFIRMED);
     }
 
-    public static PaymentRequestEvent paymentPending(Long paymentRequestId) {
-        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_PENDING);
+    public static PaymentRequestEvent paymentAcknowledged(Long paymentRequestId) {
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE,
+                PAYMENT_ACKNOWLEDGED_BY_PROVIDER);
     }
 
-    public static PaymentRequestEvent paymentCreated(Long paymentRequestId) {
+    public static PaymentRequestEvent paymentSubmittedToProvider(Long paymentRequestId) {
         return new PaymentRequestEvent(paymentRequestId, Type.CHARGE,
-                PAYMENT_PENDING_WAITING_FOR_PROVIDER);
+                PAYMENT_SUBMITTED_TO_PROVIDER);
     }
 
     public static PaymentRequestEvent paymentSubmitted(Long paymentRequestId) {
-        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_SUBMITTED);
+        return new PaymentRequestEvent(paymentRequestId, Type.CHARGE, PAYMENT_SUBMITTED_TO_BANK);
     }
 
     public static PaymentRequestEvent paymentCancelled(Long paymentRequestId) {
@@ -175,11 +176,11 @@ public class PaymentRequestEvent {
         MANDATE_ACTIVE,
         MANDATE_FAILED,
         MANDATE_CANCELLED,
-        PAYMENT_PENDING_WAITING_FOR_PROVIDER,
+        PAYMENT_SUBMITTED_TO_PROVIDER,
         PAYMENT_CANCELLED_BY_USER,
         PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE,
-        PAYMENT_PENDING,
-        PAYMENT_SUBMITTED,
+        PAYMENT_ACKNOWLEDGED_BY_PROVIDER,
+        PAYMENT_SUBMITTED_TO_BANK,
         PAYMENT_FAILED,
         PAID_OUT,
         PAID;

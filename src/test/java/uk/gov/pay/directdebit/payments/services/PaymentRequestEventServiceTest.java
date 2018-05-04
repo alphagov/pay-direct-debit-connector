@@ -29,8 +29,8 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_ACKNOWLEDGED_BY_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
@@ -103,24 +103,24 @@ public class PaymentRequestEventServiceTest {
 
     @Test
     public void registerPaymentCreatedEventFor_shouldCreateExpectedEvent() {
-        service.registerPaymentCreatedEventFor(transactionFixture.toEntity());
+        service.registerPaymentSubmittedToProviderEventFor(transactionFixture.toEntity());
 
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
-        assertThat(paymentRequestEvent.getEvent(), is(PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING_WAITING_FOR_PROVIDER));
+        assertThat(paymentRequestEvent.getEvent(), is(PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER));
         assertThat(paymentRequestEvent.getEventType(), is(CHARGE));
         assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }
 
     @Test
     public void registerPaymentPendingEventFor_shouldCreateExpectedEvent() {
-        service.registerPaymentPendingEventFor(transactionFixture.toEntity());
+        service.registerPaymentAcknowledgedEventFor(transactionFixture.toEntity());
 
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
-        assertThat(paymentRequestEvent.getEvent(), is(PAYMENT_PENDING));
+        assertThat(paymentRequestEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
         assertThat(paymentRequestEvent.getEventType(), is(CHARGE));
         assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }
@@ -132,7 +132,7 @@ public class PaymentRequestEventServiceTest {
         verify(mockedPaymentRequestEventDao).insert(prCaptor.capture());
         PaymentRequestEvent paymentRequestEvent = prCaptor.getValue();
         assertThat(paymentRequestEvent.getPaymentRequestId(), is(transactionFixture.getPaymentRequestId()));
-        assertThat(paymentRequestEvent.getEvent(), is(PAYMENT_SUBMITTED));
+        assertThat(paymentRequestEvent.getEvent(), is(PAYMENT_SUBMITTED_TO_BANK));
         assertThat(paymentRequestEvent.getEventType(), is(CHARGE));
         assertThat(paymentRequestEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }
@@ -237,10 +237,12 @@ public class PaymentRequestEventServiceTest {
     public void findBy_shouldFindEvent() {
         long paymentRequestId = 1L;
         PaymentRequestEvent expectedEvent = aPaymentRequestEventFixture().toEntity();
-        when(mockedPaymentRequestEventDao.findByPaymentRequestIdAndEvent(paymentRequestId, CHARGE, PAYMENT_PENDING))
+        when(mockedPaymentRequestEventDao.findByPaymentRequestIdAndEvent(paymentRequestId, CHARGE,
+                PAYMENT_ACKNOWLEDGED_BY_PROVIDER))
                 .thenReturn(Optional.of(expectedEvent));
 
-        Optional<PaymentRequestEvent> event = service.findBy(paymentRequestId, CHARGE, PAYMENT_PENDING);
+        Optional<PaymentRequestEvent> event = service.findBy(paymentRequestId, CHARGE,
+                PAYMENT_ACKNOWLEDGED_BY_PROVIDER);
 
         assertThat(event.get(), is(expectedEvent));
     }

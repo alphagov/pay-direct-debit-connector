@@ -57,7 +57,7 @@ public class PaymentViewServiceTest {
                     createdDate,
                     "John Doe" + i,
                     "doe@mail.mail",
-                    PaymentState.PROCESSING_DIRECT_DEBIT_DETAILS);
+                    PaymentState.PENDING_DIRECT_DEBIT_PAYMENT);
             paymentViewList.add(paymentView);
         }
         paymentViewService = new PaymentViewService(paymentViewDao, gatewayAccountDao);
@@ -73,7 +73,7 @@ public class PaymentViewServiceTest {
         PaymentViewResponse response = paymentViewService.getPaymentViewResponse(searchParams);
         assertThat(response.getPaymentViewResponses().get(3).getAmount(), is(1003l));
         assertThat(response.getPaymentViewResponses().get(1).getName(), is("John Doe1"));
-        assertThat(response.getPaymentViewResponses().get(0).getState(), is((PaymentState.PROCESSING_DIRECT_DEBIT_DETAILS.toExternal())));
+        assertThat(response.getPaymentViewResponses().get(0).getState(), is((PaymentState.PENDING_DIRECT_DEBIT_PAYMENT.toExternal())));
         assertThat(response.getPaymentViewResponses().get(2).getCreatedDate(), is(createdDate.toString()));
     }
 

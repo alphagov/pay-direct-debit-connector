@@ -20,10 +20,10 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paidOut;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerEdited;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCancelled;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCreated;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentSubmittedToProvider;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentFailed;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentMethodChanged;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentPending;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentAcknowledged;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentSubmitted;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payoutPaid;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.tokenExchanged;
@@ -77,8 +77,8 @@ public class PaymentRequestEventService {
         insertEventFor(charge, event);
     }
 
-    public PaymentRequestEvent registerPaymentCreatedEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentCreated(charge.getPaymentRequest().getId());
+    public PaymentRequestEvent registerPaymentSubmittedToProviderEventFor(Transaction charge) {
+        PaymentRequestEvent event = paymentSubmittedToProvider(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 
@@ -102,8 +102,8 @@ public class PaymentRequestEventService {
         return insertEventFor(charge, event);
     }
 
-    public PaymentRequestEvent registerPaymentPendingEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentPending(charge.getPaymentRequest().getId());
+    public PaymentRequestEvent registerPaymentAcknowledgedEventFor(Transaction charge) {
+        PaymentRequestEvent event = paymentAcknowledged(charge.getPaymentRequest().getId());
         return insertEventFor(charge, event);
     }
 

@@ -33,6 +33,5 @@ public class PaymentRequestFrontendResponseTest {
         assertFalse(paymentRequestResponse.toString().contains(payer.getEmail()));
         assertFalse(paymentRequestResponse.toString().contains(payer.getSortCode()));
         assertFalse(paymentRequestResponse.toString().contains(payer.getAccountNumber()));
-        assertFalse(paymentRequestResponse.toString().contains(payer.getAccountNumberLastTwoDigits()));
     }
 }

@@ -18,10 +18,10 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING_WAITING_FOR_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_FAILED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_ACKNOWLEDGED_BY_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
@@ -109,31 +109,31 @@ public class PaymentRequestEventTest {
     }
 
     @Test
-    public void paymentCreated_shouldReturnExpectedEvent() {
+    public void paymentSubmittedToProvider_shouldReturnExpectedEvent() {
         long paymentRequestId = 1L;
-        PaymentRequestEvent event = PaymentRequestEvent.paymentCreated(paymentRequestId);
+        PaymentRequestEvent event = PaymentRequestEvent.paymentSubmittedToProvider(paymentRequestId);
 
-        assertThat(event.getEvent(), is(PAYMENT_PENDING_WAITING_FOR_PROVIDER));
+        assertThat(event.getEvent(), is(PAYMENT_SUBMITTED_TO_PROVIDER));
         assertThat(event.getEventType(), is(CHARGE));
         assertThat(event.getPaymentRequestId(), is(paymentRequestId));
     }
 
     @Test
-    public void paymentPending_shouldReturnExpectedEvent() {
+    public void paymentAcknowlegedByProvider_shouldReturnExpectedEvent() {
         long paymentRequestId = 1L;
-        PaymentRequestEvent event = PaymentRequestEvent.paymentPending(paymentRequestId);
+        PaymentRequestEvent event = PaymentRequestEvent.paymentAcknowledged(paymentRequestId);
 
-        assertThat(event.getEvent(), is(PAYMENT_PENDING));
+        assertThat(event.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
         assertThat(event.getEventType(), is(CHARGE));
         assertThat(event.getPaymentRequestId(), is(paymentRequestId));
     }
 
     @Test
-    public void paymentSubmitted_shouldReturnExpectedEvent() {
+    public void paymentSubmittedToBank_shouldReturnExpectedEvent() {
         long paymentRequestId = 1L;
         PaymentRequestEvent event = PaymentRequestEvent.paymentSubmitted(paymentRequestId);
 
-        assertThat(event.getEvent(), is(PAYMENT_SUBMITTED));
+        assertThat(event.getEvent(), is(PAYMENT_SUBMITTED_TO_BANK));
         assertThat(event.getEventType(), is(CHARGE));
         assertThat(event.getPaymentRequestId(), is(paymentRequestId));
     }

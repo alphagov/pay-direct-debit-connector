@@ -53,7 +53,7 @@ public class SandboxServiceTest {
     }
 
     @Test
-    public void confirm_shouldRegisterAPaymentCreatedEventWhenSuccessfullyConfirmed() {
+    public void confirm_shouldRegisterAPaymentSubmittedToProviderEventWhenSuccessfullyConfirmed() {
         ConfirmationDetails confirmationDetails = confirmationDetails()
                 .withTransaction(aTransactionFixture())
                 .withMandate(aMandateFixture())
@@ -65,6 +65,6 @@ public class SandboxServiceTest {
         when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
 
         service.confirm(paymentRequestExternalId, gatewayAccount);
-        verify(mockedTransactionService).paymentCreatedFor(transaction, payer, LocalDate.now().plusDays(4));
+        verify(mockedTransactionService).paymentSubmittedToProviderFor(transaction, payer, LocalDate.now().plusDays(4));
     }
 }

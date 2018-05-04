@@ -61,7 +61,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     @Override
     protected Map<GoCardlessAction, Function<Transaction, PaymentRequestEvent>> getHandledActions() {
         return ImmutableMap.<GoCardlessAction, Function<Transaction, PaymentRequestEvent>>builder()
-                .put(GoCardlessPaymentAction.CREATED, transactionService::paymentPendingFor)
+                .put(GoCardlessPaymentAction.CREATED, transactionService::paymentAcknowledgedFor)
                 .put(GoCardlessPaymentAction.SUBMITTED, transactionService::paymentSubmittedFor)
                 .put(GoCardlessPaymentAction.CONFIRMED, (Transaction transaction) ->
                         transactionService.findPaymentSubmittedEventFor(transaction)
