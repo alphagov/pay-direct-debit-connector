@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.gatewayaccounts;
 
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.common.validation.ApiValidation;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountException;
@@ -31,11 +32,17 @@ public class GatewayAccountParamConverterProvider implements ParamConverterProvi
     public class GatewayAccountConverter implements ParamConverter<GatewayAccount> {
 
         @Override
-        public GatewayAccount fromString(String value) {
-            Long accountId = convertAccountId(value);
+        public GatewayAccount fromString(String externalAccountId) {
+            //backward compatibility - this will be removed once frontend is in
+            if (ApiValidation.isNumeric(externalAccountId)) {
+                Long accountId = convertAccountId(externalAccountId);
+                return gatewayAccountDao
+                        .findById(accountId)
+                        .orElseThrow(() -> new GatewayAccountNotFoundException(accountId.toString()));
+            }
             return gatewayAccountDao
-                    .findById(accountId)
-                    .orElseThrow(() -> new GatewayAccountNotFoundException(accountId.toString()));
+                    .findByExternalId(externalAccountId)
+                    .orElseThrow(() -> new GatewayAccountNotFoundException(externalAccountId));
         }
 
         @Override

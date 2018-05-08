@@ -46,6 +46,17 @@ public class DatabaseTestHelper {
         );
     }
 
+    public Map<String, Object> getPaymentRequestByExternalId(String externalId) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from payment_requests p WHERE p.external_id = :externalId")
+                        .bind("externalId", externalId)
+                        .mapToMap()
+                        .findFirst()
+                        .get()
+        );
+    }
+
     public Map<String, Object> getPaymentRequestEventById(Long id) {
         return jdbi.withHandle(handle ->
                 handle

@@ -107,4 +107,93 @@ public class Payer {
     public ZonedDateTime getCreatedDate() {
         return createdDate;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Payer payer = (Payer) o;
+
+        if (accountRequiresAuthorisation != payer.accountRequiresAuthorisation) {
+            return false;
+        }
+        if (id != null ? !id.equals(payer.id) : payer.id != null) {
+            return false;
+        }
+        if (!paymentRequestId.equals(payer.paymentRequestId)) {
+            return false;
+        }
+        if (!externalId.equals(payer.externalId)) {
+            return false;
+        }
+        if (!name.equals(payer.name)) {
+            return false;
+        }
+        if (!email.equals(payer.email)) {
+            return false;
+        }
+        if (!sortCode.equals(payer.sortCode)) {
+            return false;
+        }
+        if (!accountNumberLastTwoDigits.equals(payer.accountNumberLastTwoDigits)) {
+            return false;
+        }
+        if (!accountNumber.equals(payer.accountNumber)) {
+            return false;
+        }
+        if (addressLine1 != null ? !addressLine1.equals(payer.addressLine1)
+                : payer.addressLine1 != null) {
+            return false;
+        }
+        if (addressLine2 != null ? !addressLine2.equals(payer.addressLine2)
+                : payer.addressLine2 != null) {
+            return false;
+        }
+        if (addressPostcode != null ? !addressPostcode.equals(payer.addressPostcode)
+                : payer.addressPostcode != null) {
+            return false;
+        }
+        if (addressCity != null ? !addressCity.equals(payer.addressCity)
+                : payer.addressCity != null) {
+            return false;
+        }
+        if (addressCountry != null ? !addressCountry.equals(payer.addressCountry)
+                : payer.addressCountry != null) {
+            return false;
+        }
+        return createdDate.equals(payer.createdDate);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + paymentRequestId.hashCode();
+        result = 31 * result + externalId.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + email.hashCode();
+        result = 31 * result + sortCode.hashCode();
+        result = 31 * result + accountNumberLastTwoDigits.hashCode();
+        result = 31 * result + (accountRequiresAuthorisation ? 1 : 0);
+        result = 31 * result + accountNumber.hashCode();
+        result = 31 * result + (addressLine1 != null ? addressLine1.hashCode() : 0);
+        result = 31 * result + (addressLine2 != null ? addressLine2.hashCode() : 0);
+        result = 31 * result + (addressPostcode != null ? addressPostcode.hashCode() : 0);
+        result = 31 * result + (addressCity != null ? addressCity.hashCode() : 0);
+        result = 31 * result + (addressCountry != null ? addressCountry.hashCode() : 0);
+        result = 31 * result + createdDate.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Payer{" +
+                "paymentRequestId=" + paymentRequestId +
+                ", externalId='" + externalId + '\'' +
+                '}';
+    }
 }
