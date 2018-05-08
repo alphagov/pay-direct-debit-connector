@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.resources;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.payments.api.PaymentRequestFrontendResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestValidator;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestService;
@@ -44,6 +45,15 @@ public class PaymentRequestResource {
         return Response.ok(response).build();
     }
 
+    @GET
+    @Path("/v1/accounts/{accountId}/payment-requests/{paymentRequestExternalId}")
+    @Produces(APPLICATION_JSON)
+    public Response getPaymentRequest(@PathParam("accountId") String accountExternalId, @PathParam("paymentRequestExternalId") String paymentRequestExternalId) {
+        LOGGER.info("Retrieving charge for frontend - {}", paymentRequestExternalId);
+        PaymentRequestFrontendResponse response = paymentRequestService.getPaymentWithExternalId(accountExternalId, paymentRequestExternalId);
+        return Response.ok(response).build();
+    }
+    
     @POST
     @Path(CHARGES_API_PATH)
     @Produces(APPLICATION_JSON)

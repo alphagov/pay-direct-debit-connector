@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
+import uk.gov.pay.directdebit.payments.api.PaymentRequestFrontendResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
 import uk.gov.pay.directdebit.payments.exception.PaymentRequestNotFoundException;
@@ -107,6 +108,27 @@ public class PaymentRequestService {
                     return populateResponseWith(paymentRequest, accountExternalId, transaction, uriInfo);
                 })
                 .orElseThrow(() -> new PaymentRequestNotFoundException(paymentExternalId, accountExternalId));
+    }
+
+    public PaymentRequestFrontendResponse getPaymentWithExternalId(String accountExternalId, String paymentRequestExternalId) {
+        return paymentRequestDao
+                .findByExternalIdAndAccountExternalId(paymentRequestExternalId, accountExternalId)
+                .map(paymentRequest ->  {
+                    Transaction transaction = transactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
+                    // payer will be populated in the next PR
+                    return new PaymentRequestFrontendResponse(
+                            paymentRequest.getExternalId(),
+                            paymentRequest.getGatewayAccountId(),
+                            accountExternalId,
+                            transaction.getState().toExternal(),
+                            paymentRequest.getAmount(),
+                            paymentRequest.getReturnUrl(),
+                            paymentRequest.getDescription(),
+                            paymentRequest.getReference(),
+                            paymentRequest.getCreatedDate().toString(),
+                            null);
+                })
+                .orElseThrow(() -> new PaymentRequestNotFoundException(paymentRequestExternalId, accountExternalId));
     }
 
     public void changePaymentMethod(String accountExternalId, String paymentRequestExternalId) {
