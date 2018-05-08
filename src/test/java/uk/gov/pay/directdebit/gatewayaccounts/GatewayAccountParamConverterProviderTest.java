@@ -52,12 +52,4 @@ public class GatewayAccountParamConverterProviderTest {
         thrown.reportMissingExceptionWithMessage("GatewayAccountNotFoundException expected");
         paramConverter.fromString("10");
     }
-
-    @Test
-    public void shouldThrow_ifGatewayAccountIdIsNotValid() throws IOException {
-        thrown.expect(InvalidGatewayAccountException.class);
-        thrown.expectMessage("Unsupported gateway account: invalid id");
-        thrown.reportMissingExceptionWithMessage("InvalidGatewayAccountException expected");
-        paramConverter.fromString("notvalid");
-    }
 }
