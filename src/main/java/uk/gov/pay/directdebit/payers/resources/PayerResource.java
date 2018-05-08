@@ -51,7 +51,7 @@ public class PayerResource {
 
         CreatePayerResponse createPayerResponse = CreatePayerResponse.from(payer);
 
-        URI newPayerLocation = URIBuilder.selfUriFor(uriInfo, PAYER_API_PATH, gatewayAccount.getId().toString(), paymentRequestExternalId, createPayerResponse.getPayerExternalId());
+        URI newPayerLocation = URIBuilder.selfUriFor(uriInfo, PAYER_API_PATH, gatewayAccount.getExternalId(), paymentRequestExternalId, createPayerResponse.getPayerExternalId());
         return Response.created(newPayerLocation).entity(createPayerResponse).build();
     }
 

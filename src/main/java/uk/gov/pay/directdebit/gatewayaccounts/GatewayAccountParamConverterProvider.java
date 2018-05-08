@@ -33,16 +33,6 @@ public class GatewayAccountParamConverterProvider implements ParamConverterProvi
 
         @Override
         public GatewayAccount fromString(String externalAccountId) {
-            //backward compatibility - this will be removed once frontend is in
-            if (ApiValidation.isNumeric(externalAccountId)) {
-                System.out.println("AAAAAAAAAAA?????????");
-                Long accountId = convertAccountId(externalAccountId);
-                return gatewayAccountDao
-                        .findById(accountId)
-                        .orElseThrow(
-                                () -> new GatewayAccountNotFoundException(accountId.toString()));
-            }
-            System.out.println("BBBBBBBBBB?????????");
             return gatewayAccountDao
                     .findByExternalId(externalAccountId)
                     .orElseThrow(() -> new GatewayAccountNotFoundException(externalAccountId));
@@ -51,15 +41,6 @@ public class GatewayAccountParamConverterProvider implements ParamConverterProvi
         @Override
         public String toString(GatewayAccount gatewayAccount) {
             return gatewayAccount.getId().toString();
-        }
-
-        private Long convertAccountId(String param) {
-            try {
-                return Long.parseLong(param);
-            } catch (Exception exc) {
-                LOGGER.error("Could not retrieve gateway account for request from URL");
-                throw new InvalidGatewayAccountException("invalid id");
-            }
         }
     }
     @Override

@@ -38,18 +38,18 @@ public class GatewayAccountParamConverterProviderTest {
     }
 
     @Test
-    public void shouldRetrieveTheCorrectGatewayAccountForAValidId() throws IOException {
-        when(mockedGatewayAccountDao.findById(gatewayAccount.getId())).thenReturn(Optional.of(gatewayAccount));
-        GatewayAccount convertedGatewayAccount = paramConverter.fromString(this.gatewayAccount.getId().toString());
+    public void shouldRetrieveTheCorrectGatewayAccountForAValidId() {
+        when(mockedGatewayAccountDao.findByExternalId(gatewayAccount.getExternalId())).thenReturn(Optional.of(gatewayAccount));
+        GatewayAccount convertedGatewayAccount = paramConverter.fromString(gatewayAccount.getExternalId());
         Assert.assertThat(convertedGatewayAccount, is(gatewayAccount));
     }
 
     @Test
-    public void shouldThrow_ifGatewayAccountDoesNotExist() throws IOException {
-        when(mockedGatewayAccountDao.findById(10L)).thenReturn(Optional.empty());
+    public void shouldThrow_ifGatewayAccountDoesNotExist() {
+        when(mockedGatewayAccountDao.findByExternalId("not-existing")).thenReturn(Optional.empty());
         thrown.expect(GatewayAccountNotFoundException.class);
-        thrown.expectMessage("Unknown gateway account: 10");
+        thrown.expectMessage("Unknown gateway account: not-existing");
         thrown.reportMissingExceptionWithMessage("GatewayAccountNotFoundException expected");
-        paramConverter.fromString("10");
+        paramConverter.fromString("not-existing");
     }
 }

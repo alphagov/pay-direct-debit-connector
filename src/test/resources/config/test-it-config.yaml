@@ -62,7 +62,7 @@ database:
   # the maximum amount of time to wait on an empty pool before throwing an exception
   maxWaitForConnection: 1s
 
-  # the SQL joinQuery to run when validating a connection's liveness
+  # the SQL query to run when validating a connection's liveness
   validationQuery: "SELECT '1'"
 
   # the timeout before a connection validation queries fail

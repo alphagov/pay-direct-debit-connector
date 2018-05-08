@@ -63,11 +63,11 @@ public class ConfirmPaymentResourceIT {
     public void setUp() {
         wireMockAdminUsers.start();
         gatewayAccountFixture.insert(testContext.getJdbi());
-        paymentRequestFixture.insert(testContext.getJdbi());
-        transactionFixture.insert(testContext.getJdbi());
     }
 
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
+    private PayerFixture payerFixture = PayerFixture.aPayerFixture();
+
     private PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture.aPaymentRequestFixture()
             .withGatewayAccountId(gatewayAccountFixture.getId());
     private TransactionFixture transactionFixture = aTransactionFixture()
@@ -76,12 +76,13 @@ public class ConfirmPaymentResourceIT {
             .withGatewayAccountExternalId(gatewayAccountFixture.getExternalId())
             .withPaymentRequestDescription(paymentRequestFixture.getDescription())
             .withState(AWAITING_DIRECT_DEBIT_DETAILS);
-    
+
     @Test
     public void confirm_shouldCreateAMandateAndUpdateCharge() {
+        paymentRequestFixture.withPayerFixture(payerFixture).insert(testContext.getJdbi());
+        transactionFixture.insert(testContext.getJdbi());
         String paymentRequestExternalId = paymentRequestFixture.getExternalId();
-        PayerFixture payerFixture = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
-
+        
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
         String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
@@ -106,7 +107,7 @@ public class ConfirmPaymentResourceIT {
                 .willReturn(
                         aResponse().withStatus(200)));
 
-        String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getId().toString(), paymentRequestExternalId);
+        String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getExternalId(), paymentRequestExternalId);
         given().port(testContext.getPort())
                 .body(confirmDetails)
                 .contentType(APPLICATION_JSON)
@@ -171,26 +172,26 @@ public class ConfirmPaymentResourceIT {
                 .willReturn(
                         aResponse().withStatus(200)));
 
-        transactionFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         String paymentRequestExternalId = paymentRequestFixture.getExternalId();
-        PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
-            String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm",
-                    gatewayAccountFixture.getId().toString(), paymentRequestExternalId);
-            given().port(testContext.getPort())
-                    .accept(APPLICATION_JSON)
-                    .body(confirmDetails)
-                    .post(requestPath)
-                    .then()
-                    .statusCode(Response.Status.NO_CONTENT.getStatusCode());
+        String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm",
+                gatewayAccountFixture.getExternalId(), paymentRequestExternalId);
+        given().port(testContext.getPort())
+                .contentType(APPLICATION_JSON)
+                .body(confirmDetails)
+                .post(requestPath)
+                .then()
+                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-            Map<String, Object> transaction = testContext.getDatabaseTestHelper()
-                    .getTransactionById(transactionFixture.getId());
-            assertThat(transaction.get("state"), is("PENDING_DIRECT_DEBIT_PAYMENT"));
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper()
+                .getTransactionById(transactionFixture.getId());
+        assertThat(transaction.get("state"), is("PENDING_DIRECT_DEBIT_PAYMENT"));
     }
-    
+
     @Test
     public void confirm_shouldFailWhenPayerDoesNotExist() {
-        String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getId().toString(), paymentRequestFixture.getExternalId());
+        paymentRequestFixture.insert(testContext.getJdbi());
+        transactionFixture.insert(testContext.getJdbi());
+        String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getExternalId(), paymentRequestFixture.getExternalId());
 
         String confirmDetails = "{\"sort_code\": \"123456\", " +
                 "\"account_number\": \"12345678\"}";

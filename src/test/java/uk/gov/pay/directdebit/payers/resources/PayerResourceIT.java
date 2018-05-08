@@ -98,7 +98,7 @@ public class PayerResourceIT {
         createGatewayAccountWithPaymentRequestAndRequestPath(GOCARDLESS);
         insertTransactionFixtureWith(GOCARDLESS);
         String requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
-                .replace("{accountId}", testGatewayAccount.getId().toString())
+                .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
         String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
@@ -125,7 +125,7 @@ public class PayerResourceIT {
 
     private String expectedPayerRequestLocationFor(String paymentRequestExternalId, String payerExternalId) {
         return "http://localhost:" + testContext.getPort() + "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers/{payerExternalId}"
-                .replace("{accountId}", testGatewayAccount.getId().toString())
+                .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace("{paymentRequestExternalId}", paymentRequestExternalId)
                 .replace("{payerExternalId}", payerExternalId);
     }
@@ -161,7 +161,7 @@ public class PayerResourceIT {
                 .withGatewayAccountId(testGatewayAccount.getId())
                 .insert(testContext.getJdbi());
         requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
-                .replace("{accountId}", testGatewayAccount.getId().toString())
+                .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
     }
 }
