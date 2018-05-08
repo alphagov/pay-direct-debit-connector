@@ -68,6 +68,7 @@ public class PaymentViewServiceTest {
     public void getPaymentViewList_withGatewayAccountIdAndOffsetAndLimit_shouldPopulateResponse() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId, 
                 1L, 100L, createdDate.toString(), createdDate.toString());
+
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
 
