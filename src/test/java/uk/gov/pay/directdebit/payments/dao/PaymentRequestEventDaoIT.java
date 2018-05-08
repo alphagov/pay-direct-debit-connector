@@ -23,7 +23,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_ACKNOWLEDGED_BY_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
@@ -70,10 +70,11 @@ public class PaymentRequestEventDaoIT {
         aPaymentRequestEventFixture()
                 .withPaymentRequestId(testPaymentRequest.getId())
                 .withEventType(CHARGE)
-                .withEvent(PAYMENT_PENDING)
+                .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .insert(testContext.getJdbi());
 
-        Optional<PaymentRequestEvent> event = paymentRequestEventDao.findByPaymentRequestIdAndEvent(testPaymentRequest.getId(), CHARGE, PAYMENT_PENDING);
+        Optional<PaymentRequestEvent> event = paymentRequestEventDao.findByPaymentRequestIdAndEvent(testPaymentRequest.getId(), CHARGE,
+                PAYMENT_ACKNOWLEDGED_BY_PROVIDER);
 
         assertThat(event.isPresent(), is(true));
     }

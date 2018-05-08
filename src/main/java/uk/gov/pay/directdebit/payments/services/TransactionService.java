@@ -21,12 +21,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYER_CREATED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_CREATED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
@@ -102,7 +100,7 @@ public class TransactionService {
     public Transaction receiveDirectDebitDetailsFor(String accountExternalId, String paymentRequestExternalId) {
         Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
         paymentRequestEventService.registerDirectDebitReceivedEventFor(transaction);
-        return updateStateFor(transaction, DIRECT_DEBIT_DETAILS_RECEIVED);
+        return transaction;
     }
 
     public Transaction confirmedDirectDebitDetailsFor(String accountExternalId, String paymentRequestExternalId) {
@@ -112,15 +110,19 @@ public class TransactionService {
     }
 
     public Transaction payerCreatedFor(Transaction transaction) {
-        Transaction updatedTransaction = updateStateFor(transaction, PAYER_CREATED);
         paymentRequestEventService.registerPayerCreatedEventFor(transaction);
-        return updatedTransaction;
+        return transaction;
     }
 
-    public PaymentRequestEvent paymentCreatedFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
+    public PaymentRequestEvent payerEditedFor(Transaction transaction) {
+        return paymentRequestEventService.registerPayerEditedEventFor(transaction);
+    }
+
+    public PaymentRequestEvent paymentSubmittedToProviderFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
         userNotificationService.sendPaymentConfirmedEmailFor(transaction, payer, earliestChargeDate);
-        Transaction updatedTransaction = updateStateFor(transaction, PAYMENT_CREATED);
-        return paymentRequestEventService.registerPaymentCreatedEventFor(updatedTransaction);
+        Transaction updatedTransaction = updateStateFor(transaction,
+                PAYMENT_SUBMITTED_TO_PROVIDER);
+        return paymentRequestEventService.registerPaymentSubmittedToProviderEventFor(updatedTransaction);
     }
 
     public PaymentRequestEvent paymentFailedWithEmailFor(Transaction transaction, Payer payer) {
@@ -142,8 +144,8 @@ public class TransactionService {
         return paymentRequestEventService.registerPaymentPaidOutEventFor(updatedTransaction);
     }
 
-    public PaymentRequestEvent paymentPendingFor(Transaction transaction) {
-        return paymentRequestEventService.registerPaymentPendingEventFor(transaction);
+    public PaymentRequestEvent paymentAcknowledgedFor(Transaction transaction) {
+        return paymentRequestEventService.registerPaymentAcknowledgedEventFor(transaction);
     }
 
     public PaymentRequestEvent paymentCancelledFor(Transaction transaction) {
@@ -172,7 +174,8 @@ public class TransactionService {
     }
 
     public Optional<PaymentRequestEvent> findPaymentSubmittedEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), CHARGE, PAYMENT_SUBMITTED);
+        return paymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), CHARGE,
+                PAYMENT_SUBMITTED_TO_BANK);
     }
 
     public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {
@@ -183,4 +186,5 @@ public class TransactionService {
         Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
         return paymentRequestEventService.registerPaymentMethodChangedEventFor(newTransaction);
     }
+
 }

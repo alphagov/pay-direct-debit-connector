@@ -1,8 +1,18 @@
 package uk.gov.pay.directdebit.webhook.gocardless.api;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.MANDATES;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYOUTS;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,15 +20,6 @@ import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
-
-import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.*;
 
 public class GoCardlessWebhookParserTest {
 
@@ -106,7 +107,7 @@ public class GoCardlessWebhookParserTest {
     }
 
     @Test
-    public void shouldThrow_ifWebhookPayloadIsNotValid() throws IOException {
+    public void shouldThrow_ifWebhookPayloadIsNotValid() {
         thrown.expect(WebhookParserException.class);
         thrown.expectMessage("Failed to parse webhooks, body: ");
         thrown.reportMissingExceptionWithMessage("WebhookParserException expected");

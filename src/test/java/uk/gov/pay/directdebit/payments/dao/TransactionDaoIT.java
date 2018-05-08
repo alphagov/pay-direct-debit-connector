@@ -142,7 +142,7 @@ public class TransactionDaoIT {
 
         PaymentRequestFixture sandboxPaymentRequest = generateNewPaymentRequestFixture(testGatewayAccount.getId());
         TransactionFixture sandboxCharge =
-                generateNewTransactionFixture(sandboxPaymentRequest, TYPE, PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT, AMOUNT);
+                generateNewTransactionFixture(sandboxPaymentRequest, TYPE, PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT, AMOUNT);
         sandboxCharge.insert(testContext.getJdbi());
 
         PaymentRequestFixture successSandboxPaymentRequest = generateNewPaymentRequestFixture(testGatewayAccount.getId());
@@ -165,7 +165,7 @@ public class TransactionDaoIT {
     public void shouldNotFindAnyTransactionByPaymentState_ifPaymentStateIsNotUsed() {
         PaymentRequestFixture processingDirectDebitPaymentStatePaymentRequestFixture = generateNewPaymentRequestFixture(testGatewayAccount.getId());
         TransactionFixture processingDirectDebitPaymentStateTransactionFixture =
-                generateNewTransactionFixture(processingDirectDebitPaymentStatePaymentRequestFixture, TYPE, PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT, AMOUNT);
+                generateNewTransactionFixture(processingDirectDebitPaymentStatePaymentRequestFixture, TYPE, PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT, AMOUNT);
         processingDirectDebitPaymentStateTransactionFixture.insert(testContext.getJdbi());
 
         List<Transaction> successTransactionsList = transactionDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);

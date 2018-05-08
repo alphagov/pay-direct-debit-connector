@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.mandate.resources;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.After;
 import org.junit.Before;
@@ -28,7 +27,6 @@ import java.util.Map;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.restassured.RestAssured.given;
@@ -38,7 +36,10 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateMandate;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
 
@@ -73,7 +74,7 @@ public class ConfirmPaymentResourceIT {
             .withGatewayAccountId(gatewayAccountFixture.getId())
             .withGatewayAccountExternalId(gatewayAccountFixture.getExternalId())
             .withPaymentRequestDescription(paymentRequestFixture.getDescription())
-            .withState(AWAITING_CONFIRMATION);
+            .withState(AWAITING_DIRECT_DEBIT_DETAILS);
     @Test
     public void confirm_shouldCreateAMandateAndUpdateCharge() {
         gatewayAccountFixture.insert(testContext.getJdbi());
@@ -116,16 +117,20 @@ public class ConfirmPaymentResourceIT {
     }
 
     @Test
-    public void confirm_shouldCreateAMandateAndUpdateCharge_ForGoCardless() {
+    public void confirm_shouldCreateACustomerBankAccountMandateAndUpdateCharge_ForGoCardless() {
         gatewayAccountFixture.withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         paymentRequestFixture.insert(testContext.getJdbi());
         PayerFixture payerFixture = PayerFixture.aPayerFixture()
                 .withPaymentRequestId(paymentRequestFixture.getId())
                 .insert(testContext.getJdbi());
+        String customerId = "CU000358S3A2FP";
+        String customerBankAccountId = "BA0002WR3Z193A";
         GoCardlessCustomerFixture goCardlessCustomerFixture = aGoCardlessCustomerFixture().
-                withCustomerId("CU3498578")
-                .withPayerId(payerFixture.getId())
-                .insert(testContext.getJdbi());
+                withCustomerId(customerId)
+                .withCustomerBankAccountId(customerBankAccountId)
+                .withPayerId(payerFixture.getId());
+        stubCreateCustomer(paymentRequestFixture.getExternalId(), payerFixture, customerId);
+        stubCreateCustomerBankAccount(paymentRequestFixture.getExternalId(), payerFixture, customerId, customerBankAccountId);
         stubCreateMandate(paymentRequestFixture.getExternalId(), goCardlessCustomerFixture);
         stubCreatePayment(paymentRequestFixture.getExternalId(), transactionFixture);
 

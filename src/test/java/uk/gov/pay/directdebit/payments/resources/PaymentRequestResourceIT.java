@@ -10,6 +10,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CANCEL_CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGES_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
@@ -177,6 +178,24 @@ public class PaymentRequestResourceIT {
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
                     put("chargeTokenId", newChargeToken);
                 }}));
+    }
+
+    @Test
+    public void shouldCancelATransaction() {
+        PaymentRequestFixture paymentRequestFixture = getPaymentRequestFixture();
+        TransactionFixture transactionFixture = getTransactionFixture(paymentRequestFixture.getId(), PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
+
+        String requestPath = CANCEL_CHARGE_API_PATH
+                .replace("{accountId}", testGatewayAccount.getExternalId())
+                .replace("{paymentRequestExternalId}", paymentRequestFixture.getExternalId());
+
+        givenSetup()
+                .post(requestPath)
+                .then()
+                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
+
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
+        assertThat(transaction.get("state"), is("CANCELLED"));
     }
     
     @Test

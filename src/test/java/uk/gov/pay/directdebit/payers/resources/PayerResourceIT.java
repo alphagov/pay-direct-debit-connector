@@ -1,11 +1,23 @@
 package uk.gov.pay.directdebit.payers.resources;
 
+import static io.restassured.RestAssured.given;
+import static io.restassured.http.ContentType.JSON;
+import static org.hamcrest.core.Is.is;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
+import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,21 +33,6 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-
-import javax.ws.rs.core.Response;
-import java.util.Map;
-
-import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
-import static org.hamcrest.core.Is.is;
-import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
-import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
-import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
-import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -82,7 +79,7 @@ public class PayerResourceIT {
     public void shouldCreateAPayer() throws JsonProcessingException {
         createGatewayAccountWithPaymentRequestAndRequestPath(SANDBOX);
         insertTransactionFixtureWith(SANDBOX);
-        String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
+        String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
@@ -94,8 +91,8 @@ public class PayerResourceIT {
                 .build());
 
         ValidatableResponse response = givenSetup()
-                .body(postBody)
-                .post(requestPath)
+                .body(putBody)
+                .put(requestPath)
                 .then()
                 .statusCode(Response.Status.CREATED.getStatusCode());
 
@@ -113,7 +110,7 @@ public class PayerResourceIT {
     public void shouldCreateAPayer_withoutAddress() throws JsonProcessingException {
         createGatewayAccountWithPaymentRequestAndRequestPath(SANDBOX);
         insertTransactionFixtureWith(SANDBOX);
-        String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
+        String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
@@ -121,8 +118,8 @@ public class PayerResourceIT {
                 .build());
 
         ValidatableResponse response = givenSetup()
-                .body(postBody)
-                .post(requestPath)
+                .body(putBody)
+                .put(requestPath)
                 .then()
                 .statusCode(Response.Status.CREATED.getStatusCode());
 
@@ -140,14 +137,10 @@ public class PayerResourceIT {
     public void shouldCreateAPayer_forGoCardless() throws JsonProcessingException {
         createGatewayAccountWithPaymentRequestAndRequestPath(GOCARDLESS);
         insertTransactionFixtureWith(GOCARDLESS);
-        String fakeCustomerId = "CU000358S3A2FP";
-        String fakeBankAccountId = "BA0002WR3Z193A";
-        stubCreateCustomer(testPaymentRequest.getExternalId(), payerFixture, fakeCustomerId);
-        stubCreateCustomerBankAccount(testPaymentRequest.getExternalId(), payerFixture, fakeCustomerId, fakeBankAccountId);
         String requestPath = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers"
                 .replace("{accountId}", testGatewayAccount.getId().toString())
                 .replace("{paymentRequestExternalId}", testPaymentRequest.getExternalId());
-        String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
+        String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
@@ -159,8 +152,8 @@ public class PayerResourceIT {
                 .build());
 
         ValidatableResponse response = givenSetup()
-                .body(postBody)
-                .post(requestPath)
+                .body(putBody)
+                .put(requestPath)
                 .then()
                 .statusCode(Response.Status.CREATED.getStatusCode());
 
@@ -184,15 +177,15 @@ public class PayerResourceIT {
     @Test
     public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
         createGatewayAccountWithPaymentRequestAndRequestPath(SANDBOX);
-        String postBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
+        String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(SORTCODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
                 .put(EMAIL_KEY, payerFixture.getEmail())
                 .build());
 
         givenSetup()
-                .body(postBody)
-                .post(requestPath)
+                .body(putBody)
+                .put(requestPath)
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)

@@ -19,6 +19,7 @@ import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.time.LocalDate;
@@ -38,16 +39,14 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_CONFIRMATION;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING_DIRECT_DEBIT_PAYMENT;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_DETAILS;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PROCESSING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
 
@@ -106,6 +105,7 @@ public class TransactionServiceTest {
     @Test
     public void findByPaymentRequestExternalIdAndAccountId_shouldFindATransaction() {
         TransactionFixture transactionFixture = TransactionFixture
+
                 .aTransactionFixture();
         when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
@@ -133,51 +133,48 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void payerCreatedFor_shouldUpdateTransactionStateAndRegisterEvent() throws Exception {
-        TransactionFixture transactionFixture = TransactionFixture
+    public void payerCreatedFor_shouldRegisterAPayerCreatedEvent() {
+        Transaction transaction = TransactionFixture
                 .aTransactionFixture()
-                .withState(PROCESSING_DIRECT_DEBIT_DETAILS);
-        Transaction newTransaction = service.payerCreatedFor(transactionFixture.toEntity());
-        PaymentRequest paymentRequest = newTransaction.getPaymentRequest();
-        assertThat(newTransaction.getId(), is(notNullValue()));
-        assertThat(paymentRequest.getId(), is(transactionFixture.getPaymentRequestId()));
-        assertThat(paymentRequest.getExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
-        assertThat(paymentRequest.getReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
-        assertThat(newTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
-        assertThat(newTransaction.getGatewayAccountExternalId(), is(transactionFixture.getGatewayAccountExternalId()));
-        assertThat(paymentRequest.getDescription(), is(transactionFixture.getPaymentRequestDescription()));
-        assertThat(paymentRequest.getReference(), is(transactionFixture.getPaymentRequestReference()));
-        assertThat(newTransaction.getAmount(), is(transactionFixture.getAmount()));
-        assertThat(newTransaction.getType(), is(transactionFixture.getType()));
-        assertThat(newTransaction.getState(), is(AWAITING_CONFIRMATION));
-        verify(mockedPaymentRequestEventService).registerPayerCreatedEventFor(newTransaction);
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .toEntity();
+
+        service.payerCreatedFor(transaction);
+
+        verify(mockedPaymentRequestEventService).registerPayerCreatedEventFor(transaction);
+        verifyZeroInteractions(mockedTransactionDao);
+        assertThat(transaction.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
-    public void findByPaymentRequestExternalIdAndAccountId_shouldUpdateTransactionStateAndRegisterEventWhenReceivingDDDetails() throws Exception {
-        TransactionFixture transactionFixture = TransactionFixture
+    public void payerEditedFor_shouldRegisterAPayerEditedEvent() {
+        Transaction transaction = TransactionFixture
                 .aTransactionFixture()
-                .withState(AWAITING_DIRECT_DEBIT_DETAILS);
-        when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(transactionFixture.getPaymentRequestExternalId(), gatewayAccountFixture.getExternalId()))
-                .thenReturn(Optional.of(transactionFixture.toEntity()));
-        Transaction newTransaction = service.receiveDirectDebitDetailsFor(gatewayAccountFixture.getExternalId(), transactionFixture.getPaymentRequestExternalId());
-        PaymentRequest paymentRequest = newTransaction.getPaymentRequest();
-        assertThat(newTransaction.getId(), is(notNullValue()));
-        assertThat(paymentRequest.getId(), is(transactionFixture.getPaymentRequestId()));
-        assertThat(paymentRequest.getExternalId(), is(transactionFixture.getPaymentRequestExternalId()));
-        assertThat(paymentRequest.getReturnUrl(), is(transactionFixture.getPaymentRequestReturnUrl()));
-        assertThat(newTransaction.getGatewayAccountId(), is(transactionFixture.getGatewayAccountId()));
-        assertThat(newTransaction.getGatewayAccountExternalId(), is(transactionFixture.getGatewayAccountExternalId()));
-        assertThat(paymentRequest.getDescription(), is(transactionFixture.getPaymentRequestDescription()));
-        assertThat(paymentRequest.getReference(), is(transactionFixture.getPaymentRequestReference()));
-        assertThat(newTransaction.getAmount(), is(transactionFixture.getAmount()));
-        assertThat(newTransaction.getType(), is(transactionFixture.getType()));
-        assertThat(newTransaction.getState(), is(PROCESSING_DIRECT_DEBIT_DETAILS));
-        verify(mockedPaymentRequestEventService).registerDirectDebitReceivedEventFor(newTransaction);
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .toEntity();
+
+        service.payerEditedFor(transaction);
+
+        verify(mockedPaymentRequestEventService).registerPayerEditedEventFor(transaction);
+        verifyZeroInteractions(mockedTransactionDao);
+        assertThat(transaction.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
-    public void findTransactionForToken_shouldUpdateTransactionStateAndRegisterEventWhenExchangingTokens() throws Exception {
+    public void findByPaymentRequestExternalIdAndAccountId_shouldRegisterEventWhenReceivingDirectDebitDetails() {
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .toEntity();
+        when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(transaction.getPaymentRequest().getExternalId(), gatewayAccountFixture.getExternalId()))
+                .thenReturn(Optional.of(transaction));
+         service.receiveDirectDebitDetailsFor(gatewayAccountFixture.getExternalId(), transaction.getPaymentRequest().getExternalId());
+        verify(mockedPaymentRequestEventService).registerDirectDebitReceivedEventFor(transaction);
+        assertThat(transaction.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
+    }
+
+    @Test
+    public void findTransactionForToken_shouldUpdateTransactionStateAndRegisterEventWhenExchangingTokens() {
         String token = "token";
         TransactionFixture transactionFixture = TransactionFixture
                 .aTransactionFixture()
@@ -201,7 +198,33 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void findTransactionForToken_shouldNotReturnATransactionIfNoTransactionExistsForToken() throws Exception {
+    public void shouldUpdateTransactionStateAndRegisterEventWhenConfirmingDirectDebitDetails() {
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .toEntity();
+        when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(transaction.getPaymentRequest().getExternalId(), gatewayAccountFixture.getExternalId()))
+                .thenReturn(Optional.of(transaction));
+        Transaction newTransaction = service.confirmedDirectDebitDetailsFor(gatewayAccountFixture.getExternalId(), transaction.getPaymentRequest().getExternalId());
+        PaymentRequest paymentRequest = newTransaction.getPaymentRequest();
+        assertThat(newTransaction.getId(), is(notNullValue()));
+        assertThat(paymentRequest.getId(), is(transaction.getPaymentRequest().getId()));
+        assertThat(paymentRequest.getExternalId(), is(transaction.getPaymentRequest().getExternalId()));
+        assertThat(paymentRequest.getReturnUrl(), is(transaction.getPaymentRequest().getReturnUrl()));
+        assertThat(newTransaction.getGatewayAccountId(), is(transaction.getGatewayAccountId()));
+        assertThat(newTransaction.getGatewayAccountExternalId(), is(transaction.getGatewayAccountExternalId()));
+        assertThat(paymentRequest.getDescription(), is(transaction.getPaymentRequest().getDescription()));
+        assertThat(paymentRequest.getReference(), is(transaction.getPaymentRequest().getReference()));
+        assertThat(newTransaction.getAmount(), is(transaction.getAmount()));
+        assertThat(newTransaction.getType(), is(transaction.getType()));
+        assertThat(newTransaction.getState(), is(SUBMITTING_DIRECT_DEBIT_PAYMENT));
+        verify(mockedPaymentRequestEventService).registerDirectDebitConfirmedEventFor(newTransaction);
+    }
+
+
+
+    @Test
+    public void findTransactionForToken_shouldNotReturnATransactionIfNoTransactionExistsForToken() {
         when(mockedTransactionDao.findByTokenId("not-existing"))
                 .thenReturn(Optional.empty());
         assertThat(service.findTransactionForToken("not-existing").isPresent(), is(false));
@@ -209,29 +232,30 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void paymentCreatedFor_shouldUpdateTransactionAsPending_andRegisterAPaymentCreatedEvent() {
+    public void paymentSubmittedToProvider_shouldUpdateTransactionAsPending_andRegisterAPaymentSubmittedEvent() {
+
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
-                .withState(PROCESSING_DIRECT_DEBIT_PAYMENT)
+                .withState(SUBMITTING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
-        service.paymentCreatedFor(transaction, payer, LocalDate.now());
+        service.paymentSubmittedToProviderFor(transaction, payer, LocalDate.now());
 
         verify(mockedTransactionDao).updateState(transaction.getId(), PENDING_DIRECT_DEBIT_PAYMENT);
-        verify(mockedPaymentRequestEventService).registerPaymentCreatedEventFor(transaction);
+        verify(mockedPaymentRequestEventService).registerPaymentSubmittedToProviderEventFor(transaction);
         assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
     }
 
     @Test
-    public void paymentPendingFor_shouldRegisterAPaymentPendingEvent() {
+    public void paymentAcknowledgedFor_shouldRegisterAPaymentPendingEvent() {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
                 .withState(PENDING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
 
-        service.paymentPendingFor(transaction);
+        service.paymentAcknowledgedFor(transaction);
 
-        verify(mockedPaymentRequestEventService).registerPaymentPendingEventFor(transaction);
+        verify(mockedPaymentRequestEventService).registerPaymentAcknowledgedEventFor(transaction);
         verifyZeroInteractions(mockedTransactionDao);
         assertThat(transaction.getState(), is(PENDING_DIRECT_DEBIT_PAYMENT));
     }
@@ -241,7 +265,7 @@ public class TransactionServiceTest {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
-                .withState(AWAITING_CONFIRMATION)
+                .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .toEntity();
 
         service.paymentCancelledFor(transaction);
@@ -315,7 +339,7 @@ public class TransactionServiceTest {
 
 
     @Test
-    public void findPaymentSubmittedEventFor_shouldFindEvent() {
+    public void findPaymentSubmittedToBankEventFor_shouldFindEvent() {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
@@ -324,7 +348,8 @@ public class TransactionServiceTest {
 
         PaymentRequestEvent event = aPaymentRequestEventFixture().toEntity();
 
-        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), Type.CHARGE, PAYMENT_SUBMITTED))
+        when(mockedPaymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), Type.CHARGE,
+                PAYMENT_SUBMITTED_TO_BANK))
                 .thenReturn(Optional.of(event));
 
         PaymentRequestEvent foundEvent = service.findPaymentSubmittedEventFor(transaction).get();

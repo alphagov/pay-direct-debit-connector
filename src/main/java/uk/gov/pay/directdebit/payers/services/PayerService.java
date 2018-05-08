@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payers.services;
 
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
@@ -36,12 +37,26 @@ public class PayerService {
                 .orElseThrow(() -> new PayerNotFoundException(paymentRequest.getExternalId()));
     }
 
-    public Payer create(String paymentRequestExternalId, String accountExternalId, Map<String, String> createPayerRequest) {
-        Transaction transaction = transactionService.receiveDirectDebitDetailsFor(accountExternalId, paymentRequestExternalId);
-        Payer payer = payerParser.parse(createPayerRequest, transaction);
+    public Payer createOrUpdatePayer(String paymentRequestExternalId, GatewayAccount gatewayAccount, Map<String, String> createPayerRequest) {
+        Transaction transaction = transactionService.receiveDirectDebitDetailsFor(gatewayAccount.getExternalId(), paymentRequestExternalId);
+        Payer payerDetails = payerParser.parse(createPayerRequest, transaction);
+
+        return payerDao
+                .findByPaymentRequestId(transaction.getPaymentRequest().getId())
+                .map(oldPayer -> editPayer(transaction, oldPayer, payerDetails))
+                .orElseGet(() -> create(transaction, payerDetails));
+    }
+
+    private Payer editPayer(Transaction transaction, Payer oldPayer, Payer newPayer) {
+        LOGGER.info("Updating payer with external id {}", oldPayer.getExternalId());
+        payerDao.updatePayerDetails(oldPayer.getId(), newPayer);
+        transactionService.payerEditedFor(transaction);
+        return newPayer;
+    }
+
+    public Payer create(Transaction transaction, Payer payer) {
         Long id = payerDao.insert(payer);
         payer.setId(id);
-
         LOGGER.info("Created Payer with external id {}", payer.getExternalId());
         transactionService.payerCreatedFor(transaction);
         return payer;

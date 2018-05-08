@@ -1,6 +1,19 @@
 package uk.gov.pay.directdebit.payers.services;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+
 import com.google.common.collect.ImmutableMap;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,16 +29,6 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
-
-import java.util.Map;
-import java.util.Optional;
-
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PayerServiceTest {
@@ -64,10 +67,26 @@ public class PayerServiceTest {
     }
 
     @Test
-    public void shouldStoreAPayerWhenReceivingCreatePayerRequest() {
-        service.create(paymentRequestExternalId, gatewayAccount.getExternalId(), createPayerRequest);
+    public void shouldCreateAndStoreAPayerWhenReceivingCreatePayerRequest() {
+        service.createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
         verify(mockedPayerDao).insert(payer);
         verify(mockedTransactionService).payerCreatedFor(transaction);
+        verify(mockedTransactionService, never()).payerEditedFor(transaction);
+    }
+    @Test
+    public void shouldUpdateAndStoreAPayerWhenReceivingCreatePayerRequest_ifAPayerAlreadyExists() {
+        Payer originalPayer = PayerFixture.aPayerFixture()
+                .withName("mr payment").toEntity();
+        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequest().getId()))
+                .thenReturn(Optional.of(originalPayer));
+
+        Payer editedPayer = mock(Payer.class);
+        when(mockedPayerParser.parse(createPayerRequest, transaction)).thenReturn(editedPayer);
+
+        service.createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
+        verify(mockedPayerDao).updatePayerDetails(originalPayer.getId(), editedPayer);
+        verify(mockedTransactionService).payerEditedFor(transaction);
+        verify(mockedTransactionService, never()).payerCreatedFor(transaction);
     }
 
     @Test

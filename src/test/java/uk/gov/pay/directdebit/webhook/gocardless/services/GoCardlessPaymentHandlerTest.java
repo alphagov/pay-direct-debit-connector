@@ -73,15 +73,15 @@ public class GoCardlessPaymentHandlerTest {
     }
 
     @Test
-    public void handle_onCreatePaymentGoCardlessEvent_shouldSetAPayEventAsPaymentPending() {
+    public void handle_onCreatePaymentGoCardlessEvent_shouldSetAPayEventAsPaymentAcknowledged() {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("created").toEntity());
 
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
-        when(mockedTransactionService.paymentPendingFor(transaction)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.paymentAcknowledgedFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
-        verify(mockedTransactionService).paymentPendingFor(transaction);
+        verify(mockedTransactionService).paymentAcknowledgedFor(transaction);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
