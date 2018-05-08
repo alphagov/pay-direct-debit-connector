@@ -13,10 +13,10 @@ import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundEx
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
-import uk.gov.pay.directdebit.payments.dao.PaymentViewSearchParams;
 import uk.gov.pay.directdebit.payments.exception.RecordsNotFoundException;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
+import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -50,7 +50,7 @@ public class PaymentViewServiceTest {
             PaymentView paymentView = new PaymentView(
                     gatewayAccountExternalId,
                     RandomIdGenerator.newId(),
-                    1000l + i,
+                    1000L + i,
                     "Pay reference" + i,
                     "This is a description" + i,
                     "http://return-service.com/" + i,
@@ -66,7 +66,8 @@ public class PaymentViewServiceTest {
 
     @Test
     public void getPaymentViewList_withGatewayAccountIdAndOffsetAndLimit_shouldPopulateResponse() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId, 1l, 100l);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId, 
+                1L, 100L, createdDate.toString(), createdDate.toString());
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
 
@@ -79,7 +80,8 @@ public class PaymentViewServiceTest {
 
     @Test
     public void shouldThrowNoRecordsFoundException_whenPaymentViewListIsEmpty() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId, 10l, 100l);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId,
+                10L, 100L, createdDate.toString(), createdDate.toString());
         thrown.expect(RecordsNotFoundException.class);
         thrown.expectMessage("Found no records with page size 10 and display_size 100");
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
@@ -88,8 +90,9 @@ public class PaymentViewServiceTest {
     }
 
     @Test
-    public void shouldThrowNoRecordsFoundException_whenGatewayNotExists() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId, 10l, 100l);
+    public void shouldThrowGatewayAccountNotFoundException_whenGatewayNotExists() {
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId,
+                10L, 100L, createdDate.toString(), createdDate.toString());
         thrown.expect(GatewayAccountNotFoundException.class);
         thrown.expectMessage("Unknown gateway account: " + gatewayAccountExternalId);
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.empty());

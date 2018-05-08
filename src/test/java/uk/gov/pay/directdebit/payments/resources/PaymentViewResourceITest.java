@@ -26,7 +26,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTrans
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class PaymentViewResourceTest {
+public class PaymentViewResourceITest {
 
     private GatewayAccountFixture testGatewayAccount;
 
@@ -40,7 +40,7 @@ public class PaymentViewResourceTest {
 
     @Test
     public void shouldReturnAListOfPaymentView() {
-        ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1l);
         for (int i = 0; i < 3; i++) {
             PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
                     .withId(i + 1)
@@ -79,7 +79,7 @@ public class PaymentViewResourceTest {
     }
 
     @Test
-    public void shouldReturn405_whenPresentedWithNegativeOffset() {
+    public void shouldReturn400_whenPresentedWithNegativeOffset() {
         String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "0")
@@ -137,10 +137,11 @@ public class PaymentViewResourceTest {
     }
 
     @Test
-    public void shouldReturn2Records_whenPaginationSetToPage2AndDisplaySize3With5records() {
-        ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
-        for (int i = 0; i < 5; i++) {
+    public void shouldReturn2Records_whenPaginationSetToPage2AndDisplaySize3With5records_withNoDates() {
+        ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1l);
+        for (int i = 0; i < 50; i++) {
             PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
+                    .withAmount(100 + i)
                     .withId(i + 1)
                     .withGatewayAccountId(testGatewayAccount.getId())
                     .withReference("MBK" + i)
@@ -155,23 +156,125 @@ public class PaymentViewResourceTest {
                     .withName("J. Doe" + i)
                     .insert(testContext.getJdbi());
         }
+
         String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
-                .replace(":display_size", "3");
-
+                .replace(":display_size", "25");
         givenSetup()
                 .get(requestPath)
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("payment_views", hasSize(2))
+                .body("payment_views", hasSize(25))
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("page", is(2))
-                .body("display_size", is(3))
-                .body("payment_views[0].reference", is("MBK1"))
-                .body("payment_views[1].description", is("Description0"))
-                .body("payment_views[0].name", is("J. Doe1"));
+                .body("display_size", is(25))
+                .body("payment_views[0].reference", is("MBK24"))
+                .body("payment_views[24].description", is("Description0"))
+                .body("payment_views[0].name", is("J. Doe24"));
+    }
+
+    @Test
+    public void shouldReturn5Records_whenPaginationSetTo2PageAnd10DisplaySizeWith15records_withDateRange10days() {
+        ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1l);
+        for (int i = 0; i < 15; i++) {
+            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
+                    .withAmount(100 + i)
+                    .withId(i + 1)
+                    .withGatewayAccountId(testGatewayAccount.getId())
+                    .withReference("MBK" + i)
+                    .withDescription("Description" + i)
+                    .withCreatedDate(createdDate)
+                    .insert(testContext.getJdbi());
+            aTransactionFixture()
+                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .insert(testContext.getJdbi());
+            aPayerFixture()
+                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withName("J. Doe" + i)
+                    .insert(testContext.getJdbi());
+        }
+
+        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+                .replace("{accountId}", testGatewayAccount.getExternalId())
+                .replace(":page", "2")
+                .replace(":display_size", "10")
+                .replace(":fromDate", ZonedDateTime.now(ZoneOffset.UTC).minusDays(10l).toString())
+                .replace(":toDate", ZonedDateTime.now(ZoneOffset.UTC).toString());
+        givenSetup()
+                .get(requestPath)
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("payment_views", hasSize(5))
+                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
+                .body("page", is(2))
+                .body("display_size", is(10))
+                .body("payment_views[0].reference", is("MBK4"))
+                .body("payment_views[4].description", is("Description0"))
+                .body("payment_views[1].name", is("J. Doe3"))
+                .body("payment_views[2].created_date", is(createdDate.toString()));
+    }
+
+    @Test
+    public void shouldReturn3Records_whenFromAndToDateSet() {
+        ZonedDateTime fromDate = ZonedDateTime.now(ZoneOffset.UTC).minusYears(1).minusDays(4l).minusMinutes(5l);
+        ZonedDateTime toDate = ZonedDateTime.now(ZoneOffset.UTC).minusYears(1).minusDays(2l).plusMinutes(5l);
+        for (int i = 0, day = 15; i < 15; i++, day--) {
+            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
+                    .withAmount(100 + i)
+                    .withId(i + 1)
+                    .withGatewayAccountId(testGatewayAccount.getId())
+                    .withReference("MBK" + day)
+                    .withDescription("Description" + i)
+                    .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusYears(1).minusDays(day))
+                    .insert(testContext.getJdbi());
+            aTransactionFixture()
+                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .insert(testContext.getJdbi());
+            aPayerFixture()
+                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withName("J. Doe" + day)
+                    .insert(testContext.getJdbi());
+        }
+
+        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+                .replace("{accountId}", testGatewayAccount.getExternalId())
+                .replace(":page", "1")
+                .replace(":display_size", "100")
+                .replace(":fromDate", fromDate.toString())
+                .replace(":toDate", toDate.toString());
+        givenSetup()
+                .get(requestPath)
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("payment_views", hasSize(3))
+                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
+                .body("page", is(1))
+                .body("display_size", is(100))
+                .body("payment_views[0].reference", is("MBK2"))
+                .body("payment_views[2].description", is("Description11"))
+                .body("payment_views[1].name", is("J. Doe3"));
+    }
+
+    @Test
+    public void shouldReturn405_whenMailFormedDate() {
+        String fromDate = "2018-05-05T15:00Z";
+        String toDate = "2018-14-08T15:00Z";
+        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+                .replace("{accountId}", testGatewayAccount.getExternalId())
+                .replace(":page", "2")
+                .replace(":display_size", "10")
+                .replace(":fromDate", fromDate)
+                .replace(":toDate", toDate);
+        givenSetup()
+                .get(requestPath)
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .contentType(JSON)
+                .body("message", is("Input toDate (2018-14-08T15:00Z) is wrong format"));
     }
 
     private RequestSpecification givenSetup() {
