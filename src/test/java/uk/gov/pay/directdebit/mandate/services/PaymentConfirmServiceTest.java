@@ -1,16 +1,23 @@
 package uk.gov.pay.directdebit.mandate.services;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.common.exception.validation.MissingMandatoryFieldsException;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.PayerConflictException;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.payers.api.CreatePayerValidator;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -41,14 +48,20 @@ public class PaymentConfirmServiceTest {
     @Mock
     private PayerDao mockPayerDao;
 
+    private Map<String, String> details = ImmutableMap
+            .of("sort_code", "123456", "account_number", "12345678");
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+    
     @Before
     public void setup() {
         service = new PaymentConfirmService(mockTransactionService, mockPayerDao, mockMandateDao);
     }
+    
 
     @Test
     public void confirm_shouldConfirmAPaymentByCreatingAMandateAndRegisteringExpectedEvents() {
-
         String paymentRequestExternalId = "test-payment-ext-id";
         long paymentRequestId = 1L;
         Long payerId = 2L;
@@ -65,7 +78,8 @@ public class PaymentConfirmServiceTest {
 
         when(mockMandateDao.insert(any(Mandate.class))).thenReturn(mandateId);
 
-        ConfirmationDetails confirmationDetails = service.confirm(accountExternalId, paymentRequestExternalId);
+
+        ConfirmationDetails confirmationDetails = service.confirm(accountExternalId, paymentRequestExternalId, details);
         ArgumentCaptor<Mandate> maCaptor = forClass(Mandate.class);
         verify(mockMandateDao).insert(maCaptor.capture());
 
@@ -78,7 +92,10 @@ public class PaymentConfirmServiceTest {
 
         assertThat(confirmationDetails.getMandate(), is(mandate));
         assertThat(confirmationDetails.getTransaction(), is(transaction));
+        assertThat(confirmationDetails.getSortCode(), is("123456"));
+        assertThat(confirmationDetails.getAccountNumber(), is("12345678"));
     }
+    
 
     @Test
     public void confirm_shouldFail_whenPaymentDoesNotHaveAPayer() {
@@ -95,7 +112,7 @@ public class PaymentConfirmServiceTest {
                 .thenReturn(Optional.empty());
 
         try {
-            service.confirm(accountExternalId, paymentRequestExternalId);
+            service.confirm(accountExternalId, paymentRequestExternalId, details);
             fail("Expected PayerConflictException to be thrown");
         } catch (PayerConflictException e) {
             verify(mockMandateDao, never()).insert(any(Mandate.class));

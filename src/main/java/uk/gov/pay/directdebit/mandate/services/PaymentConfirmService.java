@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -31,14 +32,16 @@ public class PaymentConfirmService {
      *
      * @param paymentExternalId
      */
-    public ConfirmationDetails confirm(String accountExternalId, String paymentExternalId) {
+    public ConfirmationDetails confirm(String accountExternalId, String paymentExternalId, Map<String, String> confirmDetailsRequest) {
         Transaction transaction = transactionService.confirmedDirectDebitDetailsFor(accountExternalId, paymentExternalId);
+        String accountNumber = confirmDetailsRequest.get("account_number");
+        String sortCode = confirmDetailsRequest.get("sort_code");
         Long paymentRequestId = transaction.getPaymentRequest().getId();
         Mandate createdMandate = payerDao.findByPaymentRequestId(paymentRequestId)
                 .map(this::createMandateFor)
                 .orElseThrow(() -> new PayerConflictException(String.format("Expected payment request %s to be already associated with a payer", paymentExternalId)));
         LOGGER.info("Mandate created for payment request {}", paymentRequestId);
-        return new ConfirmationDetails(transaction, createdMandate);
+        return new ConfirmationDetails(transaction, createdMandate, accountNumber, sortCode);
     }
 
     private Mandate createMandateFor(Payer payer) {

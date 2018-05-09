@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payers.model;
 
+import org.jdbi.v3.core.mapper.reflect.ColumnName;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
 import java.time.ZoneOffset;
@@ -12,9 +13,9 @@ public class Payer {
     private String name;
     private String email;
     private String sortCode;
+    private String accountNumber;
     private String accountNumberLastTwoDigits;
     private boolean accountRequiresAuthorisation;
-    private String accountNumber;
     private String addressLine1;
     private String addressLine2;
     private String addressPostcode;
