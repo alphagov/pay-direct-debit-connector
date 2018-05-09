@@ -1,7 +1,30 @@
 package uk.gov.pay.directdebit.mandate.resources;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+import static io.restassured.RestAssured.given;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateMandate;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
+
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,31 +40,6 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-
-import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-import static io.restassured.RestAssured.given;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
-import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT;
-import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
-import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
-import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateMandate;
-import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -99,6 +97,8 @@ public class ConfirmPaymentResourceIT {
                 "}" +
                 "}";
 
+        String confirmDetails = "{\"sort_code\": \"" + payerFixture.getSortCode() + "\", " +
+                "\"account_number\": \"" + payerFixture.getAccountNumber() + "\"}";
 
         wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
                 .withRequestBody(equalToJson(emailPayloadBody))
@@ -107,7 +107,8 @@ public class ConfirmPaymentResourceIT {
 
         String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getId().toString(), paymentRequestExternalId);
         given().port(testContext.getPort())
-                .accept(APPLICATION_JSON)
+                .body(confirmDetails)
+                .contentType(APPLICATION_JSON)
                 .post(requestPath)
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
@@ -150,6 +151,9 @@ public class ConfirmPaymentResourceIT {
                 "}";
 
 
+        String confirmDetails = "{\"sort_code\": \"" + payerFixture.getSortCode() + "\", " +
+                "\"account_number\": \"" + payerFixture.getAccountNumber() + "\"}";
+
         wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
                 .withRequestBody(equalToJson(emailPayloadBody))
                 .willReturn(
@@ -161,7 +165,8 @@ public class ConfirmPaymentResourceIT {
 
         String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getId().toString(), paymentRequestExternalId);
         given().port(testContext.getPort())
-                .accept(APPLICATION_JSON)
+                .body(confirmDetails)
+                .contentType(APPLICATION_JSON)
                 .post(requestPath)
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
@@ -177,8 +182,13 @@ public class ConfirmPaymentResourceIT {
         transactionFixture.insert(testContext.getJdbi());
 
         String requestPath = String.format("/v1/api/accounts/%s/payment-requests/%s/confirm", gatewayAccountFixture.getId().toString(), paymentRequestFixture.getExternalId());
+
+        String confirmDetails = "{\"sort_code\": \"123456\", " +
+                "\"account_number\": \"12345678\"}";
+
         given().port(testContext.getPort())
-                .accept(APPLICATION_JSON)
+                .body(confirmDetails)
+                .contentType(APPLICATION_JSON)
                 .post(requestPath)
                 .then()
                 .statusCode(Response.Status.CONFLICT.getStatusCode());

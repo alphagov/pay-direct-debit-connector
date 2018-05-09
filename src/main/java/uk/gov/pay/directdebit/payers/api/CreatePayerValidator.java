@@ -6,6 +6,7 @@ import uk.gov.pay.directdebit.common.validation.FieldSize;
 
 import java.util.Map;
 import java.util.function.Function;
+import uk.gov.pay.directdebit.common.validation.FieldSizeValidator;
 
 public class CreatePayerValidator extends ApiValidation {
 
@@ -34,8 +35,8 @@ public class CreatePayerValidator extends ApiValidation {
 
     private final static Map<String, FieldSize> fieldSizes =
             ImmutableMap.<String, FieldSize>builder()
-                    .put(SORTCODE_KEY, new FieldSize(6, 6))
-                    .put(ACCOUNT_NUMBER_KEY, new FieldSize(6, 8))
+                    .put(SORTCODE_KEY, FieldSizeValidator.SORT_CODE.getFieldSize())
+                    .put(ACCOUNT_NUMBER_KEY, FieldSizeValidator.ACCOUNT_NUMBER.getFieldSize())
                     .put(EMAIL_KEY, new FieldSize(0, 254))
                     .build();
 

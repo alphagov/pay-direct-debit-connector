@@ -66,13 +66,13 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     }
 
     @Override
-    public void confirm(String paymentRequestExternalId, GatewayAccount gatewayAccount) {
-        ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId);
+    public void confirm(String paymentRequestExternalId, GatewayAccount gatewayAccount, Map<String, String> confirmDetailsRequest) {
+        ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId, confirmDetailsRequest);
 
         Payer payer = payerService.getPayerFor(confirmationDetails.getTransaction());
         LOGGER.info("Confirming payment, payment request id: {}", paymentRequestExternalId);
         GoCardlessCustomer customer = createCustomer(paymentRequestExternalId, payer);
-        createCustomerBankAccount(paymentRequestExternalId, customer, payer);
+        createCustomerBankAccount(paymentRequestExternalId, customer, payer, confirmationDetails.getSortCode(), confirmationDetails.getAccountNumber());
         GoCardlessMandate goCardlessMandate = createMandate(paymentRequestExternalId, confirmationDetails.getMandate());
         GoCardlessPayment payment = createPayment(paymentRequestExternalId, confirmationDetails.getTransaction(), goCardlessMandate);
 
@@ -95,7 +95,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         }
     }
 
-    private void createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer) {
+    private void createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer, String sortCode, String accountNumber) {
         try {
             LOGGER.info("Attempting to call gocardless to create a customer bank account, payment request id: {}", paymentRequestExternalId);
 
@@ -103,8 +103,8 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
                     paymentRequestExternalId,
                     goCardlessCustomer,
                     payer.getName(),
-                    payer.getSortCode(),
-                    payer.getAccountNumber());
+                    sortCode,
+                    accountNumber);
 
             LOGGER.info("Created customer bank account in gocardless, payment request id: {}", paymentRequestExternalId);
 

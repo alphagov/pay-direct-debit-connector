@@ -60,11 +60,12 @@ public class SandboxServiceTest {
                 .build();
         Transaction transaction = confirmationDetails.getTransaction();
 
-        when(mockedPaymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId))
+        Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678");
+        when(mockedPaymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId, details))
                 .thenReturn(confirmationDetails);
         when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
 
-        service.confirm(paymentRequestExternalId, gatewayAccount);
+        service.confirm(paymentRequestExternalId, gatewayAccount, details);
         verify(mockedTransactionService).paymentSubmittedToProviderFor(transaction, payer, LocalDate.now().plusDays(4));
     }
 }
