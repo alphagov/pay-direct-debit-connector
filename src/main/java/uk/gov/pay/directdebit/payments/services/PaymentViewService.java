@@ -6,7 +6,7 @@ import uk.gov.pay.directdebit.payments.api.PaymentViewListResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewValidator;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
-import uk.gov.pay.directdebit.payments.dao.PaymentViewSearchParams;
+import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 import uk.gov.pay.directdebit.payments.exception.RecordsNotFoundException;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
 
@@ -31,8 +31,8 @@ public class PaymentViewService {
     public PaymentViewResponse getPaymentViewResponse(PaymentViewSearchParams searchParams) {
         return gatewayAccountDao.findByExternalId(searchParams.getGatewayExternalId())
                 .map(gatewayAccount -> {
-                    paymentViewValidator.validateParams(searchParams);
-                    List<PaymentViewListResponse> viewListResponse = getPaymentViewListResponse(searchParams);
+                    List<PaymentViewListResponse> viewListResponse = 
+                            getPaymentViewListResponse(paymentViewValidator.validateParams(searchParams));
                     if (viewListResponse.size() == 0) {
                         throw new RecordsNotFoundException(format("Found no records with page size %s and display_size %s",
                                 searchParams.getPage(),

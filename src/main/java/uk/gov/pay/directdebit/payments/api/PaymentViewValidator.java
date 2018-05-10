@@ -1,16 +1,29 @@
 package uk.gov.pay.directdebit.payments.api;
 
-import uk.gov.pay.directdebit.payments.dao.PaymentViewSearchParams;
+import uk.gov.pay.directdebit.payments.exception.InvalidDateException;
 import uk.gov.pay.directdebit.payments.exception.NegativeSearchParamException;
+import uk.gov.pay.directdebit.payments.exception.UnparsableDateException;
 import uk.gov.pay.directdebit.payments.params.PaginationParams;
+import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
+import uk.gov.pay.directdebit.payments.params.SearchDateParams;
+
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PaymentViewValidator {
 
     private static final Long MAX_PAGE_NUMBER = 500l;
     private static final Long DEFAULT_PAGE_NUMBER = 1l;
+    private static final String FROM_DATE_FIELD = "fromDate";
+    private static final String TO_DATE_FIELD = "toDate";
 
-    public void validateParams(PaymentViewSearchParams searchParams) {
-        searchParams.setPaginationParams(validatePagination(searchParams.getPaginationParams()));
+    public PaymentViewSearchParams validateParams(PaymentViewSearchParams searchParams) {
+        PaginationParams paginationParams = validatePagination(searchParams.getPaginationParams());
+        SearchDateParams searchDateParams = validateSearchDate(searchParams);
+        return new PaymentViewSearchParams(searchParams.getGatewayExternalId(), searchParams.getPage(), searchParams.getDisplaySize(),
+                searchParams.getFromDateString(), searchParams.getToDateString(), paginationParams, searchDateParams);
     }
 
     private PaginationParams validatePagination(PaginationParams paginationParams) {
@@ -30,4 +43,38 @@ public class PaymentViewValidator {
         }
         return new PaginationParams(pageNumber, displaySize);
     }
+
+    private SearchDateParams validateSearchDate(PaymentViewSearchParams searchParams) {
+        ZonedDateTime from = null;
+        ZonedDateTime to = null;
+        if (isNotBlank(searchParams.getFromDateString())) {
+            from = parseDateTime(FROM_DATE_FIELD, searchParams.getFromDateString());
+        }
+        if (isNotBlank(searchParams.getToDateString())) {
+            to = parseDateTime(TO_DATE_FIELD, searchParams.getToDateString());
+        }
+        validateFromDateIsBeforeToDate(from, to);
+        return new SearchDateParams(from, to);
+    }
+
+    private ZonedDateTime parseDateTime(String fieldName, String dateToParse) {
+        ZonedDateTime dateTime;
+        try {
+            dateTime = ZonedDateTime.parse(dateToParse);
+        } catch (DateTimeParseException e) {
+            throw new UnparsableDateException(fieldName, dateToParse);
+        }
+        return dateTime;
+    }
+
+    private void validateFromDateIsBeforeToDate(ZonedDateTime fromDate, ZonedDateTime toDate) {
+        if (fromDate != null
+                && toDate != null) {
+            if (toDate
+                    .isBefore(fromDate)) {
+                throw new InvalidDateException(fromDate.toString(), toDate.toString());
+            }
+        }
+    }
 }
+

@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.payments.resources;
 
-import uk.gov.pay.directdebit.payments.dao.PaymentViewSearchParams;
+import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 import uk.gov.pay.directdebit.payments.services.PaymentViewService;
 
 import javax.inject.Inject;
@@ -16,8 +16,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("/")
 public class PaymentViewResource {
 
-    private static final String PAGE = "page";
-    private static final String DISPLAY_SIZE = "display_size";
+    private static final String PAGE_KEY = "page";
+    private static final String DISPLAY_SIZE_KEY = "display_size";
+    private static final String FROM_DATE_KEY = "from_date";
+    private static final String TO_DATE_KEY = "to_date";
     private final PaymentViewService paymentViewService;
 
     @Inject
@@ -30,12 +32,16 @@ public class PaymentViewResource {
     @Produces(APPLICATION_JSON)
     public Response getPaymentView(
             @PathParam("accountId") String accountExternalId,
-            @QueryParam(PAGE) Long pageNumber,
-            @QueryParam(DISPLAY_SIZE) Long displaySize) {
+            @QueryParam(PAGE_KEY) Long pageNumber,
+            @QueryParam(DISPLAY_SIZE_KEY) Long displaySize,
+            @QueryParam(FROM_DATE_KEY) String fromDate,
+            @QueryParam(TO_DATE_KEY) String toDate){
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(
                 accountExternalId,
                 pageNumber,
-                displaySize
+                displaySize,
+                fromDate,
+                toDate
         );
         return Response.ok().entity(paymentViewService.getPaymentViewResponse(searchParams)).build();
     }
