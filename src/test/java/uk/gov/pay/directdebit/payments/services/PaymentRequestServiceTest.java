@@ -249,7 +249,27 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    public void getPaymentWithExternalId_shouldPopulateAFrontendResponse_ifPaymentWithNoPayerExists() {
+    public void getPaymentWithExternalId_shouldPopulateAFrontendResponse_ifPaymentHasAPayer() {
+        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId())).thenReturn(Optional.of(paymentRequest.toEntity()));
+        when(mockTransactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId()))
+                .thenReturn(transactionFixture.toEntity());
+
+        PaymentRequestFrontendResponse response = service.getPaymentWithExternalId(gatewayAccountFixture.getExternalId(), paymentRequest.getExternalId());
+        assertThat(response.getAmount().toString(), is(AMOUNT));
+        assertThat(response.getDescription(), is(DESCRIPTION));
+        assertThat(response.getReference(), is(REFERENCE));
+        assertThat(response.getReturnUrl(), is(RETURN_URL));
+        assertThat(response.getGatewayAccountId(), is(gatewayAccount.getId()));
+        assertThat(response.getGatewayAccountExternalId(), is(gatewayAccount.getExternalId()));
+        assertThat(response.getPaymentExternalId(), is(paymentRequest.getExternalId()));
+        assertThat(response.getPayerDetails().getEmail(), is(payerFixture.getEmail()));
+        assertThat(response.getPayerDetails().getName(), is(payerFixture.getName()));
+        assertThat(response.getPayerDetails().getExternalId(), is(payerFixture.getExternalId()));
+        assertThat(response.getPayerDetails().getAccountRequiresAuthorisation(), is(payerFixture.getAccountRequiresAuthorisation()));
+    }
+    
+    @Test
+    public void getPaymentWithExternalId_shouldPopulateAFrontendResponse_ifPaymentHasNoPayer() {
         PaymentRequestFixture paymentRequest = aPaymentRequestFixture()
                 .withAmount(Long.parseLong(AMOUNT))
                 .withDescription(DESCRIPTION)
@@ -269,26 +289,6 @@ public class PaymentRequestServiceTest {
         assertThat(response.getGatewayAccountExternalId(), is(gatewayAccount.getExternalId()));
         assertThat(response.getPaymentExternalId(), is(paymentRequest.getExternalId()));
         assertThat(response.getPayerDetails(), is(nullValue()));
-    }
-
-    @Test
-    public void getPaymentWithExternalId_shouldPopulateAFrontendResponse_ifPaymentExists_withoutPayer() {
-        when(mockedPaymentRequestDao.findByExternalIdAndAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId())).thenReturn(Optional.of(paymentRequest.toEntity()));
-        when(mockTransactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequest.getExternalId(), gatewayAccountFixture.getExternalId()))
-                .thenReturn(transactionFixture.toEntity());
-
-        PaymentRequestFrontendResponse response = service.getPaymentWithExternalId(gatewayAccountFixture.getExternalId(), paymentRequest.getExternalId());
-        assertThat(response.getAmount().toString(), is(AMOUNT));
-        assertThat(response.getDescription(), is(DESCRIPTION));
-        assertThat(response.getReference(), is(REFERENCE));
-        assertThat(response.getReturnUrl(), is(RETURN_URL));
-        assertThat(response.getGatewayAccountId(), is(gatewayAccount.getId()));
-        assertThat(response.getGatewayAccountExternalId(), is(gatewayAccount.getExternalId()));
-        assertThat(response.getPaymentExternalId(), is(paymentRequest.getExternalId()));
-        assertThat(response.getPayerDetails().getEmail(), is(payerFixture.getEmail()));
-        assertThat(response.getPayerDetails().getName(), is(payerFixture.getName()));
-        assertThat(response.getPayerDetails().getExternalId(), is(payerFixture.getExternalId()));
-        assertThat(response.getPayerDetails().getAccountRequiresAuthorisation(), is(payerFixture.getAccountRequiresAuthorisation()));
     }
 
     @Test

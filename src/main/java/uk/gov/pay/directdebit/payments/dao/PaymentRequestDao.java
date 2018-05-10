@@ -14,59 +14,59 @@ import java.util.Optional;
 
 @RegisterRowMapper(PaymentRequestMapper.class)
 public interface PaymentRequestDao {
-    @SqlQuery("SELECT\n"+
-            "  p.id AS payment_request_id,\n" +
-            "  p.external_id AS payment_request_external_id,\n" +
-            "  p.gateway_account_id AS payment_request_gateway_account_id,\n" +
-            "  p.amount AS payment_request_amount,\n" +
-            "  p.reference AS payment_request_reference,\n" +
-            "  p.description AS payment_request_description,\n" +
-            "  p.return_url AS payment_request_return_url,\n" +
-            "  p.created_date AS payment_request_created_date,\n" +
-            "  y.id AS payer_id,\n" +
-            "  y.payment_request_id AS payer_payment_request_id,\n" +
-            "  y.external_id AS payer_external_id,\n" +
-            "  y.name AS payer_name,\n" +
-            "  y.email AS payer_email,\n" +
-            "  y.bank_account_number_last_two_digits AS payer_bank_account_number_last_two_digits,\n" +
-            "  y.bank_account_requires_authorisation AS payer_bank_account_requires_authorisation,\n" +
-            "  y.bank_account_number AS payer_bank_account_number,\n" +
-            "  y.bank_account_sort_code AS payer_bank_account_sort_code,\n" +
-            "  y.created_date AS payer_created_date\n" +
-            " FROM payment_requests p LEFT JOIN payers y ON y.payment_request_id = p.id\n" +
+    @SqlQuery("SELECT"+
+            "  p.id AS payment_request_id," +
+            "  p.external_id AS payment_request_external_id," +
+            "  p.gateway_account_id AS payment_request_gateway_account_id," +
+            "  p.amount AS payment_request_amount," +
+            "  p.reference AS payment_request_reference," +
+            "  p.description AS payment_request_description," +
+            "  p.return_url AS payment_request_return_url," +
+            "  p.created_date AS payment_request_created_date," +
+            "  y.id AS payer_id," +
+            "  y.payment_request_id AS payer_payment_request_id," +
+            "  y.external_id AS payer_external_id," +
+            "  y.name AS payer_name," +
+            "  y.email AS payer_email," +
+            "  y.bank_account_number_last_two_digits AS payer_bank_account_number_last_two_digits," +
+            "  y.bank_account_requires_authorisation AS payer_bank_account_requires_authorisation," +
+            "  y.bank_account_number AS payer_bank_account_number," +
+            "  y.bank_account_sort_code AS payer_bank_account_sort_code," +
+            "  y.created_date AS payer_created_date" +
+            " FROM payment_requests p LEFT JOIN payers y ON y.payment_request_id = p.id" +
             " WHERE p.id = :id")
     Optional<PaymentRequest> findById(@Bind("id") Long id);
 
-    @SqlQuery("SELECT\n" +
-            "  p.id AS payment_request_id,\n" +
-            "  p.external_id AS payment_request_external_id,\n" +
-            "  p.gateway_account_id AS payment_request_gateway_account_id,\n" +
-            "  p.amount AS payment_request_amount,\n" +
-            "  p.reference AS payment_request_reference,\n" +
-            "  p.description AS payment_request_description,\n" +
-            "  p.return_url AS payment_request_return_url,\n" +
-            "  p.created_date AS payment_request_created_date,\n" +
-            "  y.id AS payer_id,\n" +
-            "  y.payment_request_id AS payer_payment_request_id,\n" +
-            "  y.external_id AS payer_external_id,\n" +
-            "  y.name AS payer_name,\n" +
-            "  y.email AS payer_email,\n" +
-            "  y.bank_account_number_last_two_digits AS payer_bank_account_number_last_two_digits,\n" +
-            "  y.bank_account_requires_authorisation AS payer_bank_account_requires_authorisation,\n" +
-            "  y.bank_account_number AS payer_bank_account_number,\n" +
-            "  y.bank_account_sort_code AS payer_bank_account_sort_code,\n" +
-            "  y.created_date AS payer_created_date,\n" +
-            "  g.id AS gateway_account_id,\n" +
-            "  g.external_id AS gateway_account_external_id,\n" +
-            "  g.payment_provider AS gateway_account_payment_provider,\n" +
-            "  g.service_name AS gateway_account_service_name,\n" +
-            "  g.type AS gateway_account_type,\n" +
-            "  g.description AS gateway_account_description,\n" +
-            "  g.analytics_id AS gateway_account_analytics_id\n" +
-            "FROM payment_requests p\n" +
-            "JOIN gateway_accounts g ON p.gateway_account_id = g.id\n" +
-            "LEFT JOIN payers y ON y.payment_request_id = p.id\n" +
-            "WHERE p.external_id = :externalId AND g.external_id = :accountExternalId")
+    @SqlQuery("SELECT" +
+            "  p.id AS payment_request_id," +
+            "  p.external_id AS payment_request_external_id," +
+            "  p.gateway_account_id AS payment_request_gateway_account_id," +
+            "  p.amount AS payment_request_amount," +
+            "  p.reference AS payment_request_reference," +
+            "  p.description AS payment_request_description," +
+            "  p.return_url AS payment_request_return_url," +
+            "  p.created_date AS payment_request_created_date," +
+            "  y.id AS payer_id," +
+            "  y.payment_request_id AS payer_payment_request_id," +
+            "  y.external_id AS payer_external_id," +
+            "  y.name AS payer_name," +
+            "  y.email AS payer_email," +
+            "  y.bank_account_number_last_two_digits AS payer_bank_account_number_last_two_digits," +
+            "  y.bank_account_requires_authorisation AS payer_bank_account_requires_authorisation," +
+            "  y.bank_account_number AS payer_bank_account_number," +
+            "  y.bank_account_sort_code AS payer_bank_account_sort_code," +
+            "  y.created_date AS payer_created_date," +
+            "  g.id AS gateway_account_id," +
+            "  g.external_id AS gateway_account_external_id," +
+            "  g.payment_provider AS gateway_account_payment_provider," +
+            "  g.service_name AS gateway_account_service_name," +
+            "  g.type AS gateway_account_type," +
+            "  g.description AS gateway_account_description," +
+            "  g.analytics_id AS gateway_account_analytics_id" +
+            " FROM payment_requests p" +
+            " JOIN gateway_accounts g ON p.gateway_account_id = g.id" +
+            " LEFT JOIN payers y ON y.payment_request_id = p.id" +
+            " WHERE p.external_id = :externalId AND g.external_id = :accountExternalId")
     Optional<PaymentRequest> findByExternalIdAndAccountExternalId(@Bind("externalId") String externalId, @Bind("accountExternalId") String accountExternalId);
 
     @SqlUpdate("INSERT INTO payment_requests(external_id, gateway_account_id, amount, reference, description, return_url, created_date) VALUES (:externalId, :gatewayAccountId, :amount, :reference, :description, :returnUrl, :createdDate)")
