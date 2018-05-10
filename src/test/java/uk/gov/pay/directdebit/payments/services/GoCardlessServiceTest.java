@@ -1,6 +1,9 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import static java.lang.String.format;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,8 +32,12 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
+import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
+import uk.gov.pay.directdebit.payers.model.BankAccountDetailsParser;
+import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
@@ -71,6 +78,8 @@ public class GoCardlessServiceTest {
     private PaymentConfirmService mockedPaymentConfirmService;
     @Mock
     private GoCardlessEventDao mockedGoCardlessEventDao;
+    @Mock
+    private BankAccountDetailsParser mockedBankAccountDetailsParser;
     private GoCardlessCustomer goCardlessCustomer;
     private GoCardlessService service;
     private Payer payer = PayerFixture.aPayerFixture()
@@ -90,7 +99,7 @@ public class GoCardlessServiceTest {
             .of("sort_code", "123456", "account_number", "12345678");
     @Before
     public void setUp() {
-        service = new GoCardlessService(mockedPayerService, mockedTransactionService, mockedPaymentConfirmService, mockedGoCardlessClientWrapper, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao, mockedGoCardlessEventDao);
+        service = new GoCardlessService(mockedPayerService, mockedTransactionService, mockedPaymentConfirmService, mockedGoCardlessClientWrapper, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao, mockedGoCardlessEventDao, mockedBankAccountDetailsParser);
         goCardlessCustomer = new GoCardlessCustomer(null, payer.getId(), CUSTOMER_ID, BANK_ACCOUNT_ID);
         when(mockedGoCardlessClientWrapper.createCustomer(PAYMENT_REQUEST_EXTERNAL_ID, payer)).thenReturn(goCardlessCustomer);
         when(mockedGoCardlessClientWrapper.createCustomerBankAccount(PAYMENT_REQUEST_EXTERNAL_ID, goCardlessCustomer, payer.getName(), SORT_CODE,  ACCOUNT_NUMBER)).thenReturn(goCardlessCustomer);
@@ -201,4 +210,39 @@ public class GoCardlessServiceTest {
         thrown.reportMissingExceptionWithMessage("CreatePaymentFailedException expected");
         service.confirm(PAYMENT_REQUEST_EXTERNAL_ID, gatewayAccount, confirmDetails);
     }
+
+    @Test
+    public void shouldValidateBankAccountDetails() {
+        String accountNumber = "12345678";
+        String sortCode = "123456";
+        BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
+        Map<String, String> bankAccountDetailsRequest = ImmutableMap.of(
+                "account_number", accountNumber,
+                "sort_code", sortCode
+        );
+        GoCardlessBankAccountLookup goCardlessBankAccountLookup = new GoCardlessBankAccountLookup("Great Bank of Cake", true);
+        when(mockedBankAccountDetailsParser.parse(bankAccountDetailsRequest)).thenReturn(bankAccountDetails);
+        when(mockedGoCardlessClientWrapper.validate(bankAccountDetails)).thenReturn(goCardlessBankAccountLookup);
+        BankAccountValidationResponse response = service.validate(PAYMENT_REQUEST_EXTERNAL_ID, bankAccountDetailsRequest);
+        assertThat(response.isValid(), is(true));
+        assertThat(response.getBankName(), is("Great Bank of Cake"));
+    }
+
+    @Test
+    public void shouldValidateBankAccountDetails_ifGoCardlessReturnsInvalidLookup() {
+        String accountNumber = "12345678";
+        String sortCode = "123467";
+        BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
+        Map<String, String> bankAccountDetailsRequest = ImmutableMap.of(
+                "account_number", accountNumber,
+                "sort_code", sortCode
+        );
+        GoCardlessBankAccountLookup goCardlessBankAccountLookup = new GoCardlessBankAccountLookup(null, false);
+        when(mockedBankAccountDetailsParser.parse(bankAccountDetailsRequest)).thenReturn(bankAccountDetails);
+        when(mockedGoCardlessClientWrapper.validate(bankAccountDetails)).thenReturn(goCardlessBankAccountLookup);
+        BankAccountValidationResponse response = service.validate(PAYMENT_REQUEST_EXTERNAL_ID, bankAccountDetailsRequest);
+        assertThat(response.isValid(), is(false));
+        assertThat(response.getBankName(), is(nullValue()));
+    }
+    
 }

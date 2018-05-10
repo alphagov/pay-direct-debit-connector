@@ -1,6 +1,8 @@
 package uk.gov.pay.directdebit.payments.clients;
 
 
+import com.gocardless.resources.BankDetailsLookup;
+import com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme;
 import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Payment;
@@ -8,6 +10,8 @@ import com.gocardless.services.PaymentService;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
+import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -73,5 +77,18 @@ public class GoCardlessClientWrapper {
                 transaction.getId(),
                 goCardlessPayment.getId(),
                 LocalDate.parse(goCardlessPayment.getChargeDate()));
+    }
+
+    public GoCardlessBankAccountLookup validate(BankAccountDetails bankAccountDetails) {
+        BankDetailsLookup bankDetailsLookup = goCardlessClient.bankDetailsLookups().create()
+                .withAccountNumber(bankAccountDetails.getAccountNumber())
+                .withBranchCode(bankAccountDetails.getSortCode())
+                .withCountryCode("GB")
+                .execute();
+
+        return new GoCardlessBankAccountLookup(
+                bankDetailsLookup.getBankName(),
+                bankDetailsLookup.getAvailableDebitSchemes().contains(AvailableDebitScheme.BACS)
+        );
     }
 }

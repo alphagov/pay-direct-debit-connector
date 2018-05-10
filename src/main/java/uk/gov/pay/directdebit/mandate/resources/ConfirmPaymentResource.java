@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.mandate.api.ConfirmDetailsRequestValidator;
+import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 
@@ -24,7 +24,7 @@ public class ConfirmPaymentResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmPaymentResource.class);
     private final PaymentProviderFactory paymentProviderFactory;
 
-    private final ConfirmDetailsRequestValidator confirmDetailsRequestValidator = new ConfirmDetailsRequestValidator();
+    private final BankAccountDetailsValidator bankAccountDetailsValidator = new BankAccountDetailsValidator();
 
     @Inject
     public ConfirmPaymentResource(PaymentProviderFactory paymentProviderFactory) {
@@ -37,7 +37,7 @@ public class ConfirmPaymentResource {
     @Produces(APPLICATION_JSON)
     public Response confirm(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, Map<String, String> confirmDetailsRequest) {
         LOGGER.info("Confirming payment for payment request with id: {}", paymentRequestExternalId);
-        confirmDetailsRequestValidator.validate(confirmDetailsRequest);
+        bankAccountDetailsValidator.validate(confirmDetailsRequest);
         DirectDebitPaymentProvider service = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
         service.confirm(paymentRequestExternalId, gatewayAccount, confirmDetailsRequest);
         LOGGER.info("Confirmed payment for payment request with id: {}", paymentRequestExternalId);
