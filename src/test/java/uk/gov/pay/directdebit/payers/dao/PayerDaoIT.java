@@ -1,5 +1,13 @@
 package uk.gov.pay.directdebit.payers.dao;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
+
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,15 +21,6 @@ import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Map;
-
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
-import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
-
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class PayerDaoIT {
@@ -30,11 +29,6 @@ public class PayerDaoIT {
     private static final String SORT_CODE = "654321";
     private static final String ACCOUNT_NUMBER_LAST_TWO_DIGITS = "78";
     private static final boolean ACCOUNT_REQUIRES_AUTHORISATION = false;
-    private static final String ADDRESS_LINE_1 = "address line 1";
-    private static final String ADDRESS_LINE_2 = "address line 2";
-    private static final String ADDRESS_CITY = "london";
-    private static final String ADDRESS_POSTCODE = "a postcode";
-    private static final String ADDRESS_COUNTRY = "italy";
     private static final ZonedDateTime CREATED_DATE = ZonedDateTime.parse("2017-12-30T12:30:40Z");
     private static final String EMAIL = "aaa@bb.test";
     private static final String EXTERNAL_ID = "ablijfslkj234";
@@ -46,17 +40,13 @@ public class PayerDaoIT {
 
     private PaymentRequestFixture testPaymentRequest;
     private PayerFixture testPayer;
-    private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
     public void setup() {
         payerDao = testContext.getJdbi().onDemand(PayerDao.class);
-        this.gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
-        this.testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(gatewayAccountFixture.getId())
+        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .insert(testContext.getJdbi());
         this.testPayer = PayerFixture.aPayerFixture()
-                .withPaymentRequestId(testPaymentRequest.getId())
                 .withEmail(EMAIL)
                 .withExternalId(EXTERNAL_ID)
                 .withName(PAYER_NAME)
@@ -64,12 +54,11 @@ public class PayerDaoIT {
                 .withSortCode(SORT_CODE)
                 .withAccountNumberLastTwoDigits(ACCOUNT_NUMBER_LAST_TWO_DIGITS)
                 .withAccountRequiresAuthorisation(ACCOUNT_REQUIRES_AUTHORISATION)
-                .withAddressLine1(ADDRESS_LINE_1)
-                .withAddressLine2(ADDRESS_LINE_2)
-                .withAddressCity(ADDRESS_CITY)
-                .withAddressPostcode(ADDRESS_POSTCODE)
-                .withAddressCountry(ADDRESS_COUNTRY)
                 .withCreatedDate(CREATED_DATE);
+        this.testPaymentRequest = aPaymentRequestFixture()
+                .withGatewayAccountId(gatewayAccountFixture.getId())
+                .withPayerFixture(testPayer)
+                .insert(testContext.getJdbi());
     }
 
     @Test
@@ -85,18 +74,12 @@ public class PayerDaoIT {
         assertThat(foundPayer.get("bank_account_requires_authorisation"), is(ACCOUNT_REQUIRES_AUTHORISATION));
         assertThat(foundPayer.get("bank_account_number"), is(ACCOUNT_NUMBER));
         assertThat(foundPayer.get("bank_account_sort_code"), is(SORT_CODE));
-        assertThat(foundPayer.get("address_line1"), is(ADDRESS_LINE_1));
-        assertThat(foundPayer.get("address_line2"), is(ADDRESS_LINE_2));
-        assertThat(foundPayer.get("address_postcode"), is(ADDRESS_POSTCODE));
-        assertThat(foundPayer.get("address_city"), is(ADDRESS_CITY));
-        assertThat(foundPayer.get("address_country"), is(ADDRESS_COUNTRY));
         assertThat((Timestamp) foundPayer.get("created_date"), isDate(CREATED_DATE));
     }
 
 
     @Test
     public void shouldGetAPayerById() {
-        testPayer.insert(testContext.getJdbi());
         Payer payer = payerDao.findById(testPayer.getId()).get();
         assertThat(payer.getId(), is(testPayer.getId()));
         assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
@@ -107,11 +90,6 @@ public class PayerDaoIT {
         assertThat(payer.getAccountRequiresAuthorisation(), is(ACCOUNT_REQUIRES_AUTHORISATION));
         assertThat(payer.getAccountNumber(), is(ACCOUNT_NUMBER));
         assertThat(payer.getSortCode(), is(SORT_CODE));
-        assertThat(payer.getAddressLine1(), is(ADDRESS_LINE_1));
-        assertThat(payer.getAddressLine2(), is(ADDRESS_LINE_2));
-        assertThat(payer.getAddressPostcode(), is(ADDRESS_POSTCODE));
-        assertThat(payer.getAddressCity(), is(ADDRESS_CITY));
-        assertThat(payer.getAddressCountry(), is(ADDRESS_COUNTRY));
         assertThat(payer.getCreatedDate(), is(CREATED_DATE));
     }
 
@@ -122,7 +100,6 @@ public class PayerDaoIT {
 
     @Test
     public void shouldGetAPayerByExternalId() {
-        testPayer.insert(testContext.getJdbi());
         Payer payer = payerDao.findByExternalId(testPayer.getExternalId()).get();
         assertThat(payer.getId(), is(testPayer.getId()));
         assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
@@ -133,11 +110,6 @@ public class PayerDaoIT {
         assertThat(payer.getAccountRequiresAuthorisation(), is(ACCOUNT_REQUIRES_AUTHORISATION));
         assertThat(payer.getAccountNumber(), is(ACCOUNT_NUMBER));
         assertThat(payer.getSortCode(), is(SORT_CODE));
-        assertThat(payer.getAddressLine1(), is(ADDRESS_LINE_1));
-        assertThat(payer.getAddressLine2(), is(ADDRESS_LINE_2));
-        assertThat(payer.getAddressPostcode(), is(ADDRESS_POSTCODE));
-        assertThat(payer.getAddressCity(), is(ADDRESS_CITY));
-        assertThat(payer.getAddressCountry(), is(ADDRESS_COUNTRY));
         assertThat(payer.getCreatedDate(), is(CREATED_DATE));
     }
 
@@ -148,7 +120,6 @@ public class PayerDaoIT {
 
     @Test
     public void shouldGetAPayerByPaymentRequestId() {
-        testPayer.insert(testContext.getJdbi());
         Payer payer = payerDao.findByPaymentRequestId(testPaymentRequest.getId()).get();
         assertThat(payer.getId(), is(testPayer.getId()));
         assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
@@ -159,11 +130,6 @@ public class PayerDaoIT {
         assertThat(payer.getAccountRequiresAuthorisation(), is(ACCOUNT_REQUIRES_AUTHORISATION));
         assertThat(payer.getAccountNumber(), is(ACCOUNT_NUMBER));
         assertThat(payer.getSortCode(), is(SORT_CODE));
-        assertThat(payer.getAddressLine1(), is(ADDRESS_LINE_1));
-        assertThat(payer.getAddressLine2(), is(ADDRESS_LINE_2));
-        assertThat(payer.getAddressPostcode(), is(ADDRESS_POSTCODE));
-        assertThat(payer.getAddressCity(), is(ADDRESS_CITY));
-        assertThat(payer.getAddressCountry(), is(ADDRESS_COUNTRY));
         assertThat(payer.getCreatedDate(), is(CREATED_DATE));
     }
 
@@ -174,8 +140,6 @@ public class PayerDaoIT {
 
     @Test
     public void shouldUpdatePayerDetailsAndReturnNumberOfAffectedRows() {
-        testPayer.insert(testContext.getJdbi());
-
         String newName = "coffee";
         String newAccountNumber = "87654321";
         String newSortCode = "123456";
@@ -189,11 +153,6 @@ public class PayerDaoIT {
                 .withEmail(newEmail)
                 .withAccountRequiresAuthorisation(newRequiresAuthorisation)
                 .withAccountNumberLastTwoDigits("21")
-                .withAddressLine1(ADDRESS_LINE_1)
-                .withAddressLine2(ADDRESS_LINE_2)
-                .withAddressCity(ADDRESS_CITY)
-                .withAddressPostcode(ADDRESS_POSTCODE)
-                .withAddressCountry(ADDRESS_COUNTRY)
                 .withExternalId("this_should_not_be_updated")
                 .withCreatedDate(ZonedDateTime.now())
                 .toEntity();
@@ -207,11 +166,6 @@ public class PayerDaoIT {
         assertThat(payerAfterUpdate.get("bank_account_requires_authorisation"), is(newRequiresAuthorisation));
         assertThat(payerAfterUpdate.get("bank_account_number"), is(newAccountNumber));
         assertThat(payerAfterUpdate.get("bank_account_sort_code"), is(newSortCode));
-        assertThat(payerAfterUpdate.get("address_line1"), is(ADDRESS_LINE_1));
-        assertThat(payerAfterUpdate.get("address_line2"), is(ADDRESS_LINE_2));
-        assertThat(payerAfterUpdate.get("address_postcode"), is(ADDRESS_POSTCODE));
-        assertThat(payerAfterUpdate.get("address_city"), is(ADDRESS_CITY));
-        assertThat(payerAfterUpdate.get("address_country"), is(ADDRESS_COUNTRY));
 
         // These properties should not be updated
         assertThat(payerAfterUpdate.get("id"), is(testPayer.getId()));

@@ -19,7 +19,6 @@ import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
-import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.time.LocalDate;
@@ -105,7 +104,6 @@ public class TransactionServiceTest {
     @Test
     public void findByPaymentRequestExternalIdAndAccountId_shouldFindATransaction() {
         TransactionFixture transactionFixture = TransactionFixture
-
                 .aTransactionFixture();
         when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestFixture.getExternalId(), gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
@@ -220,8 +218,7 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getState(), is(SUBMITTING_DIRECT_DEBIT_PAYMENT));
         verify(mockedPaymentRequestEventService).registerDirectDebitConfirmedEventFor(newTransaction);
     }
-
-
+    
 
     @Test
     public void findTransactionForToken_shouldNotReturnATransactionIfNoTransactionExistsForToken() {
@@ -265,7 +262,7 @@ public class TransactionServiceTest {
 
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
-                .withState(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS)
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .toEntity();
 
         service.paymentCancelledFor(transaction);

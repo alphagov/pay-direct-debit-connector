@@ -1,6 +1,16 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import liquibase.exception.LiquibaseException;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
+
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,22 +19,10 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentRequest;
-
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
-import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -45,7 +43,7 @@ public class PaymentRequestDaoIT {
     private PaymentRequestFixture testPaymentRequest;
 
     @Before
-    public void setup() throws IOException, LiquibaseException {
+    public void setup() {
         paymentRequestDao = testContext.getJdbi().onDemand(PaymentRequestDao.class);
         this.testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testPaymentRequest = aPaymentRequestFixture()
@@ -73,8 +71,18 @@ public class PaymentRequestDaoIT {
 
     @Test
     public void shouldFindPaymentRequestById() {
-        testPaymentRequest.insert(testContext.getJdbi());
-        PaymentRequest paymentRequest = paymentRequestDao.findById(testPaymentRequest.getId()).get();
+        PayerFixture payerFixture = PayerFixture.aPayerFixture();
+        PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
+                .withGatewayAccountId(testGatewayAccount.getId())
+                .withExternalId(EXTERNAL_ID)
+                .withAmount(AMOUNT)
+                .withDescription(DESCRIPTION)
+                .withReference(REFERENCE)
+                .withReturnUrl(RETURN_URL)
+                .withCreatedDate(CREATED_DATE)
+                .withPayerFixture(payerFixture)
+                .insert(testContext.getJdbi());
+        PaymentRequest paymentRequest = paymentRequestDao.findById(paymentRequestFixture.getId()).get();
         assertThat(paymentRequest.getId(), is(notNullValue()));
         assertThat(paymentRequest.getAmount(), is(AMOUNT));
         assertThat(paymentRequest.getCreatedDate(), is(CREATED_DATE));
@@ -83,6 +91,7 @@ public class PaymentRequestDaoIT {
         assertThat(paymentRequest.getReference(), is(REFERENCE));
         assertThat(paymentRequest.getReturnUrl(), is(RETURN_URL));
         assertThat(paymentRequest.getExternalId(), is(EXTERNAL_ID));
+        assertThat(paymentRequest.getPayer(), is(payerFixture.toEntity()));
     }
 
     @Test

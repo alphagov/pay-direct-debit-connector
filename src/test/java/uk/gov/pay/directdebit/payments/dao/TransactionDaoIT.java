@@ -1,6 +1,16 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import liquibase.exception.LiquibaseException;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
+import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,19 +27,6 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
-import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -48,7 +45,7 @@ public class TransactionDaoIT {
     private TransactionFixture testTransaction;
 
     @Before
-    public void setup() throws IOException, LiquibaseException {
+    public void setup() {
         transactionDao = testContext.getJdbi().onDemand(TransactionDao.class);
         this.testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testPaymentRequest = generateNewPaymentRequestFixture(testGatewayAccount.getId());

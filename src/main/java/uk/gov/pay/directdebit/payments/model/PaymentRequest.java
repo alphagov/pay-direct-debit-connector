@@ -1,10 +1,12 @@
 package uk.gov.pay.directdebit.payments.model;
 
 
+import org.jdbi.v3.core.mapper.Nested;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import uk.gov.pay.directdebit.payers.model.Payer;
 
 public class PaymentRequest {
 
@@ -15,9 +17,11 @@ public class PaymentRequest {
     private Long gatewayAccountId;
     private String description;
     private String reference;
+    @Nested("payer")
+    private Payer payer;
     private ZonedDateTime createdDate;
 
-    public PaymentRequest(Long id, Long amount, String returnUrl, Long gatewayAccountId, String description, String reference, String externalId, ZonedDateTime createdDate) {
+    public PaymentRequest(Long id, Long amount, String returnUrl, Long gatewayAccountId, String description, String reference, String externalId, Payer payer, ZonedDateTime createdDate) {
         this.id = id;
         this.amount = amount;
         this.returnUrl = returnUrl;
@@ -26,10 +30,11 @@ public class PaymentRequest {
         this.reference = reference;
         this.createdDate = createdDate;
         this.externalId = externalId;
+        this.payer = payer;
     }
 
     public PaymentRequest(Long amount, String returnUrl, Long gatewayAccountId, String description, String reference) {
-        this(null, amount, returnUrl, gatewayAccountId, description, reference, RandomIdGenerator.newId(), ZonedDateTime.now(ZoneOffset.UTC));
+        this(null, amount, returnUrl, gatewayAccountId, description, reference, RandomIdGenerator.newId(), null, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     public String getExternalId() {
@@ -96,32 +101,62 @@ public class PaymentRequest {
         this.id = id;
     }
 
+    public Payer getPayer() {
+        return payer;
+    }
+
+    public void setPayer(Payer payer) {
+        this.payer = payer;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         PaymentRequest that = (PaymentRequest) o;
 
-        if (!id.equals(that.id)) return false;
-        if (!externalId.equals(that.externalId)) return false;
-        if (!amount.equals(that.amount)) return false;
-        if (!returnUrl.equals(that.returnUrl)) return false;
-        if (!gatewayAccountId.equals(that.gatewayAccountId)) return false;
-        if (!description.equals(that.description)) return false;
-        if (!reference.equals(that.reference)) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) {
+            return false;
+        }
+        if (!externalId.equals(that.externalId)) {
+            return false;
+        }
+        if (!amount.equals(that.amount)) {
+            return false;
+        }
+        if (!returnUrl.equals(that.returnUrl)) {
+            return false;
+        }
+        if (!gatewayAccountId.equals(that.gatewayAccountId)) {
+            return false;
+        }
+        if (!description.equals(that.description)) {
+            return false;
+        }
+        if (!reference.equals(that.reference)) {
+            return false;
+        }
+        if (payer != null ? !payer.equals(that.payer) : that.payer != null) {
+            return false;
+        }
         return createdDate.equals(that.createdDate);
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
+        int result = id != null ? id.hashCode() : 0;
         result = 31 * result + externalId.hashCode();
         result = 31 * result + amount.hashCode();
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + gatewayAccountId.hashCode();
         result = 31 * result + description.hashCode();
         result = 31 * result + reference.hashCode();
+        result = 31 * result + (payer != null ? payer.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
         return result;
     }

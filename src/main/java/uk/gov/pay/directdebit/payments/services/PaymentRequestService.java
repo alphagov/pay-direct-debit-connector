@@ -115,7 +115,6 @@ public class PaymentRequestService {
                 .findByExternalIdAndAccountExternalId(paymentRequestExternalId, accountExternalId)
                 .map(paymentRequest ->  {
                     Transaction transaction = transactionService.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
-                    // payer will be populated in the next PR
                     return new PaymentRequestFrontendResponse(
                             paymentRequest.getExternalId(),
                             paymentRequest.getGatewayAccountId(),
@@ -126,7 +125,7 @@ public class PaymentRequestService {
                             paymentRequest.getDescription(),
                             paymentRequest.getReference(),
                             paymentRequest.getCreatedDate().toString(),
-                            null);
+                            paymentRequest.getPayer());
                 })
                 .orElseThrow(() -> new PaymentRequestNotFoundException(paymentRequestExternalId, accountExternalId));
     }

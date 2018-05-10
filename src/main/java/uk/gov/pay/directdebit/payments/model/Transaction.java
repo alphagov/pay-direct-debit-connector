@@ -89,18 +89,36 @@ public class Transaction {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Transaction that = (Transaction) o;
 
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (!paymentRequest.equals(that.paymentRequest)) return false;
-        if (!gatewayAccountId.equals(that.gatewayAccountId)) return false;
-        if (!gatewayAccountExternalId.equals(that.gatewayAccountExternalId)) return false;
-        if (paymentProvider != that.paymentProvider) return false;
-        if (!amount.equals(that.amount)) return false;
-        if (type != that.type) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) {
+            return false;
+        }
+        if (!paymentRequest.equals(that.paymentRequest)) {
+            return false;
+        }
+        if (!gatewayAccountId.equals(that.gatewayAccountId)) {
+            return false;
+        }
+        if (!gatewayAccountExternalId.equals(that.gatewayAccountExternalId)) {
+            return false;
+        }
+        if (paymentProvider != that.paymentProvider) {
+            return false;
+        }
+        if (!amount.equals(that.amount)) {
+            return false;
+        }
+        if (type != that.type) {
+            return false;
+        }
         return state == that.state;
     }
 
@@ -116,5 +134,4 @@ public class Transaction {
         result = 31 * result + state.hashCode();
         return result;
     }
-
 }

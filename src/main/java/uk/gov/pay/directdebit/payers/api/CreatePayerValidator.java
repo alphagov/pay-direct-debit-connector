@@ -11,7 +11,7 @@ import uk.gov.pay.directdebit.common.validation.FieldSizeValidator;
 public class CreatePayerValidator extends ApiValidation {
 
     public final static String NAME_KEY = "account_holder_name";
-    public final static String SORTCODE_KEY = "sort_code";
+    public final static String SORT_CODE_KEY = "sort_code";
     public final static String ACCOUNT_NUMBER_KEY = "account_number";
     public final static String ADDRESS_COUNTRY_KEY = "country_code";
     public final static String ADDRESS_LINE1_KEY = "address_line1";
@@ -22,7 +22,7 @@ public class CreatePayerValidator extends ApiValidation {
     private final static Map<String, Function<String, Boolean>> validators =
             ImmutableMap.<String, Function<String, Boolean>>builder()
                     .put(NAME_KEY, ApiValidation::isNotNullOrEmpty)
-                    .put(SORTCODE_KEY, ApiValidation::isNumeric)
+                    .put(SORT_CODE_KEY, ApiValidation::isNumeric)
                     .put(ACCOUNT_NUMBER_KEY, ApiValidation::isNumeric)
                     .put(ADDRESS_COUNTRY_KEY, ApiValidation::isNotNullOrEmpty)
                     .put(ADDRESS_LINE1_KEY, ApiValidation::isNotNullOrEmpty)
@@ -31,11 +31,11 @@ public class CreatePayerValidator extends ApiValidation {
                     .put(EMAIL_KEY, ApiValidation::isNotNullOrEmpty)
                     .build();
 
-    private final static String[] requiredFields = {NAME_KEY, SORTCODE_KEY, ACCOUNT_NUMBER_KEY, EMAIL_KEY};
+    private final static String[] requiredFields = {NAME_KEY, SORT_CODE_KEY, ACCOUNT_NUMBER_KEY, EMAIL_KEY};
 
     private final static Map<String, FieldSize> fieldSizes =
             ImmutableMap.<String, FieldSize>builder()
-                    .put(SORTCODE_KEY, FieldSizeValidator.SORT_CODE.getFieldSize())
+                    .put(SORT_CODE_KEY, FieldSizeValidator.SORT_CODE.getFieldSize())
                     .put(ACCOUNT_NUMBER_KEY, FieldSizeValidator.ACCOUNT_NUMBER.getFieldSize())
                     .put(EMAIL_KEY, new FieldSize(0, 254))
                     .build();
