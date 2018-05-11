@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.payments.params;
 
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateToPaymentStateMapper;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,18 +26,20 @@ public class PaymentViewSearchParams {
     private final String email;
     private final String reference;
     private final Long amount;
+    private final CommaDelimitedSetParameter states;
     private final SearchDateParams searchDateParams;
     private final PaginationParams paginationParams;
     private Map<String, Object> queryMap;
 
     public PaymentViewSearchParams(String gatewayExternalId, Long page, Long displaySize, 
-                                   String fromDateString, String toDateString, String email, String reference, Long amount) {
-        this(gatewayExternalId, page, displaySize, fromDateString, toDateString, email, reference, amount,
+                                   String fromDateString, String toDateString, 
+                                   String email, String reference, Long amount, CommaDelimitedSetParameter states) {
+        this(gatewayExternalId, page, displaySize, fromDateString, toDateString, email, reference, amount, states,
                 null, null);
     }
     
     public PaymentViewSearchParams(String gatewayExternalId, Long page, Long displaySize, String fromDateString, String toDateString,
-                                   String email, String reference, Long amount, 
+                                   String email, String reference, Long amount, CommaDelimitedSetParameter states,
                                    PaginationParams paginationParams, SearchDateParams searchDateParams) {
         this.gatewayExternalId = gatewayExternalId;
         this.page = page;
@@ -45,6 +49,7 @@ public class PaymentViewSearchParams {
         this.email = email;
         this.reference = reference;
         this.amount = amount;
+        this.states = states;
         this.searchDateParams = searchDateParams;
         this.paginationParams = paginationParams;
     }
@@ -64,6 +69,8 @@ public class PaymentViewSearchParams {
     public String getReference() { return reference; }
 
     public Long getAmount() { return amount; }
+
+    public CommaDelimitedSetParameter getStates() { return states; }
 
     public PaginationParams getPaginationParams() {
         if (paginationParams == null) {
@@ -90,6 +97,14 @@ public class PaymentViewSearchParams {
         }
         if (amount != null) {
             sb.append(" AND pr.amount = :" + AMOUNT_FIELD);
+        }
+        if (states != null) {
+            sb.append(" AND tr.state IN(");
+            states.stream().forEach(state -> {
+                //TODO get internal states
+                sb.append(state + "',");
+            });
+            sb.append(")");
         }
         return sb.toString();
     }

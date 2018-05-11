@@ -26,7 +26,7 @@ public class PaymentViewValidator {
                 searchParams.getPage() == null ? DEFAULT_PAGE_NUMBER : searchParams.getPage(),
                 searchParams.getDisplaySize() == null ? MAX_PAGE_NUMBER : searchParams.getDisplaySize(),
                 searchParams.getFromDateString(), searchParams.getToDateString(), searchParams.getEmail(), searchParams.getReference(),
-                searchParams.getAmount(), paginationParams, searchDateParams);
+                searchParams.getAmount(), searchParams.getStates(), paginationParams, searchDateParams);
     }
 
     private PaginationParams validatePagination(PaymentViewSearchParams searchParams) {

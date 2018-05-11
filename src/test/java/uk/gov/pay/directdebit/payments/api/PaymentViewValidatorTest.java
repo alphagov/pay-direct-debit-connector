@@ -21,21 +21,21 @@ public class PaymentViewValidatorTest {
     @Test
     public void shouldReturnNoErrors_withMinimumParams() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account", 
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         validator.validateParams(searchParams);
     }
     
     @Test
     public void shouldReturnNoErrors_withValidPagination() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account",
-                2L, 3L, null, null, null, null, null);
+                2L, 3L, null, null, null, null, null, null);
         validator.validateParams(searchParams);
     }
 
     @Test
     public void shouldReturnAnError_whenPageIsZero() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account", 
-                0L, 256L, null, null, null, null, null);
+                0L, 256L, null, null, null, null, null, null);
         thrown.expect(NegativeSearchParamException.class);
         thrown.expectMessage("Query param 'page' should be a non zero positive integer");
         validator.validateParams(searchParams);
@@ -44,14 +44,14 @@ public class PaymentViewValidatorTest {
     @Test
     public void shouldResetDisplaySizeTo500() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account", 
-                2L, 600L, null, null, null, null, null);
+                2L, 600L, null, null, null, null, null, null);
         searchParams = validator.validateParams(searchParams);
         assertThat(searchParams.getPaginationParams().getDisplaySize(), is(500L));
     }
 
     @Test
     public void shouldSetPaginationWithDefaultValues() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account", null, null, null, null,null, null, null);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams("a-gateway-account", null, null, null, null,null, null, null, null);
         searchParams = validator.validateParams(searchParams);
         assertThat(searchParams.getPaginationParams().getDisplaySize(), is(500L));
         assertThat(searchParams.getPaginationParams().getPageNumber(), is(0L));
@@ -66,6 +66,7 @@ public class PaymentViewValidatorTest {
                 256L,
                 fromDate,
                 toDate,
+                null,
                 null,
                 null,
                 null);
@@ -84,6 +85,7 @@ public class PaymentViewValidatorTest {
                 null,
                 null,
                 null,
+                null,
                 null);
         searchParams = validator.validateParams(searchParams);
         assertThat(searchParams.getSearchDateParams().getFromDate().toString(), is(fromDate));
@@ -98,6 +100,7 @@ public class PaymentViewValidatorTest {
                 256L,
                 null,
                 toDate,
+                null,
                 null,
                 null,
                 null);
@@ -119,6 +122,7 @@ public class PaymentViewValidatorTest {
                 toDate,
                 null,
                 null,
+                null,
                 null);
         validator.validateParams(searchParams);
     }
@@ -134,6 +138,7 @@ public class PaymentViewValidatorTest {
                 256L,
                 fromDate,
                 toDate,
+                null,
                 null,
                 null,
                 null);
@@ -153,6 +158,7 @@ public class PaymentViewValidatorTest {
                 toDate,
                 null,
                 null,
+                null,
                 null);
         validator.validateParams(searchParams);
     }
@@ -168,6 +174,7 @@ public class PaymentViewValidatorTest {
                 256L,
                 fromDate,
                 toDate,
+                null,
                 null,
                 null,
                 null);

@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.resources;
 
+import uk.gov.pay.directdebit.payments.params.CommaDelimitedSetParameter;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 import uk.gov.pay.directdebit.payments.services.PaymentViewService;
 
@@ -23,6 +24,7 @@ public class PaymentViewResource {
     private static final String EMAIL_KEY = "email";
     private static final String REFERENCE_KEY = "reference";
     private static final String AMOUNT_KEY = "amount";
+    private static final String STATE_KEY = "state";
     private final PaymentViewService paymentViewService;
 
     @Inject
@@ -41,7 +43,8 @@ public class PaymentViewResource {
             @QueryParam(TO_DATE_KEY) String toDate,
             @QueryParam(EMAIL_KEY) String email,
             @QueryParam(REFERENCE_KEY) String reference,
-            @QueryParam(AMOUNT_KEY) Long amount){
+            @QueryParam(AMOUNT_KEY) Long amount,
+            @QueryParam(STATE_KEY) CommaDelimitedSetParameter states){
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(
                 accountExternalId,
                 pageNumber,
@@ -50,7 +53,8 @@ public class PaymentViewResource {
                 toDate,
                 email,
                 reference,
-                amount
+                amount,
+                states
         );
         return Response.ok().entity(paymentViewService.getPaymentViewResponse(searchParams)).build();
     }

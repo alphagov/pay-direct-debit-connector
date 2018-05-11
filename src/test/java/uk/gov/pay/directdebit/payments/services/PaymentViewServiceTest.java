@@ -67,7 +67,7 @@ public class PaymentViewServiceTest {
     @Test
     public void getPaymentViewList_withGatewayAccountIdAndOffsetAndLimit_shouldPopulateResponse() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId, 
-                1L, 100L, createdDate.toString(), createdDate.toString(), null, null, null);
+                1L, 100L, createdDate.toString(), createdDate.toString(), null, null, null, null);
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
 
@@ -81,7 +81,7 @@ public class PaymentViewServiceTest {
     @Test
     public void shouldThrowNoRecordsFoundException_whenPaymentViewListIsEmpty() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId,
-                10L, 100L, createdDate.toString(), createdDate.toString(), null, null, null);
+                10L, 100L, createdDate.toString(), createdDate.toString(), null, null, null, null);
         thrown.expect(RecordsNotFoundException.class);
         thrown.expectMessage("Found no records with page size 10 and display_size 100");
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
@@ -92,7 +92,7 @@ public class PaymentViewServiceTest {
     @Test
     public void shouldThrowGatewayAccountNotFoundException_whenGatewayNotExists() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId,
-                10L, 100L, createdDate.toString(), createdDate.toString(), null, null, null);
+                10L, 100L, createdDate.toString(), createdDate.toString(), null, null, null, null);
         thrown.expect(GatewayAccountNotFoundException.class);
         thrown.expectMessage("Unknown gateway account: " + gatewayAccountExternalId);
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.empty());
