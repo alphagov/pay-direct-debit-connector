@@ -14,33 +14,38 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PaymentViewValidator {
 
-    private static final Long MAX_PAGE_NUMBER = 500l;
-    private static final Long DEFAULT_PAGE_NUMBER = 1l;
+    private static final Long MAX_PAGE_NUMBER = 500L;
+    private static final Long DEFAULT_PAGE_NUMBER = 1L;
     private static final String FROM_DATE_FIELD = "fromDate";
     private static final String TO_DATE_FIELD = "toDate";
 
     public PaymentViewSearchParams validateParams(PaymentViewSearchParams searchParams) {
-        PaginationParams paginationParams = validatePagination(searchParams.getPaginationParams());
+        PaginationParams paginationParams = validatePagination(searchParams);
         SearchDateParams searchDateParams = validateSearchDate(searchParams);
-        return new PaymentViewSearchParams(searchParams.getGatewayExternalId(), searchParams.getPage(), searchParams.getDisplaySize(),
-                searchParams.getFromDateString(), searchParams.getToDateString(), paginationParams, searchDateParams);
+        return new PaymentViewSearchParams(searchParams.getGatewayExternalId(), 
+                searchParams.getPage() == null ? DEFAULT_PAGE_NUMBER : searchParams.getPage(),
+                searchParams.getDisplaySize() == null ? MAX_PAGE_NUMBER : searchParams.getDisplaySize(),
+                searchParams.getFromDateString(), searchParams.getToDateString(), searchParams.getEmail(), searchParams.getReference(),
+                searchParams.getAmount(), paginationParams, searchDateParams);
     }
 
-    private PaginationParams validatePagination(PaginationParams paginationParams) {
-        Long pageNumber = DEFAULT_PAGE_NUMBER;
+    private PaginationParams validatePagination(PaymentViewSearchParams searchParams) {
+        Long pageNumber = DEFAULT_PAGE_NUMBER - 1;
         Long displaySize = MAX_PAGE_NUMBER;
-        if (paginationParams.getPageNumber() != null && paginationParams.getPageNumber() < 1) {
-            throw new NegativeSearchParamException("page");
-        }
-        if (paginationParams.getDisplaySize() != null && paginationParams.getDisplaySize() < 1) {
-            throw new NegativeSearchParamException("display_size");
-        }
+        PaginationParams paginationParams = searchParams.getPaginationParams();
         if (paginationParams.getDisplaySize() != null) {
+            if (paginationParams.getDisplaySize() < 1) {
+                throw new NegativeSearchParamException("display_size");    
+            }
             displaySize = paginationParams.getDisplaySize() > MAX_PAGE_NUMBER ? MAX_PAGE_NUMBER : paginationParams.getDisplaySize();
         }
         if (paginationParams.getPageNumber() != null) {
+            if (paginationParams.getPageNumber() < 1) {
+                throw new NegativeSearchParamException("page");
+            }
             pageNumber = (paginationParams.getPageNumber() - 1) * displaySize;
         }
+        
         return new PaginationParams(pageNumber, displaySize);
     }
 

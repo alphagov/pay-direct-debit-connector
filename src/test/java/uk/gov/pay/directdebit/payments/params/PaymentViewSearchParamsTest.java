@@ -19,7 +19,7 @@ public class PaymentViewSearchParamsTest {
     @Test
     public void shouldCreateQueryMap() {
         searchParams = new PaymentViewSearchParams("account-id", 
-                2l, 600l, fromDate.toString(), toDate.toString());
+                2l, 600l, fromDate.toString(), toDate.toString(), null, null, null);
         searchParams = new PaymentViewValidator().validateParams(searchParams);
         assertThat(searchParams.getQueryMap().get("gatewayAccountExternalId"), is("account-id"));
         assertThat(searchParams.getQueryMap().get("offset"), is(500L));

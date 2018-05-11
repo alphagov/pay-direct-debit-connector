@@ -3,6 +3,8 @@ package uk.gov.pay.directdebit.payments.params;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class PaymentViewSearchParams {
 
     private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "gatewayAccountExternalId";
@@ -10,27 +12,39 @@ public class PaymentViewSearchParams {
     private static final String PAGE_SIZE_FIELD = "limit";
     private static final String FROM_DATE_FIELD = "fromDate";
     private static final String TO_DATE_FIELD = "toDate";
-    private String gatewayExternalId;
-    private Long page;
-    private Long displaySize;
-    private String fromDateString;
-    private String toDateString;
-    private SearchDateParams searchDateParams;
-    private PaginationParams paginationParams;
+    private static final String EMAIL_FIELD = "email";
+    private static final String REFERENCE_FIELD = "reference";
+    private static final String LIKE_HOLDER = "%LIKE%";
+    private static final String AMOUNT_FIELD = "amount";
+    private final String gatewayExternalId;
+    private final Long page;
+    private final Long displaySize;
+    private final String fromDateString;
+    private final String toDateString;
+    private final String email;
+    private final String reference;
+    private final Long amount;
+    private final SearchDateParams searchDateParams;
+    private final PaginationParams paginationParams;
     private Map<String, Object> queryMap;
 
-    public PaymentViewSearchParams(String gatewayExternalId, Long page, Long displaySize, String fromDateString, String toDateString) {
-        this(gatewayExternalId, page, displaySize, fromDateString, toDateString,
+    public PaymentViewSearchParams(String gatewayExternalId, Long page, Long displaySize, 
+                                   String fromDateString, String toDateString, String email, String reference, Long amount) {
+        this(gatewayExternalId, page, displaySize, fromDateString, toDateString, email, reference, amount,
                 null, null);
     }
     
     public PaymentViewSearchParams(String gatewayExternalId, Long page, Long displaySize, String fromDateString, String toDateString,
+                                   String email, String reference, Long amount, 
                                    PaginationParams paginationParams, SearchDateParams searchDateParams) {
         this.gatewayExternalId = gatewayExternalId;
         this.page = page;
         this.displaySize = displaySize;
         this.fromDateString = fromDateString;
         this.toDateString = toDateString;
+        this.email = email;
+        this.reference = reference;
+        this.amount = amount;
         this.searchDateParams = searchDateParams;
         this.paginationParams = paginationParams;
     }
@@ -45,6 +59,12 @@ public class PaymentViewSearchParams {
 
     public String getToDateString() { return toDateString; }
 
+    public String getEmail() { return email; }
+
+    public String getReference() { return reference; }
+
+    public Long getAmount() { return amount; }
+
     public PaginationParams getPaginationParams() {
         if (paginationParams == null) {
             return new PaginationParams(page, displaySize);
@@ -57,10 +77,19 @@ public class PaymentViewSearchParams {
     public String generateQuery() {
         StringBuilder sb = new StringBuilder("");
         if (searchDateParams.getFromDate() != null) {
-            sb.append("AND pr.created_date > :" + FROM_DATE_FIELD + " ");
+            sb.append(" AND pr.created_date > :" + FROM_DATE_FIELD);
         }
         if (searchDateParams.getToDate() != null) {
-            sb.append("AND pr.created_date < :" + TO_DATE_FIELD + " ");
+            sb.append(" AND pr.created_date < :" + TO_DATE_FIELD);
+        }
+        if (isNotBlank(email)) {
+            sb.append(" AND pa.email ILIKE :" + EMAIL_FIELD);
+        }
+        if (isNotBlank(reference)) {
+            sb.append(" AND pr.reference ILIKE :" + REFERENCE_FIELD);
+        }
+        if (amount != null) {
+            sb.append(" AND pr.amount = :" + AMOUNT_FIELD);
         }
         return sb.toString();
     }
@@ -76,6 +105,15 @@ public class PaymentViewSearchParams {
             }
             if (searchDateParams.getToDate() != null) {
                 queryMap.put(TO_DATE_FIELD, searchDateParams.getToDate());
+            }
+            if (isNotBlank(email)) {
+                queryMap.put(EMAIL_FIELD, LIKE_HOLDER.replace("LIKE", email));
+            }
+            if (isNotBlank(reference)) {
+                queryMap.put(REFERENCE_FIELD, LIKE_HOLDER.replace("LIKE", reference));
+            }
+            if (amount != null) {
+                queryMap.put(AMOUNT_FIELD, amount);
             }
         }
         return queryMap;

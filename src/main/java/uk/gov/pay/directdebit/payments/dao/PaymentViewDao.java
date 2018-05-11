@@ -37,7 +37,6 @@ public class PaymentViewDao {
     }
 
     public List<PaymentView> searchPaymentView(PaymentViewSearchParams searchParams) {
-        
         String searchExtraFields = searchParams.generateQuery();
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
