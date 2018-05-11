@@ -2,21 +2,16 @@ package uk.gov.pay.directdebit.payments.clients;
 
 
 import com.gocardless.resources.BankDetailsLookup;
-import com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme;
 import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
+import com.gocardless.resources.Mandate;
 import com.gocardless.resources.Payment;
 import com.gocardless.services.PaymentService;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
-import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import java.time.LocalDate;
 
 //thin abstraction over the client provided in the SDK
 public class GoCardlessClientWrapper {
@@ -27,21 +22,19 @@ public class GoCardlessClientWrapper {
         this.goCardlessClient = goCardlessClient;
     }
 
-    public GoCardlessCustomer createCustomer(String paymentRequestExternalId, Payer payer) {
-        Customer customer = goCardlessClient.customers()
+    public Customer createCustomer(String paymentRequestExternalId, Payer payer) {
+        return goCardlessClient.customers()
                 .create()
                 .withEmail(payer.getEmail())
                 .withGivenName(payer.getName())
                 .withFamilyName(payer.getName())
                 .withIdempotencyKey(paymentRequestExternalId)
                 .execute();
-        return new GoCardlessCustomer(
-                payer.getId(),
-                customer.getId());
     }
 
-    public GoCardlessCustomer createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer customer, String accountHolderName, String sortCode, String accountNumber){
-        CustomerBankAccount goCardlessCustomerBankAccount = goCardlessClient.customerBankAccounts()
+    public CustomerBankAccount createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer customer,
+                                                         String accountHolderName, String sortCode, String accountNumber){
+        return goCardlessClient.customerBankAccounts()
                 .create()
                 .withAccountHolderName(accountHolderName)
                 .withAccountNumber(accountNumber)
@@ -50,45 +43,31 @@ public class GoCardlessClientWrapper {
                 .withLinksCustomer(customer.getCustomerId())
                 .withIdempotencyKey(paymentRequestExternalId)
                 .execute();
-        customer.setCustomerBankAccountId(goCardlessCustomerBankAccount.getId());
-        return customer;
     }
 
-    public GoCardlessMandate createMandate(String paymentRequestExternalId, Mandate mandate, GoCardlessCustomer customer) {
-        com.gocardless.resources.Mandate goCardlessMandate = goCardlessClient.mandates()
+    public Mandate createMandate(String paymentRequestExternalId, GoCardlessCustomer customer) {
+        return goCardlessClient.mandates()
                 .create()
                 .withLinksCustomerBankAccount(customer.getCustomerBankAccountId())
                 .withIdempotencyKey(paymentRequestExternalId)
                 .execute();
-        return new GoCardlessMandate(
-                mandate.getId(),
-                goCardlessMandate.getId());
     }
 
-    public GoCardlessPayment createPayment(String paymentRequestExternalId, GoCardlessMandate mandate, Transaction transaction) {
-        Payment goCardlessPayment = goCardlessClient.payments()
+    public Payment createPayment(String paymentRequestExternalId, GoCardlessMandate mandate, Transaction transaction) {
+        return goCardlessClient.payments()
                 .create()
                 .withAmount(Math.toIntExact(transaction.getAmount()))
                 .withCurrency(PaymentService.PaymentCreateRequest.Currency.GBP)
                 .withLinksMandate(mandate.getGoCardlessMandateId())
                 .withIdempotencyKey(paymentRequestExternalId)
                 .execute();
-        return new GoCardlessPayment(
-                transaction.getId(),
-                goCardlessPayment.getId(),
-                LocalDate.parse(goCardlessPayment.getChargeDate()));
     }
 
-    public GoCardlessBankAccountLookup validate(BankAccountDetails bankAccountDetails) {
-        BankDetailsLookup bankDetailsLookup = goCardlessClient.bankDetailsLookups().create()
+    public BankDetailsLookup validate(BankAccountDetails bankAccountDetails) {
+        return goCardlessClient.bankDetailsLookups().create()
                 .withAccountNumber(bankAccountDetails.getAccountNumber())
                 .withBranchCode(bankAccountDetails.getSortCode())
                 .withCountryCode("GB")
                 .execute();
-
-        return new GoCardlessBankAccountLookup(
-                bankDetailsLookup.getBankName(),
-                bankDetailsLookup.getAvailableDebitSchemes().contains(AvailableDebitScheme.BACS)
-        );
     }
 }
