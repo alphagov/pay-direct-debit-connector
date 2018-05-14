@@ -18,6 +18,7 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
     private String name = RandomStringUtils.randomAlphabetic(7);
     private String email = generateEmail();
     private String sortCode = RandomStringUtils.randomNumeric(6);
+    private String bankName = RandomStringUtils.randomAlphabetic(15);
     private String accountNumber = RandomStringUtils.randomNumeric(8);
     private String accountNumberLastTwoDigits = accountNumber.substring(accountNumber.length() - 2);
     private boolean accountRequiresAuthorisation = true;
@@ -59,7 +60,12 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
         this.sortCode = sortCode;
         return this;
     }
-
+    
+    public PayerFixture withBankName(String bankName) {
+        this.bankName = bankName;
+        return this;
+    }
+    
     public PayerFixture withAccountNumberLastTwoDigits(String accountNumberLastTwoDigits) {
         this.accountNumberLastTwoDigits = accountNumberLastTwoDigits;
         return this;
@@ -135,9 +141,10 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
                                 "        bank_account_requires_authorisation,\n" +
                                 "        bank_account_number,\n" +
                                 "        bank_account_sort_code,\n" +
+                                "        bank_name,\n" +
                                 "        created_date\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         paymentRequestId,
                         externalId,
@@ -147,6 +154,7 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
                         accountRequiresAuthorisation,
                         accountNumber,
                         sortCode,
+                        bankName,
                         Timestamp.from(createdDate.toInstant())
                 )
         );
@@ -155,7 +163,7 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
 
     @Override
     public Payer toEntity() {
-        return new Payer(id, paymentRequestId, externalId, name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, createdDate);
+        return new Payer(id, paymentRequestId, externalId, name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, bankName, createdDate);
     }
 
     private String generateEmail() {

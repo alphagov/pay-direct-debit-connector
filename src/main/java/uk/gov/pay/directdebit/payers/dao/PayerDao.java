@@ -23,10 +23,10 @@ public interface PayerDao {
     @SqlQuery("SELECT * FROM payers p WHERE p.payment_request_id = :paymentRequestId LIMIT 1")
     Optional<Payer> findByPaymentRequestId(@Bind("paymentRequestId") Long paymentRequestId);
 
-    @SqlUpdate("INSERT INTO payers(payment_request_id, external_id, name, email, bank_account_number_last_two_digits, bank_account_requires_authorisation, bank_account_number, bank_account_sort_code, created_date ) VALUES (:paymentRequestId, :externalId, :name, :email, :accountNumberLastTwoDigits, :accountRequiresAuthorisation, :accountNumber, :sortCode, :createdDate)")
+    @SqlUpdate("INSERT INTO payers(payment_request_id, external_id, name, email, bank_account_number_last_two_digits, bank_account_requires_authorisation, bank_account_number, bank_account_sort_code, bank_name, created_date ) VALUES (:paymentRequestId, :externalId, :name, :email, :accountNumberLastTwoDigits, :accountRequiresAuthorisation, :accountNumber, :sortCode, :bankName, :createdDate)")
     @GetGeneratedKeys
     Long insert(@BindBean Payer payer);
 
-    @SqlUpdate("UPDATE payers p SET name = :name,  email = :email, bank_account_number_last_two_digits = :accountNumberLastTwoDigits, bank_account_requires_authorisation = :accountRequiresAuthorisation, bank_account_number = :accountNumber, bank_account_sort_code = :sortCode WHERE p.id = :id")
+    @SqlUpdate("UPDATE payers p SET name = :name,  email = :email, bank_account_number_last_two_digits = :accountNumberLastTwoDigits, bank_account_requires_authorisation = :accountRequiresAuthorisation, bank_account_number = :accountNumber, bank_account_sort_code = :sortCode, bank_name = :bankName WHERE p.id = :id")
     int updatePayerDetails(@Bind("id")Long id, @BindBean Payer payer);
 }
