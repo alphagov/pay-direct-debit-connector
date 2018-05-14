@@ -140,7 +140,7 @@ public class PaymentViewDaoIT {
 
     @Test
     public void shouldReturn2PaymentView_withEmailSet() {
-        List<String> emailList = Arrays.asList("jane@email.org", "joe.bog@email.org", "jane.bog@email.org", "joe@email.org");
+        List<String> emailList = Arrays.asList("jane@example.com", "joe.bog@example.com", "jane.bog@example.com", "joe@example.com");
         for (int i = 0; i < 4; i++) {
             PaymentRequestFixture paymentRequest = aPaymentRequestFixture()
                     .withGatewayAccountId(gatewayAccountFixture.getId())

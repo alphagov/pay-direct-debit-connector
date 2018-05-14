@@ -281,7 +281,7 @@ public class PaymentViewResourceITest {
 
     @Test
     public void shouldReturn7Records_whenEmailSet() {
-        List<String> emailList = Arrays.asList("john.doe@mail.org", "jane.doe@mail.org");
+        List<String> emailList = Arrays.asList("john.doe@example.com", "jane.doe@example.com");
         for (int i = 0; i < 15; i++) {
             PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
                     .withGatewayAccountId(testGatewayAccount.getId())
