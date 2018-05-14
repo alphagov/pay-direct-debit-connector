@@ -31,16 +31,17 @@ public class PaymentViewService {
     public PaymentViewResponse getPaymentViewResponse(PaymentViewSearchParams searchParams) {
         return gatewayAccountDao.findByExternalId(searchParams.getGatewayExternalId())
                 .map(gatewayAccount -> {
+                    PaymentViewSearchParams validatedSearchParams = paymentViewValidator.validateParams(searchParams);
                     List<PaymentViewListResponse> viewListResponse = 
                             getPaymentViewListResponse(paymentViewValidator.validateParams(searchParams));
                     if (viewListResponse.size() == 0) {
                         throw new RecordsNotFoundException(format("Found no records with page size %s and display_size %s",
-                                searchParams.getPage(),
-                                searchParams.getDisplaySize()));
+                                validatedSearchParams.getPage(),
+                                validatedSearchParams.getDisplaySize()));
                     }
-                    return new PaymentViewResponse(searchParams.getGatewayExternalId(),
-                            searchParams.getPage(),
-                            searchParams.getPaginationParams().getDisplaySize(),
+                    return new PaymentViewResponse(validatedSearchParams.getGatewayExternalId(),
+                            validatedSearchParams.getPage(),
+                            validatedSearchParams.getPaginationParams().getDisplaySize(),
                             viewListResponse);
 
                 })
