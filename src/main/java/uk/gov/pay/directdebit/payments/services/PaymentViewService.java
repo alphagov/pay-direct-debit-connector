@@ -51,7 +51,7 @@ public class PaymentViewService {
     private List<PaymentViewListResponse> getPaymentViewListResponse(PaymentViewSearchParams searchParams) {
         return paymentViewDao.searchPaymentView(searchParams)
                 .stream()
-                .map(paymentView -> populateResponseWith(paymentView))
+                .map(this::populateResponseWith)
                 .collect(Collectors.toList());
     }
 
