@@ -9,10 +9,11 @@ import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.common.exception.validation.InvalidFieldsException;
 import uk.gov.pay.directdebit.common.exception.validation.InvalidSizeFieldsException;
 import uk.gov.pay.directdebit.common.exception.validation.MissingMandatoryFieldsException;
+import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
 
-public class ConfirmDetailsRequestValidatorTest {
+public class BankAccountDetailsValidatorTest {
 
-    private ConfirmDetailsRequestValidator confirmDetailsRequestValidator = new ConfirmDetailsRequestValidator();
+    private BankAccountDetailsValidator bankAccountDetailsValidator = new BankAccountDetailsValidator();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -21,7 +22,7 @@ public class ConfirmDetailsRequestValidatorTest {
     public void shouldNotThrowExceptionIfRequestIsValid() {
         Map<String, String> request = ImmutableMap
                 .of("sort_code", "123456", "account_number", "12345678");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
@@ -29,167 +30,167 @@ public class ConfirmDetailsRequestValidatorTest {
         Map<String, String> request = new HashMap<>();
         thrown.expect(MissingMandatoryFieldsException.class);
         thrown.expectMessage("Field(s) missing: [" +
-                ConfirmDetailsRequestValidator.SORT_CODE_KEY + ", " +
-                ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY +
+                BankAccountDetailsValidator.SORT_CODE_KEY + ", " +
+                BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowMissingMandatoryFieldsExceptionIfSortCodeFieldIsMissing() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "123456");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "123456");
         thrown.expect(MissingMandatoryFieldsException.class);
         thrown.expectMessage("Field(s) missing: [" +
-                ConfirmDetailsRequestValidator.SORT_CODE_KEY +
+                BankAccountDetailsValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowInvalidSizeFieldsExceptionIfSortCodeFieldIsEmptyString() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "123456");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "");
         thrown.expect(InvalidSizeFieldsException.class);
         thrown.expectMessage("The size of a field(s) is invalid: [" +
-                ConfirmDetailsRequestValidator.SORT_CODE_KEY +
+                BankAccountDetailsValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowInvalidFieldsExceptionIfSortCodeFieldIsNull() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, null);
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "123456");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, null);
         thrown.expect(InvalidFieldsException.class);
         thrown.expectMessage("Field(s) are invalid: [" +
-                ConfirmDetailsRequestValidator.SORT_CODE_KEY +
+                BankAccountDetailsValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowInvalidFieldsExceptionIfSortCodeFieldIsNonNumeric() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "123abc");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "123456");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "123abc");
         thrown.expect(InvalidFieldsException.class);
         thrown.expectMessage("Field(s) are invalid: [" +
-                ConfirmDetailsRequestValidator.SORT_CODE_KEY +
+                BankAccountDetailsValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowInvalidSizeFieldsExceptionIfSortCodeFieldHasInvalidSize() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "123");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "123456");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "123");
         thrown.expect(InvalidSizeFieldsException.class);
         thrown.expectMessage("The size of a field(s) is invalid: [" +
-                ConfirmDetailsRequestValidator.SORT_CODE_KEY +
+                BankAccountDetailsValidator.SORT_CODE_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldNotThrowExceptionIfSortCodeStartsWithZeros() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "012345");
-        confirmDetailsRequestValidator.validate(request);
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "123456");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "012345");
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowMissingMandatoryFieldsExceptionIfAccountNumberFieldIsMissing() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "123456");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "123456");
         thrown.expect(MissingMandatoryFieldsException.class);
         thrown.expectMessage("Field(s) missing: [" +
-                ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY +
+                BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowInvalidSizeFieldsExceptionIfAccountNumberFieldIsEmptyString() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "123456");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "");
         thrown.expect(InvalidSizeFieldsException.class);
         thrown.expectMessage("The size of a field(s) is invalid: [" +
-                ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY +
+                BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowInvalidFieldsExceptionIfAccountNumberFieldIsNull() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, null);
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "123456");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, null);
         thrown.expect(InvalidFieldsException.class);
         thrown.expectMessage("Field(s) are invalid: [" +
-                ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY +
+                BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowInvalidFieldsExceptionIfAccountNumberFieldIsNonNumeric() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "12345abc");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "123456");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "12345abc");
         thrown.expect(InvalidFieldsException.class);
         thrown.expectMessage("Field(s) are invalid: [" +
-                ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY +
+                BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowInvalidSizeFieldsExceptionIfAccountNumberFieldHasInvalidSizeBelowMinimum() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "12345");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "123456");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "12345");
         thrown.expect(InvalidSizeFieldsException.class);
         thrown.expectMessage("The size of a field(s) is invalid: [" +
-                ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY +
+                BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldThrowInvalidSizeFieldsExceptionIfAccountNumberFieldHasInvalidSizeAboveMaximum() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "123456780");
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "123456");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "123456780");
         thrown.expect(InvalidSizeFieldsException.class);
         thrown.expectMessage("The size of a field(s) is invalid: [" +
-                ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY +
+                BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY +
                 "]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
-        confirmDetailsRequestValidator.validate(request);
+        bankAccountDetailsValidator.validate(request);
     }
 
     @Test
     public void shouldNotThrowExceptionIfAccountNumberStartsWithZeros() {
         Map<String, String> request = new HashMap<>();
-        request.put(ConfirmDetailsRequestValidator.SORT_CODE_KEY, "123456");
-        request.put(ConfirmDetailsRequestValidator.ACCOUNT_NUMBER_KEY, "01234567");
-        confirmDetailsRequestValidator.validate(request);
+        request.put(BankAccountDetailsValidator.SORT_CODE_KEY, "123456");
+        request.put(BankAccountDetailsValidator.ACCOUNT_NUMBER_KEY, "01234567");
+        bankAccountDetailsValidator.validate(request);
     }
 }

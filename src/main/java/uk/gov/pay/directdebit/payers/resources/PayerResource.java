@@ -1,9 +1,11 @@
 package uk.gov.pay.directdebit.payers.resources;
 
+import javax.ws.rs.POST;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.util.URIBuilder;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.api.CreatePayerResponse;
 import uk.gov.pay.directdebit.payers.api.CreatePayerValidator;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -12,7 +14,6 @@ import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -55,4 +56,18 @@ public class PayerResource {
         return Response.created(newPayerLocation).entity(createPayerResponse).build();
     }
 
+    @POST
+    @Path("/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers/bank-account/validate")
+    @Produces(APPLICATION_JSON)
+    @Consumes(APPLICATION_JSON)
+    public Response validateBankAccount(
+            @PathParam("accountId") GatewayAccount gatewayAccount, 
+            @PathParam("paymentRequestExternalId") String paymentRequestExternalId, 
+            Map<String, String> bankAccountDetails) {
+        LOGGER.info("Validating bank account details for payment with id: {}", paymentRequestExternalId);
+        DirectDebitPaymentProvider payerService = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
+        BankAccountValidationResponse response = payerService.validate(paymentRequestExternalId, bankAccountDetails);
+        LOGGER.info("Bank account details are valid: {}, payment request with id: {}", response.isValid(), paymentRequestExternalId);
+        return Response.ok(response).build();
+    }
 }

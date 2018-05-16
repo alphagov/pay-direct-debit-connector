@@ -42,9 +42,11 @@ public class PayerServiceTest {
 
     private final String SORT_CODE = "123456";
     private final String ACCOUNT_NUMBER = "12345678";
+    private final String BANK_NAME = "bank name";
     private final Map<String, String> createPayerRequest = ImmutableMap.of(
             "sort_code", SORT_CODE,
-            "account_number", ACCOUNT_NUMBER
+            "account_number", ACCOUNT_NUMBER,
+            "bank_name", BANK_NAME
     );
     private String paymentRequestExternalId = "sdkfhsdkjfhjdks";
 

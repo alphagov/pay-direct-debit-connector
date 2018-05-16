@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.mandate.api;
+package uk.gov.pay.directdebit.common.validation;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -7,7 +7,7 @@ import uk.gov.pay.directdebit.common.validation.ApiValidation;
 import uk.gov.pay.directdebit.common.validation.FieldSize;
 import uk.gov.pay.directdebit.common.validation.FieldSizeValidator;
 
-public class ConfirmDetailsRequestValidator extends ApiValidation {
+public class BankAccountDetailsValidator extends ApiValidation {
 
     public final static String SORT_CODE_KEY = "sort_code";
     public final static String ACCOUNT_NUMBER_KEY = "account_number";
@@ -26,7 +26,7 @@ public class ConfirmDetailsRequestValidator extends ApiValidation {
                     .put(ACCOUNT_NUMBER_KEY, FieldSizeValidator.ACCOUNT_NUMBER.getFieldSize())
                     .build();
 
-    public ConfirmDetailsRequestValidator() {
+    public BankAccountDetailsValidator() {
         super(requiredFields, fieldSizes, validators);
     }
 }

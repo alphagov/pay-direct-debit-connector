@@ -15,6 +15,7 @@ public class PayerParser {
     public Payer parse(Map<String, String> createPayerMap, Transaction transaction) {
         String accountNumber = createPayerMap.get("account_number");
         String sortCode = createPayerMap.get("sort_code");
+        String bankName = createPayerMap.getOrDefault("bank_name", null);
         return new Payer(
                 transaction.getPaymentRequest().getId(),
                 createPayerMap.get("account_holder_name"),
@@ -22,6 +23,7 @@ public class PayerParser {
                 encrypt(sortCode),
                 encrypt(accountNumber),
                 accountNumber.substring(accountNumber.length()-2),
+                bankName,
                 Boolean.parseBoolean(createPayerMap.get("requires_authorisation")));
     }
 }

@@ -32,6 +32,7 @@ public interface PaymentRequestDao {
             "  y.bank_account_requires_authorisation AS payer_bank_account_requires_authorisation," +
             "  y.bank_account_number AS payer_bank_account_number," +
             "  y.bank_account_sort_code AS payer_bank_account_sort_code," +
+            "  y.bank_name AS payer_bank_name," +
             "  y.created_date AS payer_created_date" +
             " FROM payment_requests p LEFT JOIN payers y ON y.payment_request_id = p.id" +
             " WHERE p.id = :id")
@@ -54,6 +55,7 @@ public interface PaymentRequestDao {
             "  y.bank_account_number_last_two_digits AS payer_bank_account_number_last_two_digits," +
             "  y.bank_account_requires_authorisation AS payer_bank_account_requires_authorisation," +
             "  y.bank_account_number AS payer_bank_account_number," +
+            "  y.bank_name AS payer_bank_name," +
             "  y.bank_account_sort_code AS payer_bank_account_sort_code," +
             "  y.created_date AS payer_created_date," +
             "  g.id AS gateway_account_id," +

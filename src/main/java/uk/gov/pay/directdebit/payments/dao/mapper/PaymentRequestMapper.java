@@ -28,6 +28,7 @@ public class PaymentRequestMapper implements RowMapper<PaymentRequest> {
     private static final String PAYER_BANK_ACCOUNT_REQUIRES_AUTHORISATION_COLUMN = "payer_bank_account_requires_authorisation";
     private static final String PAYER_BANK_ACCOUNT_NUMBER_COLUMN = "payer_bank_account_number";
     private static final String PAYER_BANK_ACCOUNT_SORT_CODE_COLUMN = "payer_bank_account_sort_code";
+    private static final String PAYER_BANK_NAME_COLUMN = "payer_bank_name";
     private static final String PAYER_CREATED_DATE_COLUMN= "payer_created_date";
 
     @Override
@@ -44,6 +45,7 @@ public class PaymentRequestMapper implements RowMapper<PaymentRequest> {
                     resultSet.getString(PAYER_BANK_ACCOUNT_NUMBER_COLUMN),
                     resultSet.getString(PAYER_BANK_ACCOUNT_NUMBER_LAST_TWO_DIGITS_COLUMN),
                     resultSet.getBoolean(PAYER_BANK_ACCOUNT_REQUIRES_AUTHORISATION_COLUMN),
+                    resultSet.getString(PAYER_BANK_NAME_COLUMN),
                     ZonedDateTime.ofInstant(resultSet.getTimestamp(PAYER_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC));
         }
         return new PaymentRequest(

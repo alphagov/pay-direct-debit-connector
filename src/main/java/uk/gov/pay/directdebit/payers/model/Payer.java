@@ -13,11 +13,12 @@ public class Payer {
     private String email;
     private String sortCode;
     private String accountNumber;
+    private String bankName;
     private String accountNumberLastTwoDigits;
     private boolean accountRequiresAuthorisation;
     private ZonedDateTime createdDate;
 
-    public Payer(Long id, Long paymentRequestId, String externalId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation, ZonedDateTime createdDate) {
+    public Payer(Long id, Long paymentRequestId, String externalId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation, String bankName, ZonedDateTime createdDate) {
         this.id = id;
         this.paymentRequestId = paymentRequestId;
         this.externalId = externalId;
@@ -27,11 +28,12 @@ public class Payer {
         this.accountRequiresAuthorisation = accountRequiresAuthorisation;
         this.sortCode = sortCode;
         this.accountNumber = accountNumber;
+        this.bankName = bankName;
         this.createdDate = createdDate;
     }
 
-    public Payer(Long paymentRequestId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation) {
-        this(null, paymentRequestId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, ZonedDateTime.now(ZoneOffset.UTC));
+    public Payer(Long paymentRequestId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, String bankName, boolean accountRequiresAuthorisation) {
+        this(null, paymentRequestId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, bankName, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     public void setId(Long id) {
@@ -78,6 +80,10 @@ public class Payer {
         return createdDate;
     }
 
+    public String getBankName() {
+        return bankName;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -116,6 +122,9 @@ public class Payer {
         if (!accountNumber.equals(payer.accountNumber)) {
             return false;
         }
+        if (!bankName.equals(payer.bankName)) {
+            return false;
+        }
         return createdDate.equals(payer.createdDate);
     }
 
@@ -130,6 +139,7 @@ public class Payer {
         result = 31 * result + accountNumberLastTwoDigits.hashCode();
         result = 31 * result + (accountRequiresAuthorisation ? 1 : 0);
         result = 31 * result + accountNumber.hashCode();
+        result = 31 * result + bankName.hashCode();
         result = 31 * result + createdDate.hashCode();
         return result;
     }

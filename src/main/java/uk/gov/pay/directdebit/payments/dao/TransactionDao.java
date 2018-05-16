@@ -47,6 +47,7 @@ public interface TransactionDao {
             "  y.bank_account_requires_authorisation AS payer_bank_account_requires_authorisation," +
             "  y.bank_account_number AS payer_bank_account_number," +
             "  y.bank_account_sort_code AS payer_bank_account_sort_code," +
+            "  y.bank_name AS payer_bank_name," +
             "  y.created_date AS payer_created_date" +
             " FROM transactions t " + 
             "  JOIN payment_requests p ON t.payment_request_id = p.id" +

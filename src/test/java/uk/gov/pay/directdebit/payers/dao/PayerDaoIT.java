@@ -26,6 +26,7 @@ import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 public class PayerDaoIT {
     private static final String PAYER_NAME = "payer name";
     private static final String ACCOUNT_NUMBER = "12345678";
+    private static final String BANK_NAME = "pay bank";
     private static final String SORT_CODE = "654321";
     private static final String ACCOUNT_NUMBER_LAST_TWO_DIGITS = "78";
     private static final boolean ACCOUNT_REQUIRES_AUTHORISATION = false;
@@ -52,6 +53,7 @@ public class PayerDaoIT {
                 .withName(PAYER_NAME)
                 .withAccountNumber(ACCOUNT_NUMBER)
                 .withSortCode(SORT_CODE)
+                .withBankName(BANK_NAME)
                 .withAccountNumberLastTwoDigits(ACCOUNT_NUMBER_LAST_TWO_DIGITS)
                 .withAccountRequiresAuthorisation(ACCOUNT_REQUIRES_AUTHORISATION)
                 .withCreatedDate(CREATED_DATE);
@@ -70,6 +72,7 @@ public class PayerDaoIT {
         assertThat(foundPayer.get("external_id"), is(EXTERNAL_ID));
         assertThat(foundPayer.get("name"), is(PAYER_NAME));
         assertThat(foundPayer.get("email"), is(EMAIL));
+        assertThat(foundPayer.get("bank_name"), is(BANK_NAME));
         assertThat(foundPayer.get("bank_account_number_last_two_digits"), is(ACCOUNT_NUMBER_LAST_TWO_DIGITS));
         assertThat(foundPayer.get("bank_account_requires_authorisation"), is(ACCOUNT_REQUIRES_AUTHORISATION));
         assertThat(foundPayer.get("bank_account_number"), is(ACCOUNT_NUMBER));
@@ -85,6 +88,7 @@ public class PayerDaoIT {
         assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
         assertThat(payer.getExternalId(), is(EXTERNAL_ID));
         assertThat(payer.getName(), is(PAYER_NAME));
+        assertThat(payer.getBankName(), is(BANK_NAME));
         assertThat(payer.getEmail(), is(EMAIL));
         assertThat(payer.getAccountNumberLastTwoDigits(), is(ACCOUNT_NUMBER_LAST_TWO_DIGITS));
         assertThat(payer.getAccountRequiresAuthorisation(), is(ACCOUNT_REQUIRES_AUTHORISATION));
@@ -106,6 +110,7 @@ public class PayerDaoIT {
         assertThat(payer.getExternalId(), is(EXTERNAL_ID));
         assertThat(payer.getName(), is(PAYER_NAME));
         assertThat(payer.getEmail(), is(EMAIL));
+        assertThat(payer.getBankName(), is(BANK_NAME));
         assertThat(payer.getAccountNumberLastTwoDigits(), is(ACCOUNT_NUMBER_LAST_TWO_DIGITS));
         assertThat(payer.getAccountRequiresAuthorisation(), is(ACCOUNT_REQUIRES_AUTHORISATION));
         assertThat(payer.getAccountNumber(), is(ACCOUNT_NUMBER));
@@ -126,6 +131,7 @@ public class PayerDaoIT {
         assertThat(payer.getExternalId(), is(EXTERNAL_ID));
         assertThat(payer.getName(), is(PAYER_NAME));
         assertThat(payer.getEmail(), is(EMAIL));
+        assertThat(payer.getBankName(), is(BANK_NAME));
         assertThat(payer.getAccountNumberLastTwoDigits(), is(ACCOUNT_NUMBER_LAST_TWO_DIGITS));
         assertThat(payer.getAccountRequiresAuthorisation(), is(ACCOUNT_REQUIRES_AUTHORISATION));
         assertThat(payer.getAccountNumber(), is(ACCOUNT_NUMBER));
@@ -144,6 +150,7 @@ public class PayerDaoIT {
         String newAccountNumber = "87654321";
         String newSortCode = "123456";
         String newEmail = "aaa@bbb.test";
+        String newBankName = "another bank";
         boolean newRequiresAuthorisation = true;
         Payer newPayerDetails = PayerFixture
                 .aPayerFixture()
@@ -151,6 +158,7 @@ public class PayerDaoIT {
                 .withAccountNumber(newAccountNumber)
                 .withSortCode(newSortCode)
                 .withEmail(newEmail)
+                .withBankName(newBankName)
                 .withAccountRequiresAuthorisation(newRequiresAuthorisation)
                 .withAccountNumberLastTwoDigits("21")
                 .withExternalId("this_should_not_be_updated")
@@ -166,6 +174,7 @@ public class PayerDaoIT {
         assertThat(payerAfterUpdate.get("bank_account_requires_authorisation"), is(newRequiresAuthorisation));
         assertThat(payerAfterUpdate.get("bank_account_number"), is(newAccountNumber));
         assertThat(payerAfterUpdate.get("bank_account_sort_code"), is(newSortCode));
+        assertThat(payerAfterUpdate.get("bank_name"), is(newBankName));
 
         // These properties should not be updated
         assertThat(payerAfterUpdate.get("id"), is(testPayer.getId()));
