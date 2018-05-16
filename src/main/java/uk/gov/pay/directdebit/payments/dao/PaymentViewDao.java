@@ -40,8 +40,7 @@ public class PaymentViewDao {
         String searchExtraFields = searchParams.generateQuery();
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
-            Map<String, Object> queryMap = searchParams.getQueryMap();
-            queryMap.keySet().forEach(key -> query.bind(key, queryMap.get(key)));
+            searchParams.getQueryMap().forEach(query::bind);
             return query
                     .map(new PaymentViewMapper())
                     .list();
