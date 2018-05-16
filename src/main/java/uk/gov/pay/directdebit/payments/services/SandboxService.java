@@ -54,8 +54,10 @@ public class SandboxService implements DirectDebitPaymentProvider {
         try {
              bankAccountDetailsValidator.validate(bankAccountDetailsPayload);
         } catch (ValidationException exception) {
+            LOGGER.warn("Bank details are invalid, payment with id: {}", paymentRequestExternalId);
             return new BankAccountValidationResponse(false);
         }
+        LOGGER.info("Bank details are valid, payment with id: {}", paymentRequestExternalId);
         return new BankAccountValidationResponse(true, "Sandbox Bank");
     }
 }

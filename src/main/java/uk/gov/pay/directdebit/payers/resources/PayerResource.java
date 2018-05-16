@@ -64,9 +64,10 @@ public class PayerResource {
             @PathParam("accountId") GatewayAccount gatewayAccount, 
             @PathParam("paymentRequestExternalId") String paymentRequestExternalId, 
             Map<String, String> bankAccountDetails) {
-        LOGGER.info("Validating bank account details for payment with external id {}", paymentRequestExternalId);
+        LOGGER.info("Validating bank account details for payment with id: {}", paymentRequestExternalId);
         DirectDebitPaymentProvider payerService = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
         BankAccountValidationResponse response = payerService.validate(paymentRequestExternalId, bankAccountDetails);
+        LOGGER.info("Bank account details are valid: {}, payment request with id: {}", response.isValid(), paymentRequestExternalId);
         return Response.ok(response).build();
     }
 }
