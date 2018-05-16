@@ -211,4 +211,25 @@ public class PaymentViewDaoIT {
         assertThat(viewList.size(), is(1));
         assertThat(viewList.get(0).getReference(), is("ref2"));
     }
+
+    @Test
+    public void shouldReturnOnePaymentViewWhenPaymentCreated() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            PaymentRequestFixture paymentRequest = aPaymentRequestFixture()
+                    .withGatewayAccountId(gatewayAccountFixture.getId())
+                    .withReference("important reference " + i)
+                    .withDescription("description " + i)
+                    .insert(testContext.getJdbi());
+            
+            aTransactionFixture()
+                    .withPaymentRequestId(paymentRequest.getId())
+                    .withGatewayAccountExternalId(gatewayAccountFixture.getExternalId())
+                    .withAmount(1000L + i)
+                    .insert(testContext.getJdbi());
+        }
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(),
+                2L, 100L, null, null, null, null, null, null, searchDateParams);
+        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        assertThat(viewList.size(), is(1));
+    }
 }

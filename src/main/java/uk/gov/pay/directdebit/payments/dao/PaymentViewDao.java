@@ -24,7 +24,7 @@ public class PaymentViewDao {
             "pa.email AS email, " +
             "tr.state AS state " +
             "FROM payment_requests pr " +
-            "JOIN payers pa ON pr.id = pa.payment_request_id " +
+            "LEFT JOIN payers pa ON pr.id = pa.payment_request_id " +
             "JOIN transactions tr ON pr.id = tr.payment_request_id " +
             "JOIN gateway_accounts ga ON ga.id = pr.gateway_account_id " +
             "WHERE ga.external_id = :gatewayAccountExternalId " +
