@@ -90,8 +90,13 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     public BankAccountValidationResponse validate(String paymentRequestExternalId, Map<String, String> bankAccountDetailsRequest) {
         BankAccountDetails bankAccountDetails = bankAccountDetailsParser.parse(bankAccountDetailsRequest);
         LOGGER.info("Attempting to call gocardless to validate a bank account, payment request id: {}", paymentRequestExternalId);
-        GoCardlessBankAccountLookup lookup = goCardlessClientFacade.validate(bankAccountDetails);
-        return new BankAccountValidationResponse(lookup.isBacs(), lookup.getBankName());
+        try {
+            GoCardlessBankAccountLookup lookup = goCardlessClientFacade.validate(bankAccountDetails);
+            return new BankAccountValidationResponse(lookup.isBacs(), lookup.getBankName());
+        } catch (Exception exc) {
+            LOGGER.warn("Exception while validating bank account details in gocardless, message: {}", exc.getMessage());
+            return new BankAccountValidationResponse(false);
+        }
     }
 
     

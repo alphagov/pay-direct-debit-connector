@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import com.gocardless.errors.GoCardlessApiException;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Rule;
@@ -243,6 +244,22 @@ public class GoCardlessServiceTest {
         GoCardlessBankAccountLookup goCardlessBankAccountLookup = new GoCardlessBankAccountLookup(null, false);
         when(mockedBankAccountDetailsParser.parse(bankAccountDetailsRequest)).thenReturn(bankAccountDetails);
         when(mockedGoCardlessClientFacade.validate(bankAccountDetails)).thenReturn(goCardlessBankAccountLookup);
+        BankAccountValidationResponse response = service.validate(PAYMENT_REQUEST_EXTERNAL_ID, bankAccountDetailsRequest);
+        assertThat(response.isValid(), is(false));
+        assertThat(response.getBankName(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldValidateBankAccountDetails_ifExceptionIsThrownFromGC() {
+        String accountNumber = "12345678";
+        String sortCode = "123467";
+        BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
+        Map<String, String> bankAccountDetailsRequest = ImmutableMap.of(
+                "account_number", accountNumber,
+                "sort_code", sortCode
+        );
+        when(mockedBankAccountDetailsParser.parse(bankAccountDetailsRequest)).thenReturn(bankAccountDetails);
+        when(mockedGoCardlessClientFacade.validate(bankAccountDetails)).thenThrow(new RuntimeException());
         BankAccountValidationResponse response = service.validate(PAYMENT_REQUEST_EXTERNAL_ID, bankAccountDetailsRequest);
         assertThat(response.isValid(), is(false));
         assertThat(response.getBankName(), is(nullValue()));
