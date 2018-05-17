@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -40,12 +41,12 @@ import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Supporte
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING_DIRECT_DEBIT_PAYMENT;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
 
@@ -216,9 +217,26 @@ public class TransactionServiceTest {
         assertThat(newTransaction.getAmount(), is(transaction.getAmount()));
         assertThat(newTransaction.getType(), is(transaction.getType()));
         assertThat(newTransaction.getState(), is(SUBMITTING_DIRECT_DEBIT_PAYMENT));
-        verify(mockedPaymentRequestEventService).registerDirectDebitConfirmedEventFor(newTransaction);
+        verify(mockedPaymentRequestEventService, times(1)).registerDirectDebitConfirmedEventFor(newTransaction);
     }
-    
+
+    @Test
+    public void shouldThrowWhenSubmittingTheSameDetailsSeveralTimes_andCreateOnlyOneEvent_whenConfirmingDirectDebitDetails() {
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .toEntity();
+        when(mockedTransactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(transaction.getPaymentRequest().getExternalId(), gatewayAccountFixture.getExternalId()))
+                .thenReturn(Optional.of(transaction));
+        // first call with confirmation details
+        service.confirmedDirectDebitDetailsFor(gatewayAccountFixture.getExternalId(), transaction.getPaymentRequest().getExternalId());
+        thrown.expect(InvalidStateTransitionException.class);
+        thrown.expectMessage("Transition DIRECT_DEBIT_DETAILS_CONFIRMED from state SUBMITTING_DIRECT_DEBIT_PAYMENT is not valid");
+        // second call with same details that should throw and prevent adding a new event
+        Transaction newTransaction = service.confirmedDirectDebitDetailsFor(gatewayAccountFixture.getExternalId(), transaction.getPaymentRequest().getExternalId());
+        assertThat(newTransaction.getState(), is(SUBMITTING_DIRECT_DEBIT_PAYMENT));
+        verify(mockedPaymentRequestEventService, times(1)).registerDirectDebitConfirmedEventFor(newTransaction);
+    }
 
     @Test
     public void findTransactionForToken_shouldNotReturnATransactionIfNoTransactionExistsForToken() {

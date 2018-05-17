@@ -105,8 +105,9 @@ public class TransactionService {
 
     public Transaction confirmedDirectDebitDetailsFor(String accountExternalId, String paymentRequestExternalId) {
         Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
+        transaction = updateStateFor(transaction, DIRECT_DEBIT_DETAILS_CONFIRMED);
         paymentRequestEventService.registerDirectDebitConfirmedEventFor(transaction);
-        return updateStateFor(transaction, DIRECT_DEBIT_DETAILS_CONFIRMED);
+        return transaction;
     }
 
     public Transaction payerCreatedFor(Transaction transaction) {
@@ -165,7 +166,7 @@ public class TransactionService {
         PaymentState newState = getStates().getNextStateForEvent(transaction.getState(),
                 event);
         transactionDao.updateState(transaction.getId(), newState);
-        LOGGER.info("Updating transaction {} - from {} to {}",
+        LOGGER.info("Updated transaction {} - from {} to {}",
                 transaction.getPaymentRequest().getExternalId(),
                 transaction.getState(),
                 newState);
