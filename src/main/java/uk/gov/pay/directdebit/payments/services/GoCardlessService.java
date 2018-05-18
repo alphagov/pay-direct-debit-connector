@@ -83,7 +83,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         GoCardlessMandate goCardlessMandate = createMandate(paymentRequestExternalId, confirmationDetails.getMandate());
         GoCardlessPayment payment = createPayment(paymentRequestExternalId, confirmationDetails.getTransaction(), goCardlessMandate);
 
-        transactionService.paymentSubmittedToProviderFor(confirmationDetails.getTransaction(), payer, payment.getChargeDate());
+        transactionService.paymentSubmittedToProviderFor(confirmationDetails.getTransaction(), payer, confirmationDetails.getMandate(), payment.getChargeDate());
     }
 
     @Override

@@ -9,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -248,12 +250,12 @@ public class TransactionServiceTest {
 
     @Test
     public void paymentSubmittedToProvider_shouldUpdateTransactionAsPending_andRegisterAPaymentSubmittedEvent() {
-
+        Mandate mandate = MandateFixture.aMandateFixture().toEntity();
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
                 .withState(SUBMITTING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
-        service.paymentSubmittedToProviderFor(transaction, payer, LocalDate.now());
+        service.paymentSubmittedToProviderFor(transaction, payer, mandate, LocalDate.now());
 
         verify(mockedTransactionDao).updateState(transaction.getId(), PENDING_DIRECT_DEBIT_PAYMENT);
         verify(mockedPaymentRequestEventService).registerPaymentSubmittedToProviderEventFor(transaction);
@@ -313,7 +315,7 @@ public class TransactionServiceTest {
                 .withState(PENDING_DIRECT_DEBIT_PAYMENT)
                 .toEntity();
 
-        service.paymentFailedWithoutEmailFor(transaction, payer);
+        service.paymentFailedWithoutEmailFor(transaction);
 
         verify(mockedUserNotificationService, times(0)).sendPaymentFailedEmailFor(transaction, payer);
         verify(mockedTransactionDao).updateState(transaction.getId(), FAILED);
