@@ -1,9 +1,25 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
+import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.chargeCreated;
+import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
@@ -14,22 +30,6 @@ import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import javax.inject.Inject;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.chargeCreated;
-import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
 
 public class TransactionService {
 
@@ -73,8 +73,7 @@ public class TransactionService {
     public List<Transaction> findAllByPaymentStateAndProvider(PaymentState paymentState, PaymentProvider paymentProvider) {
         return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);
     }
-
-
+    
     public Optional<Transaction> findTransactionForToken(String token) {
         return transactionDao
                 .findByTokenId(token).map(charge -> {
@@ -119,8 +118,8 @@ public class TransactionService {
         return paymentRequestEventService.registerPayerEditedEventFor(transaction);
     }
 
-    public PaymentRequestEvent paymentSubmittedToProviderFor(Transaction transaction, Payer payer, LocalDate earliestChargeDate) {
-        userNotificationService.sendPaymentConfirmedEmailFor(transaction, payer, earliestChargeDate);
+    public PaymentRequestEvent paymentSubmittedToProviderFor(Transaction transaction, Payer payer, Mandate mandate, LocalDate earliestChargeDate) {
+        userNotificationService.sendPaymentConfirmedEmailFor(transaction, payer, mandate, earliestChargeDate);
         Transaction updatedTransaction = updateStateFor(transaction,
                 PAYMENT_SUBMITTED_TO_PROVIDER);
         return paymentRequestEventService.registerPaymentSubmittedToProviderEventFor(updatedTransaction);
@@ -128,14 +127,14 @@ public class TransactionService {
 
     public PaymentRequestEvent paymentFailedWithEmailFor(Transaction transaction, Payer payer) {
         userNotificationService.sendPaymentFailedEmailFor(transaction, payer);
-        return paymentFailedFor(transaction, payer);
+        return paymentFailedFor(transaction);
     }
 
-    public PaymentRequestEvent paymentFailedWithoutEmailFor(Transaction transaction, Payer payer) {
-        return paymentFailedFor(transaction, payer);
+    public PaymentRequestEvent paymentFailedWithoutEmailFor(Transaction transaction) {
+        return paymentFailedFor(transaction);
     }
 
-    private PaymentRequestEvent paymentFailedFor(Transaction transaction, Payer payer) {
+    private PaymentRequestEvent paymentFailedFor(Transaction transaction) {
         Transaction updatedTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_FAILED);
         return paymentRequestEventService.registerPaymentFailedEventFor(updatedTransaction);
     }

@@ -173,11 +173,11 @@ public class GoCardlessMandateHandlerTest {
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
         when(mockedMandateService.mandateFailedFor(transaction, payer)).thenReturn(paymentRequestEvent);
-        when(mockedTransactionService.paymentFailedWithoutEmailFor(transaction, payer)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.paymentFailedWithoutEmailFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(mockedTransactionService).paymentFailedWithoutEmailFor(transaction, payer);
+        verify(mockedTransactionService).paymentFailedWithoutEmailFor(transaction);
         verify(mockedMandateService).mandateFailedFor(transaction, payer);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
@@ -193,11 +193,11 @@ public class GoCardlessMandateHandlerTest {
         when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
         when(mockedTransactionService.findPaymentSubmittedEventFor(transaction)).thenReturn(Optional.empty());
         when(mockedMandateService.mandateCancelledFor(transaction, payer)).thenReturn(paymentRequestEvent);
-        when(mockedTransactionService.paymentFailedWithoutEmailFor(transaction, payer)).thenReturn(paymentRequestEvent);
+        when(mockedTransactionService.paymentFailedWithoutEmailFor(transaction)).thenReturn(paymentRequestEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(mockedTransactionService).paymentFailedWithoutEmailFor(transaction, payer);
+        verify(mockedTransactionService).paymentFailedWithoutEmailFor(transaction);
         verify(mockedMandateService).mandateCancelledFor(transaction, payer);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());
@@ -216,7 +216,7 @@ public class GoCardlessMandateHandlerTest {
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(mockedTransactionService, never()).paymentFailedWithoutEmailFor(transaction, payer);
+        verify(mockedTransactionService, never()).paymentFailedWithoutEmailFor(transaction);
         verify(mockedMandateService).mandateCancelledFor(transaction, payer);
         verify(goCardlessEvent).setPaymentRequestEventId(paymentRequestEvent.getId());
         verify(mockedGoCardlessService).storeEvent(geCaptor.capture());

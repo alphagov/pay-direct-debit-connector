@@ -71,7 +71,7 @@ public class SandboxServiceTest {
         when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
 
         service.confirm(paymentRequestExternalId, gatewayAccount, details);
-        verify(mockedTransactionService).paymentSubmittedToProviderFor(transaction, payer, LocalDate.now().plusDays(4));
+        verify(mockedTransactionService).paymentSubmittedToProviderFor(transaction, payer, confirmationDetails.getMandate(), LocalDate.now().plusDays(4));
     }
 
     @Test

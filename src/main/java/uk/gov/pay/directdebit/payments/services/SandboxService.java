@@ -45,7 +45,7 @@ public class SandboxService implements DirectDebitPaymentProvider {
         LOGGER.info("Confirming payment for SANDBOX, payment with id: {}", paymentRequestExternalId);
         ConfirmationDetails confirmationDetails = paymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId, confirmDetailsRequest);
         Payer payer = payerService.getPayerFor(confirmationDetails.getTransaction());
-        transactionService.paymentSubmittedToProviderFor(confirmationDetails.getTransaction(), payer, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
+        transactionService.paymentSubmittedToProviderFor(confirmationDetails.getTransaction(), payer, confirmationDetails.getMandate(), LocalDate.now().plusDays(DAYS_TO_COLLECTION));
     }
 
     @Override
