@@ -31,7 +31,7 @@ public class PaymentViewResource {
     }
 
     @GET
-    @Path("/v1/api/accounts/{accountId}/view")
+    @Path("/v1/api/accounts/{accountId}/payment-requests/view")
     @Produces(APPLICATION_JSON)
     public Response getPaymentView(
             @PathParam("accountId") String accountExternalId,
