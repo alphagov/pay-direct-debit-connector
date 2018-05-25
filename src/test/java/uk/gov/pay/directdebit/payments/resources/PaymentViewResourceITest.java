@@ -59,7 +59,7 @@ public class PaymentViewResourceITest {
                     .withName("J. Doe" + i)
                     .insert(testContext.getJdbi());
         }
-        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "1")
                 .replace(":display_size", "100");
@@ -82,7 +82,7 @@ public class PaymentViewResourceITest {
 
     @Test
     public void shouldReturn400_whenPresentedWithNegativeOffset() {
-        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "0")
                 .replace(":display_size", "100");
@@ -97,7 +97,7 @@ public class PaymentViewResourceITest {
 
     @Test
     public void shouldReturn404_whenGatewayAccountNotExists() {
-        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", "non-existent-id")
                 .replace(":page", "1")
                 .replace(":display_size", "100");
@@ -124,7 +124,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "2");
@@ -159,7 +159,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "25");
@@ -198,7 +198,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "10")
@@ -241,7 +241,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "1")
                 .replace(":display_size", "100")
@@ -265,7 +265,7 @@ public class PaymentViewResourceITest {
     public void shouldReturn400_whenMalformedDate() {
         String fromDate = "2018-05-05T15:00Z";
         String toDate = "2018-14-08T15:00Z";
-        String requestPath = "/v1/api/accounts/{accountId}/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "10")
@@ -295,7 +295,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/view?email=:email"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?email=:email"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":email", "Jane");
         givenSetup()
@@ -322,7 +322,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/view?reference=:reference"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?reference=:reference"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":reference", "f1");
         givenSetup()
@@ -349,7 +349,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/view?amount=:amount"
+        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?amount=:amount"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":amount", "2343");
         givenSetup()
