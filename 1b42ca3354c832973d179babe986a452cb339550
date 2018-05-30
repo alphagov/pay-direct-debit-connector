@@ -29,3 +29,5 @@ production-2.tag=FAILED-60
 production-2.FAILED-60.date=
 
 production-2.FAILED-60.status=failed
+
+staging-2.tag=FAILED-61
