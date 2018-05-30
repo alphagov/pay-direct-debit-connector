@@ -37,3 +37,5 @@ staging-2.FAILED-61.date=
 staging-2.FAILED-61.status=failed
 
 release.tag=alpha_release-62
+
+release.alpha_release-62.date=2018-05-30:15:32:32
