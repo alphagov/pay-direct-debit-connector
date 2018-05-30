@@ -27,3 +27,5 @@ release.alpha_release-61.date=2018-05-30:12:40:14
 production-2.tag=FAILED-60
 
 production-2.FAILED-60.date=
+
+production-2.FAILED-60.status=failed
