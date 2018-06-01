@@ -5,3 +5,5 @@ release.alpha_release-63.date=2018-06-01:15:43:42
 release.tag=alpha_release-64
 
 release.alpha_release-64.date=2018-06-01:15:58:12
+
+staging-2.tag=alpha_staging-2-64
