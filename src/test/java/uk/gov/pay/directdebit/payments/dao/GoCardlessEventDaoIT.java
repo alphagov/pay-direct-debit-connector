@@ -2,7 +2,10 @@ package uk.gov.pay.directdebit.payments.dao;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import liquibase.exception.LiquibaseException;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,24 +16,16 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.Optional;
-
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.EventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestEventFixture.aPaymentRequestEventFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
@@ -44,7 +39,7 @@ public class GoCardlessEventDaoIT {
     @DropwizardTestContext
     private TestContext testContext;
 
-    private final static Long PAYMENT_REQUEST_EVENTS_ID = 6L;
+    private final static Long EVENT_ID = 6L;
     private final static String GOCARDLESS_EVENT_ID = "dhg2342h3kjh";
     private final static String GOCARDLESS_ACTION = "something happened";
     private final static GoCardlessResourceType GOCARDLESS_RESOURCE_TYPE = PAYMENTS;
@@ -53,23 +48,21 @@ public class GoCardlessEventDaoIT {
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2017-12-30T12:30:40Z");
 
     private GoCardlessEvent goCardlessEvent;
-    private PaymentRequestFixture testPaymentRequest;
+    private MandateFixture testMandate;
     private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
-    public void setup() throws IOException, LiquibaseException {
+    public void setup() throws IOException {
         eventJson = objectMapper.readTree("{\"id\": \"somejson\"}");
         goCardlessEventDao = testContext.getJdbi().onDemand(GoCardlessEventDao.class);
         gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
-        testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(gatewayAccountFixture.getId())
-                .insert(testContext.getJdbi());
+        testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
         aPaymentRequestEventFixture()
-                .withPaymentRequestId(testPaymentRequest.getId())
-                .withId(PAYMENT_REQUEST_EVENTS_ID)
+                .withMandateId(testMandate.getId())
+                .withId(EVENT_ID)
                 .insert(testContext.getJdbi());
         goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture()
-                .withPaymentRequestEventsId(PAYMENT_REQUEST_EVENTS_ID)
+                .withPaymentRequestEventsId(EVENT_ID)
                 .withEventId(GOCARDLESS_EVENT_ID)
                 .withAction(GOCARDLESS_ACTION)
                 .withResourceType(GOCARDLESS_RESOURCE_TYPE)
@@ -83,8 +76,8 @@ public class GoCardlessEventDaoIT {
         Long id = goCardlessEventDao.insert(goCardlessEvent);
         Map<String, Object> foundGoCardlessEvent = testContext.getDatabaseTestHelper().getGoCardlessEventById(id);
         assertThat(foundGoCardlessEvent.get("id"), is(id));
-        assertThat(foundGoCardlessEvent.get("payment_request_events_id"), is(PAYMENT_REQUEST_EVENTS_ID));
-        assertThat(foundGoCardlessEvent.get("event_id"), is(GOCARDLESS_EVENT_ID));
+        assertThat(foundGoCardlessEvent.get("event_id"), is(EVENT_ID));
+        assertThat(foundGoCardlessEvent.get("gocardless_event_id"), is(GOCARDLESS_EVENT_ID));
         assertThat(foundGoCardlessEvent.get("action"), is(GOCARDLESS_ACTION));
         assertThat(foundGoCardlessEvent.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
         assertThat(objectMapper.readTree(foundGoCardlessEvent.get("json").toString()), is(eventJson));
@@ -92,41 +85,22 @@ public class GoCardlessEventDaoIT {
     }
 
     @Test
-    public void shouldFindAGoCardlessEventById() throws IOException {
-        Long id = goCardlessEventDao.insert(goCardlessEvent);
-        GoCardlessEvent foundEvent = goCardlessEventDao.findById(id).get();
-        assertThat(foundEvent.getPaymentRequestEventId(), is(PAYMENT_REQUEST_EVENTS_ID));
-        assertThat(foundEvent.getEventId(), is(GOCARDLESS_EVENT_ID));
-        assertThat(foundEvent.getAction(), is(GOCARDLESS_ACTION));
-        assertThat(foundEvent.getResourceType(), is(GOCARDLESS_RESOURCE_TYPE));
-        assertThat(foundEvent.getResourceId(), is(nullValue()));
-        assertThat(objectMapper.readTree(foundEvent.getJson()), is(eventJson));
-        assertThat(foundEvent.getCreatedAt(), is(CREATED_AT));
-    }
-
-    @Test
-    public void shouldNotFindAGoCardlessEventById_IdIsInvalid() {
-        assertThat(goCardlessEventDao.findById(38L), is(Optional.empty()));
-    }
-
-    @Test
-    public void shouldUpdatePaymentRequestEventIdAndReturnNumberOfAffectedRows() throws IOException {
+    public void shouldUpdateEventIdAndReturnNumberOfAffectedRows() throws IOException {
         Long newEventId = 10L;
         aPaymentRequestEventFixture()
-                .withPaymentRequestId(testPaymentRequest.getId())
+                .withMandateId(testMandate.getId())
                 .withId(newEventId)
                 .insert(testContext.getJdbi());
         Long id = goCardlessEventDao.insert(goCardlessEvent);
-        int numOfUpdatedEvents = goCardlessEventDao.updatePaymentRequestEventId(id, newEventId);
-        GoCardlessEvent eventAfterUpdate = goCardlessEventDao.findById(id).get();
+        int numOfUpdatedEvents = goCardlessEventDao.updateEventId(id, newEventId);
+        Map<String, Object> eventAfterUpdate = testContext.getDatabaseTestHelper().getGoCardlessEventById(id);
         assertThat(numOfUpdatedEvents, is(1));
-        assertThat(eventAfterUpdate.getPaymentRequestEventId(), is(newEventId));
-        assertThat(eventAfterUpdate.getEventId(), is(GOCARDLESS_EVENT_ID));
-        assertThat(eventAfterUpdate.getAction(), is(GOCARDLESS_ACTION));
-        assertThat(eventAfterUpdate.getResourceType(), is(GOCARDLESS_RESOURCE_TYPE));
-        assertThat(eventAfterUpdate.getResourceId(), is(nullValue()));
-        assertThat(objectMapper.readTree(eventAfterUpdate.getJson()), is(eventJson));
-        assertThat(eventAfterUpdate.getCreatedAt(), is(CREATED_AT));
+        assertThat(eventAfterUpdate.get("event_id"), is(newEventId));
+        assertThat(eventAfterUpdate.get("gocardless_event_id"), is(GOCARDLESS_EVENT_ID));
+        assertThat(eventAfterUpdate.get("action"), is(GOCARDLESS_ACTION));
+        assertThat(eventAfterUpdate.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
+        assertThat(objectMapper.readTree(eventAfterUpdate.get("json").toString()), is(eventJson));
+        assertThat((Timestamp) eventAfterUpdate.get("created_at"), isDate(CREATED_AT));
     }
 
 

@@ -1,143 +1,156 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import java.util.Optional;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
-import uk.gov.pay.directdebit.payments.model.PaymentRequest;
-import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.payments.dao.EventDao;
+import uk.gov.pay.directdebit.payments.model.Event;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
-import javax.inject.Inject;
-import java.util.Optional;
-
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsConfirmed;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.directDebitDetailsReceived;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateActive;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateCancelled;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandateFailed;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.mandatePending;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paidOut;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerCreated;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payerEdited;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentCancelled;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentSubmittedToProvider;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentFailed;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentMethodChanged;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentAcknowledged;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.paymentSubmitted;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.payoutPaid;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.tokenExchanged;
+import static uk.gov.pay.directdebit.payments.model.Event.awaitingDirectDebitDetails;
+import static uk.gov.pay.directdebit.payments.model.Event.directDebitDetailsConfirmed;
+import static uk.gov.pay.directdebit.payments.model.Event.directDebitDetailsReceived;
+import static uk.gov.pay.directdebit.payments.model.Event.mandateActive;
+import static uk.gov.pay.directdebit.payments.model.Event.mandateCancelled;
+import static uk.gov.pay.directdebit.payments.model.Event.mandateFailed;
+import static uk.gov.pay.directdebit.payments.model.Event.mandatePending;
+import static uk.gov.pay.directdebit.payments.model.Event.paidOut;
+import static uk.gov.pay.directdebit.payments.model.Event.payerCreated;
+import static uk.gov.pay.directdebit.payments.model.Event.payerEdited;
+import static uk.gov.pay.directdebit.payments.model.Event.paymentAcknowledged;
+import static uk.gov.pay.directdebit.payments.model.Event.paymentCancelled;
+import static uk.gov.pay.directdebit.payments.model.Event.paymentFailed;
+import static uk.gov.pay.directdebit.payments.model.Event.paymentMethodChanged;
+import static uk.gov.pay.directdebit.payments.model.Event.paymentSubmitted;
+import static uk.gov.pay.directdebit.payments.model.Event.paymentSubmittedToProvider;
+import static uk.gov.pay.directdebit.payments.model.Event.payoutPaid;
+import static uk.gov.pay.directdebit.payments.model.Event.tokenExchanged;
 
 public class PaymentRequestEventService {
 
     private static final Logger LOGGER = PayLoggerFactory.getLogger(PaymentRequestEventService.class);
 
-    private final PaymentRequestEventDao paymentRequestEventDao;
+    private final EventDao eventDao;
 
     @Inject
-    public PaymentRequestEventService(PaymentRequestEventDao paymentRequestEventDao) {
-        this.paymentRequestEventDao = paymentRequestEventDao;
+    public PaymentRequestEventService(EventDao eventDao) {
+        this.eventDao = eventDao;
     }
 
-    private PaymentRequestEvent insertEventFor(Transaction charge, PaymentRequestEvent event) {
-        LOGGER.info("Creating event for {} {}: {} - {}",
-                charge.getType(), charge.getPaymentRequest().getExternalId(),
-                event.getEventType(), event.getEvent());
-        Long id = paymentRequestEventDao.insert(event);
+    private Event insertEventFor(Transaction charge, Event event) {
+        LOGGER.info("Creating event for transaction {}: {} - {}", 
+                charge.getExternalId(),
+                event.getEventType(), 
+                event.getEvent());
+        Long id = eventDao.insert(event);
         event.setId(id);
         return event;
     }
 
-    void insertEventFor(PaymentRequest paymentRequest, PaymentRequestEvent event) {
-        LOGGER.info("Creating event for payment request {}: {} - {}",
-                paymentRequest.getExternalId(), event.getEventType(), event.getEvent());
-        paymentRequestEventDao.insert(event);
+    public Event insertEventFor(Mandate mandate, Event event) {
+        LOGGER.info("Creating event for mandate {}: {} - {}",
+                mandate.getExternalId(), event.getEventType(), event.getEvent());
+        Long id = eventDao.insert(event);
+        event.setId(id);
+        return event;
     }
 
-    public void registerDirectDebitReceivedEventFor(Transaction charge) {
-        insertEventFor(charge, directDebitDetailsReceived(charge.getPaymentRequest().getId()));
+    public void registerTokenExchangedEventFor(Mandate mandate) {
+        Event event = tokenExchanged(mandate.getId());
+        insertEventFor(mandate, event);
     }
 
-    public void registerDirectDebitConfirmedEventFor(Transaction charge) {
-        PaymentRequestEvent event = directDebitDetailsConfirmed(charge.getPaymentRequest().getId());
-        insertEventFor(charge, event);
+    public Event registerPaymentSubmittedToProviderEventFor(Transaction transaction) {
+        Event event = paymentSubmittedToProvider(transaction.getMandate().getId(), transaction.getId());
+        return insertEventFor(transaction.getMandate(), event);
     }
 
-    public void registerPayerCreatedEventFor(Transaction charge) {
-        PaymentRequestEvent event = payerCreated(charge.getPaymentRequest().getId());
-        insertEventFor(charge, event);
-    }
-    public PaymentRequestEvent registerPayerEditedEventFor(Transaction charge) {
-        PaymentRequestEvent event = payerEdited(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
+    public Event registerPaymentCancelledEventFor(Mandate mandate, Transaction transaction) {
+        Event event = paymentCancelled(mandate.getId(), transaction.getId());
+        return insertEventFor(mandate, event);
     }
 
-    public void registerTokenExchangedEventFor(Transaction charge) {
-        PaymentRequestEvent event = tokenExchanged(charge.getPaymentRequest().getId());
-        insertEventFor(charge, event);
+    public Event registerMandateFailedEventFor(Mandate mandate) {
+        Event event = mandateFailed(mandate.getId());
+        return insertEventFor(mandate, event);
     }
 
-    public PaymentRequestEvent registerPaymentSubmittedToProviderEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentSubmittedToProvider(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
+    public Event registerMandateCancelledEventFor(Mandate mandate) {
+        Event event = mandateCancelled(mandate.getId());
+        return insertEventFor(mandate, event);
     }
 
-    public PaymentRequestEvent registerPaymentCancelledEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentCancelled(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
-    }
-
-    public PaymentRequestEvent registerMandateFailedEventFor(Transaction charge) {
-        PaymentRequestEvent event = mandateFailed(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
-    }
-
-    public PaymentRequestEvent registerMandateCancelledEventFor(Transaction charge) {
-        PaymentRequestEvent event = mandateCancelled(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
-    }
-
-    public PaymentRequestEvent registerPaymentFailedEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentFailed(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
-    }
-
-    public PaymentRequestEvent registerPaymentAcknowledgedEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentAcknowledged(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
-    }
-
-    public PaymentRequestEvent registerPaymentSubmittedEventFor(Transaction charge) {
-        PaymentRequestEvent event = paymentSubmitted(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
-    }
-
-    public PaymentRequestEvent registerPaymentPaidOutEventFor(Transaction charge) {
-        PaymentRequestEvent event = paidOut(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
-    }
-
-    public PaymentRequestEvent registerPayoutPaidEventFor(Transaction charge) {
-        PaymentRequestEvent event = payoutPaid(charge.getPaymentRequest().getId());
-        return insertEventFor(charge, event);
-    }
-
-    public PaymentRequestEvent registerMandatePendingEventFor(Transaction transaction) {
-        PaymentRequestEvent event = mandatePending(transaction.getPaymentRequest().getId());
+    public Event registerPaymentFailedEventFor(Transaction transaction) {
+        Mandate mandate = transaction.getMandate();
+        Event event = paymentFailed(mandate.getId(), transaction.getId());
         return insertEventFor(transaction, event);
     }
 
-    public PaymentRequestEvent registerMandateActiveEventFor(Transaction transaction) {
-        PaymentRequestEvent event = mandateActive(transaction.getPaymentRequest().getId());
+    public Event registerPaymentAcknowledgedEventFor(Transaction transaction) {
+        Mandate mandate = transaction.getMandate();
+        Event event = paymentAcknowledged(mandate.getId(), transaction.getId());
         return insertEventFor(transaction, event);
     }
 
-    public Optional<PaymentRequestEvent> findBy(Long paymentRequestId, PaymentRequestEvent.Type type, PaymentRequestEvent.SupportedEvent event) {
-        return paymentRequestEventDao.findByPaymentRequestIdAndEvent(paymentRequestId, type, event);
+    public Event registerPaymentSubmittedEventFor(Transaction transaction) {
+        Mandate mandate = transaction.getMandate();
+        Event event = paymentSubmitted(mandate.getId(), transaction.getId());
+        return insertEventFor(transaction, event);
     }
 
-    public PaymentRequestEvent registerPaymentMethodChangedEventFor(Transaction transaction) {
-        PaymentRequestEvent event = paymentMethodChanged(transaction.getPaymentRequest().getId());
+    public Event registerPaymentPaidOutEventFor(Transaction transaction) {
+        Mandate mandate = transaction.getMandate();
+        Event event = paidOut(mandate.getId(), transaction.getId());
         return insertEventFor(transaction, event);
+    }
+
+    public Event registerPayoutPaidEventFor(Transaction transaction) {
+        Mandate mandate = transaction.getMandate();
+        Event event = payoutPaid(mandate.getId(), transaction.getId());
+        return insertEventFor(transaction, event);
+    }
+
+    public Event registerPaymentMethodChangedEventFor(Mandate mandate) {
+        Event event = paymentMethodChanged(mandate.getId());
+        return insertEventFor(mandate, event);
+    }
+    
+    public Event registerMandatePendingEventFor(Mandate mandate) {
+        Event event = mandatePending(mandate.getId());
+        return insertEventFor(mandate, event);
+    }
+
+    public Event registerMandateActiveEventFor(Mandate mandate) {
+        Event event = mandateActive(mandate.getId());
+        return insertEventFor(mandate, event);
+    }
+
+    public Event registerAwaitingDirectDebitDetailsEventFor(Mandate mandate) {
+        Event event = awaitingDirectDebitDetails(mandate.getId());
+        return insertEventFor(mandate, event);
+    }
+    
+    public void registerPayerCreatedEventFor(Mandate mandate) {
+        Event event = payerCreated(mandate.getId());
+        insertEventFor(mandate, event);
+    }
+
+    public void registerDirectDebitConfirmedEventFor(Mandate mandate) {
+        Event event = directDebitDetailsConfirmed(mandate.getId());
+        insertEventFor(mandate, event);
+    }
+
+    public void registerDirectDebitReceivedEventFor(Mandate mandate) {
+        insertEventFor(mandate, directDebitDetailsReceived(mandate.getId()));
+    }
+
+    public Event registerPayerEditedEventFor(Mandate mandate) {
+        return insertEventFor(mandate, payerEdited(mandate.getId()));
+    }
+    
+    public Optional<Event> findBy(Long mandateId, Event.Type type, Event.SupportedEvent event) {
+        return eventDao.findByMandateIdAndEvent(mandateId, type, event);
     }
 }

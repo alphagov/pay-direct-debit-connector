@@ -68,6 +68,6 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
 
     @Override
     public GoCardlessMandate toEntity() {
-        return new GoCardlessMandate(id, mandateId, goCardlessMandateId);
+        return new GoCardlessMandate(id, mandateId, goCardlessMandateId, null);
     }
 }

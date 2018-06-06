@@ -1,6 +1,11 @@
 package uk.gov.pay.directdebit.payments.resources;
 
 import io.restassured.specification.RequestSpecification;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
+import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,21 +14,14 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-
-import javax.ws.rs.core.Response;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
@@ -44,18 +42,16 @@ public class PaymentViewResourceITest {
     public void shouldReturnAListOfPaymentView() {
         ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1L);
         for (int i = 0; i < 3; i++) {
-            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                    .withId(i + 1)
-                    .withGatewayAccountId(testGatewayAccount.getId())
+            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+            aTransactionFixture()
+                    .withId((long) i)
+                    .withMandateFixture(mandateFixture)
                     .withReference("MBK" + i)
                     .withDescription("Description" + i)
                     .withCreatedDate(createdDate)
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
-                    .insert(testContext.getJdbi());
             aPayerFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withMandateId(mandateFixture.getId())
                     .withName("J. Doe" + i)
                     .insert(testContext.getJdbi());
         }
@@ -74,9 +70,9 @@ public class PaymentViewResourceITest {
                 .body("display_size", is(100))
                 .body("payment_views", hasSize(3))
                 .body("payment_views[0].reference", is("MBK2"))
+                .body("payment_views[0].name", is("J. Doe2"))
                 .body("payment_views[2].description", is("Description0"))
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
-                .body("payment_views[0].name", is("J. Doe2"))
                 .body("payment_views[1].created_date", is(createdDate.toString()));
     }
 
@@ -113,14 +109,13 @@ public class PaymentViewResourceITest {
     @Test
     public void shouldReturn404_whenPaginationFindsNoRecords() {
         for (int i = 0; i < 2; i++) {
-            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                    .withGatewayAccountId(testGatewayAccount.getId())
-                    .insert(testContext.getJdbi());
+            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
             aTransactionFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withId((long) i)
+                    .withMandateFixture(mandateFixture)
                     .insert(testContext.getJdbi());
             aPayerFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withMandateId(mandateFixture.getId())
                     .insert(testContext.getJdbi());
         }
 
@@ -142,19 +137,18 @@ public class PaymentViewResourceITest {
     public void shouldReturn25Records_whenPaginationSetToPage2AndDisplaySize3With5records_withNoDates() {
         ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1L);
         for (int i = 0; i < 50; i++) {
-            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                    .withAmount(100 + i)
-                    .withId(i + 1)
-                    .withGatewayAccountId(testGatewayAccount.getId())
+            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+
+            aTransactionFixture()
+                    .withId((long) i)
+                    .withMandateFixture(mandateFixture)
+                    .withAmount(((long) 100 + i))
                     .withReference("MBK" + i)
                     .withDescription("Description" + i)
                     .withCreatedDate(createdDate)
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
-                    .insert(testContext.getJdbi());
             aPayerFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withMandateId(mandateFixture.getId())
                     .withName("J. Doe" + i)
                     .insert(testContext.getJdbi());
         }
@@ -181,19 +175,18 @@ public class PaymentViewResourceITest {
     public void shouldReturn5Records_whenPaginationSetTo2PageAnd10DisplaySizeWith15records_withDateRange10days() {
         ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1L);
         for (int i = 0; i < 15; i++) {
-            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                    .withAmount(100 + i)
-                    .withId(i + 1)
-                    .withGatewayAccountId(testGatewayAccount.getId())
+            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+
+            aTransactionFixture()
+                    .withId((long) i)
+                    .withMandateFixture(mandateFixture)
+                    .withAmount(((long) 100 + i))
                     .withReference("MBK" + i)
                     .withDescription("Description" + i)
                     .withCreatedDate(createdDate)
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
-                    .insert(testContext.getJdbi());
             aPayerFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withMandateId(mandateFixture.getId())
                     .withName("J. Doe" + i)
                     .insert(testContext.getJdbi());
         }
@@ -224,19 +217,18 @@ public class PaymentViewResourceITest {
         ZonedDateTime fromDate = ZonedDateTime.now(ZoneOffset.UTC).minusYears(1).minusDays(4L).minusMinutes(5L);
         ZonedDateTime toDate = ZonedDateTime.now(ZoneOffset.UTC).minusYears(1).minusDays(2L).plusMinutes(5L);
         for (int i = 0, day = 15; i < 15; i++, day--) {
-            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                    .withAmount(100 + i)
-                    .withId(i + 1)
-                    .withGatewayAccountId(testGatewayAccount.getId())
+            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+
+            aTransactionFixture()
+                    .withId((long) i)
+                    .withMandateFixture(mandateFixture)
+                    .withAmount((long) 100 + i)
                     .withReference("MBK" + day)
                     .withDescription("Description" + i)
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusYears(1).minusDays(day))
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
-                    .insert(testContext.getJdbi());
             aPayerFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withMandateId(mandateFixture.getId())
                     .withName("J. Doe" + day)
                     .insert(testContext.getJdbi());
         }
@@ -283,14 +275,14 @@ public class PaymentViewResourceITest {
     public void shouldReturn7Records_whenEmailSet() {
         List<String> emailList = Arrays.asList("john.doe@example.com", "jane.doe@example.com");
         for (int i = 0; i < 15; i++) {
-            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                    .withGatewayAccountId(testGatewayAccount.getId())
-                    .insert(testContext.getJdbi());
+            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+
             aTransactionFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withId((long) i)
+                    .withMandateFixture(mandateFixture)
                     .insert(testContext.getJdbi());
             aPayerFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withMandateId(mandateFixture.getId())
                     .withEmail(i % 2 == 0 ? emailList.get(0) : emailList.get(1))
                     .insert(testContext.getJdbi());
         }
@@ -310,15 +302,15 @@ public class PaymentViewResourceITest {
     public void shouldReturn5Records_whenReferenceSet_ignoreCase() {
         List<String> referenceList = Arrays.asList("REF1", "REF2");
         for (int i = 0; i < 15; i++) {
-            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                    .withGatewayAccountId(testGatewayAccount.getId())
+            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+
+            aTransactionFixture()
+                    .withId((long) i)
+                    .withMandateFixture(mandateFixture)
                     .withReference(i % 3 == 0 ? referenceList.get(0) : referenceList.get(1))
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
-                    .insert(testContext.getJdbi());
             aPayerFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withMandateId(mandateFixture.getId())
                     .insert(testContext.getJdbi());
         }
 
@@ -337,15 +329,15 @@ public class PaymentViewResourceITest {
     public void shouldReturn6Records_whenAmountSet() {
         List<Long> amountList = Arrays.asList(1051L, 2343L, 1111L);
         for (int i = 0; i < 20; i++) {
-            PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                    .withGatewayAccountId(testGatewayAccount.getId())
+            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+
+            aTransactionFixture()
+                    .withId((long) i)
+                    .withMandateFixture(mandateFixture)
                     .withAmount(i % 3 == 0 ? amountList.get(0) : i % 2 == 0 ? amountList.get(1) : amountList.get(2))
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
-                    .insert(testContext.getJdbi());
             aPayerFixture()
-                    .withPaymentRequestId(paymentRequestFixture.getId())
+                    .withMandateId(mandateFixture.getId())
                     .insert(testContext.getJdbi());
         }
 

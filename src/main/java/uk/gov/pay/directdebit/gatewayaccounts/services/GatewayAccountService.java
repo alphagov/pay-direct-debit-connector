@@ -1,15 +1,14 @@
 package uk.gov.pay.directdebit.gatewayaccounts.services;
 
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Map;
 
 public class GatewayAccountService {
 
@@ -32,8 +31,8 @@ public class GatewayAccountService {
 
     public GatewayAccount getGatewayAccountFor(Transaction transaction) {
         return gatewayAccountDao
-                .findById(transaction.getGatewayAccountId())
-                .orElseThrow(() -> new GatewayAccountNotFoundException(transaction.getGatewayAccountId().toString()));
+                .findById(transaction.getMandate().getGatewayAccount().getId())
+                .orElseThrow(() -> new GatewayAccountNotFoundException(transaction.getMandate().getGatewayAccount().getId().toString()));
     }
 
     public List<GatewayAccount> getAllGatewayAccounts() {

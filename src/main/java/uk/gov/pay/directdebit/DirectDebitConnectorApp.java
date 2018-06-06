@@ -13,6 +13,9 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import java.util.concurrent.TimeUnit;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
@@ -30,7 +33,8 @@ import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
-import uk.gov.pay.directdebit.mandate.resources.ConfirmPaymentResource;
+import uk.gov.pay.directdebit.mandate.resources.ConfirmMandateSetupResource;
+import uk.gov.pay.directdebit.mandate.resources.MandateResource;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payments.resources.PaymentRequestResource;
 import uk.gov.pay.directdebit.payments.resources.PaymentViewResource;
@@ -38,10 +42,6 @@ import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;
@@ -93,10 +93,11 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
         environment.jersey().register(injector.getInstance(SecurityTokensResource.class));
         environment.jersey().register(injector.getInstance(PayerResource.class));
-        environment.jersey().register(injector.getInstance(ConfirmPaymentResource.class));
+        environment.jersey().register(injector.getInstance(ConfirmMandateSetupResource.class));
         environment.jersey().register(injector.getInstance(GatewayAccountResource.class));
         environment.jersey().register(injector.getInstance(PaymentRequestResource.class));
         environment.jersey().register(injector.getInstance(PaymentViewResource.class));
+        environment.jersey().register(injector.getInstance(MandateResource.class));
 
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new BadRequestExceptionMapper());

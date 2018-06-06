@@ -1,11 +1,10 @@
 package uk.gov.pay.directdebit.mandate.dao.mapper;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class GoCardlessMandateMapper implements RowMapper<GoCardlessMandate> {
     private static final String ID_COLUMN = "id";
@@ -17,6 +16,7 @@ public class GoCardlessMandateMapper implements RowMapper<GoCardlessMandate> {
         return new GoCardlessMandate(
                 resultSet.getLong(ID_COLUMN),
                 resultSet.getLong(MANDATE_ID_COLUMN),
-                resultSet.getString(GOCARDLESS_MANDATE_ID_COLUMN));
+                resultSet.getString(GOCARDLESS_MANDATE_ID_COLUMN),
+                null);
     }
 }

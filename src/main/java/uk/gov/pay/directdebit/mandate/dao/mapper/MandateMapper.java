@@ -1,29 +1,81 @@
 package uk.gov.pay.directdebit.mandate.dao.mapper;
 
-import org.jdbi.v3.core.mapper.RowMapper;
-import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateState;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import org.jdbi.v3.core.mapper.RowMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.payers.model.Payer;
 
 public class MandateMapper implements RowMapper<Mandate> {
 
-    private static final String ID_COLUMN = "id";
-    private static final String EXTERNAL_ID_COLUMN = "external_id";
+    private static final String ID_COLUMN = "mandate_id";
+    private static final String EXTERNAL_ID_COLUMN = "mandate_external_id";
+    private static final String MANDATE_TYPE_COLUMN = "mandate_type";
+    private static final String STATE_COLUMN = "mandate_state";
+    private static final String REFERENCE_COLUMN = "mandate_reference";
+    private static final String RETURN_URL_COLUMN = "mandate_return_url";
+    private static final String CREATED_DATE_COLUMN = "mandate_created_date";
+    private static final String GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
+    private static final String GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN = "gateway_account_external_id";
+    private static final String GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN = "gateway_account_payment_provider";
+    private static final String GATEWAY_ACCOUNT_TYPE_COLUMN = "gateway_account_type";
+    private static final String GATEWAY_ACCOUNT_SERVICE_NAME_COLUMN = "gateway_account_service_name";
+    private static final String GATEWAY_ACCOUNT_DESCRIPTION_COLUMN = "gateway_account_description";
+    private static final String GATEWAY_ACCOUNT_ANALYTICS_ID_COLUMN = "gateway_account_analytics_id";
     private static final String PAYER_ID_COLUMN = "payer_id";
-    private static final String STATE_COLUMN = "state";
-    private static final String REFERENCE_COLUMN = "reference";
-
+    private static final String PAYER_MANDATE_ID_COLUMN = "payer_mandate_id";
+    private static final String PAYER_EXTERNAL_ID_COLUMN = "payer_external_id";
+    private static final String PAYER_NAME_COLUMN = "payer_name";
+    private static final String PAYER_EMAIL_COLUMN = "payer_email";
+    private static final String PAYER_BANK_ACCOUNT_NUMBER_LAST_TWO_DIGITS_COLUMN = "payer_bank_account_number_last_two_digits";
+    private static final String PAYER_BANK_ACCOUNT_REQUIRES_AUTHORISATION_COLUMN = "payer_bank_account_requires_authorisation";
+    private static final String PAYER_BANK_ACCOUNT_NUMBER_COLUMN = "payer_bank_account_number";
+    private static final String PAYER_BANK_ACCOUNT_SORT_CODE_COLUMN = "payer_bank_account_sort_code";
+    private static final String PAYER_BANK_NAME_COLUMN = "payer_bank_name";
+    private static final String PAYER_CREATED_DATE_COLUMN = "payer_created_date";
+    
     @Override
     public Mandate map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
+        Payer payer = null;
+        if (resultSet.getTimestamp(PAYER_CREATED_DATE_COLUMN) != null) {
+            payer = new Payer(
+                    resultSet.getLong(PAYER_ID_COLUMN),
+                    resultSet.getLong(PAYER_MANDATE_ID_COLUMN),
+                    resultSet.getString(PAYER_EXTERNAL_ID_COLUMN),
+                    resultSet.getString(PAYER_NAME_COLUMN),
+                    resultSet.getString(PAYER_EMAIL_COLUMN),
+                    resultSet.getString(PAYER_BANK_ACCOUNT_SORT_CODE_COLUMN),
+                    resultSet.getString(PAYER_BANK_ACCOUNT_NUMBER_COLUMN),
+                    resultSet.getString(PAYER_BANK_ACCOUNT_NUMBER_LAST_TWO_DIGITS_COLUMN),
+                    resultSet.getBoolean(PAYER_BANK_ACCOUNT_REQUIRES_AUTHORISATION_COLUMN),
+                    resultSet.getString(PAYER_BANK_NAME_COLUMN),
+                    ZonedDateTime.ofInstant(resultSet.getTimestamp(PAYER_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC));
+        }
+        GatewayAccount gatewayAccount = new GatewayAccount(
+                resultSet.getLong(GATEWAY_ACCOUNT_ID_COLUMN),
+                resultSet.getString(GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN),
+                PaymentProvider.fromString(resultSet.getString(GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN)),
+                GatewayAccount.Type.fromString(resultSet.getString(GATEWAY_ACCOUNT_TYPE_COLUMN)),
+                resultSet.getString(GATEWAY_ACCOUNT_SERVICE_NAME_COLUMN),
+                resultSet.getString(GATEWAY_ACCOUNT_DESCRIPTION_COLUMN),
+                resultSet.getString(GATEWAY_ACCOUNT_ANALYTICS_ID_COLUMN)
+        );
         return new Mandate(
                 resultSet.getLong(ID_COLUMN),
+                gatewayAccount,
+                MandateType.valueOf(resultSet.getString(MANDATE_TYPE_COLUMN)),
                 resultSet.getString(EXTERNAL_ID_COLUMN),
-                resultSet.getLong(PAYER_ID_COLUMN),
                 resultSet.getString(REFERENCE_COLUMN),
-                MandateState.valueOf(resultSet.getString(STATE_COLUMN))
-        );
+                MandateState.valueOf(resultSet.getString(STATE_COLUMN)),
+                resultSet.getString(RETURN_URL_COLUMN),
+                ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
+                payer);
     }
 }

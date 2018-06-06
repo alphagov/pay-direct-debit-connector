@@ -3,9 +3,7 @@ package uk.gov.pay.directdebit.payments.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,11 +13,11 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class PaymentRequestResponse {
     @JsonProperty("links")
-    private List<Map<String, Object>> dataLinks = new ArrayList<>();
+    private List<Map<String, Object>> dataLinks;
 
-    //backwards compatibility?
+    //compatibility with public api
     @JsonProperty("charge_id")
-    private String paymentExternalId;
+    private String transactionExternalId;
 
     @JsonProperty
     private Long amount;
@@ -39,8 +37,8 @@ public class PaymentRequestResponse {
     @JsonProperty
     private ExternalPaymentState state;
 
-    public PaymentRequestResponse(String paymentExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
-        this.paymentExternalId = paymentExternalId;
+    public PaymentRequestResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
+        this.transactionExternalId = transactionExternalId;
         this.state = state;
         this.dataLinks = dataLinks;
         this.amount = amount;
@@ -54,8 +52,8 @@ public class PaymentRequestResponse {
         return dataLinks;
     }
 
-    public String getPaymentExternalId() {
-        return paymentExternalId;
+    public String getTransactionExternalId() {
+        return transactionExternalId;
     }
 
     public Long getAmount() {
@@ -90,7 +88,7 @@ public class PaymentRequestResponse {
         PaymentRequestResponse that = (PaymentRequestResponse) o;
 
         if (dataLinks != null ? !dataLinks.equals(that.dataLinks) : that.dataLinks != null) return false;
-        if (!paymentExternalId.equals(that.paymentExternalId)) return false;
+        if (!transactionExternalId.equals(that.transactionExternalId)) return false;
         if (!amount.equals(that.amount)) return false;
         if (!returnUrl.equals(that.returnUrl)) return false;
         if (description != null ? !description.equals(that.description) : that.description != null) return false;
@@ -102,7 +100,7 @@ public class PaymentRequestResponse {
     @Override
     public int hashCode() {
         int result = dataLinks != null ? dataLinks.hashCode() : 0;
-        result = 31 * result + paymentExternalId.hashCode();
+        result = 31 * result + transactionExternalId.hashCode();
         result = 31 * result + amount.hashCode();
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
@@ -116,7 +114,7 @@ public class PaymentRequestResponse {
     public String toString() {
         return "PaymentRequestResponse{" +
                 "dataLinks=" + dataLinks +
-                ", paymentRequestId='" + paymentExternalId + '\'' +
+                ", paymentRequestId='" + transactionExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +
                 ", amount=" + amount +
                 ", returnUrl='" + returnUrl + '\'' +

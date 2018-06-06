@@ -5,8 +5,8 @@ import java.time.ZonedDateTime;
 public class GoCardlessEvent {
 
     private Long id;
-    private Long paymentRequestEventId;
-    private String eventId;
+    private Long eventId;
+    private String goCardlessEventId;
     //todo action should be typed (see https://developer.gocardless.com/api-reference/#events-payment-actions and the equivalent for other resource_types
     private String action;
     private GoCardlessResourceType resourceType;
@@ -14,18 +14,18 @@ public class GoCardlessEvent {
     private ZonedDateTime createdAt;
     private String resourceId;
 
-    public GoCardlessEvent(Long id, Long paymentRequestEventId, String eventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
+    public GoCardlessEvent(Long id, Long eventId, String goCardlessEventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
         this.id = id;
-        this.paymentRequestEventId = paymentRequestEventId;
         this.eventId = eventId;
+        this.goCardlessEventId = goCardlessEventId;
         this.action = action;
         this.resourceType = resourceType;
         this.json = json;
         this.createdAt = createdAt;
     }
 
-    public GoCardlessEvent(String eventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
-        this(null, null, eventId, action,  resourceType, json, createdAt);
+    public GoCardlessEvent(String goCardlessEventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
+        this(null, null, goCardlessEventId, action,  resourceType, json, createdAt);
     }
 
     public Long getId() {
@@ -37,21 +37,21 @@ public class GoCardlessEvent {
         return this;
     }
 
-    public Long getPaymentRequestEventId() {
-        return paymentRequestEventId;
-    }
-
-    public GoCardlessEvent setPaymentRequestEventId(Long paymentRequestEventId) {
-        this.paymentRequestEventId = paymentRequestEventId;
-        return this;
-    }
-
-    public String getEventId() {
+    public Long getEventId() {
         return eventId;
     }
 
-    public GoCardlessEvent setEventId(String eventId) {
+    public GoCardlessEvent setEventId(Long eventId) {
         this.eventId = eventId;
+        return this;
+    }
+
+    public String getGoCardlessEventId() {
+        return goCardlessEventId;
+    }
+
+    public GoCardlessEvent setGoCardlessEventId(String goCardlessEventId) {
+        this.goCardlessEventId = goCardlessEventId;
         return this;
     }
 

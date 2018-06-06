@@ -1,163 +1,203 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAID_OUT;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.CHARGE;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.Type.MANDATE;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.chargeCreated;
-import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
-
+import com.google.common.collect.ImmutableMap;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
+import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
+import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
-import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.api.PaymentRequestFrontendResponse;
+import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
-import uk.gov.pay.directdebit.payments.model.PaymentRequest;
-import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent;
-import uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
+import uk.gov.pay.directdebit.payments.model.Event;
+import uk.gov.pay.directdebit.payments.model.Event.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
+import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.tokens.services.TokenService;
+
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
+import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
+import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAID_OUT;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.Event.Type.CHARGE;
+import static uk.gov.pay.directdebit.payments.model.Event.chargeCreated;
+import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
+import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
 
 public class TransactionService {
 
     private static final Logger LOGGER = PayLoggerFactory.getLogger(TransactionService.class);
+    private final TokenService tokenService;
+    private final GatewayAccountDao gatewayAccountDao;
+    private final DirectDebitConfig directDebitConfig;
     private final TransactionDao transactionDao;
     private final PaymentRequestEventService paymentRequestEventService;
     private final UserNotificationService userNotificationService;
-
+    private final CreatePaymentParser createPaymentParser;
     @Inject
-    public TransactionService(TransactionDao transactionDao, PaymentRequestEventService paymentRequestEventService, UserNotificationService userNotificationService) {
+    public TransactionService(TokenService tokenService,
+            GatewayAccountDao gatewayAccountDao,
+            DirectDebitConfig directDebitConfig,
+            TransactionDao transactionDao,
+            PaymentRequestEventService paymentRequestEventService,
+            UserNotificationService userNotificationService,
+            CreatePaymentParser createPaymentParser) {
+        this.tokenService = tokenService;
+        this.gatewayAccountDao = gatewayAccountDao;
+        this.directDebitConfig = directDebitConfig;
         this.paymentRequestEventService = paymentRequestEventService;
         this.transactionDao = transactionDao;
         this.userNotificationService = userNotificationService;
+        this.createPaymentParser = createPaymentParser;
     }
 
-    public Transaction findTransactionForExternalIdAndGatewayAccountExternalId(String paymentRequestExternalId, String accountExternalId) {
-        Transaction transaction = transactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId)
-                .orElseThrow(() -> new ChargeNotFoundException("payment request external id", paymentRequestExternalId));
-        LOGGER.info("Found charge for payment request with id: {} for gateway account id: {}", paymentRequestExternalId, accountExternalId);
+    public Transaction findTransactionForExternalIdAndGatewayAccountExternalId(String externalId, String accountExternalId) {
+        Transaction transaction = transactionDao.findByExternalId(externalId)
+                .orElseThrow(() -> new ChargeNotFoundException("No charges found for transaction id: " + externalId));
+        LOGGER.info("Found charge for transaction with id: {} for gateway account id: {}", externalId, accountExternalId);
         return transaction;
     }
 
-    Transaction createChargeFor(PaymentRequest paymentRequest, GatewayAccount gatewayAccount) {
-        Transaction transaction = new Transaction(
-                null,
-                paymentRequest,
-                gatewayAccount.getId(),
-                gatewayAccount.getExternalId(),
-                gatewayAccount.getPaymentProvider(),
-                paymentRequest.getAmount(),
-                Transaction.Type.CHARGE,
-                PaymentStatesGraph.initialState()
-        );
-        LOGGER.info("Created transaction for payment request {}", paymentRequest.getExternalId());
-        Long id = transactionDao.insert(transaction);
-        transaction.setId(id);
-        paymentRequestEventService.insertEventFor(paymentRequest, chargeCreated(paymentRequest.getId()));
-        return transaction;
+    private PaymentRequestResponse populateResponseWith(String accountExternalId, Transaction transaction, UriInfo uriInfo) {
+        List<Map<String, Object>> dataLinks = new ArrayList<>();
+
+        dataLinks.add(createLink("self", GET, selfUriFor(uriInfo, CHARGE_API_PATH, accountExternalId, transaction.getExternalId())));
+
+        if (!transaction.getState().toExternal().isFinished()) {
+            Token token = tokenService.generateNewTokenFor(transaction.getMandate());
+            dataLinks.add(createLink("next_url",
+                    GET,
+                    nextUrl(directDebitConfig.getLinks().getFrontendUrl(), "secure", token.getToken())));
+            dataLinks.add(createLink("next_url_post",
+                    POST,
+                    nextUrl(directDebitConfig.getLinks().getFrontendUrl(), "secure"),
+                    APPLICATION_FORM_URLENCODED,
+                    ImmutableMap.of("chargeTokenId", token.getToken())));
+        }
+        return new PaymentRequestResponse(
+                transaction.getExternalId(),
+                transaction.getState().toExternal(),
+                transaction.getAmount(),
+                transaction.getMandate().getReturnUrl(),
+                transaction.getDescription(),
+                transaction.getReference(),
+                transaction.getCreatedDate().toString(),
+                dataLinks);
+    }
+    
+    public PaymentRequestResponse createTransaction(Map<String, String> createPaymentRequest, Mandate mandate, String accountExternalId, UriInfo uriInfo) {
+        return gatewayAccountDao.findByExternalId(accountExternalId)
+                .map(gatewayAccount -> {
+                    LOGGER.info("Creating transaction for mandate {}", mandate.getExternalId());
+                    Transaction transaction = createPaymentParser
+                            .parse(createPaymentRequest, mandate);
+                    Long id = transactionDao.insert(transaction);
+                    transaction.setId(id);
+                    paymentRequestEventService.insertEventFor(mandate, chargeCreated(mandate.getId(), transaction.getId()));
+                    LOGGER.info("Created transaction with external id {}", transaction.getExternalId());
+                    return populateResponseWith(accountExternalId, transaction, uriInfo);
+                })
+                .orElseThrow(() -> {
+                    LOGGER.error("Gateway account with id {} not found", accountExternalId);
+                    return new GatewayAccountNotFoundException(accountExternalId);
+                });
+    }
+
+    public PaymentRequestResponse getPaymentWithExternalId(String accountExternalId, String paymentExternalId, UriInfo uriInfo) {
+        Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(
+                paymentExternalId, accountExternalId);
+        return populateResponseWith(accountExternalId, transaction, uriInfo);
+    }
+
+    public PaymentRequestFrontendResponse populateFrontendResponse(String accountExternalId, Mandate mandate, Transaction transaction) {
+        return new PaymentRequestFrontendResponse(
+                mandate.getExternalId(),
+                mandate.getGatewayAccount().getId(),
+                accountExternalId,
+                mandate.getState().toExternal(),
+                mandate.getReturnUrl(),
+                mandate.getReference(),
+                mandate.getCreatedDate().toString(),
+                mandate.getPayer(),
+                transaction);
     }
 
     public List<Transaction> findAllByPaymentStateAndProvider(PaymentState paymentState, PaymentProvider paymentProvider) {
         return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);
     }
     
-    public Optional<Transaction> findTransactionForToken(String token) {
-        return transactionDao
-                .findByTokenId(token).map(charge -> {
-                    Transaction newCharge = updateStateFor(charge, TOKEN_EXCHANGED);
-                    paymentRequestEventService.registerTokenExchangedEventFor(newCharge);
-                    return newCharge;
-                });
-    }
-
-    public Transaction findTransactionFor(Long transactionId) {
+    public Transaction findTransaction(Long transactionId) {
         return transactionDao
                 .findById(transactionId)
-                .orElseThrow(() -> new ChargeNotFoundException("transaction id", transactionId.toString()));
+                .orElseThrow(() -> new ChargeNotFoundException("transaction id" + transactionId.toString()));
     }
 
-    public Transaction findTransactionForMandateId(Long mandateId) {
-        Transaction transaction = transactionDao.findByMandateId(mandateId)
-                .orElseThrow(() -> new ChargeNotFoundException("mandate id", mandateId.toString()));
-        LOGGER.info("Found transaction {} for mandate {}", transaction.getId(), mandateId.toString());
-        return transaction;
+    public List<Transaction> findTransactionsForMandate(String mandateExternalId) {
+        return transactionDao.findAllByMandateExternalId(mandateExternalId);
     }
 
-    public Transaction receiveDirectDebitDetailsFor(String accountExternalId, String paymentRequestExternalId) {
-        Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
-        paymentRequestEventService.registerDirectDebitReceivedEventFor(transaction);
-        return transaction;
-    }
-
-    public Transaction confirmedDirectDebitDetailsFor(String accountExternalId, String paymentRequestExternalId) {
-        Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(paymentRequestExternalId, accountExternalId);
-        transaction = updateStateFor(transaction, DIRECT_DEBIT_DETAILS_CONFIRMED);
-        paymentRequestEventService.registerDirectDebitConfirmedEventFor(transaction);
-        return transaction;
-    }
-
-    public Transaction payerCreatedFor(Transaction transaction) {
-        paymentRequestEventService.registerPayerCreatedEventFor(transaction);
-        return transaction;
-    }
-
-    public PaymentRequestEvent payerEditedFor(Transaction transaction) {
-        return paymentRequestEventService.registerPayerEditedEventFor(transaction);
-    }
-
-    public PaymentRequestEvent paymentSubmittedToProviderFor(Transaction transaction, Payer payer, Mandate mandate, LocalDate earliestChargeDate) {
-        userNotificationService.sendPaymentConfirmedEmailFor(transaction, payer, mandate, earliestChargeDate);
-        Transaction updatedTransaction = updateStateFor(transaction,
+    public Event paymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {
+        updateStateFor(transaction,
                 PAYMENT_SUBMITTED_TO_PROVIDER);
-        return paymentRequestEventService.registerPaymentSubmittedToProviderEventFor(updatedTransaction);
+        userNotificationService.sendPaymentConfirmedEmailFor(transaction, earliestChargeDate);
+        return paymentRequestEventService.registerPaymentSubmittedToProviderEventFor(transaction);
     }
 
-    public PaymentRequestEvent paymentFailedWithEmailFor(Transaction transaction, Payer payer) {
-        userNotificationService.sendPaymentFailedEmailFor(transaction, payer);
+    public Event paymentFailedWithEmailFor(Transaction transaction) {
+        userNotificationService.sendPaymentFailedEmailFor(transaction);
         return paymentFailedFor(transaction);
     }
 
-    public PaymentRequestEvent paymentFailedWithoutEmailFor(Transaction transaction) {
+    public Event paymentFailedWithoutEmailFor(Transaction transaction) {
         return paymentFailedFor(transaction);
     }
 
-    private PaymentRequestEvent paymentFailedFor(Transaction transaction) {
+    private Event paymentFailedFor(Transaction transaction) {
         Transaction updatedTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_FAILED);
         return paymentRequestEventService.registerPaymentFailedEventFor(updatedTransaction);
     }
 
-    public PaymentRequestEvent paymentPaidOutFor(Transaction transaction) {
+    public Event paymentPaidOutFor(Transaction transaction) {
         Transaction updatedTransaction = updateStateFor(transaction, PAID_OUT);
         return paymentRequestEventService.registerPaymentPaidOutEventFor(updatedTransaction);
     }
 
-    public PaymentRequestEvent paymentAcknowledgedFor(Transaction transaction) {
+    public Event paymentAcknowledgedFor(Transaction transaction) {
         return paymentRequestEventService.registerPaymentAcknowledgedEventFor(transaction);
     }
 
-    public PaymentRequestEvent paymentCancelledFor(Transaction transaction) {
+    public Event paymentCancelledFor(Transaction transaction) {
         Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_CANCELLED_BY_USER);
-        return paymentRequestEventService.registerPaymentCancelledEventFor(newTransaction);
+        return paymentRequestEventService.registerPaymentCancelledEventFor(transaction.getMandate(), newTransaction);
     }
 
-    public PaymentRequestEvent paymentSubmittedFor(Transaction transaction) {
+    public Event paymentMethodChangedFor(Transaction transaction) {
+        Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
+        return paymentRequestEventService.registerPaymentMethodChangedEventFor(newTransaction.getMandate());
+    }
+
+    public Event paymentSubmittedFor(Transaction transaction) {
         return paymentRequestEventService.registerPaymentSubmittedEventFor(transaction);
     }
 
-    public PaymentRequestEvent payoutPaidFor(Transaction transaction) {
+    public Event payoutPaidFor(Transaction transaction) {
         return paymentRequestEventService.registerPayoutPaidEventFor(transaction);
     }
 
@@ -166,25 +206,15 @@ public class TransactionService {
                 event);
         transactionDao.updateState(transaction.getId(), newState);
         LOGGER.info("Updated transaction {} - from {} to {}",
-                transaction.getPaymentRequest().getExternalId(),
+                transaction.getExternalId(),
                 transaction.getState(),
                 newState);
         transaction.setState(newState);
         return transaction;
     }
 
-    public Optional<PaymentRequestEvent> findPaymentSubmittedEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), CHARGE,
-                PAYMENT_SUBMITTED_TO_BANK);
-    }
-
-    public Optional<PaymentRequestEvent> findMandatePendingEventFor(Transaction transaction) {
-        return paymentRequestEventService.findBy(transaction.getPaymentRequest().getId(), MANDATE, MANDATE_PENDING);
-    }
-
-    public PaymentRequestEvent paymentMethodChangedFor(Transaction transaction) {
-        Transaction newTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
-        return paymentRequestEventService.registerPaymentMethodChangedEventFor(newTransaction);
+    public Optional<Event> findPaymentSubmittedEventFor(Transaction transaction) {
+        return paymentRequestEventService.findBy(transaction.getId(), CHARGE, PAYMENT_SUBMITTED_TO_BANK);
     }
 
 }

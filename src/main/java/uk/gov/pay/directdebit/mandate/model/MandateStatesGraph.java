@@ -6,13 +6,22 @@ import com.google.common.graph.ValueGraphBuilder;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
 import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CANCELLED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_ACTIVE;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_CANCELLED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.MANDATE_FAILED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_CANCEL_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_ACTIVE;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_CANCELLED;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_FAILED;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.TOKEN_EXCHANGED;
 
 public class MandateStatesGraph {
 
@@ -37,6 +46,12 @@ public class MandateStatesGraph {
 
         addNodes(graph, MandateState.values());
 
+        graph.putEdgeValue(CREATED, AWAITING_DIRECT_DEBIT_DETAILS, TOKEN_EXCHANGED);
+        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, SUBMITTED, DIRECT_DEBIT_DETAILS_CONFIRMED);
+        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, CANCELLED, PAYMENT_CANCELLED_BY_USER);
+        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, USER_CANCEL_NOT_ELIGIBLE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
+
+        graph.putEdgeValue(SUBMITTED, PENDING, MANDATE_PENDING);
         graph.putEdgeValue(PENDING, ACTIVE, MANDATE_ACTIVE);
         graph.putEdgeValue(PENDING, FAILED, MANDATE_FAILED);
         graph.putEdgeValue(PENDING, CANCELLED, MANDATE_CANCELLED);

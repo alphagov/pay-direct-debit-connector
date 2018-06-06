@@ -5,16 +5,18 @@ public class GoCardlessMandate {
     private Long id;
     private Long mandateId;
     private String goCardlessMandateId;
+    private String goCardlessReference;
 
-
-    public GoCardlessMandate(Long id, Long mandateId, String goCardlessMandateId) {
+    public GoCardlessMandate(Long id, Long mandateId, String goCardlessMandateId, String goCardlessReference) {
         this.id = id;
         this.mandateId = mandateId;
         this.goCardlessMandateId = goCardlessMandateId;
+        this.goCardlessReference = goCardlessReference;
     }
-    public GoCardlessMandate(Long mandateId, String goCardlessMandateId) {
-        this(null, mandateId, goCardlessMandateId);
+    public GoCardlessMandate(Long mandateId, String goCardlessMandateId, String goCardlessReference) {
+        this(null, mandateId, goCardlessMandateId, goCardlessReference);
     }
+    
 
     public Long getId() {
         return id;
@@ -40,6 +42,14 @@ public class GoCardlessMandate {
         this.goCardlessMandateId = goCardlessMandateId;
     }
 
+    public String getGoCardlessReference() {
+        return goCardlessReference;
+    }
+
+    public void setGoCardlessReference(String goCardlessReference) {
+        this.goCardlessReference = goCardlessReference;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -49,6 +59,7 @@ public class GoCardlessMandate {
 
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (!mandateId.equals(that.mandateId)) return false;
+        if (!goCardlessReference.equals(that.goCardlessReference)) return false;
         return goCardlessMandateId.equals(that.goCardlessMandateId);
     }
 
@@ -56,6 +67,7 @@ public class GoCardlessMandate {
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + mandateId.hashCode();
+        result = 31 * result + goCardlessReference.hashCode();
         result = 31 * result + goCardlessMandateId.hashCode();
         return result;
     }

@@ -1,9 +1,8 @@
 package uk.gov.pay.directdebit.util;
 
-import org.jdbi.v3.core.Jdbi;
-
 import java.util.List;
 import java.util.Map;
+import org.jdbi.v3.core.Jdbi;
 
 public class DatabaseTestHelper {
 
@@ -13,54 +12,42 @@ public class DatabaseTestHelper {
         this.jdbi = jdbi;
     }
 
-    public Map<String, Object> getTokenByPaymentRequestId(Long paymentRequestId) {
+    public Map<String, Object> getTokenByMandateExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * from tokens t WHERE t.payment_request_id = :payment_request_id  ORDER BY t.id DESC")
-                        .bind("payment_request_id", paymentRequestId)
+                        .createQuery("SELECT * from tokens t JOIN mandates m ON t.mandate_id = m.id WHERE m.external_id = :external_id ORDER BY t.id DESC")
+                        .bind("external_id", externalId)
                         .mapToMap()
                         .findFirst()
                         .get()
         );
     }
 
-    public String getTokenByPaymentRequestExternalId(String externalId) {
+    public Map<String, Object> getTokenByMandateId(Long mandateId) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT secure_redirect_token from tokens t JOIN payment_requests p ON p.id = t.payment_request_id WHERE p.external_id = :external_id ORDER BY t.id DESC")
+                        .createQuery("SELECT * from tokens t WHERE t.mandate_id = :mandate_id ORDER BY t.id DESC")
+                        .bind("mandate_id", mandateId)
+                        .mapToMap()
+                        .findFirst()
+                        .get()
+        );
+    }
+    public String getTokenByTransactionExternalId(String externalId) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT secure_redirect_token from tokens t JOIN transactions r ON r.mandate_id = t.mandate_id WHERE r.external_id = :external_id ORDER BY t.id DESC")
                         .bind("external_id", externalId)
                         .mapTo(String.class)
                         .findFirst()
                         .get()
         );
     }
-
-    public Map<String, Object> getPaymentRequestById(Long id) {
+    
+    public Map<String, Object> getEventById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * from payment_requests p WHERE p.id = :id")
-                        .bind("id", id)
-                        .mapToMap()
-                        .findFirst()
-                        .get()
-        );
-    }
-
-    public Map<String, Object> getPaymentRequestByExternalId(String externalId) {
-        return jdbi.withHandle(handle ->
-                handle
-                        .createQuery("SELECT * from payment_requests p WHERE p.external_id = :externalId")
-                        .bind("externalId", externalId)
-                        .mapToMap()
-                        .findFirst()
-                        .get()
-        );
-    }
-
-    public Map<String, Object> getPaymentRequestEventById(Long id) {
-        return jdbi.withHandle(handle ->
-                handle
-                        .createQuery("SELECT * from payment_request_events p WHERE p.id = :id")
+                        .createQuery("SELECT * from events p WHERE p.id = :id")
                         .bind("id", id)
                         .mapToMap()
                         .findFirst()
@@ -79,6 +66,28 @@ public class DatabaseTestHelper {
         );
     }
 
+    public Map<String, Object> getTransactionByExternalId(String externalId) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from transactions t WHERE t.external_id = :externalId")
+                        .bind("externalId", externalId)
+                        .mapToMap()
+                        .findFirst()
+                        .get()
+        );
+    }
+    
+
+    public List<Map<String, Object>> getTransactionsForMandate(Long id) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from transactions t JOIN mandates m ON t.mandate_id = m.id WHERE m.id = :id")
+                        .bind("id", id)
+                        .mapToMap()
+                        .list()
+        );
+    }
+
     public Map<String, Object> getPayerById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
@@ -90,10 +99,10 @@ public class DatabaseTestHelper {
         );
     }
 
-    public Map<String, Object> getPayerByPaymentRequestExternalId(String externalId) {
+    public Map<String, Object> getPayerByMandateExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT p.* from payers p INNER JOIN payment_requests r ON p.payment_request_id = r.id WHERE r.external_id = :externalId")
+                        .createQuery("SELECT p.* from payers p INNER JOIN mandates m ON p.mandate_id = m.id WHERE m.external_id = :externalId")
                         .bind("externalId", externalId)
                         .mapToMap()
                         .findFirst()
@@ -111,7 +120,29 @@ public class DatabaseTestHelper {
                         .get()
         );
     }
+    
+    public Map<String, Object> getMandateByExternalId(String externalId) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from mandates m WHERE m.external_id = :externalId")
+                        .bind("externalId", externalId)
+                        .mapToMap()
+                        .findFirst()
+                        .get()
+        );
+    }
 
+    public Map<String, Object> getMandateByTransactionExternalId(String externalId) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from mandates m JOIN transactions t ON t.mandate_id = m.id WHERE t.external_id = :externalId")
+                        .bind("externalId", externalId)
+                        .mapToMap()
+                        .findFirst()
+                        .get()
+        );
+    }
+    
     public Map<String, Object> getGatewayAccountById(Long id) {
         return jdbi.withHandle(handle ->
                 handle

@@ -1,17 +1,16 @@
 package uk.gov.pay.directdebit.notifications.clients;
 
-import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.config.AdminUsersConfig;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.notifications.api.EmailPayloadRequest;
-import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-
+import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Map;
+import org.slf4j.Logger;
+import uk.gov.pay.directdebit.app.config.AdminUsersConfig;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.notifications.api.EmailPayloadRequest;
+import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 
 public class AdminUsersClient {
 
@@ -26,12 +25,12 @@ public class AdminUsersClient {
         this.config = config;
     }
 
-    public void sendEmail(EmailTemplate template, Transaction transaction, String email, Map<String, String> personalisation) {
-        LOGGER.info("Calling adminusers to send {} email for payment request ID {} for gateway account ID {}",
+    public void sendEmail(EmailTemplate template, Mandate mandate, Map<String, String> personalisation) {
+        LOGGER.info("Calling adminusers to send {} email for mandate id {} for gateway account id {}",
                 template.toString(),
-                transaction.getPaymentRequest().getExternalId(),
-                transaction.getGatewayAccountExternalId());
-        EmailPayloadRequest emailPayloadRequest = new EmailPayloadRequest(email, transaction.getGatewayAccountExternalId(), template, personalisation);
+                mandate.getExternalId(),
+                mandate.getGatewayAccount().getExternalId());
+        EmailPayloadRequest emailPayloadRequest = new EmailPayloadRequest(mandate.getPayer().getEmail(), mandate.getGatewayAccount().getExternalId(), template, personalisation);
         try {
              Response response = client.target(config.getAdminUsersUrl())
                     .path("/v1/emails/send")

@@ -1,16 +1,14 @@
 package uk.gov.pay.directdebit.webhook.sandbox.resources;
 
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
-
+import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
-
-import java.util.List;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.services.TransactionService;
 
 import static javax.ws.rs.core.Response.Status.OK;
 
@@ -26,7 +24,7 @@ public class WebhookSandboxResource {
 
     @POST
     public Response handleWebhook() {
-        List<Transaction> pendingTransactions = transactionService.findAllByPaymentStateAndProvider(PaymentState.PENDING_DIRECT_DEBIT_PAYMENT, PaymentProvider.SANDBOX);
+        List<Transaction> pendingTransactions = transactionService.findAllByPaymentStateAndProvider(PaymentState.PENDING, PaymentProvider.SANDBOX);
         pendingTransactions.forEach(transactionService::paymentPaidOutFor);
 
         return Response.status(OK).build();

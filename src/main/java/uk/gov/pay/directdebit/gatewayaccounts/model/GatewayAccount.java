@@ -102,4 +102,51 @@ public class GatewayAccount {
         this.externalId = externalId;
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        GatewayAccount that = (GatewayAccount) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null) {
+            return false;
+        }
+        if (!externalId.equals(that.externalId)) {
+            return false;
+        }
+        if (paymentProvider != that.paymentProvider) {
+            return false;
+        }
+        if (type != that.type) {
+            return false;
+        }
+        if (serviceName != null ? !serviceName.equals(that.serviceName)
+                : that.serviceName != null) {
+            return false;
+        }
+        if (description != null ? !description.equals(that.description)
+                : that.description != null) {
+            return false;
+        }
+        return analyticsId != null ? analyticsId.equals(that.analyticsId)
+                : that.analyticsId == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + externalId.hashCode();
+        result = 31 * result + paymentProvider.hashCode();
+        result = 31 * result + type.hashCode();
+        result = 31 * result + (serviceName != null ? serviceName.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (analyticsId != null ? analyticsId.hashCode() : 0);
+        return result;
+    }
 }

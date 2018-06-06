@@ -9,13 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class PaymentViewListResponse {
 
     @JsonProperty("charge_id")
-    private String paymentExternalId;
+    private String transactionId;
 
     @JsonProperty
     private Long amount;
-
-    @JsonProperty("return_url")
-    private String returnUrl;
 
     @JsonProperty
     private String description;
@@ -36,36 +33,30 @@ public class PaymentViewListResponse {
     private ExternalPaymentState state;
 
 
-    public PaymentViewListResponse(String paymentExternalId,
+    public PaymentViewListResponse(String transactionId,
                                    Long amount,
                                    String reference,
                                    String description,
-                                   String returnUrl,
                                    String createdDate,
                                    String name,
                                    String email,
                                    ExternalPaymentState state) {
-        this.paymentExternalId = paymentExternalId;
+        this.transactionId = transactionId;
         this.amount = amount;
         this.reference = reference;
         this.description = description;
-        this.returnUrl = returnUrl;
         this.createdDate = createdDate;
         this.name = name;
         this.email = email;
         this.state = state;
     }
 
-    public String getPaymentExternalId() {
-        return paymentExternalId;
+    public String getTransactionId() {
+        return transactionId;
     }
 
     public Long getAmount() {
         return amount;
-    }
-
-    public String getReturnUrl() {
-        return returnUrl;
     }
 
     public String getDescription() {
@@ -99,9 +90,8 @@ public class PaymentViewListResponse {
 
         PaymentViewListResponse that = (PaymentViewListResponse) o;
 
-        if (!paymentExternalId.equals(that.paymentExternalId)) return false;
+        if (!transactionId.equals(that.transactionId)) return false;
         if (!amount.equals(that.amount)) return false;
-        if (!returnUrl.equals(that.returnUrl)) return false;
         if (description != null ? !description.equals(that.description) : that.description != null) return false;
         if (reference != null ? !reference.equals(that.reference) : that.reference != null) return false;
         if (!createdDate.equals(that.createdDate)) return false;
@@ -112,10 +102,9 @@ public class PaymentViewListResponse {
 
     @Override
     public int hashCode() {
-        int result = paymentExternalId.hashCode();
-        result = 31 * result + paymentExternalId.hashCode();
+        int result = transactionId.hashCode();
+        result = 31 * result + transactionId.hashCode();
         result = 31 * result + amount.hashCode();
-        result = 31 * result + returnUrl.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (reference != null ? reference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
@@ -128,9 +117,8 @@ public class PaymentViewListResponse {
     @Override
     public String toString() {
         return "PaymentRequestResponse{" +
-                ", paymentRequestId='" + paymentExternalId + '\'' +
+                ", paymentRequestId='" + transactionId + '\'' +
                 ", amount=" + amount +
-                ", returnUrl='" + returnUrl + '\'' +
                 ", reference='" + reference + '\'' +
                 ", createdDate=" + createdDate +
                 ", name=" + name +

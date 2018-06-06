@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.mandate.dao;
 
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,12 +13,8 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
-import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-
-import java.util.Map;
-import java.util.Optional;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -31,6 +29,7 @@ public class GoCardlessMandateDaoIT {
 
     private GoCardlessMandateDao mandateDao;
     private MandateFixture mandateFixture;
+    private GatewayAccountFixture gatewayAccountFixture;
 
     private final static String GOCARDLESS_MANDATE_ID = "NA23434";
     private GoCardlessMandateFixture testGoCardlessMandate;
@@ -38,13 +37,12 @@ public class GoCardlessMandateDaoIT {
     @Before
     public void setup()  {
         mandateDao = testContext.getJdbi().onDemand(GoCardlessMandateDao.class);
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
-        PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture
-                .aPaymentRequestFixture()
-                .withGatewayAccountId(gatewayAccountFixture.getId())
+        gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        TransactionFixture
+                .aTransactionFixture()
+                .withMandateFixture(mandateFixture)
                 .insert(testContext.getJdbi());
-        PayerFixture payerFixture = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
-        mandateFixture = MandateFixture.aMandateFixture().withPayerId(payerFixture.getId()).insert(testContext.getJdbi());
         testGoCardlessMandate = aGoCardlessMandateFixture()
                 .withMandateId(mandateFixture.getId())
                 .withGoCardlessMandateId(GOCARDLESS_MANDATE_ID);

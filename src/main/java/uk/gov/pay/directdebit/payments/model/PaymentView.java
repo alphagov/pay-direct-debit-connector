@@ -4,32 +4,29 @@ import java.time.ZonedDateTime;
 
 public class PaymentView {
     private String gatewayExternalId;
-    private String paymentRequestExternalId;
+    private String transactionExternalId;
     private Long amount;
     private String reference;
     private String description;
-    private String returnUrl;
     private ZonedDateTime createdDate;
     private String name;
     private String email;
     private PaymentState state;
 
     public PaymentView(String gatewayExternalId,
-                       String paymentRequestExternalId,
+                       String transactionExternalId,
                        Long amount,
                        String reference,
                        String description,
-                       String returnUrl,
                        ZonedDateTime createdDate,
                        String name,
                        String email,
                        PaymentState state) {
         this.gatewayExternalId = gatewayExternalId;
-        this.paymentRequestExternalId = paymentRequestExternalId;
+        this.transactionExternalId = transactionExternalId;
         this.amount = amount;
         this.reference = reference;
         this.description = description;
-        this.returnUrl = returnUrl;
         this.createdDate = createdDate;
         this.name = name;
         this.email = email;
@@ -40,8 +37,8 @@ public class PaymentView {
         return gatewayExternalId;
     }
 
-    public String getPaymentRequestExternalId() {
-        return paymentRequestExternalId;
+    public String getTransactionExternalId() {
+        return transactionExternalId;
     }
 
     public Long getAmount() {
@@ -54,10 +51,6 @@ public class PaymentView {
 
     public String getDescription() {
         return description;
-    }
-
-    public String getReturnUrl() {
-        return returnUrl;
     }
 
     public ZonedDateTime getCreatedDate() {
@@ -84,9 +77,8 @@ public class PaymentView {
         PaymentView that = (PaymentView) o;
 
         if (!gatewayExternalId.equals(that.gatewayExternalId)) return false;
-        if (!paymentRequestExternalId.equals(that.paymentRequestExternalId)) return false;
+        if (!transactionExternalId.equals(that.transactionExternalId)) return false;
         if (!amount.equals(that.amount)) return false;
-        if (!returnUrl.equals(that.returnUrl)) return false;
         if (description != null ? !description.equals(that.description) : that.description != null) return false;
         if (reference != null ? !reference.equals(that.reference) : that.reference != null) return false;
         if (!createdDate.equals(that.createdDate)) return false;
@@ -98,9 +90,8 @@ public class PaymentView {
     @Override
     public int hashCode() {
         int result = gatewayExternalId.hashCode();
-        result = 31 * result + paymentRequestExternalId.hashCode();
+        result = 31 * result + transactionExternalId.hashCode();
         result = 31 * result + amount.hashCode();
-        result = 31 * result + returnUrl.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (reference != null ? reference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
