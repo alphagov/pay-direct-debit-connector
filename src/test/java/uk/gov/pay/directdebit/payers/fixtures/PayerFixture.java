@@ -1,5 +1,8 @@
 package uk.gov.pay.directdebit.payers.fixtures;
 
+import java.sql.Timestamp;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
@@ -7,13 +10,9 @@ import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
-import java.sql.Timestamp;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-
 public class PayerFixture implements DbFixture<PayerFixture, Payer> {
     private Long id = RandomUtils.nextLong(1, 99999);
-    private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
+    private Long mandateId = RandomUtils.nextLong(1, 99999);
     private String externalId = RandomIdGenerator.newId();
     private String name = RandomStringUtils.randomAlphabetic(7);
     private String email = generateEmail();
@@ -36,8 +35,8 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
         return this;
     }
 
-    public PayerFixture withPaymentRequestId(Long paymentRequestId) {
-        this.paymentRequestId = paymentRequestId;
+    public PayerFixture withMandateId(Long mandateId) {
+        this.mandateId = mandateId;
         return this;
     }
 
@@ -90,10 +89,6 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
         return id;
     }
 
-    public Long getPaymentRequestId() {
-        return paymentRequestId;
-    }
-
     public String getExternalId() {
         return externalId;
     }
@@ -133,7 +128,7 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
                         "INSERT INTO" +
                                 "    payers(\n" +
                                 "        id,\n" +
-                                "        payment_request_id,\n" +
+                                "        mandate_id,\n" +
                                 "        external_id,\n" +
                                 "        name,\n" +
                                 "        email,\n" +
@@ -146,7 +141,7 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
                                 "    )\n" +
                                 "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
-                        paymentRequestId,
+                        mandateId,
                         externalId,
                         name,
                         email,
@@ -163,7 +158,7 @@ public class PayerFixture implements DbFixture<PayerFixture, Payer> {
 
     @Override
     public Payer toEntity() {
-        return new Payer(id, paymentRequestId, externalId, name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, bankName, createdDate);
+        return new Payer(id, mandateId, externalId, name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, bankName, createdDate);
     }
 
     private String generateEmail() {

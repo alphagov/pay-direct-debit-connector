@@ -1,5 +1,9 @@
 package uk.gov.pay.directdebit.payers.api;
 
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,19 +11,11 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PayerParserTest {
@@ -33,9 +29,6 @@ public class PayerParserTest {
 
     private PayerParser payerParser = new PayerParser();
 
-    private PaymentRequest paymentRequest =
-            PaymentRequestFixture.aPaymentRequestFixture().withId(19L).toEntity();
-
     @Test
     public void shouldCreateAPayerWhenAllFieldsAreThere() {
         Map<String, String> createPaymentRequestWithAllFields = new HashMap<String, String>() {{
@@ -45,10 +38,9 @@ public class PayerParserTest {
             put("email", EMAIL);
             put("requires_authorisation", "true");
         }};
-        when(mockedTransaction.getPaymentRequest()).thenReturn(paymentRequest);
-        Payer payer = payerParser.parse(createPaymentRequestWithAllFields, mockedTransaction);
+        Payer payer = payerParser.parse(createPaymentRequestWithAllFields, 10L);
         assertThat(payer.getExternalId(), is(notNullValue()));
-        assertThat(payer.getPaymentRequestId(), is(19L));
+        assertThat(payer.getMandateId(), is(10L));
         assertThat(payer.getName(), is(NAME));
         assertThat(payer.getEmail(), is(EMAIL));
         assertThat(payer.getAccountNumberLastTwoDigits(), is("78"));

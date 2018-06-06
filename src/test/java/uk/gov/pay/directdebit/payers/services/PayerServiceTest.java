@@ -1,14 +1,5 @@
 package uk.gov.pay.directdebit.payers.services;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,12 +12,21 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PayerServiceTest {
@@ -34,7 +34,7 @@ public class PayerServiceTest {
     @Mock
     PayerDao mockedPayerDao;
     @Mock
-    TransactionService mockedTransactionService;
+    MandateService mockedMandateService;
     @Mock
     PayerParser mockedPayerParser;
 
@@ -48,61 +48,64 @@ public class PayerServiceTest {
             "account_number", ACCOUNT_NUMBER,
             "bank_name", BANK_NAME
     );
-    private String paymentRequestExternalId = "sdkfhsdkjfhjdks";
+    private String mandateExternalId = "sdkfhsdkjfhjdks";
 
     private Payer payer = PayerFixture.aPayerFixture()
             .withName("mr payment").toEntity();
     private GatewayAccount gatewayAccount = aGatewayAccountFixture().toEntity();
-
-    private Transaction transaction = aTransactionFixture().withPaymentRequestExternalId(paymentRequestExternalId).toEntity();
+    private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withExternalId(mandateExternalId);
+    
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {
-        service = new PayerService(mockedPayerDao, mockedTransactionService, mockedPayerParser);
+        service = new PayerService(mockedPayerDao, mockedMandateService, mockedPayerParser);
 
-        when(mockedTransactionService.receiveDirectDebitDetailsFor(gatewayAccount.getExternalId(), paymentRequestExternalId)).thenReturn(transaction);
-        when(mockedPayerParser.parse(createPayerRequest, transaction)).thenReturn(payer);
+        when(mockedMandateService.receiveDirectDebitDetailsFor(mandateExternalId)).thenReturn(mandateFixture.toEntity());
+        when(mockedPayerParser.parse(createPayerRequest, mandateFixture.getId())).thenReturn(payer);
     }
 
     @Test
     public void shouldCreateAndStoreAPayerWhenReceivingCreatePayerRequest() {
-        service.createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
+        service.createOrUpdatePayer(mandateExternalId, gatewayAccount, createPayerRequest);
+        Mandate mandate = mandateFixture.toEntity();
         verify(mockedPayerDao).insert(payer);
-        verify(mockedTransactionService).payerCreatedFor(transaction);
-        verify(mockedTransactionService, never()).payerEditedFor(transaction);
+        verify(mockedMandateService).payerCreatedFor(mandate);
+        verify(mockedMandateService, never()).payerEditedFor(mandate);
     }
     @Test
     public void shouldUpdateAndStoreAPayerWhenReceivingCreatePayerRequest_ifAPayerAlreadyExists() {
         Payer originalPayer = PayerFixture.aPayerFixture()
                 .withName("mr payment").toEntity();
-        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequest().getId()))
+        Mandate mandate = mandateFixture.toEntity();
+
+        when(mockedPayerDao.findByMandateId(mandate.getId()))
                 .thenReturn(Optional.of(originalPayer));
 
         Payer editedPayer = mock(Payer.class);
-        when(mockedPayerParser.parse(createPayerRequest, transaction)).thenReturn(editedPayer);
+        when(mockedPayerParser.parse(createPayerRequest, mandateFixture.getId())).thenReturn(editedPayer);
 
-        service.createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
+        service.createOrUpdatePayer(mandateExternalId, gatewayAccount, createPayerRequest);
         verify(mockedPayerDao).updatePayerDetails(originalPayer.getId(), editedPayer);
-        verify(mockedTransactionService).payerEditedFor(transaction);
-        verify(mockedTransactionService, never()).payerCreatedFor(transaction);
+        verify(mockedMandateService).payerEditedFor(mandate);
+        verify(mockedMandateService, never()).payerCreatedFor(mandate);
     }
 
     @Test
     public void shouldReturnPayerForTransactionIfItExists() {
-        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequest().getId())).thenReturn(Optional.of(payer));
-        Payer payer = service.getPayerFor(transaction);
+        when(mockedPayerDao.findByMandateId(mandateFixture.getId())).thenReturn(Optional.of(payer));
+        Payer payer = service.getPayerFor(mandateFixture.toEntity());
         assertThat(payer.getId(), is(payer.getId()));
         assertThat(payer.getExternalId(), is(payer.getExternalId()));
     }
 
     @Test
     public void shouldThrowIfGatewayAccountDoesNotExist() {
-        when(mockedPayerDao.findByPaymentRequestId(transaction.getPaymentRequest().getId())).thenReturn(Optional.empty());
+        when(mockedPayerDao.findByMandateId(mandateFixture.getId())).thenReturn(Optional.empty());
         thrown.expect(PayerNotFoundException.class);
-        thrown.expectMessage("Couldn't find payer for payment request with external id: sdkfhsdkjfhjdks");
+        thrown.expectMessage("Couldn't find payer for mandate with external id: sdkfhsdkjfhjdks");
         thrown.reportMissingExceptionWithMessage("PayerNotFoundException expected");
-        service.getPayerFor(transaction);
+        service.getPayerFor(mandateFixture.toEntity());
     }
 }

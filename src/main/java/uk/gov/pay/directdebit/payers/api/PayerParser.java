@@ -1,10 +1,8 @@
 package uk.gov.pay.directdebit.payers.api;
 
+import java.util.Map;
 import org.mindrot.jbcrypt.BCrypt;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import java.util.Map;
 
 public class PayerParser {
 
@@ -12,12 +10,12 @@ public class PayerParser {
         return BCrypt.hashpw(toEncrypt, BCrypt.gensalt(12));
     }
 
-    public Payer parse(Map<String, String> createPayerMap, Transaction transaction) {
+    public Payer parse(Map<String, String> createPayerMap, Long mandateId) {
         String accountNumber = createPayerMap.get("account_number");
         String sortCode = createPayerMap.get("sort_code");
         String bankName = createPayerMap.getOrDefault("bank_name", null);
         return new Payer(
-                transaction.getPaymentRequest().getId(),
+                mandateId,
                 createPayerMap.get("account_holder_name"),
                 createPayerMap.get("email"),
                 encrypt(sortCode),

@@ -1,10 +1,5 @@
 package uk.gov.pay.directdebit.payers.dao;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
-import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
-
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -16,10 +11,15 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -39,13 +39,15 @@ public class PayerDaoIT {
 
     private PayerDao payerDao;
 
-    private PaymentRequestFixture testPaymentRequest;
+    private GatewayAccountFixture testGatewayAccount;
+    private TransactionFixture testTransaction;
     private PayerFixture testPayer;
+    private MandateFixture testMandate;
 
     @Before
     public void setup() {
         payerDao = testContext.getJdbi().onDemand(PayerDao.class);
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+        testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture()
                 .insert(testContext.getJdbi());
         this.testPayer = PayerFixture.aPayerFixture()
                 .withEmail(EMAIL)
@@ -57,9 +59,12 @@ public class PayerDaoIT {
                 .withAccountNumberLastTwoDigits(ACCOUNT_NUMBER_LAST_TWO_DIGITS)
                 .withAccountRequiresAuthorisation(ACCOUNT_REQUIRES_AUTHORISATION)
                 .withCreatedDate(CREATED_DATE);
-        this.testPaymentRequest = aPaymentRequestFixture()
-                .withGatewayAccountId(gatewayAccountFixture.getId())
+        this.testMandate = MandateFixture.aMandateFixture()                
                 .withPayerFixture(testPayer)
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+        this.testTransaction = TransactionFixture.aTransactionFixture()
+                .withMandateFixture(testMandate)
                 .insert(testContext.getJdbi());
     }
 
@@ -68,7 +73,7 @@ public class PayerDaoIT {
         Long id = payerDao.insert(testPayer.toEntity());
         Map<String, Object> foundPayer = testContext.getDatabaseTestHelper().getPayerById(id);
         assertThat(foundPayer.get("id"), is(id));
-        assertThat(foundPayer.get("payment_request_id"), is(testPaymentRequest.getId()));
+        assertThat(foundPayer.get("mandate_id"), is(testMandate.getId()));
         assertThat(foundPayer.get("external_id"), is(EXTERNAL_ID));
         assertThat(foundPayer.get("name"), is(PAYER_NAME));
         assertThat(foundPayer.get("email"), is(EMAIL));
@@ -80,33 +85,11 @@ public class PayerDaoIT {
         assertThat((Timestamp) foundPayer.get("created_date"), isDate(CREATED_DATE));
     }
 
-
-    @Test
-    public void shouldGetAPayerById() {
-        Payer payer = payerDao.findById(testPayer.getId()).get();
-        assertThat(payer.getId(), is(testPayer.getId()));
-        assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
-        assertThat(payer.getExternalId(), is(EXTERNAL_ID));
-        assertThat(payer.getName(), is(PAYER_NAME));
-        assertThat(payer.getBankName(), is(BANK_NAME));
-        assertThat(payer.getEmail(), is(EMAIL));
-        assertThat(payer.getAccountNumberLastTwoDigits(), is(ACCOUNT_NUMBER_LAST_TWO_DIGITS));
-        assertThat(payer.getAccountRequiresAuthorisation(), is(ACCOUNT_REQUIRES_AUTHORISATION));
-        assertThat(payer.getAccountNumber(), is(ACCOUNT_NUMBER));
-        assertThat(payer.getSortCode(), is(SORT_CODE));
-        assertThat(payer.getCreatedDate(), is(CREATED_DATE));
-    }
-
-    @Test
-    public void shouldNotFindAPayerById_ifIdIsInvalid() {
-        assertThat(payerDao.findById(9876512L).isPresent(), is(false));
-    }
-
     @Test
     public void shouldGetAPayerByExternalId() {
         Payer payer = payerDao.findByExternalId(testPayer.getExternalId()).get();
         assertThat(payer.getId(), is(testPayer.getId()));
-        assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
+        assertThat(payer.getMandateId(), is(testMandate.getId()));
         assertThat(payer.getExternalId(), is(EXTERNAL_ID));
         assertThat(payer.getName(), is(PAYER_NAME));
         assertThat(payer.getEmail(), is(EMAIL));
@@ -124,10 +107,10 @@ public class PayerDaoIT {
     }
 
     @Test
-    public void shouldGetAPayerByPaymentRequestId() {
-        Payer payer = payerDao.findByPaymentRequestId(testPaymentRequest.getId()).get();
+    public void shouldGetAPayerByTransactionId() {
+        Payer payer = payerDao.findByTransactionId(testTransaction.getId()).get();
         assertThat(payer.getId(), is(testPayer.getId()));
-        assertThat(payer.getPaymentRequestId(), is(testPaymentRequest.getId()));
+        assertThat(payer.getMandateId(), is(testMandate.getId()));
         assertThat(payer.getExternalId(), is(EXTERNAL_ID));
         assertThat(payer.getName(), is(PAYER_NAME));
         assertThat(payer.getEmail(), is(EMAIL));
@@ -140,8 +123,8 @@ public class PayerDaoIT {
     }
 
     @Test
-    public void shouldNotFindAPayerByRequestId_ifIdIsInvalid() {
-        assertThat(payerDao.findByPaymentRequestId(154L).isPresent(), is(false));
+    public void shouldNotFindAPayerByTransactionId_ifIdIsInvalid() {
+        assertThat(payerDao.findByTransactionId(154L).isPresent(), is(false));
     }
 
     @Test
@@ -178,7 +161,7 @@ public class PayerDaoIT {
 
         // These properties should not be updated
         assertThat(payerAfterUpdate.get("id"), is(testPayer.getId()));
-        assertThat(payerAfterUpdate.get("payment_request_id"), is(testPaymentRequest.getId()));
+        assertThat(payerAfterUpdate.get("mandate_id"), is(testMandate.getId()));
         assertThat(payerAfterUpdate.get("external_id"), is(EXTERNAL_ID));
         assertThat((Timestamp) payerAfterUpdate.get("created_date"), isDate(CREATED_DATE));
 
