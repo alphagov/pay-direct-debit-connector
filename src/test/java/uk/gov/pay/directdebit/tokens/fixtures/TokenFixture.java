@@ -8,7 +8,7 @@ import uk.gov.pay.directdebit.payments.model.Token;
 public class TokenFixture implements DbFixture<TokenFixture, Token> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private String token = "3c9fee80-977a-4da5-a003-4872a8cf95b6";
-    private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
+    private Long mandateId = RandomUtils.nextLong(1, 99999);
 
     private TokenFixture() {
     }
@@ -17,8 +17,8 @@ public class TokenFixture implements DbFixture<TokenFixture, Token> {
         return new TokenFixture();
     }
 
-    public TokenFixture withPaymentRequestId(Long paymentRequestId) {
-        this.paymentRequestId = paymentRequestId;
+    public TokenFixture withMandateId(Long mandateId) {
+        this.mandateId = mandateId;
         return this;
     }
 
@@ -31,16 +31,16 @@ public class TokenFixture implements DbFixture<TokenFixture, Token> {
         return token;
     }
 
-    public Long getPaymentRequestId() {
-        return paymentRequestId;
+    public Long getMandateId() {
+        return mandateId;
     }
 
     @Override
     public TokenFixture insert(Jdbi jdbi) {
         jdbi.withHandle(handle ->
                 handle
-                        .createUpdate("INSERT INTO tokens(payment_request_id, secure_redirect_token) VALUES (:payment_request_id, :secure_redirect_token)")
-                        .bind("payment_request_id", paymentRequestId)
+                        .createUpdate("INSERT INTO tokens(mandate_id, secure_redirect_token) VALUES (:mandate_id, :secure_redirect_token)")
+                        .bind("mandate_id", mandateId)
                         .bind("secure_redirect_token", token)
                         .execute()
         );
@@ -49,7 +49,7 @@ public class TokenFixture implements DbFixture<TokenFixture, Token> {
 
     @Override
     public Token toEntity() {
-        return new Token(id, token, paymentRequestId);
+        return new Token(id, token, mandateId);
     }
 
 }
