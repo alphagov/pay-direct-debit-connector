@@ -14,7 +14,6 @@ public class PaymentViewSearchParams {
     private static final String TO_DATE_FIELD = "toDate";
     private static final String EMAIL_FIELD = "email";
     private static final String REFERENCE_FIELD = "reference";
-    private static final String LIKE_HOLDER = "%LIKE%";
     private static final String AMOUNT_FIELD = "amount";
     private final String gatewayExternalId;
     private final Long page;
@@ -107,15 +106,19 @@ public class PaymentViewSearchParams {
                 queryMap.put(TO_DATE_FIELD, searchDateParams.getToDate());
             }
             if (isNotBlank(email)) {
-                queryMap.put(EMAIL_FIELD, LIKE_HOLDER.replace("LIKE", email));
+                queryMap.put(EMAIL_FIELD, likeClause(email));
             }
             if (isNotBlank(reference)) {
-                queryMap.put(REFERENCE_FIELD, LIKE_HOLDER.replace("LIKE", reference));
+                queryMap.put(REFERENCE_FIELD, likeClause(reference));
             }
             if (amount != null) {
                 queryMap.put(AMOUNT_FIELD, amount);
             }
         }
         return queryMap;
+    }
+
+    private String likeClause(String rawUserInputText) {
+        return "%" + rawUserInputText + "%";
     }
 }
