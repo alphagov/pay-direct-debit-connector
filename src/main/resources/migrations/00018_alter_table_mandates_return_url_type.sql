@@ -24,6 +24,4 @@ ALTER TABLE mandates ADD COLUMN created_date TIMESTAMP WITH TIME ZONE DEFAULT (n
 ALTER TABLE mandates DROP CONSTRAINT mandates_payers_fk
 --rollback add constraint mandates_payers_fk FOREIGN KEY (payer_id) REFERENCES payers (id);
 
---changeset uk.gov.pay:alter_table-mandates-payer-id
-ALTER TABLE mandates DROP COLUMN payer_id;
---rollback ALTER TABLE mandates ADD COLUMN payer_id BIGINT NOT NULL;
+
