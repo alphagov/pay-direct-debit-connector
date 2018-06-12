@@ -4,6 +4,10 @@
 ALTER TABLE mandates ADD COLUMN return_url VARCHAR(255);
 --rollback ALTER TABLE mandates DROP COLUMN return_url;
 
+--changeset uk.gov.pay:alter_table-mandates-external_id
+ALTER TABLE mandates ALTER COLUMN external_id TYPE VARCHAR(26);
+--rollback ALTER TABLE mandates ALTER COLUMN external_id VARCHAR(30);
+
 --changeset uk.gov.pay:alter_table-mandates-gateway-account-id
 ALTER TABLE mandates ADD COLUMN gateway_account_id BIGINT;
 --rollback ALTER TABLE mandates DROP COLUMN gateway_account_id;

@@ -17,7 +17,7 @@ ALTER TABLE transactions ADD COLUMN mandate_id BIGINT;
 --rollback ALTER TABLE transactions DROP COLUMN mandate_id;
 
 --changeset uk.gov.pay:alter_table-transactions-external_id
-ALTER TABLE transactions ADD COLUMN external_id VARCHAR(30);
+ALTER TABLE transactions ADD COLUMN external_id VARCHAR(26);
 --rollback ALTER TABLE transactions DROP COLUMN external_id;
 
 --changeset uk.gov.pay:alter_table-transactions-reference
