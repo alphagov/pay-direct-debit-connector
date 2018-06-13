@@ -1,6 +1,11 @@
 package uk.gov.pay.directdebit.mandate.resources;
 
-import java.util.Map;
+import org.slf4j.Logger;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -10,11 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
-import uk.gov.pay.directdebit.mandate.services.MandateService;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
@@ -32,8 +33,8 @@ public class MandateResource {
     @Path("/v1/api/accounts/{accountId}/mandates")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    public Response createMandate(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("mandateExternalId") String mandateExternalId, Map<String, String> createMandateRequest, @Context UriInfo uriInfo) {
-        LOGGER.info("Received create mandate request: {}", mandateExternalId);
+    public Response createMandate(@PathParam("accountId") GatewayAccount gatewayAccount, Map<String, String> createMandateRequest, @Context UriInfo uriInfo) {
+        LOGGER.info("Received create mandate request with gateway account external id - {}", gatewayAccount.getExternalId());
         CreateMandateResponse createMandateResponse = mandateService.createMandateResponse(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
         return created(createMandateResponse.getLink("self")).entity(createMandateResponse).build();
     }
