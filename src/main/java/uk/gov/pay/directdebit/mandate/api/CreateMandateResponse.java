@@ -3,10 +3,11 @@ package uk.gov.pay.directdebit.mandate.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
+
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -16,11 +17,11 @@ public class CreateMandateResponse {
     @JsonProperty("links")
     private List<Map<String, Object>> dataLinks;
 
-    @JsonProperty("agreement_id")
-    private String agreementId;
+    @JsonProperty("mandate_id")
+    private String mandateId;
 
-    @JsonProperty("agreement_type")
-    private MandateType agreementType;
+    @JsonProperty("mandate_type")
+    private MandateType mandateType;
     
     @JsonProperty("return_url")
     private String returnUrl;
@@ -31,24 +32,24 @@ public class CreateMandateResponse {
     @JsonProperty
     private ExternalMandateState state;
 
-    public CreateMandateResponse(String agreementId,
-            MandateType agreementType, String returnUrl, String createdDate,
-            ExternalMandateState state,
-            List<Map<String, Object>> dataLinks) {
+    public CreateMandateResponse(String mandateId,
+                                 MandateType mandateType, String returnUrl, String createdDate,
+                                 ExternalMandateState state,
+                                 List<Map<String, Object>> dataLinks) {
         this.dataLinks = dataLinks;
-        this.agreementId = agreementId;
-        this.agreementType = agreementType;
+        this.mandateId = mandateId;
+        this.mandateType = mandateType;
         this.returnUrl = returnUrl;
         this.createdDate = createdDate;
         this.state = state;
     }
 
-    public String getAgreementId() {
-        return agreementId;
+    public String getMandateId() {
+        return mandateId;
     }
 
-    public MandateType getAgreementType() {
-        return agreementType;
+    public MandateType getMandateType() {
+        return mandateType;
     }
 
     public String getReturnUrl() {
