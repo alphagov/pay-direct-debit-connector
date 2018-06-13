@@ -1,14 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import javax.inject.Inject;
-import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
@@ -32,6 +24,15 @@ import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.UriInfo;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -80,7 +81,7 @@ public class MandateService {
                 .map(gatewayAccount -> {
                     Mandate mandate = new Mandate(
                             gatewayAccount,
-                            MandateType.fromString(mandateRequestMap.get("agreement_type")),
+                            MandateType.valueOf(mandateRequestMap.get("agreement_type")),
                             MandateState.CREATED,
                             mandateRequestMap.get("return_url"),
                             ZonedDateTime.now(ZoneOffset.UTC),
