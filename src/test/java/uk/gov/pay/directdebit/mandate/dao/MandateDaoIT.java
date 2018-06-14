@@ -1,9 +1,5 @@
 package uk.gov.pay.directdebit.mandate.dao;
 
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +14,11 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
+
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.time.ZonedDateTime.now;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -55,7 +56,6 @@ public class MandateDaoIT {
         assertThat(mandate.get("type"), is("ONE_OFF"));
         assertThat(mandate.get("state"), is("PENDING"));
         assertThat((Timestamp) mandate.get("created_date"), isDate(createdDate));
-
     }
 
     @Test
@@ -86,7 +86,7 @@ public class MandateDaoIT {
         
         Mandate mandate = mandateDao.findByTokenId(token.getToken()).get();
         assertThat(mandate.getId(), is(mandateFixture.getId()));
-        assertThat(mandate.getExternalId(), is(notNullValue()));
+        assertThat(mandate.getExternalId(), is(mandateFixture.getExternalId()));
         assertThat(mandate.getReference(), is("ref"));
         assertThat(mandate.getState(), is(MandateState.CREATED));
         assertThat(mandate.getType(), is(mandateFixture.getMandateType()));
@@ -137,7 +137,7 @@ public class MandateDaoIT {
     }
 
     @Test
-    public void shouldUpdateRefrenceAndReturnNumberOfAffectedRows() {
+    public void shouldUpdateReferenceAndReturnNumberOfAffectedRows() {
         Mandate testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withReference("old-reference").insert(testContext.getJdbi()).toEntity();
         String newReference = "newReference";
         int numOfUpdatedMandates = mandateDao.updateReference(testMandate.getId(), newReference);
