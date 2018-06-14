@@ -5,7 +5,7 @@ import java.time.ZonedDateTime;
 public class GoCardlessEvent {
 
     private Long id;
-    private Long eventId;
+    private Long directDebitEventId;
     private String goCardlessEventId;
     //todo action should be typed (see https://developer.gocardless.com/api-reference/#events-payment-actions and the equivalent for other resource_types
     private String action;
@@ -14,9 +14,9 @@ public class GoCardlessEvent {
     private ZonedDateTime createdAt;
     private String resourceId;
 
-    public GoCardlessEvent(Long id, Long eventId, String goCardlessEventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
+    public GoCardlessEvent(Long id, Long directDebitEventId, String goCardlessEventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
         this.id = id;
-        this.eventId = eventId;
+        this.directDebitEventId = directDebitEventId;
         this.goCardlessEventId = goCardlessEventId;
         this.action = action;
         this.resourceType = resourceType;
@@ -37,12 +37,12 @@ public class GoCardlessEvent {
         return this;
     }
 
-    public Long getEventId() {
-        return eventId;
+    public Long getDirectDebitEventId() {
+        return directDebitEventId;
     }
 
-    public GoCardlessEvent setEventId(Long eventId) {
-        this.eventId = eventId;
+    public GoCardlessEvent setDirectDebitEventId(Long directDebitEventId) {
+        this.directDebitEventId = directDebitEventId;
         return this;
     }
 

@@ -48,7 +48,7 @@ public class GoCardlessWebhookParserTest {
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
 
         GoCardlessEvent firstEvent = parsedEvents.get(0);
-        assertThat(firstEvent.getEventId(), is(nullValue()));
+        assertThat(firstEvent.getDirectDebitEventId(), is(nullValue()));
         assertThat(firstEvent.getId(), is(nullValue()));
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
@@ -75,7 +75,7 @@ public class GoCardlessWebhookParserTest {
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
 
         GoCardlessEvent firstEvent = parsedEvents.get(0);
-        assertThat(firstEvent.getEventId(), is(nullValue()));
+        assertThat(firstEvent.getDirectDebitEventId(), is(nullValue()));
         assertThat(firstEvent.getId(), is(nullValue()));
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
@@ -83,7 +83,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getJson(), is(objectMapper.readTree(firstEventPayload).toString()));
 
         GoCardlessEvent secondEvent = parsedEvents.get(1);
-        assertThat(secondEvent.getEventId(), is(nullValue()));
+        assertThat(secondEvent.getDirectDebitEventId(), is(nullValue()));
         assertThat(secondEvent.getId(), is(nullValue()));
         assertThat(secondEvent.getAction(), is(secondEventAction));
         assertThat(secondEvent.getResourceType(), is(secondEventResourceType));
@@ -91,7 +91,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(secondEvent.getJson(), is(objectMapper.readTree(secondEventPayload).toString()));
 
         GoCardlessEvent thirdEvent = parsedEvents.get(2);
-        assertThat(thirdEvent.getEventId(), is(nullValue()));
+        assertThat(thirdEvent.getDirectDebitEventId(), is(nullValue()));
         assertThat(thirdEvent.getId(), is(nullValue()));
         assertThat(thirdEvent.getAction(), is(thirdEventAction));
         assertThat(thirdEvent.getResourceType(), is(thirdEventResourceType));

@@ -55,7 +55,7 @@ public class GoCardlessHandlerTest {
             }
         };
         goCardlessHandler.handle(goCardlessEvent);
-        verify(goCardlessEvent).setEventId(event.getId());
+        verify(goCardlessEvent).setDirectDebitEventId(event.getId());
         verify(mockedGoCardlessService).updateInternalEventId(goCardlessEvent);
     }
 }

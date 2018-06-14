@@ -1,7 +1,5 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import java.util.Map;
-import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -33,6 +31,9 @@ import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundExcept
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import javax.inject.Inject;
+import java.util.Map;
 
 public class GoCardlessService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessService.class);
@@ -192,8 +193,8 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     }
 
     public void updateInternalEventId(GoCardlessEvent event) {
-        goCardlessEventDao.updateEventId(event.getId(), event.getEventId());
-        LOGGER.info("Updated gocardless event with gocardless event id {}, internal event id {} ", event.getGoCardlessEventId(), event.getEventId());
+        goCardlessEventDao.updateEventId(event.getId(), event.getDirectDebitEventId());
+        LOGGER.info("Updated gocardless event with gocardless event id {}, internal event id {} ", event.getGoCardlessEventId(), event.getDirectDebitEventId());
     }
     
     public GoCardlessPayment findPaymentForEvent(GoCardlessEvent event) {
