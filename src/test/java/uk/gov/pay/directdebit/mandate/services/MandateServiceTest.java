@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.mandate.services;
 
-import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,6 +20,8 @@ import uk.gov.pay.directdebit.payments.model.Event;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
+
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -194,7 +195,6 @@ public class MandateServiceTest {
         assertThat(newMandate.getType(), is(mandate.getType()));
         assertThat(newMandate.getState(), is(SUBMITTED));
         assertThat(newMandate.getCreatedDate(), is(mandate.getCreatedDate()));
-        verify(mockedPaymentRequestEventService, times(1)).registerDirectDebitConfirmedEventFor(mandate);
     }
 
     @Test
