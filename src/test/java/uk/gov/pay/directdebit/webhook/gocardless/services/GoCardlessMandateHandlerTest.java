@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services;
 
 import com.google.common.collect.ImmutableList;
-import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +12,6 @@ import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.fixtures.EventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -24,7 +21,10 @@ import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
 
+import java.util.Optional;
+
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -42,15 +42,12 @@ public class GoCardlessMandateHandlerTest {
     @Mock
     private GoCardlessService mockedGoCardlessService;
 
-    @Mock
-    private PayerService mockedPayerService;
-
     @Captor
     private ArgumentCaptor<GoCardlessEvent> geCaptor;
 
     private Event event = EventFixture.aPaymentRequestEventFixture().toEntity();
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
-    
+
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withPayerFixture(payerFixture);
     private GoCardlessMandateFixture goCardlessMandateFixture = GoCardlessMandateFixture.aGoCardlessMandateFixture().withMandateId(mandateFixture.getId());
     private TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
@@ -75,8 +72,8 @@ public class GoCardlessMandateHandlerTest {
         verify(goCardlessEvent).setEventId(event.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
-        Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
     @Test
@@ -91,8 +88,8 @@ public class GoCardlessMandateHandlerTest {
         verify(goCardlessEvent).setEventId(event.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
-        Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
     @Test
@@ -106,8 +103,8 @@ public class GoCardlessMandateHandlerTest {
         verify(goCardlessEvent).setEventId(event.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
-        Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
     @Test
@@ -124,8 +121,8 @@ public class GoCardlessMandateHandlerTest {
         verify(mockedMandateService, never()).mandatePendingFor(mandateFixture.toEntity());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
-        Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
     @Test
@@ -140,8 +137,8 @@ public class GoCardlessMandateHandlerTest {
         verify(goCardlessEvent).setEventId(event.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
-        Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
     @Test
@@ -156,8 +153,8 @@ public class GoCardlessMandateHandlerTest {
         verify(mockedMandateService, never()).mandatePendingFor(mandateFixture.toEntity());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
-        Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
     @Test
@@ -175,8 +172,8 @@ public class GoCardlessMandateHandlerTest {
         verify(goCardlessEvent).setEventId(event.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
-        Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
     @Test
@@ -195,8 +192,8 @@ public class GoCardlessMandateHandlerTest {
         verify(goCardlessEvent).setEventId(event.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
-        Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
     @Test
@@ -214,7 +211,7 @@ public class GoCardlessMandateHandlerTest {
         verify(mockedMandateService).mandateCancelledFor(mandateFixture.toEntity());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
-        Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 }
