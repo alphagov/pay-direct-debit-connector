@@ -118,12 +118,11 @@ public class TokenResponse {
     @Override
     public String toString() {
         return "TokenResponse{" +
-                "externalId=" + mandateExternalId +
+                "external_id=" + mandateExternalId +
                 ", reference=" + reference +
                 ", transaction_external_id=" + transactionExternalId +
                 ", gateway_account_id=" + gatewayAccountId +
                 ", gateway_account_external_id=" + gatewayAccountExternalId +
-                ", amount=" + reference +
                 ", type='" + type + '\'' +
                 ", state='" + state + '\'' +
                 ", return_url=" + returnUrl +
