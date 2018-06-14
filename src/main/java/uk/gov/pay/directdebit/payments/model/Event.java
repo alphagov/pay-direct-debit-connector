@@ -1,9 +1,10 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import java.time.ZonedDateTime;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.exception.UnsupportedPaymentRequestEventException;
+
+import java.time.ZonedDateTime;
 
 import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
@@ -23,6 +24,9 @@ import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT
 import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.payments.model.Event.Type.CHARGE;
+import static uk.gov.pay.directdebit.payments.model.Event.Type.MANDATE;
+import static uk.gov.pay.directdebit.payments.model.Event.Type.PAYER;
 
 public class Event {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(Event.class);
@@ -48,80 +52,80 @@ public class Event {
     }
     
     public static Event tokenExchanged(Long mandateId) {
-        return new Event(mandateId, null, Type.MANDATE, TOKEN_EXCHANGED);
+        return new Event(mandateId, null, MANDATE, TOKEN_EXCHANGED);
     }
 
     public static Event directDebitDetailsReceived(Long mandateId) {
-        return new Event(mandateId, null, Type.MANDATE, DIRECT_DEBIT_DETAILS_RECEIVED);
+        return new Event(mandateId, null, MANDATE, DIRECT_DEBIT_DETAILS_RECEIVED);
     }
 
     public static Event payerCreated(Long mandateId) {
-        return new Event(mandateId, null, Type.PAYER, PAYER_CREATED);
+        return new Event(mandateId, null, PAYER, PAYER_CREATED);
     }
 
     public static Event payerEdited(Long mandateId) {
-        return new Event(mandateId, null, Type.PAYER, PAYER_EDITED);
+        return new Event(mandateId, null, PAYER, PAYER_EDITED);
     }
 
     public static Event directDebitDetailsConfirmed(Long mandateId) {
-        return new Event(mandateId, null, Type.MANDATE, DIRECT_DEBIT_DETAILS_CONFIRMED);
+        return new Event(mandateId, null, MANDATE, DIRECT_DEBIT_DETAILS_CONFIRMED);
     }
     
     public static Event mandatePending(Long mandateId) {
-        return new Event(mandateId, null, Type.MANDATE, MANDATE_PENDING);
+        return new Event(mandateId, null, MANDATE, MANDATE_PENDING);
     }
 
     public static Event mandateFailed(Long mandateId) {
-        return new Event(mandateId, null, Type.MANDATE, MANDATE_FAILED);
+        return new Event(mandateId, null, MANDATE, MANDATE_FAILED);
     }
 
     public static Event mandateCancelled(Long mandateId) {
-        return new Event(mandateId, null, Type.MANDATE, MANDATE_CANCELLED);
+        return new Event(mandateId, null, MANDATE, MANDATE_CANCELLED);
     }
     
     public static Event mandateActive(Long mandateId) {
-        return new Event(mandateId, null, Type.MANDATE, MANDATE_ACTIVE);
+        return new Event(mandateId, null, MANDATE, MANDATE_ACTIVE);
     }
 
     public static Event awaitingDirectDebitDetails(Long mandateId) {
-        return new Event(mandateId, null, Type.MANDATE, TOKEN_EXCHANGED);
+        return new Event(mandateId, null, MANDATE, TOKEN_EXCHANGED);
     }
     
     public static Event paymentMethodChanged(Long mandateId) {
-        return new Event(mandateId, null, Type.MANDATE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
+        return new Event(mandateId, null, MANDATE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
     }
 
     public static Event chargeCreated(Long mandateId, Long paymentRequestId) {
-        return new Event(mandateId, paymentRequestId, Type.CHARGE, CHARGE_CREATED);
+        return new Event(mandateId, paymentRequestId, CHARGE, CHARGE_CREATED);
     }
     
     public static Event paymentAcknowledged(Long mandateId, Long paymentRequestId) {
-        return new Event(mandateId, paymentRequestId, Type.CHARGE,
+        return new Event(mandateId, paymentRequestId, CHARGE,
                 PAYMENT_ACKNOWLEDGED_BY_PROVIDER);
     }
 
     public static Event paymentSubmittedToProvider(Long mandateId, Long paymentRequestId) {
-        return new Event(mandateId, paymentRequestId, Type.CHARGE,
+        return new Event(mandateId, paymentRequestId, CHARGE,
                 PAYMENT_SUBMITTED_TO_PROVIDER);
     }
 
     public static Event paymentSubmitted(Long mandateId, Long paymentRequestId) {
-        return new Event(mandateId, paymentRequestId, Type.CHARGE, PAYMENT_SUBMITTED_TO_BANK);
+        return new Event(mandateId, paymentRequestId, CHARGE, PAYMENT_SUBMITTED_TO_BANK);
     }
 
     public static Event paymentCancelled(Long mandateId, Long paymentRequestId) {
-        return new Event(mandateId, paymentRequestId, Type.CHARGE, PAYMENT_CANCELLED_BY_USER);
+        return new Event(mandateId, paymentRequestId, CHARGE, PAYMENT_CANCELLED_BY_USER);
     }
 
     public static Event paymentFailed(Long mandateId, Long paymentRequestId) {
-        return new Event(mandateId, paymentRequestId, Type.CHARGE, PAYMENT_FAILED);
+        return new Event(mandateId, paymentRequestId, CHARGE, PAYMENT_FAILED);
     }
     public static Event paidOut(Long mandateId, Long paymentRequestId) {
-        return new Event(mandateId, paymentRequestId, Type.CHARGE, PAID_OUT);
+        return new Event(mandateId, paymentRequestId, CHARGE, PAID_OUT);
     }
 
     public static Event payoutPaid(Long mandateId, Long paymentRequestId) {
-        return new Event(mandateId, paymentRequestId, Type.CHARGE, PAID);
+        return new Event(mandateId, paymentRequestId, CHARGE, PAID);
     }
 
     public Long getId() {
