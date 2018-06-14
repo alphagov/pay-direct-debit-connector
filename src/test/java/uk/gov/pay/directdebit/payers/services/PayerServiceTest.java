@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.payers.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,6 +18,9 @@ import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
+import java.util.Map;
+import java.util.Optional;
+
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -32,10 +33,13 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 public class PayerServiceTest {
 
     @Mock
+    private
     PayerDao mockedPayerDao;
     @Mock
+    private
     MandateService mockedMandateService;
     @Mock
+    private
     PayerParser mockedPayerParser;
 
     private PayerService service;
@@ -54,7 +58,7 @@ public class PayerServiceTest {
             .withName("mr payment").toEntity();
     private GatewayAccount gatewayAccount = aGatewayAccountFixture().toEntity();
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withExternalId(mandateExternalId);
-    
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -74,6 +78,7 @@ public class PayerServiceTest {
         verify(mockedMandateService).payerCreatedFor(mandate);
         verify(mockedMandateService, never()).payerEditedFor(mandate);
     }
+
     @Test
     public void shouldUpdateAndStoreAPayerWhenReceivingCreatePayerRequest_ifAPayerAlreadyExists() {
         Payer originalPayer = PayerFixture.aPayerFixture()
