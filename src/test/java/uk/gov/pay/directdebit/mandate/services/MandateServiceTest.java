@@ -13,12 +13,14 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.fixtures.EventFixture;
 import uk.gov.pay.directdebit.payments.model.Event;
 import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
 import java.util.Optional;
@@ -75,7 +77,7 @@ public class MandateServiceTest {
         verify(mockedPaymentRequestEventService).registerMandateFailedEventFor(mandate);
         verify(mockedUserNotificationService).sendMandateFailedEmailFor(mandate);
     }
-
+    
     @Test
     public void shouldUpdateMandateStateRegisterEventAndSendEmail_whenMandateIsCancelled() {
         Mandate mandate = MandateFixture
@@ -155,17 +157,19 @@ public class MandateServiceTest {
         verify(mockedPaymentRequestEventService).registerDirectDebitReceivedEventFor(mandate);
         assertThat(mandate.getState(), Matchers.is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
-
+    
     @Test
     public void findMandateForToken_shouldUpdateTransactionStateAndRegisterEventWhenExchangingTokens() {
         String token = "token";
         Mandate mandate = MandateFixture
                 .aMandateFixture()
+                .withMandateType(MandateType.ON_DEMAND)
                 .withState(CREATED)
                 .toEntity();
         when(mockedMandateDao.findByTokenId(token))
                 .thenReturn(Optional.of(mandate));
-        Mandate newMandate = service.findMandateForToken(token).get();
+        TokenExchangeDetails tokenExchangeDetails = service.getMandateFor(token);
+        Mandate newMandate = tokenExchangeDetails.getMandate();
         assertThat(newMandate.getId(), is(notNullValue()));
         assertThat(newMandate.getExternalId(), is(mandate.getExternalId()));
         assertThat(newMandate.getReturnUrl(), is(mandate.getReturnUrl()));
@@ -177,7 +181,6 @@ public class MandateServiceTest {
         assertThat(newMandate.getCreatedDate(), is(mandate.getCreatedDate()));
         verify(mockedPaymentRequestEventService).registerTokenExchangedEventFor(newMandate);
     }
-
     @Test
     public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails() {
         Mandate mandate = MandateFixture

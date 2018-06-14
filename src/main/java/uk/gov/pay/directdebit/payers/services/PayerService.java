@@ -28,13 +28,7 @@ public class PayerService {
         this.mandateService = mandateService;
         this.payerParser = payerParser;
     }
-
-    public Payer getPayerFor(Transaction transaction) {
-        return payerDao
-                .findByTransactionId(transaction.getId())
-                .orElseThrow(() -> new PayerNotFoundException(transaction.getExternalId()));
-    }
-
+    
     public Payer getPayerFor(Mandate mandate) {
         return payerDao
                 .findByMandateId(mandate.getId())

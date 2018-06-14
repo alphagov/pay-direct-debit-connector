@@ -7,13 +7,13 @@ import uk.gov.pay.directdebit.payers.model.Payer;
 
 public class Mandate {
     private Long id;
-    private String externalId;
+    private final String externalId;
     private MandateState state;
-    private GatewayAccount gatewayAccount;
-    private String returnUrl;
-    private MandateType type;
-    private String reference;
-    private ZonedDateTime createdDate;
+    private final GatewayAccount gatewayAccount;
+    private final String returnUrl;
+    private final MandateType type;
+    private final String reference;
+    private final ZonedDateTime createdDate;
     private Payer payer;
     
     public Mandate(Long id, GatewayAccount gatewayAccount, MandateType type, String externalId,
@@ -35,11 +35,6 @@ public class Mandate {
         return payer;
     }
 
-    public Mandate setPayer(Payer payer) {
-        this.payer = payer;
-        return this;
-    }
-
     public Mandate(GatewayAccount gatewayAccount, MandateType type, 
             MandateState state, String returnUrl, ZonedDateTime createdDate,
             Payer payer) {
@@ -51,24 +46,12 @@ public class Mandate {
         return gatewayAccount;
     }
 
-    public void setGatewayAccount(GatewayAccount gatewayAccount) {
-        this.gatewayAccount = gatewayAccount;
-    }
-
     public String getReturnUrl() {
         return returnUrl;
     }
 
-    public void setReturnUrl(String returnUrl) {
-        this.returnUrl = returnUrl;
-    }
-
     public ZonedDateTime getCreatedDate() {
         return createdDate;
-    }
-
-    public void setCreatedDate(ZonedDateTime createdDate) {
-        this.createdDate = createdDate;
     }
 
     public Long getId() {
@@ -78,13 +61,9 @@ public class Mandate {
     public void setId(Long id) {
         this.id = id;
     }
-
+    
     public String getExternalId() {
         return externalId;
-    }
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
     }
 
     public MandateState getState() {
@@ -94,21 +73,12 @@ public class Mandate {
     public void setState(MandateState state) {
         this.state = state;
     }
-
     public String getReference() {
         return reference;
     }
 
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
-
     public MandateType getType() {
         return type;
-    }
-
-    public void setType(MandateType type) {
-        this.type = type;
     }
 
     @Override

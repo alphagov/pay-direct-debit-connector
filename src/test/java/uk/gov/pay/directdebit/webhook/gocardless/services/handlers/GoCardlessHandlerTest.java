@@ -30,9 +30,6 @@ public class GoCardlessHandlerTest {
     TransactionService mockedTransactionService;
 
     @Mock
-    PayerService mockedPayerService;
-
-    @Mock
     GoCardlessService mockedGoCardlessService;
 
     @Spy
@@ -55,7 +52,7 @@ public class GoCardlessHandlerTest {
             }
         };
         goCardlessHandler.handle(goCardlessEvent);
-        verify(goCardlessEvent).setDirectDebitEventId(event.getId());
+        verify(goCardlessEvent).setEventId(event.getId());
         verify(mockedGoCardlessService).updateInternalEventId(goCardlessEvent);
     }
 }

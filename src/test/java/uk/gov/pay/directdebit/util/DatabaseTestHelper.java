@@ -47,7 +47,7 @@ public class DatabaseTestHelper {
     public Map<String, Object> getEventById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * from events p WHERE p.id = :id")
+                        .createQuery("SELECT * from payment_request_events p WHERE p.id = :id")
                         .bind("id", id)
                         .mapToMap()
                         .findFirst()
@@ -78,11 +78,11 @@ public class DatabaseTestHelper {
     }
     
 
-    public List<Map<String, Object>> getTransactionsForMandate(Long id) {
+    public List<Map<String, Object>> getTransactionsForMandate(String mandateExternalId) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * from transactions t JOIN mandates m ON t.mandate_id = m.id WHERE m.id = :id")
-                        .bind("id", id)
+                        .createQuery("SELECT * from transactions t JOIN mandates m ON t.mandate_id = m.id WHERE m.external_id = :mandateExternalId")
+                        .bind("mandateExternalId", mandateExternalId)
                         .mapToMap()
                         .list()
         );

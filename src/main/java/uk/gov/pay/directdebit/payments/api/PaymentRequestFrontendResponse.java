@@ -160,22 +160,6 @@ public class PaymentRequestFrontendResponse {
         } 
         return null;
     }
-    public PayerDetails getPayerDetails() {
-        return payer;
-    }
-
-    public Long getGatewayAccountId() {
-        return gatewayAccountId;
-    }
-
-    public String getGatewayAccountExternalId() {
-        return gatewayAccountExternalId;
-    }
-
-    public String getPaymentExternalId() {
-        return mandateExternalId;
-    }
-    
     public String getReturnUrl() {
         return returnUrl;
     }
@@ -223,10 +207,12 @@ public class PaymentRequestFrontendResponse {
     @Override
     public int hashCode() {
         int result = payer != null ? payer.hashCode() : 0;
+        result = 31 * result + (transaction != null ? transaction.hashCode() : 0);
         result = 31 * result + mandateExternalId.hashCode();
-        result = 31 * result + transaction.hashCode();
         result = 31 * result + returnUrl.hashCode();
-        result = 31 * result + reference.hashCode();
+        result = 31 * result + gatewayAccountId.hashCode();
+        result = 31 * result + gatewayAccountExternalId.hashCode();
+        result = 31 * result + (reference != null ? reference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
         result = 31 * result + state.hashCode();
         return result;
@@ -235,8 +221,8 @@ public class PaymentRequestFrontendResponse {
     @Override
     public String toString() {
         return "PaymentRequestResponse{" +
-                "payer=" + payer +
-                ", transaction='" + transaction + '\'' +
+                "payer=" + payer.externalId +
+                ", transaction='" + transaction.externalId + '\'' +
                 ", paymentRequestId='" + mandateExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +
                 ", returnUrl='" + returnUrl + '\'' +

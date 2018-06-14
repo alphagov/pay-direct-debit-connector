@@ -25,9 +25,9 @@ public abstract class GoCardlessHandler implements GoCardlessActionHandler {
 
     public void handle(GoCardlessEvent event) {
         process(event).ifPresent((paymentRequestEvent) -> {
-            event.setDirectDebitEventId(paymentRequestEvent.getId());
+            event.setEventId(paymentRequestEvent.getId());
             goCardlessService.updateInternalEventId(event);
-            LOGGER.info("handled gocardless event with id: {}, resource type: {}", event.getDirectDebitEventId(), event.getResourceType().toString());
+            LOGGER.info("handled gocardless event with id: {}, resource type: {}", event.getEventId(), event.getResourceType().toString());
         });
     }
 }

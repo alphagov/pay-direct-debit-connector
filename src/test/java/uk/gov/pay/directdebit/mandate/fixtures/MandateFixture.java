@@ -21,7 +21,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     private String externalId = RandomIdGenerator.newId();
     private String reference = RandomStringUtils.randomAlphanumeric(18);
     private MandateState state = MandateState.CREATED;
-    private String returnUrl = "http://example.com/success-page";
+    private String returnUrl = "http://service.test/success-page";
     private MandateType mandateType = MandateType.ONE_OFF;
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private PayerFixture payerFixture = null;

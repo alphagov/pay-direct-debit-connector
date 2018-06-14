@@ -24,7 +24,7 @@ public class TokenService {
         token.setId(id);
         return token;
     }
-
+    
     public void deleteToken(String token) {
         int numOfDeletedTokens = tokenDao.deleteToken(token);
         if (numOfDeletedTokens == 0) {

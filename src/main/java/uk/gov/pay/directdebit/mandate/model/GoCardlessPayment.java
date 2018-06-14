@@ -5,9 +5,9 @@ import java.time.LocalDate;
 public class GoCardlessPayment {
 
     private Long id;
-    private Long transactionId;
-    private String paymentId;
-    private LocalDate chargeDate;
+    private final Long transactionId;
+    private final String paymentId;
+    private final LocalDate chargeDate;
 
     public GoCardlessPayment(Long id, Long transactionId, String paymentId, LocalDate chargeDate) {
         this.id = id;
@@ -23,35 +23,22 @@ public class GoCardlessPayment {
     public Long getId() {
         return id;
     }
-
+    
     public void setId(Long id) {
         this.id = id;
     }
-
     public Long getTransactionId() {
         return transactionId;
     }
-
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
-    }
-
+    
     public String getPaymentId() {
         return paymentId;
     }
-
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
-    }
-
+    
     public LocalDate getChargeDate() {
         return chargeDate;
     }
-
-    public void setChargeDate(LocalDate chargeDate) {
-        this.chargeDate = chargeDate;
-    }
-
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

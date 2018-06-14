@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class PaymentRequestResponse {
     @JsonProperty("links")
-    private List<Map<String, Object>> dataLinks;
+    private List<Map<String, Object>> dataLinks = new ArrayList<>();
 
     //compatibility with public api
     @JsonProperty("charge_id")

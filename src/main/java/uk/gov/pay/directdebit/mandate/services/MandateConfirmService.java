@@ -26,7 +26,7 @@ public class MandateConfirmService {
     }
 
     /**
-     * Creates a mandate and updates the mandate to a pending (Sandbox)
+     * Creates a mandate. If this is sandbox, also updates it to pending.
      *
      * @param mandateExternalId
      */

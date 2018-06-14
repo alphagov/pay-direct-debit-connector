@@ -125,19 +125,7 @@ public class TransactionService {
                 paymentExternalId, accountExternalId);
         return populateResponseWith(accountExternalId, transaction, uriInfo);
     }
-
-    public PaymentRequestFrontendResponse populateFrontendResponse(String accountExternalId, Mandate mandate, Transaction transaction) {
-        return new PaymentRequestFrontendResponse(
-                mandate.getExternalId(),
-                mandate.getGatewayAccount().getId(),
-                accountExternalId,
-                mandate.getState().toExternal(),
-                mandate.getReturnUrl(),
-                mandate.getReference(),
-                mandate.getCreatedDate().toString(),
-                mandate.getPayer(),
-                transaction);
-    }
+    
 
     public List<Transaction> findAllByPaymentStateAndProvider(PaymentState paymentState, PaymentProvider paymentProvider) {
         return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);

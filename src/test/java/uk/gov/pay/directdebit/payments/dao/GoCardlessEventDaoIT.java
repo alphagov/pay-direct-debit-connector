@@ -76,8 +76,8 @@ public class GoCardlessEventDaoIT {
         Long id = goCardlessEventDao.insert(goCardlessEvent);
         Map<String, Object> foundGoCardlessEvent = testContext.getDatabaseTestHelper().getGoCardlessEventById(id);
         assertThat(foundGoCardlessEvent.get("id"), is(id));
-        assertThat(foundGoCardlessEvent.get("event_id"), is(EVENT_ID));
-        assertThat(foundGoCardlessEvent.get("gocardless_event_id"), is(GOCARDLESS_EVENT_ID));
+        assertThat(foundGoCardlessEvent.get("payment_request_events_id"), is(EVENT_ID));
+        assertThat(foundGoCardlessEvent.get("event_id"), is(GOCARDLESS_EVENT_ID));
         assertThat(foundGoCardlessEvent.get("action"), is(GOCARDLESS_ACTION));
         assertThat(foundGoCardlessEvent.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
         assertThat(objectMapper.readTree(foundGoCardlessEvent.get("json").toString()), is(eventJson));
@@ -95,8 +95,8 @@ public class GoCardlessEventDaoIT {
         int numOfUpdatedEvents = goCardlessEventDao.updateEventId(id, newEventId);
         Map<String, Object> eventAfterUpdate = testContext.getDatabaseTestHelper().getGoCardlessEventById(id);
         assertThat(numOfUpdatedEvents, is(1));
-        assertThat(eventAfterUpdate.get("event_id"), is(newEventId));
-        assertThat(eventAfterUpdate.get("gocardless_event_id"), is(GOCARDLESS_EVENT_ID));
+        assertThat(eventAfterUpdate.get("payment_request_events_id"), is(newEventId));
+        assertThat(eventAfterUpdate.get("event_id"), is(GOCARDLESS_EVENT_ID));
         assertThat(eventAfterUpdate.get("action"), is(GOCARDLESS_ACTION));
         assertThat(eventAfterUpdate.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
         assertThat(objectMapper.readTree(eventAfterUpdate.get("json").toString()), is(eventJson));

@@ -19,12 +19,14 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.Event;
 
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.EventFixture.aPaymentRequestEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_FAILED;
 import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_ACKNOWLEDGED_BY_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.Event.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.Event.Type.MANDATE;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
@@ -38,7 +40,6 @@ public class EventDaoIT {
 
     private MandateFixture testMandate;
     private TransactionFixture testTransaction;
-    private GatewayAccountFixture gatewayAccountFixture;
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -46,8 +47,10 @@ public class EventDaoIT {
     @Before
     public void setup() {
         eventDao = testContext.getJdbi().onDemand(EventDao.class);
-        this.gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
-        this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
+                .insert(testContext.getJdbi());
+        this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(
+                gatewayAccountFixture).insert(testContext.getJdbi());
         this.testTransaction = TransactionFixture.aTransactionFixture()
                 .withMandateFixture(testMandate)
                 .insert(testContext.getJdbi());
@@ -77,11 +80,13 @@ public class EventDaoIT {
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .insert(testContext.getJdbi());
 
-        Optional<Event> event = eventDao
+        Event foundEvent = eventDao
                 .findByMandateIdAndEvent(testMandate.getId(), MANDATE,
-                        PAYMENT_ACKNOWLEDGED_BY_PROVIDER);
+                        PAYMENT_ACKNOWLEDGED_BY_PROVIDER).get();
 
-        assertThat(event.isPresent(), is(true));
+        assertThat(foundEvent.getMandateId(), is(testMandate.getId()));
+        assertThat(foundEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
+        assertThat(foundEvent.getEventType(), is(MANDATE));
     }
 
     @Test

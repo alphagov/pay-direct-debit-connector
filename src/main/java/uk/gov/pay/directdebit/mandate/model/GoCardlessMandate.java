@@ -3,9 +3,9 @@ package uk.gov.pay.directdebit.mandate.model;
 public class GoCardlessMandate {
 
     private Long id;
-    private Long mandateId;
-    private String goCardlessMandateId;
-    private String goCardlessReference;
+    private final Long mandateId;
+    private final String goCardlessMandateId;
+    private final String goCardlessReference;
 
     public GoCardlessMandate(Long id, Long mandateId, String goCardlessMandateId, String goCardlessReference) {
         this.id = id;
@@ -16,7 +16,6 @@ public class GoCardlessMandate {
     public GoCardlessMandate(Long mandateId, String goCardlessMandateId, String goCardlessReference) {
         this(null, mandateId, goCardlessMandateId, goCardlessReference);
     }
-    
 
     public Long getId() {
         return id;
@@ -25,29 +24,17 @@ public class GoCardlessMandate {
     public void setId(Long id) {
         this.id = id;
     }
-
+    
     public Long getMandateId() {
         return mandateId;
-    }
-
-    public void setMandateId(Long mandateId) {
-        this.mandateId = mandateId;
     }
 
     public String getGoCardlessMandateId() {
         return goCardlessMandateId;
     }
 
-    public void setGoCardlessMandateId(String goCardlessMandateId) {
-        this.goCardlessMandateId = goCardlessMandateId;
-    }
-
     public String getGoCardlessReference() {
         return goCardlessReference;
-    }
-
-    public void setGoCardlessReference(String goCardlessReference) {
-        this.goCardlessReference = goCardlessReference;
     }
 
     @Override

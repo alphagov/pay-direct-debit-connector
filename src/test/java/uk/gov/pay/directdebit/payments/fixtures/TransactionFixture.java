@@ -114,9 +114,10 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                                 "        state,\n" +
                                 "        reference,\n" +
                                 "        description,\n" +
+                                "        type,\n" +
                                 "        created_date\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         mandateFixture.getId(),
                         externalId,
@@ -124,6 +125,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         state,
                         reference,
                         description,
+                        "charge",
                         createdDate
                 )
         );

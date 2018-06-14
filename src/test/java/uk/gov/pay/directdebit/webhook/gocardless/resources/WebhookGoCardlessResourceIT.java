@@ -151,12 +151,12 @@ public class WebhookGoCardlessResourceIT {
 
         List<Map<String, Object>> events = testContext.getDatabaseTestHelper().getAllGoCardlessEvents();
         Map<String, Object> firstEvent = events.get(0);
-        assertThat(firstEvent.get("gocardless_event_id"), is("EV0000ED6V59V1"));
+        assertThat(firstEvent.get("event_id"), is("EV0000ED6V59V1"));
         assertThat(firstEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(firstEvent.get("action"), is("submitted"));
 
         Map<String, Object> secondEvent = events.get(1);
-        assertThat(secondEvent.get("gocardless_event_id"), is("EV0000ED6WBEQ0"));
+        assertThat(secondEvent.get("event_id"), is("EV0000ED6WBEQ0"));
         assertThat(secondEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(secondEvent.get("action"), is("paid_out"));
 
@@ -214,12 +214,12 @@ public class WebhookGoCardlessResourceIT {
         List<Map<String, Object>> events = testContext.getDatabaseTestHelper().getAllGoCardlessEvents();
 
         Map<String, Object> firstEvent = events.get(0);
-        assertThat(firstEvent.get("gocardless_event_id"), is("EV0000ED6V59V1"));
+        assertThat(firstEvent.get("event_id"), is("EV0000ED6V59V1"));
         assertThat(firstEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(firstEvent.get("action"), is("submitted"));
 
         Map<String, Object> secondEvent = events.get(1);
-        assertThat(secondEvent.get("gocardless_event_id"), is("EV0000ED6WBEQ0"));
+        assertThat(secondEvent.get("event_id"), is("EV0000ED6WBEQ0"));
         assertThat(secondEvent.get("resource_type"), is("MANDATES"));
         assertThat(secondEvent.get("action"), is("failed"));
 

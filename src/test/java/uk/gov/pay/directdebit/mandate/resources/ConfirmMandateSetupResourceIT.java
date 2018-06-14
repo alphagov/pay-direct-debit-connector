@@ -2,6 +2,12 @@ package uk.gov.pay.directdebit.mandate.resources;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,14 +26,6 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-
-import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -121,7 +119,7 @@ public class ConfirmMandateSetupResourceIT {
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getId());
+        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
         assertThat(transactionsForMandate.size(), is(1));
         assertThat(transactionsForMandate.get(0).get("state"), is("SUBMITTED"));
     }
@@ -135,7 +133,7 @@ public class ConfirmMandateSetupResourceIT {
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
 
-        //fixme not asserting on the email rn, we should do this we play the story to add email for one-off. Consider payment vs mandate reference
+        //fixme not asserting on the email rn, we should do this we play the story to add email for on-demand. Consider payment vs mandate reference
 
 //        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
 //        String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
@@ -168,7 +166,7 @@ public class ConfirmMandateSetupResourceIT {
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getId());
+        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
         assertThat(transactionsForMandate, is(empty()));
     }
 
@@ -233,7 +231,7 @@ public class ConfirmMandateSetupResourceIT {
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getId());
+        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
         assertThat(transactionsForMandate.size(), is(1));
         assertThat(transactionsForMandate.get(0).get("state"), is("SUBMITTED"));
     }
@@ -261,7 +259,7 @@ public class ConfirmMandateSetupResourceIT {
 
 //        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
 
-        //fixme not asserting on the email rn, we should do this we play the story to add email for one-off. Consider payment vs mandate reference
+        //fixme not asserting on the email rn, we should do this we play the story to add email for on-demand. Consider payment vs mandate reference
 
 //        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
 //                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
@@ -293,7 +291,7 @@ public class ConfirmMandateSetupResourceIT {
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getId());
-        assertThat(transactionsForMandate.isEmpty(), is(true));
+        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
+        assertThat(transactionsForMandate, is(empty()));
     }
 }

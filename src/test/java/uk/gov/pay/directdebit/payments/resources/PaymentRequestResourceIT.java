@@ -63,7 +63,7 @@ public class PaymentRequestResourceIT {
     }
 
     @Test
-    public void shouldCreateAMandateAndATransaction() throws Exception {
+    public void shouldCreateAMandateAndATransactionForOneOffPaymentRequest() throws Exception {
         String accountExternalId = testGatewayAccount.getExternalId();
         String expectedReference = "Test reference";
         String expectedDescription = "Test description";
@@ -180,78 +180,6 @@ public class PaymentRequestResourceIT {
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
                     put("chargeTokenId", newChargeToken);
                 }}));
-    }
-
-    @Test
-    public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenATransactionHasBeenCreated() {
-
-        String accountExternalId = testGatewayAccount.getExternalId();
-        PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withPayerFixture(payerFixture)
-                .withGatewayAccountFixture(testGatewayAccount)
-                .insert(testContext.getJdbi());
-
-        TransactionFixture transactionFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
-
-        String frontendPaymentRequestPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
-        String requestPath = frontendPaymentRequestPath
-                .replace("{accountId}", accountExternalId)
-                .replace("{mandateExternalId}", mandateFixture.getExternalId())
-                .replace("{transactionExternalId}", transactionFixture.getExternalId());
-
-        givenSetup()
-                .get(requestPath)
-                .then()
-                .statusCode(OK.getStatusCode())
-                .contentType(JSON)
-                .body("external_id", is(mandateFixture.getExternalId()))
-                .body("gateway_account_id", isNumber(testGatewayAccount.getId()))
-                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
-                .body("state.status", is(mandateFixture.getState().toExternal().getState()))
-                .body("reference", is(mandateFixture.getReference()))
-                .body("created_date", is(mandateFixture.getCreatedDate().toString()))
-                .body("transaction." + JSON_AMOUNT_KEY, isNumber(transactionFixture.getAmount()))
-                .body("transaction." + JSON_REFERENCE_KEY, is(transactionFixture.getReference()))
-                .body("transaction." + JSON_DESCRIPTION_KEY, is(transactionFixture.getDescription()))
-                .body("transaction." + JSON_STATE_KEY, is(transactionFixture.getState().toExternal().getState()))
-                .body("payer.payer_external_id", is(payerFixture.getExternalId()))
-                .body("payer.account_holder_name", is(payerFixture.getName()))
-                .body("payer.email", is(payerFixture.getEmail()))
-                .body("payer.requires_authorisation", is(payerFixture.getAccountRequiresAuthorisation()));
-    }
-
-    @Test
-    public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenNoTransactionHasBeenCreated() {
-
-        String accountExternalId = testGatewayAccount.getExternalId();
-        PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withPayerFixture(payerFixture)
-                .withGatewayAccountFixture(testGatewayAccount)
-                .insert(testContext.getJdbi());
-
-        String frontendPaymentRequestPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}";
-        String requestPath = frontendPaymentRequestPath
-                .replace("{accountId}", accountExternalId)
-                .replace("{mandateExternalId}", mandateFixture.getExternalId());
-
-        givenSetup()
-                .get(requestPath)
-                .then()
-                .statusCode(OK.getStatusCode())
-                .contentType(JSON)
-                .body("external_id", is(mandateFixture.getExternalId()))
-                .body("gateway_account_id", isNumber(testGatewayAccount.getId()))
-                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
-                .body("state.status", is(mandateFixture.getState().toExternal().getState()))
-                .body("reference", is(mandateFixture.getReference()))
-                .body("created_date", is(mandateFixture.getCreatedDate().toString()))
-                .body("$", not(hasKey("transaction")))
-                .body("payer.payer_external_id", is(payerFixture.getExternalId()))
-                .body("payer.account_holder_name", is(payerFixture.getName()))
-                .body("payer.email", is(payerFixture.getEmail()))
-                .body("payer.requires_authorisation", is(payerFixture.getAccountRequiresAuthorisation()));
     }
     
     @Test

@@ -144,24 +144,23 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         }
     }
 
-    private GoCardlessMandate createMandate(Mandate payMandate, GoCardlessCustomer goCardlessCustomer) {
+    private GoCardlessMandate createMandate(Mandate mandate, GoCardlessCustomer goCardlessCustomer) {
         try {
 
-            LOGGER.info("Attempting to call gocardless to create a mandate, pay mandate id: {}", payMandate.getExternalId());
+            LOGGER.info("Attempting to call gocardless to create a mandate, pay mandate id: {}", mandate.getExternalId());
 
-            GoCardlessMandate mandate = goCardlessClientFacade.createMandate(payMandate, goCardlessCustomer);
+            GoCardlessMandate goCardlessMandate = goCardlessClientFacade.createMandate(mandate, goCardlessCustomer);
             LOGGER.info("Created mandate in gocardless, pay mandate id: {}, gocardless mandate id: {}", 
-                    payMandate.getExternalId(),
-                    mandate.getGoCardlessMandateId());
+                    mandate.getExternalId(),
+                    goCardlessMandate.getGoCardlessMandateId());
 
-            Long id = goCardlessMandateDao.insert(mandate);
-            mandate.setId(id);
-            
-            mandateDao.updateReference(payMandate.getId(), mandate.getGoCardlessReference());
-            return mandate;
+            Long id = goCardlessMandateDao.insert(goCardlessMandate);
+            goCardlessMandate.setId(id);
+            mandateDao.updateReference(mandate.getId(), goCardlessMandate.getGoCardlessReference());
+            return goCardlessMandate;
         } catch (Exception exc) {
-            logException(exc, "mandate", payMandate.getExternalId());
-            throw new CreateMandateFailedException(payMandate.getExternalId());
+            logException(exc, "mandate", mandate.getExternalId());
+            throw new CreateMandateFailedException(mandate.getExternalId());
         }
     }
 
@@ -193,8 +192,8 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     }
 
     public void updateInternalEventId(GoCardlessEvent event) {
-        goCardlessEventDao.updateEventId(event.getId(), event.getDirectDebitEventId());
-        LOGGER.info("Updated gocardless event with gocardless event id {}, internal event id {} ", event.getGoCardlessEventId(), event.getDirectDebitEventId());
+        goCardlessEventDao.updateEventId(event.getId(), event.getEventId());
+        LOGGER.info("Updated gocardless event with gocardless event id {}, internal event id {} ", event.getGoCardlessEventId(), event.getEventId());
     }
     
     public GoCardlessPayment findPaymentForEvent(GoCardlessEvent event) {

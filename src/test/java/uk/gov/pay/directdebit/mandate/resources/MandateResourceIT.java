@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -24,6 +25,9 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -31,12 +35,18 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class MandateResourceIT {
 
+    private static final String JSON_AMOUNT_KEY = "amount";
+    private static final String JSON_REFERENCE_KEY = "reference";
+    private static final String JSON_DESCRIPTION_KEY = "description";
+    private static final String JSON_STATE_KEY = "state.status";
+    private static final String JSON_MANDATE_ID_KEY = "mandate_id";
     private GatewayAccountFixture testGatewayAccount;
 
     @DropwizardTestContext
@@ -65,12 +75,12 @@ public class MandateResourceIT {
                 .post(requestPath)
                 .then()
                 .statusCode(Response.Status.CREATED.getStatusCode())
-                .body("agreement_id", is(notNullValue()))
-                .body("agreement_type", is(agreementType))
+                .body(JSON_MANDATE_ID_KEY, is(notNullValue()))
+                .body("mandate_type", is(agreementType))
                 .body("return_url", is(returnUrl))
                 .body("created_date", is(notNullValue()))
                 .contentType(JSON);
-        String externalMandateId = response.extract().path("agreement_id").toString();
+        String externalMandateId = response.extract().path(JSON_MANDATE_ID_KEY).toString();
 
         String documentLocation = expectedMandateLocationFor(accountExternalId, externalMandateId);
         String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(externalMandateId).get("secure_redirect_token").toString();
@@ -95,53 +105,79 @@ public class MandateResourceIT {
         assertThat(createdMandate.get("payer"), is(nullValue()));
         assertThat(createdMandate.get("transaction"), is(nullValue()));
     }
+
     
-//    @Test
-//    public void shouldCreateAMandateAndATransaction_IfMandateIsOneOff() throws Exception {
-//        String accountExternalId = testGatewayAccount.getExternalId();
-//        String expectedReference = "Test reference";
-//        String expectedDescription = "Test description";
-//        String returnUrl = "http://service.url/success-page/";
-//        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-//                .put(JSON_AMOUNT_KEY, AMOUNT)
-//                .put(JSON_REFERENCE_KEY, expectedReference)
-//                .put(JSON_DESCRIPTION_KEY, expectedDescription)
-//                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
-//                .put(JSON_RETURN_URL_KEY, returnUrl)
-//                .build());
-//
-//        String requestPath = CHARGES_API_PATH
-//                .replace("{accountId}", accountExternalId);
-//
-//        ValidatableResponse response = givenSetup()
-//                .body(postBody)
-//                .post(requestPath)
-//                .then()
-//                .statusCode(Response.Status.CREATED.getStatusCode())
-//                .body(JSON_CHARGE_KEY, is(notNullValue()))
-//                .body(JSON_AMOUNT_KEY, isNumber(AMOUNT))
-//                .body(JSON_REFERENCE_KEY, is(expectedReference))
-//                .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
-//                .body(JSON_RETURN_URL_KEY, is(returnUrl))
-//                .contentType(JSON);
-//
-//        String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
-//
-//        Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getTransactionByExternalId(externalTransactionId);
-//        assertThat(createdTransaction.get("external_id"), is(notNullValue()));
-//        assertThat(createdTransaction.get("reference"), is(expectedReference));
-//        assertThat(createdTransaction.get("description"), is(expectedDescription));
-//        assertThat(createdTransaction.get("amount"), is(AMOUNT));
-//
-//        Map<String, Object> createdMandate = testContext.getDatabaseTestHelper().getMandateByTransactionExternalId(externalTransactionId);
-//
-//        assertThat(createdMandate.get("external_id"), is(notNullValue()));
-//        assertThat(createdMandate.get("reference"), is(expectedReference));
-//        assertThat(createdMandate.get("description"), is(expectedDescription));
-//        assertThat(createdMandate.get("return_url"), is(returnUrl));
-//        assertThat(createdMandate.get("gateway_account_id"), is(testGatewayAccount.getId()));
-//        assertThat(createdMandate.get("payer"), is(nullValue()));
-//    }
+    
+    @Test
+    public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenATransactionHasBeenCreated() {
+        String accountExternalId = testGatewayAccount.getExternalId();
+        PayerFixture payerFixture = PayerFixture.aPayerFixture();
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withPayerFixture(payerFixture)
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
+        TransactionFixture transactionFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
+
+        String frontendPaymentRequestPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
+        String requestPath = frontendPaymentRequestPath
+                .replace("{accountId}", accountExternalId)
+                .replace("{mandateExternalId}", mandateFixture.getExternalId())
+                .replace("{transactionExternalId}", transactionFixture.getExternalId());
+
+        givenSetup()
+                .get(requestPath)
+                .then()
+                .statusCode(OK.getStatusCode())
+                .contentType(JSON)
+                .body("external_id", is(mandateFixture.getExternalId()))
+                .body("gateway_account_id", isNumber(testGatewayAccount.getId()))
+                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
+                .body("state.status", is(mandateFixture.getState().toExternal().getState()))
+                .body("reference", is(mandateFixture.getReference()))
+                .body("created_date", is(mandateFixture.getCreatedDate().toString()))
+                .body("transaction." + JSON_AMOUNT_KEY, isNumber(transactionFixture.getAmount()))
+                .body("transaction." + JSON_REFERENCE_KEY, is(transactionFixture.getReference()))
+                .body("transaction." + JSON_DESCRIPTION_KEY, is(transactionFixture.getDescription()))
+                .body("transaction." + JSON_STATE_KEY, is(transactionFixture.getState().toExternal().getState()))
+                .body("payer.payer_external_id", is(payerFixture.getExternalId()))
+                .body("payer.account_holder_name", is(payerFixture.getName()))
+                .body("payer.email", is(payerFixture.getEmail()))
+                .body("payer.requires_authorisation", is(payerFixture.getAccountRequiresAuthorisation()));
+    }
+
+    @Test
+    public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenNoTransactionHasBeenCreated() {
+
+        String accountExternalId = testGatewayAccount.getExternalId();
+        PayerFixture payerFixture = PayerFixture.aPayerFixture();
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withPayerFixture(payerFixture)
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
+        String frontendPaymentRequestPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}";
+        String requestPath = frontendPaymentRequestPath
+                .replace("{accountId}", accountExternalId)
+                .replace("{mandateExternalId}", mandateFixture.getExternalId());
+
+        givenSetup()
+                .get(requestPath)
+                .then()
+                .statusCode(OK.getStatusCode())
+                .contentType(JSON)
+                .body("external_id", is(mandateFixture.getExternalId()))
+                .body("gateway_account_id", isNumber(testGatewayAccount.getId()))
+                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
+                .body("state.status", is(mandateFixture.getState().toExternal().getState()))
+                .body("reference", is(mandateFixture.getReference()))
+                .body("created_date", is(mandateFixture.getCreatedDate().toString()))
+                .body("$", not(hasKey("transaction")))
+                .body("payer.payer_external_id", is(payerFixture.getExternalId()))
+                .body("payer.account_holder_name", is(payerFixture.getName()))
+                .body("payer.email", is(payerFixture.getEmail()))
+                .body("payer.requires_authorisation", is(payerFixture.getAccountRequiresAuthorisation()));
+    }
     
     @Test
     public void shouldCancelAMandate() {
@@ -241,7 +277,12 @@ public class MandateResourceIT {
         Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
         assertThat(transaction.get("state"), is("USER_CANCEL_NOT_ELIGIBLE"));
     }
-
+    private TransactionFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
+        return aTransactionFixture()
+                .withMandateFixture(mandateFixture)
+                .withState(paymentState)
+                .insert(testContext.getJdbi());
+    }
 
     private String expectedMandateLocationFor(String accountId, String mandateExternalId) {
         return "http://localhost:" + testContext.getPort() + "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}"

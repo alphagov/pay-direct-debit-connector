@@ -77,7 +77,7 @@ public class MandateDaoIT {
     }
 
     @Test
-    public void shouldFindATransactionByTokenId() {
+    public void shouldFindAMandateByTokenId() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture().withReference("ref").withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
         
         TokenFixture token = aTokenFixture()

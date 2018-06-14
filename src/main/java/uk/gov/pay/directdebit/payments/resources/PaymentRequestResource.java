@@ -13,6 +13,7 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestFrontendResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
@@ -49,35 +50,14 @@ public class PaymentRequestResource {
         PaymentRequestResponse response = transactionService.getPaymentWithExternalId(accountExternalId, transactionExternalId, uriInfo);
         return Response.ok(response).build();
     }
-
-    @GET
-    @Path("/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}")
-    @Produces(APPLICATION_JSON)
-    public Response getMandateWithTransaction(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId, @PathParam("transactionExternalId") String transactionExternalId) {
-        LOGGER.info("Retrieving mandate {} and charge {} for frontend", mandateExternalId, transactionExternalId);
-        Mandate mandate = mandateService.findByExternalId(mandateExternalId);
-        Transaction transaction = transactionService.findTransactionForExternalIdAndGatewayAccountExternalId(transactionExternalId, accountExternalId);
-        PaymentRequestFrontendResponse response = transactionService.populateFrontendResponse(accountExternalId, mandate, transaction);
-        return Response.ok(response).build();
-    }
-
-    @GET
-    @Path("/v1/accounts/{accountId}/mandates/{mandateExternalId}")
-    @Produces(APPLICATION_JSON)
-    public Response getMandateWithoutTransaction(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId) {
-        LOGGER.info("Retrieving mandate {} for frontend", mandateExternalId);
-        Mandate mandate = mandateService.findByExternalId(mandateExternalId);
-        PaymentRequestFrontendResponse response = transactionService.populateFrontendResponse(accountExternalId, mandate, null);
-        return Response.ok(response).build();
-    }
     
     @POST
     @Path(CHARGES_API_PATH)
     @Produces(APPLICATION_JSON)
-    public Response createNewPaymentRequest(@PathParam("accountId") String accountExternalId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
+    public Response createOneOffPayment(@PathParam("accountId") String accountExternalId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
         LOGGER.info("Received new one-off payment request");
         paymentRequestValidator.validate(paymentRequest);
-        paymentRequest.put("agreement_type", "ONE_OFF");
+        paymentRequest.put("agreement_type", MandateType.ONE_OFF.toString());
         Mandate mandate = mandateService
                 .createMandate(paymentRequest, accountExternalId);
         PaymentRequestResponse response = transactionService.createTransaction(paymentRequest, mandate, accountExternalId, uriInfo);

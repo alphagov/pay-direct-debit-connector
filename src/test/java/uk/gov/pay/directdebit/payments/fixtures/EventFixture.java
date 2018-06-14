@@ -87,7 +87,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         jdbi.withHandle(h ->
                 h.execute(
                         "INSERT INTO" +
-                                "    events(\n" +
+                                "    payment_request_events(\n" +
                                 "        id,\n" +
                                 "        mandate_id,\n" +
                                 "        transaction_id,\n" +
