@@ -1,7 +1,5 @@
 package uk.gov.pay.directdebit.mandate.fixtures;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
@@ -14,13 +12,16 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+
 public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
     private String externalId = RandomIdGenerator.newId();
     private String reference = RandomStringUtils.randomAlphanumeric(18);
     private MandateState state = MandateState.CREATED;
-    private String returnUrl = "http://service.com/success-page";
+    private String returnUrl = "http://example.com/success-page";
     private MandateType mandateType = MandateType.ONE_OFF;
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private PayerFixture payerFixture = null;
