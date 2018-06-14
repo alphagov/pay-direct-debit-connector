@@ -114,7 +114,7 @@ public class PaymentRequestResponse {
     public String toString() {
         return "PaymentRequestResponse{" +
                 "dataLinks=" + dataLinks +
-                ", paymentRequestId='" + transactionExternalId + '\'' +
+                ", transactionExternalId='" + transactionExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +
                 ", amount=" + amount +
                 ", returnUrl='" + returnUrl + '\'' +
