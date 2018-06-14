@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,6 +15,8 @@ import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -42,7 +43,7 @@ public class MandateConfirmServiceTest {
     }
     
     @Test
-    public void confirm_shouldConfirmAPaymentByRegisteringExpectedEvents_whenNoTransactionIsSupplied() {
+    public void confirm_shouldConfirmMandateByRegisteringExpectedEvents_whenNoTransactionIsSupplied() {
         ImmutableMap<String, String> confirmMandateRequest = ImmutableMap
                 .of("sort_code", "123456", "account_number", "12345678");
         
