@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +17,10 @@ import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -50,7 +51,7 @@ public class MandateResourceIT {
     public void shouldCreateAMandateWithoutTransaction_IfMandateIsOnDemand() throws Exception {
         String accountExternalId = testGatewayAccount.getExternalId();
         String agreementType = MandateType.ON_DEMAND.toString();
-        String returnUrl = "http://service.url/success-page/";
+        String returnUrl = "http://example.com/success-page/";
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put("agreement_type", agreementType)
                 .put("return_url", returnUrl)
