@@ -119,8 +119,8 @@ public class MandateResourceIT {
 
         TransactionFixture transactionFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
 
-        String frontendPaymentRequestPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
-        String requestPath = frontendPaymentRequestPath
+        String frontendMandateWithTransationPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
+        String requestPath = frontendMandateWithTransationPath
                 .replace("{accountId}", accountExternalId)
                 .replace("{mandateExternalId}", mandateFixture.getExternalId())
                 .replace("{transactionExternalId}", transactionFixture.getExternalId());
@@ -156,8 +156,8 @@ public class MandateResourceIT {
                 .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
 
-        String frontendPaymentRequestPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}";
-        String requestPath = frontendPaymentRequestPath
+        String frontendMandatePath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}";
+        String requestPath = frontendMandatePath
                 .replace("{accountId}", accountExternalId)
                 .replace("{mandateExternalId}", mandateFixture.getExternalId());
 

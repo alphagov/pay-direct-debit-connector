@@ -43,7 +43,7 @@ public class PaymentViewResponse {
 
     @Override
     public String toString() {
-        return "PaymentRequestResponse{" +
+        return "TransactionResponse{" +
                 " gatewayExternalId='" + gatewayExternalId + '\n' +
                 ", page='" + page + '\'' +
                 ", displaySize=" + displaySize + '\'' +

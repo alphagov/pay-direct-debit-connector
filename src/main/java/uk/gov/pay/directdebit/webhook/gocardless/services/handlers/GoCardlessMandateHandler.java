@@ -10,7 +10,7 @@ import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
-import uk.gov.pay.directdebit.payments.model.Event;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
@@ -48,7 +48,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
         }
     }
 
-    private Map<GoCardlessAction, Function<Mandate, Event>> getHandledActions() {
+    private Map<GoCardlessAction, Function<Mandate, DirectDebitEvent>> getHandledActions() {
         return ImmutableMap.of(
                 GoCardlessMandateAction.CREATED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
                 GoCardlessMandateAction.SUBMITTED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
@@ -70,7 +70,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
     }
 
     @Override
-    protected Optional<Event> process(GoCardlessEvent event) {
+    protected Optional<DirectDebitEvent> process(GoCardlessEvent event) {
         return Optional.ofNullable(GoCardlessMandateAction.fromString(event.getAction()))
                 .map((action) -> getHandledActions().get(action))
                 .map((handledAction -> {
@@ -80,7 +80,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 }));
     }
 
-    private Event findMandatePendingEventOrInsertOneIfItDoesNotExist(Mandate mandate) {
+    private DirectDebitEvent findMandatePendingEventOrInsertOneIfItDoesNotExist(Mandate mandate) {
         return mandateService.findMandatePendingEventFor(mandate)
                 .orElseGet(() -> mandateService.mandatePendingFor(mandate));
     }

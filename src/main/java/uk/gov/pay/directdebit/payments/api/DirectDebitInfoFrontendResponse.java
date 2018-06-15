@@ -11,7 +11,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public class PaymentRequestFrontendResponse {
+public class DirectDebitInfoFrontendResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public static class PayerDetails {
@@ -125,7 +125,7 @@ public class PaymentRequestFrontendResponse {
     @JsonProperty
     private ExternalMandateState state;
 
-    public PaymentRequestFrontendResponse(String paymentExternalId, Long gatewayAccountId, String gatewayAccountExternalId, ExternalMandateState state, String returnUrl, String reference, String createdDate, Payer payer, Transaction transaction) {
+    public DirectDebitInfoFrontendResponse(String paymentExternalId, Long gatewayAccountId, String gatewayAccountExternalId, ExternalMandateState state, String returnUrl, String reference, String createdDate, Payer payer, Transaction transaction) {
         this.mandateExternalId = paymentExternalId;
         this.state = state;
         this.gatewayAccountId = gatewayAccountId;
@@ -181,7 +181,7 @@ public class PaymentRequestFrontendResponse {
             return false;
         }
 
-        PaymentRequestFrontendResponse that = (PaymentRequestFrontendResponse) o;
+        DirectDebitInfoFrontendResponse that = (DirectDebitInfoFrontendResponse) o;
 
         if (payer != null ? !payer.equals(that.payer) : that.payer != null) {
             return false;
@@ -220,7 +220,7 @@ public class PaymentRequestFrontendResponse {
 
     @Override
     public String toString() {
-        return "PaymentRequestResponse{" +
+        return "PaymentInfoFrontend{" +
                 "payerId=" + payer.externalId +
                 ", transactionId='" + transaction.externalId + '\'' +
                 ", mandateId='" + mandateExternalId + '\'' +

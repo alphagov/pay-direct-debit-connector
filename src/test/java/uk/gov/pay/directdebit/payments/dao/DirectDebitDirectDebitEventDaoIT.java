@@ -14,29 +14,27 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.payments.fixtures.EventFixture;
+import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.Event;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.EventFixture.aPaymentRequestEventFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture.aDirectDebitEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_FAILED;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_ACKNOWLEDGED_BY_PROVIDER;
-import static uk.gov.pay.directdebit.payments.model.Event.Type.CHARGE;
-import static uk.gov.pay.directdebit.payments.model.Event.Type.MANDATE;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_FAILED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_ACKNOWLEDGED_BY_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.MANDATE;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class EventDaoIT {
+public class DirectDebitDirectDebitEventDaoIT {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-    private EventDao eventDao;
+    private DirectDebitEventDao directDebitEventDao;
 
     private MandateFixture testMandate;
     private TransactionFixture testTransaction;
@@ -46,7 +44,7 @@ public class EventDaoIT {
 
     @Before
     public void setup() {
-        eventDao = testContext.getJdbi().onDemand(EventDao.class);
+        directDebitEventDao = testContext.getJdbi().onDemand(DirectDebitEventDao.class);
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .insert(testContext.getJdbi());
         this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(
@@ -58,46 +56,46 @@ public class EventDaoIT {
 
     @Test
     public void shouldInsertAnEvent() {
-        EventFixture paymentRequestEvent = EventFixture
-                .aPaymentRequestEventFixture()
+        DirectDebitEventFixture directDebitEvent = DirectDebitEventFixture
+                .aDirectDebitEventFixture()
                 .withTransactionId(testTransaction.getId())
                 .withMandateId(testMandate.getId());
-        Long id = eventDao.insert(paymentRequestEvent.toEntity());
-        Map<String, Object> foundPaymentRequestEvent = testContext.getDatabaseTestHelper().getEventById(id);
-        assertThat(foundPaymentRequestEvent.get("id"), is(id));
-        assertThat(foundPaymentRequestEvent.get("mandate_id"), is(testMandate.getId()));
-        assertThat(foundPaymentRequestEvent.get("transaction_id"), is(testTransaction.getId()));
-        assertThat(foundPaymentRequestEvent.get("event_type"), is(paymentRequestEvent.getEventType().toString()));
-        assertThat(foundPaymentRequestEvent.get("event"), is(paymentRequestEvent.getEvent().toString()));
-        assertThat((Timestamp) foundPaymentRequestEvent.get("event_date"), isDate(paymentRequestEvent.getEventDate()));
+        Long id = directDebitEventDao.insert(directDebitEvent.toEntity());
+        Map<String, Object> foundDirectDebitEvent = testContext.getDatabaseTestHelper().getEventById(id);
+        assertThat(foundDirectDebitEvent.get("id"), is(id));
+        assertThat(foundDirectDebitEvent.get("mandate_id"), is(testMandate.getId()));
+        assertThat(foundDirectDebitEvent.get("transaction_id"), is(testTransaction.getId()));
+        assertThat(foundDirectDebitEvent.get("event_type"), is(directDebitEvent.getEventType().toString()));
+        assertThat(foundDirectDebitEvent.get("event"), is(directDebitEvent.getEvent().toString()));
+        assertThat((Timestamp) foundDirectDebitEvent.get("event_date"), isDate(directDebitEvent.getEventDate()));
     }
 
     @Test
     public void shouldFindByMandateIdAndEvent() {
-        aPaymentRequestEventFixture()
+        aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .insert(testContext.getJdbi());
 
-        Event foundEvent = eventDao
+        DirectDebitEvent foundDirectDebitEvent = directDebitEventDao
                 .findByMandateIdAndEvent(testMandate.getId(), MANDATE,
                         PAYMENT_ACKNOWLEDGED_BY_PROVIDER).get();
 
-        assertThat(foundEvent.getMandateId(), is(testMandate.getId()));
-        assertThat(foundEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
-        assertThat(foundEvent.getEventType(), is(MANDATE));
+        assertThat(foundDirectDebitEvent.getMandateId(), is(testMandate.getId()));
+        assertThat(foundDirectDebitEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
+        assertThat(foundDirectDebitEvent.getEventType(), is(MANDATE));
     }
 
     @Test
     public void shouldNotFindByMandateIdAndEvent_ifMandateDoesNotExist() {
-        aPaymentRequestEventFixture()
+        aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .insert(testContext.getJdbi());
 
-        Optional<Event> event = eventDao
+        Optional<DirectDebitEvent> event = directDebitEventDao
                 .findByMandateIdAndEvent(456L, MANDATE,
                         PAYMENT_ACKNOWLEDGED_BY_PROVIDER);
 
@@ -106,13 +104,13 @@ public class EventDaoIT {
 
     @Test
     public void shouldNotFindByMandateIdAndEvent_ifEventIsWrong() {
-        aPaymentRequestEventFixture()
+        aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .insert(testContext.getJdbi());
 
-        Optional<Event> event = eventDao
+        Optional<DirectDebitEvent> event = directDebitEventDao
                 .findByMandateIdAndEvent(testMandate.getId(), MANDATE,
                         MANDATE_FAILED);
 

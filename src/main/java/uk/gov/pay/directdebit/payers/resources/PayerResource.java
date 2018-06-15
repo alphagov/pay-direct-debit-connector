@@ -27,8 +27,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/")
 public class PayerResource {
-    private static final String PAYER_API_PATH = "/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers/{payerExternalId}";
-
     private static final Logger LOGGER = PayLoggerFactory.getLogger(PayerResource.class);
     private final PaymentProviderFactory paymentProviderFactory;
     private final CreatePayerValidator createPayerValidator = new CreatePayerValidator();

@@ -8,8 +8,8 @@ import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.CHARGE_CREATED;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.CHARGE_CREATED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 
 public class PaymentStatesGraphTest {

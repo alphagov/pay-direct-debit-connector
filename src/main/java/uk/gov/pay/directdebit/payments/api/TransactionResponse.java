@@ -12,7 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public class PaymentRequestResponse {
+public class TransactionResponse {
     @JsonProperty("links")
     private List<Map<String, Object>> dataLinks = new ArrayList<>();
 
@@ -38,7 +38,7 @@ public class PaymentRequestResponse {
     @JsonProperty
     private ExternalPaymentState state;
 
-    public PaymentRequestResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
+    public TransactionResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
         this.transactionExternalId = transactionExternalId;
         this.state = state;
         this.dataLinks = dataLinks;
@@ -86,7 +86,7 @@ public class PaymentRequestResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PaymentRequestResponse that = (PaymentRequestResponse) o;
+        TransactionResponse that = (TransactionResponse) o;
 
         if (dataLinks != null ? !dataLinks.equals(that.dataLinks) : that.dataLinks != null) return false;
         if (!transactionExternalId.equals(that.transactionExternalId)) return false;
@@ -113,7 +113,7 @@ public class PaymentRequestResponse {
 
     @Override
     public String toString() {
-        return "PaymentRequestResponse{" +
+        return "TransactionResponse{" +
                 "dataLinks=" + dataLinks +
                 ", transactionExternalId='" + transactionExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +

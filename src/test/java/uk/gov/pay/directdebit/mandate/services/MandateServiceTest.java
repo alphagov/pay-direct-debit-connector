@@ -16,9 +16,9 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
-import uk.gov.pay.directdebit.payments.fixtures.EventFixture;
-import uk.gov.pay.directdebit.payments.model.Event;
-import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
+import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -37,14 +37,14 @@ import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_PENDING;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MandateServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     @Mock
-    private PaymentRequestEventService mockedPaymentRequestEventService;
+    private DirectDebitEventService mockedDirectDebitEventService;
     @Mock
     private MandateDao mockedMandateDao;
     @Mock
@@ -63,7 +63,7 @@ public class MandateServiceTest {
     @Before
     public void setUp() {
         service = new MandateService(mockedDirectDebitConfig, mockedMandateDao, mockedGatewayAccountDao, mockedTokenService,
-                mockedTransactionService, mockedPaymentRequestEventService, mockedUserNotificationService);
+                mockedTransactionService, mockedDirectDebitEventService, mockedUserNotificationService);
     }
 
 
@@ -74,7 +74,7 @@ public class MandateServiceTest {
                 .withState(PENDING)
                 .toEntity();
         service.mandateFailedFor(mandate);
-        verify(mockedPaymentRequestEventService).registerMandateFailedEventFor(mandate);
+        verify(mockedDirectDebitEventService).registerMandateFailedEventFor(mandate);
         verify(mockedUserNotificationService).sendMandateFailedEmailFor(mandate);
     }
     
@@ -85,7 +85,7 @@ public class MandateServiceTest {
                 .withState(PENDING)
                 .toEntity();
         service.mandateCancelledFor(mandate);
-        verify(mockedPaymentRequestEventService).registerMandateCancelledEventFor(mandate);
+        verify(mockedDirectDebitEventService).registerMandateCancelledEventFor(mandate);
         verify(mockedUserNotificationService).sendMandateCancelledEmailFor(mandate);
     }
 
@@ -97,7 +97,7 @@ public class MandateServiceTest {
                 .toEntity();
         service.mandateActiveFor(mandate);
 
-        verify(mockedPaymentRequestEventService).registerMandateActiveEventFor(mandate);
+        verify(mockedDirectDebitEventService).registerMandateActiveEventFor(mandate);
         assertThat(mandate.getState(), is(ACTIVE));
     }
 
@@ -108,14 +108,15 @@ public class MandateServiceTest {
                 .aMandateFixture()
                 .withState(PENDING)
                 .toEntity();
-        Event event = EventFixture.aPaymentRequestEventFixture().toEntity();
+        DirectDebitEvent directDebitEvent = DirectDebitEventFixture.aDirectDebitEventFixture().toEntity();
 
-        when(mockedPaymentRequestEventService.findBy(mandate.getId(), Event.Type.MANDATE, MANDATE_PENDING))
-                .thenReturn(Optional.of(event));
+        when(mockedDirectDebitEventService
+                .findBy(mandate.getId(), DirectDebitEvent.Type.MANDATE, MANDATE_PENDING))
+                .thenReturn(Optional.of(directDebitEvent));
 
-        Event foundEvent = service.findMandatePendingEventFor(mandate).get();
+        DirectDebitEvent foundDirectDebitEvent = service.findMandatePendingEventFor(mandate).get();
 
-        assertThat(foundEvent, is(event));
+        assertThat(foundDirectDebitEvent, is(directDebitEvent));
     }
 
     @Test
@@ -127,7 +128,7 @@ public class MandateServiceTest {
 
         service.payerCreatedFor(mandate);
 
-        verify(mockedPaymentRequestEventService).registerPayerCreatedEventFor(mandate);
+        verify(mockedDirectDebitEventService).registerPayerCreatedEventFor(mandate);
         verifyZeroInteractions(mockedMandateDao);
         assertThat(mandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
@@ -140,7 +141,7 @@ public class MandateServiceTest {
                 .toEntity();
         service.payerEditedFor(mandate);
 
-        verify(mockedPaymentRequestEventService).registerPayerEditedEventFor(mandate);
+        verify(mockedDirectDebitEventService).registerPayerEditedEventFor(mandate);
         verifyZeroInteractions(mockedMandateDao);
         assertThat(mandate.getState(), Matchers.is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
@@ -154,7 +155,7 @@ public class MandateServiceTest {
         when(mockedMandateDao.findByExternalId(mandate.getExternalId()))
                 .thenReturn(Optional.of(mandate));
         service.receiveDirectDebitDetailsFor(mandate.getExternalId());
-        verify(mockedPaymentRequestEventService).registerDirectDebitReceivedEventFor(mandate);
+        verify(mockedDirectDebitEventService).registerDirectDebitReceivedEventFor(mandate);
         assertThat(mandate.getState(), Matchers.is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
     
@@ -179,7 +180,7 @@ public class MandateServiceTest {
         assertThat(newMandate.getType(), is(mandate.getType()));
         assertThat(newMandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
         assertThat(newMandate.getCreatedDate(), is(mandate.getCreatedDate()));
-        verify(mockedPaymentRequestEventService).registerTokenExchangedEventFor(newMandate);
+        verify(mockedDirectDebitEventService).registerTokenExchangedEventFor(newMandate);
     }
     @Test
     public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails() {
@@ -209,7 +210,7 @@ public class MandateServiceTest {
 
         service.mandatePendingFor(mandate);
 
-        verify(mockedPaymentRequestEventService).registerMandatePendingEventFor(mandate);
+        verify(mockedDirectDebitEventService).registerMandatePendingEventFor(mandate);
         assertThat(mandate.getState(), is(PENDING));
     }
 
@@ -230,6 +231,6 @@ public class MandateServiceTest {
         Mandate newMandate = service.confirmedDirectDebitDetailsFor(mandate.getExternalId());
         
         assertThat(newMandate.getState(), is(SUBMITTED));
-        verify(mockedPaymentRequestEventService, times(1)).registerDirectDebitConfirmedEventFor(newMandate);
+        verify(mockedDirectDebitEventService, times(1)).registerDirectDebitConfirmedEventFor(newMandate);
     }
 }

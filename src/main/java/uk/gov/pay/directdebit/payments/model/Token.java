@@ -14,11 +14,11 @@ public class Token {
         this.mandateId = mandateId;
     }
 
-    public Token(String token, Long paymentRequestId) {
-        this(null, token, paymentRequestId);
+    public Token(String token, Long mandateId) {
+        this(null, token, mandateId);
     }
-    public static Token generateNewTokenFor(Long paymentRequestId) {
-        return new Token(UUID.randomUUID().toString(), paymentRequestId);
+    public static Token generateNewTokenFor(Long mandateId) {
+        return new Token(UUID.randomUUID().toString(), mandateId);
     }
 
     public void setId(Long id) {

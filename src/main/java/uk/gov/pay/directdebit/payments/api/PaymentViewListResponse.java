@@ -116,7 +116,7 @@ public class PaymentViewListResponse {
 
     @Override
     public String toString() {
-        return "PaymentRequestResponse{" +
+        return "TransactionResponse{" +
                 ", transactionId='" + transactionId + '\'' +
                 ", amount=" + amount +
                 ", reference='" + reference + '\'' +

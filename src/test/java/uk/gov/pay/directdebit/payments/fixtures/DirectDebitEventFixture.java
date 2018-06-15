@@ -6,14 +6,14 @@ import java.time.ZonedDateTime;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
-import uk.gov.pay.directdebit.payments.model.Event;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.CHARGE_CREATED;
-import static uk.gov.pay.directdebit.payments.model.Event.Type;
-import static uk.gov.pay.directdebit.payments.model.Event.Type.CHARGE;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.CHARGE_CREATED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
 
-public class EventFixture implements DbFixture<EventFixture, Event> {
+public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixture, DirectDebitEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long mandateId = RandomUtils.nextLong(1, 99999);
     private Long transactionId = null;
@@ -21,18 +21,18 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
     private SupportedEvent event = CHARGE_CREATED;
     private ZonedDateTime eventDate = ZonedDateTime.now(ZoneOffset.UTC);
 
-    private EventFixture() {
+    private DirectDebitEventFixture() {
     }
 
-    public static EventFixture aPaymentRequestEventFixture() {
-        return new EventFixture();
+    public static DirectDebitEventFixture aDirectDebitEventFixture() {
+        return new DirectDebitEventFixture();
     }
 
     public Long getId() {
         return id;
     }
 
-    public EventFixture withId(Long id) {
+    public DirectDebitEventFixture withId(Long id) {
         this.id = id;
         return this;
     }
@@ -41,7 +41,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return transactionId;
     }
 
-    public EventFixture withTransactionId(Long transactionId) {
+    public DirectDebitEventFixture withTransactionId(Long transactionId) {
         this.transactionId = transactionId;
         return this;
     }
@@ -50,7 +50,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return mandateId;
     }
 
-    public EventFixture withMandateId(Long mandateId) {
+    public DirectDebitEventFixture withMandateId(Long mandateId) {
         this.mandateId = mandateId;
         return this;
     }
@@ -59,7 +59,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return eventType;
     }
 
-    public EventFixture withEventType(Type eventType) {
+    public DirectDebitEventFixture withEventType(Type eventType) {
         this.eventType = eventType;
         return this;
     }
@@ -68,7 +68,7 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return event;
     }
 
-    public EventFixture withEvent(SupportedEvent event) {
+    public DirectDebitEventFixture withEvent(SupportedEvent event) {
         this.event = event;
         return this;
     }
@@ -77,13 +77,13 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
         return eventDate;
     }
 
-    public EventFixture withEventDate(ZonedDateTime eventDate) {
+    public DirectDebitEventFixture withEventDate(ZonedDateTime eventDate) {
         this.eventDate = eventDate;
         return this;
     }
 
     @Override
-    public EventFixture insert(Jdbi jdbi) {
+    public DirectDebitEventFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
                 h.execute(
                         "INSERT INTO" +
@@ -108,8 +108,8 @@ public class EventFixture implements DbFixture<EventFixture, Event> {
     }
 
     @Override
-    public Event toEntity() {
-        return new Event(id, mandateId, transactionId, eventType, event, eventDate);
+    public DirectDebitEvent toEntity() {
+        return new DirectDebitEvent(id, mandateId, transactionId, eventType, event, eventDate);
     }
 
 }

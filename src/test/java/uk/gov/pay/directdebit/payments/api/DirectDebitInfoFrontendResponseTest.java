@@ -10,18 +10,18 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import static org.junit.Assert.assertFalse;
 
-public class PaymentRequestFrontendResponseTest {
+public class DirectDebitInfoFrontendResponseTest {
     
     @Test
     public void shouldNotStringifyPIIFields() {
-        String paymentRequestId = "id";
+        String transactionExternalId = "id";
         String returnUrl = "http://bla.bla";
         String reference = "ref";
         String createdDate = ZonedDateTime.now().toString();
         Payer payer = PayerFixture.aPayerFixture().toEntity();
         Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
-        PaymentRequestFrontendResponse paymentRequestResponse = new PaymentRequestFrontendResponse(
-                paymentRequestId,
+        DirectDebitInfoFrontendResponse directDebitInfoFrontendResponse = new DirectDebitInfoFrontendResponse(
+                transactionExternalId,
                 3L,
                 "aaaa",
                 ExternalMandateState.EXTERNAL_INACTIVE,
@@ -31,8 +31,8 @@ public class PaymentRequestFrontendResponseTest {
                 payer,
                 transaction
         );
-        assertFalse(paymentRequestResponse.toString().contains(payer.getEmail()));
-        assertFalse(paymentRequestResponse.toString().contains(payer.getSortCode()));
-        assertFalse(paymentRequestResponse.toString().contains(payer.getAccountNumber()));
+        assertFalse(directDebitInfoFrontendResponse.toString().contains(payer.getEmail()));
+        assertFalse(directDebitInfoFrontendResponse.toString().contains(payer.getSortCode()));
+        assertFalse(directDebitInfoFrontendResponse.toString().contains(payer.getAccountNumber()));
     }
 }

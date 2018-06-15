@@ -15,29 +15,27 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
-import uk.gov.pay.directdebit.payments.api.PaymentRequestFrontendResponse;
-import uk.gov.pay.directdebit.payments.api.PaymentRequestResponse;
-import uk.gov.pay.directdebit.payments.api.PaymentRequestValidator;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.api.TransactionResponse;
+import uk.gov.pay.directdebit.payments.api.TransactionRequestValidator;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
 
 @Path("/")
-public class PaymentRequestResource {
+public class TransactionResource {
     //has to be /charges unless we change public api
     public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{transactionExternalId}";
     public static final String CHARGES_API_PATH = "/v1/api/accounts/{accountId}/charges";
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentRequestResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
     private final TransactionService transactionService;
     private final MandateService mandateService;
-    private final PaymentRequestValidator paymentRequestValidator = new PaymentRequestValidator();
+    private final TransactionRequestValidator transactionRequestValidator = new TransactionRequestValidator();
 
     @Inject
-    public PaymentRequestResource(TransactionService transactionService,
+    public TransactionResource(TransactionService transactionService,
             MandateService mandateService) {
         this.transactionService = transactionService;
         this.mandateService = mandateService;
@@ -47,20 +45,20 @@ public class PaymentRequestResource {
     @Path(CHARGE_API_PATH)
     @Produces(APPLICATION_JSON)
     public Response getCharge(@PathParam("accountId") String accountExternalId, @PathParam("transactionExternalId") String transactionExternalId, @Context UriInfo uriInfo) {
-        PaymentRequestResponse response = transactionService.getPaymentWithExternalId(accountExternalId, transactionExternalId, uriInfo);
+        TransactionResponse response = transactionService.getPaymentWithExternalId(accountExternalId, transactionExternalId, uriInfo);
         return Response.ok(response).build();
     }
     
     @POST
     @Path(CHARGES_API_PATH)
     @Produces(APPLICATION_JSON)
-    public Response createOneOffPayment(@PathParam("accountId") String accountExternalId, Map<String, String> paymentRequest, @Context UriInfo uriInfo) {
+    public Response createOneOffPayment(@PathParam("accountId") String accountExternalId, Map<String, String> transactionRequest, @Context UriInfo uriInfo) {
         LOGGER.info("Received new one-off payment request");
-        paymentRequestValidator.validate(paymentRequest);
-        paymentRequest.put("agreement_type", MandateType.ONE_OFF.toString());
+        transactionRequestValidator.validate(transactionRequest);
+        transactionRequest.put("agreement_type", MandateType.ONE_OFF.toString());
         Mandate mandate = mandateService
-                .createMandate(paymentRequest, accountExternalId);
-        PaymentRequestResponse response = transactionService.createTransaction(paymentRequest, mandate, accountExternalId, uriInfo);
+                .createMandate(transactionRequest, accountExternalId);
+        TransactionResponse response = transactionService.createTransaction(transactionRequest, mandate, accountExternalId, uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }
 }

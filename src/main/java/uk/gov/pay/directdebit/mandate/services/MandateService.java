@@ -24,12 +24,12 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
-import uk.gov.pay.directdebit.payments.api.PaymentRequestFrontendResponse;
-import uk.gov.pay.directdebit.payments.model.Event;
-import uk.gov.pay.directdebit.payments.model.Event.SupportedEvent;
+import uk.gov.pay.directdebit.payments.api.DirectDebitInfoFrontendResponse;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.PaymentRequestEventService;
+import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
@@ -41,13 +41,13 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_ACTIVE;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_CANCELLED;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_FAILED;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_PENDING;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.TOKEN_EXCHANGED;
-import static uk.gov.pay.directdebit.payments.model.Event.Type.MANDATE;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CANCELLED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_FAILED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_PENDING;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.MANDATE;
 
 public class MandateService {
 
@@ -57,7 +57,7 @@ public class MandateService {
     private final GatewayAccountDao gatewayAccountDao;
     private final TokenService tokenService;
     private final TransactionService transactionService;
-    private final PaymentRequestEventService paymentRequestEventService;
+    private final DirectDebitEventService directDebitEventService;
     private final UserNotificationService userNotificationService;
 
     @Inject
@@ -66,12 +66,12 @@ public class MandateService {
             MandateDao mandateDao, GatewayAccountDao gatewayAccountDao,
             TokenService tokenService,
             TransactionService transactionService,
-            PaymentRequestEventService paymentRequestEventService,
+            DirectDebitEventService directDebitEventService,
             UserNotificationService userNotificationService) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
         this.transactionService = transactionService;
-        this.paymentRequestEventService = paymentRequestEventService;
+        this.directDebitEventService = directDebitEventService;
         this.mandateDao = mandateDao;
         this.userNotificationService = userNotificationService;
         this.linksConfig = directDebitConfig.getLinks();
@@ -103,7 +103,7 @@ public class MandateService {
                 .findByTokenId(token)
                 .map(mandateForToken -> {
                     Mandate newMandate = updateStateFor(mandateForToken, TOKEN_EXCHANGED);
-                    paymentRequestEventService.registerTokenExchangedEventFor(newMandate);
+                    directDebitEventService.registerTokenExchangedEventFor(newMandate);
                     return newMandate;
                 })
                 .orElseThrow(TokenNotFoundException::new);
@@ -119,12 +119,12 @@ public class MandateService {
         return new TokenExchangeDetails(mandate, transactionExternalId);
 
     }
-    public PaymentRequestFrontendResponse populateGetMandateWithTransactionResponseForFrontend(String accountExternalId, String transactionExternalId) {
+    public DirectDebitInfoFrontendResponse populateGetMandateWithTransactionResponseForFrontend(String accountExternalId, String transactionExternalId) {
         Transaction transaction = transactionService
                 .findTransactionForExternalIdAndGatewayAccountExternalId(transactionExternalId,
                         accountExternalId);
         Mandate mandate = transaction.getMandate();
-        return new PaymentRequestFrontendResponse(
+        return new DirectDebitInfoFrontendResponse(
                 mandate.getExternalId(),
                 mandate.getGatewayAccount().getId(),
                 accountExternalId,
@@ -136,9 +136,9 @@ public class MandateService {
                 transaction);
     }
 
-    public PaymentRequestFrontendResponse populateGetMandateResponseForFrontend(String accountExternalId, String mandateExternalId) {
+    public DirectDebitInfoFrontendResponse populateGetMandateResponseForFrontend(String accountExternalId, String mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        return new PaymentRequestFrontendResponse(
+        return new DirectDebitInfoFrontendResponse(
                 mandate.getExternalId(),
                 mandate.getGatewayAccount().getId(),
                 accountExternalId,
@@ -192,52 +192,52 @@ public class MandateService {
                 .orElseThrow(() -> new MandateNotFoundException(id.toString()));
     }
 
-    public Event mandateFailedFor(Mandate mandate) {
+    public DirectDebitEvent mandateFailedFor(Mandate mandate) {
         Mandate newMandate = updateStateFor(mandate, MANDATE_FAILED);
         userNotificationService.sendMandateFailedEmailFor(newMandate);
-        return paymentRequestEventService.registerMandateFailedEventFor(newMandate);
+        return directDebitEventService.registerMandateFailedEventFor(newMandate);
     }
 
-    public Event mandateCancelledFor(Mandate mandate) {
+    public DirectDebitEvent mandateCancelledFor(Mandate mandate) {
         Mandate newMandate = updateStateFor(mandate, MANDATE_CANCELLED);
         userNotificationService.sendMandateCancelledEmailFor(newMandate);
-        return paymentRequestEventService.registerMandateCancelledEventFor(newMandate);
+        return directDebitEventService.registerMandateCancelledEventFor(newMandate);
     }
     
-    public Event mandatePendingFor(Mandate mandate) {
+    public DirectDebitEvent mandatePendingFor(Mandate mandate) {
         Mandate newMandate = updateStateFor(mandate, MANDATE_PENDING);
-        return paymentRequestEventService.registerMandatePendingEventFor(newMandate);
+        return directDebitEventService.registerMandatePendingEventFor(newMandate);
     }
 
-    public Event awaitingDirectDebitDetailsFor(Mandate mandate) {
-        return paymentRequestEventService.registerAwaitingDirectDebitDetailsEventFor(mandate);
+    public DirectDebitEvent awaitingDirectDebitDetailsFor(Mandate mandate) {
+        return directDebitEventService.registerAwaitingDirectDebitDetailsEventFor(mandate);
     }
     
-    public Event mandateActiveFor(Mandate mandate) {
+    public DirectDebitEvent mandateActiveFor(Mandate mandate) {
         updateStateFor(mandate, MANDATE_ACTIVE);
-        return paymentRequestEventService.registerMandateActiveEventFor(mandate);
+        return directDebitEventService.registerMandateActiveEventFor(mandate);
     }
     
     public Mandate receiveDirectDebitDetailsFor(String mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        paymentRequestEventService.registerDirectDebitReceivedEventFor(mandate);
+        directDebitEventService.registerDirectDebitReceivedEventFor(mandate);
         return mandate;
     }
 
     public Mandate confirmedDirectDebitDetailsFor(String mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
         updateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED);
-        paymentRequestEventService.registerDirectDebitConfirmedEventFor(mandate);
+        directDebitEventService.registerDirectDebitConfirmedEventFor(mandate);
         return mandate;
     }
 
     public Mandate payerCreatedFor(Mandate mandate) {
-        paymentRequestEventService.registerPayerCreatedEventFor(mandate);
+        directDebitEventService.registerPayerCreatedEventFor(mandate);
         return mandate;
     }
 
-    public Event payerEditedFor(Mandate mandate) {
-        return paymentRequestEventService.registerPayerEditedEventFor(mandate);
+    public DirectDebitEvent payerEditedFor(Mandate mandate) {
+        return directDebitEventService.registerPayerEditedEventFor(mandate);
     }
 
     private Mandate updateStateFor(Mandate mandate, SupportedEvent event) {
@@ -252,28 +252,28 @@ public class MandateService {
         return mandate;
     }
 
-    public Optional<Event> findMandatePendingEventFor(Mandate mandate) {
-        return paymentRequestEventService.findBy(mandate.getId(), MANDATE, MANDATE_PENDING);
+    public Optional<DirectDebitEvent> findMandatePendingEventFor(Mandate mandate) {
+        return directDebitEventService.findBy(mandate.getId(), MANDATE, MANDATE_PENDING);
     }
 
-    public Event changePaymentMethodFor(String mandateExternalId) {
+    public DirectDebitEvent changePaymentMethodFor(String mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
         if (MandateType.ONE_OFF.equals(mandate.getType())) {
             Transaction transaction = retrieveTransactionForOneOffMandate(mandateExternalId);
             transactionService.paymentMethodChangedFor(transaction);
         }
         Mandate newMandate = updateStateFor(mandate, SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
-        return paymentRequestEventService.registerPaymentMethodChangedEventFor(newMandate);
+        return directDebitEventService.registerPaymentMethodChangedEventFor(newMandate);
     }
 
-    public Event cancelMandateCreation(String mandateExternalId) {
+    public DirectDebitEvent cancelMandateCreation(String mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
         if (MandateType.ONE_OFF.equals(mandate.getType())) {
             Transaction transaction = retrieveTransactionForOneOffMandate(mandateExternalId);
             transactionService.paymentCancelledFor(transaction);
         }
         Mandate newMandate = updateStateFor(mandate, SupportedEvent.PAYMENT_CANCELLED_BY_USER);
-        return paymentRequestEventService.registerMandateCancelledEventFor(newMandate);
+        return directDebitEventService.registerMandateCancelledEventFor(newMandate);
     }
     
     private Transaction retrieveTransactionForOneOffMandate(String mandateExternalId) {

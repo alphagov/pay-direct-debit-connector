@@ -52,7 +52,7 @@ public class PayerResourceIT {
     private PayerFixture payerFixture = aPayerFixture().withAccountNumber("12345678");
 
     private void createPayerFor(PaymentProvider paymentProvider) throws JsonProcessingException {
-        createGatewayAccountWithPaymentRequestAndRequestPath(paymentProvider);
+        createGatewayAccountWithTransactionAndRequestPath(paymentProvider);
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace("{mandateExternalId}", testMandate.getExternalId());
@@ -98,7 +98,7 @@ public class PayerResourceIT {
 
     @Test
     public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
-        createGatewayAccountWithPaymentRequestAndRequestPath(SANDBOX);
+        createGatewayAccountWithTransactionAndRequestPath(SANDBOX);
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace("{mandateExternalId}", testMandate.getExternalId());
@@ -122,7 +122,7 @@ public class PayerResourceIT {
                 .contentType(JSON);
     }
 
-    private void createGatewayAccountWithPaymentRequestAndRequestPath(PaymentProvider paymentProvider) {
+    private void createGatewayAccountWithTransactionAndRequestPath(PaymentProvider paymentProvider) {
         testGatewayAccount = aGatewayAccountFixture()
                 .withPaymentProvider(paymentProvider)
                 .insert(testContext.getJdbi());
