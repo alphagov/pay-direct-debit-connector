@@ -20,7 +20,6 @@ import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbUri;
 import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getOrCreate;
 
 public class DropwizardAppWithPostgresRule implements TestRule {
-    private static final Logger logger = LoggerFactory.getLogger(DropwizardAppWithPostgresRule.class);
 
     private final DropwizardAppRule<DirectDebitConfig> app;
     private final String configFilePath;
