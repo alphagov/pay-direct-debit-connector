@@ -4,7 +4,7 @@ pipeline {
   agent any
 
   parameters {
-    booleanParam(defaultValue: false, description: '', name: 'runEndToEndOnPR')
+    booleanParam(defaultValue: true, description: '', name: 'runEndToEndOnPR')
   }
 
   options {
@@ -65,6 +65,12 @@ pipeline {
       }
     }
     stage('Direct-Debit End-to-End') {
+      when {
+        anyOf {
+          branch 'master'
+          environment name: 'RUN_END_TO_END_ON_PR', value: 'true'
+        }
+      }
       steps {
         runDirectDebitE2E("directdebit-connector")
       }
