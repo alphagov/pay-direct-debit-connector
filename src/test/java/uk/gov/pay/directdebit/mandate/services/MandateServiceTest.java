@@ -221,14 +221,14 @@ public class MandateServiceTest {
                 .toEntity();
 
         when(mockedMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
-
         // first call with confirmation details
         service.confirmedDirectDebitDetailsFor(mandate.getExternalId());
+        
         thrown.expect(InvalidStateTransitionException.class);
         thrown.expectMessage("Transition DIRECT_DEBIT_DETAILS_CONFIRMED from state SUBMITTED is not valid");
-
         // second call with same details that should throw and prevent adding a new event
         Mandate newMandate = service.confirmedDirectDebitDetailsFor(mandate.getExternalId());
+        
         assertThat(newMandate.getState(), is(SUBMITTED));
         verify(mockedPaymentRequestEventService, times(1)).registerDirectDebitConfirmedEventFor(newMandate);
     }

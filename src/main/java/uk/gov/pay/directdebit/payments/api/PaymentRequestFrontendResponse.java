@@ -221,9 +221,9 @@ public class PaymentRequestFrontendResponse {
     @Override
     public String toString() {
         return "PaymentRequestResponse{" +
-                "payer=" + payer.externalId +
-                ", transaction='" + transaction.externalId + '\'' +
-                ", paymentRequestId='" + mandateExternalId + '\'' +
+                "payerId=" + payer.externalId +
+                ", transactionId='" + transaction.externalId + '\'' +
+                ", mandateId='" + mandateExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +
                 ", returnUrl='" + returnUrl + '\'' +
                 ", reference='" + reference + '\'' +
