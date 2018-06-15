@@ -1,38 +1,33 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import java.time.ZonedDateTime;
+import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 
 public class Transaction {
 
     private Long id;
-    private PaymentRequest paymentRequest;
-    private Long gatewayAccountId;
-    private String gatewayAccountExternalId;
-    private PaymentProvider paymentProvider;
+    private String externalId;
     private Long amount;
-    private Type type;
     private PaymentState state;
+    private String description;
+    private String reference;
+    private ZonedDateTime createdDate;
+    private Mandate mandate;
 
-    public enum Type {
-        CHARGE
+    public Transaction(Long id, String externalId, Long amount, PaymentState state, String description, String reference, Mandate mandate, ZonedDateTime createdDate) {
+        this.id = id;
+        this.externalId = externalId;
+        this.amount = amount;
+        this.state = state;
+        this.description = description;
+        this.reference = reference;
+        this.createdDate = createdDate;
+        this.mandate = mandate;
     }
 
-    public Transaction(Long id,
-                       PaymentRequest paymentRequest,
-                       Long gatewayAccountId,
-                       String gatewayAccountExternalId,
-                       PaymentProvider paymentProvider,
-                       Long amount,
-                       Type type,
-                       PaymentState state) {
-        this.id = id;
-        this.paymentRequest = paymentRequest;
-        this.gatewayAccountId = gatewayAccountId;
-        this.gatewayAccountExternalId = gatewayAccountExternalId;
-        this.paymentProvider = paymentProvider;
-        this.amount = amount;
-        this.type = type;
-        this.state = state;
+    public Transaction(Long amount, PaymentState state, String description, String reference, Mandate mandate, ZonedDateTime createdDate) {
+        this(null, RandomIdGenerator.newId(), amount, state, description, reference, mandate, createdDate);
     }
 
     public Long getId() {
@@ -43,24 +38,12 @@ public class Transaction {
         this.id = id;
     }
 
-    public PaymentRequest getPaymentRequest() {
-        return paymentRequest;
+    public String getExternalId() {
+        return externalId;
     }
 
-    public void setPaymentProvider(PaymentProvider paymentProvider) {
-        this.paymentProvider = paymentProvider;
-    }
-
-    public Long getGatewayAccountId() {
-        return gatewayAccountId;
-    }
-
-    public String getGatewayAccountExternalId() {
-        return gatewayAccountExternalId;
-    }
-
-    public PaymentProvider getPaymentProvider() {
-        return paymentProvider;
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
     public Long getAmount() {
@@ -71,20 +54,44 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
-    }
-
     public PaymentState getState() {
         return state;
     }
 
     public void setState(PaymentState state) {
         this.state = state;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Mandate getMandate() {
+        return mandate;
+    }
+
+    public void setMandate(Mandate mandate) {
+        this.mandate = mandate;
     }
 
     @Override
@@ -101,37 +108,38 @@ public class Transaction {
         if (id != null ? !id.equals(that.id) : that.id != null) {
             return false;
         }
-        if (!paymentRequest.equals(that.paymentRequest)) {
-            return false;
-        }
-        if (!gatewayAccountId.equals(that.gatewayAccountId)) {
-            return false;
-        }
-        if (!gatewayAccountExternalId.equals(that.gatewayAccountExternalId)) {
-            return false;
-        }
-        if (paymentProvider != that.paymentProvider) {
+        if (!externalId.equals(that.externalId)) {
             return false;
         }
         if (!amount.equals(that.amount)) {
             return false;
         }
-        if (type != that.type) {
+        if (state != that.state) {
             return false;
         }
-        return state == that.state;
+        if (description != null ? !description.equals(that.description)
+                : that.description != null) {
+            return false;
+        }
+        if (reference != null ? !reference.equals(that.reference) : that.reference != null) {
+            return false;
+        }
+        if (!createdDate.equals(that.createdDate)) {
+            return false;
+        }
+        return mandate.equals(that.mandate);
     }
 
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + paymentRequest.hashCode();
-        result = 31 * result + gatewayAccountId.hashCode();
-        result = 31 * result + gatewayAccountExternalId.hashCode();
-        result = 31 * result + paymentProvider.hashCode();
+        result = 31 * result + externalId.hashCode();
         result = 31 * result + amount.hashCode();
-        result = 31 * result + type.hashCode();
         result = 31 * result + state.hashCode();
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (reference != null ? reference.hashCode() : 0);
+        result = 31 * result + createdDate.hashCode();
+        result = 31 * result + mandate.hashCode();
         return result;
     }
 }

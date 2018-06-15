@@ -1,13 +1,12 @@
 package uk.gov.pay.directdebit.payers.model;
 
-import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
 public class Payer {
     private Long id;
-    private Long paymentRequestId;
+    private Long mandateId;
     private String externalId;
     private String name;
     private String email;
@@ -18,9 +17,9 @@ public class Payer {
     private boolean accountRequiresAuthorisation;
     private ZonedDateTime createdDate;
 
-    public Payer(Long id, Long paymentRequestId, String externalId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation, String bankName, ZonedDateTime createdDate) {
+    public Payer(Long id, Long mandateId, String externalId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, boolean accountRequiresAuthorisation, String bankName, ZonedDateTime createdDate) {
         this.id = id;
-        this.paymentRequestId = paymentRequestId;
+        this.mandateId = mandateId;
         this.externalId = externalId;
         this.name = name;
         this.email = email;
@@ -32,8 +31,8 @@ public class Payer {
         this.createdDate = createdDate;
     }
 
-    public Payer(Long paymentRequestId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, String bankName, boolean accountRequiresAuthorisation) {
-        this(null, paymentRequestId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, bankName, ZonedDateTime.now(ZoneOffset.UTC));
+    public Payer(Long mandateId, String name, String email, String sortCode, String accountNumber, String accountNumberLastTwoDigits, String bankName, boolean accountRequiresAuthorisation) {
+        this(null, mandateId, RandomIdGenerator.newId(), name, email, sortCode, accountNumber, accountNumberLastTwoDigits, accountRequiresAuthorisation, bankName, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     public void setId(Long id) {
@@ -44,8 +43,8 @@ public class Payer {
         return id;
     }
 
-    public Long getPaymentRequestId() {
-        return paymentRequestId;
+    public Long getMandateId() {
+        return mandateId;
     }
 
     public String getExternalId() {
@@ -101,7 +100,7 @@ public class Payer {
         if (id != null ? !id.equals(payer.id) : payer.id != null) {
             return false;
         }
-        if (!paymentRequestId.equals(payer.paymentRequestId)) {
+        if (!mandateId.equals(payer.mandateId)) {
             return false;
         }
         if (!externalId.equals(payer.externalId)) {
@@ -131,7 +130,7 @@ public class Payer {
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + paymentRequestId.hashCode();
+        result = 31 * result + mandateId.hashCode();
         result = 31 * result + externalId.hashCode();
         result = 31 * result + name.hashCode();
         result = 31 * result + email.hashCode();
@@ -147,7 +146,7 @@ public class Payer {
     @Override
     public String toString() {
         return "Payer{" +
-                "paymentRequestId=" + paymentRequestId +
+                "mandateId=" + mandateId +
                 ", externalId='" + externalId + '\'' +
                 '}';
     }

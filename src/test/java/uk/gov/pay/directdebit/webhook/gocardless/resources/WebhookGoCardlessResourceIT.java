@@ -1,7 +1,11 @@
 package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.hamcrest.MatcherAssert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,15 +15,12 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-
-import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
@@ -32,7 +33,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
@@ -120,17 +120,22 @@ public class WebhookGoCardlessResourceIT {
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(10110);
+    
+    private GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture();
 
+    @Before
+    public void setUp() {
+        testGatewayAccount.insert(testContext.getJdbi());
+    }
+    
     @Test
     public void handleWebhook_whenAPaidOutWebhookArrives_shouldInsertGoCardlessEventsUpdatePaymentToSuccessAndReturn200() {
-        GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
-        PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                .withGatewayAccountId(testGatewayAccount.getId())
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
         TransactionFixture transactionFixture = aTransactionFixture()
-                .withPaymentRequestId(paymentRequestFixture.getId())
-                .withPaymentRequestExternalId(paymentRequestFixture.getExternalId())
-                .withState(PaymentState.PENDING_DIRECT_DEBIT_PAYMENT)
+                .withMandateFixture(mandateFixture)
+                .withState(PaymentState.PENDING)
                 .insert(testContext.getJdbi());
         aGoCardlessPaymentFixture()
                 .withPaymentId("PM00008Q30R2BR")
@@ -145,7 +150,6 @@ public class WebhookGoCardlessResourceIT {
                 .statusCode(Response.Status.OK.getStatusCode());
 
         List<Map<String, Object>> events = testContext.getDatabaseTestHelper().getAllGoCardlessEvents();
-
         Map<String, Object> firstEvent = events.get(0);
         assertThat(firstEvent.get("event_id"), is("EV0000ED6V59V1"));
         assertThat(firstEvent.get("resource_type"), is("PAYMENTS"));
@@ -162,17 +166,16 @@ public class WebhookGoCardlessResourceIT {
 
     @Test
     public void handleWebhook_whenAMandateFailedWebhookArrives_shouldInsertGoCardlessEventsUpdatePaymentToFailedAndReturn200() {
-        GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
-        PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture()
-                .withGatewayAccountId(testGatewayAccount.getId())
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .withState(MandateState.PENDING)
+                .withMandateType(MandateType.ONE_OFF)
                 .insert(testContext.getJdbi());
-        TransactionFixture transactionFixture = aTransactionFixture()
-                .withPaymentRequestId(paymentRequestFixture.getId())
-                .withPaymentRequestExternalId(paymentRequestFixture.getExternalId())
-                .withState(PaymentState.PENDING_DIRECT_DEBIT_PAYMENT)
+        TransactionFixture transactionFixture = aTransactionFixture()                
+                .withMandateFixture(mandateFixture)
+                .withState(PaymentState.PENDING)
                 .insert(testContext.getJdbi());
-        PayerFixture payerFixture = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture().withPayerId(payerFixture.getId()).insert(testContext.getJdbi());
+        PayerFixture payerFixture = PayerFixture.aPayerFixture().withMandateId(mandateFixture.getId()).insert(testContext.getJdbi());
         aGoCardlessPaymentFixture()
                 .withPaymentId("PM00008Q30R2BR")
                 .withTransactionId(transactionFixture.getId())
@@ -220,6 +223,9 @@ public class WebhookGoCardlessResourceIT {
         assertThat(secondEvent.get("resource_type"), is("MANDATES"));
         assertThat(secondEvent.get("action"), is("failed"));
 
+        Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
+        MatcherAssert.assertThat(mandate.get("state"), is("FAILED"));
+        
         Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
         MatcherAssert.assertThat(transaction.get("state"), is("FAILED"));
     }

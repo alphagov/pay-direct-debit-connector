@@ -3,17 +3,18 @@ package uk.gov.pay.directdebit.mandate.model;
 public class GoCardlessMandate {
 
     private Long id;
-    private Long mandateId;
-    private String goCardlessMandateId;
+    private final Long mandateId;
+    private final String goCardlessMandateId;
+    private final String goCardlessReference;
 
-
-    public GoCardlessMandate(Long id, Long mandateId, String goCardlessMandateId) {
+    public GoCardlessMandate(Long id, Long mandateId, String goCardlessMandateId, String goCardlessReference) {
         this.id = id;
         this.mandateId = mandateId;
         this.goCardlessMandateId = goCardlessMandateId;
+        this.goCardlessReference = goCardlessReference;
     }
-    public GoCardlessMandate(Long mandateId, String goCardlessMandateId) {
-        this(null, mandateId, goCardlessMandateId);
+    public GoCardlessMandate(Long mandateId, String goCardlessMandateId, String goCardlessReference) {
+        this(null, mandateId, goCardlessMandateId, goCardlessReference);
     }
 
     public Long getId() {
@@ -23,21 +24,17 @@ public class GoCardlessMandate {
     public void setId(Long id) {
         this.id = id;
     }
-
+    
     public Long getMandateId() {
         return mandateId;
-    }
-
-    public void setMandateId(Long mandateId) {
-        this.mandateId = mandateId;
     }
 
     public String getGoCardlessMandateId() {
         return goCardlessMandateId;
     }
 
-    public void setGoCardlessMandateId(String goCardlessMandateId) {
-        this.goCardlessMandateId = goCardlessMandateId;
+    public String getGoCardlessReference() {
+        return goCardlessReference;
     }
 
     @Override
@@ -49,6 +46,7 @@ public class GoCardlessMandate {
 
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (!mandateId.equals(that.mandateId)) return false;
+        if (!goCardlessReference.equals(that.goCardlessReference)) return false;
         return goCardlessMandateId.equals(that.goCardlessMandateId);
     }
 
@@ -56,6 +54,7 @@ public class GoCardlessMandate {
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + mandateId.hashCode();
+        result = 31 * result + goCardlessReference.hashCode();
         result = 31 * result + goCardlessMandateId.hashCode();
         return result;
     }

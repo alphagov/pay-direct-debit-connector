@@ -6,6 +6,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import io.dropwizard.setup.Environment;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import javax.net.ssl.SSLSocketFactory;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
@@ -16,17 +19,13 @@ import uk.gov.pay.directdebit.notifications.clients.ClientFactory;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
+import uk.gov.pay.directdebit.payments.dao.EventDao;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
-import uk.gov.pay.directdebit.payments.dao.PaymentRequestDao;
-import uk.gov.pay.directdebit.payments.dao.PaymentRequestEventDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
-import javax.net.ssl.SSLSocketFactory;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 
 public class DirectDebitModule extends AbstractModule {
 
@@ -96,20 +95,14 @@ public class DirectDebitModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PaymentRequestEventDao providePaymentRequestEventDao() {
-        return jdbi.onDemand(PaymentRequestEventDao.class);
+    public EventDao providePaymentRequestEventDao() {
+        return jdbi.onDemand(EventDao.class);
     }
 
     @Provides
     @Singleton
     public TokenDao provideTokenDao() {
         return jdbi.onDemand(TokenDao.class);
-    }
-
-    @Provides
-    @Singleton
-    public PaymentRequestDao providePaymentRequestDao() {
-        return jdbi.onDemand(PaymentRequestDao.class);
     }
 
     @Provides

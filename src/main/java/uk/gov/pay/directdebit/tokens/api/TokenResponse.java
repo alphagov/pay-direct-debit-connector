@@ -3,18 +3,14 @@ package uk.gov.pay.directdebit.tokens.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.pay.directdebit.payments.model.PaymentRequest;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class TokenResponse {
 
     @JsonProperty("external_id")
-    private String paymentExternalId;
-
-    @JsonProperty("amount")
-    private Long amount;
+    private String mandateExternalId;
 
     @JsonProperty("type")
     private String type;
@@ -31,79 +27,102 @@ public class TokenResponse {
     @JsonProperty("gateway_account_external_id")
     private String gatewayAccountExternalId;
 
-    @JsonProperty("description")
-    private String description;
+    @JsonProperty("reference")
+    private String reference;
+
+    @JsonProperty("transaction_external_id")
+    private String transactionExternalId;
 
 
     private TokenResponse(String paymentExternalId,
-                          Long gatewayAccountId,
-                          String gatewayAccountExternalId,
-                          String description,
-                          String returnUrl,
-                          Long amount,
-                          String type,
-                          String state) {
-        this.paymentExternalId = paymentExternalId;
+            Long gatewayAccountId,
+            String gatewayAccountExternalId,
+            String reference,
+            String returnUrl,
+            String type,
+            String state,
+            String transactionExternalId) {
+        this.mandateExternalId = paymentExternalId;
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
-        this.amount = amount;
         this.type = type;
         this.state = state;
         this.returnUrl = returnUrl;
-        this.description = description;
+        this.reference = reference;
+        this.transactionExternalId = transactionExternalId;
     }
 
-    public static TokenResponse from(Transaction transaction) {
-        PaymentRequest paymentRequest = transaction.getPaymentRequest();
+    public static TokenResponse from(Mandate mandate, String transactionExternalId) {
         return new TokenResponse(
-                paymentRequest.getExternalId(),
-                transaction.getGatewayAccountId(),
-                transaction.getGatewayAccountExternalId(),
-                paymentRequest.getDescription(),
-                paymentRequest.getReturnUrl(),
-                transaction.getAmount(),
-                transaction.getType().toString(),
-                transaction.getState().toString()
+                mandate.getExternalId(),
+                mandate.getGatewayAccount().getId(),
+                mandate.getGatewayAccount().getExternalId(),
+                mandate.getReference(),
+                mandate.getReturnUrl(),
+                mandate.getType().toString(),
+                mandate.getState().toString(),
+                transactionExternalId
         );
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         TokenResponse that = (TokenResponse) o;
-        if (!returnUrl.equals(that.returnUrl)) return false;
-        if (!paymentExternalId.equals(that.paymentExternalId)) return false;
-        if (!gatewayAccountId.equals(that.gatewayAccountId)) return false;
-        if (!gatewayAccountExternalId.equals(that.gatewayAccountExternalId)) return false;
-        if (!description.equals(that.description)) return false;
-        if (!amount.equals(that.amount)) return false;
-        if (!type.equals(that.type)) return false;
-        return state.equals(that.state);
+
+        if (!mandateExternalId.equals(that.mandateExternalId)) {
+            return false;
+        }
+        if (!type.equals(that.type)) {
+            return false;
+        }
+        if (!state.equals(that.state)) {
+            return false;
+        }
+        if (!returnUrl.equals(that.returnUrl)) {
+            return false;
+        }
+        if (!gatewayAccountId.equals(that.gatewayAccountId)) {
+            return false;
+        }
+        if (!gatewayAccountExternalId.equals(that.gatewayAccountExternalId)) {
+            return false;
+        }
+        if (reference != null ? !reference.equals(that.reference) : that.reference != null) {
+            return false;
+        }
+        return transactionExternalId != null ? transactionExternalId
+                .equals(that.transactionExternalId) : that.transactionExternalId == null;
     }
 
     @Override
     public int hashCode() {
-        int result = paymentExternalId.hashCode();
-        result = 31 * result + amount.hashCode();
+        int result = mandateExternalId.hashCode();
+        result = 31 * result + type.hashCode();
+        result = 31 * result + state.hashCode();
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + gatewayAccountId.hashCode();
         result = 31 * result + gatewayAccountExternalId.hashCode();
-        result = 31 * result + description.hashCode();
-        result = 31 * result + type.hashCode();
-        result = 31 * result + state.hashCode();
+        result = 31 * result + (reference != null ? reference.hashCode() : 0);
+        result = 31 * result + (transactionExternalId != null ? transactionExternalId.hashCode()
+                : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "TokenResponse{" +
-                "externalId=" + paymentExternalId +
-                ", description=" + description +
+                "external_id=" + mandateExternalId +
+                ", reference=" + reference +
+                ", transaction_external_id=" + transactionExternalId +
                 ", gateway_account_id=" + gatewayAccountId +
                 ", gateway_account_external_id=" + gatewayAccountExternalId +
-                ", amount=" + amount +
                 ", type='" + type + '\'' +
                 ", state='" + state + '\'' +
                 ", return_url=" + returnUrl +

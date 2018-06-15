@@ -1,5 +1,10 @@
 package uk.gov.pay.directdebit.gatewayaccounts.services;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,15 +16,10 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -42,6 +42,8 @@ public class GatewayAccountServiceTest {
                         .withType(TYPE)
                         .withAnalyticsId(ANALYTICS_ID);
 
+    private MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+            .withGatewayAccountFixture(gatewayAccountFixture);
     @Mock
     private GatewayAccountDao mockedGatewayAccountDao;
 
@@ -51,13 +53,12 @@ public class GatewayAccountServiceTest {
     private GatewayAccountService service;
 
     private Map<String, String> createPaymentRequest = new HashMap<>();
-
-    private Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
+    private Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         service = new GatewayAccountService(mockedGatewayAccountDao, mockedGatewayAccountParser);
     }
 
@@ -86,7 +87,7 @@ public class GatewayAccountServiceTest {
 
     @Test
     public void shouldReturnGatewayAccountForTransactionIfItExists() {
-        when(mockedGatewayAccountDao.findById(transaction.getGatewayAccountId()))
+        when(mockedGatewayAccountDao.findById(gatewayAccountFixture.getId()))
                 .thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
         GatewayAccount gatewayAccount = service.getGatewayAccountFor(transaction);
         assertThat(gatewayAccount.getId(), is(gatewayAccountFixture.getId()));
@@ -99,10 +100,10 @@ public class GatewayAccountServiceTest {
 
     @Test
     public void shouldThrowIfGatewayAccountForTransactionDoesNotExist() {
-        when(mockedGatewayAccountDao.findById(transaction.getGatewayAccountId()))
+        when(mockedGatewayAccountDao.findById(gatewayAccountFixture.getId()))
                 .thenReturn(Optional.empty());
         thrown.expect(GatewayAccountNotFoundException.class);
-        thrown.expectMessage("Unknown gateway account: " + transaction.getGatewayAccountId().toString());
+        thrown.expectMessage("Unknown gateway account: " + gatewayAccountFixture.getId());
         thrown.reportMissingExceptionWithMessage("GatewayAccountNotFoundException expected");
         service.getGatewayAccountFor(transaction);
     }

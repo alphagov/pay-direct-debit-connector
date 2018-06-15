@@ -22,17 +22,17 @@ public class GoCardlessClientWrapper {
         this.goCardlessClient = goCardlessClient;
     }
 
-    public Customer createCustomer(String paymentRequestExternalId, Payer payer) {
+    public Customer createCustomer(String mandateExternalId, Payer payer) {
         return goCardlessClient.customers()
                 .create()
                 .withEmail(payer.getEmail())
                 .withGivenName(payer.getName())
                 .withFamilyName(payer.getName())
-                .withIdempotencyKey(paymentRequestExternalId)
+                .withIdempotencyKey(mandateExternalId)
                 .execute();
     }
 
-    public CustomerBankAccount createCustomerBankAccount(String paymentRequestExternalId, GoCardlessCustomer customer,
+    public CustomerBankAccount createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer customer,
                                                          String accountHolderName, String sortCode, String accountNumber){
         return goCardlessClient.customerBankAccounts()
                 .create()
@@ -41,25 +41,25 @@ public class GoCardlessClientWrapper {
                 .withBranchCode(sortCode)
                 .withCountryCode("GB")
                 .withLinksCustomer(customer.getCustomerId())
-                .withIdempotencyKey(paymentRequestExternalId)
+                .withIdempotencyKey(mandateExternalId)
                 .execute();
     }
 
-    public Mandate createMandate(String paymentRequestExternalId, GoCardlessCustomer customer) {
+    public Mandate createMandate(String mandateExternalId, GoCardlessCustomer customer) {
         return goCardlessClient.mandates()
                 .create()
                 .withLinksCustomerBankAccount(customer.getCustomerBankAccountId())
-                .withIdempotencyKey(paymentRequestExternalId)
+                .withIdempotencyKey(mandateExternalId)
                 .execute();
     }
 
-    public Payment createPayment(String paymentRequestExternalId, GoCardlessMandate mandate, Transaction transaction) {
+    public Payment createPayment(Transaction transaction, GoCardlessMandate mandate) {
         return goCardlessClient.payments()
                 .create()
                 .withAmount(Math.toIntExact(transaction.getAmount()))
                 .withCurrency(PaymentService.PaymentCreateRequest.Currency.GBP)
                 .withLinksMandate(mandate.getGoCardlessMandateId())
-                .withIdempotencyKey(paymentRequestExternalId)
+                .withIdempotencyKey(transaction.getExternalId())
                 .execute();
     }
 

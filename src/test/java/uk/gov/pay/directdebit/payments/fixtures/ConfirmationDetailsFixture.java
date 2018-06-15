@@ -3,30 +3,32 @@ package uk.gov.pay.directdebit.payments.fixtures;
 import org.apache.commons.lang.RandomStringUtils;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
+import uk.gov.pay.directdebit.payments.model.Transaction;
 
 public class ConfirmationDetailsFixture {
 
-    private TransactionFixture transactionFixture;
-    private MandateFixture mandateFixture;
+    private MandateFixture mandateFixture = MandateFixture.aMandateFixture();
     private String sortCode = RandomStringUtils.randomNumeric(6);
     private String accountNumber = RandomStringUtils.randomNumeric(8);
-
+    private TransactionFixture transactionFixture = null;
+    
     private ConfirmationDetailsFixture() { }
 
     public static ConfirmationDetailsFixture confirmationDetails() {
         return new ConfirmationDetailsFixture();
     }
 
-    public ConfirmationDetailsFixture withTransaction(TransactionFixture transaction) {
-        this.transactionFixture = transaction;
-        return this;
-    }
 
-    public ConfirmationDetailsFixture withMandate(MandateFixture mandateFixture) {
+    public ConfirmationDetailsFixture withMandateFixture(MandateFixture mandateFixture) {
         this.mandateFixture = mandateFixture;
         return this;
     }
 
+    public ConfirmationDetailsFixture withTransactionFixture(TransactionFixture transactionFixture) {
+        this.transactionFixture = transactionFixture;
+        return this;
+    }
+    
     public ConfirmationDetailsFixture withSortCode(String sortCode) {
         this.sortCode = sortCode;
         return this;
@@ -38,7 +40,8 @@ public class ConfirmationDetailsFixture {
     }
 
     public ConfirmationDetails build() {
-        return new ConfirmationDetails(transactionFixture.toEntity(), mandateFixture.toEntity(), accountNumber, sortCode);
+        Transaction transaction = transactionFixture != null ? transactionFixture.toEntity() : null;
+        return new ConfirmationDetails(mandateFixture.toEntity(), transaction, accountNumber, sortCode);
     }
 
 }

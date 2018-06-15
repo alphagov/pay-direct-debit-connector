@@ -7,22 +7,44 @@ import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-    private Long payerId = RandomUtils.nextLong(1, 99999);
     private String externalId = RandomIdGenerator.newId();
     private String reference = RandomStringUtils.randomAlphanumeric(18);
-    private MandateState state = MandateState.PENDING;
-
+    private MandateState state = MandateState.CREATED;
+    private String returnUrl = "http://service.test/success-page";
+    private MandateType mandateType = MandateType.ONE_OFF;
+    private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
+    private PayerFixture payerFixture = null;
+    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
     private MandateFixture() {
     }
 
     public static MandateFixture aMandateFixture() {
         return new MandateFixture();
     }
+    
+    public MandateFixture withGatewayAccountFixture(
+            GatewayAccountFixture gatewayAccountFixture) {
+        this.gatewayAccountFixture = gatewayAccountFixture;
+        return this;
+    }
 
+    public MandateFixture withPayerFixture(
+            PayerFixture payerFixture) {
+        this.payerFixture = payerFixture;
+        return this;
+    }
+    
     public Long getId() {
         return id;
     }
@@ -32,12 +54,12 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return this;
     }
 
-    public Long getPayerId() {
-        return payerId;
+    public MandateType getMandateType() {
+        return mandateType;
     }
 
-    public MandateFixture withPayerId(Long payerId) {
-        this.payerId = payerId;
+    public MandateFixture withMandateType(MandateType mandateType) {
+        this.mandateType = mandateType;
         return this;
     }
 
@@ -68,6 +90,19 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return this;
     }
 
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public MandateFixture withReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
+        return this;
+    }
+
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
+    }
+
     @Override
     public MandateFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -75,24 +110,35 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                         "INSERT INTO" +
                                 "    mandates(\n" +
                                 "        id,\n" +
-                                "        payer_id,\n" +
+                                "        gateway_account_id,\n" +
                                 "        external_id,\n" +
+                                "        type,\n" +
                                 "        reference,\n" +
-                                "        state\n" +
+                                "        return_url,\n" +
+                                "        state,\n" +
+                                "        created_date\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
-                        payerId,
+                        gatewayAccountFixture.getId(),
                         externalId,
+                        mandateType.toString(),
                         reference,
-                        state.toString()
+                        returnUrl,
+                        state.toString(),
+                        createdDate
                 )
         );
+        if (payerFixture != null) {
+            payerFixture.withMandateId(id);
+            payerFixture.insert(jdbi);
+        }
         return this;
     }
 
     @Override
     public Mandate toEntity() {
-        return new Mandate(id, externalId, payerId, reference, state);
+        Payer payer = payerFixture != null ? payerFixture.toEntity() : null;
+        return new Mandate(id, gatewayAccountFixture.toEntity(), mandateType, externalId, reference, state, returnUrl, createdDate, payer);
     }
 }

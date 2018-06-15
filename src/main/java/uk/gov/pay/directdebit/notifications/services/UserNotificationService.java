@@ -9,7 +9,6 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
-import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 public class UserNotificationService {
@@ -33,8 +32,8 @@ public class UserNotificationService {
         this.directDebitConfig = directDebitConfig;
     }
 
-    public void sendMandateFailedEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
-        adminUsersClient.sendEmail(EmailTemplate.MANDATE_FAILED, transaction, payer.getEmail(),
+    public void sendMandateFailedEmailFor(Mandate mandate) {
+        adminUsersClient.sendEmail(EmailTemplate.MANDATE_FAILED, mandate,
                 ImmutableMap.of(
                         MANDATE_REFERENCE_KEY, mandate.getReference(),
                         DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
@@ -42,8 +41,8 @@ public class UserNotificationService {
         );
     }
 
-    public void sendMandateCancelledEmailFor(Transaction transaction, Mandate mandate, Payer payer) {
-        adminUsersClient.sendEmail(EmailTemplate.MANDATE_CANCELLED, transaction, payer.getEmail(),
+    public void sendMandateCancelledEmailFor(Mandate mandate) {
+        adminUsersClient.sendEmail(EmailTemplate.MANDATE_CANCELLED, mandate,
                 ImmutableMap.of(
                         MANDATE_REFERENCE_KEY, mandate.getReference(),
                         DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
@@ -51,20 +50,20 @@ public class UserNotificationService {
         );
     }
 
-    public void sendPaymentConfirmedEmailFor(Transaction transaction, Payer payer, Mandate mandate, LocalDate earliestChargeDate) {
-        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_CONFIRMED, transaction, payer.getEmail(),
+    public void sendPaymentConfirmedEmailFor(Transaction transaction, LocalDate earliestChargeDate) {
+        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_CONFIRMED, transaction.getMandate(),
                 ImmutableMap.<String, String>builder()
                         .put(AMOUNT_KEY, formatToPounds(transaction.getAmount()))
                         .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate))
-                        .put(MANDATE_REFERENCE_KEY, mandate.getReference())
-                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, "******" + payer.getAccountNumberLastTwoDigits())
+                        .put(MANDATE_REFERENCE_KEY, transaction.getMandate().getReference())
+                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, "******" + transaction.getMandate().getPayer().getAccountNumberLastTwoDigits())
                         .put(STATEMENT_NAME_KEY, PLACEHOLDER_STATEMENT_NAME)
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
                         .build());
     }
 
-    public void sendPaymentFailedEmailFor(Transaction transaction, Payer payer) {
-        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_FAILED, transaction, payer.getEmail(),
+    public void sendPaymentFailedEmailFor(Transaction transaction) {
+        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_FAILED, transaction.getMandate(),
                 ImmutableMap.of(
                         DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
                 ));

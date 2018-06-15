@@ -5,6 +5,6 @@ import uk.gov.pay.directdebit.common.exception.NotFoundException;
 public class TokenNotFoundException extends NotFoundException {
 
     public TokenNotFoundException() {
-        super("No one-time token found for payment request");
+        super("No one-time token found for mandate");
     }
 }

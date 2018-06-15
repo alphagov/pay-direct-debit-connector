@@ -1,5 +1,10 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,12 +22,6 @@ import uk.gov.pay.directdebit.payments.exception.RecordsNotFoundException;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
-
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -53,11 +52,10 @@ public class PaymentViewServiceTest {
                     1000L + i,
                     "Pay reference" + i,
                     "This is a description" + i,
-                    "http://return-service.com/" + i,
                     createdDate,
                     "John Doe" + i,
                     "doe@mail.mail",
-                    PaymentState.PENDING_DIRECT_DEBIT_PAYMENT);
+                    PaymentState.NEW);
             paymentViewList.add(paymentView);
         }
         paymentViewService = new PaymentViewService(paymentViewDao, gatewayAccountDao);
@@ -74,7 +72,7 @@ public class PaymentViewServiceTest {
         PaymentViewResponse response = paymentViewService.getPaymentViewResponse(searchParams);
         assertThat(response.getPaymentViewResponses().get(3).getAmount(), is(1003L));
         assertThat(response.getPaymentViewResponses().get(1).getName(), is("John Doe1"));
-        assertThat(response.getPaymentViewResponses().get(0).getState(), is((PaymentState.PENDING_DIRECT_DEBIT_PAYMENT.toExternal())));
+        assertThat(response.getPaymentViewResponses().get(0).getState(), is((PaymentState.NEW.toExternal())));
         assertThat(response.getPaymentViewResponses().get(2).getCreatedDate(), is(createdDate.toString()));
     }
 

@@ -1,44 +1,26 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
-import org.apache.commons.lang.RandomStringUtils;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.payments.model.PaymentRequest;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 
 public class TransactionFixture implements DbFixture<TransactionFixture, Transaction> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-
-    private Long paymentRequestId = RandomUtils.nextLong(1, 99999);
-
-    private String paymentRequestExternalId = RandomIdGenerator.newId();
-
-    private String paymentRequestDescription = RandomStringUtils.randomAlphabetic(20);
-
-    private String paymentRequestReference = RandomStringUtils.randomAlphabetic(20);
-
-    private Long gatewayAccountId = RandomUtils.nextLong(1, 99999);
-
-    private String gatewayAccountExternalId = RandomIdGenerator.newId();
-
-    private String paymentRequestReturnUrl = "http://www." + RandomStringUtils.randomAlphabetic(10) + ".test";
-
-    private PaymentProvider paymentProvider = PaymentProvider.SANDBOX;
-
+    private MandateFixture mandateFixture = MandateFixture.aMandateFixture();
+    private String externalId = RandomIdGenerator.newId();
     private Long amount = RandomUtils.nextLong(1, 99999);
-
-    private Transaction.Type type = Transaction.Type.CHARGE;
-
     private PaymentState state = PaymentState.NEW;
-
+    private String reference = RandomStringUtils.randomAlphanumeric(10);
+    private String description = RandomStringUtils.randomAlphanumeric(20);
+    private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
     private TransactionFixture() {
     }
 
@@ -46,44 +28,36 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return new TransactionFixture();
     }
 
-    public TransactionFixture withPaymentRequestId(Long paymentRequestId) {
-        this.paymentRequestId = paymentRequestId;
+    public Long getId() {
+        return id;
+    }
+    
+    public TransactionFixture withId(Long id) {
+        this.id = id;
         return this;
     }
 
-    public TransactionFixture withPaymentRequestExternalId(String paymentRequestExternalId) {
-        this.paymentRequestExternalId = paymentRequestExternalId;
+    public MandateFixture getMandateFixture() {
+        return mandateFixture;
+    }
+
+    public TransactionFixture withMandateFixture(
+            MandateFixture mandateFixture) {
+        this.mandateFixture = mandateFixture;
         return this;
     }
 
-    public TransactionFixture withPaymentRequestDescription(String paymentRequestDescription) {
-        this.paymentRequestDescription = paymentRequestDescription;
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public TransactionFixture withExternalId(String externalId) {
+        this.externalId = externalId;
         return this;
     }
 
-    public TransactionFixture withPaymentRequestReference(String paymentRequestReference) {
-        this.paymentRequestReference = paymentRequestReference;
-        return this;
-    }
-
-    public TransactionFixture withGatewayAccountId(Long gatewayAccountId) {
-        this.gatewayAccountId = gatewayAccountId;
-        return this;
-    }
-
-    public TransactionFixture withGatewayAccountExternalId(String gatewayAccountExternalId) {
-        this.gatewayAccountExternalId = gatewayAccountExternalId;
-        return this;
-    }
-
-    public TransactionFixture withPaymentRequestReturnUrl(String paymentRequestReturnUrl) {
-        this.paymentRequestReturnUrl = paymentRequestReturnUrl;
-        return this;
-    }
-
-    public TransactionFixture withPaymentProvider(PaymentProvider paymentProvider) {
-        this.paymentProvider = paymentProvider;
-        return this;
+    public Long getAmount() {
+        return amount;
     }
 
     public TransactionFixture withAmount(Long amount) {
@@ -91,9 +65,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public TransactionFixture withType(Transaction.Type type) {
-        this.type = type;
-        return this;
+    public PaymentState getState() {
+        return state;
     }
 
     public TransactionFixture withState(PaymentState state) {
@@ -101,52 +74,31 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return this;
     }
 
-    public PaymentProvider getPaymentProvider() {
-        return paymentProvider;
+    public String getReference() {
+        return reference;
     }
 
-    public Long getPaymentRequestId() {
-        return paymentRequestId;
+    public TransactionFixture withReference(String reference) {
+        this.reference = reference;
+        return this;
     }
 
-    public String getPaymentRequestExternalId() {
-        return paymentRequestExternalId;
+    public String getDescription() {
+        return description;
     }
 
-    public Long getAmount() {
-        return amount;
+    public TransactionFixture withDescription(String description) {
+        this.description = description;
+        return this;
     }
 
-    public Transaction.Type getType() {
-        return type;
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public PaymentState getState() {
-        return state;
-    }
-
-    public String getPaymentRequestReference() {
-        return paymentRequestReference;
-    }
-
-    public String getPaymentRequestReturnUrl() {
-        return paymentRequestReturnUrl;
-    }
-
-    public Long getGatewayAccountId() {
-        return gatewayAccountId;
-    }
-
-    public String getGatewayAccountExternalId() {
-        return gatewayAccountExternalId;
-    }
-
-    public String getPaymentRequestDescription() {
-        return paymentRequestDescription;
+    public TransactionFixture withCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
+        return this;
     }
 
     @Override
@@ -156,17 +108,25 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
                         "INSERT INTO" +
                                 "    transactions(\n" +
                                 "        id,\n" +
-                                "        payment_request_id,\n" +
+                                "        mandate_id,\n" +
+                                "        external_id,\n" +
                                 "        amount,\n" +
+                                "        state,\n" +
+                                "        reference,\n" +
+                                "        description,\n" +
                                 "        type,\n" +
-                                "        state\n" +
+                                "        created_date\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
-                        paymentRequestId,
+                        mandateFixture.getId(),
+                        externalId,
                         amount,
-                        type,
-                        state
+                        state,
+                        reference,
+                        description,
+                        "charge",
+                        createdDate
                 )
         );
         return this;
@@ -174,19 +134,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public Transaction toEntity() {
-        PaymentRequest paymentRequest = new PaymentRequest(
-                paymentRequestId,
-                amount,
-                paymentRequestReturnUrl,
-                gatewayAccountId,
-                paymentRequestDescription,
-                paymentRequestReference,
-                paymentRequestExternalId,
-                null,
-                ZonedDateTime.now(ZoneOffset.UTC)
-        );
-
-        return new Transaction(id, paymentRequest, gatewayAccountId, gatewayAccountExternalId, paymentProvider, amount, type, state);
+     
+        return new Transaction(id, externalId, amount, state, description, reference, mandateFixture.toEntity(), createdDate);
     }
 
 }

@@ -1,18 +1,17 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.payments.api.PaymentViewListResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewValidator;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
-import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 import uk.gov.pay.directdebit.payments.exception.RecordsNotFoundException;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.stream.Collectors;
+import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
 import static java.lang.String.format;
 
@@ -57,11 +56,10 @@ public class PaymentViewService {
 
     private PaymentViewListResponse populateResponseWith(PaymentView paymentView) {
         return new PaymentViewListResponse(
-                paymentView.getPaymentRequestExternalId(),
+                paymentView.getTransactionExternalId(),
                 paymentView.getAmount(),
                 paymentView.getReference(),
                 paymentView.getDescription(),
-                paymentView.getReturnUrl(),
                 paymentView.getCreatedDate().toString(),
                 paymentView.getName(),
                 paymentView.getEmail(),

@@ -6,7 +6,7 @@ import static java.lang.String.format;
 
 public class CustomerNotFoundException extends NotFoundException {
 
-    public CustomerNotFoundException(String paymentRequestExternalId, String mandateId) {
-        super(format("Customer not found in gocardless, payment request id: %s, mandate id: %s", paymentRequestExternalId, mandateId));
+    public CustomerNotFoundException(String mandateId, String transactionId) {
+        super(format("Customer not found in gocardless, mandate id: %s, transaction id: %s", mandateId, transactionId));
     }
 }

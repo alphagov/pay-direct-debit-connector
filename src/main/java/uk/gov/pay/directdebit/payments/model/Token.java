@@ -6,12 +6,12 @@ public class Token {
 
     private Long id;
     private String token;
-    private Long paymentRequestId;
+    private Long mandateId;
 
-    public Token(Long id, String token, Long paymentRequestId) {
+    public Token(Long id, String token, Long mandateId) {
         this.id = id;
         this.token = token;
-        this.paymentRequestId = paymentRequestId;
+        this.mandateId = mandateId;
     }
 
     public Token(String token, Long paymentRequestId) {
@@ -37,11 +37,11 @@ public class Token {
         this.token = token;
     }
 
-    public Long getPaymentRequestId() {
-        return paymentRequestId;
+    public Long getMandateId() {
+        return mandateId;
     }
 
-    public void setPaymentRequestId(Long paymentRequestId) {
-        this.paymentRequestId = paymentRequestId;
+    public void setMandateId(Long mandateId) {
+        this.mandateId = mandateId;
     }
 }

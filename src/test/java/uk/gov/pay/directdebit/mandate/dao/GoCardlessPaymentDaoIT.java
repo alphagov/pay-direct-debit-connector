@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.mandate.dao;
 
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,13 +11,10 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-
-import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -37,15 +36,12 @@ public class GoCardlessPaymentDaoIT {
     private GoCardlessPaymentFixture goCardlessPaymentFixture;
 
     private GatewayAccountFixture gatewayAccountFixture;
-
+    private MandateFixture mandateFixture;
     @Before
     public void setup()  {
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
-        PaymentRequestFixture paymentRequestFixture = PaymentRequestFixture
-                .aPaymentRequestFixture()
-                .withGatewayAccountId(gatewayAccountFixture.getId())
-                .insert(testContext.getJdbi());
-        transactionFixture = TransactionFixture.aTransactionFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
+        mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).insert(testContext.getJdbi());
         goCardlessPaymentDao = testContext.getJdbi().onDemand(GoCardlessPaymentDao.class);
         goCardlessPaymentFixture = aGoCardlessPaymentFixture()
                 .withTransactionId(transactionFixture.getId())

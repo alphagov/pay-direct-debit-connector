@@ -1,33 +1,31 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Assert;
+import java.time.LocalDate;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
-import uk.gov.pay.directdebit.mandate.services.PaymentConfirmService;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.services.MandateConfirmService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
-import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import java.time.LocalDate;
-import java.util.Map;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.ConfirmationDetailsFixture.confirmationDetails;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SandboxServiceTest {
@@ -35,53 +33,68 @@ public class SandboxServiceTest {
     @Mock
     private PayerService mockedPayerService;
     @Mock
-    private PaymentConfirmService mockedPaymentConfirmService;
+    private MandateConfirmService mockedMandateConfirmService;
     @Mock
     private TransactionService mockedTransactionService;
 
     private SandboxService service;
-    private String paymentRequestExternalId = "sdkfhsdkjfhjdks";
 
-    private GatewayAccount gatewayAccount = aGatewayAccountFixture().toEntity();
-    private Payer payer = PayerFixture.aPayerFixture().toEntity();
+    private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture();
+    private MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture);
 
     @Before
     public void setUp() {
-        service = new SandboxService(mockedPayerService, mockedPaymentConfirmService, mockedTransactionService);
+        service = new SandboxService(mockedPayerService, mockedMandateConfirmService, mockedTransactionService);
     }
 
     @Test
     public void createPayer_shouldCreatePayerWhenReceivingPayerRequest() {
         Map<String, String> createPayerRequest = ImmutableMap.of();
-        service.createPayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
-        verify(mockedPayerService).createOrUpdatePayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
+        service.createPayer(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), createPayerRequest);
+        verify(mockedPayerService).createOrUpdatePayer(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), createPayerRequest);
     }
 
     @Test
-    public void confirm_shouldRegisterAPaymentSubmittedToProviderEventWhenSuccessfullyConfirmed() {
+    public void confirm_shouldRegisterAPaymentSubmittedToProviderEventWhenSuccessfullyConfirmingOneOffMandate() {
+        MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ONE_OFF).withGatewayAccountFixture(gatewayAccountFixture);
+        TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
         ConfirmationDetails confirmationDetails = confirmationDetails()
-                .withTransaction(aTransactionFixture())
-                .withMandate(aMandateFixture())
+                .withMandateFixture(mandateFixture)
+                .withTransactionFixture(transactionFixture)
                 .build();
-        Transaction transaction = confirmationDetails.getTransaction();
-
-        Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678");
-        when(mockedPaymentConfirmService.confirm(gatewayAccount.getExternalId(), paymentRequestExternalId, details))
+        Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678", "transaction_external_id", transactionFixture.getExternalId());
+        when(mockedMandateConfirmService
+                .confirm(mandateFixture.getExternalId(), details))
                 .thenReturn(confirmationDetails);
-        when(mockedPayerService.getPayerFor(transaction)).thenReturn(payer);
 
-        service.confirm(paymentRequestExternalId, gatewayAccount, details);
-        verify(mockedTransactionService).paymentSubmittedToProviderFor(transaction, payer, confirmationDetails.getMandate(), LocalDate.now().plusDays(4));
+        service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
+        verify(mockedTransactionService).paymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
     }
 
+    @Test
+    public void confirm_shouldNotRegisterAPaymentSubmittedToProviderEventWhenSuccessfullyConfirmingOnDemandMandate() {
+        MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(gatewayAccountFixture);
+        ConfirmationDetails confirmationDetails = confirmationDetails()
+                .withMandateFixture(mandateFixture)
+                .build();
+        Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678");
+        when(mockedMandateConfirmService
+                .confirm(mandateFixture.getExternalId(), details))
+                .thenReturn(confirmationDetails);
+
+        service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
+        verifyNoMoreInteractions(mockedTransactionService);
+    }
+    
     @Test
     public void shouldValidateBankAccountDetails_ifSortCodeAndAccountNumberAreValid() {
         Map<String, String> bankAccountDetails = ImmutableMap.of(
                 "account_number", "12345678",
-                "sort_code", "123456" 
+                "sort_code", "123456",
+                "transaction_external_id", "12asdasd3456" 
         );
 
-        BankAccountValidationResponse response = service.validate(paymentRequestExternalId, bankAccountDetails);
+        BankAccountValidationResponse response = service.validate(mandateFixture.getExternalId(), bankAccountDetails);
         assertThat(response.isValid(), is(true));
         assertThat(response.getBankName(), is("Sandbox Bank"));
     }
@@ -90,10 +103,11 @@ public class SandboxServiceTest {
     public void shouldValidateBankAccountDetails_ifSortCodeIsInvalid() {
         Map<String, String> bankAccountDetails = ImmutableMap.of(
                 "account_number", "12345678",
-                "sort_code", "12345s"
+                "sort_code", "12345s",
+                "transaction_external_id", "fsdfsdf343"
         );
 
-        BankAccountValidationResponse response = service.validate(paymentRequestExternalId, bankAccountDetails);
+        BankAccountValidationResponse response = service.validate(mandateFixture.getExternalId(), bankAccountDetails);
         assertThat(response.isValid(), is(false));
         assertThat(response.getBankName(), is(nullValue()));
     }
@@ -102,10 +116,11 @@ public class SandboxServiceTest {
     public void shouldValidateBankAccountDetails_ifAccountNumberIsInvalid() {
         Map<String, String> bankAccountDetails = ImmutableMap.of(
                 "account_number", "1234567r",
-                "sort_code", "123456"
+                "sort_code", "123456",
+                "transaction_external_id", "fsdfsdf343"
         );
 
-        BankAccountValidationResponse response = service.validate(paymentRequestExternalId, bankAccountDetails);
+        BankAccountValidationResponse response = service.validate(mandateFixture.getExternalId(), bankAccountDetails);
         assertThat(response.isValid(), is(false));
         assertThat(response.getBankName(), is(nullValue()));
     }

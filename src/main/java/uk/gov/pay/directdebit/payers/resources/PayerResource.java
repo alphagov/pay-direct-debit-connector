@@ -1,6 +1,17 @@
 package uk.gov.pay.directdebit.payers.resources;
 
+import java.net.URI;
+import java.util.Map;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.util.URIBuilder;
@@ -11,18 +22,6 @@ import uk.gov.pay.directdebit.payers.api.CreatePayerValidator;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
-
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.net.URI;
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -37,37 +36,39 @@ public class PayerResource {
     public PayerResource(PaymentProviderFactory paymentProviderFactory) {
         this.paymentProviderFactory = paymentProviderFactory;
     }
-
+    
     @PUT
-    @Path("/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers")
+    @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    public Response createPayer(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("paymentRequestExternalId") String paymentRequestExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
-        createPayerValidator.validate(paymentRequestExternalId, createPayerRequest);
+    public Response createPayer(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("mandateExternalId") String mandateExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
+        createPayerValidator.validate(mandateExternalId, createPayerRequest);
 
-        LOGGER.info("Received create payer request for payment request with id: {}", paymentRequestExternalId);
+        LOGGER.info("Received create payer request for mandate with id: {}", mandateExternalId);
 
         DirectDebitPaymentProvider payerService = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
-        Payer payer = payerService.createPayer(paymentRequestExternalId, gatewayAccount, createPayerRequest);
+        Payer payer = payerService.createPayer(mandateExternalId, gatewayAccount, createPayerRequest);
 
         CreatePayerResponse createPayerResponse = CreatePayerResponse.from(payer);
 
-        URI newPayerLocation = URIBuilder.selfUriFor(uriInfo, PAYER_API_PATH, gatewayAccount.getExternalId(), paymentRequestExternalId, createPayerResponse.getPayerExternalId());
+        URI newPayerLocation = URIBuilder.selfUriFor(uriInfo,
+                "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers/{payerExternalId}",
+                gatewayAccount.getExternalId(), mandateExternalId, createPayerResponse.getPayerExternalId());
         return Response.created(newPayerLocation).entity(createPayerResponse).build();
     }
 
     @POST
-    @Path("/v1/api/accounts/{accountId}/payment-requests/{paymentRequestExternalId}/payers/bank-account/validate")
+    @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers/bank-account/validate")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     public Response validateBankAccount(
-            @PathParam("accountId") GatewayAccount gatewayAccount, 
-            @PathParam("paymentRequestExternalId") String paymentRequestExternalId, 
+            @PathParam("accountId") GatewayAccount gatewayAccount,
+            @PathParam("mandateExternalId") String mandateExternalId,
             Map<String, String> bankAccountDetails) {
-        LOGGER.info("Validating bank account details for payment with id: {}", paymentRequestExternalId);
+        LOGGER.info("Validating bank account details for mandate with id: {}", mandateExternalId);
         DirectDebitPaymentProvider payerService = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
-        BankAccountValidationResponse response = payerService.validate(paymentRequestExternalId, bankAccountDetails);
-        LOGGER.info("Bank account details are valid: {}, payment request with id: {}", response.isValid(), paymentRequestExternalId);
+        BankAccountValidationResponse response = payerService.validate(mandateExternalId, bankAccountDetails);
+        LOGGER.info("Bank account details are valid: {}, mandate with id: {}", response.isValid(), mandateExternalId);
         return Response.ok(response).build();
     }
 }

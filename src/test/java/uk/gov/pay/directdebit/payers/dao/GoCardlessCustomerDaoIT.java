@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.payers.dao;
 
-import liquibase.exception.LiquibaseException;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,14 +9,11 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-
-import java.io.IOException;
-import java.util.Map;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -34,18 +31,19 @@ public class GoCardlessCustomerDaoIT {
     private GoCardlessCustomerDao goCardlessCustomerDao;
 
     private GoCardlessCustomerFixture goCardlessCustomerFixture;
-    private PaymentRequestFixture paymentRequestFixture;
+    private TransactionFixture transactionFixture;
     private PayerFixture payerFixture;
+    private MandateFixture mandateFixture;
     private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
-    public void setup() throws IOException, LiquibaseException {
+    public void setup() {
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
-        paymentRequestFixture = PaymentRequestFixture
-                .aPaymentRequestFixture()
-                .withGatewayAccountId(gatewayAccountFixture.getId())
+        mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        transactionFixture = TransactionFixture.aTransactionFixture()
+                .withMandateFixture(mandateFixture)
                 .insert(testContext.getJdbi());
-        payerFixture = PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
+        payerFixture = PayerFixture.aPayerFixture().withMandateId(mandateFixture.getId()).insert(testContext.getJdbi());
         goCardlessCustomerDao = testContext.getJdbi().onDemand(GoCardlessCustomerDao.class);
         goCardlessCustomerFixture = aGoCardlessCustomerFixture()
                 .withPayerId(payerFixture.getId())
@@ -61,22 +59,6 @@ public class GoCardlessCustomerDaoIT {
         assertThat(foundGoCardlessCustomer.get("payer_id"), is(payerFixture.getId()));
         assertThat(foundGoCardlessCustomer.get("customer_id"), is(CUSTOMER_ID));
         assertThat(foundGoCardlessCustomer.get("customer_bank_account_id"), is(CUSTOMER_BANK_ACCOUNT_ID));
-    }
-
-
-    @Test
-    public void shouldGetAGoCardlessCustomerByPayerId() {
-        goCardlessCustomerFixture.insert(testContext.getJdbi());
-        GoCardlessCustomer goCardlessCustomer = goCardlessCustomerDao.findByPayerId(payerFixture.getId()).get();
-        assertThat(goCardlessCustomer.getId(), is(goCardlessCustomerFixture.getId()));
-        assertThat(goCardlessCustomer.getPayerId(), is(payerFixture.getId()));
-        assertThat(goCardlessCustomer.getCustomerId(), is(CUSTOMER_ID));
-        assertThat(goCardlessCustomer.getCustomerBankAccountId(), is(CUSTOMER_BANK_ACCOUNT_ID));
-    }
-
-    @Test
-    public void shouldNotFindAPayerById_ifIdIsInvalid() {
-        assertThat(goCardlessCustomerDao.findByPayerId(9812L).isPresent(), is(false));
     }
 
     @Test

@@ -1,12 +1,5 @@
 package uk.gov.pay.directdebit.webhook.gocardless.api;
 
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.MANDATES;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYOUTS;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -20,6 +13,13 @@ import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
+
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.MANDATES;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
+import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYOUTS;
 
 public class GoCardlessWebhookParserTest {
 
@@ -48,7 +48,7 @@ public class GoCardlessWebhookParserTest {
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
 
         GoCardlessEvent firstEvent = parsedEvents.get(0);
-        assertThat(firstEvent.getPaymentRequestEventId(), is(nullValue()));
+        assertThat(firstEvent.getEventId(), is(nullValue()));
         assertThat(firstEvent.getId(), is(nullValue()));
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
@@ -75,7 +75,7 @@ public class GoCardlessWebhookParserTest {
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
 
         GoCardlessEvent firstEvent = parsedEvents.get(0);
-        assertThat(firstEvent.getPaymentRequestEventId(), is(nullValue()));
+        assertThat(firstEvent.getEventId(), is(nullValue()));
         assertThat(firstEvent.getId(), is(nullValue()));
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
@@ -83,7 +83,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getJson(), is(objectMapper.readTree(firstEventPayload).toString()));
 
         GoCardlessEvent secondEvent = parsedEvents.get(1);
-        assertThat(secondEvent.getPaymentRequestEventId(), is(nullValue()));
+        assertThat(secondEvent.getEventId(), is(nullValue()));
         assertThat(secondEvent.getId(), is(nullValue()));
         assertThat(secondEvent.getAction(), is(secondEventAction));
         assertThat(secondEvent.getResourceType(), is(secondEventResourceType));
@@ -91,7 +91,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(secondEvent.getJson(), is(objectMapper.readTree(secondEventPayload).toString()));
 
         GoCardlessEvent thirdEvent = parsedEvents.get(2);
-        assertThat(thirdEvent.getPaymentRequestEventId(), is(nullValue()));
+        assertThat(thirdEvent.getEventId(), is(nullValue()));
         assertThat(thirdEvent.getId(), is(nullValue()));
         assertThat(thirdEvent.getAction(), is(thirdEventAction));
         assertThat(thirdEvent.getResourceType(), is(thirdEventResourceType));

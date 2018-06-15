@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payers.dao;
 
+import java.util.Optional;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -9,21 +10,18 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.payers.dao.mapper.PayerMapper;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
-import java.util.Map;
-import java.util.Optional;
-
 @RegisterRowMapper(PayerMapper.class)
 public interface PayerDao {
-    @SqlQuery("SELECT * FROM payers p WHERE p.id = :id")
-    Optional<Payer> findById(@Bind("id") Long id);
-
     @SqlQuery("SELECT * FROM payers p WHERE p.external_id = :externalId")
     Optional<Payer> findByExternalId(@Bind("externalId") String externalId);
 
-    @SqlQuery("SELECT * FROM payers p WHERE p.payment_request_id = :paymentRequestId LIMIT 1")
-    Optional<Payer> findByPaymentRequestId(@Bind("paymentRequestId") Long paymentRequestId);
+    @SqlQuery("SELECT * FROM payers p JOIN mandates m ON p.mandate_id = m.id  JOIN transactions t ON t.mandate_id = m.id WHERE t.id = :transactionId LIMIT 1")
+    Optional<Payer> findByTransactionId(@Bind("transactionId") Long transactionId);
 
-    @SqlUpdate("INSERT INTO payers(payment_request_id, external_id, name, email, bank_account_number_last_two_digits, bank_account_requires_authorisation, bank_account_number, bank_account_sort_code, bank_name, created_date ) VALUES (:paymentRequestId, :externalId, :name, :email, :accountNumberLastTwoDigits, :accountRequiresAuthorisation, :accountNumber, :sortCode, :bankName, :createdDate)")
+    @SqlQuery("SELECT * FROM payers p WHERE p.mandate_id = :mandateId")
+    Optional<Payer> findByMandateId(@Bind("mandateId") Long mandateId);
+    
+    @SqlUpdate("INSERT INTO payers(mandate_id, external_id, name, email, bank_account_number_last_two_digits, bank_account_requires_authorisation, bank_account_number, bank_account_sort_code, bank_name, created_date ) VALUES (:mandateId, :externalId, :name, :email, :accountNumberLastTwoDigits, :accountRequiresAuthorisation, :accountNumber, :sortCode, :bankName, :createdDate)")
     @GetGeneratedKeys
     Long insert(@BindBean Payer payer);
 

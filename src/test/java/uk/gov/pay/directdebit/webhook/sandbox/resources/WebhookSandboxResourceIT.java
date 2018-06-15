@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.webhook.sandbox.resources;
 
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
@@ -7,21 +9,17 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
-
-import javax.ws.rs.core.Response;
-import java.util.Map;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import static io.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING_DIRECT_DEBIT_PAYMENT;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -31,12 +29,12 @@ public class WebhookSandboxResourceIT {
     private TestContext testContext;
 
     @Test
-    public void handleWebhook_shouldChangeTheStateToSuccessAndReturn200() throws Exception {
+    public void handleWebhook_shouldChangeTheStateToSuccessAndReturn200() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
-        PaymentRequestFixture paymentRequestFixture = aPaymentRequestFixture().withGatewayAccountId(gatewayAccountFixture.getId()).insert(testContext.getJdbi());
-        PayerFixture.aPayerFixture().withPaymentRequestId(paymentRequestFixture.getId()).insert(testContext.getJdbi());
-        Long transactionId = aTransactionFixture().withPaymentRequestId(paymentRequestFixture.getId())
-                .withState(PENDING_DIRECT_DEBIT_PAYMENT).insert(testContext.getJdbi()).getId();
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        PayerFixture.aPayerFixture().withMandateId(mandateFixture.getId()).insert(testContext.getJdbi());
+        Long transactionId = aTransactionFixture().withMandateFixture(mandateFixture)
+                .withState(PaymentState.PENDING).insert(testContext.getJdbi()).getId();
 
         String requestPath = "/v1/webhooks/sandbox";
 

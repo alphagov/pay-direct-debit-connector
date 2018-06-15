@@ -1,16 +1,8 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture.aPaymentRequestFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
-import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
-
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,20 +12,24 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentRequestFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.PaymentRequest;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
+import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class TransactionDaoIT {
 
-    private static final Transaction.Type TYPE = Transaction.Type.CHARGE;
-    private static final PaymentState STATE = PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+    private static final PaymentState STATE = PaymentState.NEW;
     private static final long AMOUNT = 10L;
 
     @DropwizardTestContext
@@ -41,15 +37,15 @@ public class TransactionDaoIT {
     private TransactionDao transactionDao;
 
     private GatewayAccountFixture testGatewayAccount;
-    private PaymentRequestFixture testPaymentRequest;
     private TransactionFixture testTransaction;
+    private MandateFixture testMandate;
 
     @Before
     public void setup() {
         transactionDao = testContext.getJdbi().onDemand(TransactionDao.class);
-        this.testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
-        this.testPaymentRequest = generateNewPaymentRequestFixture(testGatewayAccount.getId());
-        this.testTransaction = generateNewTransactionFixture(testPaymentRequest, TYPE, STATE, AMOUNT);
+        testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
+        testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+        testTransaction = generateNewTransactionFixture(testMandate, STATE, AMOUNT);
     }
 
     @Test
@@ -58,9 +54,8 @@ public class TransactionDaoIT {
         Long id = transactionDao.insert(transaction);
         Map<String, Object> foundTransaction = testContext.getDatabaseTestHelper().getTransactionById(id);
         assertThat(foundTransaction.get("id"), is(id));
-        assertThat(foundTransaction.get("payment_request_id"), is(testPaymentRequest.getId()));
+        assertThat(foundTransaction.get("mandate_id"), is(testMandate.getId()));
         assertThat((Long) foundTransaction.get("amount"), isNumber(AMOUNT));
-        assertThat(Transaction.Type.valueOf((String) foundTransaction.get("type")), is(TYPE));
         assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(STATE));
     }
 
@@ -68,101 +63,61 @@ public class TransactionDaoIT {
     public void shouldGetATransactionById() {
         testTransaction.insert(testContext.getJdbi());
         Transaction transaction = transactionDao.findById(testTransaction.getId()).get();
-        PaymentRequest paymentRequest = transaction.getPaymentRequest();
         assertThat(transaction.getId(), is(testTransaction.getId()));
-        assertThat(paymentRequest.getId(), is(testPaymentRequest.getId()));
-        assertThat(paymentRequest.getExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
-        assertThat(paymentRequest.getDescription(), is(testPaymentRequest.getDescription()));
-        assertThat(transaction.getType(), is(TYPE));
+        assertThat(transaction.getMandate(), is(testMandate.toEntity()));
+        assertThat(transaction.getExternalId(), is(testTransaction.getExternalId()));
+        assertThat(transaction.getDescription(), is(testTransaction.getDescription()));
+        assertThat(transaction.getReference(), is(testTransaction.getReference()));
         assertThat(transaction.getAmount(), is(AMOUNT));
         assertThat(transaction.getState(), is(STATE));
+        assertThat(transaction.getCreatedDate(), is(testTransaction.getCreatedDate()));
     }
 
     @Test
-    public void shouldGetATransactionByPaymentRequestId() {
+    public void shouldGetATransactionByExternalId() {
         testTransaction.insert(testContext.getJdbi());
-        Transaction transaction = transactionDao.findByPaymentRequestId(testPaymentRequest.getId()).get();
-        PaymentRequest paymentRequest = transaction.getPaymentRequest();
+        Transaction transaction = transactionDao.findByExternalId(testTransaction.getExternalId()).get();
         assertThat(transaction.getId(), is(testTransaction.getId()));
-        assertThat(paymentRequest.getId(), is(testPaymentRequest.getId()));
-        assertThat(paymentRequest.getExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
-        assertThat(paymentRequest.getDescription(), is(testPaymentRequest.getDescription()));
-        assertThat(transaction.getType(), is(TYPE));
+        assertThat(transaction.getMandate(), is(testMandate.toEntity()));
+        assertThat(transaction.getExternalId(), is(testTransaction.getExternalId()));
+        assertThat(transaction.getDescription(), is(testTransaction.getDescription()));
+        assertThat(transaction.getReference(), is(testTransaction.getReference()));
         assertThat(transaction.getAmount(), is(AMOUNT));
         assertThat(transaction.getState(), is(STATE));
-    }
-
-    @Test
-    public void shouldGetATransactionByPaymentRequestExternalIdAndGatewayAccountId() {
-        testTransaction.insert(testContext.getJdbi());
-        Transaction transaction = transactionDao.findTransactionForExternalIdAndGatewayAccountExternalId(testPaymentRequest.getExternalId(), testGatewayAccount.getExternalId()).get();
-        PaymentRequest paymentRequest = transaction.getPaymentRequest();
-        assertThat(transaction.getId(), is(testTransaction.getId()));
-        assertThat(paymentRequest.getId(), is(testTransaction.getPaymentRequestId()));
-        assertThat(paymentRequest.getExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
-        assertThat(paymentRequest.getDescription(), is(testPaymentRequest.getDescription()));
-        assertThat(transaction.getType(), is(TYPE));
-        assertThat(transaction.getAmount(), is(AMOUNT));
-        assertThat(transaction.getState(), is(STATE));
-    }
-
-    @Test
-    public void shouldFindATransactionByTokenId() {
-        TokenFixture token = aTokenFixture()
-                .withPaymentRequestId(testPaymentRequest.getId())
-                .insert(testContext.getJdbi());
-        testTransaction.insert(testContext.getJdbi());
-        Transaction transaction = transactionDao.findByTokenId(token.getToken()).get();
-        PaymentRequest paymentRequest = transaction.getPaymentRequest();
-        assertThat(transaction.getId(), is(testTransaction.getId()));
-        assertThat(paymentRequest.getId(), is(testPaymentRequest.getId()));
-        assertThat(paymentRequest.getExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transaction.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
-        assertThat(paymentRequest.getDescription(), is(testPaymentRequest.getDescription()));
-        assertThat(transaction.getType(), is(TYPE));
-        assertThat(transaction.getAmount(), is(AMOUNT));
-        assertThat(transaction.getState(), is(STATE));
-    }
-
-    @Test
-    public void shouldNotFindATransactionByTokenId_ifTokenIdIsInvalid() {
-        String tokenId = "non_existing_tokenId";
-        assertThat(transactionDao.findByTokenId(tokenId), is(Optional.empty()));
+        assertThat(transaction.getCreatedDate(), is(testTransaction.getCreatedDate()));
     }
 
     @Test
     public void shouldFindAllTransactionsByPaymentStateAndProvider() {
         GatewayAccountFixture goCardlessGatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
+        GatewayAccountFixture sandboxGatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.SANDBOX).insert(testContext.getJdbi());
 
-        PaymentRequestFixture sandboxPaymentRequest = generateNewPaymentRequestFixture(testGatewayAccount.getId());
+        MandateFixture sandboxMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(sandboxGatewayAccount).insert(testContext.getJdbi());
+        MandateFixture goCardlessMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(goCardlessGatewayAccount).insert(testContext.getJdbi());
         TransactionFixture sandboxCharge =
-                generateNewTransactionFixture(sandboxPaymentRequest, TYPE, PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT, AMOUNT);
+                generateNewTransactionFixture(sandboxMandate, PaymentState.NEW, AMOUNT);
+        
+        generateNewTransactionFixture(goCardlessMandate, PaymentState.NEW, AMOUNT);
         sandboxCharge.insert(testContext.getJdbi());
 
-        PaymentRequestFixture successSandboxPaymentRequest = generateNewPaymentRequestFixture(testGatewayAccount.getId());
         TransactionFixture successSandboxCharge =
-                generateNewTransactionFixture(successSandboxPaymentRequest, TYPE, PaymentState.SUCCESS, AMOUNT);
+                generateNewTransactionFixture(sandboxMandate, PaymentState.SUCCESS, AMOUNT);
         successSandboxCharge.insert(testContext.getJdbi());
 
-        PaymentRequestFixture gocardlessPaymentRequest = generateNewPaymentRequestFixture(goCardlessGatewayAccount.getId());
         TransactionFixture goCardlessSuccessCharge =
-                generateNewTransactionFixture(gocardlessPaymentRequest, TYPE, PaymentState.SUCCESS, AMOUNT);
+                generateNewTransactionFixture(goCardlessMandate, PaymentState.SUCCESS, AMOUNT);
         goCardlessSuccessCharge.insert(testContext.getJdbi());
 
         List<Transaction> successTransactionsList = transactionDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
         assertThat(successTransactionsList.size(), is(1));
         assertThat(successTransactionsList.get(0).getState(), is(PaymentState.SUCCESS));
-        assertThat(successTransactionsList.get(0).getPaymentProvider(), is(PaymentProvider.SANDBOX));
+        assertThat(successTransactionsList.get(0).getMandate().getGatewayAccount().getPaymentProvider(), is(PaymentProvider.SANDBOX));
     }
 
     @Test
     public void shouldNotFindAnyTransactionByPaymentState_ifPaymentStateIsNotUsed() {
-        PaymentRequestFixture processingDirectDebitPaymentStatePaymentRequestFixture = generateNewPaymentRequestFixture(testGatewayAccount.getId());
         TransactionFixture processingDirectDebitPaymentStateTransactionFixture =
-                generateNewTransactionFixture(processingDirectDebitPaymentStatePaymentRequestFixture, TYPE, PaymentState.SUBMITTING_DIRECT_DEBIT_PAYMENT, AMOUNT);
+                generateNewTransactionFixture(testMandate, PaymentState.NEW, AMOUNT);
         processingDirectDebitPaymentStateTransactionFixture.insert(testContext.getJdbi());
 
         List<Transaction> successTransactionsList = transactionDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
@@ -171,46 +126,35 @@ public class TransactionDaoIT {
 
     @Test
     public void shouldUpdateStateAndReturnNumberOfAffectedRows() {
-        PaymentState newState = PaymentState.AWAITING_DIRECT_DEBIT_DETAILS;
+        PaymentState newState = PaymentState.NEW;
         testTransaction.insert(testContext.getJdbi());
         int numOfUpdatedTransactions = transactionDao.updateState(testTransaction.getId(), newState);
-        Transaction transactionAfterUpdate = transactionDao.findByPaymentRequestId(testTransaction.getPaymentRequestId()).get();
-        PaymentRequest paymentRequest = transactionAfterUpdate.getPaymentRequest();
+        Map<String, Object> transactionAfterUpdate = testContext.getDatabaseTestHelper().getTransactionById(testTransaction.getId());
         assertThat(numOfUpdatedTransactions, is(1));
-        assertThat(transactionAfterUpdate.getId(), is(testTransaction.getId()));
-        assertThat(paymentRequest.getId(), is(testPaymentRequest.getId()));
-        assertThat(paymentRequest.getExternalId(), is(testPaymentRequest.getExternalId()));
-        assertThat(transactionAfterUpdate.getGatewayAccountId(), is(testPaymentRequest.getGatewayAccountId()));
-        assertThat(paymentRequest.getDescription(), is(testPaymentRequest.getDescription()));
-        assertThat(transactionAfterUpdate.getType(), is(TYPE));
-        assertThat(transactionAfterUpdate.getAmount(), is(AMOUNT));
-        assertThat(transactionAfterUpdate.getState(), is(newState));
+        assertThat(transactionAfterUpdate.get("id"), is(testTransaction.getId()));
+        assertThat(transactionAfterUpdate.get("external_id"), is(testTransaction.getExternalId()));
+        assertThat(transactionAfterUpdate.get("mandate_id"), is(testMandate.getId()));
+        assertThat(transactionAfterUpdate.get("description"), is(testTransaction.getDescription()));
+        assertThat(transactionAfterUpdate.get("reference"), is(testTransaction.getReference()));
+        assertThat(transactionAfterUpdate.get("amount"), is(AMOUNT));
+        assertThat(transactionAfterUpdate.get("state"), is(newState.toString()));
+        assertThat((Timestamp) transactionAfterUpdate.get("created_date"), isDate(testTransaction.getCreatedDate()));
     }
 
     @Test
     public void shouldNotUpdateAnythingIfTransactionDoesNotExist() {
-        int numOfUpdatedTransactions = transactionDao.updateState(34L, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS);
+        int numOfUpdatedTransactions = transactionDao.updateState(34L, PaymentState.NEW);
         assertThat(numOfUpdatedTransactions, is(0));
     }
 
-    private PaymentRequestFixture generateNewPaymentRequestFixture(Long accountId) {
-        return aPaymentRequestFixture()
-                .withGatewayAccountId(accountId)
-                .insert(testContext.getJdbi());
-    }
 
-    private TransactionFixture generateNewTransactionFixture(PaymentRequestFixture paymentRequestFixture,
-                                                             Transaction.Type type,
-                                                             PaymentState paymentState,
-                                                             long amount) {
+    private TransactionFixture generateNewTransactionFixture(MandateFixture mandateFixture,
+            PaymentState paymentState,
+            long amount) {
         return aTransactionFixture()
-                .withPaymentRequestId(paymentRequestFixture.getId())
-                .withPaymentRequestExternalId(paymentRequestFixture.getExternalId())
-                .withGatewayAccountId(paymentRequestFixture.getGatewayAccountId())
-                .withPaymentRequestDescription(paymentRequestFixture.getDescription())
+                .withMandateFixture(mandateFixture)
                 .withAmount(amount)
-                .withState(paymentState)
-                .withType(type);
+                .withState(paymentState);
     }
 
 }

@@ -8,8 +8,8 @@ import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.CHARGE_CREATED;
-import static uk.gov.pay.directdebit.payments.model.PaymentRequestEvent.SupportedEvent.TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.CHARGE_CREATED;
+import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 
 public class PaymentStatesGraphTest {
@@ -30,7 +30,7 @@ public class PaymentStatesGraphTest {
 
     @Test
     public void getNextStateForEvent_shouldGiveTheNextStateIfEventIsValid() {
-        assertThat(paymentStatesGraph.getNextStateForEvent(NEW, TOKEN_EXCHANGED), is(PaymentState.AWAITING_DIRECT_DEBIT_DETAILS));
+        assertThat(paymentStatesGraph.getNextStateForEvent(NEW, PAYMENT_SUBMITTED_TO_PROVIDER), is(PaymentState.PENDING));
     }
 
     @Test
@@ -43,12 +43,12 @@ public class PaymentStatesGraphTest {
 
     @Test
     public void isValidTransition_shouldReturnTrueFromWhenTransitionIsExpected() {
-        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS, TOKEN_EXCHANGED), is(true));
+        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.PENDING, PAYMENT_SUBMITTED_TO_PROVIDER), is(true));
     }
 
     @Test
     public void isValidTransition_shouldReturnFalseWhenTransitionIsInvalid() {
-        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.AWAITING_DIRECT_DEBIT_DETAILS, CHARGE_CREATED), is(false));
+        assertThat(paymentStatesGraph.isValidTransition(PaymentState.NEW, PaymentState.NEW, CHARGE_CREATED), is(false));
     }
 }
 
