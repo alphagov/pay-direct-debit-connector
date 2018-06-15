@@ -105,6 +105,15 @@ pipeline {
         runDirectDebitSmokeTest()
       }
     }
+    stage('Pact Tag') {
+      when {
+        branch 'master'
+      }
+      steps {
+        echo 'Tagging provider pact with "test"'
+        tagPact("direct-debit-connector", gitCommit(), "test")
+      }
+    }
     stage('Complete') {
       failFast true
       parallel {
