@@ -13,7 +13,7 @@ pipeline {
   }
 
   libraries {
-    lib("pay-jenkins-library@no_dd_tests")
+    lib("pay-jenkins-library@master")
   }
 
   environment {
