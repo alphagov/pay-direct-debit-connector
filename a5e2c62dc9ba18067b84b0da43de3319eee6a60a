@@ -3,3 +3,5 @@ release.tag=alpha_release-70
 release.alpha_release-70.date=2018-06-15:15:22:13
 
 staging-2.tag=FAILED-70
+
+staging-2.FAILED-70.date=
