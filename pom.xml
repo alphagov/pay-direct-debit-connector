@@ -32,6 +32,18 @@
         <mockito.version>2.18.0</mockito.version>
         <docker-client.version>8.11.2</docker-client.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-govuk-pay-pay-java-commons</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/govuk-pay/pay-java-commons</url>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -117,6 +129,18 @@
             <version>0.4</version>
         </dependency>
         <!-- testing -->
+        <dependency>
+            <groupId>au.com.dius</groupId>
+            <artifactId>pact-jvm-provider-junit_2.12</artifactId>
+            <version>3.5.18</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.pay</groupId>
+            <artifactId>testing</artifactId>
+            <version>1.0.0-2</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
@@ -328,4 +352,49 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <property>
+                    <name>!runContractTests</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.12.4</version>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/*ContractTest.java</exclude>
+                                <exclude>**/*ContractTestSuite.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>contract-tests</id>
+            <activation>
+                <property>
+                    <name>runContractTests</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.12.4</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*ContractTestSuite.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
