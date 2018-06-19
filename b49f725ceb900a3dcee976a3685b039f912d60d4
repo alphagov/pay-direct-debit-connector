@@ -23,3 +23,5 @@ staging-2.alpha_staging-2-71.status=success
 staging-2.tag=FAILED-71
 
 staging-2.FAILED-71.date=
+
+staging-2.FAILED-71.status=failed
