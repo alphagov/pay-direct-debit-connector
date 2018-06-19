@@ -1,10 +1,10 @@
-package uk.gov.pay.directdebit.payments.api;
+package uk.gov.pay.directdebit.mandate.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.pay.directdebit.mandate.api.ExternalMandateState;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -170,6 +170,30 @@ public class DirectDebitInfoFrontendResponse {
 
     public TransactionDetails getTransaction() {
         return transaction;
+    }
+
+    public PayerDetails getPayer() {
+        return payer;
+    }
+
+    public String getMandateExternalId() {
+        return mandateExternalId;
+    }
+
+    public Long getGatewayAccountId() {
+        return gatewayAccountId;
+    }
+
+    public String getGatewayAccountExternalId() {
+        return gatewayAccountExternalId;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public ExternalMandateState getState() {
+        return state;
     }
 
     @Override

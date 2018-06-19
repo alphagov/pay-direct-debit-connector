@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
+import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneOffMandateException;
@@ -24,7 +25,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
-import uk.gov.pay.directdebit.payments.api.DirectDebitInfoFrontendResponse;
+import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -149,28 +150,25 @@ public class MandateService {
                 mandate.getPayer(),
                 null);
     }
+
+    public GetMandateResponse populateGetMandateResponse(String accountExternalId, String mandateExternalId, UriInfo uriInfo) {
+        Mandate mandate = findByExternalId(mandateExternalId);
+        List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
+        
+        return new GetMandateResponse(
+                mandateExternalId, 
+                mandate.getType(),
+                mandate.getReturnUrl(),
+                dataLinks,
+                mandate.getState().toExternal()
+        );
+    }
     
     public CreateMandateResponse createMandateResponse(Map<String, String> mandateRequestMap, String accountExternalId, UriInfo uriInfo) {
         Mandate mandate = createMandate(mandateRequestMap, accountExternalId);
         String mandateExternalId = mandate.getExternalId();
-        List<Map<String, Object>> dataLinks = new ArrayList<>();
-
-        dataLinks.add(createLink("self", GET, selfUriFor(uriInfo, 
-                "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}", 
-                accountExternalId, 
-                mandateExternalId)));
-
-        if (!mandate.getState().toExternal().isFinished()) {
-            Token token = tokenService.generateNewTokenFor(mandate);
-            dataLinks.add(createLink("next_url",
-                    GET,
-                    nextUrl(linksConfig.getFrontendUrl(), "secure", token.getToken())));
-            dataLinks.add(createLink("next_url_post",
-                    POST,
-                    nextUrl(linksConfig.getFrontendUrl(), "secure"),
-                    APPLICATION_FORM_URLENCODED,
-                    ImmutableMap.of("chargeTokenId", token.getToken())));
-        }
+        List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
+        
         return new CreateMandateResponse(
                 mandateExternalId,
                 mandate.getType(),
@@ -282,5 +280,27 @@ public class MandateService {
             throw new WrongNumberOfTransactionsForOneOffMandateException("Found multiple transactions for one off mandate with external id " + mandateExternalId);
         }
         return transactions.get(0);
+    }
+    
+    private List<Map<String, Object>> createLinks(Mandate mandate, String accountExternalId, UriInfo uriInfo) {
+        List<Map<String, Object>> dataLinks = new ArrayList<>();
+
+        dataLinks.add(createLink("self", GET, selfUriFor(uriInfo,
+                "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}",
+                accountExternalId,
+                mandate.getExternalId())));
+
+        if (!mandate.getState().toExternal().isFinished()) {
+            Token token = tokenService.generateNewTokenFor(mandate);
+            dataLinks.add(createLink("next_url",
+                    GET,
+                    nextUrl(linksConfig.getFrontendUrl(), "secure", token.getToken())));
+            dataLinks.add(createLink("next_url_post",
+                    POST,
+                    nextUrl(linksConfig.getFrontendUrl(), "secure"),
+                    APPLICATION_FORM_URLENCODED,
+                    ImmutableMap.of("chargeTokenId", token.getToken())));
+        }
+        return dataLinks;
     }
 }
