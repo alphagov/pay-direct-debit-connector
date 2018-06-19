@@ -16,10 +16,10 @@ import static uk.gov.pay.directdebit.payments.model.Event.Type;
 @RegisterRowMapper(EventMapper.class)
 public interface EventDao {
 
-    @SqlUpdate("INSERT INTO payment_request_events(mandate_id, transaction_id, event_type, event, event_date) VALUES (:mandateId, :transactionId, :eventType, :event, :eventDate)")
+    @SqlUpdate("INSERT INTO events(mandate_id, transaction_id, event_type, event, event_date) VALUES (:mandateId, :transactionId, :eventType, :event, :eventDate)")
     @GetGeneratedKeys
     Long insert(@BindBean Event event);
 
-    @SqlQuery("SELECT * FROM payment_request_events e WHERE e.mandate_id = :mandateId and e.event_type = :eventType and e.event = :event")
+    @SqlQuery("SELECT * FROM events e WHERE e.mandate_id = :mandateId and e.event_type = :eventType and e.event = :event")
     Optional<Event> findByMandateIdAndEvent(@Bind("mandateId") Long mandateId, @Bind("eventType") Type eventType, @Bind("event") SupportedEvent event);
 }

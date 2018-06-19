@@ -62,9 +62,6 @@ public interface TransactionDao {
     @SqlQuery(joinQuery + " WHERE t.external_id = :externalId")
     Optional<Transaction> findByExternalId(@Bind("externalId") String externalId);
 
-    @SqlQuery(joinQuery + " JOIN tokens k ON k.mandate_id = m.id WHERE k.secure_redirect_token = :tokenId")
-    Optional<Transaction> findByTokenId(@Bind("tokenId") String tokenId);
-
     @SqlQuery(joinQuery + " WHERE t.state = :state AND g.payment_provider = :paymentProvider")
     List<Transaction> findAllByPaymentStateAndProvider(@Bind("state") PaymentState paymentState, @Bind("paymentProvider") PaymentProvider paymentProvider);
 
@@ -74,7 +71,7 @@ public interface TransactionDao {
     @SqlUpdate("UPDATE transactions t SET state = :state WHERE t.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") PaymentState paymentState);
 
-    @SqlUpdate("INSERT INTO transactions(mandate_id, external_id, amount, state, type, description, reference, created_date) VALUES (:mandate.id, :externalId, :amount, :state, 'charge',:description, :reference, :createdDate)")
+    @SqlUpdate("INSERT INTO transactions(mandate_id, external_id, amount, state, description, reference, created_date) VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate)")
     @GetGeneratedKeys
     Long insert(@BindBean Transaction transaction);
 

@@ -108,7 +108,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                         "INSERT INTO" +
                                 "    gocardless_events(\n" +
                                 "        id,\n" +
-                                "        payment_request_events_id,\n" +
+                                "        internal_event_id,\n" +
                                 "        event_id,\n" +
                                 "        action,\n" +
                                 "        resource_type,\n" +
