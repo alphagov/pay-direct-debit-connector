@@ -47,7 +47,7 @@ public class DatabaseTestHelper {
     public Map<String, Object> getEventById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * from payment_request_events p WHERE p.id = :id")
+                        .createQuery("SELECT * from events p WHERE p.id = :id")
                         .bind("id", id)
                         .mapToMap()
                         .findFirst()
