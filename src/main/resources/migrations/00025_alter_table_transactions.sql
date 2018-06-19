@@ -7,4 +7,3 @@ ALTER TABLE transactions DROP COLUMN payment_request_id;
 --changeset uk.gov.pay:alter_table-transactions-type
 ALTER TABLE transactions ALTER COLUMN type DROP NOT NULL;
 --rollback ALTER COLUMN type NOT NULL;
-

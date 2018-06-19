@@ -1,17 +1,17 @@
-package uk.gov.pay.directdebit.payments.api;
+package uk.gov.pay.directdebit.mandate.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.pay.directdebit.mandate.api.ExternalMandateState;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public class PaymentRequestFrontendResponse {
+public class DirectDebitInfoFrontendResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public static class PayerDetails {
@@ -125,7 +125,7 @@ public class PaymentRequestFrontendResponse {
     @JsonProperty
     private ExternalMandateState state;
 
-    public PaymentRequestFrontendResponse(String paymentExternalId, Long gatewayAccountId, String gatewayAccountExternalId, ExternalMandateState state, String returnUrl, String reference, String createdDate, Payer payer, Transaction transaction) {
+    public DirectDebitInfoFrontendResponse(String paymentExternalId, Long gatewayAccountId, String gatewayAccountExternalId, ExternalMandateState state, String returnUrl, String reference, String createdDate, Payer payer, Transaction transaction) {
         this.mandateExternalId = paymentExternalId;
         this.state = state;
         this.gatewayAccountId = gatewayAccountId;
@@ -172,6 +172,30 @@ public class PaymentRequestFrontendResponse {
         return transaction;
     }
 
+    public PayerDetails getPayer() {
+        return payer;
+    }
+
+    public String getMandateExternalId() {
+        return mandateExternalId;
+    }
+
+    public Long getGatewayAccountId() {
+        return gatewayAccountId;
+    }
+
+    public String getGatewayAccountExternalId() {
+        return gatewayAccountExternalId;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public ExternalMandateState getState() {
+        return state;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -181,7 +205,7 @@ public class PaymentRequestFrontendResponse {
             return false;
         }
 
-        PaymentRequestFrontendResponse that = (PaymentRequestFrontendResponse) o;
+        DirectDebitInfoFrontendResponse that = (DirectDebitInfoFrontendResponse) o;
 
         if (payer != null ? !payer.equals(that.payer) : that.payer != null) {
             return false;
@@ -220,7 +244,7 @@ public class PaymentRequestFrontendResponse {
 
     @Override
     public String toString() {
-        return "PaymentRequestResponse{" +
+        return "PaymentInfoFrontend{" +
                 "payerId=" + payer.externalId +
                 ", transactionId='" + transaction.externalId + '\'' +
                 ", mandateId='" + mandateExternalId + '\'' +

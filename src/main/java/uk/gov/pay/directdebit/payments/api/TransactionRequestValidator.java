@@ -7,7 +7,7 @@ import uk.gov.pay.directdebit.common.validation.FieldSize;
 import java.util.Map;
 import java.util.function.Function;
 
-public class PaymentRequestValidator extends ApiValidation {
+public class TransactionRequestValidator extends ApiValidation {
 
     private final static String AMOUNT_KEY = "amount";
     private final static String DESCRIPTION_KEY = "description";
@@ -33,7 +33,7 @@ public class PaymentRequestValidator extends ApiValidation {
                     .put(REFERENCE_KEY, new FieldSize(0, 255))
                     .build();
 
-    public PaymentRequestValidator() {
+    public TransactionRequestValidator() {
         super(requiredFields, fieldSizes, validators);
     }
 

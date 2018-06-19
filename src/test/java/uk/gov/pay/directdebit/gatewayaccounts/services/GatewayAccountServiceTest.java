@@ -52,7 +52,7 @@ public class GatewayAccountServiceTest {
 
     private GatewayAccountService service;
 
-    private Map<String, String> createPaymentRequest = new HashMap<>();
+    private Map<String, String> createTransactionRequest = new HashMap<>();
     private Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -123,8 +123,8 @@ public class GatewayAccountServiceTest {
     @Test
     public void shouldStoreAGatewayAccount() {
         GatewayAccount parsedGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().toEntity();
-        when(mockedGatewayAccountParser.parse(createPaymentRequest)).thenReturn(parsedGatewayAccount);
-        service.create(createPaymentRequest);
+        when(mockedGatewayAccountParser.parse(createTransactionRequest)).thenReturn(parsedGatewayAccount);
+        service.create(createTransactionRequest);
         verify(mockedGatewayAccountDao).insert(parsedGatewayAccount);
     }
 

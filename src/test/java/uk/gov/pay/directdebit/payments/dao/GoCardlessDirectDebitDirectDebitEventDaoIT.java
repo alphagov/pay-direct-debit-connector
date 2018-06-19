@@ -24,14 +24,14 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.EventFixture.aPaymentRequestEventFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture.aDirectDebitEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class GoCardlessEventDaoIT {
+public class GoCardlessDirectDebitDirectDebitEventDaoIT {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
     private GoCardlessEventDao goCardlessEventDao;
@@ -57,13 +57,13 @@ public class GoCardlessEventDaoIT {
         goCardlessEventDao = testContext.getJdbi().onDemand(GoCardlessEventDao.class);
         gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
         testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
-        aPaymentRequestEventFixture()
+        aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
                 .withId(EVENT_ID)
                 .insert(testContext.getJdbi());
         goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture()
-                .withPaymentRequestEventsId(EVENT_ID)
-                .withEventId(GOCARDLESS_EVENT_ID)
+                .withEventId(EVENT_ID)
+                .withGoCardlessEventId(GOCARDLESS_EVENT_ID)
                 .withAction(GOCARDLESS_ACTION)
                 .withResourceType(GOCARDLESS_RESOURCE_TYPE)
                 .withCreatedAt(CREATED_AT)
@@ -87,7 +87,7 @@ public class GoCardlessEventDaoIT {
     @Test
     public void shouldUpdateEventIdAndReturnNumberOfAffectedRows() throws IOException {
         Long newEventId = 10L;
-        aPaymentRequestEventFixture()
+        aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
                 .withId(newEventId)
                 .insert(testContext.getJdbi());

@@ -22,14 +22,14 @@ public class CreatePaymentParserTest {
     private CreatePaymentParser createPaymentParser = new CreatePaymentParser();
 
     @Test
-    public void shouldCreateATransactionWhenPaymentRequestIsValid() {
+    public void shouldCreateATransactionWhenTransactionRequestIsValid() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture();
-        Map<String, String> createPaymentRequest = new HashMap<String, String>() {{
+        Map<String, String> createTransactionRequest = new HashMap<String, String>() {{
             put("amount", AMOUNT);
             put("description", DESCRIPTION);
             put("reference", REFERENCE);
         }};
-        Transaction transaction = createPaymentParser.parse(createPaymentRequest, mandateFixture.toEntity());
+        Transaction transaction = createPaymentParser.parse(createTransactionRequest, mandateFixture.toEntity());
         assertThat(transaction.getExternalId(), is(notNullValue()));
         assertThat(transaction.getReference(), is(REFERENCE));
         assertThat(transaction.getDescription(), is(DESCRIPTION));

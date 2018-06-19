@@ -5,12 +5,12 @@ import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAID_OUT;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_FAILED;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID_OUT;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_FAILED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
@@ -34,7 +34,7 @@ public class PaymentStatesGraph {
         return new PaymentStatesGraph();
     }
 
-    private ImmutableValueGraph<PaymentState, Event.SupportedEvent> buildStatesGraph() {
+    private ImmutableValueGraph<PaymentState, DirectDebitEvent.SupportedEvent> buildStatesGraph() {
         MutableValueGraph<PaymentState, SupportedEvent> graph = ValueGraphBuilder
                 .directed()
                 .build();
@@ -53,7 +53,7 @@ public class PaymentStatesGraph {
         return ImmutableValueGraph.copyOf(graph);
     }
 
-    public PaymentState getNextStateForEvent(PaymentState from, Event.SupportedEvent event) {
+    public PaymentState getNextStateForEvent(PaymentState from, DirectDebitEvent.SupportedEvent event) {
         return graphStates.successors(from).stream()
                 .filter(to -> isValidTransition(from, to, event))
                 .findFirst()
@@ -66,7 +66,7 @@ public class PaymentStatesGraph {
         }
     }
 
-    boolean isValidTransition(PaymentState from, PaymentState to, Event.SupportedEvent trigger) {
+    boolean isValidTransition(PaymentState from, PaymentState to, DirectDebitEvent.SupportedEvent trigger) {
         return graphStates.edgeValue(from, to).filter(trigger::equals).isPresent();
     }
 }

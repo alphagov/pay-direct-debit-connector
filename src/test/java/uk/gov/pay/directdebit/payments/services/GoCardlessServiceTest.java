@@ -167,7 +167,7 @@ public class GoCardlessServiceTest {
     }
 
     @Test
-    public void confirm_shouldStoreAGoCardlessCustomerBankAccountMandateAndPaymentWhenReceivingConfirmPaymentRequest() {
+    public void confirm_shouldStoreAGoCardlessCustomerBankAccountMandateAndPaymentWhenReceivingConfirmTransaction() {
         when(mockedGoCardlessClientFacade.createMandate(mandateFixture.toEntity(), goCardlessCustomer)).thenReturn(goCardlessMandate);
         when(mockedGoCardlessClientFacade.createPayment(transaction, goCardlessMandate)).thenReturn(goCardlessPayment);
 

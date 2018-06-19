@@ -8,18 +8,18 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertFalse;
 
 
-public class PaymentRequestResponseTest {
+public class TransactionResponseTest {
 
     @Test
     public void shouldNotStringifyPIIFields() {
-        String paymentRequestId = "id";
+        String transactionId = "id";
         Long amount = 10L;
         String returnUrl = "http://bla.bla";
         String description = "desc";
         String reference = "ref";
         String createdDate = ZonedDateTime.now().toString();
-        PaymentRequestResponse paymentRequestResponse = new PaymentRequestResponse(
-                paymentRequestId,
+        TransactionResponse transactionResponse = new TransactionResponse(
+                transactionId,
                 ExternalPaymentState.EXTERNAL_STARTED,
                 amount,
                 returnUrl,
@@ -28,6 +28,6 @@ public class PaymentRequestResponseTest {
                 createdDate,
                 new ArrayList<>()
         );
-        assertFalse(paymentRequestResponse.toString().contains(description));
+        assertFalse(transactionResponse.toString().contains(description));
     }
 }
