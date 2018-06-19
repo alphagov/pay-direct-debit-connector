@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
+import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 
 import javax.inject.Inject;
@@ -17,7 +18,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.Map;
-import uk.gov.pay.directdebit.payments.api.DirectDebitInfoFrontendResponse;
+import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
@@ -26,6 +27,7 @@ import static javax.ws.rs.core.Response.created;
 public class MandateResource {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(MandateResource.class);
     private final MandateService mandateService;
+    
     @Inject
     public MandateResource(MandateService mandateService) {
         this.mandateService = mandateService;
@@ -42,9 +44,18 @@ public class MandateResource {
     }
 
     @GET
+    @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}")
+    @Produces(APPLICATION_JSON)
+    public Response getMandate(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId, @Context UriInfo uriInfo) {
+        LOGGER.info("Retrieving mandate {} for frontend", mandateExternalId);
+        GetMandateResponse response = mandateService.populateGetMandateResponse(accountExternalId, mandateExternalId, uriInfo);
+        return Response.ok(response).build();gci
+    }
+    
+    @GET
     @Path("/v1/accounts/{accountId}/mandates/{mandateExternalId}")
     @Produces(APPLICATION_JSON)
-    public Response getMandate(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId) {
+    public Response getMandateFrontend(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId) {
         LOGGER.info("Retrieving mandate {} for frontend", mandateExternalId);
         DirectDebitInfoFrontendResponse response = mandateService.populateGetMandateResponseForFrontend(accountExternalId, mandateExternalId);
         return Response.ok(response).build();
@@ -53,7 +64,7 @@ public class MandateResource {
     @GET
     @Path("/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}")
     @Produces(APPLICATION_JSON)
-    public Response getMandateWithTransaction(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId, @PathParam("transactionExternalId") String transactionExternalId) {
+    public Response getMandateWithTransactionFrontend(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId, @PathParam("transactionExternalId") String transactionExternalId) {
         LOGGER.info("Retrieving mandate {} and charge {} for frontend", mandateExternalId, transactionExternalId);
         DirectDebitInfoFrontendResponse response = mandateService.populateGetMandateWithTransactionResponseForFrontend(accountExternalId, transactionExternalId);
         return Response.ok(response).build();

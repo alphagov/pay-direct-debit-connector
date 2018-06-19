@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.api;
 
 import java.time.ZonedDateTime;
 import org.junit.Test;
+import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.ExternalMandateState;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
