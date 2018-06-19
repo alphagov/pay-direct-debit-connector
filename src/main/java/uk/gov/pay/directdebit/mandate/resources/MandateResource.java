@@ -49,7 +49,7 @@ public class MandateResource {
     public Response getMandate(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId, @Context UriInfo uriInfo) {
         LOGGER.info("Retrieving mandate {} for frontend", mandateExternalId);
         GetMandateResponse response = mandateService.populateGetMandateResponse(accountExternalId, mandateExternalId, uriInfo);
-        return Response.ok(response).build();gci
+        return Response.ok(response).build();
     }
     
     @GET
