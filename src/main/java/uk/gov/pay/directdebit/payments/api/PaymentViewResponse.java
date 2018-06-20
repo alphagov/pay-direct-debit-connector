@@ -3,7 +3,6 @@ package uk.gov.pay.directdebit.payments.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -43,7 +42,7 @@ public class PaymentViewResponse {
 
     @Override
     public String toString() {
-        return "PaymentRequestResponse{" +
+        return "TransactionResponse{" +
                 " gatewayExternalId='" + gatewayExternalId + '\n' +
                 ", page='" + page + '\'' +
                 ", displaySize=" + displaySize + '\'' +

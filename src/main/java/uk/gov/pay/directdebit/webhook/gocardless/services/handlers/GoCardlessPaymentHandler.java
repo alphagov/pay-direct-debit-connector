@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
-import uk.gov.pay.directdebit.payments.model.Event;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
@@ -45,7 +45,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     }
 
     @Override
-    protected Optional<Event> process(GoCardlessEvent event) {
+    protected Optional<DirectDebitEvent> process(GoCardlessEvent event) {
         return Optional.ofNullable(GoCardlessPaymentAction.fromString(event.getAction()))
                 .map((action) -> getHandledActions().get(action))
                 .map((handledAction) -> {
@@ -55,8 +55,8 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 });
     }
 
-    private Map<GoCardlessAction, Function<Transaction, Event>> getHandledActions() {
-        return ImmutableMap.<GoCardlessAction, Function<Transaction, Event>>builder()
+    private Map<GoCardlessAction, Function<Transaction, DirectDebitEvent>> getHandledActions() {
+        return ImmutableMap.<GoCardlessAction, Function<Transaction, DirectDebitEvent>>builder()
                 .put(GoCardlessPaymentAction.CREATED, transactionService::paymentAcknowledgedFor)
                 .put(GoCardlessPaymentAction.SUBMITTED, transactionService::paymentSubmittedFor)
                 .put(GoCardlessPaymentAction.CONFIRMED, (Transaction transaction) ->

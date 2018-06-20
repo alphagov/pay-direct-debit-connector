@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,16 +13,14 @@ import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payments.fixtures.EventFixture;
+import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.Event;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
-
-import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -45,7 +44,7 @@ public class GoCardlessMandateHandlerTest {
     @Captor
     private ArgumentCaptor<GoCardlessEvent> geCaptor;
 
-    private Event event = EventFixture.aPaymentRequestEventFixture().toEntity();
+    private DirectDebitEvent directDebitEvent = DirectDebitEventFixture.aDirectDebitEventFixture().toEntity();
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
 
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withPayerFixture(payerFixture);
@@ -66,13 +65,14 @@ public class GoCardlessMandateHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("created").toEntity());
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
-        when(mockedMandateService.mandatePendingFor(mandateFixture.toEntity())).thenReturn(event);
+        when(mockedMandateService.mandatePendingFor(mandateFixture.toEntity())).thenReturn(
+                directDebitEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
-        verify(goCardlessEvent).setEventId(event.getId());
+        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
         assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -81,14 +81,15 @@ public class GoCardlessMandateHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("created").toEntity());
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
-        when(mockedMandateService.findMandatePendingEventFor(mandateFixture.toEntity())).thenReturn(Optional.of(event));
+        when(mockedMandateService.findMandatePendingEventFor(mandateFixture.toEntity())).thenReturn(Optional.of(
+                directDebitEvent));
         goCardlessMandateHandler.handle(goCardlessEvent);
 
         verify(mockedMandateService, never()).mandatePendingFor(mandateFixture.toEntity());
-        verify(goCardlessEvent).setEventId(event.getId());
+        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
         assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -97,13 +98,14 @@ public class GoCardlessMandateHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("active").toEntity());
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
-        when(mockedMandateService.mandateActiveFor(mandateFixture.toEntity())).thenReturn(event);
+        when(mockedMandateService.mandateActiveFor(mandateFixture.toEntity())).thenReturn(
+                directDebitEvent);
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(goCardlessEvent).setEventId(event.getId());
+        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
         assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -113,15 +115,16 @@ public class GoCardlessMandateHandlerTest {
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
 
-        when(mockedMandateService.mandateActiveFor(mandateFixture.toEntity())).thenReturn(event);
+        when(mockedMandateService.mandateActiveFor(mandateFixture.toEntity())).thenReturn(
+                directDebitEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(goCardlessEvent).setEventId(event.getId());
+        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
         verify(mockedMandateService, never()).mandatePendingFor(mandateFixture.toEntity());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
         assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -130,14 +133,15 @@ public class GoCardlessMandateHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("submitted").toEntity());
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
-        when(mockedMandateService.mandatePendingFor(mandateFixture.toEntity())).thenReturn(event);
+        when(mockedMandateService.mandatePendingFor(mandateFixture.toEntity())).thenReturn(
+                directDebitEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(goCardlessEvent).setEventId(event.getId());
+        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
         assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -146,14 +150,15 @@ public class GoCardlessMandateHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("submitted").toEntity());
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
-        when(mockedMandateService.findMandatePendingEventFor(mandateFixture.toEntity())).thenReturn(Optional.of(event));
+        when(mockedMandateService.findMandatePendingEventFor(mandateFixture.toEntity())).thenReturn(Optional.of(
+                directDebitEvent));
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(goCardlessEvent).setEventId(event.getId());
+        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
         verify(mockedMandateService, never()).mandatePendingFor(mandateFixture.toEntity());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
         assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -162,17 +167,19 @@ public class GoCardlessMandateHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(GoCardlessEventFixture.aGoCardlessEventFixture().withAction("failed").toEntity());
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
-        when(mockedMandateService.mandateFailedFor(mandateFixture.toEntity())).thenReturn(event);
-        when(mockedTransactionService.paymentFailedWithoutEmailFor(transactionFixture.toEntity())).thenReturn(event);
+        when(mockedMandateService.mandateFailedFor(mandateFixture.toEntity())).thenReturn(
+                directDebitEvent);
+        when(mockedTransactionService.paymentFailedWithoutEmailFor(transactionFixture.toEntity())).thenReturn(
+                directDebitEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
         verify(mockedTransactionService).paymentFailedWithoutEmailFor(transactionFixture.toEntity());
         verify(mockedMandateService).mandateFailedFor(mandateFixture.toEntity());
-        verify(goCardlessEvent).setEventId(event.getId());
+        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
         assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -182,17 +189,19 @@ public class GoCardlessMandateHandlerTest {
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedTransactionService.findPaymentSubmittedEventFor(transactionFixture.toEntity())).thenReturn(Optional.empty());
-        when(mockedMandateService.mandateCancelledFor(mandateFixture.toEntity())).thenReturn(event);
-        when(mockedTransactionService.paymentFailedWithoutEmailFor(transactionFixture.toEntity())).thenReturn(event);
+        when(mockedMandateService.mandateCancelledFor(mandateFixture.toEntity())).thenReturn(
+                directDebitEvent);
+        when(mockedTransactionService.paymentFailedWithoutEmailFor(transactionFixture.toEntity())).thenReturn(
+                directDebitEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
         verify(mockedTransactionService).paymentFailedWithoutEmailFor(transactionFixture.toEntity());
         verify(mockedMandateService).mandateCancelledFor(mandateFixture.toEntity());
-        verify(goCardlessEvent).setEventId(event.getId());
+        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
         assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -202,8 +211,9 @@ public class GoCardlessMandateHandlerTest {
 
         when(mockedGoCardlessService.findMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedTransactionService.findPaymentSubmittedEventFor(transactionFixture.toEntity())).thenReturn(Optional.of(
-                event));
-        when(mockedMandateService.mandateCancelledFor(mandateFixture.toEntity())).thenReturn(event);
+                directDebitEvent));
+        when(mockedMandateService.mandateCancelledFor(mandateFixture.toEntity())).thenReturn(
+                directDebitEvent);
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
@@ -211,7 +221,7 @@ public class GoCardlessMandateHandlerTest {
         verify(mockedMandateService).mandateCancelledFor(mandateFixture.toEntity());
         verify(mockedGoCardlessService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        assertThat(storedGoCardlessEvent.getEventId(), is(event.getId()));
+        assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
         assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 }

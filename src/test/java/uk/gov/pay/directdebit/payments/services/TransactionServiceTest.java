@@ -16,11 +16,11 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
-import uk.gov.pay.directdebit.payments.fixtures.EventFixture;
+import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.Event;
-import uk.gov.pay.directdebit.payments.model.Event.Type;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
@@ -60,18 +60,19 @@ public class TransactionServiceTest {
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
     private TransactionService service;
     @Mock
-    private PaymentRequestEventService mockedPaymentRequestEventService;
+    private DirectDebitEventService mockedDirectDebitEventService;
 
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withPayerFixture(payerFixture);
     private TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
     @Before
     public void setUp() {
-        service = new TransactionService(mockedTokenService, mockedGatewayAccountDao, mockedDirectDebitConfig, mockedTransactionDao, mockedPaymentRequestEventService, mockedUserNotificationService, mockedCreatePaymentParser);
+        service = new TransactionService(mockedTokenService, mockedGatewayAccountDao, mockedDirectDebitConfig, mockedTransactionDao,
+                mockedDirectDebitEventService, mockedUserNotificationService, mockedCreatePaymentParser);
     }
 
     @Test
-    public void findByPaymentRequestExternalIdAndAccountId_shouldFindATransaction() {
+    public void findByTransactionExternalIdAndAccountId_shouldFindATransaction() {
         when(mockedTransactionDao.findByExternalId(transactionFixture.getExternalId()))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
         Transaction foundTransaction = service.findTransactionForExternalIdAndGatewayAccountExternalId(transactionFixture.getExternalId(), gatewayAccountFixture.getExternalId());
@@ -104,7 +105,7 @@ public class TransactionServiceTest {
         service.paymentSubmittedToProviderFor(transaction, LocalDate.now());
 
         verify(mockedTransactionDao).updateState(transaction.getId(), PaymentState.PENDING);
-        verify(mockedPaymentRequestEventService).registerPaymentSubmittedToProviderEventFor(transaction);
+        verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(transaction);
         assertThat(transaction.getState(), is(PENDING));
     }
 
@@ -117,7 +118,7 @@ public class TransactionServiceTest {
 
         service.paymentAcknowledgedFor(transaction);
 
-        verify(mockedPaymentRequestEventService).registerPaymentAcknowledgedEventFor(transaction);
+        verify(mockedDirectDebitEventService).registerPaymentAcknowledgedEventFor(transaction);
         verifyZeroInteractions(mockedTransactionDao);
         assertThat(transaction.getState(), is(PENDING));
     }
@@ -133,7 +134,7 @@ public class TransactionServiceTest {
         service.paymentPaidOutFor(transaction);
 
         verify(mockedTransactionDao).updateState(transaction.getId(), SUCCESS);
-        verify(mockedPaymentRequestEventService).registerPaymentPaidOutEventFor(transaction);
+        verify(mockedDirectDebitEventService).registerPaymentPaidOutEventFor(transaction);
         assertThat(transaction.getState(), is(SUCCESS));
     }
 
@@ -149,7 +150,7 @@ public class TransactionServiceTest {
 
         verify(mockedUserNotificationService, times(0)).sendPaymentFailedEmailFor(transaction);
         verify(mockedTransactionDao).updateState(transaction.getId(), FAILED);
-        verify(mockedPaymentRequestEventService).registerPaymentFailedEventFor(transaction);
+        verify(mockedDirectDebitEventService).registerPaymentFailedEventFor(transaction);
         assertThat(transaction.getState(), is(FAILED));
     }
 
@@ -164,7 +165,7 @@ public class TransactionServiceTest {
 
         verify(mockedUserNotificationService, times(1)).sendPaymentFailedEmailFor(transaction);
         verify(mockedTransactionDao).updateState(transaction.getId(), FAILED);
-        verify(mockedPaymentRequestEventService).registerPaymentFailedEventFor(transaction);
+        verify(mockedDirectDebitEventService).registerPaymentFailedEventFor(transaction);
         assertThat(transaction.getState(), is(FAILED));
     }
 
@@ -178,7 +179,7 @@ public class TransactionServiceTest {
 
         service.payoutPaidFor(transaction);
 
-        verify(mockedPaymentRequestEventService).registerPayoutPaidEventFor(transaction);
+        verify(mockedDirectDebitEventService).registerPayoutPaidEventFor(transaction);
         verifyZeroInteractions(mockedTransactionDao);
         assertThat(transaction.getState(), is(SUCCESS));
     }
@@ -192,15 +193,15 @@ public class TransactionServiceTest {
                 .withState(PENDING)
                 .toEntity();
 
-        Event event = EventFixture.aPaymentRequestEventFixture().toEntity();
+        DirectDebitEvent directDebitEvent = DirectDebitEventFixture.aDirectDebitEventFixture().toEntity();
 
-        when(mockedPaymentRequestEventService.findBy(transaction.getId(), Type.CHARGE,
+        when(mockedDirectDebitEventService.findBy(transaction.getId(), Type.CHARGE,
                 PAYMENT_SUBMITTED_TO_BANK))
-                .thenReturn(Optional.of(event));
+                .thenReturn(Optional.of(directDebitEvent));
 
-        Event foundEvent = service.findPaymentSubmittedEventFor(transaction).get();
+        DirectDebitEvent foundDirectDebitEvent = service.findPaymentSubmittedEventFor(transaction).get();
 
-        assertThat(foundEvent, is(event));
+        assertThat(foundDirectDebitEvent, is(directDebitEvent));
     }
 
     @Test
@@ -214,7 +215,7 @@ public class TransactionServiceTest {
 
         service.paymentCancelledFor(transaction);
 
-        verify(mockedPaymentRequestEventService).registerPaymentCancelledEventFor(mandateFixture.toEntity(), transaction);
+        verify(mockedDirectDebitEventService).registerPaymentCancelledEventFor(mandateFixture.toEntity(), transaction);
         verify(mockedTransactionDao).updateState(transaction.getId(), CANCELLED);
         assertThat(transaction.getState(), is(CANCELLED));
     }
@@ -229,7 +230,7 @@ public class TransactionServiceTest {
 
         service.paymentMethodChangedFor(transaction);
 
-        verify(mockedPaymentRequestEventService).registerPaymentMethodChangedEventFor(mandateFixture.toEntity());
+        verify(mockedDirectDebitEventService).registerPaymentMethodChangedEventFor(mandateFixture.toEntity());
         verify(mockedTransactionDao).updateState(transaction.getId(), USER_CANCEL_NOT_ELIGIBLE);
         assertThat(transaction.getState(), is(USER_CANCEL_NOT_ELIGIBLE));
     }

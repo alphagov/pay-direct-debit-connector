@@ -18,7 +18,6 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -26,23 +25,21 @@ import uk.gov.pay.directdebit.payments.model.PaymentState;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGES_API_PATH;
-import static uk.gov.pay.directdebit.payments.resources.PaymentRequestResource.CHARGE_API_PATH;
+import static uk.gov.pay.directdebit.payments.resources.TransactionResource.CHARGES_API_PATH;
+import static uk.gov.pay.directdebit.payments.resources.TransactionResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class PaymentRequestResourceIT {
+public class TransactionResourceIT {
 
     private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
     private static final String JSON_AMOUNT_KEY = "amount";
@@ -63,7 +60,7 @@ public class PaymentRequestResourceIT {
     }
 
     @Test
-    public void shouldCreateAMandateAndATransactionForOneOffPaymentRequest() throws Exception {
+    public void shouldCreateAMandateAndATransactionForOneOffTransaction() throws Exception {
         String accountExternalId = testGatewayAccount.getExternalId();
         String expectedReference = "Test reference";
         String expectedDescription = "Test description";
@@ -110,7 +107,7 @@ public class PaymentRequestResourceIT {
     }
 
     @Test
-    public void shouldRetrieveAPaymentRequest_fromPublicApiEndpoint() {
+    public void shouldRetrieveATransaction_fromPublicApiEndpoint() {
 
         String accountExternalId = testGatewayAccount.getExternalId();
 
@@ -138,7 +135,7 @@ public class PaymentRequestResourceIT {
                 .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
 
 
-        String documentLocation = expectedPaymentRequestLocationFor(accountExternalId, transactionFixture.getExternalId());
+        String documentLocation = expectedTransactionLocationFor(accountExternalId, transactionFixture.getExternalId());
         String token = testContext.getDatabaseTestHelper().getTokenByTransactionExternalId(transactionFixture.getExternalId());
 
         String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + token;
@@ -257,7 +254,7 @@ public class PaymentRequestResourceIT {
                 .insert(testContext.getJdbi());
     }
 
-    private String expectedPaymentRequestLocationFor(String accountId, String chargeId) {
+    private String expectedTransactionLocationFor(String accountId, String chargeId) {
         return "http://localhost:" + testContext.getPort() + CHARGE_API_PATH
                 .replace("{accountId}", accountId)
                 .replace("{transactionExternalId}", chargeId);

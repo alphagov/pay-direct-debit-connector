@@ -8,10 +8,8 @@ import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mindrot.jbcrypt.BCrypt;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -24,21 +22,18 @@ public class PayerParserTest {
     private static final String ACCOUNT_NUMBER = "12345678";
     private static final String NAME = "name";
 
-    @Mock
-    private Transaction mockedTransaction;
-
     private PayerParser payerParser = new PayerParser();
 
     @Test
     public void shouldCreateAPayerWhenAllFieldsAreThere() {
-        Map<String, String> createPaymentRequestWithAllFields = new HashMap<String, String>() {{
+        Map<String, String> createTransactionWithAllFields = new HashMap<String, String>() {{
             put("account_holder_name", NAME);
             put("account_number", ACCOUNT_NUMBER);
             put("sort_code", SORT_CODE);
             put("email", EMAIL);
             put("requires_authorisation", "true");
         }};
-        Payer payer = payerParser.parse(createPaymentRequestWithAllFields, 10L);
+        Payer payer = payerParser.parse(createTransactionWithAllFields, 10L);
         assertThat(payer.getExternalId(), is(notNullValue()));
         assertThat(payer.getMandateId(), is(10L));
         assertThat(payer.getName(), is(NAME));

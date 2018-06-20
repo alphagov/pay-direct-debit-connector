@@ -1,5 +1,8 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
+import java.sql.Timestamp;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
@@ -8,14 +11,10 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
-import java.sql.Timestamp;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-
 public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture, GoCardlessEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
-    private Long paymentRequestEventsId = RandomUtils.nextLong(1, 99999);
-    private String eventId = RandomIdGenerator.newId();
+    private Long eventId = RandomUtils.nextLong(1, 99999);
+    private String goCardlessEventId = RandomIdGenerator.newId();
     private String action = RandomStringUtils.randomAlphabetic(20);
     private GoCardlessResourceType resourceType = GoCardlessResourceType.PAYMENTS;
     private String resourceId = RandomStringUtils.randomAlphabetic(20);
@@ -38,12 +37,12 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public Long getPaymentRequestEventsId() {
-        return paymentRequestEventsId;
+    public Long getEventId() {
+        return eventId;
     }
 
-    public GoCardlessEventFixture withPaymentRequestEventsId(Long paymentRequestEventsId) {
-        this.paymentRequestEventsId = paymentRequestEventsId;
+    public GoCardlessEventFixture withEventId(Long eventId) {
+        this.eventId = eventId;
         return this;
     }
 
@@ -56,12 +55,12 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public String getEventId() {
-        return eventId;
+    public String getGoCardlessEventId() {
+        return goCardlessEventId;
     }
 
-    public GoCardlessEventFixture withEventId(String eventId) {
-        this.eventId = eventId;
+    public GoCardlessEventFixture withGoCardlessEventId(String eventId) {
+        this.goCardlessEventId = eventId;
         return this;
     }
 
@@ -117,8 +116,8 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                                 "    )\n" +
                                 "   VALUES(?, ?, ?, ?, ?, ?, ?)\n",
                         id,
-                        paymentRequestEventsId,
                         eventId,
+                        goCardlessEventId,
                         action,
                         resourceType.toString(),
                         json,
@@ -130,7 +129,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
 
     @Override
     public GoCardlessEvent toEntity() {
-        return new GoCardlessEvent(id, paymentRequestEventsId, eventId, action, resourceType, json, createdAt);
+        return new GoCardlessEvent(id, eventId, goCardlessEventId, action, resourceType, json, createdAt);
     }
 
 }
