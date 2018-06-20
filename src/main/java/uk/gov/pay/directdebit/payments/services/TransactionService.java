@@ -2,10 +2,8 @@ package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.ZonedDateTime;
+import java.util.*;
 import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
@@ -15,6 +13,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
@@ -129,6 +128,10 @@ public class TransactionService {
 
     public List<Transaction> findAllByPaymentStateAndProvider(PaymentState paymentState, PaymentProvider paymentProvider) {
         return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);
+    }
+    
+    public List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(List<MandateState> states, ZonedDateTime creationTime) {
+        return transactionDao.findAllPaymentsBySetOfStatesAndCreationTime(states, creationTime);
     }
     
     public Transaction findTransaction(Long transactionId) {

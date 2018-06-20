@@ -38,6 +38,8 @@ import uk.gov.pay.directdebit.mandate.resources.MandateResource;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payments.resources.PaymentViewResource;
 import uk.gov.pay.directdebit.payments.resources.TransactionResource;
+import uk.gov.pay.directdebit.tasks.resources.ExpireResource;
+import uk.gov.pay.directdebit.tasks.services.ExpireService;
 import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
@@ -98,6 +100,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(injector.getInstance(TransactionResource.class));
         environment.jersey().register(injector.getInstance(PaymentViewResource.class));
         environment.jersey().register(injector.getInstance(MandateResource.class));
+        environment.jersey().register(injector.getInstance(ExpireResource.class));
+
 
         environment.jersey().register(new InvalidWebhookExceptionMapper());
         environment.jersey().register(new BadRequestExceptionMapper());

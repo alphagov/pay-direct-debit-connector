@@ -1,14 +1,19 @@
 package uk.gov.pay.directdebit.payments.dao;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payments.dao.mapper.TransactionMapper;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -74,5 +79,8 @@ public interface TransactionDao {
     @SqlUpdate("INSERT INTO transactions(mandate_id, external_id, amount, state, description, reference, created_date) VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate)")
     @GetGeneratedKeys
     Long insert(@BindBean Transaction transaction);
+    
+    @SqlQuery(joinQuery + " WHERE t.state IN (<states>) AND t.created_date < :maxDateTime")
+    List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(@BindList("states") List<MandateState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
 
 }

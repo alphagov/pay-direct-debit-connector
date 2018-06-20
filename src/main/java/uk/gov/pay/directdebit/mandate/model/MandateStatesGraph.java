@@ -4,6 +4,9 @@ import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
+
+import java.util.*;
 
 import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
@@ -27,7 +30,7 @@ public class MandateStatesGraph {
 
     private final ImmutableValueGraph<MandateState, SupportedEvent> graphStates;
 
-    private MandateStatesGraph() {
+    public MandateStatesGraph() {
         this.graphStates = buildStatesGraph();
     }
 
@@ -58,6 +61,19 @@ public class MandateStatesGraph {
         graph.putEdgeValue(ACTIVE, CANCELLED, MANDATE_CANCELLED);
 
         return ImmutableValueGraph.copyOf(graph);
+    }
+    
+    public Set<MandateState> getPriorStates(MandateState state) {
+        return recursiveGetPriorStates(state);
+    }
+    
+    private Set<MandateState> recursiveGetPriorStates(MandateState state) {
+        Set<MandateState> priorStates = new HashSet<>();
+        for (MandateState mandateState: graphStates.asGraph().predecessors(state)) {
+            priorStates.add(mandateState);
+            priorStates.addAll(recursiveGetPriorStates(mandateState));
+        }
+        return priorStates;
     }
 
     public MandateState getNextStateForEvent(MandateState from, SupportedEvent event) {
