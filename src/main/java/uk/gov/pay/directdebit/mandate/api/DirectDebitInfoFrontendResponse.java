@@ -17,10 +17,10 @@ public class DirectDebitInfoFrontendResponse {
     public static class PayerDetails {
         @JsonProperty("payer_external_id")
         private String externalId;
-
+        
         @JsonProperty("account_holder_name")
         private String name;
-
+        
         @JsonProperty
         private String email;
 
@@ -103,7 +103,7 @@ public class DirectDebitInfoFrontendResponse {
 
     @JsonProperty("transaction")
     private TransactionDetails transaction;
-
+    
     @JsonProperty("external_id")
     private String mandateExternalId;
 
@@ -115,7 +115,7 @@ public class DirectDebitInfoFrontendResponse {
 
     @JsonProperty("gateway_account_external_id")
     private String gatewayAccountExternalId;
-
+    
     @JsonProperty
     private String reference;
 
@@ -149,7 +149,7 @@ public class DirectDebitInfoFrontendResponse {
         }
         return null;
     }
-
+    
     private PayerDetails initPayer(Payer payer) {
         if (payer != null ) {
             return new PayerDetails(
@@ -157,7 +157,7 @@ public class DirectDebitInfoFrontendResponse {
                     payer.getName(),
                     payer.getEmail(),
                     payer.getAccountRequiresAuthorisation());
-        }
+        } 
         return null;
     }
     public String getReturnUrl() {
@@ -256,3 +256,5 @@ public class DirectDebitInfoFrontendResponse {
     }
 
 }
+
+

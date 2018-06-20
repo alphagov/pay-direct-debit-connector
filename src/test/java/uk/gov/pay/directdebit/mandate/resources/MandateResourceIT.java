@@ -177,6 +177,45 @@ public class MandateResourceIT {
                 .body("payer.email", is(payerFixture.getEmail()))
                 .body("payer.requires_authorisation", is(payerFixture.getAccountRequiresAuthorisation()));
     }
+
+    @Test
+    public void shouldRetrieveAMandate_FromPublicApiEndpoint() {
+        String accountExternalId = testGatewayAccount.getExternalId();
+        PayerFixture payerFixture = PayerFixture.aPayerFixture();
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withPayerFixture(payerFixture)
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
+        String publicApiMandatePath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}";
+        String requestPath = publicApiMandatePath
+                .replace("{accountId}", accountExternalId)
+                .replace("{mandateExternalId}", mandateFixture.getExternalId());
+        
+        ValidatableResponse getMandateResponse = givenSetup()
+                .get(requestPath)
+                .then()
+                .statusCode(OK.getStatusCode())
+                .contentType(JSON)
+                .body("mandate_id", is(mandateFixture.getExternalId()))
+                .body("mandate_type", is(mandateFixture.getMandateType().toString()))
+                .body("return_url", is(mandateFixture.getReturnUrl()))
+                .body("state.status", is(mandateFixture.getState().toExternal().getState()));
+
+        String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(mandateFixture.getExternalId()).get("secure_redirect_token").toString();
+        String documentLocation = expectedMandateLocationFor(accountExternalId, mandateFixture.getExternalId());
+
+        String hrefNextUrl = "http://Frontend/secure/" + token;
+        String hrefNextUrlPost = "http://Frontend/secure";
+
+        getMandateResponse .body("links", hasSize(3))
+                .body("links", containsLink("self", "GET", documentLocation))
+                .body("links", containsLink("next_url", "GET", hrefNextUrl))
+                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
+                    put("chargeTokenId", token);
+                }}));
+                
+    }
     
     @Test
     public void shouldCancelAMandate() {
