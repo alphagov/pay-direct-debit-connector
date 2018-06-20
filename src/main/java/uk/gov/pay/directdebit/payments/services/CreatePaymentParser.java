@@ -8,12 +8,12 @@ import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 public class CreatePaymentParser {
-    public Transaction parse(Map<String, String> createPaymentRequest, Mandate mandate) {
+    public Transaction parse(Map<String, String> createTransaction, Mandate mandate) {
         return new Transaction(
-                new Long(createPaymentRequest.get("amount")),
+                new Long(createTransaction.get("amount")),
                 PaymentStatesGraph.initialState(),
-                createPaymentRequest.get("description"),
-                createPaymentRequest.get("reference"),
+                createTransaction.get("description"),
+                createTransaction.get("reference"),
                 mandate,
                 ZonedDateTime.now(ZoneOffset.UTC)
         );

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import java.util.HashMap;
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,16 +22,12 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
-import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.Map;
-
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -119,8 +118,8 @@ public class MandateResourceIT {
 
         TransactionFixture transactionFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
 
-        String frontendPaymentRequestPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
-        String requestPath = frontendPaymentRequestPath
+        String frontendMandateWithTransationPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
+        String requestPath = frontendMandateWithTransationPath
                 .replace("{accountId}", accountExternalId)
                 .replace("{mandateExternalId}", mandateFixture.getExternalId())
                 .replace("{transactionExternalId}", transactionFixture.getExternalId());
@@ -156,8 +155,8 @@ public class MandateResourceIT {
                 .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
 
-        String frontendPaymentRequestPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}";
-        String requestPath = frontendPaymentRequestPath
+        String frontendMandatePath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}";
+        String requestPath = frontendMandatePath
                 .replace("{accountId}", accountExternalId)
                 .replace("{mandateExternalId}", mandateFixture.getExternalId());
 

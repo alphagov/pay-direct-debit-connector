@@ -10,8 +10,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_ACTIVE;
-import static uk.gov.pay.directdebit.payments.model.Event.SupportedEvent.MANDATE_FAILED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_FAILED;
 
 public class MandateStatesGraphTest {
 
