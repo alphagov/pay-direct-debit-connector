@@ -19,7 +19,7 @@ public class MandateMapper implements RowMapper<Mandate> {
     private static final String EXTERNAL_ID_COLUMN = "mandate_external_id";
     private static final String MANDATE_TYPE_COLUMN = "mandate_type";
     private static final String STATE_COLUMN = "mandate_state";
-    private static final String REFERENCE_COLUMN = "mandate_reference";
+    private static final String MANDATE_MANDATE_REFERENCE_COLUMN = "mandate_mandate_reference";
     private static final String RETURN_URL_COLUMN = "mandate_return_url";
     private static final String CREATED_DATE_COLUMN = "mandate_created_date";
     private static final String GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
@@ -72,7 +72,7 @@ public class MandateMapper implements RowMapper<Mandate> {
                 gatewayAccount,
                 MandateType.valueOf(resultSet.getString(MANDATE_TYPE_COLUMN)),
                 resultSet.getString(EXTERNAL_ID_COLUMN),
-                resultSet.getString(REFERENCE_COLUMN),
+                resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN),
                 MandateState.valueOf(resultSet.getString(STATE_COLUMN)),
                 resultSet.getString(RETURN_URL_COLUMN),
                 ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),

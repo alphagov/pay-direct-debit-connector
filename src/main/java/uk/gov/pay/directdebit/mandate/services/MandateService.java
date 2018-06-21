@@ -131,7 +131,7 @@ public class MandateService {
                 accountExternalId,
                 mandate.getState().toExternal(),
                 mandate.getReturnUrl(),
-                mandate.getReference(),
+                mandate.getMandateReference(),
                 mandate.getCreatedDate().toString(),
                 mandate.getPayer(),
                 transaction);
@@ -145,7 +145,7 @@ public class MandateService {
                 accountExternalId,
                 mandate.getState().toExternal(),
                 mandate.getReturnUrl(),
-                mandate.getReference(),
+                mandate.getMandateReference(),
                 mandate.getCreatedDate().toString(),
                 mandate.getPayer(),
                 null);

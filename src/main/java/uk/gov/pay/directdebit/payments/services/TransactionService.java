@@ -53,6 +53,7 @@ public class TransactionService {
     private final DirectDebitEventService directDebitEventService;
     private final UserNotificationService userNotificationService;
     private final CreatePaymentParser createPaymentParser;
+
     @Inject
     public TransactionService(TokenService tokenService,
             GatewayAccountDao gatewayAccountDao,
@@ -154,8 +155,7 @@ public class TransactionService {
     }
 
     public DirectDebitEvent paymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {
-        updateStateFor(transaction,
-                PAYMENT_SUBMITTED_TO_PROVIDER);
+        updateStateFor(transaction, PAYMENT_SUBMITTED_TO_PROVIDER);
         userNotificationService.sendPaymentConfirmedEmailFor(transaction, earliestChargeDate);
         return directDebitEventService.registerPaymentSubmittedToProviderEventFor(transaction);
     }

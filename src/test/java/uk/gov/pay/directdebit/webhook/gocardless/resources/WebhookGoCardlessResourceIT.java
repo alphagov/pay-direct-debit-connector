@@ -191,7 +191,7 @@ public class WebhookGoCardlessResourceIT {
                 "  \"gateway_account_external_id\": \"" + testGatewayAccount.getExternalId() + "\",\n" +
                 "  \"template\": \"MANDATE_FAILED\",\n" +
                 "  \"personalisation\": {\n" +
-                "    \"mandate reference\": \"" + mandateFixture.getReference() + "\",\n" +
+                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
                 "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
                 "  }\n" +
                 "}";

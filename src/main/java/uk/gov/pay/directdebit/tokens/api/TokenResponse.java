@@ -35,13 +35,13 @@ public class TokenResponse {
 
 
     private TokenResponse(String paymentExternalId,
-            Long gatewayAccountId,
-            String gatewayAccountExternalId,
-            String reference,
-            String returnUrl,
-            String type,
-            String state,
-            String transactionExternalId) {
+                          Long gatewayAccountId,
+                          String gatewayAccountExternalId,
+                          String reference,
+                          String returnUrl,
+                          String type,
+                          String state,
+                          String transactionExternalId) {
         this.mandateExternalId = paymentExternalId;
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
@@ -57,7 +57,7 @@ public class TokenResponse {
                 mandate.getExternalId(),
                 mandate.getGatewayAccount().getId(),
                 mandate.getGatewayAccount().getExternalId(),
-                mandate.getReference(),
+                mandate.getMandateReference(),
                 mandate.getReturnUrl(),
                 mandate.getType().toString(),
                 mandate.getState().toString(),
@@ -123,8 +123,8 @@ public class TokenResponse {
                 ", transaction_external_id=" + transactionExternalId +
                 ", gateway_account_id=" + gatewayAccountId +
                 ", gateway_account_external_id=" + gatewayAccountExternalId +
-                ", type='" + type + '\'' +
-                ", state='" + state + '\'' +
+                ", type=" + type +
+                ", state=" + state +
                 ", return_url=" + returnUrl +
                 '}';
     }
