@@ -12,6 +12,7 @@ import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import uk.gov.pay.commons.testing.pact.providers.PayPactRunner;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import java.util.Map;
@@ -30,6 +31,7 @@ public class PublicApiContractTest {
     public static Target target;
 
     private GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture();
+    private MandateFixture testMandate = MandateFixture.aMandateFixture();
 
     @BeforeClass
     public static void setUpService() {
@@ -39,5 +41,10 @@ public class PublicApiContractTest {
     @State("a gateway account with external id exists")
     public void aGatewayAccountWithExternalIdExists(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
+    }
+
+    @State("a mandate external id exists")
+    public void aMandateWithExternalIdExists(Map<String, String> params) {
+        testMandate.withExternalId(params.get("mandate_id")).insert(app.getTestContext().getJdbi());
     }
 }
