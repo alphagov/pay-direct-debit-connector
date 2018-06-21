@@ -43,7 +43,7 @@ public class PublicApiContractTest {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
     }
 
-    @State("a mandate external id exists")
+    @State("a mandate with external id exists")
     public void aMandateWithExternalIdExists(Map<String, String> params) {
         testMandate.withExternalId(params.get("mandate_id")).insert(app.getTestContext().getJdbi());
     }
