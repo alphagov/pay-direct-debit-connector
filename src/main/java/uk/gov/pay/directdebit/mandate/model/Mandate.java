@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.mandate.model;
 
-import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
@@ -14,29 +13,32 @@ public class Mandate {
     private final String returnUrl;
     private final MandateType type;
     private final String mandateReference;
+    private final String serviceReference;
     private final ZonedDateTime createdDate;
     private Payer payer;
 
-    public Mandate(Long id, GatewayAccount gatewayAccount, MandateType type, String externalId,
-                   String mandateReference,
-                   MandateState state, String returnUrl, ZonedDateTime createdDate,
-                   Payer payer) {
+    public Mandate(
+            Long id,
+            GatewayAccount gatewayAccount,
+            MandateType type,
+            String externalId,
+            String mandateReference,
+            String serviceReference,
+            MandateState state,
+            String returnUrl,
+            ZonedDateTime createdDate,
+            Payer payer
+    ) {
         this.id = id;
         this.gatewayAccount = gatewayAccount;
         this.type = type;
         this.externalId = externalId;
         this.mandateReference = mandateReference;
+        this.serviceReference = serviceReference;
         this.state = state;
         this.returnUrl = returnUrl;
         this.createdDate = createdDate;
         this.payer = payer;
-    }
-
-    public Mandate(GatewayAccount gatewayAccount, MandateType type,
-                   MandateState state, String returnUrl, ZonedDateTime createdDate,
-                   Payer payer) {
-        this(null, gatewayAccount, type, RandomIdGenerator.newId(), "default-ref", state, returnUrl,
-                createdDate, payer);
     }
 
     public Payer getPayer() {
@@ -79,6 +81,10 @@ public class Mandate {
         return mandateReference;
     }
 
+    public String getServiceReference() {
+        return serviceReference;
+    }
+
     public MandateType getType() {
         return type;
     }
@@ -115,6 +121,9 @@ public class Mandate {
         if (mandateReference != null ? !mandateReference.equals(mandate.mandateReference) : mandate.mandateReference != null) {
             return false;
         }
+        if (serviceReference != null ? !serviceReference.equals(mandate.serviceReference) : mandate.serviceReference != null) {
+            return false;
+        }
         if (payer != null ? !payer.equals(mandate.payer) : mandate.payer != null) {
             return false;
         }
@@ -131,6 +140,7 @@ public class Mandate {
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + type.hashCode();
         result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
+        result = 31 * result + (serviceReference != null ? serviceReference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
         return result;
     }

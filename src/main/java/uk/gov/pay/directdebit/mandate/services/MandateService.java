@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
+
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -9,10 +10,12 @@ import java.util.Map;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
+
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
@@ -82,8 +85,12 @@ public class MandateService {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     Mandate mandate = new Mandate(
+                            null,
                             gatewayAccount,
                             MandateType.valueOf(mandateRequestMap.get("agreement_type")),
+                            RandomIdGenerator.newId(),
+                            null,
+                            mandateRequestMap.get("service_reference"),
                             MandateState.CREATED,
                             mandateRequestMap.get("return_url"),
                             ZonedDateTime.now(ZoneOffset.UTC),
@@ -120,6 +127,7 @@ public class MandateService {
         return new TokenExchangeDetails(mandate, transactionExternalId);
 
     }
+
     public DirectDebitInfoFrontendResponse populateGetMandateWithTransactionResponseForFrontend(String accountExternalId, String transactionExternalId) {
         Transaction transaction = transactionService
                 .findTransactionForExternalIdAndGatewayAccountExternalId(transactionExternalId,
@@ -154,34 +162,36 @@ public class MandateService {
     public GetMandateResponse populateGetMandateResponse(String accountExternalId, String mandateExternalId, UriInfo uriInfo) {
         Mandate mandate = findByExternalId(mandateExternalId);
         List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
-        
+
         return new GetMandateResponse(
-                mandateExternalId, 
+                mandateExternalId,
                 mandate.getType(),
                 mandate.getReturnUrl(),
                 dataLinks,
                 mandate.getState().toExternal()
         );
     }
-    
+
     public CreateMandateResponse createMandateResponse(Map<String, String> mandateRequestMap, String accountExternalId, UriInfo uriInfo) {
         Mandate mandate = createMandate(mandateRequestMap, accountExternalId);
         String mandateExternalId = mandate.getExternalId();
         List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
-        
+
         return new CreateMandateResponse(
                 mandateExternalId,
                 mandate.getType(),
                 mandate.getReturnUrl(),
                 mandate.getCreatedDate().toString(),
                 mandate.getState().toExternal(),
-                dataLinks);
+                dataLinks,
+                mandate.getServiceReference()
+        );
     }
 
     public Mandate findByExternalId(String externalId) {
         return mandateDao
                 .findByExternalId(externalId)
-                .orElseThrow(() -> new MandateNotFoundException(externalId)); 
+                .orElseThrow(() -> new MandateNotFoundException(externalId));
     }
 
     public Mandate findById(Long id) {
@@ -201,7 +211,7 @@ public class MandateService {
         userNotificationService.sendMandateCancelledEmailFor(newMandate);
         return directDebitEventService.registerMandateCancelledEventFor(newMandate);
     }
-    
+
     public DirectDebitEvent mandatePendingFor(Mandate mandate) {
         Mandate newMandate = updateStateFor(mandate, MANDATE_PENDING);
         return directDebitEventService.registerMandatePendingEventFor(newMandate);
@@ -210,12 +220,12 @@ public class MandateService {
     public DirectDebitEvent awaitingDirectDebitDetailsFor(Mandate mandate) {
         return directDebitEventService.registerAwaitingDirectDebitDetailsEventFor(mandate);
     }
-    
+
     public DirectDebitEvent mandateActiveFor(Mandate mandate) {
         updateStateFor(mandate, MANDATE_ACTIVE);
         return directDebitEventService.registerMandateActiveEventFor(mandate);
     }
-    
+
     public Mandate receiveDirectDebitDetailsFor(String mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
         directDebitEventService.registerDirectDebitReceivedEventFor(mandate);
@@ -273,7 +283,7 @@ public class MandateService {
         Mandate newMandate = updateStateFor(mandate, SupportedEvent.PAYMENT_CANCELLED_BY_USER);
         return directDebitEventService.registerMandateCancelledEventFor(newMandate);
     }
-    
+
     private Transaction retrieveTransactionForOneOffMandate(String mandateExternalId) {
         List<Transaction> transactions = transactionService.findTransactionsForMandate(mandateExternalId);
         if (transactions.size() != 1) {
@@ -281,7 +291,7 @@ public class MandateService {
         }
         return transactions.get(0);
     }
-    
+
     private List<Map<String, Object>> createLinks(Mandate mandate, String accountExternalId, UriInfo uriInfo) {
         List<Map<String, Object>> dataLinks = new ArrayList<>();
 

@@ -22,7 +22,7 @@ public class CreateMandateResponse {
 
     @JsonProperty("mandate_type")
     private MandateType mandateType;
-    
+
     @JsonProperty("return_url")
     private String returnUrl;
 
@@ -32,16 +32,21 @@ public class CreateMandateResponse {
     @JsonProperty
     private ExternalMandateState state;
 
+    @JsonProperty("service_reference")
+    private String serviceReference;
+
     public CreateMandateResponse(String mandateId,
                                  MandateType mandateType, String returnUrl, String createdDate,
                                  ExternalMandateState state,
-                                 List<Map<String, Object>> dataLinks) {
+                                 List<Map<String, Object>> dataLinks,
+                                 String serviceReference) {
         this.dataLinks = dataLinks;
         this.mandateId = mandateId;
         this.mandateType = mandateType;
         this.returnUrl = returnUrl;
         this.createdDate = createdDate;
         this.state = state;
+        this.serviceReference = serviceReference;
     }
 
     public String getMandateId() {
@@ -62,6 +67,10 @@ public class CreateMandateResponse {
 
     public ExternalMandateState getState() {
         return state;
+    }
+
+    public String getServiceReference() {
+        return serviceReference;
     }
 
     public URI getLink(String rel) {

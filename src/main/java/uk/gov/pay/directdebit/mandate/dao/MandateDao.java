@@ -19,6 +19,7 @@ public interface MandateDao {
             "  external_id,\n" +
             "  gateway_account_id,\n" +
             "  mandate_reference,\n" +
+            "  service_reference,\n" +
             "  state,\n" +
             "  type,\n" +
             "  return_url,\n" +
@@ -27,6 +28,7 @@ public interface MandateDao {
             "  :externalId,\n" +
             "  :gatewayAccount.id,\n" +
             "  :mandateReference,\n" +
+            "  :serviceReference,\n" +
             "  :state,\n" +
             "  :type,\n" +
             "  :returnUrl,\n" +
@@ -39,6 +41,7 @@ public interface MandateDao {
             "  m.id AS mandate_id," +
             "  m.external_id AS mandate_external_id," +
             "  m.mandate_reference AS mandate_mandate_reference," +
+            "  m.service_reference AS mandate_service_reference," +
             "  m.gateway_account_id AS mandate_gateway_account_id," +
             "  m.return_url AS mandate_return_url," +
             "  m.type AS mandate_type," +

@@ -32,6 +32,7 @@ public interface TransactionDao {
             "  m.id AS mandate_id," +
             "  m.external_id AS mandate_external_id," +
             "  m.mandate_reference AS mandate_mandate_reference," +
+            "  m.service_reference AS mandate_service_reference," +
             "  m.gateway_account_id AS mandate_gateway_account_id," +
             "  m.return_url AS mandate_return_url," +
             "  m.type AS mandate_type," +

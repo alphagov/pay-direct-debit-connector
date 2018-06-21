@@ -198,6 +198,7 @@ public class MandateServiceTest {
         assertThat(newMandate.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(newMandate.getGatewayAccount(), is(mandate.getGatewayAccount()));
         assertThat(newMandate.getMandateReference(), is(mandate.getMandateReference()));
+        assertThat(newMandate.getServiceReference(), is(mandate.getServiceReference()));
         assertThat(newMandate.getPayer(), is(mandate.getPayer()));
         assertThat(newMandate.getType(), is(mandate.getType()));
         assertThat(newMandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
@@ -217,6 +218,7 @@ public class MandateServiceTest {
         assertThat(newMandate.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(newMandate.getGatewayAccount(), is(mandate.getGatewayAccount()));
         assertThat(newMandate.getMandateReference(), is(mandate.getMandateReference()));
+        assertThat(newMandate.getServiceReference(), is(mandate.getServiceReference()));
         assertThat(newMandate.getPayer(), is(mandate.getPayer()));
         assertThat(newMandate.getType(), is(mandate.getType()));
         assertThat(newMandate.getState(), is(SUBMITTED));
@@ -248,7 +250,6 @@ public class MandateServiceTest {
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId());
         assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
-        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
         assertThat(mandateResponseForFrontend.getTransaction(), is(nullValue()));
     }
 

@@ -48,6 +48,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
     private static final String MANDATE_STATE_COLUMN = "mandate_state";
     private static final String MANDATE_TYPE_COLUMN = "mandate_type";
     private static final String MANDATE_MANDATE_REFERENCE_COLUMN = "mandate_mandate_reference";
+    private static final String MANDATE_SERVICE_REFERENCE_COLUMN = "mandate_service_reference";
     private static final String MANDATE_CREATED_DATE_COLUMN = "mandate_created_date";
 
     @Override
@@ -82,6 +83,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
                 MandateType.valueOf(resultSet.getString(MANDATE_TYPE_COLUMN)),
                 resultSet.getString(MANDATE_EXTERNAL_ID_COLUMN),
                 resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN),
+                resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN),
                 MandateState.valueOf(resultSet.getString(MANDATE_STATE_COLUMN)),
                 resultSet.getString(MANDATE_RETURN_URL_COLUMN),
                 ZonedDateTime.ofInstant(resultSet.getTimestamp(MANDATE_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
