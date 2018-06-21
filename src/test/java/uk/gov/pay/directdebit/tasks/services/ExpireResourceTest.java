@@ -45,7 +45,7 @@ public class ExpireResourceTest {
                 .withCreatedDate(ZonedDateTime.of(2018,1,1,1,1,1,1,ZoneId.systemDefault()))
                 .withMandateFixture(mandateFixture)
                 .insert(testContext.getJdbi());
-        String requestPath = "/v1/api/tasks/expirePaymentsAndMandates";
+        String requestPath = "/v1/api/tasks/expire-payments-and-mandates";
         ValidatableResponse response = given()
                 .port(testContext.getPort())
                 .contentType(JSON)

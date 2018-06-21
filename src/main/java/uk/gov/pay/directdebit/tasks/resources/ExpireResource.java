@@ -15,7 +15,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("/")
 public class ExpireResource {
 
-    private final String EXPIRE_SWEEP_API_PATH = "/v1/api/tasks/expirePaymentsAndMandates";
+    private final String EXPIRE_SWEEP_API_PATH = "/v1/api/tasks/expire-payments-and-mandates";
     private final ExpireService expireService;
     
     @Inject
