@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.tasks.resources;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.pay.directdebit.tasks.services.ExpireService;
 
 import javax.inject.Inject;
@@ -25,9 +27,20 @@ public class ExpireResource {
     @Path(EXPIRE_SWEEP_API_PATH)
     @Produces(APPLICATION_JSON)
     public Response expirePaymentsAndMandates() {
-        expireService.expireMandates();
-        expireService.expirePayments();
-        return Response.ok().build();
+        int numberOfExpiredPayments = expireService.expirePayments();
+        ExpiredPaymentsCount expiredPaymentsCount =  new ExpiredPaymentsCount(numberOfExpiredPayments);
+        return Response.ok(expiredPaymentsCount).build();
+    }
+    
+    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
+    private static class ExpiredPaymentsCount {
+        
+        @JsonProperty
+        private final int numberOfExpiredPayments;
+        
+        ExpiredPaymentsCount(int numberOfExpiredPayments) {
+            this.numberOfExpiredPayments = numberOfExpiredPayments;
+        }
     }
     
 }

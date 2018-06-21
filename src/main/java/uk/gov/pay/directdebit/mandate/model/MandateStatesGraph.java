@@ -3,46 +3,26 @@ package uk.gov.pay.directdebit.mandate.model;
 import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
-import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
-import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+import uk.gov.pay.directdebit.payments.model.DirectDebitStatesGraph;
 
-import java.util.*;
-
-import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.CANCELLED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_CANCEL_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.*;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CANCELLED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_FAILED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_PENDING;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.*;
 
-public class MandateStatesGraph {
-
-    private final ImmutableValueGraph<MandateState, SupportedEvent> graphStates;
-
-    public MandateStatesGraph() {
-        this.graphStates = buildStatesGraph();
-    }
+public class MandateStatesGraph extends DirectDebitStatesGraph<MandateState> {
+    
 
     public static MandateState initialState() {
         return PENDING;
     }
-
+    
     public static MandateStatesGraph getStates() {
         return new MandateStatesGraph();
     }
-
-    private ImmutableValueGraph<MandateState, SupportedEvent> buildStatesGraph() {
+    
+    @Override
+    protected ImmutableValueGraph<MandateState, DirectDebitEvent.SupportedEvent> buildStatesGraph() {
         MutableValueGraph<MandateState, SupportedEvent> graph = ValueGraphBuilder
                 .directed()
                 .build();
@@ -61,35 +41,5 @@ public class MandateStatesGraph {
         graph.putEdgeValue(ACTIVE, CANCELLED, MANDATE_CANCELLED);
 
         return ImmutableValueGraph.copyOf(graph);
-    }
-    
-    public Set<MandateState> getPriorStates(MandateState state) {
-        return recursiveGetPriorStates(state);
-    }
-    
-    private Set<MandateState> recursiveGetPriorStates(MandateState state) {
-        Set<MandateState> priorStates = new HashSet<>();
-        for (MandateState mandateState: graphStates.asGraph().predecessors(state)) {
-            priorStates.add(mandateState);
-            priorStates.addAll(recursiveGetPriorStates(mandateState));
-        }
-        return priorStates;
-    }
-
-    public MandateState getNextStateForEvent(MandateState from, SupportedEvent event) {
-        return graphStates.successors(from).stream()
-                .filter(to -> isValidTransition(from, to, event))
-                .findFirst()
-                .orElseThrow(() -> new InvalidStateTransitionException(event.toString(), from.toString()));
-    }
-
-    private void addNodes(MutableValueGraph<MandateState, SupportedEvent> graph, MandateState[] values) {
-        for (MandateState value : values) {
-            graph.addNode(value);
-        }
-    }
-
-    boolean isValidTransition(MandateState from, MandateState to, SupportedEvent trigger) {
-        return graphStates.edgeValue(from, to).filter(trigger::equals).isPresent();
     }
 }

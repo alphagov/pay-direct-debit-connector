@@ -81,6 +81,6 @@ public interface TransactionDao {
     Long insert(@BindBean Transaction transaction);
     
     @SqlQuery(joinQuery + " WHERE t.state IN (<states>) AND t.created_date < :maxDateTime")
-    List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(@BindList("states") List<MandateState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
-
+    List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(@BindList("states") Set<PaymentState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
+    
 }

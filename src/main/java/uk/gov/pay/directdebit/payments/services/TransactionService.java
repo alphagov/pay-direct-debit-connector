@@ -130,7 +130,7 @@ public class TransactionService {
         return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);
     }
     
-    public List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(List<MandateState> states, ZonedDateTime creationTime) {
+    public List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(Set<PaymentState> states, ZonedDateTime creationTime) {
         return transactionDao.findAllPaymentsBySetOfStatesAndCreationTime(states, creationTime);
     }
     
@@ -142,6 +142,11 @@ public class TransactionService {
 
     public List<Transaction> findTransactionsForMandate(String mandateExternalId) {
         return transactionDao.findAllByMandateExternalId(mandateExternalId);
+    }
+    
+    public DirectDebitEvent paymentExpired(Transaction transaction) {
+        Transaction updateTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_EXPIRED_BY_SYSTEM);
+        return directDebitEventService.registerPaymentExpiredEventFor(updateTransaction);
     }
 
     public DirectDebitEvent paymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {

@@ -9,24 +9,7 @@ import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.awaitingDirectDebitDetails;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.directDebitDetailsConfirmed;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.directDebitDetailsReceived;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.mandateActive;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.mandateCancelled;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.mandateFailed;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.mandatePending;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.paidOut;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.payerCreated;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.payerEdited;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.paymentAcknowledged;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.paymentCancelled;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.paymentFailed;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.paymentMethodChanged;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.paymentSubmitted;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.paymentSubmittedToProvider;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.payoutPaid;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.tokenExchanged;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.*;
 
 public class DirectDebitEventService {
 
@@ -60,6 +43,11 @@ public class DirectDebitEventService {
     public void registerTokenExchangedEventFor(Mandate mandate) {
         DirectDebitEvent directDebitEvent = tokenExchanged(mandate.getId());
         insertEventFor(mandate, directDebitEvent);
+    }
+    
+    public DirectDebitEvent registerPaymentExpiredEventFor(Transaction transaction) {
+        DirectDebitEvent directDebitEvent = paymentExpired(transaction.getMandate().getId(), transaction.getId());
+        return insertEventFor(transaction, directDebitEvent);
     }
 
     public DirectDebitEvent registerPaymentSubmittedToProviderEventFor(Transaction transaction) {
