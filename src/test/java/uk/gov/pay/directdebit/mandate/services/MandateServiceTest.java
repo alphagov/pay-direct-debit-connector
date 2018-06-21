@@ -1,6 +1,10 @@
 package uk.gov.pay.directdebit.mandate.services;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
@@ -13,6 +17,7 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
+import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -23,6 +28,7 @@ import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
@@ -32,6 +38,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -63,16 +71,22 @@ public class MandateServiceTest {
     private LinksConfig mockedLinksConfig;
     @Mock
     private UserNotificationService mockedUserNotificationService;
+    @Mock
+    private UriInfo mockedUriInfo;
+    @Mock
+    private UriBuilder mockedUriBuilder;
 
     private MandateService service;
 
     @Before
-    public void setUp() {
+    public void setUp() throws URISyntaxException {
         when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
-        service = new MandateService(mockedDirectDebitConfig, mockedMandateDao,
-                mockedGatewayAccountDao, mockedTokenService,
-                mockedTransactionService, mockedDirectDebitEventService,
-                mockedUserNotificationService);
+        service = new MandateService(mockedDirectDebitConfig, mockedMandateDao, mockedGatewayAccountDao, mockedTokenService,
+                mockedTransactionService, mockedDirectDebitEventService, mockedUserNotificationService);
+        when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
+        when(mockedUriBuilder.path(anyString())).thenReturn(mockedUriBuilder);
+        when(mockedUriBuilder.build(any())).thenReturn(new URI("aaa"));
+        when(mockedLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
     }
 
     @Test
@@ -207,6 +221,21 @@ public class MandateServiceTest {
         assertThat(newMandate.getType(), is(mandate.getType()));
         assertThat(newMandate.getState(), is(SUBMITTED));
         assertThat(newMandate.getCreatedDate(), is(mandate.getCreatedDate()));
+    }
+
+    @Test
+    public void shouldPopulateGetMandateResponseForFrontend() {
+        Mandate mandate = MandateFixture
+                .aMandateFixture()
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .toEntity();
+        when(mockedMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
+        when(mockedTokenService.generateNewTokenFor(mandate)).thenReturn(new Token("token", mandate.getId()));
+        GetMandateResponse getMandateResponse = service.populateGetMandateResponse(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId(), mockedUriInfo);
+        assertThat(getMandateResponse.getReturnUrl(), is(mandate.getReturnUrl()));
+        assertThat(getMandateResponse.getMandateId(), is(mandate.getExternalId()));
+        assertThat(getMandateResponse.getMandateType(), is(mandate.getType()));
+        assertThat(getMandateResponse.getState(), is(mandate.getState().toExternal()));
     }
 
     @Test

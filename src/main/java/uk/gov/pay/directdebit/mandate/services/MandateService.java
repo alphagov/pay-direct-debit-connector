@@ -17,6 +17,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
+import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneOffMandateException;
@@ -148,6 +149,19 @@ public class MandateService {
                 mandate.getCreatedDate().toString(),
                 mandate.getPayer(),
                 null);
+    }
+
+    public GetMandateResponse populateGetMandateResponse(String accountExternalId, String mandateExternalId, UriInfo uriInfo) {
+        Mandate mandate = findByExternalId(mandateExternalId);
+        List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
+        
+        return new GetMandateResponse(
+                mandateExternalId, 
+                mandate.getType(),
+                mandate.getReturnUrl(),
+                dataLinks,
+                mandate.getState().toExternal()
+        );
     }
     
     public CreateMandateResponse createMandateResponse(Map<String, String> mandateRequestMap, String accountExternalId, UriInfo uriInfo) {
