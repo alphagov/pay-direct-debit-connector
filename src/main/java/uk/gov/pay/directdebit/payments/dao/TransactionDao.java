@@ -1,10 +1,5 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -13,10 +8,14 @@ import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payments.dao.mapper.TransactionMapper;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RegisterRowMapper(TransactionMapper.class)
 public interface TransactionDao {

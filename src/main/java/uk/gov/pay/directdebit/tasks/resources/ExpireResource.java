@@ -28,17 +28,17 @@ public class ExpireResource {
     @Produces(APPLICATION_JSON)
     public Response expirePaymentsAndMandates() {
         int numberOfExpiredPayments = expireService.expirePayments();
-        ExpiredPaymentsCount expiredPaymentsCount =  new ExpiredPaymentsCount(numberOfExpiredPayments);
-        return Response.ok(expiredPaymentsCount).build();
+        ResourceResponse resourceResponse =  new ResourceResponse(numberOfExpiredPayments);
+        return Response.ok(resourceResponse).build();
     }
     
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-    private static class ExpiredPaymentsCount {
+    private static class ResourceResponse {
         
         @JsonProperty
         private final int numberOfExpiredPayments;
-        
-        ExpiredPaymentsCount(int numberOfExpiredPayments) {
+
+        ResourceResponse(int numberOfExpiredPayments) {
             this.numberOfExpiredPayments = numberOfExpiredPayments;
         }
     }
