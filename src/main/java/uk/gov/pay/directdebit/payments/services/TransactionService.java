@@ -1,13 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import javax.inject.Inject;
-import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
@@ -25,6 +18,16 @@ import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.UriInfo;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -131,6 +134,10 @@ public class TransactionService {
         return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);
     }
     
+    public List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(Set<PaymentState> states, ZonedDateTime creationTime) {
+        return transactionDao.findAllPaymentsBySetOfStatesAndCreationTime(states, creationTime);
+    }
+    
     public Transaction findTransaction(Long transactionId) {
         return transactionDao
                 .findById(transactionId)
@@ -139,6 +146,11 @@ public class TransactionService {
 
     public List<Transaction> findTransactionsForMandate(String mandateExternalId) {
         return transactionDao.findAllByMandateExternalId(mandateExternalId);
+    }
+    
+    public DirectDebitEvent paymentExpired(Transaction transaction) {
+        Transaction updateTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_EXPIRED_BY_SYSTEM);
+        return directDebitEventService.registerPaymentExpiredEventFor(updateTransaction);
     }
 
     public DirectDebitEvent paymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {

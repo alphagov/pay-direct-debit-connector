@@ -1,8 +1,11 @@
 package uk.gov.pay.directdebit.payments.dao;
 
 import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +19,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import static org.hamcrest.core.Is.is;
@@ -146,7 +150,46 @@ public class TransactionDaoIT {
         int numOfUpdatedTransactions = transactionDao.updateState(34L, PaymentState.NEW);
         assertThat(numOfUpdatedTransactions, is(0));
     }
+    
+    @Test
+    public void findAllPaymentsBySetOfStatesAndCreationTime_shouldFindThreePayments() {
+        aTransactionFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
+        
+        aTransactionFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
+        
+        aTransactionFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
+        
+        PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
+        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.PENDING);
+        List<Transaction> transactions = transactionDao.findAllPaymentsBySetOfStatesAndCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
+        assertThat(transactions.size(), is(3));
+    }
 
+    @Test
+    public void findAllPaymentsBySetOfStatesAndCreationTime_shouldNotFindPayment_TooEarly() {
+        aTransactionFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
+                .withCreatedDate(ZonedDateTime.now()).insert(testContext.getJdbi());
+
+        PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
+        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.PENDING);
+        List<Transaction> transactions = transactionDao.findAllPaymentsBySetOfStatesAndCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
+        assertThat(transactions.size(), is(0));
+    }
+
+    @Test
+    public void findAllPaymentsBySetOfStatesAndCreationTime_shouldNotFindPayment_WrongState() {
+        aTransactionFixture().withMandateFixture(testMandate).withState(PaymentState.PENDING)
+                .withCreatedDate(ZonedDateTime.now()).insert(testContext.getJdbi());
+
+        PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
+        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.PENDING);
+        List<Transaction> transactions = transactionDao.findAllPaymentsBySetOfStatesAndCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
+        assertThat(transactions.size(), is(0));
+    }
+    
 
     private TransactionFixture generateNewTransactionFixture(MandateFixture mandateFixture,
             PaymentState paymentState,

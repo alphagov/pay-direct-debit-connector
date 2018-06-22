@@ -32,13 +32,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_EXPIRED_BY_SYSTEM;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionServiceTest {
@@ -233,5 +229,18 @@ public class TransactionServiceTest {
         verify(mockedDirectDebitEventService).registerPaymentMethodChangedEventFor(mandateFixture.toEntity());
         verify(mockedTransactionDao).updateState(transaction.getId(), USER_CANCEL_NOT_ELIGIBLE);
         assertThat(transaction.getState(), is(USER_CANCEL_NOT_ELIGIBLE));
+    }
+    
+    @Test
+    public void paymentExpired_shouldSetStatusToExpired() {
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withMandateFixture(mandateFixture)
+                .withState(NEW)
+                .toEntity();
+        service.paymentExpired(transaction);
+        verify(mockedDirectDebitEventService).registerPaymentExpiredEventFor(transaction);
+        verify(mockedTransactionDao).updateState(transaction.getId(), EXPIRED);
+        assertThat(transaction.getState(), is(EXPIRED));
     }
 }

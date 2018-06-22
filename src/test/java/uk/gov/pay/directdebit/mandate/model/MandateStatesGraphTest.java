@@ -6,6 +6,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
@@ -51,5 +54,12 @@ public class MandateStatesGraphTest {
     public void isValidTransition_shouldReturnFalseWhenTransitionIsInvalid() {
         assertThat(mandateStatesGraph.isValidTransition(MandateState.CANCELLED, MandateState.PENDING, MANDATE_FAILED), is(false));
     }
+
+    @Test
+    public void priorStates() {
+        assertThat(mandateStatesGraph.getPriorStates(MandateState.PENDING), is(new HashSet(Arrays.asList(MandateState.SUBMITTED, MandateState.CREATED, MandateState.AWAITING_DIRECT_DEBIT_DETAILS))));
+    }
+    
+    
 }
 
