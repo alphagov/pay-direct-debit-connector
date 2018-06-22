@@ -31,7 +31,7 @@ public class PublicApiContractTest {
     public static Target target;
 
     private GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture();
-    private MandateFixture testMandate = MandateFixture.aMandateFixture();
+    private MandateFixture testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount);
 
     @BeforeClass
     public static void setUpService() {
