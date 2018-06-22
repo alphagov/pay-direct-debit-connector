@@ -22,11 +22,17 @@ public class PaymentViewValidator {
     public PaymentViewSearchParams validateParams(PaymentViewSearchParams searchParams) {
         PaginationParams paginationParams = validatePagination(searchParams);
         SearchDateParams searchDateParams = validateSearchDate(searchParams);
-        return new PaymentViewSearchParams(searchParams.getGatewayExternalId(), 
-                searchParams.getPage() == null ? DEFAULT_PAGE_NUMBER : searchParams.getPage(),
-                searchParams.getDisplaySize() == null ? MAX_PAGE_NUMBER : searchParams.getDisplaySize(),
-                searchParams.getFromDateString(), searchParams.getToDateString(), searchParams.getEmail(), searchParams.getReference(),
-                searchParams.getAmount(), paginationParams, searchDateParams);
+        return new PaymentViewSearchParams(searchParams.getGatewayExternalId())
+                .withPage(searchParams.getPage() == null ? DEFAULT_PAGE_NUMBER : searchParams.getPage())        
+                .withDisplaySize(searchParams.getDisplaySize() == null ? MAX_PAGE_NUMBER : searchParams.getDisplaySize())
+                .withFromDateString(searchParams.getFromDateString())
+                .withToDateString(searchParams.getToDateString())
+                .withEmail(searchParams.getEmail())
+                .withReference(searchParams.getReference())
+                .withAmount(searchParams.getAmount())
+                .withMandateId(searchParams.getMandateId())
+                .withPaginationParams(paginationParams)
+                .withSearchDateParams(searchDateParams);
     }
 
     private PaginationParams validatePagination(PaymentViewSearchParams searchParams) {

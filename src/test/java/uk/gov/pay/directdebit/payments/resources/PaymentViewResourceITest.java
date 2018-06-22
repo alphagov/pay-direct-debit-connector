@@ -1,11 +1,6 @@
 package uk.gov.pay.directdebit.payments.resources;
 
 import io.restassured.specification.RequestSpecification;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,13 +10,22 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+
+import javax.ws.rs.core.Response;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
@@ -55,7 +59,7 @@ public class PaymentViewResourceITest {
                     .withName("J. Doe" + i)
                     .insert(testContext.getJdbi());
         }
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "1")
                 .replace(":display_size", "100");
@@ -67,18 +71,19 @@ public class PaymentViewResourceITest {
                 .contentType(JSON)
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("page", is(1))
-                .body("display_size", is(100))
-                .body("payment_views", hasSize(3))
-                .body("payment_views[0].reference", is("MBK2"))
-                .body("payment_views[0].name", is("J. Doe2"))
-                .body("payment_views[2].description", is("Description0"))
+                .body("total", is(3))
+                .body("count", is(3))
+                .body("results", hasSize(3))
+                .body("results[0].reference", is("MBK2"))
+                .body("results[0].name", is("J. Doe2"))
+                .body("results[2].description", is("Description0"))
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
-                .body("payment_views[1].created_date", is(createdDate.toString()));
+                .body("results[1].created_date", is(createdDate.toString()));
     }
 
     @Test
     public void shouldReturn400_whenPresentedWithNegativeOffset() {
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "0")
                 .replace(":display_size", "100");
@@ -93,7 +98,7 @@ public class PaymentViewResourceITest {
 
     @Test
     public void shouldReturn404_whenGatewayAccountNotExists() {
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", "non-existent-id")
                 .replace(":page", "1")
                 .replace(":display_size", "100");
@@ -107,7 +112,7 @@ public class PaymentViewResourceITest {
     }
 
     @Test
-    public void shouldReturn404_whenPaginationFindsNoRecords() {
+    public void shouldReturnEmptyResults_whenPaginationFindsNoRecords() {
         for (int i = 0; i < 2; i++) {
             MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
             aTransactionFixture()
@@ -119,7 +124,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "2");
@@ -128,49 +133,11 @@ public class PaymentViewResourceITest {
         givenSetup()
                 .get(requestPath)
                 .then()
-                .statusCode(Response.Status.NOT_FOUND.getStatusCode())
-                .contentType(JSON)
-                .body("message", is("Found no records with page size 2 and display_size 2"));
-    }
-
-    @Test
-    public void shouldReturn25Records_whenPaginationSetToPage2AndDisplaySize3With5records_withNoDates() {
-        ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1L);
-        for (int i = 0; i < 50; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-
-            aTransactionFixture()
-                    .withId((long) i)
-                    .withMandateFixture(mandateFixture)
-                    .withAmount(((long) 100 + i))
-                    .withReference("MBK" + i)
-                    .withDescription("Description" + i)
-                    .withCreatedDate(createdDate)
-                    .insert(testContext.getJdbi());
-            aPayerFixture()
-                    .withMandateId(mandateFixture.getId())
-                    .withName("J. Doe" + i)
-                    .insert(testContext.getJdbi());
-        }
-
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size"
-                .replace("{accountId}", testGatewayAccount.getExternalId())
-                .replace(":page", "2")
-                .replace(":display_size", "25");
-        givenSetup()
-                .get(requestPath)
-                .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("payment_views", hasSize(25))
-                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
-                .body("page", is(2))
-                .body("display_size", is(25))
-                .body("payment_views[0].reference", is("MBK24"))
-                .body("payment_views[24].description", is("Description0"))
-                .body("payment_views[0].name", is("J. Doe24"));
+                .body("results", hasSize(0));
     }
-
+    
     @Test
     public void shouldReturn5Records_whenPaginationSetTo2PageAnd10DisplaySizeWith15records_withDateRange10days() {
         ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1L);
@@ -191,7 +158,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "10")
@@ -202,14 +169,15 @@ public class PaymentViewResourceITest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("payment_views", hasSize(5))
+                .body("results", hasSize(5))
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
+                .body("total", is(15))
+                .body("count", is(5))
                 .body("page", is(2))
-                .body("display_size", is(10))
-                .body("payment_views[0].reference", is("MBK4"))
-                .body("payment_views[4].description", is("Description0"))
-                .body("payment_views[1].name", is("J. Doe3"))
-                .body("payment_views[2].created_date", is(createdDate.toString()));
+                .body("results[0].reference", is("MBK4"))
+                .body("results[4].description", is("Description0"))
+                .body("results[1].name", is("J. Doe3"))
+                .body("results[2].created_date", is(createdDate.toString()));
     }
 
     @Test
@@ -230,10 +198,11 @@ public class PaymentViewResourceITest {
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .withName("J. Doe" + day)
+                    .withEmail("j.doe@mail.fake")
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "1")
                 .replace(":display_size", "100")
@@ -244,20 +213,21 @@ public class PaymentViewResourceITest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("payment_views", hasSize(3))
+                .body("results", hasSize(3))
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("page", is(1))
-                .body("display_size", is(100))
-                .body("payment_views[0].reference", is("MBK2"))
-                .body("payment_views[2].description", is("Description11"))
-                .body("payment_views[1].name", is("J. Doe3"));
+                .body("total", is(3))
+                .body("count", is(3))
+                .body("results[0].reference", is("MBK2"))
+                .body("results[2].description", is("Description11"))
+                .body("results[1].name", is("J. Doe3"));
     }
 
     @Test
     public void shouldReturn400_whenMalformedDate() {
         String fromDate = "2018-05-05T15:00Z";
         String toDate = "2018-14-08T15:00Z";
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "10")
@@ -287,7 +257,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?email=:email"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?email=:email"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":email", "Jane");
         givenSetup()
@@ -295,7 +265,7 @@ public class PaymentViewResourceITest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("payment_views", hasSize(7));
+                .body("results", hasSize(7));
     }
 
     @Test
@@ -314,7 +284,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?reference=:reference"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?reference=:reference"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":reference", "f1");
         givenSetup()
@@ -322,7 +292,7 @@ public class PaymentViewResourceITest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("payment_views", hasSize(5));
+                .body("results", hasSize(5));
     }
 
     @Test
@@ -341,7 +311,7 @@ public class PaymentViewResourceITest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payment-requests/view?amount=:amount"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?amount=:amount"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":amount", "2343");
         givenSetup()
@@ -349,11 +319,61 @@ public class PaymentViewResourceITest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("payment_views", hasSize(6));
+                .body("results", hasSize(6));
     }
 
     private RequestSpecification givenSetup() {
         return given().port(testContext.getPort())
                 .contentType(JSON);
+    }
+    
+    @Test
+    public void shouldReturn3Records_whenSearchingByMandateId(){
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
+                .withExternalId("gateway-external-id")
+                .insert(testContext.getJdbi());
+        String mandateExternalId = "a-mandate-external-id";
+        String anotherMandateExternalId = "another-external-id";
+        MandateFixture mandateFixture1 = aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withExternalId(mandateExternalId)
+                .insert(testContext.getJdbi());
+        MandateFixture mandateFixture2 = aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withExternalId(anotherMandateExternalId)
+                .insert(testContext.getJdbi());
+        PayerFixture payerFixture1 = aPayerFixture()
+                .withMandateId(mandateFixture1.getId())
+                .withEmail("j.citizen@mail.fake")
+                .withName("J. Citizen")
+                .insert(testContext.getJdbi());
+        aPayerFixture()
+                .withMandateId(mandateFixture2.getId())
+                .withEmail("j.doe@mail.fake")
+                .withName("J. Doe")
+                .insert(testContext.getJdbi());
+        for (int i = 0; i < 6; i++) {
+            if (i%2 == 0) {
+                aTransactionFixture()
+                        .withMandateFixture(mandateFixture2)
+                        .insert(testContext.getJdbi());
+                continue;
+            }
+            aTransactionFixture()
+                    .withMandateFixture(mandateFixture1)
+                    .insert(testContext.getJdbi());
+        }
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?mandate_id=:mandateId"
+                .replace("{accountId}", gatewayAccountFixture.getExternalId())
+                .replace(":mandateId", mandateFixture1.getExternalId());
+        givenSetup()
+                .get(requestPath)
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(3))
+                .body("results", hasSize(3))
+                .body("results[0].email", is(payerFixture1.getEmail()))
+                .body("results[1].name", is("J. Citizen"));
     }
 }

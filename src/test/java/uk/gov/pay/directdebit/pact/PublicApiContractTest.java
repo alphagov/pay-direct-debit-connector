@@ -13,7 +13,9 @@ import org.junit.runner.RunWith;
 import uk.gov.pay.commons.testing.pact.providers.PayPactRunner;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
 import java.util.Map;
 
@@ -47,5 +49,19 @@ public class PublicApiContractTest {
     public void aGatewayAccountWithExternalIdAndAMandateWithExternalIdExist(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
         testMandate.withGatewayAccountFixture(testGatewayAccount).withExternalId(params.get("mandate_id")).insert(app.getTestContext().getJdbi());
+    }
+    
+    @State("three transaction records exist")
+    public void threeTransactionRecordsExist(Map<String, String> params) {
+        testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
+        MandateFixture testMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .withExternalId(params.get("mandate_id"));
+        testMandate.insert(app.getTestContext().getJdbi());
+        PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
+        testPayer.insert(app.getTestContext().getJdbi());
+        for (int x = 0; x < 3; x++) {
+            TransactionFixture.aTransactionFixture().withMandateFixture(testMandate).insert(app.getTestContext().getJdbi());
+        }
     }
 }

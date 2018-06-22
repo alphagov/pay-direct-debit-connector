@@ -3,12 +3,16 @@ package uk.gov.pay.directdebit.payments.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.payments.links.Link;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class PaymentViewListResponse {
 
-    @JsonProperty("charge_id")
+    @JsonProperty("transaction_id")
     private String transactionId;
 
     @JsonProperty
@@ -31,6 +35,9 @@ public class PaymentViewListResponse {
 
     @JsonProperty
     private ExternalPaymentState state;
+    
+    @JsonProperty
+    private List<Link> links = new ArrayList<>();
 
 
     public PaymentViewListResponse(String transactionId,
@@ -81,6 +88,13 @@ public class PaymentViewListResponse {
 
     public ExternalPaymentState getState() {
         return state;
+    }
+
+    public List<Link> getLinks() { return links; }
+    
+    public PaymentViewListResponse withLink(Link link) {
+        this.links.add(link);
+        return this;
     }
 
     @Override
