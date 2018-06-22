@@ -31,7 +31,7 @@ public class PublicApiContractTest {
     public static Target target;
 
     private GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture();
-    private MandateFixture testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount);
+    private MandateFixture testMandate = MandateFixture.aMandateFixture();
 
     @BeforeClass
     public static void setUpService() {
@@ -45,6 +45,6 @@ public class PublicApiContractTest {
 
     @State("a mandate with external id exists")
     public void aMandateWithExternalIdExists(Map<String, String> params) {
-        testMandate.withExternalId(params.get("mandate_id")).insert(app.getTestContext().getJdbi());
+        testMandate.withGatewayAccountFixture(testGatewayAccount).withExternalId(params.get("mandate_id")).insert(app.getTestContext().getJdbi());
     }
 }
