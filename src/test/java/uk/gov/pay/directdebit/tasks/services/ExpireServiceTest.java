@@ -40,7 +40,7 @@ public class ExpireServiceTest {
     
     @Before
     public void setup() {
-        expireService = new ExpireService(transactionService, mandateStatesGraph, paymentStatesGraph);
+        expireService = new ExpireService(transactionService, paymentStatesGraph);
     }
     
     
