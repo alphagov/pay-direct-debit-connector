@@ -43,8 +43,9 @@ public class PublicApiContractTest {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
     }
 
-    @State("a mandate with external id exists")
-    public void aMandateWithExternalIdExists(Map<String, String> params) {
+    @State("a gateway account with external id and a mandate with external id exist")
+    public void aGatewayAccountWithExternalIdAndAMandateWithExternalIdExist(Map<String, String> params) {
+        testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
         testMandate.withGatewayAccountFixture(testGatewayAccount).withExternalId(params.get("mandate_id")).insert(app.getTestContext().getJdbi());
     }
 }
