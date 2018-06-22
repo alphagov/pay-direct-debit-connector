@@ -15,7 +15,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("/")
 public class ExpireResource {
 
-    private final String EXPIRE_SWEEP_API_PATH = "/v1/api/tasks/expire-payments-and-mandates";
     private final ExpireService expireService;
     
     @Inject
@@ -24,7 +23,7 @@ public class ExpireResource {
     }
 
     @POST
-    @Path(EXPIRE_SWEEP_API_PATH)
+    @Path("/v1/api/tasks/expire-payments-and-mandates")
     @Produces(APPLICATION_JSON)
     public Response expirePaymentsAndMandates() {
         int numberOfExpiredPayments = expireService.expirePayments();

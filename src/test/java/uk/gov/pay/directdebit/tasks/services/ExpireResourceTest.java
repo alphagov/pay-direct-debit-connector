@@ -46,14 +46,13 @@ public class ExpireResourceTest {
                 .withMandateFixture(mandateFixture)
                 .insert(testContext.getJdbi());
         String requestPath = "/v1/api/tasks/expire-payments-and-mandates";
-        ValidatableResponse response = given()
-                .port(testContext.getPort())
-                .contentType(JSON)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body("numberOfExpiredPayments", is(1));
+        given().port(testContext.getPort())
+            .contentType(JSON)
+            .post(requestPath)
+            .then()
+            .statusCode(Response.Status.OK.getStatusCode())
+            .contentType(JSON)
+            .body("numberOfExpiredPayments", is(1));
     }
 
 

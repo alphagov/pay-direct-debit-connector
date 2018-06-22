@@ -153,8 +153,6 @@ public class TransactionDaoIT {
     
     @Test
     public void findAllPaymentsBySetOfStatesAndCreationTime_shouldFindThreePayments() {
-        
-        // Should find this payment.
         aTransactionFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
         
@@ -172,8 +170,6 @@ public class TransactionDaoIT {
 
     @Test
     public void findAllPaymentsBySetOfStatesAndCreationTime_shouldNotFindPayment_TooEarly() {
-
-        // Should find this payment.
         aTransactionFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
                 .withCreatedDate(ZonedDateTime.now()).insert(testContext.getJdbi());
 
@@ -185,8 +181,6 @@ public class TransactionDaoIT {
 
     @Test
     public void findAllPaymentsBySetOfStatesAndCreationTime_shouldNotFindPayment_WrongState() {
-
-        // Should find this payment.
         aTransactionFixture().withMandateFixture(testMandate).withState(PaymentState.PENDING)
                 .withCreatedDate(ZonedDateTime.now()).insert(testContext.getJdbi());
 
