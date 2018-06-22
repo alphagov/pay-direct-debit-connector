@@ -29,13 +29,11 @@ public class ExpireService {
     public int expirePayments() {
         LOGGER.info("Starting expire payments process.");
         List<Transaction> paymentsToExpire = getPaymentsForExpiration();
-        int expirePaymentsCounter = 0;
         for (Transaction payment : paymentsToExpire) {
             transactionService.paymentExpired(payment);
             LOGGER.info("Expired payment " + payment.getId());
-            expirePaymentsCounter++;
         }
-        return expirePaymentsCounter;
+        return paymentsToExpire.size();
     }
 
     private List<Transaction> getPaymentsForExpiration() {

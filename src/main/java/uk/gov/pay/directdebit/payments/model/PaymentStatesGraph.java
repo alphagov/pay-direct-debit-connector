@@ -6,7 +6,13 @@ import com.google.common.graph.ValueGraphBuilder;
 
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.*;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.*;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.EXPIRED;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
 
 public class PaymentStatesGraph extends DirectDebitStatesGraph<PaymentState> {
 
