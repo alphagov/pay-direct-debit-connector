@@ -1,6 +1,5 @@
-package uk.gov.pay.directdebit.tasks.services;
+package uk.gov.pay.directdebit.tasks.resources;
 
-import io.restassured.response.ValidatableResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,7 +8,10 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -21,6 +23,7 @@ import java.time.ZonedDateTime;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -30,7 +33,6 @@ public class ExpireResourceTest {
     private TestContext testContext;
     
     private GatewayAccountFixture testGatewayAccount;
-    
 
     @Before
     public void setUp() {
@@ -55,5 +57,25 @@ public class ExpireResourceTest {
             .body("numberOfExpiredPayments", is(1));
     }
 
+    @Test
+    public void shouldExpireAMandateInState_CREATED_OlderThan_90Minutes() throws Exception {
+        Mandate mandate = MandateFixture.aMandateFixture()
+                .withState(MandateState.CREATED)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi()).toEntity();
+        
+        String requestPath = "/v1/api/tasks/expire-payments-and-mandates";
+        given()
+            .port(testContext.getPort())
+            .contentType(JSON)
+            .post(requestPath)
+            .then()
+            .statusCode(Response.Status.OK.getStatusCode())
+            .contentType(JSON)
+            .body("numberOfExpiredMandates", is(1));
 
+        MandateDao mandateDao = testContext.getJdbi().onDemand(MandateDao.class);
+        assertEquals(MandateState.EXPIRED, mandateDao.findById(mandate.getId()).get().getState());
+    }
 }

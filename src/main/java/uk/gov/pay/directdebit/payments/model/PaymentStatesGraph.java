@@ -5,7 +5,12 @@ import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.*;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID_OUT;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_EXPIRED_BY_SYSTEM;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_FAILED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.EXPIRED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;

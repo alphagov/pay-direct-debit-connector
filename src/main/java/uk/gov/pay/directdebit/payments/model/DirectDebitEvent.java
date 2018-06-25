@@ -10,6 +10,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_RECEIVED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CANCELLED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_EXPIRED_BY_SYSTEM;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_FAILED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID;
@@ -81,6 +82,10 @@ public class DirectDebitEvent {
 
     public static DirectDebitEvent mandateCancelled(Long mandateId) {
         return new DirectDebitEvent(mandateId, null, MANDATE, MANDATE_CANCELLED);
+    }
+    
+    public static DirectDebitEvent mandateExpiredBySystem(Long mandateId) {
+        return new DirectDebitEvent(mandateId, null, MANDATE, MANDATE_EXPIRED_BY_SYSTEM);
     }
     
     public static DirectDebitEvent mandateActive(Long mandateId) {
@@ -195,6 +200,7 @@ public class DirectDebitEvent {
         MANDATE_ACTIVE,
         MANDATE_FAILED,
         MANDATE_CANCELLED,
+        MANDATE_EXPIRED_BY_SYSTEM,
         PAYMENT_SUBMITTED_TO_PROVIDER,
         PAYMENT_CANCELLED_BY_USER,
         PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE,

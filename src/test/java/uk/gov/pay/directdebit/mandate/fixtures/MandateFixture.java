@@ -39,6 +39,11 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         this.gatewayAccountFixture = gatewayAccountFixture;
         return this;
     }
+    
+    public MandateFixture withCreatedDate(ZonedDateTime createdDate) {
+        this.createdDate = createdDate;
+        return this;
+    }
 
     public MandateFixture withPayerFixture(
             PayerFixture payerFixture) {
