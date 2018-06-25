@@ -215,7 +215,7 @@ public class MandateDaoIT {
     }
 
     @Test
-    public void findAllMandatesBySetOfStatesAndMaxCreationTime_shouldNotFindMandate_WrongState() {
+    public void shouldNotFindMandateInWrongState() {
         MandateFixture.aMandateFixture()
                 .withState(MandateState.PENDING)
                 .withGatewayAccountFixture(gatewayAccountFixture)
@@ -229,7 +229,7 @@ public class MandateDaoIT {
     }
 
     @Test
-    public void findAllMandatesBySetOfStatesAndMaxCreationTime_shouldNotFindMandate_WrongCreationTime() {
+    public void shouldNotFindMandateWrongCreationTime() {
         MandateFixture.aMandateFixture()
                 .withState(MandateState.CREATED)
                 .withGatewayAccountFixture(gatewayAccountFixture)
@@ -243,7 +243,7 @@ public class MandateDaoIT {
     }
 
     @Test
-    public void findAllMandatesBySetOfStatesAndMaxCreationTime_shouldFindThreeMandates() {
+    public void shouldFindThreeMandates() {
         MandateFixture.aMandateFixture()
                 .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)

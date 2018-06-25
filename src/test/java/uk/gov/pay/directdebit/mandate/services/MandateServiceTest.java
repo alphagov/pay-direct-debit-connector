@@ -7,7 +7,6 @@ import java.util.Optional;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -320,7 +319,7 @@ public class MandateServiceTest {
     }
 
     @Test
-    public void mandateExpired_shouldSetStatusToExpired() {
+    public void shouldSetMandateStatusToExpired_FromCreated() {
         Mandate mandate = MandateFixture.aMandateFixture()
                 .withState(MandateState.CREATED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
@@ -328,6 +327,39 @@ public class MandateServiceTest {
         service.mandateExpiredFor(mandate);
         verify(mockedDirectDebitEventService).registerMandateExpiredEventFor(mandate);
         verify(mockedMandateDao).updateState(mandate.getId(), MandateState.EXPIRED);
-        assertThat(mandate.getState(), Is.is(MandateState.EXPIRED));
+        assertThat(mandate.getState(), is(MandateState.EXPIRED));
+    }
+
+    @Test
+    public void shouldSetMandateStatusToExpired_FromSubmitted() {
+        Mandate mandate = MandateFixture.aMandateFixture()
+                .withState(MandateState.SUBMITTED)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .toEntity();
+        service.mandateExpiredFor(mandate);
+        verify(mockedDirectDebitEventService).registerMandateExpiredEventFor(mandate);
+        verify(mockedMandateDao).updateState(mandate.getId(), MandateState.EXPIRED);
+        assertThat(mandate.getState(), is(MandateState.EXPIRED));
+    }
+
+    @Test
+    public void shouldSetMandateStatusToExpired_FromDdDetails() {
+        Mandate mandate = MandateFixture.aMandateFixture()
+                .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .toEntity();
+        service.mandateExpiredFor(mandate);
+        verify(mockedDirectDebitEventService).registerMandateExpiredEventFor(mandate);
+        verify(mockedMandateDao).updateState(mandate.getId(), MandateState.EXPIRED);
+        assertThat(mandate.getState(), is(MandateState.EXPIRED));
+    }
+
+    @Test(expected = InvalidStateTransitionException.class)
+    public void shouldNotExpireMandateSinceWrongState_PENDING() {
+        Mandate mandate = MandateFixture.aMandateFixture()
+                .withState(MandateState.PENDING)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .toEntity();
+        service.mandateExpiredFor(mandate);
     }
 }
