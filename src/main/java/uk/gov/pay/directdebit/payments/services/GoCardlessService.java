@@ -156,7 +156,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
             Long id = goCardlessMandateDao.insert(goCardlessMandate);
             goCardlessMandate.setId(id);
-            mandateDao.updateReference(mandate.getId(), goCardlessMandate.getGoCardlessReference());
+            mandateDao.updateMandateReference(mandate.getId(), goCardlessMandate.getGoCardlessReference());
             return goCardlessMandate;
         } catch (Exception exc) {
             logException(exc, "mandate", mandate.getExternalId());

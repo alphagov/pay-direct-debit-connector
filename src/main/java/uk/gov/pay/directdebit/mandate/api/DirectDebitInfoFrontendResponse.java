@@ -17,10 +17,10 @@ public class DirectDebitInfoFrontendResponse {
     public static class PayerDetails {
         @JsonProperty("payer_external_id")
         private String externalId;
-        
+
         @JsonProperty("account_holder_name")
         private String name;
-        
+
         @JsonProperty
         private String email;
 
@@ -72,7 +72,7 @@ public class DirectDebitInfoFrontendResponse {
         private String reference;
 
         public TransactionDetails(String externalId, Long amount,
-                ExternalPaymentState state, String description, String reference) {
+                                  ExternalPaymentState state, String description, String reference) {
             this.externalId = externalId;
             this.amount = amount;
             this.state = state;
@@ -103,7 +103,7 @@ public class DirectDebitInfoFrontendResponse {
 
     @JsonProperty("transaction")
     private TransactionDetails transaction;
-    
+
     @JsonProperty("external_id")
     private String mandateExternalId;
 
@@ -115,9 +115,9 @@ public class DirectDebitInfoFrontendResponse {
 
     @JsonProperty("gateway_account_external_id")
     private String gatewayAccountExternalId;
-    
-    @JsonProperty
-    private String reference;
+
+    @JsonProperty("mandate_reference")
+    private String mandateReference;
 
     @JsonProperty("created_date")
     private String createdDate;
@@ -125,20 +125,28 @@ public class DirectDebitInfoFrontendResponse {
     @JsonProperty
     private ExternalMandateState state;
 
-    public DirectDebitInfoFrontendResponse(String paymentExternalId, Long gatewayAccountId, String gatewayAccountExternalId, ExternalMandateState state, String returnUrl, String reference, String createdDate, Payer payer, Transaction transaction) {
+    public DirectDebitInfoFrontendResponse(String paymentExternalId,
+                                           Long gatewayAccountId,
+                                           String gatewayAccountExternalId,
+                                           ExternalMandateState state,
+                                           String returnUrl,
+                                           String mandateReference,
+                                           String createdDate,
+                                           Payer payer,
+                                           Transaction transaction) {
         this.mandateExternalId = paymentExternalId;
         this.state = state;
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.returnUrl = returnUrl;
-        this.reference = reference;
+        this.mandateReference = mandateReference;
         this.createdDate = createdDate;
         this.transaction = initTransaction(transaction);
         this.payer = initPayer(payer);
     }
 
     private TransactionDetails initTransaction(Transaction transaction) {
-        if (transaction != null ) {
+        if (transaction != null) {
             return new TransactionDetails(
                     transaction.getExternalId(),
                     transaction.getAmount(),
@@ -149,23 +157,24 @@ public class DirectDebitInfoFrontendResponse {
         }
         return null;
     }
-    
+
     private PayerDetails initPayer(Payer payer) {
-        if (payer != null ) {
+        if (payer != null) {
             return new PayerDetails(
                     payer.getExternalId(),
                     payer.getName(),
                     payer.getEmail(),
                     payer.getAccountRequiresAuthorisation());
-        } 
+        }
         return null;
     }
+
     public String getReturnUrl() {
         return returnUrl;
     }
 
-    public String getReference() {
-        return reference;
+    public String getMandateReference() {
+        return mandateReference;
     }
 
     public TransactionDetails getTransaction() {
@@ -219,7 +228,7 @@ public class DirectDebitInfoFrontendResponse {
         if (!returnUrl.equals(that.returnUrl)) {
             return false;
         }
-        if (!reference.equals(that.reference)) {
+        if (!mandateReference.equals(that.mandateReference)) {
             return false;
         }
         if (!createdDate.equals(that.createdDate)) {
@@ -236,7 +245,7 @@ public class DirectDebitInfoFrontendResponse {
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + gatewayAccountId.hashCode();
         result = 31 * result + gatewayAccountExternalId.hashCode();
-        result = 31 * result + (reference != null ? reference.hashCode() : 0);
+        result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
         result = 31 * result + state.hashCode();
         return result;
@@ -245,16 +254,14 @@ public class DirectDebitInfoFrontendResponse {
     @Override
     public String toString() {
         return "PaymentInfoFrontend{" +
-                "payerId=" + payer.externalId +
-                ", transactionId='" + transaction.externalId + '\'' +
-                ", mandateId='" + mandateExternalId + '\'' +
-                ", state='" + state.getState() + '\'' +
-                ", returnUrl='" + returnUrl + '\'' +
-                ", reference='" + reference + '\'' +
-                ", createdDate=" + createdDate +
-                '}';
+                "payerId='" + payer.externalId + "'" +
+                ", transactionId='" + transaction.externalId + "'" +
+                ", mandateId='" + mandateExternalId + "'" +
+                ", state='" + state.getState() + "'" +
+                ", returnUrl='" + returnUrl + "'" +
+                ", mandateReference='" + mandateReference + "'" +
+                ", createdDate='" + createdDate + "'" +
+                "}";
     }
 
 }
-
-

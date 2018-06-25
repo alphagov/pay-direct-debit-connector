@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 import static java.time.ZonedDateTime.now;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
@@ -44,15 +46,56 @@ public class MandateDaoIT {
     }
 
     @Test
-    public void shouldInsertAMandate() {
+    public void shouldInsertAMandateWithoutServiceReference() {
         ZonedDateTime createdDate = now();
-        Long id = mandateDao.insert(new Mandate(gatewayAccountFixture.toEntity(), MandateType.ONE_OFF, MandateState.PENDING, "bla", createdDate,
-                null));
+        Long id = mandateDao.insert(
+                new Mandate(
+                        null,
+                        gatewayAccountFixture.toEntity(),
+                        MandateType.ONE_OFF,
+                        RandomIdGenerator.newId(),
+                        "test-reference",
+                        null,
+                        MandateState.PENDING,
+                        "https://www.example.com/return_url",
+                        createdDate,
+                        null
+                )
+        );
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(id);
         assertThat(mandate.get("id"), is(id));
         assertThat(mandate.get("external_id"), is(notNullValue()));
-        assertThat(mandate.get("reference"), is("default-ref"));
-        assertThat(mandate.get("return_url"), is("bla"));
+        assertThat(mandate.get("mandate_reference"), is("test-reference"));
+        assertThat(mandate.get("service_reference"), is(nullValue()));
+        assertThat(mandate.get("return_url"), is("https://www.example.com/return_url"));
+        assertThat(mandate.get("type"), is("ONE_OFF"));
+        assertThat(mandate.get("state"), is("PENDING"));
+        assertThat((Timestamp) mandate.get("created_date"), isDate(createdDate));
+    }
+
+    @Test
+    public void shouldInsertAMandateWithServiceReference() {
+        ZonedDateTime createdDate = now();
+        Long id = mandateDao.insert(
+                new Mandate(
+                        null,
+                        gatewayAccountFixture.toEntity(),
+                        MandateType.ONE_OFF,
+                        RandomIdGenerator.newId(),
+                        "test-reference",
+                        "test-service-reference",
+                        MandateState.PENDING,
+                        "https://www.example.com/return_url",
+                        createdDate,
+                        null
+                )
+        );
+        Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(id);
+        assertThat(mandate.get("id"), is(id));
+        assertThat(mandate.get("external_id"), is(notNullValue()));
+        assertThat(mandate.get("mandate_reference"), is("test-reference"));
+        assertThat(mandate.get("service_reference"), is("test-service-reference"));
+        assertThat(mandate.get("return_url"), is("https://www.example.com/return_url"));
         assertThat(mandate.get("type"), is("ONE_OFF"));
         assertThat(mandate.get("state"), is("PENDING"));
         assertThat((Timestamp) mandate.get("created_date"), isDate(createdDate));
@@ -60,14 +103,19 @@ public class MandateDaoIT {
 
     @Test
     public void shouldFindAMandateById() {
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture().withReference("ref").withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withMandateReference("test-reference")
+                .withServiceReference("test-service-reference")
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .insert(testContext.getJdbi()
+                );
         Mandate mandate = mandateDao.findById(mandateFixture.getId()).get();
         assertThat(mandate.getId(), is(mandateFixture.getId()));
         assertThat(mandate.getExternalId(), is(notNullValue()));
-        assertThat(mandate.getReference(), is("ref"));
+        assertThat(mandate.getMandateReference(), is("test-reference"));
+        assertThat(mandate.getServiceReference(), is("test-service-reference"));
         assertThat(mandate.getState(), is(MandateState.CREATED));
         assertThat(mandate.getType(), is(mandateFixture.getMandateType()));
-
     }
 
     @Test
@@ -78,16 +126,21 @@ public class MandateDaoIT {
 
     @Test
     public void shouldFindAMandateByTokenId() {
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture().withReference("ref").withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withMandateReference("test-reference")
+                .withServiceReference("test-service-reference")
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .insert(testContext.getJdbi());
         
         TokenFixture token = aTokenFixture()
                 .withMandateId(mandateFixture.getId())
                 .insert(testContext.getJdbi());
-        
+
         Mandate mandate = mandateDao.findByTokenId(token.getToken()).get();
         assertThat(mandate.getId(), is(mandateFixture.getId()));
         assertThat(mandate.getExternalId(), is(mandateFixture.getExternalId()));
-        assertThat(mandate.getReference(), is("ref"));
+        assertThat(mandate.getMandateReference(), is("test-reference"));
+        assertThat(mandate.getServiceReference(), is("test-service-reference"));
         assertThat(mandate.getState(), is(MandateState.CREATED));
         assertThat(mandate.getType(), is(mandateFixture.getMandateType()));
     }
@@ -100,11 +153,17 @@ public class MandateDaoIT {
 
     @Test
     public void shouldFindAMandateByExternalId() {
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture().withReference("ref").withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withMandateReference("test-reference")
+                .withServiceReference("test-service-reference")
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .insert(testContext.getJdbi());
+
         Mandate mandate = mandateDao.findByExternalId(mandateFixture.getExternalId()).get();
         assertThat(mandate.getId(), is(mandateFixture.getId()));
         assertThat(mandate.getExternalId(), is(notNullValue()));
-        assertThat(mandate.getReference(), is("ref"));
+        assertThat(mandate.getMandateReference(), is("test-reference"));
+        assertThat(mandate.getServiceReference(), is("test-service-reference"));
         assertThat(mandate.getState(), is(MandateState.CREATED));
         assertThat(mandate.getType(), is(mandateFixture.getMandateType()));
     }
@@ -121,11 +180,12 @@ public class MandateDaoIT {
         MandateState newState = MandateState.FAILED;
         int numOfUpdatedMandates = mandateDao.updateState(testMandate.getId(), newState);
 
-        Map<String, Object> mandateAfterUpdate =  testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
+        Map<String, Object> mandateAfterUpdate = testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
         assertThat(numOfUpdatedMandates, is(1));
         assertThat(mandateAfterUpdate.get("id"), is(testMandate.getId()));
         assertThat(mandateAfterUpdate.get("external_id"), is(testMandate.getExternalId()));
-        assertThat(mandateAfterUpdate.get("reference"), is(testMandate.getReference()));
+        assertThat(mandateAfterUpdate.get("mandate_reference"), is(testMandate.getMandateReference()));
+        assertThat(mandateAfterUpdate.get("service_reference"), is(testMandate.getServiceReference()));
         assertThat(mandateAfterUpdate.get("state"), is(newState.toString()));
         assertThat(mandateAfterUpdate.get("type"), is(testMandate.getType().toString()));
     }
@@ -138,15 +198,15 @@ public class MandateDaoIT {
 
     @Test
     public void shouldUpdateReferenceAndReturnNumberOfAffectedRows() {
-        Mandate testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withReference("old-reference").insert(testContext.getJdbi()).toEntity();
-        String newReference = "newReference";
-        int numOfUpdatedMandates = mandateDao.updateReference(testMandate.getId(), newReference);
+        Mandate testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withMandateReference("old-reference").insert(testContext.getJdbi()).toEntity();
+        String newMandateReference = "newReference";
+        int numOfUpdatedMandates = mandateDao.updateMandateReference(testMandate.getId(), newMandateReference);
 
-        Map<String, Object> mandateAfterUpdate =  testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
+        Map<String, Object> mandateAfterUpdate = testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
         assertThat(numOfUpdatedMandates, is(1));
         assertThat(mandateAfterUpdate.get("id"), is(testMandate.getId()));
         assertThat(mandateAfterUpdate.get("external_id"), is(testMandate.getExternalId()));
-        assertThat(mandateAfterUpdate.get("reference"), is(newReference));
+        assertThat(mandateAfterUpdate.get("mandate_reference"), is(newMandateReference));
         assertThat(mandateAfterUpdate.get("state"), is(testMandate.getState().toString()));
         assertThat(mandateAfterUpdate.get("type"), is(testMandate.getType().toString()));
     }

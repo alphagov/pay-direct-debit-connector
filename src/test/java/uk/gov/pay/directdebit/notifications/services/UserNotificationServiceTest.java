@@ -52,7 +52,7 @@ public class UserNotificationServiceTest {
     public void shouldSendMandateFailedEmail() {
         userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
         HashMap<String, String> emailPersonalisation = new HashMap<>();
-        emailPersonalisation.put("mandate reference", mandateFixture.getReference());
+        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
         userNotificationService.sendMandateFailedEmailFor(mandateFixture.toEntity());
@@ -64,7 +64,7 @@ public class UserNotificationServiceTest {
     public void shouldSendMandateCancelledEmail() {
         userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
         HashMap<String, String> emailPersonalisation = new HashMap<>();
-        emailPersonalisation.put("mandate reference", mandateFixture.getReference());
+        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
         userNotificationService.sendMandateCancelledEmailFor(mandateFixture.toEntity());
@@ -78,7 +78,7 @@ public class UserNotificationServiceTest {
 
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("amount", "123.45");
-        emailPersonalisation.put("mandate reference", mandateFixture.getReference());
+        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
         emailPersonalisation.put("collection date", "21/05/2018");
         emailPersonalisation.put("bank account last 2 digits", "******" + payerFixture.getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");

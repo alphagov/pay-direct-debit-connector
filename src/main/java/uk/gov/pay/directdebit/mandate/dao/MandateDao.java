@@ -15,14 +15,33 @@ import java.util.Optional;
 @RegisterRowMapper(MandateMapper.class)
 public interface MandateDao {
 
-    @SqlUpdate("INSERT INTO mandates(external_id, gateway_account_id, reference, state, type, return_url, created_date) VALUES (:externalId, :gatewayAccount.id, :reference, :state, :type, :returnUrl, :createdDate)")
+    @SqlUpdate("INSERT INTO mandates (\n" +
+            "  external_id,\n" +
+            "  gateway_account_id,\n" +
+            "  mandate_reference,\n" +
+            "  service_reference,\n" +
+            "  state,\n" +
+            "  type,\n" +
+            "  return_url,\n" +
+            "  created_date\n" +
+            ") VALUES (\n" +
+            "  :externalId,\n" +
+            "  :gatewayAccount.id,\n" +
+            "  :mandateReference,\n" +
+            "  :serviceReference,\n" +
+            "  :state,\n" +
+            "  :type,\n" +
+            "  :returnUrl,\n" +
+            "  :createdDate\n" +
+            ")")
     @GetGeneratedKeys
     Long insert(@BindBean Mandate mandate);
 
     String query = "SELECT DISTINCT" +
             "  m.id AS mandate_id," +
             "  m.external_id AS mandate_external_id," +
-            "  m.reference AS mandate_reference," +
+            "  m.mandate_reference AS mandate_mandate_reference," +
+            "  m.service_reference AS mandate_service_reference," +
             "  m.gateway_account_id AS mandate_gateway_account_id," +
             "  m.return_url AS mandate_return_url," +
             "  m.type AS mandate_type," +
@@ -63,6 +82,6 @@ public interface MandateDao {
     @SqlUpdate("UPDATE mandates m SET state = :state WHERE m.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
 
-    @SqlUpdate("UPDATE mandates m SET reference = :reference WHERE m.id = :id")
-    int updateReference(@Bind("id") Long id, @Bind("reference") String reference);
+    @SqlUpdate("UPDATE mandates m SET mandate_reference = :mandateReference WHERE m.id = :id")
+    int updateMandateReference(@Bind("id") Long id, @Bind("mandateReference") String mandateReference);
 }

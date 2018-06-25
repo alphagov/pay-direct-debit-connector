@@ -175,7 +175,7 @@ public class GoCardlessServiceTest {
         verify(mockedGoCardlessCustomerDao).insert(goCardlessCustomer);
         verify(mockedGoCardlessMandateDao).insert(goCardlessMandate);
         verify(mockedGoCardlessPaymentDao).insert(goCardlessPayment);
-        verify(mockedMandateDao).updateReference(mandateFixture.getId(), goCardlessMandate.getGoCardlessReference());
+        verify(mockedMandateDao).updateMandateReference(mandateFixture.getId(), goCardlessMandate.getGoCardlessReference());
         InOrder orderedCalls = inOrder(mockedGoCardlessClientFacade);
 
         orderedCalls.verify(mockedGoCardlessClientFacade).createCustomer(MANDATE_ID, payerFixture.toEntity());

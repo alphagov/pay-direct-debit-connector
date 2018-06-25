@@ -19,22 +19,23 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
     private String externalId = RandomIdGenerator.newId();
-    private String reference = RandomStringUtils.randomAlphanumeric(18);
+    private String mandateReference = RandomStringUtils.randomAlphanumeric(18);
+    private String serviceReference = RandomStringUtils.randomAlphanumeric(18);
     private MandateState state = MandateState.CREATED;
     private String returnUrl = "http://service.test/success-page";
     private MandateType mandateType = MandateType.ONE_OFF;
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private PayerFixture payerFixture = null;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+
     private MandateFixture() {
     }
 
     public static MandateFixture aMandateFixture() {
         return new MandateFixture();
     }
-    
-    public MandateFixture withGatewayAccountFixture(
-            GatewayAccountFixture gatewayAccountFixture) {
+
+    public MandateFixture withGatewayAccountFixture(GatewayAccountFixture gatewayAccountFixture) {
         this.gatewayAccountFixture = gatewayAccountFixture;
         return this;
     }
@@ -44,7 +45,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         this.payerFixture = payerFixture;
         return this;
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -72,12 +73,17 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return this;
     }
 
-    public String getReference() {
-        return reference;
+    public String getMandateReference() {
+        return mandateReference;
     }
 
-    public MandateFixture withReference(String reference) {
-        this.reference = reference;
+    public MandateFixture withMandateReference(String mandateReference) {
+        this.mandateReference = mandateReference;
+        return this;
+    }
+
+    public MandateFixture withServiceReference(String serviceReference) {
+        this.serviceReference = serviceReference;
         return this;
     }
 
@@ -107,23 +113,25 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     public MandateFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
                 h.execute(
-                        "INSERT INTO" +
-                                "    mandates(\n" +
-                                "        id,\n" +
-                                "        gateway_account_id,\n" +
-                                "        external_id,\n" +
-                                "        type,\n" +
-                                "        reference,\n" +
-                                "        return_url,\n" +
-                                "        state,\n" +
-                                "        created_date\n" +
-                                "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?)\n",
+                        "INSERT INTO mandates (\n" +
+                                "  id,\n" +
+                                "  gateway_account_id,\n" +
+                                "  external_id,\n" +
+                                "  type,\n" +
+                                "  mandate_reference,\n" +
+                                "  service_reference,\n" +
+                                "  return_url,\n" +
+                                "  state,\n" +
+                                "  created_date\n" +
+                                ") VALUES (\n" +
+                                "  ?, ?, ?, ?, ?, ?, ?, ?, ?\n" +
+                                ")\n",
                         id,
                         gatewayAccountFixture.getId(),
                         externalId,
                         mandateType.toString(),
-                        reference,
+                        mandateReference,
+                        serviceReference,
                         returnUrl,
                         state.toString(),
                         createdDate
@@ -139,6 +147,17 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     @Override
     public Mandate toEntity() {
         Payer payer = payerFixture != null ? payerFixture.toEntity() : null;
-        return new Mandate(id, gatewayAccountFixture.toEntity(), mandateType, externalId, reference, state, returnUrl, createdDate, payer);
+        return new Mandate(
+                id,
+                gatewayAccountFixture.toEntity(),
+                mandateType,
+                externalId,
+                mandateReference,
+                serviceReference,
+                state,
+                returnUrl,
+                createdDate,
+                payer
+        );
     }
 }

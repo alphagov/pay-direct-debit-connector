@@ -1,9 +1,9 @@
 package uk.gov.pay.directdebit.mandate.model;
 
-import java.time.ZonedDateTime;
-import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.payers.model.Payer;
+
+import java.time.ZonedDateTime;
 
 public class Mandate {
     private Long id;
@@ -12,19 +12,29 @@ public class Mandate {
     private final GatewayAccount gatewayAccount;
     private final String returnUrl;
     private final MandateType type;
-    private final String reference;
+    private final String mandateReference;
+    private final String serviceReference;
     private final ZonedDateTime createdDate;
     private Payer payer;
-    
-    public Mandate(Long id, GatewayAccount gatewayAccount, MandateType type, String externalId,
-            String reference,
-            MandateState state, String returnUrl, ZonedDateTime createdDate,
-            Payer payer) {
+
+    public Mandate(
+            Long id,
+            GatewayAccount gatewayAccount,
+            MandateType type,
+            String externalId,
+            String mandateReference,
+            String serviceReference,
+            MandateState state,
+            String returnUrl,
+            ZonedDateTime createdDate,
+            Payer payer
+    ) {
         this.id = id;
         this.gatewayAccount = gatewayAccount;
         this.type = type;
         this.externalId = externalId;
-        this.reference = reference;
+        this.mandateReference = mandateReference;
+        this.serviceReference = serviceReference;
         this.state = state;
         this.returnUrl = returnUrl;
         this.createdDate = createdDate;
@@ -33,13 +43,6 @@ public class Mandate {
 
     public Payer getPayer() {
         return payer;
-    }
-
-    public Mandate(GatewayAccount gatewayAccount, MandateType type, 
-            MandateState state, String returnUrl, ZonedDateTime createdDate,
-            Payer payer) {
-        this(null, gatewayAccount, type, RandomIdGenerator.newId(), "default-ref", state, returnUrl,
-                createdDate, payer);
     }
 
     public GatewayAccount getGatewayAccount() {
@@ -61,7 +64,7 @@ public class Mandate {
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public String getExternalId() {
         return externalId;
     }
@@ -73,8 +76,13 @@ public class Mandate {
     public void setState(MandateState state) {
         this.state = state;
     }
-    public String getReference() {
-        return reference;
+
+    public String getMandateReference() {
+        return mandateReference;
+    }
+
+    public String getServiceReference() {
+        return serviceReference;
     }
 
     public MandateType getType() {
@@ -110,7 +118,10 @@ public class Mandate {
         if (type != mandate.type) {
             return false;
         }
-        if (reference != null ? !reference.equals(mandate.reference) : mandate.reference != null) {
+        if (mandateReference != null ? !mandateReference.equals(mandate.mandateReference) : mandate.mandateReference != null) {
+            return false;
+        }
+        if (serviceReference != null ? !serviceReference.equals(mandate.serviceReference) : mandate.serviceReference != null) {
             return false;
         }
         if (payer != null ? !payer.equals(mandate.payer) : mandate.payer != null) {
@@ -128,7 +139,8 @@ public class Mandate {
         result = 31 * result + gatewayAccount.hashCode();
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + type.hashCode();
-        result = 31 * result + (reference != null ? reference.hashCode() : 0);
+        result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
+        result = 31 * result + (serviceReference != null ? serviceReference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
         return result;
     }

@@ -197,7 +197,8 @@ public class MandateServiceTest {
         assertThat(newMandate.getExternalId(), is(mandate.getExternalId()));
         assertThat(newMandate.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(newMandate.getGatewayAccount(), is(mandate.getGatewayAccount()));
-        assertThat(newMandate.getReference(), is(mandate.getReference()));
+        assertThat(newMandate.getMandateReference(), is(mandate.getMandateReference()));
+        assertThat(newMandate.getServiceReference(), is(mandate.getServiceReference()));
         assertThat(newMandate.getPayer(), is(mandate.getPayer()));
         assertThat(newMandate.getType(), is(mandate.getType()));
         assertThat(newMandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
@@ -216,7 +217,8 @@ public class MandateServiceTest {
         assertThat(newMandate.getExternalId(), is(mandate.getExternalId()));
         assertThat(newMandate.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(newMandate.getGatewayAccount(), is(mandate.getGatewayAccount()));
-        assertThat(newMandate.getReference(), is(mandate.getReference()));
+        assertThat(newMandate.getMandateReference(), is(mandate.getMandateReference()));
+        assertThat(newMandate.getServiceReference(), is(mandate.getServiceReference()));
         assertThat(newMandate.getPayer(), is(mandate.getPayer()));
         assertThat(newMandate.getType(), is(mandate.getType()));
         assertThat(newMandate.getState(), is(SUBMITTED));
@@ -246,9 +248,8 @@ public class MandateServiceTest {
                 .toEntity();
         when(mockedMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId());
-        assertThat(mandateResponseForFrontend.getReference(), is(mandate.getReference()));
+        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
-        assertThat(mandateResponseForFrontend.getReference(), is(mandate.getReference()));
         assertThat(mandateResponseForFrontend.getTransaction(), is(nullValue()));
     }
 
@@ -265,12 +266,12 @@ public class MandateServiceTest {
         Mandate mandate = mandateFixture.toEntity();
         when(mockedTransactionService.findTransactionForExternalIdAndGatewayAccountExternalId(mandateFixture.getExternalId(), mandate.getGatewayAccount().getExternalId())).thenReturn(transactionFixture.toEntity());
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateWithTransactionResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId());
-        assertThat(mandateResponseForFrontend.getReference(), is(mandate.getReference()));
+        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
         assertThat(mandateResponseForFrontend.getGatewayAccountExternalId(), is(mandate.getGatewayAccount().getExternalId()));
         assertThat(mandateResponseForFrontend.getGatewayAccountId(), is(mandate.getGatewayAccount().getId()));
         assertThat(mandateResponseForFrontend.getCreatedDate(), is(mandate.getCreatedDate().toString()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
-        assertThat(mandateResponseForFrontend.getReference(), is(mandate.getReference()));
+        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
         assertThat(mandateResponseForFrontend.getPayer().getExternalId(), is(payerFixture.getExternalId()));
         assertThat(mandateResponseForFrontend.getPayer().getName(), is(payerFixture.getName()));
         assertThat(mandateResponseForFrontend.getPayer().getEmail(), is(payerFixture.getEmail()));

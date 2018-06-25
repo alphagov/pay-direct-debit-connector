@@ -93,7 +93,7 @@ public class ConfirmMandateSetupResourceIT {
                 "\"personalisation\": " +
                 "{" +
                 "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
-                "\"mandate reference\": \"" + mandateFixture.getReference() + "\", " +
+                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
                 "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
                 "\"collection date\": \"" +  chargeDate + "\", " +
                 "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
@@ -143,7 +143,7 @@ public class ConfirmMandateSetupResourceIT {
 //                "\"personalisation\": " +
 //                "{" +
 //                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
-//                "\"mandate reference\": \"" + mandateFixture.getReference() + "\", " +
+//                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
 //                "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
 //                "\"collection date\": \"" +  chargeDate + "\", " +
 //                "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
@@ -204,7 +204,7 @@ public class ConfirmMandateSetupResourceIT {
                 "\"personalisation\": " +
                 "{" +
                 "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
-                "\"mandate reference\": \"" + mandateFixture.getReference() + "\", " +
+                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
                 "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
                 "\"collection date\": \"2014-05-21\", " +
                 "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
@@ -267,7 +267,7 @@ public class ConfirmMandateSetupResourceIT {
 //                "\"personalisation\": " +
 //                "{" +
 //                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
-//                "\"mandate reference\": \"" + mandateFixture.getReference() + "\", " +
+//                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
 //                "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
 //                "\"collection date\": \"2014-05-21\", " +
 //                "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
