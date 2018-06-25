@@ -1,6 +1,5 @@
-package uk.gov.pay.directdebit.tasks.services;
+package uk.gov.pay.directdebit.tasks.resources;
 
-import io.restassured.response.ValidatableResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +9,7 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -55,5 +55,22 @@ public class ExpireResourceTest {
             .body("numberOfExpiredPayments", is(1));
     }
 
-
+    @Test
+    public void shouldExpireAMandateInState_CREATED_OlderThan_90Minutes() throws Exception {
+        MandateFixture.aMandateFixture()
+                .withState(MandateState.CREATED)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+        
+        String requestPath = "/v1/api/tasks/expire-payments-and-mandates";
+        given()
+            .port(testContext.getPort())
+            .contentType(JSON)
+            .post(requestPath)
+            .then()
+            .statusCode(Response.Status.OK.getStatusCode())
+            .contentType(JSON)
+            .body("numberOfExpiredMandates", is(1));
+    }
 }

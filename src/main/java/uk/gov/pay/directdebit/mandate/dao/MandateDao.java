@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.mandate.dao;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -10,7 +11,10 @@ import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RegisterRowMapper(MandateMapper.class)
 public interface MandateDao {
@@ -78,6 +82,9 @@ public interface MandateDao {
 
     @SqlQuery(query + "WHERE m.external_id = :externalId")
     Optional<Mandate> findByExternalId(@Bind("externalId") String externalId);
+
+    @SqlQuery(query + "WHERE m.state IN (<states>) AND m.created_date < :maxDateTime")
+    List<Mandate> findAllMandatesBySetOfStatesAndMaxCreationTime(@BindList("states") Set<MandateState> states, @Bind("maxDateTime")ZonedDateTime maxDateTime);
     
     @SqlUpdate("UPDATE mandates m SET state = :state WHERE m.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
 
@@ -199,6 +200,10 @@ public class MandateService {
                 .findById(id)
                 .orElseThrow(() -> new MandateNotFoundException(id.toString()));
     }
+    
+    public List<Mandate> findAllMandatesBySetOfStatesAndMaxCreationTime(Set<MandateState> states, ZonedDateTime maxCreationTime) {
+        return mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, maxCreationTime);
+    }
 
     public DirectDebitEvent mandateFailedFor(Mandate mandate) {
         Mandate newMandate = updateStateFor(mandate, MANDATE_FAILED);
@@ -225,7 +230,12 @@ public class MandateService {
         updateStateFor(mandate, MANDATE_ACTIVE);
         return directDebitEventService.registerMandateActiveEventFor(mandate);
     }
-
+    
+    public DirectDebitEvent mandateExpiredFor(Mandate mandate) {
+        Mandate updatedMandate = updateStateFor(mandate, SupportedEvent.MANDATE_EXPIRED_BY_SYSTEM);
+        return directDebitEventService.registerMandateExpiredEventFor(updatedMandate);
+    }
+    
     public Mandate receiveDirectDebitDetailsFor(String mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
         directDebitEventService.registerDirectDebitReceivedEventFor(mandate);

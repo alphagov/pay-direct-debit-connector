@@ -70,6 +70,12 @@ public class DirectDebitEventService {
         return insertEventFor(mandate, directDebitEvent);
     }
 
+    public DirectDebitEvent registerMandateExpiredEventFor(Mandate mandate) {
+        DirectDebitEvent directDebitEvent = mandateExpiredBySystem(mandate.getId());
+        return insertEventFor(mandate, directDebitEvent);
+    }
+
+
     public DirectDebitEvent registerPaymentFailedEventFor(Transaction transaction) {
         Mandate mandate = transaction.getMandate();
         DirectDebitEvent directDebitEvent = paymentFailed(mandate.getId(), transaction.getId());

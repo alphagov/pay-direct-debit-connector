@@ -57,7 +57,11 @@ public class MandateStatesGraphTest {
 
     @Test
     public void priorStates() {
-        assertThat(mandateStatesGraph.getPriorStates(MandateState.PENDING), is(new HashSet(Arrays.asList(MandateState.SUBMITTED, MandateState.CREATED, MandateState.AWAITING_DIRECT_DEBIT_DETAILS))));
+        assertThat(mandateStatesGraph.getPriorStates(MandateState.PENDING), 
+                is(new HashSet<>(Arrays.asList(
+                        MandateState.CREATED,
+                        MandateState.SUBMITTED,
+                        MandateState.AWAITING_DIRECT_DEBIT_DETAILS))));
     }
     
     

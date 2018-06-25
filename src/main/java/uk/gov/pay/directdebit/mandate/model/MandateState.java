@@ -19,7 +19,8 @@ public enum MandateState implements DirectDebitState {
     PENDING(EXTERNAL_PENDING),
     ACTIVE(EXTERNAL_ACTIVE),
     FAILED(EXTERNAL_INACTIVE),
-    CANCELLED(EXTERNAL_INACTIVE);
+    CANCELLED(EXTERNAL_INACTIVE),
+    EXPIRED(EXTERNAL_INACTIVE);
 
     private ExternalMandateState externalState;
 

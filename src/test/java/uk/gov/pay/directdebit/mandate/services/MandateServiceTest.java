@@ -2,10 +2,12 @@ package uk.gov.pay.directdebit.mandate.services;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,6 +23,7 @@ import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -314,5 +317,17 @@ public class MandateServiceTest {
 
         assertThat(newMandate.getState(), is(SUBMITTED));
         verify(mockedDirectDebitEventService, times(1)).registerDirectDebitConfirmedEventFor(newMandate);
+    }
+
+    @Test
+    public void mandateExpired_shouldSetStatusToExpired() {
+        Mandate mandate = MandateFixture.aMandateFixture()
+                .withState(MandateState.CREATED)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .toEntity();
+        service.mandateExpiredFor(mandate);
+        verify(mockedDirectDebitEventService).registerMandateExpiredEventFor(mandate);
+        verify(mockedMandateDao).updateState(mandate.getId(), MandateState.EXPIRED);
+        assertThat(mandate.getState(), Is.is(MandateState.EXPIRED));
     }
 }

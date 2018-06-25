@@ -14,7 +14,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/")
 public class ExpireResource {
-
+    
     private final ExpireService expireService;
     
     @Inject
@@ -27,7 +27,8 @@ public class ExpireResource {
     @Produces(APPLICATION_JSON)
     public Response expirePaymentsAndMandates() {
         int numberOfExpiredPayments = expireService.expirePayments();
-        ResourceResponse resourceResponse =  new ResourceResponse(numberOfExpiredPayments);
+        int numberOfExpiredMandates = expireService.expireMandates();
+        ResourceResponse resourceResponse =  new ResourceResponse(numberOfExpiredPayments, numberOfExpiredMandates);
         return Response.ok(resourceResponse).build();
     }
     
@@ -36,9 +37,13 @@ public class ExpireResource {
         
         @JsonProperty
         private final int numberOfExpiredPayments;
+        
+        @JsonProperty
+        private final int numberOfExpiredMandates;
 
-        ResourceResponse(int numberOfExpiredPayments) {
+        ResourceResponse(int numberOfExpiredPayments, int numberOfExpiredMandates) {
             this.numberOfExpiredPayments = numberOfExpiredPayments;
+            this.numberOfExpiredMandates = numberOfExpiredMandates;
         }
     }
     

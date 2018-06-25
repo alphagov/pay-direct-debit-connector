@@ -12,14 +12,17 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.time.ZonedDateTime.now;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -209,5 +212,59 @@ public class MandateDaoIT {
         assertThat(mandateAfterUpdate.get("mandate_reference"), is(newMandateReference));
         assertThat(mandateAfterUpdate.get("state"), is(testMandate.getState().toString()));
         assertThat(mandateAfterUpdate.get("type"), is(testMandate.getType().toString()));
+    }
+
+    @Test
+    public void findAllMandatesBySetOfStatesAndMaxCreationTime_shouldNotFindMandate_WrongState() {
+        MandateFixture.aMandateFixture()
+                .withState(MandateState.PENDING)
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .insert(testContext.getJdbi());
+
+        MandateStatesGraph mandateStatesGraph = new MandateStatesGraph();
+        Set<MandateState> states = mandateStatesGraph.getPriorStates(MandateState.PENDING);
+        List<Mandate> transactions = mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
+        assertThat(transactions.size(), is(0));
+    }
+
+    @Test
+    public void findAllMandatesBySetOfStatesAndMaxCreationTime_shouldNotFindMandate_WrongCreationTime() {
+        MandateFixture.aMandateFixture()
+                .withState(MandateState.CREATED)
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withCreatedDate(ZonedDateTime.now())
+                .insert(testContext.getJdbi());
+
+        MandateStatesGraph mandateStatesGraph = new MandateStatesGraph();
+        Set<MandateState> states = mandateStatesGraph.getPriorStates(MandateState.PENDING);
+        List<Mandate> transactions = mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
+        assertThat(transactions.size(), is(0));
+    }
+
+    @Test
+    public void findAllMandatesBySetOfStatesAndMaxCreationTime_shouldFindThreeMandates() {
+        MandateFixture.aMandateFixture()
+                .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(200L))
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withState(MandateState.CREATED)
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(100L))
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withState(MandateState.SUBMITTED)
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .insert(testContext.getJdbi());
+
+        MandateStatesGraph mandateStatesGraph = new MandateStatesGraph();
+        Set<MandateState> states = mandateStatesGraph.getPriorStates(MandateState.PENDING);
+        List<Mandate> transactions = mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
+        assertThat(transactions.size(), is(3));
     }
 }
