@@ -363,7 +363,7 @@ public class PaymentViewResourceITest {
                     .withMandateFixture(mandateFixture1)
                     .insert(testContext.getJdbi());
         }
-        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?mandate_id=:mandateId"
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?agreement=:mandateId"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
                 .replace(":mandateId", mandateFixture1.getExternalId());
         givenSetup()

@@ -25,7 +25,7 @@ public class PaymentViewResource {
     private static final String EMAIL_KEY = "email";
     private static final String REFERENCE_KEY = "reference";
     private static final String AMOUNT_KEY = "amount";
-    private static final String MANDATE_ID_KEY = "mandate_id";
+    private static final String MANDATE_ID_EXTERNAL_KEY = "agreement";
     private final PaymentViewService paymentViewService;
 
     @Inject
@@ -45,7 +45,7 @@ public class PaymentViewResource {
             @QueryParam(EMAIL_KEY) String email,
             @QueryParam(REFERENCE_KEY) String reference,
             @QueryParam(AMOUNT_KEY) Long amount,
-            @QueryParam(MANDATE_ID_KEY) String mandateId,
+            @QueryParam(MANDATE_ID_EXTERNAL_KEY) String mandateId,
             @Context UriInfo uriInfo){
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(accountExternalId)
                 .withPage(pageNumber)

@@ -56,7 +56,7 @@ public class PublicApiContractTest {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
-                .withExternalId(params.get("mandate_id"));
+                .withExternalId(params.get("agreement"));
         testMandate.insert(app.getTestContext().getJdbi());
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
         testPayer.insert(app.getTestContext().getJdbi());
