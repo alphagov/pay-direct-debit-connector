@@ -18,6 +18,7 @@ public class PaymentViewSearchParams {
     private static final String AMOUNT_FIELD = "amount";
     private static final String MANDATE_EXTERNAL_ID_FIELD = "mandate_external_id";
     private static final String MANDATE_ID_KEY = "mandate_id";
+    private static final String MANDATE_ID_EXTERNAL_KEY = "agreement";
     private static final String FROM_DATE_KEY = "from_date";
     private static final String TO_DATE_KEY = "to_date";
     private final String gatewayExternalId;
@@ -171,29 +172,29 @@ public class PaymentViewSearchParams {
     }
     
     public String buildQueryParamString() {
-        StringBuilder sb = new StringBuilder("");
+        String query = "";
         if (isNotBlank(mandateId)) {
-            sb.append("&" + MANDATE_ID_KEY + "=" + mandateId);
+            query += "&" + MANDATE_ID_KEY + "=" + mandateId;
         }
         if (searchDateParams != null) {
             if (searchDateParams.getFromDate() != null) {
-                sb.append("&" + FROM_DATE_KEY + "=" + searchDateParams.getFromDate().toString());
+                query += "&" + FROM_DATE_KEY + "=" + searchDateParams.getFromDate().toString();
             }
             if (searchDateParams.getToDate() != null) {
-                sb.append("&" + TO_DATE_KEY + "=" + searchDateParams.getToDate().toString());
+                query += "&" + TO_DATE_KEY + "=" + searchDateParams.getToDate().toString();
             }
         }
         if (isNotBlank(email)) {
-            sb.append("&" + EMAIL_FIELD + "=" + email);
+            query += "&" + EMAIL_FIELD + "=" + email;
         }
         if (isNotBlank(reference)) {
-            sb.append("&" + REFERENCE_FIELD + "=" + reference);
+            query += "&" + REFERENCE_FIELD + "=" + reference;
         }
         if (amount != null) {
-            sb.append("&" + AMOUNT_FIELD + "=" + amount);
+            query += "&" + AMOUNT_FIELD + "=" + amount;
         }
-        sb.append(addPaginationParams());
-        return sb.toString();
+        query += addPaginationParams();
+        return query;
     }
     
     private String addPaginationParams() {
