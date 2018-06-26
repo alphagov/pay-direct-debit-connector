@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import java.util.Optional;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -9,6 +8,8 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.payments.dao.mapper.EventMapper;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+
+import java.util.Optional;
 
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
