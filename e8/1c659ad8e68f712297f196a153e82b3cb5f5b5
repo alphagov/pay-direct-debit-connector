@@ -15,3 +15,5 @@ staging-2.alpha_staging-2-87.date=2018-06-26:14:36:17
 staging-2.alpha_staging-2-87.status=success
 
 production-2.tag=FAILED-87
+
+production-2.FAILED-87.date=
