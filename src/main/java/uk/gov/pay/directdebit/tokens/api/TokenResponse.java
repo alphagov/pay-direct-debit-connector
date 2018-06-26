@@ -27,8 +27,8 @@ public class TokenResponse {
     @JsonProperty("gateway_account_external_id")
     private String gatewayAccountExternalId;
 
-    @JsonProperty("reference")
-    private String reference;
+    @JsonProperty("mandate_reference")
+    private String mandateReference;
 
     @JsonProperty("transaction_external_id")
     private String transactionExternalId;
@@ -37,7 +37,7 @@ public class TokenResponse {
     private TokenResponse(String paymentExternalId,
                           Long gatewayAccountId,
                           String gatewayAccountExternalId,
-                          String reference,
+                          String mandateReference,
                           String returnUrl,
                           String type,
                           String state,
@@ -48,7 +48,7 @@ public class TokenResponse {
         this.type = type;
         this.state = state;
         this.returnUrl = returnUrl;
-        this.reference = reference;
+        this.mandateReference = mandateReference;
         this.transactionExternalId = transactionExternalId;
     }
 
@@ -94,7 +94,7 @@ public class TokenResponse {
         if (!gatewayAccountExternalId.equals(that.gatewayAccountExternalId)) {
             return false;
         }
-        if (reference != null ? !reference.equals(that.reference) : that.reference != null) {
+        if (mandateReference != null ? !mandateReference.equals(that.mandateReference) : that.mandateReference != null) {
             return false;
         }
         return transactionExternalId != null ? transactionExternalId
@@ -109,7 +109,7 @@ public class TokenResponse {
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + gatewayAccountId.hashCode();
         result = 31 * result + gatewayAccountExternalId.hashCode();
-        result = 31 * result + (reference != null ? reference.hashCode() : 0);
+        result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
         result = 31 * result + (transactionExternalId != null ? transactionExternalId.hashCode()
                 : 0);
         return result;
@@ -119,7 +119,7 @@ public class TokenResponse {
     public String toString() {
         return "TokenResponse{" +
                 "external_id=" + mandateExternalId +
-                ", reference=" + reference +
+                ", mandateReference=" + mandateReference +
                 ", transaction_external_id=" + transactionExternalId +
                 ", gateway_account_id=" + gatewayAccountId +
                 ", gateway_account_external_id=" + gatewayAccountExternalId +
