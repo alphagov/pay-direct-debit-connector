@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
@@ -20,7 +21,9 @@ import uk.gov.pay.directdebit.payments.params.SearchDateParams;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
@@ -45,10 +48,10 @@ public class PaymentViewDaoIT {
 
     @Test
     public void shouldReturnAllPaymentViews()  {
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
 
         for (int i = 0; i < 3; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+            MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .withName("Joe Bog" + i)
@@ -61,18 +64,20 @@ public class PaymentViewDaoIT {
                     .withAmount(1000L + i)
                     .insert(testContext.getJdbi());
         }
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(),
-                0L, 100L, null, null, null, null, null, null, searchDateParams);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .withPage(0L)
+                .withDisplaySize(100L)
+                .withSearchDateParams(searchDateParams);
         List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(3));
     }
 
     @Test
     public void shouldReturnOnePaymentViewOnly() {
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
 
         for (int i = 0; i < 3; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+            MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .withName("Joe Bog" + i)
@@ -85,26 +90,27 @@ public class PaymentViewDaoIT {
                     .withAmount(1000L + i)
                     .insert(testContext.getJdbi());
         }
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(),
-                2L, 100L, null, null, null, null, null, null, searchDateParams);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .withPage(2L)
+                .withDisplaySize(1L)
+                .withSearchDateParams(searchDateParams);
         List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
     }
 
     @Test
     public void shouldReturnAnEmptyList_whenNoMatchingGatewayAccounts() throws Exception {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams("invalid-external-id",
-                1L, 100L, null, null, null, null, null, null, searchDateParams);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams("invalid-external-id");
         List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.isEmpty(), is(true));
     }
 
     @Test
     public void shouldReturnTwoPaymentView_withFromDateSet() {
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
 
         for (int i = 1; i < 4; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+            MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .withName("Joe Bog" + i)
@@ -118,9 +124,11 @@ public class PaymentViewDaoIT {
                     .withAmount(1000L + i)
                     .insert(testContext.getJdbi());
         }
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(),
-                1L, 100L, zonedDateTime7DaysAgo.toString(), null, null, null, null, null,
-                new SearchDateParams(zonedDateTime7DaysAgo, zonedDateTimeNow));
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .withPage(1L)
+                .withDisplaySize(100L)
+                .withFromDateString(zonedDateTime7DaysAgo.toString())
+                .withSearchDateParams(new SearchDateParams(zonedDateTime7DaysAgo, zonedDateTimeNow));
         List<PaymentView> paymentViewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(paymentViewList.size(), is(2));
         assertThat(paymentViewList.get(0).getCreatedDate().isAfter(zonedDateTime7DaysAgo), is(true));
@@ -131,10 +139,10 @@ public class PaymentViewDaoIT {
 
     @Test
     public void shouldReturn2PaymentView_withEmailSet() {
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
         List<String> emailList = Arrays.asList("jane@example.com", "joe.bog@example.com", "jane.bog@example.com", "joe@example.com");
         for (int i = 0; i < 4; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+            MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .withEmail(emailList.get(i))
@@ -144,8 +152,8 @@ public class PaymentViewDaoIT {
                     .withMandateFixture(mandateFixture)
                     .insert(testContext.getJdbi());
         }
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(),
-                0L, 100L, null, null, "bog", null, null, null, searchDateParams);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .withEmail("bog");
         List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(2));
         assertThat(viewList.get(0).getEmail().contains("bog"), is(true));
@@ -154,11 +162,11 @@ public class PaymentViewDaoIT {
 
     @Test
     public void shouldReturn2PaymentView_withReferenceSet() {
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
 
         List<String> referenceList = Arrays.asList("MBKH45", "MBKI19", "MBKH46", "MBKI21");
         for (int i = 0; i < 4; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+            MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .insert(testContext.getJdbi());
@@ -169,8 +177,8 @@ public class PaymentViewDaoIT {
                     .withAmount(((long) 200 + i))
                     .insert(testContext.getJdbi());
         }
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(),
-                0L, 100L, null, null, null, "bkh", null, null, searchDateParams);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .withReference("bkh");
         List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(2));
         assertThat(viewList.get(0).getReference(), is(referenceList.get(2)));
@@ -178,11 +186,11 @@ public class PaymentViewDaoIT {
     }
 
     @Test
-    public void shouldReturn2PaymentView_withAmountSet() {
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+    public void shouldReturn1PaymentView_withAmountSet() {
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
 
         for (int i = 0; i < 4; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+            MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .insert(testContext.getJdbi());
@@ -193,8 +201,9 @@ public class PaymentViewDaoIT {
                     .withAmount(((long) 200 + i))
                     .insert(testContext.getJdbi());
         }
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(),
-                0L, 100L, null, null, null, null, 202L, null, searchDateParams);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .withAmount(202L)
+                .withSearchDateParams(searchDateParams);
         List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
         assertThat(viewList.get(0).getReference(), is("ref2"));
@@ -202,10 +211,13 @@ public class PaymentViewDaoIT {
 
     @Test
     public void shouldReturnOnePaymentViewWhenPaymentCreated() {
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
 
         for (int i = 0; i < 3; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+            MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+            aPayerFixture()
+                    .withMandateId(mandateFixture.getId())
+                    .insert(testContext.getJdbi());
             aTransactionFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
@@ -214,9 +226,78 @@ public class PaymentViewDaoIT {
                     .withAmount(1000L + i)
                     .insert(testContext.getJdbi());
         }
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId(),
-                2L, 100L, null, null, null, null, null, null, searchDateParams);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .withPage(2L)
+                .withDisplaySize(100L)
+                .withSearchDateParams(searchDateParams);
         List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
+    }
+    
+    @Test
+    public void shouldReturnCount_whenRecordsExist() {
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
+        MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        aPayerFixture()
+                .withMandateId(mandateFixture.getId())
+                .insert(testContext.getJdbi());
+        for (int i = 0; i < 3; i++) {
+            aTransactionFixture()
+                    .withId((long) i)
+                    .withMandateFixture(mandateFixture)
+                    .withReference("important reference " + i)
+                    .withDescription("description " + i)
+                    .withAmount(1000L + i)
+                    .insert(testContext.getJdbi());
+        }
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .withMandateId(mandateFixture.getExternalId());
+        Long count = paymentViewDao.getPaymentViewCount(searchParams);
+        assertThat(count, is(3L));
+    }
+    
+    @Test
+    public void shouldReturn3Records_withMatchingEmailsOnly() {
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
+                .withExternalId("gateway-external-id")
+                .insert(testContext.getJdbi());
+        String mandateExternalId = "a-mandate-external-id";
+        String anotherMandateExternalId = "another-external-id";
+        MandateFixture mandateFixture1 = aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withExternalId(mandateExternalId)
+                .insert(testContext.getJdbi());
+        MandateFixture mandateFixture2 = aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withExternalId(anotherMandateExternalId)
+                .insert(testContext.getJdbi());
+        PayerFixture payerFixture1 = aPayerFixture()
+                .withMandateId(mandateFixture1.getId())
+                .withEmail("j.citizen@mail.fake")
+                .insert(testContext.getJdbi());
+        aPayerFixture()
+                .withMandateId(mandateFixture2.getId())
+                .withEmail("j.doe@mail.fake")
+                .insert(testContext.getJdbi());
+        for (int i = 0; i < 6; i++) {
+            if (i%2 == 0) {
+                aTransactionFixture()
+                        .withMandateFixture(mandateFixture2)
+                        .insert(testContext.getJdbi());
+                continue;
+            }
+            aTransactionFixture()
+                    .withMandateFixture(mandateFixture1)
+                    .insert(testContext.getJdbi());
+        }
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .withMandateId(mandateFixture1.getExternalId());
+        Long count = paymentViewDao.getPaymentViewCount(searchParams);
+        assertThat(count, is(3L));
+        List<PaymentView> paymentViews = paymentViewDao.searchPaymentView(searchParams);
+        assertThat(paymentViews.size(), is(3));
+        assertThat(paymentViews.get(0).getEmail().equals(payerFixture1.getEmail()), is(true));
+        assertThat(paymentViews.get(1).getEmail().equals(payerFixture1.getEmail()), is(true));
+        assertThat(paymentViews.get(2).getEmail().equals(payerFixture1.getEmail()), is(true));
     }
 }

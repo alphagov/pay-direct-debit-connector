@@ -12,7 +12,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentView;
 public class PaymentViewMapper implements RowMapper<PaymentView> {
 
     private static final String GATEWAY_EXTERNAL_ACCOUNT_ID_COLUMN = "gateway_external_id";
-    private static final String PAYMENT_REQUEST_EXTERNAL_ID_COLUMN = "payment_request_id";
+    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "transaction_external_id";
     private static final String AMOUNT_COLUMN = "amount";
     private static final String REFERENCE_COLUMN = "reference";
     private static final String DESCRIPTION_COLUMN = "description";
@@ -25,7 +25,7 @@ public class PaymentViewMapper implements RowMapper<PaymentView> {
     public PaymentView map(ResultSet rs, StatementContext ctx) throws SQLException {
         return new PaymentView(
                 rs.getString(GATEWAY_EXTERNAL_ACCOUNT_ID_COLUMN),
-                rs.getString(PAYMENT_REQUEST_EXTERNAL_ID_COLUMN),
+                rs.getString(TRANSACTION_EXTERNAL_ID_COLUMN),
                 rs.getLong(AMOUNT_COLUMN),
                 rs.getString(REFERENCE_COLUMN),
                 rs.getString(DESCRIPTION_COLUMN),

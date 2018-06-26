@@ -1,25 +1,30 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.payments.api.PaymentViewListResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewValidator;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
-import uk.gov.pay.directdebit.payments.exception.RecordsNotFoundException;
+import uk.gov.pay.directdebit.payments.links.Link;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
+import uk.gov.pay.directdebit.payments.model.ViewPaginationBuilder;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
-import static java.lang.String.format;
+import javax.inject.Inject;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PaymentViewService {
 
     private final PaymentViewDao paymentViewDao;
     private final GatewayAccountDao gatewayAccountDao;
     private final PaymentViewValidator paymentViewValidator = new PaymentViewValidator();
+    private UriInfo uriInfo;
+    private UriBuilder uriBuilder;
 
     @Inject
     public PaymentViewService(PaymentViewDao paymentViewDao, GatewayAccountDao gatewayAccountDao) {
@@ -31,26 +36,40 @@ public class PaymentViewService {
         return gatewayAccountDao.findByExternalId(searchParams.getGatewayExternalId())
                 .map(gatewayAccount -> {
                     PaymentViewSearchParams validatedSearchParams = paymentViewValidator.validateParams(searchParams);
-                    List<PaymentViewListResponse> viewListResponse = 
-                            getPaymentViewListResponse(paymentViewValidator.validateParams(searchParams));
-                    if (viewListResponse.size() == 0) {
-                        throw new RecordsNotFoundException(format("Found no records with page size %s and display_size %s",
-                                validatedSearchParams.getPage(),
-                                validatedSearchParams.getDisplaySize()));
+                    List<PaymentViewListResponse> viewListResponse = Collections.emptyList();
+                    Long total = getTotal(validatedSearchParams);
+                    if (total > 0) {
+                        viewListResponse =
+                                getPaymentViewListResponse(validatedSearchParams, gatewayAccount.getExternalId());
                     }
+                    ViewPaginationBuilder paginationBuilder = new ViewPaginationBuilder(validatedSearchParams, viewListResponse, uriInfo);
                     return new PaymentViewResponse(validatedSearchParams.getGatewayExternalId(),
+                            total,
                             validatedSearchParams.getPage(),
-                            validatedSearchParams.getPaginationParams().getDisplaySize(),
-                            viewListResponse);
+                            viewListResponse)
+                                .withPaginationBuilder(paginationBuilder
+                                .withTotalCount(total)
+                                .buildResponse());
 
                 })
                 .orElseThrow(() -> new GatewayAccountNotFoundException(searchParams.getGatewayExternalId()));
     }
+    
+    public PaymentViewService withUriInfo(UriInfo uriInfo) {
+        this.uriInfo = uriInfo;
+        this.uriBuilder = UriBuilder.fromUri(uriInfo.getBaseUri());
+        
+        return this;
+    }
 
-    private List<PaymentViewListResponse> getPaymentViewListResponse(PaymentViewSearchParams searchParams) {
+    private Long getTotal(PaymentViewSearchParams searchParams) {
+        return paymentViewDao.getPaymentViewCount(searchParams);
+    }
+
+    private List<PaymentViewListResponse> getPaymentViewListResponse(PaymentViewSearchParams searchParams, String gatewayAccountId) {
         return paymentViewDao.searchPaymentView(searchParams)
                 .stream()
-                .map(this::populateResponseWith)
+                .map(paymentView -> decorateWithSelfLink(populateResponseWith(paymentView), gatewayAccountId))
                 .collect(Collectors.toList());
     }
 
@@ -63,7 +82,15 @@ public class PaymentViewService {
                 paymentView.getCreatedDate().toString(),
                 paymentView.getName(),
                 paymentView.getEmail(),
-                paymentView.getState().toExternal()
-        );
+                paymentView.getState().toExternal());
+    }
+    
+    private PaymentViewListResponse decorateWithSelfLink(PaymentViewListResponse listResponse, String gatewayAccountId) {
+        String href = uriBuilder
+                        .path("/v1/api/accounts/{accountId}/charges/{transactionExternalId}")
+                        .build(gatewayAccountId, listResponse.getTransactionId()).toString();
+        
+        Link link = Link.ofValue(href, "GET", "self");
+        return listResponse.withLink(link);
     }
 }

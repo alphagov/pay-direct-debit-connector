@@ -9,7 +9,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -23,6 +25,7 @@ public class PaymentViewResource {
     private static final String EMAIL_KEY = "email";
     private static final String REFERENCE_KEY = "reference";
     private static final String AMOUNT_KEY = "amount";
+    private static final String MANDATE_ID_KEY = "mandate_id";
     private final PaymentViewService paymentViewService;
 
     @Inject
@@ -31,7 +34,7 @@ public class PaymentViewResource {
     }
 
     @GET
-    @Path("/v1/api/accounts/{accountId}/payment-requests/view")
+    @Path("/v1/api/accounts/{accountId}/transactions/view")
     @Produces(APPLICATION_JSON)
     public Response getPaymentView(
             @PathParam("accountId") String accountExternalId,
@@ -41,17 +44,21 @@ public class PaymentViewResource {
             @QueryParam(TO_DATE_KEY) String toDate,
             @QueryParam(EMAIL_KEY) String email,
             @QueryParam(REFERENCE_KEY) String reference,
-            @QueryParam(AMOUNT_KEY) Long amount){
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(
-                accountExternalId,
-                pageNumber,
-                displaySize,
-                fromDate,
-                toDate,
-                email,
-                reference,
-                amount
-        );
-        return Response.ok().entity(paymentViewService.getPaymentViewResponse(searchParams)).build();
+            @QueryParam(AMOUNT_KEY) Long amount,
+            @QueryParam(MANDATE_ID_KEY) String mandateId,
+            @Context UriInfo uriInfo){
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(accountExternalId)
+                .withPage(pageNumber)
+                .withDisplaySize(displaySize)
+                .withFromDateString(fromDate)
+                .withToDateString(toDate)
+                .withEmail(email)
+                .withReference(reference)
+                .withAmount(amount)
+                .withMandateId(mandateId);
+        
+        return Response.ok().entity(paymentViewService
+                .withUriInfo(uriInfo)
+                .getPaymentViewResponse(searchParams)).build();
     }
 }
