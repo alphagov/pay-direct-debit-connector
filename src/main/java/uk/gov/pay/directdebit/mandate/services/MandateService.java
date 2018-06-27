@@ -177,8 +177,9 @@ public class MandateService {
                 mandate.getType(),
                 mandate.getReturnUrl(),
                 dataLinks,
-                mandate.getState().toExternal()
-        );
+                mandate.getState().toExternal(),
+                mandate.getServiceReference(),
+                mandate.getMandateReference());
     }
 
     public CreateMandateResponse createMandateResponse(Map<String, String> mandateRequestMap, String accountExternalId, UriInfo uriInfo) {
@@ -193,8 +194,8 @@ public class MandateService {
                 mandate.getCreatedDate().toString(),
                 mandate.getState().toExternal(),
                 dataLinks,
-                mandate.getServiceReference()
-        );
+                mandate.getServiceReference(),
+                mandate.getMandateReference());
     }
 
     public Mandate findByExternalId(String externalId) {
