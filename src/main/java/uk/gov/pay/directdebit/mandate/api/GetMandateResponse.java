@@ -3,9 +3,10 @@ package uk.gov.pay.directdebit.mandate.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
+
 import java.util.List;
 import java.util.Map;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -17,25 +18,35 @@ public class GetMandateResponse {
 
     @JsonProperty("mandate_type")
     private MandateType mandateType;
-    
+
     @JsonProperty("return_url")
     private String returnUrl;
 
     @JsonProperty("links")
     private List<Map<String, Object>> dataLinks;
-    
+
     @JsonProperty
     private ExternalMandateState state;
 
+    @JsonProperty("service_reference")
+    private String serviceReference;
+
+    @JsonProperty("mandate_reference")
+    private String mandateReference;
+
     public GetMandateResponse(String mandateId,
-            MandateType mandateType, String returnUrl,
-            List<Map<String, Object>> dataLinks,
-            ExternalMandateState state) {
+                              MandateType mandateType, String returnUrl,
+                              List<Map<String, Object>> dataLinks,
+                              ExternalMandateState state,
+                              String serviceReference,
+                              String mandateReference) {
         this.mandateId = mandateId;
         this.mandateType = mandateType;
         this.returnUrl = returnUrl;
         this.dataLinks = dataLinks;
         this.state = state;
+        this.serviceReference = serviceReference;
+        this.mandateReference = mandateReference;
     }
 
     public String getReturnUrl() {
@@ -56,6 +67,14 @@ public class GetMandateResponse {
 
     public ExternalMandateState getState() {
         return state;
+    }
+
+    public String getServiceReference() {
+        return serviceReference;
+    }
+
+    public String getMandateReference() {
+        return mandateReference;
     }
 
     @Override
@@ -93,6 +112,7 @@ public class GetMandateResponse {
         result = 31 * result + state.hashCode();
         return result;
     }
+
 }
 
 

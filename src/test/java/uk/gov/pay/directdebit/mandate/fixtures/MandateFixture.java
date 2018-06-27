@@ -39,7 +39,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         this.gatewayAccountFixture = gatewayAccountFixture;
         return this;
     }
-    
+
     public MandateFixture withCreatedDate(ZonedDateTime createdDate) {
         this.createdDate = createdDate;
         return this;
@@ -85,6 +85,10 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     public MandateFixture withMandateReference(String mandateReference) {
         this.mandateReference = mandateReference;
         return this;
+    }
+
+    public String getServiceReference() {
+        return serviceReference;
     }
 
     public MandateFixture withServiceReference(String serviceReference) {

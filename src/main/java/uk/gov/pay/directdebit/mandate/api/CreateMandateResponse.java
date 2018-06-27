@@ -35,11 +35,17 @@ public class CreateMandateResponse {
     @JsonProperty("service_reference")
     private String serviceReference;
 
+    @JsonProperty("mandate_reference")
+    private String mandateReference;
+
     public CreateMandateResponse(String mandateId,
-                                 MandateType mandateType, String returnUrl, String createdDate,
+                                 MandateType mandateType,
+                                 String returnUrl,
+                                 String createdDate,
                                  ExternalMandateState state,
                                  List<Map<String, Object>> dataLinks,
-                                 String serviceReference) {
+                                 String serviceReference,
+                                 String mandateReference) {
         this.dataLinks = dataLinks;
         this.mandateId = mandateId;
         this.mandateType = mandateType;
@@ -47,6 +53,7 @@ public class CreateMandateResponse {
         this.createdDate = createdDate;
         this.state = state;
         this.serviceReference = serviceReference;
+        this.mandateReference = mandateReference;
     }
 
     public String getMandateId() {
@@ -71,6 +78,10 @@ public class CreateMandateResponse {
 
     public String getServiceReference() {
         return serviceReference;
+    }
+
+    public String getMandateReference() {
+        return mandateReference;
     }
 
     public URI getLink(String rel) {

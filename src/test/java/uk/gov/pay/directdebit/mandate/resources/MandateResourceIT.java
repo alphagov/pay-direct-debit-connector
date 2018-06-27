@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +18,10 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -68,7 +69,7 @@ public class MandateResourceIT {
 
         String requestPath = "/v1/api/accounts/{accountId}/mandates"
                 .replace("{accountId}", accountExternalId);
-        
+
         ValidatableResponse response = givenSetup()
                 .body(postBody)
                 .post(requestPath)
@@ -87,7 +88,6 @@ public class MandateResourceIT {
         String hrefNextUrl = "http://Frontend/secure/" + token;
         String hrefNextUrlPost = "http://Frontend/secure";
 
-
         response
                 .body("links", hasSize(3))
                 .body("links", containsLink("self", "GET", documentLocation))
@@ -95,7 +95,7 @@ public class MandateResourceIT {
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
                     put("chargeTokenId", token);
                 }}));
-        
+
         Map<String, Object> createdMandate = testContext.getDatabaseTestHelper().getMandateByExternalId(externalMandateId);
 
         assertThat(createdMandate.get("external_id"), is(notNullValue()));
@@ -105,8 +105,51 @@ public class MandateResourceIT {
         assertThat(createdMandate.get("transaction"), is(nullValue()));
     }
 
-    
-    
+    @Test
+    public void shouldCreateAMandate_withAllFields() throws Exception {
+        String accountExternalId = testGatewayAccount.getExternalId();
+        String agreementType = MandateType.ON_DEMAND.toString();
+        String returnUrl = "http://example.com/success-page/";
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put("agreement_type", agreementType)
+                .put("return_url", returnUrl)
+                .put("service_reference", "test-service-reference")
+                .build());
+
+        String requestPath = "/v1/api/accounts/{accountId}/mandates"
+                .replace("{accountId}", accountExternalId);
+
+        ValidatableResponse response = givenSetup()
+                .body(postBody)
+                .post(requestPath)
+                .then()
+                .statusCode(Response.Status.CREATED.getStatusCode())
+                .body(JSON_MANDATE_ID_KEY, is(notNullValue()))
+                .body("mandate_type", is(agreementType))
+                .body("return_url", is(returnUrl))
+                .body("created_date", is(notNullValue()))
+                .body("state.status", is("created"))
+                .body("state.finished", is(false))
+                .body("service_reference", is("test-service-reference"))
+                .body("mandate_reference", is(notNullValue()))
+                .contentType(JSON);
+        String externalMandateId = response.extract().path(JSON_MANDATE_ID_KEY).toString();
+
+        String documentLocation = expectedMandateLocationFor(accountExternalId, externalMandateId);
+        String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(externalMandateId).get("secure_redirect_token").toString();
+
+        String hrefNextUrl = "http://Frontend/secure/" + token;
+        String hrefNextUrlPost = "http://Frontend/secure";
+
+        response
+                .body("links", hasSize(3))
+                .body("links", containsLink("self", "GET", documentLocation))
+                .body("links", containsLink("next_url", "GET", hrefNextUrl))
+                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
+                    put("chargeTokenId", token);
+                }}));
+    }
+
     @Test
     public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenATransactionHasBeenCreated() {
         String accountExternalId = testGatewayAccount.getExternalId();
@@ -191,7 +234,7 @@ public class MandateResourceIT {
         String requestPath = publicApiMandatePath
                 .replace("{accountId}", accountExternalId)
                 .replace("{mandateExternalId}", mandateFixture.getExternalId());
-        
+
         ValidatableResponse getMandateResponse = givenSetup()
                 .get(requestPath)
                 .then()
@@ -200,7 +243,10 @@ public class MandateResourceIT {
                 .body("mandate_id", is(mandateFixture.getExternalId()))
                 .body("mandate_type", is(mandateFixture.getMandateType().toString()))
                 .body("return_url", is(mandateFixture.getReturnUrl()))
-                .body("state.status", is(mandateFixture.getState().toExternal().getState()));
+                .body("state.status", is(mandateFixture.getState().toExternal().getState()))
+                .body("state.finished", is(mandateFixture.getState().toExternal().isFinished()))
+                .body("service_reference", is(mandateFixture.getServiceReference()))
+                .body("mandate_reference", is(notNullValue()));
 
         String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(mandateFixture.getExternalId()).get("secure_redirect_token").toString();
         String documentLocation = expectedMandateLocationFor(accountExternalId, mandateFixture.getExternalId());
@@ -208,15 +254,15 @@ public class MandateResourceIT {
         String hrefNextUrl = "http://Frontend/secure/" + token;
         String hrefNextUrlPost = "http://Frontend/secure";
 
-        getMandateResponse .body("links", hasSize(3))
+        getMandateResponse.body("links", hasSize(3))
                 .body("links", containsLink("self", "GET", documentLocation))
                 .body("links", containsLink("next_url", "GET", hrefNextUrl))
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
                     put("chargeTokenId", token);
                 }}));
-                
+
     }
-    
+
     @Test
     public void shouldCancelAMandate() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
@@ -250,7 +296,7 @@ public class MandateResourceIT {
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());
-        
+
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/cancel"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace("{mandateExternalId}", mandateFixture.getExternalId());
@@ -259,7 +305,6 @@ public class MandateResourceIT {
                 .post(requestPath)
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
-
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         assertThat(mandate.get("state"), is("CANCELLED"));
@@ -300,7 +345,7 @@ public class MandateResourceIT {
                 .withMandateFixture(testMandate)
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());
-        
+
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/change-payment-method"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace("{mandateExternalId}", testMandate.getExternalId());
@@ -315,6 +360,7 @@ public class MandateResourceIT {
         Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
         assertThat(transaction.get("state"), is("USER_CANCEL_NOT_ELIGIBLE"));
     }
+
     private TransactionFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
         return aTransactionFixture()
                 .withMandateFixture(mandateFixture)
@@ -332,6 +378,5 @@ public class MandateResourceIT {
         return given().port(testContext.getPort())
                 .contentType(JSON);
     }
-
 
 }
