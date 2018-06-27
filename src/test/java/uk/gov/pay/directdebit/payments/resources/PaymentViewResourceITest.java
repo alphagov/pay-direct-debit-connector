@@ -69,7 +69,6 @@ public class PaymentViewResourceITest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("page", is(1))
                 .body("total", is(3))
                 .body("count", is(3))
@@ -77,7 +76,6 @@ public class PaymentViewResourceITest {
                 .body("results[0].reference", is("MBK2"))
                 .body("results[0].name", is("J. Doe2"))
                 .body("results[2].description", is("Description0"))
-                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("results[1].created_date", is(createdDate.toString()));
     }
 
@@ -170,7 +168,6 @@ public class PaymentViewResourceITest {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("results", hasSize(5))
-                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("total", is(15))
                 .body("count", is(5))
                 .body("page", is(2))
@@ -214,7 +211,6 @@ public class PaymentViewResourceITest {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("results", hasSize(3))
-                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("page", is(1))
                 .body("total", is(3))
                 .body("count", is(3))
