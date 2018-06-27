@@ -1,17 +1,7 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
-
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import javax.inject.Inject;
-import javax.ws.rs.core.UriInfo;
-
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
@@ -19,6 +9,7 @@ import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
@@ -39,6 +30,16 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.UriInfo;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -85,12 +86,19 @@ public class MandateService {
     public Mandate createMandate(Map<String, String> mandateRequestMap, String accountExternalId) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
+                    // TODO:
+                    // when we introduce GoCardless gateway accounts to work with create mandate,
+                    // then modify appropriate mandate reference values
+                    String mandateReference = PaymentProvider.SANDBOX.equals(gatewayAccount.getPaymentProvider()) ?
+                            RandomStringUtils.randomAlphanumeric(18) :
+                            "gocardless-default";
+
                     Mandate mandate = new Mandate(
                             null,
                             gatewayAccount,
                             MandateType.valueOf(mandateRequestMap.get("agreement_type")),
                             RandomIdGenerator.newId(),
-                            null,
+                            mandateReference,
                             mandateRequestMap.get("service_reference"),
                             MandateState.CREATED,
                             mandateRequestMap.get("return_url"),
@@ -200,7 +208,7 @@ public class MandateService {
                 .findById(id)
                 .orElseThrow(() -> new MandateNotFoundException(id.toString()));
     }
-    
+
     public List<Mandate> findAllMandatesBySetOfStatesAndMaxCreationTime(Set<MandateState> states, ZonedDateTime maxCreationTime) {
         return mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, maxCreationTime);
     }
@@ -230,12 +238,12 @@ public class MandateService {
         updateStateFor(mandate, MANDATE_ACTIVE);
         return directDebitEventService.registerMandateActiveEventFor(mandate);
     }
-    
+
     public DirectDebitEvent mandateExpiredFor(Mandate mandate) {
         Mandate updatedMandate = updateStateFor(mandate, SupportedEvent.MANDATE_EXPIRED_BY_SYSTEM);
         return directDebitEventService.registerMandateExpiredEventFor(updatedMandate);
     }
-    
+
     public Mandate receiveDirectDebitDetailsFor(String mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
         directDebitEventService.registerDirectDebitReceivedEventFor(mandate);
