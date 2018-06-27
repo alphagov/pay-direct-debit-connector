@@ -4,26 +4,22 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.core.statement.StatementContext;
+import uk.gov.pay.directdebit.payments.dao.mapper.EventMapper;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
 
 import javax.inject.Inject;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 public class DirectDebitEventSearchDao {
 
-    private static final String QUERY = "SELECT * from EVENTS e WHERE :searchFields";
+    private static final String QUERY = "SELECT * from EVENTS e :searchFields ORDER BY e.id DESC LIMIT :limit OFFSET :offset";
     
     private final Jdbi jdbi;
 
@@ -34,10 +30,15 @@ public class DirectDebitEventSearchDao {
     
     public List<DirectDebitEvent> findEvents(DirectDebitEventSearchParams searchParams) {
         QueryStringAndQueryMap queryStringAndQueryMap = generateQuery(searchParams);
+        String limit = isNull(searchParams.getPageSize()) ? "NULL" : searchParams.getPageSize().toString();
+        String offset = searchParams.getPage() == null ? "0" : Integer.toString((searchParams.getPage() - 1) * searchParams.getPageSize());
         return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(QUERY.replace(":searchFields", queryStringAndQueryMap.queryString));
+            Query query = handle.createQuery(QUERY
+                    .replace(":searchFields", queryStringAndQueryMap.queryString)
+                    .replace(":limit", limit)
+                    .replace(":offset", offset));
             queryStringAndQueryMap.queryMap.forEach(query::bind);
-            return query.map(new DirectDebitEventsMapper()).list();
+            return query.map(new EventMapper()).list();
         });
     }
 
@@ -60,20 +61,8 @@ public class DirectDebitEventSearchDao {
             searchStrings.add("e.event_date > :after_date");
             queryMap.put("after_date", searchParams.getAfterDate());
         }
-        return new QueryStringAndQueryMap(searchStrings.stream().collect(Collectors.joining(" AND ")), queryMap);
-    }
-
-    private class DirectDebitEventsMapper implements RowMapper<DirectDebitEvent> {
-        @Override
-        public DirectDebitEvent map(ResultSet rs, StatementContext ctx) throws SQLException {
-            return new DirectDebitEvent(
-                    rs.getLong("id"),
-                    rs.getLong("mandate_id"),
-                    rs.getLong("transaction_id"),
-                    DirectDebitEvent.Type.valueOf(rs.getString("event_type")),
-                    DirectDebitEvent.SupportedEvent.valueOf(rs.getString("event")),
-                    ZonedDateTime.ofInstant(rs.getTimestamp("event_date").toInstant(), ZoneOffset.UTC));
-        }
+        String queryString = searchStrings.isEmpty() ? "" : "WHERE " + searchStrings.stream().collect(Collectors.joining(" AND "));
+        return new QueryStringAndQueryMap(queryString, queryMap);
     }
 
     @AllArgsConstructor

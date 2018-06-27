@@ -29,8 +29,8 @@ public class DirectDebitEventsResource {
     @Produces(APPLICATION_JSON)
     public Response findEvents(@QueryParam("before") String beforeDate,
                                @QueryParam("after") String afterDate,
-                               @QueryParam("page_size") String pageSize,
-                               @QueryParam("page") String page,
+                               @QueryParam("page_size") Integer pageSize,
+                               @QueryParam("page") Integer page,
                                @QueryParam("mandate_id") Long mandateId,
                                @QueryParam("transaction_id") Long transactionId) {
 
@@ -39,6 +39,8 @@ public class DirectDebitEventsResource {
                 .afterDate(afterDate)
                 .mandateId(mandateId)
                 .transactionId(transactionId)
+                .pageSize(pageSize)
+                .page(page)
                 .build();
         
         List<DirectDebitEvent> events = directDebitEventsSearchService.search(searchParams);

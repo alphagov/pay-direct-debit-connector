@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
@@ -56,6 +57,7 @@ public class DirectDebitEvent {
     private SupportedEvent event;
 
     @JsonProperty("event_date")
+    @JsonSerialize(using = CustomDateSerializer.class)
     private ZonedDateTime eventDate;
 
     public DirectDebitEvent(Long id, Long mandateId, Long transactionId, Type eventType, SupportedEvent event, ZonedDateTime eventDate) {

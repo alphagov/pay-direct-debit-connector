@@ -13,15 +13,21 @@ public class DirectDebitEventSearchParams {
     @Getter private ZonedDateTime afterDate;
     @Getter private Long mandateId;
     @Getter private Long transactionId;
- 
+    @Getter private Integer pageSize;
+    @Getter private Integer page;
+
     public static class DirectDebitEventSearchParamsBuilder {
         public DirectDebitEventSearchParamsBuilder beforeDate(String date) {
-            this.beforeDate = parseDate(date, "beforeDate");
+            if (date != null) {
+                this.beforeDate = parseDate(date, "beforeDate");    
+            }
             return this;
         }
 
         public DirectDebitEventSearchParamsBuilder afterDate(String date) {
-            this.afterDate = parseDate(date, "afterDate");
+            if (date != null) {
+                this.afterDate = parseDate(date, "afterDate");    
+            }
             return this;
         }
 
