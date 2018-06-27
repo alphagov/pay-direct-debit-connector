@@ -1,11 +1,5 @@
 package uk.gov.pay.directdebit.mandate.services;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,6 +11,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -28,6 +24,7 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -36,7 +33,17 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -207,6 +214,7 @@ public class MandateServiceTest {
         assertThat(newMandate.getCreatedDate(), is(mandate.getCreatedDate()));
         verify(mockedDirectDebitEventService).registerTokenExchangedEventFor(newMandate);
     }
+
     @Test
     public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails() {
         Mandate mandate = MandateFixture
@@ -361,5 +369,36 @@ public class MandateServiceTest {
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
                 .toEntity();
         service.mandateExpiredFor(mandate);
+    }
+
+    @Test
+    public void shouldCreateAMandateForSandbox_withCustomGeneratedReference() {
+        Mandate mandate = getMandateForProvider(PaymentProvider.SANDBOX);
+
+        assertThat(mandate.getMandateReference(), is(not("gocardless-default")));
+    }
+
+    @Test
+    public void shouldCreateAMandateForGoCardless_withCustomGeneratedReference() {
+        Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
+
+        assertThat(mandate.getMandateReference(), is("gocardless-default"));
+    }
+
+    private Map<String, String> getMandateRequestPayload() {
+        Map<String, String> payload = new HashMap<>();
+        payload.put("agreement_type", "ON_DEMAND");
+        payload.put("return_url", "https://example.com/return");
+        payload.put("service_reference", "some-service-reference");
+        return payload;
+    }
+
+    private Mandate getMandateForProvider(PaymentProvider paymentProvider) {
+        GatewayAccount gatewayAccount =
+                GatewayAccountFixture.aGatewayAccountFixture().withPaymentProvider(paymentProvider).toEntity();
+        when(mockedGatewayAccountDao.findByExternalId(anyString())).thenReturn(Optional.of(gatewayAccount));
+        when(mockedMandateDao.insert(any(Mandate.class))).thenReturn(1L);
+
+        return service.createMandate(getMandateRequestPayload(), gatewayAccount.getExternalId());
     }
 }
