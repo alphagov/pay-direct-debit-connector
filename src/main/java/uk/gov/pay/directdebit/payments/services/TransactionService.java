@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
@@ -9,6 +10,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundEx
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
@@ -78,7 +80,26 @@ public class TransactionService {
         return transaction;
     }
 
-    private TransactionResponse populateResponseWith(String accountExternalId, Transaction transaction, UriInfo uriInfo) {
+    public Transaction createTransaction(Map<String, String> createTransaction, Mandate mandate, String accountExternalId) {
+        return gatewayAccountDao.findByExternalId(accountExternalId)
+                .map(gatewayAccount -> {
+                    LOGGER.info("Creating transaction for mandate {}", mandate.getExternalId());
+                    Transaction transaction = createPaymentParser
+                            .parse(createTransaction, mandate);
+                    Long id = transactionDao.insert(transaction);
+                    transaction.setId(id);
+                    directDebitEventService
+                            .insertEventFor(mandate, chargeCreated(mandate.getId(), transaction.getId()));
+                    LOGGER.info("Created transaction with external id {}", transaction.getExternalId());
+                    return transaction;
+                })
+                .orElseThrow(() -> {
+                    LOGGER.error("Gateway account with id {} not found", accountExternalId);
+                    return new GatewayAccountNotFoundException(accountExternalId);
+                });
+    }
+
+    public TransactionResponse createPaymentResponseWithAllLinks(Transaction transaction, String accountExternalId, UriInfo uriInfo) {
         List<Map<String, Object>> dataLinks = new ArrayList<>();
 
         dataLinks.add(createLink("self", GET, selfUriFor(uriInfo, CHARGE_API_PATH, accountExternalId, transaction.getExternalId())));
@@ -94,51 +115,32 @@ public class TransactionService {
                     APPLICATION_FORM_URLENCODED,
                     ImmutableMap.of("chargeTokenId", token.getToken())));
         }
-        return new TransactionResponse(
-                transaction.getExternalId(),
-                transaction.getState().toExternal(),
-                transaction.getAmount(),
-                transaction.getMandate().getReturnUrl(),
-                transaction.getDescription(),
-                transaction.getReference(),
-                transaction.getCreatedDate().toString(),
-                dataLinks);
-    }
-    
-    public TransactionResponse createTransaction(Map<String, String> createTransaction, Mandate mandate, String accountExternalId, UriInfo uriInfo) {
-        return gatewayAccountDao.findByExternalId(accountExternalId)
-                .map(gatewayAccount -> {
-                    LOGGER.info("Creating transaction for mandate {}", mandate.getExternalId());
-                    Transaction transaction = createPaymentParser
-                            .parse(createTransaction, mandate);
-                    Long id = transactionDao.insert(transaction);
-                    transaction.setId(id);
-                    directDebitEventService
-                            .insertEventFor(mandate, chargeCreated(mandate.getId(), transaction.getId()));
-                    LOGGER.info("Created transaction with external id {}", transaction.getExternalId());
-                    return populateResponseWith(accountExternalId, transaction, uriInfo);
-                })
-                .orElseThrow(() -> {
-                    LOGGER.error("Gateway account with id {} not found", accountExternalId);
-                    return new GatewayAccountNotFoundException(accountExternalId);
-                });
+        return TransactionResponse.from(transaction, dataLinks);
     }
 
+    public CollectPaymentResponse collectPaymentResponseWithSelfLink(Transaction transaction, String accountExternalId, UriInfo uriInfo) {
+        List<Map<String, Object>> dataLinks = ImmutableList.of(
+                createLink("self", GET, selfUriFor(uriInfo, "/v1/api/accounts/{accountId}/charges/{transactionExternalId}",
+                        accountExternalId, transaction.getExternalId()))
+        );
+        return CollectPaymentResponse.from(transaction, dataLinks);
+    }
+    
     public TransactionResponse getPaymentWithExternalId(String accountExternalId, String paymentExternalId, UriInfo uriInfo) {
         Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(
                 paymentExternalId, accountExternalId);
-        return populateResponseWith(accountExternalId, transaction, uriInfo);
+        return createPaymentResponseWithAllLinks(transaction, accountExternalId, uriInfo);
     }
-    
+
 
     public List<Transaction> findAllByPaymentStateAndProvider(PaymentState paymentState, PaymentProvider paymentProvider) {
         return transactionDao.findAllByPaymentStateAndProvider(paymentState, paymentProvider);
     }
-    
+
     public List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(Set<PaymentState> states, ZonedDateTime creationTime) {
         return transactionDao.findAllPaymentsBySetOfStatesAndCreationTime(states, creationTime);
     }
-    
+
     public Transaction findTransaction(Long transactionId) {
         return transactionDao
                 .findById(transactionId)
@@ -148,7 +150,7 @@ public class TransactionService {
     public List<Transaction> findTransactionsForMandate(String mandateExternalId) {
         return transactionDao.findAllByMandateExternalId(mandateExternalId);
     }
-    
+
     public DirectDebitEvent paymentExpired(Transaction transaction) {
         Transaction updateTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_EXPIRED_BY_SYSTEM);
         return directDebitEventService.registerPaymentExpiredEventFor(updateTransaction);
@@ -217,5 +219,4 @@ public class TransactionService {
     public Optional<DirectDebitEvent> findPaymentSubmittedEventFor(Transaction transaction) {
         return directDebitEventService.findBy(transaction.getId(), CHARGE, PAYMENT_SUBMITTED_TO_BANK);
     }
-
 }

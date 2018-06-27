@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.LocalDate;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,10 +10,14 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.services.MandateConfirmService;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+
+import java.time.LocalDate;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -36,6 +38,8 @@ public class SandboxServiceTest {
     private MandateConfirmService mockedMandateConfirmService;
     @Mock
     private TransactionService mockedTransactionService;
+    @Mock
+    private MandateService mockedMandateService;
 
     private SandboxService service;
 
@@ -44,7 +48,7 @@ public class SandboxServiceTest {
 
     @Before
     public void setUp() {
-        service = new SandboxService(mockedPayerService, mockedMandateConfirmService, mockedTransactionService);
+        service = new SandboxService(mockedPayerService, mockedMandateConfirmService, mockedTransactionService, mockedMandateService);
     }
 
     @Test
@@ -85,6 +89,24 @@ public class SandboxServiceTest {
         service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
         verifyNoMoreInteractions(mockedTransactionService);
     }
+
+    @Test
+    public void collect_shouldRegisterAPaymentSubmittedToProviderEvent() {
+        MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(gatewayAccountFixture);
+        TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
+        Map<String, String> details = ImmutableMap.of(
+                "amount", "123456",
+                "reference", "a reference",
+                "description", "a description",
+                "agreement_id", mandateFixture.getExternalId());
+        when(mockedMandateService
+                .findByExternalId(mandateFixture.getExternalId()))
+                .thenReturn(mandateFixture.toEntity());
+        when(mockedTransactionService.createTransaction(details, mandateFixture.toEntity(), gatewayAccountFixture.getExternalId()))
+                .thenReturn(transactionFixture.toEntity());
+        service.collect(gatewayAccountFixture.toEntity(), details);
+        verify(mockedTransactionService).paymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
+    }
     
     @Test
     public void shouldValidateBankAccountDetails_ifSortCodeAndAccountNumberAreValid() {
@@ -124,4 +146,5 @@ public class SandboxServiceTest {
         assertThat(response.isValid(), is(false));
         assertThat(response.getBankName(), is(nullValue()));
     }
+    
 }

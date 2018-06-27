@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -89,9 +90,14 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
         if (mandate.getType().equals(MandateType.ONE_OFF)) {
             Transaction transaction = confirmationDetails.getTransaction();
-             GoCardlessPayment payment = createPayment(transaction, goCardlessMandate);
-             transactionService.paymentSubmittedToProviderFor(transaction, payment.getChargeDate());
+            GoCardlessPayment payment = createPayment(transaction, goCardlessMandate);
+            transactionService.paymentSubmittedToProviderFor(transaction, payment.getChargeDate());
         }
+    }
+
+    @Override
+    public Transaction collect(GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequest) {
+        throw new NotImplementedException("Collecting payments from an existing mandate via GoCardless is not yet supported");
     }
 
     @Override

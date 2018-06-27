@@ -1,8 +1,5 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import java.time.LocalDate;
-import java.util.Map;
-import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.exception.validation.ValidationException;
@@ -12,11 +9,16 @@ import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.services.MandateConfirmService;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import javax.inject.Inject;
+import java.time.LocalDate;
+import java.util.Map;
 
 public class SandboxService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(SandboxService.class);
@@ -24,15 +26,17 @@ public class SandboxService implements DirectDebitPaymentProvider {
     private final PayerService payerService;
     private final MandateConfirmService mandateConfirmService;
     private final TransactionService transactionService;
+    private final MandateService mandateService;
     private final BankAccountDetailsValidator bankAccountDetailsValidator = new BankAccountDetailsValidator();
     
     @Inject
     public SandboxService(PayerService payerService,
-            MandateConfirmService mandateConfirmService,
-            TransactionService transactionService) {
+                          MandateConfirmService mandateConfirmService,
+                          TransactionService transactionService, MandateService mandateService) {
         this.payerService = payerService;
         this.mandateConfirmService = mandateConfirmService;
         this.transactionService = transactionService;
+        this.mandateService = mandateService;
     }
 
     @Override
@@ -51,6 +55,20 @@ public class SandboxService implements DirectDebitPaymentProvider {
             Transaction transaction = confirmationDetails.getTransaction();
             transactionService.paymentSubmittedToProviderFor(transaction, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
         }
+    }
+
+    @Override
+    public Transaction collect(GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequest) {
+        String mandateExternalId = collectPaymentRequest.get("agreement_id");
+        LOGGER.info("Collecting payment for SANDBOX, mandate with id: {}", mandateExternalId);
+        Mandate mandate = mandateService.findByExternalId(mandateExternalId);
+        Transaction transaction = transactionService.createTransaction(
+                collectPaymentRequest,
+                mandate,
+                gatewayAccount.getExternalId());
+        transactionService.paymentSubmittedToProviderFor(transaction, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
+        LOGGER.info("Submitted payment collection for SANDBOX, for mandate with id: {}", mandateExternalId);
+        return transaction;
     }
 
     @Override

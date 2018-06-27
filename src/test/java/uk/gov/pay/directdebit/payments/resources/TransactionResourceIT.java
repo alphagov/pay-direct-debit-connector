@@ -5,9 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,9 +15,14 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -47,6 +49,7 @@ public class TransactionResourceIT {
     private static final String JSON_DESCRIPTION_KEY = "description";
     private static final String JSON_GATEWAY_ACC_KEY = "gateway_account_id";
     private static final String JSON_RETURN_URL_KEY = "return_url";
+    private static final String JSON_AGREEMENT_ID_KEY = "agreement_id";
     private static final String JSON_CHARGE_KEY = "charge_id";
     private static final String JSON_STATE_KEY = "state.status";
     private static final long AMOUNT = 6234L;
@@ -106,6 +109,47 @@ public class TransactionResourceIT {
         assertThat(createdMandate.get("payer"), is(nullValue()));
     }
 
+    @Test
+    public void shouldCollectAPayment() throws Exception {
+        PayerFixture payerFixture = PayerFixture.aPayerFixture();
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .withPayerFixture(payerFixture)
+                .insert(testContext.getJdbi());
+        String accountExternalId = testGatewayAccount.getExternalId();
+        String expectedReference = "Test reference";
+        String expectedDescription = "Test description";
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put(JSON_AMOUNT_KEY, AMOUNT)
+                .put(JSON_REFERENCE_KEY, expectedReference)
+                .put(JSON_DESCRIPTION_KEY, expectedDescription)
+                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
+                .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId())
+                .build());
+
+        String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
+                .replace("{accountId}", accountExternalId);
+
+        ValidatableResponse response = givenSetup()
+                .body(postBody)
+                .post(requestPath)
+                .then()
+                .statusCode(Response.Status.CREATED.getStatusCode())
+                .body(JSON_CHARGE_KEY, is(notNullValue()))
+                .body(JSON_AMOUNT_KEY, isNumber(AMOUNT))
+                .body(JSON_REFERENCE_KEY, is(expectedReference))
+                .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
+                .contentType(JSON);
+
+        String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
+
+        Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getTransactionByExternalId(externalTransactionId);
+        assertThat(createdTransaction.get("external_id"), is(notNullValue()));
+        assertThat(createdTransaction.get("reference"), is(expectedReference));
+        assertThat(createdTransaction.get("description"), is(expectedDescription));
+        assertThat(createdTransaction.get("amount"), is(AMOUNT));
+    }
+    
     @Test
     public void shouldRetrieveATransaction_fromPublicApiEndpoint() {
 

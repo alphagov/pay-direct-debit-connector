@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.payments.api;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,9 +9,12 @@ import uk.gov.pay.directdebit.common.exception.validation.InvalidFieldsException
 import uk.gov.pay.directdebit.common.exception.validation.InvalidSizeFieldsException;
 import uk.gov.pay.directdebit.common.exception.validation.MissingMandatoryFieldsException;
 
+import java.util.Map;
+
 public class TransactionRequestValidatorTest {
 
     private TransactionRequestValidator transactionRequestValidator = new TransactionRequestValidator();
+    
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -68,4 +70,19 @@ public class TransactionRequestValidatorTest {
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
         transactionRequestValidator.validate(request);
     }
+
+    @Test
+    public void shouldThrowInvalidFieldsExceptionIfAmountFieldIsNonNumeric() {
+        Map<String, String> request = ImmutableMap.of(
+                "amount", "eqweqw",
+                "description", "bla",
+                "return_url", "bla",
+                "reference", "blabla"
+        );
+        thrown.expect(InvalidFieldsException.class);
+        thrown.expectMessage("Field(s) are invalid: [amount]");
+        thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
+        transactionRequestValidator.validate(request);
+    }
+    
 }
