@@ -72,7 +72,7 @@ public class SandboxServiceTest {
                 .thenReturn(confirmationDetails);
 
         service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
-        verify(mockedTransactionService).paymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
+        verify(mockedTransactionService).oneOffPaymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class SandboxServiceTest {
         when(mockedTransactionService.createTransaction(details, mandateFixture.toEntity(), gatewayAccountFixture.getExternalId()))
                 .thenReturn(transactionFixture.toEntity());
         service.collect(gatewayAccountFixture.toEntity(), details);
-        verify(mockedTransactionService).paymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
+        verify(mockedTransactionService).onDemandPaymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
     }
     
     @Test

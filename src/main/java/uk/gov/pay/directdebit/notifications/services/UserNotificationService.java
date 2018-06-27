@@ -1,15 +1,16 @@
 package uk.gov.pay.directdebit.notifications.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import javax.inject.Inject;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class UserNotificationService {
 
@@ -50,8 +51,8 @@ public class UserNotificationService {
         );
     }
 
-    public void sendPaymentConfirmedEmailFor(Transaction transaction, LocalDate earliestChargeDate) {
-        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_CONFIRMED, transaction.getMandate(),
+    public void sendPaymentConfirmedEmailFor(EmailTemplate template, Transaction transaction, LocalDate earliestChargeDate) {
+        adminUsersClient.sendEmail(template, transaction.getMandate(),
                 ImmutableMap.<String, String>builder()
                         .put(AMOUNT_KEY, formatToPounds(transaction.getAmount()))
                         .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate))

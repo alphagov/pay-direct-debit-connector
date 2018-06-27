@@ -53,7 +53,7 @@ public class SandboxService implements DirectDebitPaymentProvider {
         Mandate mandate = confirmationDetails.getMandate();
         if (mandate.getType().equals(MandateType.ONE_OFF)) {
             Transaction transaction = confirmationDetails.getTransaction();
-            transactionService.paymentSubmittedToProviderFor(transaction, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
+            transactionService.oneOffPaymentSubmittedToProviderFor(transaction, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
         }
     }
 
@@ -66,7 +66,7 @@ public class SandboxService implements DirectDebitPaymentProvider {
                 collectPaymentRequest,
                 mandate,
                 gatewayAccount.getExternalId());
-        transactionService.paymentSubmittedToProviderFor(transaction, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
+        transactionService.onDemandPaymentSubmittedToProviderFor(transaction, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
         LOGGER.info("Submitted payment collection for SANDBOX, for mandate with id: {}", mandateExternalId);
         return transaction;
     }

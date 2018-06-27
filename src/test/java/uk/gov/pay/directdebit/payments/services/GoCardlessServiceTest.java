@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,6 +37,9 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
@@ -183,7 +184,7 @@ public class GoCardlessServiceTest {
         orderedCalls.verify(mockedGoCardlessClientFacade).createMandate(mandateFixture.toEntity(), goCardlessCustomer);
         orderedCalls.verify(mockedGoCardlessClientFacade).createPayment(transaction, goCardlessMandate);
 
-        verify(mockedTransactionService).paymentSubmittedToProviderFor(transaction, goCardlessPayment.getChargeDate());
+        verify(mockedTransactionService).oneOffPaymentSubmittedToProviderFor(transaction, goCardlessPayment.getChargeDate());
     }
     
     @Test

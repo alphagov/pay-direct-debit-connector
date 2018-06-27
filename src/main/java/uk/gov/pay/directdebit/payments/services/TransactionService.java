@@ -37,6 +37,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
+import static uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED;
+import static uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
@@ -156,9 +158,15 @@ public class TransactionService {
         return directDebitEventService.registerPaymentExpiredEventFor(updateTransaction);
     }
 
-    public DirectDebitEvent paymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {
+    public DirectDebitEvent oneOffPaymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {
         updateStateFor(transaction, PAYMENT_SUBMITTED_TO_PROVIDER);
-        userNotificationService.sendPaymentConfirmedEmailFor(transaction, earliestChargeDate);
+        userNotificationService.sendPaymentConfirmedEmailFor(ONE_OFF_PAYMENT_CONFIRMED, transaction, earliestChargeDate);
+        return directDebitEventService.registerPaymentSubmittedToProviderEventFor(transaction);
+    }
+
+    public DirectDebitEvent onDemandPaymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {
+        updateStateFor(transaction, PAYMENT_SUBMITTED_TO_PROVIDER);
+        userNotificationService.sendPaymentConfirmedEmailFor(ON_DEMAND_PAYMENT_CONFIRMED, transaction, earliestChargeDate);
         return directDebitEventService.registerPaymentSubmittedToProviderEventFor(transaction);
     }
 

@@ -169,14 +169,29 @@ public class TransactionServiceTest {
         assertThat(transactionResponse.getReference(), is(transactionFixture.getReference()));
         assertThat(transactionResponse.getReturnUrl(), is(transactionFixture.getMandateFixture().getReturnUrl()));
     }
+
     @Test
-    public void paymentSubmittedToProvider_shouldUpdateTransactionAsPending_andRegisterAPaymentSubmittedEvent() {
+    public void oneOffPaymentSubmittedToProvider_shouldUpdateTransactionAsPending_andRegisterAPaymentSubmittedEvent() {
         Transaction transaction = TransactionFixture
                 .aTransactionFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(NEW)
                 .toEntity();
-        service.paymentSubmittedToProviderFor(transaction, LocalDate.now());
+        service.oneOffPaymentSubmittedToProviderFor(transaction, LocalDate.now());
+
+        verify(mockedTransactionDao).updateState(transaction.getId(), PaymentState.PENDING);
+        verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(transaction);
+        assertThat(transaction.getState(), is(PENDING));
+    }
+
+    @Test
+    public void onDemandPaymentSubmittedToProvider_shouldUpdateTransactionAsPending_andRegisterAPaymentSubmittedEvent() {
+        Transaction transaction = TransactionFixture
+                .aTransactionFixture()
+                .withMandateFixture(mandateFixture)
+                .withState(NEW)
+                .toEntity();
+        service.onDemandPaymentSubmittedToProviderFor(transaction, LocalDate.now());
 
         verify(mockedTransactionDao).updateState(transaction.getId(), PaymentState.PENDING);
         verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(transaction);

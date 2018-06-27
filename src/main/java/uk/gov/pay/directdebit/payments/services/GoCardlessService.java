@@ -91,7 +91,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         if (mandate.getType().equals(MandateType.ONE_OFF)) {
             Transaction transaction = confirmationDetails.getTransaction();
             GoCardlessPayment payment = createPayment(transaction, goCardlessMandate);
-            transactionService.paymentSubmittedToProviderFor(transaction, payment.getChargeDate());
+            transactionService.oneOffPaymentSubmittedToProviderFor(transaction, payment.getChargeDate());
         }
     }
 
