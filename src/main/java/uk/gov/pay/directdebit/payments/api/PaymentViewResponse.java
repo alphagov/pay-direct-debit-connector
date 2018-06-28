@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.payments.api;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.pay.directdebit.payments.model.ViewPaginationBuilder;
@@ -11,7 +12,7 @@ import java.util.List;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class PaymentViewResponse {
 
-    @JsonProperty("gateway_account_external_id")
+    @JsonIgnore
     private String gatewayExternalId;
     @JsonProperty("total")
     private Long total;

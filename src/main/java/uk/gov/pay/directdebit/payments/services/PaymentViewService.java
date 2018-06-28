@@ -57,8 +57,6 @@ public class PaymentViewService {
     
     public PaymentViewService withUriInfo(UriInfo uriInfo) {
         this.uriInfo = uriInfo;
-        this.uriBuilder = UriBuilder.fromUri(uriInfo.getBaseUri());
-        
         return this;
     }
 
@@ -86,9 +84,11 @@ public class PaymentViewService {
     }
     
     private PaymentViewListResponse decorateWithSelfLink(PaymentViewListResponse listResponse, String gatewayAccountId) {
-        String href = uriBuilder
-                        .path("/v1/api/accounts/{accountId}/charges/{transactionExternalId}")
-                        .build(gatewayAccountId, listResponse.getTransactionId()).toString();
+        if (this.uriBuilder == null) {
+            this.uriBuilder = UriBuilder.fromUri(uriInfo.getBaseUri())
+            .path("/v1/api/accounts/{accountId}/charges/{transactionExternalId}");
+        }
+        String href = uriBuilder.build(gatewayAccountId, listResponse.getTransactionId()).toString();
         
         Link link = Link.ofValue(href, "GET", "self");
         return listResponse.withLink(link);
