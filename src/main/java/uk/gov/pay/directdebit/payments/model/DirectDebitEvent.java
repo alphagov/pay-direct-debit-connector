@@ -1,6 +1,12 @@
 package uk.gov.pay.directdebit.payments.model;
 
 import java.time.ZonedDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Data;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.exception.UnsupportedDirectDebitEventException;
@@ -29,14 +35,29 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.MANDATE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.PAYER;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@Data
 public class DirectDebitEvent {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(DirectDebitEvent.class);
 
+    @JsonProperty("id")
     private Long id;
+    
+    @JsonProperty("mandate_id")
     private Long mandateId;
+
+    @JsonProperty("transaction_id")
     private Long transactionId;
+
+    @JsonProperty("event_type")
     private Type eventType;
+
+    @JsonProperty
     private SupportedEvent event;
+
+    @JsonProperty("event_date")
+    @JsonSerialize(using = CustomDateSerializer.class)
     private ZonedDateTime eventDate;
 
     public DirectDebitEvent(Long id, Long mandateId, Long transactionId, Type eventType, SupportedEvent event, ZonedDateTime eventDate) {
@@ -136,55 +157,7 @@ public class DirectDebitEvent {
     public static DirectDebitEvent paymentExpired(Long mandateId, Long transactionId) {
         return new DirectDebitEvent(mandateId, transactionId, CHARGE, PAYMENT_EXPIRED_BY_SYSTEM);
     }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getMandateId() {
-        return mandateId;
-    }
-
-    public void setMandateId(Long mandateId) {
-        this.mandateId = mandateId;
-    }
-
-    public Long getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public Type getEventType() {
-        return eventType;
-    }
-
-    public void setEventType(Type eventType) {
-        this.eventType = eventType;
-    }
-
-    public SupportedEvent getEvent() {
-        return event;
-    }
-
-    public void setEvent(SupportedEvent event) {
-        this.event = event;
-    }
-
-    public ZonedDateTime getEventDate() {
-        return eventDate;
-    }
-
-    public void setEventDate(ZonedDateTime eventDate) {
-        this.eventDate = eventDate;
-    }
-
+    
     public enum Type {
         PAYER, CHARGE, MANDATE
     }
