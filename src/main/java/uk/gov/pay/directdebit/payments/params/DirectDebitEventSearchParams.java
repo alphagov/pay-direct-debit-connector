@@ -17,19 +17,30 @@ public class DirectDebitEventSearchParams {
     @Getter private Integer page;
 
     public static class DirectDebitEventSearchParamsBuilder {
+        
+        private Integer pageSize = 500;
+        
         public DirectDebitEventSearchParamsBuilder beforeDate(String date) {
             if (date != null) {
                 this.beforeDate = parseDate(date, "beforeDate");    
             }
             return this;
         }
-
+        
         public DirectDebitEventSearchParamsBuilder afterDate(String date) {
             if (date != null) {
                 this.afterDate = parseDate(date, "afterDate");    
             }
             return this;
         }
+
+        public DirectDebitEventSearchParamsBuilder pageSize(Integer pageSize) {
+            if (pageSize != null && pageSize < 500) {
+                this.pageSize = pageSize;
+            }
+            return this;
+        }
+
 
         private ZonedDateTime parseDate(String date, String fieldName) {
             ZonedDateTime dateTime;

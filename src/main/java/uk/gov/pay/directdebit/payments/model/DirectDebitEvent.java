@@ -41,7 +41,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.PAYER;
 public class DirectDebitEvent {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(DirectDebitEvent.class);
 
-    @JsonProperty
+    @JsonProperty("id")
     private Long id;
     
     @JsonProperty("mandate_id")

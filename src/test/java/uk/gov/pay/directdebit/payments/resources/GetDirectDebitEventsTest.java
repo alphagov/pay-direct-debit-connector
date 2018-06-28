@@ -251,14 +251,11 @@ public class GetDirectDebitEventsTest {
     }
     
     @Test
-    public void shouldReturnBadRequestIfPageIsSetAndPageSizeIsNotSet() {
-        
-    }
-    
-    @Test
     public void shouldReturnThirdEventWherePageSizeIsTwoAndPageIsTwo() {
+        
         for (int i = 1; i < 4; i++) {
             aDirectDebitEventFixture()
+                    .withId(Long.valueOf(i))
                     .withMandateId(testMandate.getId())
                     .withTransactionId(testTransaction.getId())
                     .withEventType(MANDATE)
@@ -267,7 +264,7 @@ public class GetDirectDebitEventsTest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = format("/v1/events?transaction_id=%s&page_size=2&page=2", testTransaction.getId());
+        String requestPath = format("/v1/events?page_size=2&page=2");
 
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -275,11 +272,31 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(1));
+                .body("$", hasSize(1))
+                .body("[0].id", is(1) );
     }
     
     @Test
     public void shouldReturnFiveHundredEventsWhenPageSizeIsFiveHundredAndOne() {
-        
+        for (int i = 1; i < 503; i++) {
+            aDirectDebitEventFixture()
+                    .withId(Long.valueOf(i))
+                    .withMandateId(testMandate.getId())
+                    .withTransactionId(testTransaction.getId())
+                    .withEventType(MANDATE)
+                    .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
+                    .withEventDate(ZonedDateTime.now())
+                    .insert(testContext.getJdbi());
+        }
+
+        String requestPath = format("/v1/events?page_size=501");
+
+        given().port(testContext.getPort())
+                .contentType(JSON)
+                .get(requestPath)
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("$", hasSize(500));
     }
 }
