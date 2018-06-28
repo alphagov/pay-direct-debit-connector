@@ -116,7 +116,7 @@ public class CollectPaymentResponse {
 
     @Override
     public String toString() {
-        return "TransactionResponse{" +
+        return "CollectPaymentResponse{" +
                 "dataLinks=" + dataLinks +
                 ", transactionExternalId='" + transactionExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +
