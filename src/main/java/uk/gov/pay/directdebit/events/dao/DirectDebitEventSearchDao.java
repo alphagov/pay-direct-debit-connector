@@ -20,6 +20,7 @@ import static java.util.Objects.nonNull;
 public class DirectDebitEventSearchDao {
 
     private static final String QUERY = "SELECT * from EVENTS e :searchFields ORDER BY e.id DESC LIMIT :limit OFFSET :offset";
+    private static final String COUNT_QUERY = "SELECT count(*) from EVENTS e :searchFields";
     
     private final Jdbi jdbi;
 
@@ -63,6 +64,17 @@ public class DirectDebitEventSearchDao {
         }
         String queryString = searchStrings.isEmpty() ? "" : "WHERE " + searchStrings.stream().collect(Collectors.joining(" AND "));
         return new QueryStringAndQueryMap(queryString, queryMap);
+    }
+
+    public int getTotalNumberOfEvents(DirectDebitEventSearchParams searchParams) {
+        QueryStringAndQueryMap queryStringAndQueryMap = generateQuery(searchParams);
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(COUNT_QUERY.replace(":searchFields", queryStringAndQueryMap.queryString));
+            queryStringAndQueryMap.queryMap.forEach(query::bind);
+            return query
+                    .mapTo(Integer.class)
+                    .findOnly();
+        });
     }
 
     @AllArgsConstructor

@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.resources;
 
+import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,7 +64,8 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(1));
+                .body("count", is(1))
+                .body("results", hasSize(1));
     }
     
     @Test
@@ -107,12 +109,13 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(1))
-                .body("[0].mandate_id", is(Math.toIntExact(testMandate.getId())))
-                .body("[0].transaction_id", is(Math.toIntExact(testTransaction.getId())))
-                .body("[0].event_type", is(MANDATE.toString()))
-                .body("[0].event", is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER.toString()))
-                .body("[0].event_date", is(directDebitEventFixture.getEventDate().format(DateTimeFormatter.ISO_INSTANT).toString()))
+                .body("results", hasSize(1))
+                .body("count", is(1))
+                .body("results[0].mandate_id", is(Math.toIntExact(testMandate.getId())))
+                .body("results[0].transaction_id", is(Math.toIntExact(testTransaction.getId())))
+                .body("results[0].event_type", is(MANDATE.toString()))
+                .body("results[0].event", is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER.toString()))
+                .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(DateTimeFormatter.ISO_INSTANT).toString()))
         ;
     }
 
@@ -138,7 +141,8 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(0));
+                .body("count", is(0))
+                .body("results", hasSize(0));
     }
 
     @Test
@@ -160,7 +164,8 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(1));
+                .body("count", is(1))
+                .body("results", hasSize(1));
     }
 
     @Test
@@ -182,7 +187,8 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(1));
+                .body("count", is(1))
+                .body("results", hasSize(1));
     }
 
     @Test
@@ -203,7 +209,8 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(1));
+                .body("count", is(1))
+                .body("results", hasSize(1));
     }
 
     @Test
@@ -224,7 +231,8 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(1));
+                .body("count", is(1))
+                .body("results", hasSize(1));
     }
     
     @Test
@@ -247,7 +255,10 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(2));
+                .body("page", Is.is(1))
+                .body("total", Is.is(4))
+                .body("count", Is.is(2))
+                .body("results", hasSize(2));
     }
     
     @Test
@@ -272,8 +283,10 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(1))
-                .body("[0].id", is(1) );
+                .body("count", is(1))
+                .body("total", is(3))
+                .body("results", hasSize(1))
+                .body("results[0].id", is(1) );
     }
     
     @Test
@@ -297,6 +310,6 @@ public class GetDirectDebitEventsTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("$", hasSize(500));
+                .body("results", hasSize(500));
     }
 }

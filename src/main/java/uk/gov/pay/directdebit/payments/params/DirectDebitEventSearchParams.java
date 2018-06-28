@@ -19,6 +19,7 @@ public class DirectDebitEventSearchParams {
     public static class DirectDebitEventSearchParamsBuilder {
         
         private Integer pageSize = 500;
+        private Integer page = 1;
         
         public DirectDebitEventSearchParamsBuilder beforeDate(String date) {
             if (date != null) {
@@ -30,6 +31,13 @@ public class DirectDebitEventSearchParams {
         public DirectDebitEventSearchParamsBuilder afterDate(String date) {
             if (date != null) {
                 this.afterDate = parseDate(date, "afterDate");    
+            }
+            return this;
+        }
+        
+        public DirectDebitEventSearchParamsBuilder page(Integer page) {
+            if (page != null) {
+                this.page = page;
             }
             return this;
         }

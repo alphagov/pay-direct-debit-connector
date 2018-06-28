@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.events.resources;
 
+import uk.gov.pay.directdebit.events.api.DirectDebitEventsResponse;
 import uk.gov.pay.directdebit.events.service.DirectDebitEventsSearchService;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
@@ -42,9 +43,9 @@ public class DirectDebitEventsResource {
                 .pageSize(pageSize)
                 .page(page)
                 .build();
+
+        DirectDebitEventsResponse response = directDebitEventsSearchService.search(searchParams);
         
-        List<DirectDebitEvent> events = directDebitEventsSearchService.search(searchParams);
-        
-        return Response.ok(events).build();
+        return Response.ok(response).build();
     }
 }

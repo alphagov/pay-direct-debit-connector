@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.events.service;
 
+import uk.gov.pay.directdebit.events.api.DirectDebitEventsResponse;
 import uk.gov.pay.directdebit.events.dao.DirectDebitEventSearchDao;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
@@ -16,7 +17,9 @@ public class DirectDebitEventsSearchService {
         this.dao = dao;
     }
 
-    public List<DirectDebitEvent> search(DirectDebitEventSearchParams searchParams) {
-        return dao.findEvents(searchParams);
+    public DirectDebitEventsResponse search(DirectDebitEventSearchParams searchParams) {
+        List<DirectDebitEvent> events = dao.findEvents(searchParams);
+        int total = dao.getTotalNumberOfEvents(searchParams);
+        return new DirectDebitEventsResponse(events, searchParams.getPage(), total);
     }
 }
