@@ -21,11 +21,11 @@ public class PaymentViewResponse {
     @JsonProperty("page")
     private Long page;
     @JsonProperty("results")
-    private List<PaymentViewListResponse> paymentViewResponses;
+    private List<PaymentViewResultResponse> paymentViewResponses;
     @JsonProperty("_links")
     private ViewPaginationBuilder paginationBuilder;
 
-    public PaymentViewResponse(String gatewayExternalId, Long total, Long page, List<PaymentViewListResponse> paymentViewResponses) {
+    public PaymentViewResponse(String gatewayExternalId, Long total, Long page, List<PaymentViewResultResponse> paymentViewResponses) {
         this.gatewayExternalId = gatewayExternalId;
         this.total = total;
         this.count = (long)paymentViewResponses.size();
@@ -33,7 +33,7 @@ public class PaymentViewResponse {
         this.paymentViewResponses = paymentViewResponses;
     }
 
-    public List<PaymentViewListResponse> getPaymentViewResponses() {
+    public List<PaymentViewResultResponse> getPaymentViewResponses() {
         return paymentViewResponses;
     }
 

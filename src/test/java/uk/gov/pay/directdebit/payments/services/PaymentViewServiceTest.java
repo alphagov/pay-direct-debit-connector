@@ -14,7 +14,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.api.PaymentViewListResponse;
+import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -94,9 +94,9 @@ public class PaymentViewServiceTest {
             .withDisplaySize(100L)
             .withFromDateString(createdDate.toString())
             .withToDateString(createdDate.toString());    
-        List<PaymentViewListResponse> listResponses = new ArrayList<>();
+        List<PaymentViewResultResponse> listResponses = new ArrayList<>();
         for (PaymentView paymentView : paymentViewList){
-            listResponses.add(new PaymentViewListResponse(paymentView.getTransactionExternalId(),
+            listResponses.add(new PaymentViewResultResponse(paymentView.getTransactionExternalId(),
                     paymentView.getAmount(), paymentView.getReference(), paymentView.getDescription(),
                     paymentView.getCreatedDate().toString(), paymentView.getName(), paymentView.getEmail(), paymentView.getState().toExternal()));
         }
