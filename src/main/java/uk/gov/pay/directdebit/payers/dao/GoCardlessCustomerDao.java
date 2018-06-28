@@ -14,6 +14,9 @@ public interface GoCardlessCustomerDao {
     @GetGeneratedKeys
     Long insert(@BindBean GoCardlessCustomer goCardlessCustomer);
 
-    @SqlUpdate("UPDATE gocardless_customers g SET customer_bank_account_id = :customerBankAccountId WHERE g.id = :id")
-    int updateBankAccountId(@Bind("id") Long id, @Bind("customerBankAccountId") String accountId);
+    @SqlUpdate("UPDATE gocardless_customers g " +
+            "SET customer_bank_account_id = :customerBankAccountId, " +
+            "customer_id = :customerId " +
+            "WHERE g.id = :id")
+    int update(@BindBean GoCardlessCustomer goCardlessCustomer);
 }

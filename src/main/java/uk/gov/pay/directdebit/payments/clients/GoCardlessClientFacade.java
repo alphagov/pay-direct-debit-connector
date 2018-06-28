@@ -26,19 +26,16 @@ public class GoCardlessClientFacade {
         this.goCardlessClientWrapper = goCardlessClientWrapper;
     }
 
-    public GoCardlessCustomer createCustomer(String mandateExternalId, Payer payer) {
+    public String createCustomer(String mandateExternalId, Payer payer) {
         Customer customer = goCardlessClientWrapper.createCustomer(mandateExternalId, payer);
-        return new GoCardlessCustomer(
-                payer.getId(),
-                customer.getId());
+        return customer.getId();
     }
 
-    public GoCardlessCustomer createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer customer,
+    public String createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer customer,
                                                         String accountHolderName, String sortCode, String accountNumber) {
         CustomerBankAccount gcCustomerBankAccount = goCardlessClientWrapper.createCustomerBankAccount(mandateExternalId, customer,
                 accountHolderName, sortCode, accountNumber);
-        customer.setCustomerBankAccountId(gcCustomerBankAccount.getId());
-        return customer;
+        return gcCustomerBankAccount.getId();
     }
 
     public GoCardlessMandate createMandate(Mandate mandate, GoCardlessCustomer customer) {

@@ -88,6 +88,10 @@ public class Mandate {
     public MandateType getType() {
         return type;
     }
+    
+    public Boolean isOneOff() {
+        return type == MandateType.ONE_OFF;
+    }
 
     @Override
     public boolean equals(Object o) {

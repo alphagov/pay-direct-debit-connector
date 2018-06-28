@@ -7,10 +7,10 @@ import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.services.MandateConfirmService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
@@ -33,7 +33,9 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 import java.util.Map;
+import java.util.Optional;
 
 public class GoCardlessService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessService.class);
@@ -78,20 +80,114 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     @Override
     public void confirm(String mandateExternalId, GatewayAccount gatewayAccount, Map<String, String> confirmDetailsRequest) {
-        ConfirmationDetails confirmationDetails = mandateConfirmService
-                .confirm(mandateExternalId, confirmDetailsRequest);
+        ConfirmationDetails confirmationDetails = initialiseConfirmationDetails(mandateExternalId, gatewayAccount, confirmDetailsRequest);
+
+        //mandateConfirmService.checkConfirmable(mandate);
+        
+        GoCardlessConfirmationDetails gcConfirmationDetails = initialiseGoCardlessConfirmationDetails(confirmationDetails);
+        
+        insertPlaceHolders(gcConfirmationDetails);
+        sendToGoCardless(confirmationDetails, gcConfirmationDetails);
+        completeConfirmation(gcConfirmationDetails);
+    }
+    
+    private ConfirmationDetails initialiseConfirmationDetails(
+            String mandateExternalId, 
+            GatewayAccount gatewayAccount,
+            Map<String, 
+            String> confirmDetailsRequest
+    ) {
+        String sortCode = confirmDetailsRequest.get("sort_code");
+        String accountNumber = confirmDetailsRequest.get("account_number");
+        
+        Mandate mandate = mandateDao.findByExternalId(mandateExternalId)
+                .orElseThrow(NotFoundException::new);
+        
+        Transaction transaction = Optional
+                .ofNullable(confirmDetailsRequest.get("transaction_external_id"))
+                .map(transactionExternalId -> transactionService
+                        .findTransactionForExternalIdAndGatewayAccountExternalId(
+                                transactionExternalId, 
+                                gatewayAccount.getExternalId()
+                        ))
+                .orElse(null);
+        
+        return new ConfirmationDetails(mandate, transaction, accountNumber, sortCode);
+    }
+    
+    private GoCardlessConfirmationDetails initialiseGoCardlessConfirmationDetails(ConfirmationDetails confirmationDetails) {
         Mandate mandate = confirmationDetails.getMandate();
-
-        LOGGER.info("Confirming direct debit details, mandate with id: {}", mandateExternalId);
-        GoCardlessCustomer customer = createCustomer(mandateExternalId, mandate.getPayer());
-        createCustomerBankAccount(mandateExternalId, customer, mandate.getPayer(), confirmationDetails.getSortCode(), confirmationDetails.getAccountNumber());
-        GoCardlessMandate goCardlessMandate = createMandate(mandate, customer);
-
-        if (mandate.getType().equals(MandateType.ONE_OFF)) {
-            Transaction transaction = confirmationDetails.getTransaction();
-             GoCardlessPayment payment = createPayment(transaction, goCardlessMandate);
-             transactionService.paymentSubmittedToProviderFor(transaction, payment.getChargeDate());
+        Transaction transaction = confirmationDetails.getTransaction();
+        
+        GoCardlessMandate goCardlessMandate = new GoCardlessMandate(mandate.getId());
+        GoCardlessCustomer gcCustomer = new GoCardlessCustomer(mandate.getPayer().getId());
+        
+        if (mandate.isOneOff()) {
+            return new GoCardlessConfirmationDetails(
+                    goCardlessMandate,
+                    gcCustomer,
+                    new GoCardlessPayment(transaction.getId())
+            );
+        } else {
+            return new GoCardlessConfirmationDetails(
+                    goCardlessMandate,
+                    gcCustomer
+            );
         }
+    }
+    
+    @org.jdbi.v3.sqlobject.transaction.Transaction
+    private void insertPlaceHolders(GoCardlessConfirmationDetails confirmationDetails) {
+        Long goCardlessCustomerPrimaryKey = goCardlessCustomerDao.insert(confirmationDetails.getCustomer());
+        confirmationDetails.getCustomer().setId(goCardlessCustomerPrimaryKey);
+        
+        Long goCardlessMandatePrimaryKey = goCardlessMandateDao.insert(confirmationDetails.getMandate());
+        confirmationDetails.getMandate().setId(goCardlessMandatePrimaryKey);
+        
+        if (confirmationDetails.getPayment() != null) {
+            Long goCardlessPaymentPrimaryKey = goCardlessPaymentDao.insert(confirmationDetails.getPayment());
+            confirmationDetails.getPayment().setId(goCardlessPaymentPrimaryKey);
+        }
+    }
+    
+    private void sendToGoCardless(ConfirmationDetails confirmationDetails, GoCardlessConfirmationDetails goCardlessConfirmationDetails) {
+        LOGGER.info("Confirming direct debit details, mandate with id: {}", confirmationDetails.getMandate().getExternalId());
+        
+        Mandate mandate = confirmationDetails.getMandate();
+        Payer payer = mandate.getPayer();
+        String goCardlessCustomerId = sendCustomer(
+                mandate.getExternalId(),
+                payer);
+        goCardlessConfirmationDetails.getCustomer().setCustomerId(goCardlessCustomerId);
+        
+        String goCardlessCustimerBankAccountId = createCustomerBankAccount(
+                mandate.getExternalId(),
+                goCardlessConfirmationDetails.getCustomer(),
+                payer,
+                payer.getSortCode(),
+                payer.getAccountNumber()
+        );
+        goCardlessConfirmationDetails.getCustomer().setCustomerBankAccountId(goCardlessCustimerBankAccountId);
+
+
+        String goCardlessMandateId = createMandate(mandate, goCardlessConfirmationDetails.getCustomer());
+        goCardlessConfirmationDetails.getMandate().setGoCardlessMandateId(goCardlessMandateId);
+
+        if (confirmationDetails.getMandate().isOneOff()) {
+            Transaction transaction = confirmationDetails.getTransaction();
+            String goCardlessPaymentId = createPayment(transaction, goCardlessConfirmationDetails.getMandate());
+            goCardlessConfirmationDetails.getPayment().setPaymentId(goCardlessPaymentId);
+        }
+    }
+
+    @org.jdbi.v3.sqlobject.transaction.Transaction
+    private void completeConfirmation(GoCardlessConfirmationDetails confirmationDetails) {
+        //goCardlessPaymentDao.update(confirmationDetails.getPayment());
+        goCardlessMandateDao.update(confirmationDetails.getMandate());
+        goCardlessCustomerDao.update(confirmationDetails.getCustomer());
+        
+        //@TODO write events and update state
+
     }
 
     @Override
@@ -108,27 +204,25 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     }
 
     
-    private GoCardlessCustomer createCustomer(String mandateExternalId, Payer payer) {
+    private String sendCustomer(String mandateExternalId, Payer payer) {
         try {
             LOGGER.info("Attempting to call gocardless to create a customer, mandate id: {}", mandateExternalId);
 
-            GoCardlessCustomer customer = goCardlessClientFacade.createCustomer(mandateExternalId, payer);
+            String goCardlessCustomerId = goCardlessClientFacade.createCustomer(mandateExternalId, payer);
             LOGGER.info("Created customer in gocardless, mandate id: {}", mandateExternalId);
 
-            Long id = goCardlessCustomerDao.insert(customer);
-            customer.setId(id);
-            return customer;
+            return goCardlessCustomerId;
         } catch (Exception exc) {
             logException(exc, "customer", mandateExternalId);
             throw new CreateCustomerFailedException(mandateExternalId, payer.getExternalId());
         }
     }
 
-    private void createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer, String sortCode, String accountNumber) {
+    private String createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer, String sortCode, String accountNumber) {
         try {
             LOGGER.info("Attempting to call gocardless to create a customer bank account, mandate id: {}", mandateExternalId);
 
-            GoCardlessCustomer customerWithBankAccount = goCardlessClientFacade.createCustomerBankAccount(
+            String customerBankAccountId = goCardlessClientFacade.createCustomerBankAccount(
                     mandateExternalId,
                     goCardlessCustomer,
                     payer.getName(),
@@ -137,14 +231,14 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
             LOGGER.info("Created customer bank account in gocardless, mandate id: {}", mandateExternalId);
 
-            goCardlessCustomerDao.updateBankAccountId(customerWithBankAccount.getId(), customerWithBankAccount.getCustomerBankAccountId());
+            return customerBankAccountId;
         } catch (Exception exc) {
             logException(exc, "bank account", mandateExternalId);
             throw new CreateCustomerBankAccountFailedException(mandateExternalId, payer.getExternalId());
         }
     }
 
-    private GoCardlessMandate createMandate(Mandate mandate, GoCardlessCustomer goCardlessCustomer) {
+    private String createMandate(Mandate mandate, GoCardlessCustomer goCardlessCustomer) {
         try {
 
             LOGGER.info("Attempting to call gocardless to create a mandate, pay mandate id: {}", mandate.getExternalId());
@@ -154,17 +248,14 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
                     mandate.getExternalId(),
                     goCardlessMandate.getGoCardlessMandateId());
 
-            Long id = goCardlessMandateDao.insert(goCardlessMandate);
-            goCardlessMandate.setId(id);
-            mandateDao.updateMandateReference(mandate.getId(), goCardlessMandate.getGoCardlessReference());
-            return goCardlessMandate;
+            return goCardlessMandate.getGoCardlessMandateId();
         } catch (Exception exc) {
             logException(exc, "mandate", mandate.getExternalId());
             throw new CreateMandateFailedException(mandate.getExternalId());
         }
     }
 
-    private GoCardlessPayment createPayment(Transaction transaction, GoCardlessMandate goCardlessMandate) {
+    private String createPayment(Transaction transaction, GoCardlessMandate goCardlessMandate) {
         try {
             LOGGER.info("Attempting to call gocardless to create a payment, mandate id: {}, transaction id: {}", 
                     transaction.getMandate().getExternalId(), 
@@ -177,9 +268,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
                     transaction.getExternalId(), 
                     goCardlessPayment.getPaymentId());
             
-            Long id = goCardlessPaymentDao.insert(goCardlessPayment);
-            goCardlessPayment.setId(id);
-            return goCardlessPayment;
+            return goCardlessPayment.getPaymentId();
         } catch (Exception exc) {
             logException(exc, "payment", transaction.getExternalId());
             throw new CreatePaymentFailedException(transaction.getMandate().getExternalId(), transaction.getExternalId());

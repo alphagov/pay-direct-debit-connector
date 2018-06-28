@@ -108,8 +108,8 @@ public class GoCardlessServiceTest {
                 mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao, mockedGoCardlessEventDao,
                 mockedMandateDao, mockedBankAccountDetailsParser);
         goCardlessCustomer = new GoCardlessCustomer(null, payerFixture.getId(), CUSTOMER_ID, BANK_ACCOUNT_ID);
-        when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity())).thenReturn(goCardlessCustomer);
-        when(mockedGoCardlessClientFacade.createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE,  ACCOUNT_NUMBER)).thenReturn(goCardlessCustomer);
+        when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity())).thenReturn("id");
+        when(mockedGoCardlessClientFacade.createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE,  ACCOUNT_NUMBER)).thenReturn("id");
         when(mockedMandateConfirmService.confirm(MANDATE_ID, confirmDetails)).thenReturn(confirmationDetails);
     }
 

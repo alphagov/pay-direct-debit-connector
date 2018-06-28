@@ -20,4 +20,7 @@ public interface GoCardlessPaymentDao {
     @SqlUpdate("INSERT INTO gocardless_payments(transaction_id, payment_id) VALUES (:transactionId, :paymentId)")
     @GetGeneratedKeys
     Long insert(@BindBean GoCardlessPayment payment);
+    
+    @SqlUpdate("UPDATE gocardless_payments SET payment_id = :paymentId WHERE id = :id")
+    Long update(@BindBean GoCardlessPayment payment);
 }

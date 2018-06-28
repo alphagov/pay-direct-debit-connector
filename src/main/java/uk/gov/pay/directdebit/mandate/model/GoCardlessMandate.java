@@ -4,8 +4,9 @@ public class GoCardlessMandate {
 
     private Long id;
     private final Long mandateId;
-    private final String goCardlessMandateId;
+    private String goCardlessMandateId;
     private final String goCardlessReference;
+    private GoCardlessPayment goCardlessPayment;
 
     public GoCardlessMandate(Long id, Long mandateId, String goCardlessMandateId, String goCardlessReference) {
         this.id = id;
@@ -15,6 +16,10 @@ public class GoCardlessMandate {
     }
     public GoCardlessMandate(Long mandateId, String goCardlessMandateId, String goCardlessReference) {
         this(null, mandateId, goCardlessMandateId, goCardlessReference);
+    }
+
+    public GoCardlessMandate(Long mandateId) {
+        this(null, mandateId, null, null);
     }
 
     public Long getId() {
@@ -36,6 +41,14 @@ public class GoCardlessMandate {
     public String getGoCardlessReference() {
         return goCardlessReference;
     }
+    
+    public void setGoCardlessPayment(GoCardlessPayment goCardlessPayment) {
+        this.goCardlessPayment = goCardlessPayment;
+    }
+
+    public GoCardlessPayment getGoCardlessPayment() {
+        return goCardlessPayment;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -53,9 +66,13 @@ public class GoCardlessMandate {
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + mandateId.hashCode();
-        result = 31 * result + goCardlessReference.hashCode();
-        result = 31 * result + goCardlessMandateId.hashCode();
+//        result = 31 * result + mandateId.hashCode();
+//        result = 31 * result + goCardlessReference.hashCode();
+//        result = 31 * result + goCardlessMandateId.hashCode();
         return result;
+    }
+
+    public void setGoCardlessMandateId(String goCardlessMandateId) {
+        this.goCardlessMandateId = goCardlessMandateId;
     }
 }

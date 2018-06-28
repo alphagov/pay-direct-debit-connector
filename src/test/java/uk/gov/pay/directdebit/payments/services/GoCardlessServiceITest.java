@@ -36,6 +36,7 @@ import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -95,7 +96,7 @@ public class GoCardlessServiceITest {
     }
     
     @Test
-    public void shouldNotPersistMandate_whenGCCallToCreatePaymentFails() throws Exception {
+    public void shouldNotPersistMandate_whenGCCallToCreatePaymentFails() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount);
 
@@ -132,9 +133,9 @@ public class GoCardlessServiceITest {
         when(mockedMandateConfirmService.confirm(mandateFixture.getExternalId(), confirmDetails))
                 .thenReturn(confirmationDetails);
         when(goCardlessClientFacade.createCustomer(mandateFixture.getExternalId(), payerFixture.toEntity()))
-                .thenReturn(goCardlessCustomer);
+                .thenReturn("id");
         when(goCardlessClientFacade.createCustomerBankAccount(mandateFixture.getExternalId(), goCardlessCustomer, payerFixture.getName(), sortCode, accountNumber))
-                .thenReturn(goCardlessCustomer);
+                .thenReturn("id");
         when(goCardlessClientFacade.createMandate(mandateFixture.toEntity(), goCardlessCustomer))
                 .thenReturn(goCardlessMandate);
         when(goCardlessClientFacade.createPayment(any(), any())).thenThrow(new RuntimeException());
@@ -145,6 +146,8 @@ public class GoCardlessServiceITest {
             // do nuttin'
         }
         
-        assertNull(testContext.getDatabaseTestHelper().getGoCardlessMandateById(goCardlessMandate.getId()));
+        
+        thrown.expect(NoSuchElementException.class);
+        testContext.getDatabaseTestHelper().getGoCardlessMandateById(goCardlessMandate.getId());
     }
 }

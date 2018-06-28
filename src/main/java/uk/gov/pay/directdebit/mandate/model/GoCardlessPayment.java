@@ -6,7 +6,7 @@ public class GoCardlessPayment {
 
     private Long id;
     private final Long transactionId;
-    private final String paymentId;
+    private String paymentId;
     private final LocalDate chargeDate;
 
     public GoCardlessPayment(Long id, Long transactionId, String paymentId, LocalDate chargeDate) {
@@ -18,6 +18,10 @@ public class GoCardlessPayment {
 
     public GoCardlessPayment(Long transactionId, String paymentId, LocalDate chargeDate) {
         this(null, transactionId, paymentId, chargeDate);
+    }
+    
+    public GoCardlessPayment(Long transactionId) {
+        this(null, transactionId, null, null);
     }
 
     public Long getId() {
@@ -55,9 +59,13 @@ public class GoCardlessPayment {
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + transactionId.hashCode();
-        result = 31 * result + paymentId.hashCode();
-        result = 31 * result + chargeDate.hashCode();
+//        result = 31 * result + transactionId.hashCode();
+//        result = 31 * result + paymentId.hashCode();
+//        result = 31 * result + chargeDate.hashCode();
         return result;
+    }
+
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
     }
 }

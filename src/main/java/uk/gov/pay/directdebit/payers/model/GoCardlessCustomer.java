@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.payers.model;
 public class GoCardlessCustomer {
     private Long id;
     private final Long payerId;
-    private final String customerId;
+    private String customerId;
     private String customerBankAccountId;
 
     public GoCardlessCustomer(Long id, Long payerId, String customerId, String customerBankAccountId) {
@@ -15,6 +15,10 @@ public class GoCardlessCustomer {
 
     public GoCardlessCustomer(Long payerId, String customerId) {
         this(null, payerId, customerId, null);
+    }
+
+    public GoCardlessCustomer(Long payerId) {
+        this(null, payerId, null, null);
     }
     
     public GoCardlessCustomer setId(Long id) {
@@ -41,5 +45,9 @@ public class GoCardlessCustomer {
 
     public Long getPayerId() {
         return payerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 }

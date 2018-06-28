@@ -20,4 +20,8 @@ public interface GoCardlessMandateDao {
     @SqlUpdate("INSERT INTO gocardless_mandates(mandate_id, gocardless_mandate_id) VALUES (:mandateId, :goCardlessMandateId)")
     @GetGeneratedKeys
     Long insert(@BindBean GoCardlessMandate mandate);
+
+    @SqlUpdate("UPDATE gocardless_mandates SET gocardless_mandate_id = :goCardlessMandateId WHERE id = :id")
+    @GetGeneratedKeys
+    Long update(@BindBean GoCardlessMandate mandate);
 }

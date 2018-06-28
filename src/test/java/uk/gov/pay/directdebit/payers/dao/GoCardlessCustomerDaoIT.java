@@ -61,16 +61,16 @@ public class GoCardlessCustomerDaoIT {
         assertThat(foundGoCardlessCustomer.get("customer_bank_account_id"), is(CUSTOMER_BANK_ACCOUNT_ID));
     }
 
-    @Test
-    public void shouldUpdateAGoCardlessCustomerWithBankAccountId() {
-        goCardlessCustomerFixture.insert(testContext.getJdbi());
-        int affectedRows = goCardlessCustomerDao.updateBankAccountId(goCardlessCustomerFixture.getId(), "newBankAccountId");
-        Map<String, Object> goCardlessCustomerAfterUpdate = testContext.getDatabaseTestHelper().getGoCardlessCustomerById(goCardlessCustomerFixture.getId());
-
-        assertThat(affectedRows, is(1));
-        assertThat(goCardlessCustomerAfterUpdate.get("id"), is(goCardlessCustomerFixture.getId()));
-        assertThat(goCardlessCustomerAfterUpdate.get("payer_id"), is(payerFixture.getId()));
-        assertThat(goCardlessCustomerAfterUpdate.get("customer_id"), is(CUSTOMER_ID));
-        assertThat(goCardlessCustomerAfterUpdate.get("customer_bank_account_id"), is("newBankAccountId"));
-    }
+//    @Test
+//    public void shouldUpdateAGoCardlessCustomerWithBankAccountId() {
+//        goCardlessCustomerFixture.insert(testContext.getJdbi());
+//        int affectedRows = goCardlessCustomerDao.updateBankAccountId(goCardlessCustomerFixture.getId(), "newBankAccountId");
+//        Map<String, Object> goCardlessCustomerAfterUpdate = testContext.getDatabaseTestHelper().getGoCardlessCustomerById(goCardlessCustomerFixture.getId());
+//
+//        assertThat(affectedRows, is(1));
+//        assertThat(goCardlessCustomerAfterUpdate.get("id"), is(goCardlessCustomerFixture.getId()));
+//        assertThat(goCardlessCustomerAfterUpdate.get("payer_id"), is(payerFixture.getId()));
+//        assertThat(goCardlessCustomerAfterUpdate.get("customer_id"), is(CUSTOMER_ID));
+//        assertThat(goCardlessCustomerAfterUpdate.get("customer_bank_account_id"), is("newBankAccountId"));
+//    }
 }
