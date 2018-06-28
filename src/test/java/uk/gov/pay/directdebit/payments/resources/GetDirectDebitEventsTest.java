@@ -1,13 +1,16 @@
 package uk.gov.pay.directdebit.payments.resources;
 
+import com.jayway.jsonassert.JsonAssert;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import junitparams.converters.Nullable;
 import org.hamcrest.core.Is;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
@@ -15,6 +18,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -28,22 +32,28 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_ACKNOWLEDGED_BY_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.MANDATE;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+@RunWith(JUnitParamsRunner.class)
 public class GetDirectDebitEventsTest {
 
-    @DropwizardTestContext
-    private TestContext testContext;
-
+    @ClassRule
+    public static DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
+    
     private MandateFixture testMandate;
     private TransactionFixture testTransaction;
     private GatewayAccountFixture gatewayAccountFixture;
+    private TestContext testContext;
 
     @Before
     public void setUp() {
+        testContext = app.getTestContext();
         gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
         this.testTransaction = TransactionFixture.aTransactionFixture().withMandateFixture(testMandate).insert(testContext.getJdbi());
+    }
+    
+    @After
+    public void cleanup() {
+        testContext.getJdbi().withHandle(handle -> handle.execute("DELETE FROM events"));
     }
 
     @Test
@@ -287,6 +297,51 @@ public class GetDirectDebitEventsTest {
                 .body("total", is(3))
                 .body("results", hasSize(1))
                 .body("results[0].id", is(1) );
+    }
+    
+    @Test
+    @Parameters({
+            "1, 2, null, 1, 5",
+            "2, 3, 1, 1, 5",
+            "5, null, 4, 1, 5"
+    })
+    public void testLinksForTenEventsWithPageSizeOfTwo(String currentPage, @Nullable String nextPage, @Nullable String prevPage, String firstPage, String lastPage) throws IOException {
+
+        for (int i = 1; i < 11; i++) {
+            aDirectDebitEventFixture()
+                    .withId(Long.valueOf(i))
+                    .withMandateId(testMandate.getId())
+                    .withTransactionId(testTransaction.getId())
+                    .withEventType(MANDATE)
+                    .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
+                    .withEventDate(ZonedDateTime.now())
+                    .insert(testContext.getJdbi());
+        }
+
+        String requestPath = format("/v1/events?page_size=2&page=%s", currentPage);
+
+        String body = given().port(testContext.getPort())
+                .contentType(JSON)
+                .get(requestPath).body().asString();
+
+        String directDebitConnectorUrl = format("http://localhost:%s", app.getLocalPort());
+        
+        JsonAssert.with(body)
+                .assertThat("_links.self.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, currentPage)))
+                .assertThat("_links.first_page.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, firstPage)))
+                .assertThat("_links.last_page.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, lastPage)));
+                
+        if (nextPage == null) {
+            JsonAssert.with(body).assertNotDefined("_links.next_page.href");
+        } else {
+            JsonAssert.with(body).assertThat("_links.next_page.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, nextPage)));
+        }
+        
+        if (prevPage == null) {
+            JsonAssert.with(body).assertNotDefined("_links.prev_page.href");
+        } else{
+            JsonAssert.with(body).assertThat("_links.prev_page.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, prevPage)));
+        }
     }
     
     @Test

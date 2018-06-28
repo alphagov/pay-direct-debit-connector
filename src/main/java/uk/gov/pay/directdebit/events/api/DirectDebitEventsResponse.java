@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
-import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
 
 import java.util.List;
 
@@ -22,11 +21,14 @@ public class DirectDebitEventsResponse {
     private final int total;
     @JsonProperty
     private final int count;
+    @JsonProperty("_links")
+    private DirectDebitEventsPagination pagination;
     
-    public DirectDebitEventsResponse(List<DirectDebitEvent> events, int page, int total) {
+    public DirectDebitEventsResponse(List<DirectDebitEvent> events, int page, int total, DirectDebitEventsPagination directDebitEventsPagination) {
         this.events = events;
         this.total = total;
         this.page = page;
         this.count = events.size();
+        this.pagination = directDebitEventsPagination;
     }
 }

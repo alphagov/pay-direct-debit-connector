@@ -5,16 +5,44 @@ import lombok.Getter;
 import uk.gov.pay.directdebit.payments.exception.UnparsableDateException;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Builder
 public class DirectDebitEventSearchParams {
-    @Getter private ZonedDateTime beforeDate;
-    @Getter private ZonedDateTime afterDate;
-    @Getter private Long mandateId;
-    @Getter private Long transactionId;
-    @Getter private Integer pageSize;
-    @Getter private Integer page;
+    @Getter private final ZonedDateTime beforeDate;
+    @Getter private final ZonedDateTime afterDate;
+    @Getter private final Long mandateId;
+    @Getter private final Long transactionId;
+    @Getter private final Integer pageSize;
+    @Getter private final Integer page;
+
+    public DirectDebitEventSearchParamsBuilder copy() {
+        return new DirectDebitEventSearchParamsBuilder().page(page).pageSize(pageSize).transactionId(transactionId).mandateId(mandateId).afterDate(afterDate).beforeDate(beforeDate);
+    }
+
+    public Map<String, String> getParamsAsMap() {
+        Map<String, String> params = new HashMap<>();
+        
+        if (beforeDate != null) 
+            params.put("before", beforeDate.format(DateTimeFormatter.ISO_INSTANT));
+        
+        if (afterDate != null)
+            params.put("after", afterDate.format(DateTimeFormatter.ISO_INSTANT));
+        
+        if (mandateId != null)
+            params.put("mandate_id", mandateId.toString());
+        
+        if (transactionId != null)
+            params.put("transaction_id", transactionId.toString());
+        
+        params.put("page_size", pageSize.toString());
+        params.put("page", page.toString());
+        
+        return params;
+    }
 
     public static class DirectDebitEventSearchParamsBuilder {
         
@@ -27,11 +55,21 @@ public class DirectDebitEventSearchParams {
             }
             return this;
         }
+
+        public DirectDebitEventSearchParamsBuilder beforeDate(ZonedDateTime date) {
+            this.beforeDate = date;
+            return this;
+        }
         
         public DirectDebitEventSearchParamsBuilder afterDate(String date) {
             if (date != null) {
                 this.afterDate = parseDate(date, "afterDate");    
             }
+            return this;
+        }
+
+        public DirectDebitEventSearchParamsBuilder afterDate(ZonedDateTime date) {
+            this.afterDate = date;    
             return this;
         }
         
