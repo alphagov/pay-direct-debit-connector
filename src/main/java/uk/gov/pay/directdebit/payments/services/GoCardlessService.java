@@ -12,7 +12,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
-import uk.gov.pay.directdebit.mandate.services.MandateConfirmService;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
@@ -41,7 +41,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     private final PayerService payerService;
     private final TransactionService transactionService;
-    private final MandateConfirmService mandateConfirmService;
+    private final MandateService mandateService;
     private final GoCardlessClientFacade goCardlessClientFacade;
     private final GoCardlessCustomerDao goCardlessCustomerDao;
     private final GoCardlessMandateDao goCardlessMandateDao;
@@ -52,7 +52,8 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     @Inject
     public GoCardlessService(PayerService payerService,
-            TransactionService transactionService, MandateConfirmService mandateConfirmService,
+            TransactionService transactionService, 
+            MandateService mandateService,
             GoCardlessClientFacade goCardlessClientFacade,
             GoCardlessCustomerDao goCardlessCustomerDao,
             GoCardlessPaymentDao goCardlessPaymentDao,
@@ -62,7 +63,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             BankAccountDetailsParser bankAccountDetailsParser) {
         this.payerService = payerService;
         this.transactionService = transactionService;
-        this.mandateConfirmService = mandateConfirmService;
+        this.mandateService = mandateService;
         this.goCardlessClientFacade = goCardlessClientFacade;
         this.goCardlessCustomerDao = goCardlessCustomerDao;
         this.goCardlessMandateDao = goCardlessMandateDao;
@@ -79,8 +80,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     @Override
     public void confirm(String mandateExternalId, GatewayAccount gatewayAccount, Map<String, String> confirmDetailsRequest) {
-        ConfirmationDetails confirmationDetails = mandateConfirmService
-                .confirm(mandateExternalId, confirmDetailsRequest);
+        ConfirmationDetails confirmationDetails = mandateService.confirm(mandateExternalId, confirmDetailsRequest);
         Mandate mandate = confirmationDetails.getMandate();
 
         LOGGER.info("Confirming direct debit details, mandate with id: {}", mandateExternalId);

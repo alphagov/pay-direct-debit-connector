@@ -1,6 +1,8 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
+import java.time.LocalDate;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,15 +11,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
-import uk.gov.pay.directdebit.mandate.services.MandateConfirmService;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-
-import java.time.LocalDate;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -35,8 +33,6 @@ public class SandboxServiceTest {
     @Mock
     private PayerService mockedPayerService;
     @Mock
-    private MandateConfirmService mockedMandateConfirmService;
-    @Mock
     private TransactionService mockedTransactionService;
     @Mock
     private MandateService mockedMandateService;
@@ -48,7 +44,7 @@ public class SandboxServiceTest {
 
     @Before
     public void setUp() {
-        service = new SandboxService(mockedPayerService, mockedMandateConfirmService, mockedTransactionService, mockedMandateService);
+        service = new SandboxService(mockedPayerService, mockedMandateService, mockedTransactionService);
     }
 
     @Test
@@ -67,7 +63,7 @@ public class SandboxServiceTest {
                 .withTransactionFixture(transactionFixture)
                 .build();
         Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678", "transaction_external_id", transactionFixture.getExternalId());
-        when(mockedMandateConfirmService
+        when(mockedMandateService
                 .confirm(mandateFixture.getExternalId(), details))
                 .thenReturn(confirmationDetails);
 
@@ -82,7 +78,7 @@ public class SandboxServiceTest {
                 .withMandateFixture(mandateFixture)
                 .build();
         Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678");
-        when(mockedMandateConfirmService
+        when(mockedMandateService
                 .confirm(mandateFixture.getExternalId(), details))
                 .thenReturn(confirmationDetails);
 

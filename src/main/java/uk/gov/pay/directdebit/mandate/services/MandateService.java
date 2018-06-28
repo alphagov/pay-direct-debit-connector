@@ -16,11 +16,13 @@ import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneOffMandateException;
+import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
+import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -41,6 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
@@ -139,8 +142,7 @@ public class MandateService {
 
     public DirectDebitInfoFrontendResponse populateGetMandateWithTransactionResponseForFrontend(String accountExternalId, String transactionExternalId) {
         Transaction transaction = transactionService
-                .findTransactionForExternalIdAndGatewayAccountExternalId(transactionExternalId,
-                        accountExternalId);
+                .findTransactionForExternalId(transactionExternalId);
         Mandate mandate = transaction.getMandate();
         return new DirectDebitInfoFrontendResponse(
                 mandate.getExternalId(),
@@ -331,5 +333,21 @@ public class MandateService {
                     ImmutableMap.of("chargeTokenId", token.getToken())));
         }
         return dataLinks;
+    }
+
+    /**
+     * Creates a mandate. If this is sandbox, also updates it to pending.
+     *
+     * @param mandateExternalId
+     */
+    public ConfirmationDetails confirm(String mandateExternalId, Map<String, String> confirmDetailsRequest) {
+        String sortCode = confirmDetailsRequest.get("sort_code");
+        String accountNumber = confirmDetailsRequest.get("account_number");
+        Mandate mandate = confirmedDirectDebitDetailsFor(mandateExternalId);
+        Transaction transaction = Optional
+                .ofNullable(confirmDetailsRequest.get("transaction_external_id"))
+                .map(transactionService::findTransactionForExternalId)
+                .orElse(null);
+        return new ConfirmationDetails(mandate, transaction, accountNumber, sortCode);
     }
 }

@@ -75,10 +75,10 @@ public class TransactionService {
         this.createPaymentParser = createPaymentParser;
     }
 
-    public Transaction findTransactionForExternalIdAndGatewayAccountExternalId(String externalId, String accountExternalId) {
+    public Transaction findTransactionForExternalId(String externalId) {
         Transaction transaction = transactionDao.findByExternalId(externalId)
                 .orElseThrow(() -> new ChargeNotFoundException("No charges found for transaction id: " + externalId));
-        LOGGER.info("Found charge for transaction with id: {} for gateway account id: {}", externalId, accountExternalId);
+        LOGGER.info("Found charge for transaction with id: {}", externalId);
         return transaction;
     }
 
@@ -129,8 +129,7 @@ public class TransactionService {
     }
     
     public TransactionResponse getPaymentWithExternalId(String accountExternalId, String paymentExternalId, UriInfo uriInfo) {
-        Transaction transaction = findTransactionForExternalIdAndGatewayAccountExternalId(
-                paymentExternalId, accountExternalId);
+        Transaction transaction = findTransactionForExternalId(paymentExternalId);
         return createPaymentResponseWithAllLinks(transaction, accountExternalId, uriInfo);
     }
 

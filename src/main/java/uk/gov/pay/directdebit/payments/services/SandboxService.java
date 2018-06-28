@@ -7,8 +7,8 @@ import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
-import uk.gov.pay.directdebit.mandate.services.MandateConfirmService;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -24,17 +24,15 @@ public class SandboxService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(SandboxService.class);
     private static final int DAYS_TO_COLLECTION = 4;
     private final PayerService payerService;
-    private final MandateConfirmService mandateConfirmService;
     private final TransactionService transactionService;
     private final MandateService mandateService;
     private final BankAccountDetailsValidator bankAccountDetailsValidator = new BankAccountDetailsValidator();
     
     @Inject
     public SandboxService(PayerService payerService,
-                          MandateConfirmService mandateConfirmService,
-                          TransactionService transactionService, MandateService mandateService) {
+                          MandateService mandateService,
+                          TransactionService transactionService) {
         this.payerService = payerService;
-        this.mandateConfirmService = mandateConfirmService;
         this.transactionService = transactionService;
         this.mandateService = mandateService;
     }
@@ -48,7 +46,7 @@ public class SandboxService implements DirectDebitPaymentProvider {
     @Override
     public void confirm(String mandateExternalId, GatewayAccount gatewayAccount, Map<String, String> confirmDetailsRequest) {
         LOGGER.info("Confirming payment for SANDBOX, mandate with id: {}", mandateExternalId);
-        ConfirmationDetails confirmationDetails = mandateConfirmService
+        ConfirmationDetails confirmationDetails = mandateService
                 .confirm(mandateExternalId, confirmDetailsRequest);
         Mandate mandate = confirmationDetails.getMandate();
         if (mandate.getType().equals(MandateType.ONE_OFF)) {

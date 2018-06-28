@@ -1,6 +1,8 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,7 +18,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
-import uk.gov.pay.directdebit.mandate.services.MandateConfirmService;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -37,9 +39,6 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import java.util.Map;
-import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
@@ -76,7 +75,7 @@ public class GoCardlessServiceTest {
     @Mock
     private GoCardlessPaymentDao mockedGoCardlessPaymentDao;
     @Mock
-    private MandateConfirmService mockedMandateConfirmService;
+    private MandateService mockedMandateService;
     @Mock
     private GoCardlessEventDao mockedGoCardlessEventDao;
     @Mock
@@ -105,13 +104,13 @@ public class GoCardlessServiceTest {
     @Before
     public void setUp() {
         service = new GoCardlessService(mockedPayerService, mockedTransactionService,
-                mockedMandateConfirmService, mockedGoCardlessClientFacade,
+                mockedMandateService, mockedGoCardlessClientFacade,
                 mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao, mockedGoCardlessEventDao,
                 mockedMandateDao, mockedBankAccountDetailsParser);
         goCardlessCustomer = new GoCardlessCustomer(null, payerFixture.getId(), CUSTOMER_ID, BANK_ACCOUNT_ID);
         when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity())).thenReturn(goCardlessCustomer);
         when(mockedGoCardlessClientFacade.createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE,  ACCOUNT_NUMBER)).thenReturn(goCardlessCustomer);
-        when(mockedMandateConfirmService.confirm(MANDATE_ID, confirmDetails)).thenReturn(confirmationDetails);
+        when(mockedMandateService.confirm(MANDATE_ID, confirmDetails)).thenReturn(confirmationDetails);
     }
 
     @Test

@@ -102,7 +102,7 @@ public class TransactionServiceTest {
     public void findByTransactionExternalIdAndAccountId_shouldFindATransaction() {
         when(mockedTransactionDao.findByExternalId(transactionFixture.getExternalId()))
                 .thenReturn(Optional.of(transactionFixture.toEntity()));
-        Transaction foundTransaction = service.findTransactionForExternalIdAndGatewayAccountExternalId(transactionFixture.getExternalId(), gatewayAccountFixture.getExternalId());
+        Transaction foundTransaction = service.findTransactionForExternalId(transactionFixture.getExternalId());
         assertThat(foundTransaction.getId(), is(notNullValue()));
         assertThat(foundTransaction.getExternalId(), is(transactionFixture.getExternalId()));
         assertThat(foundTransaction.getMandate(), is(mandateFixture.toEntity()));
@@ -118,7 +118,7 @@ public class TransactionServiceTest {
         thrown.expect(ChargeNotFoundException.class);
         thrown.expectMessage("No charges found for transaction id: not-existing");
         thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
-        service.findTransactionForExternalIdAndGatewayAccountExternalId("not-existing", gatewayAccountFixture.getExternalId());
+        service.findTransactionForExternalId("not-existing");
     }
     
     @Test
