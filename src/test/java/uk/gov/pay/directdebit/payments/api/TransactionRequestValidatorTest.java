@@ -23,7 +23,7 @@ public class TransactionRequestValidatorTest {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "100",
                 "description", "bla",
-                "return_url", "blabla",
+                "return_url", "https://blabla.test",
                 "reference", "blablabla"
         );
         transactionRequestValidator.validate(request);
@@ -35,8 +35,8 @@ public class TransactionRequestValidatorTest {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "100",
                 "description", "bla",
-                "return_url", "blabla"
-        );
+                "return_url", "https://blabla.test"
+                );
         thrown.expect(MissingMandatoryFieldsException.class);
         thrown.expectMessage("Field(s) missing: [reference]");
         thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
@@ -48,7 +48,7 @@ public class TransactionRequestValidatorTest {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "100",
                 "description", RandomStringUtils.randomAlphabetic(256),
-                "return_url", "bla",
+                "return_url", "https://blabla.test",
                 "reference", RandomStringUtils.randomAlphabetic(256)
         );
         thrown.expect(InvalidSizeFieldsException.class);
@@ -62,7 +62,7 @@ public class TransactionRequestValidatorTest {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "10000001",
                 "description", "bla",
-                "return_url", "bla",
+                "return_url", "https://blabla.test",
                 "reference", "blabla"
         );
         thrown.expect(InvalidFieldsException.class);
@@ -76,7 +76,7 @@ public class TransactionRequestValidatorTest {
         Map<String, String> request = ImmutableMap.of(
                 "amount", "eqweqw",
                 "description", "bla",
-                "return_url", "bla",
+                "return_url", "https://blabla.test",
                 "reference", "blabla"
         );
         thrown.expect(InvalidFieldsException.class);
