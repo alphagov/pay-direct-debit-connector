@@ -10,7 +10,7 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public class PaymentViewListResponse {
+public class PaymentViewResultResponse {
 
     @JsonProperty("transaction_id")
     private String transactionId;
@@ -40,14 +40,14 @@ public class PaymentViewListResponse {
     private List<Link> links = new ArrayList<>();
 
 
-    public PaymentViewListResponse(String transactionId,
-                                   Long amount,
-                                   String reference,
-                                   String description,
-                                   String createdDate,
-                                   String name,
-                                   String email,
-                                   ExternalPaymentState state) {
+    public PaymentViewResultResponse(String transactionId,
+                                     Long amount,
+                                     String reference,
+                                     String description,
+                                     String createdDate,
+                                     String name,
+                                     String email,
+                                     ExternalPaymentState state) {
         this.transactionId = transactionId;
         this.amount = amount;
         this.reference = reference;
@@ -92,7 +92,7 @@ public class PaymentViewListResponse {
 
     public List<Link> getLinks() { return links; }
     
-    public PaymentViewListResponse withLink(Link link) {
+    public PaymentViewResultResponse withLink(Link link) {
         this.links.add(link);
         return this;
     }
@@ -102,7 +102,7 @@ public class PaymentViewListResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PaymentViewListResponse that = (PaymentViewListResponse) o;
+        PaymentViewResultResponse that = (PaymentViewResultResponse) o;
 
         if (!transactionId.equals(that.transactionId)) return false;
         if (!amount.equals(that.amount)) return false;
