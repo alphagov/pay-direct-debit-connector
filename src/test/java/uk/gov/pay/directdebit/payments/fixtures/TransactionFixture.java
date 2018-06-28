@@ -132,7 +132,6 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
 
     @Override
     public Transaction toEntity() {
-     
         return new Transaction(id, externalId, amount, state, description, reference, mandateFixture.toEntity(), createdDate);
     }
 

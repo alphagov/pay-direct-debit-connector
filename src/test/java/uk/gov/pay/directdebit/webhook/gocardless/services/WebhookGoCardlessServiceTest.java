@@ -107,7 +107,7 @@ public class WebhookGoCardlessServiceTest {
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
 
-        doThrow(new GoCardlessMandateNotFoundException("OOPSIE")).when(mockedGoCardlessMandateHandler).handle(goCardlessEvent);
+        doThrow(new GoCardlessMandateNotFoundException("error", "OOPSIE")).when(mockedGoCardlessMandateHandler).handle(goCardlessEvent);
         try {
             webhookGoCardlessService.handleEvents(events);
             fail("Expected GoCardlessMandateNotFoundException.");

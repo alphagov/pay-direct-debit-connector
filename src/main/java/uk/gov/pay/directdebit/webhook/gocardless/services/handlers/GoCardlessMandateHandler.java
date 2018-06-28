@@ -74,7 +74,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
         return Optional.ofNullable(GoCardlessMandateAction.fromString(event.getAction()))
                 .map((action) -> getHandledActions().get(action))
                 .map((handledAction -> {
-                    GoCardlessMandate goCardlessMandate = goCardlessService.findMandateForEvent(event);
+                    GoCardlessMandate goCardlessMandate = goCardlessService.findGoCardlessMandateForEvent(event);
                     Mandate mandate = mandateService.findById(goCardlessMandate.getMandateId());
                     return handledAction.apply(mandate);
                 }));

@@ -85,7 +85,7 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
         
-        userNotificationService.sendPaymentConfirmedEmailFor(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, transaction, LocalDate.parse("2018-05-21"));
+        userNotificationService.sendOneOffPaymentConfirmedEmailFor(transaction, LocalDate.parse("2018-05-21"));
 
         verify(mockAdminUsersClient).sendEmail(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, mandateFixture.toEntity(), emailPersonalisation);
     }
@@ -102,7 +102,7 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
-        userNotificationService.sendPaymentConfirmedEmailFor(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, transaction, LocalDate.parse("2018-05-21"));
+        userNotificationService.sendOndDemandPaymentConfirmedEmailFor(transaction, LocalDate.parse("2018-05-21"));
 
         verify(mockAdminUsersClient).sendEmail(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, mandateFixture.toEntity(), emailPersonalisation);
     }

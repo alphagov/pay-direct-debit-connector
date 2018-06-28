@@ -197,7 +197,7 @@ public class ConfirmMandateSetupResourceIT {
         stubCreateCustomer(mandateFixture.getExternalId(), payerFixture, customerId);
         stubCreateCustomerBankAccount(mandateFixture.getExternalId(), payerFixture, customerId, customerBankAccountId);
         stubCreateMandate(mandateFixture.getExternalId(), goCardlessCustomerFixture);
-        stubCreatePayment(transactionFixture);
+        stubCreatePayment(transactionFixture.getAmount(), "MD123", transactionFixture.getExternalId());
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +

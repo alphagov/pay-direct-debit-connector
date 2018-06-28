@@ -159,13 +159,13 @@ public class TransactionService {
 
     public DirectDebitEvent oneOffPaymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {
         updateStateFor(transaction, PAYMENT_SUBMITTED_TO_PROVIDER);
-        userNotificationService.sendPaymentConfirmedEmailFor(ONE_OFF_PAYMENT_CONFIRMED, transaction, earliestChargeDate);
+        userNotificationService.sendOneOffPaymentConfirmedEmailFor(transaction, earliestChargeDate);
         return directDebitEventService.registerPaymentSubmittedToProviderEventFor(transaction);
     }
 
     public DirectDebitEvent onDemandPaymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {
         updateStateFor(transaction, PAYMENT_SUBMITTED_TO_PROVIDER);
-        userNotificationService.sendPaymentConfirmedEmailFor(ON_DEMAND_PAYMENT_CONFIRMED, transaction, earliestChargeDate);
+        userNotificationService.sendOndDemandPaymentConfirmedEmailFor(transaction, earliestChargeDate);
         return directDebitEventService.registerPaymentSubmittedToProviderEventFor(transaction);
     }
 

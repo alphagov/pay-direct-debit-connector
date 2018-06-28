@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.Map;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -32,9 +33,6 @@ import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundExcept
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-
-import javax.inject.Inject;
-import java.util.Map;
 
 public class GoCardlessService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessService.class);
@@ -94,10 +92,21 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             transactionService.oneOffPaymentSubmittedToProviderFor(transaction, payment.getChargeDate());
         }
     }
-
+    
     @Override
     public Transaction collect(GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequest) {
-        throw new NotImplementedException("Collecting payments from an existing mandate via GoCardless is not yet supported");
+        String mandateExternalId = collectPaymentRequest.get("agreement_id");
+        LOGGER.info("Collecting payment for GOCARDLESS, mandate with id: {}", mandateExternalId);
+        Mandate mandate = mandateService.findByExternalId(mandateExternalId);
+        Transaction transaction = transactionService.createTransaction(
+                collectPaymentRequest,
+                mandate,
+                gatewayAccount.getExternalId());
+        GoCardlessMandate goCardlessMandate = findGoCardlessMandateForMandate(mandate);
+        GoCardlessPayment payment = createPayment(transaction, goCardlessMandate);
+        transactionService.onDemandPaymentSubmittedToProviderFor(transaction, payment.getChargeDate());
+        LOGGER.info("Submitted payment collection for GOCARDLESS, for mandate with id: {}", mandateExternalId);
+        return transaction;
     }
 
     @Override
@@ -211,20 +220,30 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
                 });
     }
 
-    public GoCardlessMandate findMandateForEvent(GoCardlessEvent event) {
+    public GoCardlessMandate findGoCardlessMandateForEvent(GoCardlessEvent event) {
         return goCardlessMandateDao
                 .findByEventResourceId(event.getResourceId())
                 .orElseThrow(() -> {
                     LOGGER.error("Couldn't find gocardless mandate for event: {}", event.getJson());
-                    return new GoCardlessMandateNotFoundException(event.getResourceId());
+                    return new GoCardlessMandateNotFoundException("resource id", event.getResourceId());
                 });
     }
-    private void logException(Exception exc, String resource, String mandateExternalId) {
+
+    private GoCardlessMandate findGoCardlessMandateForMandate(Mandate mandate) {
+        return goCardlessMandateDao
+                .findByMandateId(mandate.getId())
+                .orElseThrow(() -> {
+                    LOGGER.error("Couldn't find gocardless mandate for mandate with id: {}", mandate.getExternalId());
+                    return new GoCardlessMandateNotFoundException("mandate id", mandate.getExternalId());
+                });
+    }
+    private void logException(Exception exc, String resource, String id) {
         if (exc.getCause() != null) {
-            LOGGER.error("Failed to create a {} in gocardless, mandate id : {}, error: {}, cause: {}", resource, mandateExternalId, exc.getMessage(), exc.getCause().getMessage());
+            LOGGER.error("Failed to create a {} in gocardless, id : {}, error: {}, cause: {}", resource, id, exc.getMessage(), exc.getCause().getMessage());
         } else {
-            LOGGER.error("Failed to create a {} in gocardless, mandate id: {}, error: {}", resource, mandateExternalId, exc.getMessage());
+            LOGGER.error("Failed to create a {} in gocardless, id: {}, error: {}", resource, id, exc.getMessage());
         }
     }
+
     
 }

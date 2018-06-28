@@ -29,7 +29,6 @@ public class GoCardlessMandateDaoIT {
 
     private GoCardlessMandateDao mandateDao;
     private MandateFixture mandateFixture;
-    private GatewayAccountFixture gatewayAccountFixture;
 
     private final static String GOCARDLESS_MANDATE_ID = "NA23434";
     private GoCardlessMandateFixture testGoCardlessMandate;
@@ -37,8 +36,10 @@ public class GoCardlessMandateDaoIT {
     @Before
     public void setup()  {
         mandateDao = testContext.getJdbi().onDemand(GoCardlessMandateDao.class);
-        gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
-        mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+                .insert(testContext.getJdbi());
+        mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(
+                gatewayAccountFixture).insert(testContext.getJdbi());
         TransactionFixture
                 .aTransactionFixture()
                 .withMandateFixture(mandateFixture)
@@ -71,5 +72,21 @@ public class GoCardlessMandateDaoIT {
     public void shouldNotFindAGoCardlessMandateByEventResourceId_ifResourceIdIsInvalid() {
         String resourceId = "non_existing_resourceId";
         assertThat(mandateDao.findByEventResourceId(resourceId), is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldFindAGoCardlessMandateByMandateId() {
+        testGoCardlessMandate.insert(testContext.getJdbi());
+        GoCardlessMandate goCardlessMandate = mandateDao
+                .findByMandateId(mandateFixture.getId()).get();
+        assertThat(goCardlessMandate.getId(), is(testGoCardlessMandate.getId()));
+        assertThat(goCardlessMandate.getMandateId(), is(mandateFixture.getId()));
+        assertThat(goCardlessMandate.getGoCardlessMandateId(), is(GOCARDLESS_MANDATE_ID));
+    }
+
+    @Test
+    public void shouldNotFindAGoCardlessMandateByMandateId_ifMandateIdIsInvalid() {
+        Long mandateId = 102L;
+        assertThat(mandateDao.findByMandateId(mandateId), is(Optional.empty()));
     }
 }

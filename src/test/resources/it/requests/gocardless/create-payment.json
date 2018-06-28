@@ -3,7 +3,7 @@
     "amount": {{amount}},
     "currency": "GBP",
     "links": {
-      "mandate": "MD123"
+      "mandate": "{{gocardless_mandate_id}}"
     }
   }
 }

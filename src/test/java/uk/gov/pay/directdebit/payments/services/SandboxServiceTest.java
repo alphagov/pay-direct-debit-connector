@@ -90,7 +90,7 @@ public class SandboxServiceTest {
     public void collect_shouldRegisterAPaymentSubmittedToProviderEvent() {
         MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(gatewayAccountFixture);
         TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
-        Map<String, String> details = ImmutableMap.of(
+        Map<String, String> collectPaymentRequest = ImmutableMap.of(
                 "amount", "123456",
                 "reference", "a reference",
                 "description", "a description",
@@ -98,9 +98,9 @@ public class SandboxServiceTest {
         when(mockedMandateService
                 .findByExternalId(mandateFixture.getExternalId()))
                 .thenReturn(mandateFixture.toEntity());
-        when(mockedTransactionService.createTransaction(details, mandateFixture.toEntity(), gatewayAccountFixture.getExternalId()))
+        when(mockedTransactionService.createTransaction(collectPaymentRequest, mandateFixture.toEntity(), gatewayAccountFixture.getExternalId()))
                 .thenReturn(transactionFixture.toEntity());
-        service.collect(gatewayAccountFixture.toEntity(), details);
+        service.collect(gatewayAccountFixture.toEntity(), collectPaymentRequest);
         verify(mockedTransactionService).onDemandPaymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
     }
     

@@ -14,10 +14,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
+import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
@@ -49,6 +52,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
+import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 
@@ -141,7 +145,7 @@ public class GoCardlessServiceTest {
         thrown.expect(GoCardlessMandateNotFoundException.class);
         thrown.expectMessage("No gocardless mandate found with resource id: aaa");
         thrown.reportMissingExceptionWithMessage("GoCardlessMandateNotFoundException expected");
-        service.findMandateForEvent(goCardlessEvent);
+        service.findGoCardlessMandateForEvent(goCardlessEvent);
     }
 
     @Test
@@ -255,5 +259,30 @@ public class GoCardlessServiceTest {
         assertThat(response.isValid(), is(false));
         assertThat(response.getBankName(), is(nullValue()));
     }
-    
+
+    @Test
+    public void collect_shouldCreateAGoCardlessPaymentAndRegiseterOnDemandPaymentSubmittedEvent() {
+        MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(gatewayAccountFixture);
+        GoCardlessMandate goCardlessMandate = GoCardlessMandateFixture.aGoCardlessMandateFixture().withMandateId(mandateFixture.getId()).toEntity();
+        Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
+        Mandate mandate = mandateFixture.toEntity();
+        Map<String, String> collectPaymentRequest = ImmutableMap.of(
+                "amount", "123456",
+                "reference", "a reference",
+                "description", "a description",
+                "agreement_id", mandateFixture.getExternalId());
+        
+        when(mockedMandateService.findByExternalId(mandateFixture.getExternalId())).thenReturn(mandate);
+        when(mockedTransactionService
+                .createTransaction(collectPaymentRequest, mandate, gatewayAccountFixture.getExternalId()))
+                .thenReturn(transaction);
+        when(mockedGoCardlessMandateDao
+                .findByMandateId(mandateFixture.getId()))
+                .thenReturn(Optional.of(goCardlessMandate));
+        when(mockedGoCardlessClientFacade.createPayment(transaction, goCardlessMandate)).thenReturn(goCardlessPayment);
+        service.collect(gatewayAccountFixture.toEntity(), collectPaymentRequest);
+        verify(mockedGoCardlessPaymentDao).insert(goCardlessPayment);
+        verify(mockedGoCardlessClientFacade).createPayment(transaction, goCardlessMandate);
+        verify(mockedTransactionService).onDemandPaymentSubmittedToProviderFor(transaction, goCardlessPayment.getChargeDate());
+    }
 }
