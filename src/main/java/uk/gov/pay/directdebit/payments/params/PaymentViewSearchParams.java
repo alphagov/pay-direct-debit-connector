@@ -16,8 +16,7 @@ public class PaymentViewSearchParams {
     private static final String EMAIL_FIELD = "email";
     private static final String REFERENCE_FIELD = "reference";
     private static final String AMOUNT_FIELD = "amount";
-    private static final String MANDATE_EXTERNAL_ID_FIELD = "mandate_external_id";
-    private static final String MANDATE_ID_KEY = "mandate_id";
+    private static final String MANDATE_ID_INTERNAL_KEY = "mandate_id";
     private static final String MANDATE_ID_EXTERNAL_KEY = "agreement";
     private static final String FROM_DATE_KEY = "from_date";
     private static final String TO_DATE_KEY = "to_date";
@@ -119,7 +118,7 @@ public class PaymentViewSearchParams {
     public String generateQuery() {
         StringBuilder sb = new StringBuilder("");
         if (isNotBlank(mandateId)) {
-            sb.append(" AND m.external_id = :" + MANDATE_EXTERNAL_ID_FIELD);
+            sb.append(" AND m.external_id = :" + MANDATE_ID_INTERNAL_KEY);
         }
         if (searchDateParams != null) {
             if (searchDateParams.getFromDate() != null) {
@@ -148,7 +147,7 @@ public class PaymentViewSearchParams {
             queryMap.put(PAGE_NUMBER_FIELD, getPaginationParams().getPageNumber());
             queryMap.put(PAGE_SIZE_FIELD, getPaginationParams().getDisplaySize());
             if (isNotBlank(mandateId)) {
-                queryMap.put(MANDATE_EXTERNAL_ID_FIELD, mandateId);
+                queryMap.put(MANDATE_ID_INTERNAL_KEY, mandateId);
             }
             if (searchDateParams != null) {
                 if (searchDateParams.getFromDate() != null) {
@@ -174,7 +173,7 @@ public class PaymentViewSearchParams {
     public String buildQueryParamString() {
         String query = "";
         if (isNotBlank(mandateId)) {
-            query += "&" + MANDATE_ID_KEY + "=" + mandateId;
+            query += "&" + MANDATE_ID_EXTERNAL_KEY + "=" + mandateId;
         }
         if (searchDateParams != null) {
             if (searchDateParams.getFromDate() != null) {
