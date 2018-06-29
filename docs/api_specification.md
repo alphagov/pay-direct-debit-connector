@@ -90,7 +90,7 @@ GET /v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?r
 | `page`                    | - | To get the results from the specified page number, should be a non zero +ve number (optional, defaults to 1)|
 | `display_size`            | - | Number of records to be returned per page, should be a non zero +ve number (optional, defaults to 500)|
 | `email`                   | - | Email of the payment user to search for          |
-| `agreement`               | - | Agreement external id |
+| `agreement_id`            | - | Mandate external id |
 
 ### Response example
 ```

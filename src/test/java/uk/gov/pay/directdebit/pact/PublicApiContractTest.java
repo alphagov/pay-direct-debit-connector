@@ -54,17 +54,9 @@ public class PublicApiContractTest {
     @State("three transaction records exist")
     public void threeTransactionRecordsExist(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
-        String mandateId;
-        if (params.get("agreement") != null) {
-            mandateId = params.get("agreement");
-        } else if (params.get("agreement_id") != null) {
-            mandateId = params.get("agreement_id");
-        } else {
-            throw new RuntimeException("Cannot run `three transaction records exist` pact test, couldn't get agreement id from params");
-        }
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
-                .withExternalId(mandateId);
+                .withExternalId(params.get("agreement_id"));
         testMandate.insert(app.getTestContext().getJdbi());
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
         testPayer.insert(app.getTestContext().getJdbi());
