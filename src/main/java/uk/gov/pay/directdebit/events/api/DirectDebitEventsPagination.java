@@ -8,6 +8,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 
+
 public class DirectDebitEventsPagination {
 
     @JsonProperty("self")
@@ -37,5 +38,25 @@ public class DirectDebitEventsPagination {
         UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path(uriInfo.getPath());
         params.getParamsAsMap().forEach((k, v) -> uriBuilder.queryParam(k, v));
         return uriBuilder.build();
+    }
+
+    public PaginationLink getSelfLink() {
+        return selfLink;
+    }
+
+    public PaginationLink getFirstLink() {
+        return firstLink;
+    }
+
+    public PaginationLink getLastLink() {
+        return lastLink;
+    }
+
+    public PaginationLink getPrevLink() {
+        return prevLink;
+    }
+
+    public PaginationLink getNextLink() {
+        return nextLink;
     }
 }

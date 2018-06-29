@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.resources;
+package uk.gov.pay.directdebit.events.resources;
 
 import com.jayway.jsonassert.JsonAssert;
 import junitparams.JUnitParamsRunner;

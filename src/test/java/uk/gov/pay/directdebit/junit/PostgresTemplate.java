@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.junit;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static java.lang.String.format;
 import static java.sql.DriverManager.getConnection;
 
 final class PostgresTemplate {
@@ -15,7 +16,11 @@ final class PostgresTemplate {
             terminateDbConnections(connection, config.getDatabaseName());
             connection.createStatement().execute("CREATE DATABASE " + TEMPLATE_NAME + " WITH TEMPLATE " + config.getDatabaseName() + " OWNER " + config.getUserName());
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (e.getMessage().equals(format("ERROR: database \"%s\" already exists", TEMPLATE_NAME))){
+                restorePostgres(databaseUrl, user, password);
+            } else {
+                throw new RuntimeException(e);
+            }
         }
     }
 
