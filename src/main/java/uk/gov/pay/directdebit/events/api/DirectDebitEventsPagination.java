@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.events.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import uk.gov.pay.directdebit.payments.links.PaginationLink;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
 
@@ -11,15 +12,15 @@ import java.net.URI;
 
 public class DirectDebitEventsPagination {
 
-    @JsonProperty("self")
+    @JsonProperty("self") @Getter
     private PaginationLink selfLink;
-    @JsonProperty("first_page")
+    @JsonProperty("first_page") @Getter
     private PaginationLink firstLink;
-    @JsonProperty("last_page")
+    @JsonProperty("last_page") @Getter
     private PaginationLink lastLink;
-    @JsonProperty("prev_page")
+    @JsonProperty("prev_page") @Getter
     private PaginationLink prevLink;
-    @JsonProperty("next_page")
+    @JsonProperty("next_page") @Getter
     private PaginationLink nextLink;
 
     public DirectDebitEventsPagination(DirectDebitEventSearchParams searchParams, int total, UriInfo uriInfo) {
@@ -38,25 +39,5 @@ public class DirectDebitEventsPagination {
         UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path(uriInfo.getPath());
         params.getParamsAsMap().forEach((k, v) -> uriBuilder.queryParam(k, v));
         return uriBuilder.build();
-    }
-
-    public PaginationLink getSelfLink() {
-        return selfLink;
-    }
-
-    public PaginationLink getFirstLink() {
-        return firstLink;
-    }
-
-    public PaginationLink getLastLink() {
-        return lastLink;
-    }
-
-    public PaginationLink getPrevLink() {
-        return prevLink;
-    }
-
-    public PaginationLink getNextLink() {
-        return nextLink;
     }
 }

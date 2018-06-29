@@ -3,14 +3,12 @@ package uk.gov.pay.directdebit.events.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@AllArgsConstructor
 public class DirectDebitEventsResponse {
     
     @JsonProperty("results")
