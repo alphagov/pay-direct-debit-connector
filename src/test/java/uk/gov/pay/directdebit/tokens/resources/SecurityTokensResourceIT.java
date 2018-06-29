@@ -55,11 +55,11 @@ public class SecurityTokensResourceIT {
                 .contentType(JSON)
                 .body("external_id", is(testMandate.getExternalId()))
                 .body("mandate_reference", is(testMandate.getMandateReference()))
+                .body("mandate_type", is("ON_DEMAND"))
                 .body("return_url", is(testMandate.getReturnUrl()))
                 .body("gateway_account_id", isNumber(testGatewayAccount.getId()))
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("state", is(MandateState.AWAITING_DIRECT_DEBIT_DETAILS.toString()))
-                .body("type", is("ON_DEMAND"))
                 .body("$", not(hasKey("transaction_external_id")));
     }
 
@@ -80,11 +80,11 @@ public class SecurityTokensResourceIT {
                 .contentType(JSON)
                 .body("external_id", is(testMandate.getExternalId()))
                 .body("mandate_reference", is(testMandate.getMandateReference()))
+                .body("mandate_type", is("ONE_OFF"))
                 .body("return_url", is(testMandate.getReturnUrl()))
                 .body("gateway_account_id", isNumber(testGatewayAccount.getId()))
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("state", is(MandateState.AWAITING_DIRECT_DEBIT_DETAILS.toString()))
-                .body("type", is("ONE_OFF"))
                 .body("transaction_external_id", is(testTransaction.getExternalId()));
     }
 
