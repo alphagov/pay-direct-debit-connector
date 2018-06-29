@@ -13,6 +13,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -35,23 +36,23 @@ public class DirectDebitEventsPaginationTest {
     public void testWithAllSearchParameters() {
         DirectDebitEventSearchParams searchParams = DirectDebitEventSearchParams.builder()
                 .page(2)
-                .afterDate(ZonedDateTime.of(2018, 6, 29, 8, 0, 0, 0, ZoneId.systemDefault()))
-                .beforeDate(ZonedDateTime.of(2018, 6, 29, 9, 0, 0, 0, ZoneId.systemDefault()))
+                .afterDate(ZonedDateTime.of(2018, 6, 29, 8, 0, 0, 0, ZoneId.of("UTC")))
+                .beforeDate(ZonedDateTime.of(2018, 6, 29, 9, 0, 0, 0, ZoneId.of("UTC")))
                 .mandateId(1234L)
                 .transactionId(5678L)
                 .pageSize(10)
                 .build();
         DirectDebitEventsPagination pagination = new DirectDebitEventsPagination(searchParams, 100, mockUriInfo);
         
-        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T08%3A00%3A00Z&mandate_id=1234&after=2018-06-29T07%3A00%3A00Z&page=2&page_size=10")
+        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T09%3A00%3A00Z&mandate_id=1234&after=2018-06-29T08%3A00%3A00Z&page=2&page_size=10")
                 , pagination.getSelfLink());
-        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T08%3A00%3A00Z&mandate_id=1234&after=2018-06-29T07%3A00%3A00Z&page=3&page_size=10")
+        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T09%3A00%3A00Z&mandate_id=1234&after=2018-06-29T08%3A00%3A00Z&page=3&page_size=10")
                 , pagination.getNextLink());
-        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T08%3A00%3A00Z&mandate_id=1234&after=2018-06-29T07%3A00%3A00Z&page=1&page_size=10")
+        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T09%3A00%3A00Z&mandate_id=1234&after=2018-06-29T08%3A00%3A00Z&page=1&page_size=10")
                 , pagination.getFirstLink());
-        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T08%3A00%3A00Z&mandate_id=1234&after=2018-06-29T07%3A00%3A00Z&page=10&page_size=10")
+        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T09%3A00%3A00Z&mandate_id=1234&after=2018-06-29T08%3A00%3A00Z&page=10&page_size=10")
                 , pagination.getLastLink());
-        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T08%3A00%3A00Z&mandate_id=1234&after=2018-06-29T07%3A00%3A00Z&page=1&page_size=10")
+        assertEquals(PaginationLink.ofValue("http://test.com/test/?transaction_id=5678&before=2018-06-29T09%3A00%3A00Z&mandate_id=1234&after=2018-06-29T08%3A00%3A00Z&page=1&page_size=10")
                 , pagination.getPrevLink());
     }
 
