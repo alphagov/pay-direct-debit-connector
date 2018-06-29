@@ -12,9 +12,6 @@ public class TokenResponse {
     @JsonProperty("external_id")
     private String mandateExternalId;
 
-    @JsonProperty("type")
-    private String type;
-
     @JsonProperty("state")
     private String state;
 
@@ -30,22 +27,24 @@ public class TokenResponse {
     @JsonProperty("mandate_reference")
     private String mandateReference;
 
+    @JsonProperty("mandate_type")
+    private String mandateType;
+
     @JsonProperty("transaction_external_id")
     private String transactionExternalId;
-
 
     private TokenResponse(String paymentExternalId,
                           Long gatewayAccountId,
                           String gatewayAccountExternalId,
                           String mandateReference,
                           String returnUrl,
-                          String type,
+                          String mandateType,
                           String state,
                           String transactionExternalId) {
         this.mandateExternalId = paymentExternalId;
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
-        this.type = type;
+        this.mandateType = mandateType;
         this.state = state;
         this.returnUrl = returnUrl;
         this.mandateReference = mandateReference;
@@ -79,9 +78,6 @@ public class TokenResponse {
         if (!mandateExternalId.equals(that.mandateExternalId)) {
             return false;
         }
-        if (!type.equals(that.type)) {
-            return false;
-        }
         if (!state.equals(that.state)) {
             return false;
         }
@@ -97,6 +93,9 @@ public class TokenResponse {
         if (mandateReference != null ? !mandateReference.equals(that.mandateReference) : that.mandateReference != null) {
             return false;
         }
+        if (!mandateType.equals(that.mandateType)) {
+            return false;
+        }
         return transactionExternalId != null ? transactionExternalId
                 .equals(that.transactionExternalId) : that.transactionExternalId == null;
     }
@@ -104,12 +103,12 @@ public class TokenResponse {
     @Override
     public int hashCode() {
         int result = mandateExternalId.hashCode();
-        result = 31 * result + type.hashCode();
         result = 31 * result + state.hashCode();
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + gatewayAccountId.hashCode();
         result = 31 * result + gatewayAccountExternalId.hashCode();
         result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
+        result = 31 * result + mandateType.hashCode();
         result = 31 * result + (transactionExternalId != null ? transactionExternalId.hashCode()
                 : 0);
         return result;
@@ -119,11 +118,11 @@ public class TokenResponse {
     public String toString() {
         return "TokenResponse{" +
                 "external_id=" + mandateExternalId +
-                ", mandateReference=" + mandateReference +
                 ", transaction_external_id=" + transactionExternalId +
                 ", gateway_account_id=" + gatewayAccountId +
                 ", gateway_account_external_id=" + gatewayAccountExternalId +
-                ", type=" + type +
+                ", mandateReference=" + mandateReference +
+                ", mandateType=" + mandateType +
                 ", state=" + state +
                 ", return_url=" + returnUrl +
                 '}';
