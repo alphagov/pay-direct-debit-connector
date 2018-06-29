@@ -24,6 +24,9 @@ public class CollectPaymentResponse {
     @JsonProperty
     private Long amount;
 
+    @JsonProperty("payment_provider")
+    private String paymentProvider;
+    
     @JsonProperty
     private String description;
 
@@ -36,7 +39,7 @@ public class CollectPaymentResponse {
     @JsonProperty
     private ExternalPaymentState state;
 
-    public CollectPaymentResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
+    public CollectPaymentResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String description, String reference, String createdDate, String paymentProvider, List<Map<String, Object>> dataLinks) {
         this.transactionExternalId = transactionExternalId;
         this.state = state;
         this.dataLinks = dataLinks;
@@ -44,6 +47,11 @@ public class CollectPaymentResponse {
         this.description = description;
         this.reference = reference;
         this.createdDate = createdDate;
+        this.paymentProvider = paymentProvider;
+    }
+
+    public String getPaymentProvider() {
+        return paymentProvider;
     }
 
     public List<Map<String, Object>> getDataLinks() {
@@ -83,32 +91,53 @@ public class CollectPaymentResponse {
                 transaction.getDescription(),
                 transaction.getReference(),
                 transaction.getCreatedDate().toString(),
+                transaction.getMandate().getGatewayAccount().getPaymentProvider().toString(),
                 dataLinks);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         CollectPaymentResponse that = (CollectPaymentResponse) o;
 
-        if (dataLinks != null ? !dataLinks.equals(that.dataLinks) : that.dataLinks != null) return false;
-        if (!transactionExternalId.equals(that.transactionExternalId)) return false;
-        if (!amount.equals(that.amount)) return false;
-        if (description != null ? !description.equals(that.description) : that.description != null) return false;
-        if (reference != null ? !reference.equals(that.reference) : that.reference != null) return false;
-        if (!createdDate.equals(that.createdDate)) return false;
+        if (!dataLinks.equals(that.dataLinks)) {
+            return false;
+        }
+        if (!transactionExternalId.equals(that.transactionExternalId)) {
+            return false;
+        }
+        if (!amount.equals(that.amount)) {
+            return false;
+        }
+        if (!paymentProvider.equals(that.paymentProvider)) {
+            return false;
+        }
+        if (!description.equals(that.description)) {
+            return false;
+        }
+        if (!reference.equals(that.reference)) {
+            return false;
+        }
+        if (!createdDate.equals(that.createdDate)) {
+            return false;
+        }
         return state == that.state;
     }
 
     @Override
     public int hashCode() {
-        int result = dataLinks != null ? dataLinks.hashCode() : 0;
+        int result = dataLinks.hashCode();
         result = 31 * result + transactionExternalId.hashCode();
         result = 31 * result + amount.hashCode();
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (reference != null ? reference.hashCode() : 0);
+        result = 31 * result + paymentProvider.hashCode();
+        result = 31 * result + description.hashCode();
+        result = 31 * result + reference.hashCode();
         result = 31 * result + createdDate.hashCode();
         result = 31 * result + state.hashCode();
         return result;
@@ -121,6 +150,7 @@ public class CollectPaymentResponse {
                 ", transactionExternalId='" + transactionExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +
                 ", amount=" + amount +
+                ", paymentProvider=" + paymentProvider +
                 ", reference='" + reference + '\'' +
                 ", createdDate=" + createdDate +
                 '}';
