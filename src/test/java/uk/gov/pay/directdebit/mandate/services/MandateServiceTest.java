@@ -1,6 +1,16 @@
 package uk.gov.pay.directdebit.mandate.services;
 
+import com.google.common.collect.ImmutableMap;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,30 +27,24 @@ import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
+import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
-
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -274,7 +278,7 @@ public class MandateServiceTest {
                 .aTransactionFixture()
                 .withMandateFixture(mandateFixture);
         Mandate mandate = mandateFixture.toEntity();
-        when(mockedTransactionService.findTransactionForExternalIdAndGatewayAccountExternalId(mandateFixture.getExternalId(), mandate.getGatewayAccount().getExternalId())).thenReturn(transactionFixture.toEntity());
+        when(mockedTransactionService.findTransactionForExternalId(mandateFixture.getExternalId())).thenReturn(transactionFixture.toEntity());
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateWithTransactionResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId());
         assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
         assertThat(mandateResponseForFrontend.getGatewayAccountExternalId(), is(mandate.getGatewayAccount().getExternalId()));
@@ -383,6 +387,39 @@ public class MandateServiceTest {
         Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
 
         assertThat(mandate.getMandateReference(), is("gocardless-default"));
+    }
+
+    @Test
+    public void confirm_shouldConfirmMandateByRegisteringExpectedEvents_whenNoTransactionIsSupplied() {
+        ImmutableMap<String, String> confirmMandateRequest = ImmutableMap
+                .of("sort_code", "123456", "account_number", "12345678");
+
+        String mandateExternalId = "test-mandate-ext-id";
+        Mandate mandate = MandateFixture.aMandateFixture().withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS).withExternalId(mandateExternalId).toEntity();
+        when(mockedMandateDao.findByExternalId(mandateExternalId)).thenReturn(Optional.of(mandate));
+        ConfirmationDetails confirmationDetails = service.confirm(mandateExternalId, confirmMandateRequest);
+        assertThat(confirmationDetails.getMandate(), Is.is(mandate));
+        assertThat(confirmationDetails.getSortCode(), Is.is("123456"));
+        assertThat(confirmationDetails.getAccountNumber(), Is.is("12345678"));
+        assertThat(confirmationDetails.getTransaction(), Is.is(nullValue()));
+    }
+
+    @Test
+    public void confirm_shouldConfirmAPaymentByRegisteringExpectedEvents_whenATransactionIsSuppliedAndExists() {
+        String transactionExternaId = "usdfhkdhfksd";
+        ImmutableMap<String, String> confirmMandateRequest = ImmutableMap
+                .of("sort_code", "123456", "account_number", "12345678", "transaction_external_id", transactionExternaId);
+
+        String mandateExternalId = "test-mandate-ext-id";
+        Mandate mandate = MandateFixture.aMandateFixture().withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS).withExternalId(mandateExternalId).toEntity();
+        Transaction transaction = TransactionFixture.aTransactionFixture().toEntity();
+        when(mockedMandateDao.findByExternalId(mandateExternalId)).thenReturn(Optional.of(mandate));
+        when(mockedTransactionService.findTransactionForExternalId(transactionExternaId)).thenReturn(transaction);
+        ConfirmationDetails confirmationDetails = service.confirm(mandateExternalId, confirmMandateRequest);
+        assertThat(confirmationDetails.getMandate(), Is.is(mandate));
+        assertThat(confirmationDetails.getSortCode(), Is.is("123456"));
+        assertThat(confirmationDetails.getAccountNumber(), Is.is("12345678"));
+        assertThat(confirmationDetails.getTransaction(), Is.is(transaction));
     }
 
     private Map<String, String> getMandateRequestPayload() {

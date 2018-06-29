@@ -6,8 +6,8 @@ import static java.lang.String.format;
 
 public class GoCardlessMandateNotFoundException extends NotFoundException {
 
-    public GoCardlessMandateNotFoundException(String goCardlessResourceId) {
-        super(format("No gocardless mandate found with resource id: %s", goCardlessResourceId));
+    public GoCardlessMandateNotFoundException(String field, String value) {
+        super(format("No gocardless mandate found with %s: %s", field, value));
     }
 }
 

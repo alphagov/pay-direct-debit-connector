@@ -14,19 +14,15 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public class TransactionResponse {
+public class CollectPaymentResponse {
     @JsonProperty("links")
     private List<Map<String, Object>> dataLinks = new ArrayList<>();
 
-    //compatibility with public api
     @JsonProperty("charge_id")
     private String transactionExternalId;
 
     @JsonProperty
     private Long amount;
-
-    @JsonProperty("return_url")
-    private String returnUrl;
 
     @JsonProperty
     private String description;
@@ -40,12 +36,11 @@ public class TransactionResponse {
     @JsonProperty
     private ExternalPaymentState state;
 
-    public TransactionResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
+    public CollectPaymentResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
         this.transactionExternalId = transactionExternalId;
         this.state = state;
         this.dataLinks = dataLinks;
         this.amount = amount;
-        this.returnUrl = returnUrl;
         this.description = description;
         this.reference = reference;
         this.createdDate = createdDate;
@@ -61,10 +56,6 @@ public class TransactionResponse {
 
     public Long getAmount() {
         return amount;
-    }
-
-    public String getReturnUrl() {
-        return returnUrl;
     }
 
     public String getDescription() {
@@ -84,12 +75,11 @@ public class TransactionResponse {
     }
 
     
-    public static TransactionResponse from(Transaction transaction, List<Map<String, Object>> dataLinks) {
-        return new TransactionResponse(
+    public static CollectPaymentResponse from(Transaction transaction, List<Map<String, Object>> dataLinks) {
+        return new CollectPaymentResponse(
                 transaction.getExternalId(),
                 transaction.getState().toExternal(),
                 transaction.getAmount(),
-                transaction.getMandate().getReturnUrl(),
                 transaction.getDescription(),
                 transaction.getReference(),
                 transaction.getCreatedDate().toString(),
@@ -101,12 +91,11 @@ public class TransactionResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TransactionResponse that = (TransactionResponse) o;
+        CollectPaymentResponse that = (CollectPaymentResponse) o;
 
         if (dataLinks != null ? !dataLinks.equals(that.dataLinks) : that.dataLinks != null) return false;
         if (!transactionExternalId.equals(that.transactionExternalId)) return false;
         if (!amount.equals(that.amount)) return false;
-        if (!returnUrl.equals(that.returnUrl)) return false;
         if (description != null ? !description.equals(that.description) : that.description != null) return false;
         if (reference != null ? !reference.equals(that.reference) : that.reference != null) return false;
         if (!createdDate.equals(that.createdDate)) return false;
@@ -118,7 +107,6 @@ public class TransactionResponse {
         int result = dataLinks != null ? dataLinks.hashCode() : 0;
         result = 31 * result + transactionExternalId.hashCode();
         result = 31 * result + amount.hashCode();
-        result = 31 * result + returnUrl.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (reference != null ? reference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
@@ -128,12 +116,11 @@ public class TransactionResponse {
 
     @Override
     public String toString() {
-        return "TransactionResponse{" +
+        return "CollectPaymentResponse{" +
                 "dataLinks=" + dataLinks +
                 ", transactionExternalId='" + transactionExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +
                 ", amount=" + amount +
-                ", returnUrl='" + returnUrl + '\'' +
                 ", reference='" + reference + '\'' +
                 ", createdDate=" + createdDate +
                 '}';

@@ -11,7 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
-import uk.gov.pay.directdebit.mandate.services.MandateConfirmService;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -33,9 +33,9 @@ public class SandboxServiceTest {
     @Mock
     private PayerService mockedPayerService;
     @Mock
-    private MandateConfirmService mockedMandateConfirmService;
-    @Mock
     private TransactionService mockedTransactionService;
+    @Mock
+    private MandateService mockedMandateService;
 
     private SandboxService service;
 
@@ -44,7 +44,7 @@ public class SandboxServiceTest {
 
     @Before
     public void setUp() {
-        service = new SandboxService(mockedPayerService, mockedMandateConfirmService, mockedTransactionService);
+        service = new SandboxService(mockedPayerService, mockedMandateService, mockedTransactionService);
     }
 
     @Test
@@ -63,12 +63,12 @@ public class SandboxServiceTest {
                 .withTransactionFixture(transactionFixture)
                 .build();
         Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678", "transaction_external_id", transactionFixture.getExternalId());
-        when(mockedMandateConfirmService
+        when(mockedMandateService
                 .confirm(mandateFixture.getExternalId(), details))
                 .thenReturn(confirmationDetails);
 
         service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
-        verify(mockedTransactionService).paymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
+        verify(mockedTransactionService).oneOffPaymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
     }
 
     @Test
@@ -78,12 +78,30 @@ public class SandboxServiceTest {
                 .withMandateFixture(mandateFixture)
                 .build();
         Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678");
-        when(mockedMandateConfirmService
+        when(mockedMandateService
                 .confirm(mandateFixture.getExternalId(), details))
                 .thenReturn(confirmationDetails);
 
         service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
         verifyNoMoreInteractions(mockedTransactionService);
+    }
+
+    @Test
+    public void collect_shouldRegisterAPaymentSubmittedToProviderEvent() {
+        MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(gatewayAccountFixture);
+        TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
+        Map<String, String> collectPaymentRequest = ImmutableMap.of(
+                "amount", "123456",
+                "reference", "a reference",
+                "description", "a description",
+                "agreement_id", mandateFixture.getExternalId());
+        when(mockedMandateService
+                .findByExternalId(mandateFixture.getExternalId()))
+                .thenReturn(mandateFixture.toEntity());
+        when(mockedTransactionService.createTransaction(collectPaymentRequest, mandateFixture.toEntity(), gatewayAccountFixture.getExternalId()))
+                .thenReturn(transactionFixture.toEntity());
+        service.collect(gatewayAccountFixture.toEntity(), collectPaymentRequest);
+        verify(mockedTransactionService).onDemandPaymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
     }
     
     @Test
@@ -124,4 +142,5 @@ public class SandboxServiceTest {
         assertThat(response.isValid(), is(false));
         assertThat(response.getBankName(), is(nullValue()));
     }
+    
 }

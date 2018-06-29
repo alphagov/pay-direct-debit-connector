@@ -2,12 +2,6 @@ package uk.gov.pay.directdebit.mandate.resources;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,6 +20,14 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+
+import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -89,7 +91,7 @@ public class ConfirmMandateSetupResourceIT {
         String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
                 "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
-                "\"template\": \"PAYMENT_CONFIRMED\"," +
+                "\"template\": \"ONE_OFF_PAYMENT_CONFIRMED\"," +
                 "\"personalisation\": " +
                 "{" +
                 "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
@@ -139,7 +141,7 @@ public class ConfirmMandateSetupResourceIT {
 //        String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 //        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
 //                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
-//                "\"template\": \"PAYMENT_CONFIRMED\"," +
+//                "\"template\": \"ONE_OFF_PAYMENT_CONFIRMED\"," +
 //                "\"personalisation\": " +
 //                "{" +
 //                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
@@ -195,12 +197,12 @@ public class ConfirmMandateSetupResourceIT {
         stubCreateCustomer(mandateFixture.getExternalId(), payerFixture, customerId);
         stubCreateCustomerBankAccount(mandateFixture.getExternalId(), payerFixture, customerId, customerBankAccountId);
         stubCreateMandate(mandateFixture.getExternalId(), goCardlessCustomerFixture);
-        stubCreatePayment(transactionFixture);
+        stubCreatePayment(transactionFixture.getAmount(), "MD123", transactionFixture.getExternalId());
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
                 "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
-                "\"template\": \"PAYMENT_CONFIRMED\"," +
+                "\"template\": \"ONE_OFF_PAYMENT_CONFIRMED\"," +
                 "\"personalisation\": " +
                 "{" +
                 "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
@@ -263,7 +265,7 @@ public class ConfirmMandateSetupResourceIT {
 
 //        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
 //                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
-//                "\"template\": \"PAYMENT_CONFIRMED\"," +
+//                "\"template\": \"ONE_OFF_PAYMENT_CONFIRMED\"," +
 //                "\"personalisation\": " +
 //                "{" +
 //                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +

@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.util;
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -62,26 +63,31 @@ public class GoCardlessStubs {
         stubCallsFor("/mandates", 200, mandateExternalId, mandateRequestExpectedBody, mandateResponseBody);
     }
 
-    public static void stubCreatePayment(TransactionFixture transactionFixture) {
+    public static void stubCreatePayment(Long amount, String goCardlessMandateId, String idempotencyKey) {
         String paymentRequestExpectedBody = load(GOCARDLESS_CREATE_PAYMENT_REQUEST)
-                .replace("{{amount}}", String.valueOf(transactionFixture.getAmount()));
+                .replace("{{amount}}", String.valueOf(amount))
+                .replace("{{gocardless_mandate_id}}", goCardlessMandateId);
 
         String paymentResponseBody = load(GOCARDLESS_CREATE_PAYMENT_SUCCESS_RESPONSE)
-                .replace("{{amount}}", String.valueOf(transactionFixture.getAmount()));
-        stubCallsFor("/payments", 200, transactionFixture.getExternalId(), paymentRequestExpectedBody, paymentResponseBody);
+                .replace("{{amount}}", String.valueOf(amount))
+                .replace("{{gocardless_mandate_id}}", goCardlessMandateId);
+        stubCallsFor("/payments", 200, idempotencyKey, paymentRequestExpectedBody, paymentResponseBody);
     }
+    
     private static void stubCallsFor(String url, int statusCode, String idempotencyKey, String requestBody, String responseBody) {
-        stubFor(
-                post(urlPathEqualTo(url))
-                        .withHeader("Authorization", equalTo("Bearer accesstoken"))
-                        .withHeader("Idempotency-Key", equalTo(idempotencyKey))
-                        .withRequestBody(equalToJson(requestBody))
-                        .willReturn(
-                                aResponse()
-                                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-                                        .withStatus(statusCode)
-                                        .withBody(responseBody)
-                        )
-        );
+        MappingBuilder postRequest = post(urlPathEqualTo(url));
+        if (idempotencyKey != null) {
+            postRequest.withHeader("Idempotency-Key", equalTo(idempotencyKey));
+        }
+        postRequest
+                .withHeader("Authorization", equalTo("Bearer accesstoken"))
+                .withRequestBody(equalToJson(requestBody))
+                .willReturn(
+                        aResponse()
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                                .withStatus(statusCode)
+                                .withBody(responseBody)
+                );
+        stubFor(postRequest);
     }
 }

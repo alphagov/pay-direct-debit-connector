@@ -1,7 +1,5 @@
 package uk.gov.pay.directdebit.notifications.services;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +12,9 @@ import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import java.time.LocalDate;
+import java.util.HashMap;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,7 +74,24 @@ public class UserNotificationServiceTest {
     }
 
     @Test
-    public void shouldSendPaymentConfirmedEmail() {
+    public void shouldSendOneOffPaymentConfirmedEmail() {
+        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
+
+        HashMap<String, String> emailPersonalisation = new HashMap<>();
+        emailPersonalisation.put("amount", "123.45");
+        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
+        emailPersonalisation.put("collection date", "21/05/2018");
+        emailPersonalisation.put("bank account last 2 digits", "******" + payerFixture.getAccountNumberLastTwoDigits());
+        emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");
+        emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
+        
+        userNotificationService.sendOneOffPaymentConfirmedEmailFor(transaction, LocalDate.parse("2018-05-21"));
+
+        verify(mockAdminUsersClient).sendEmail(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, mandateFixture.toEntity(), emailPersonalisation);
+    }
+
+    @Test
+    public void shouldSendOnDemandPaymentConfirmedEmail() {
         userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
 
         HashMap<String, String> emailPersonalisation = new HashMap<>();
@@ -84,10 +102,9 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
+        userNotificationService.sendOndDemandPaymentConfirmedEmailFor(transaction, LocalDate.parse("2018-05-21"));
 
-        userNotificationService.sendPaymentConfirmedEmailFor(transaction, LocalDate.parse("2018-05-21"));
-
-        verify(mockAdminUsersClient).sendEmail(EmailTemplate.PAYMENT_CONFIRMED, mandateFixture.toEntity(), emailPersonalisation);
+        verify(mockAdminUsersClient).sendEmail(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, mandateFixture.toEntity(), emailPersonalisation);
     }
 
     @Test
