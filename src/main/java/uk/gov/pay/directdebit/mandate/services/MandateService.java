@@ -22,7 +22,6 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
-import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -43,7 +42,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.lang.String.format;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
@@ -151,9 +149,11 @@ public class MandateService {
                 mandate.getState().toExternal(),
                 mandate.getReturnUrl(),
                 mandate.getMandateReference(),
+                mandate.getType().toString(),
                 mandate.getCreatedDate().toString(),
                 mandate.getPayer(),
-                transaction);
+                transaction
+        );
     }
 
     public DirectDebitInfoFrontendResponse populateGetMandateResponseForFrontend(String accountExternalId, String mandateExternalId) {
@@ -165,9 +165,11 @@ public class MandateService {
                 mandate.getState().toExternal(),
                 mandate.getReturnUrl(),
                 mandate.getMandateReference(),
+                mandate.getType().toString(),
                 mandate.getCreatedDate().toString(),
                 mandate.getPayer(),
-                null);
+                null
+        );
     }
 
     public GetMandateResponse populateGetMandateResponse(String accountExternalId, String mandateExternalId, UriInfo uriInfo) {

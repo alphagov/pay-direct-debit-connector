@@ -119,6 +119,9 @@ public class DirectDebitInfoFrontendResponse {
     @JsonProperty("mandate_reference")
     private String mandateReference;
 
+    @JsonProperty("mandate_type")
+    private String mandateType;
+
     @JsonProperty("created_date")
     private String createdDate;
 
@@ -131,6 +134,7 @@ public class DirectDebitInfoFrontendResponse {
                                            ExternalMandateState state,
                                            String returnUrl,
                                            String mandateReference,
+                                           String mandateType,
                                            String createdDate,
                                            Payer payer,
                                            Transaction transaction) {
@@ -140,6 +144,7 @@ public class DirectDebitInfoFrontendResponse {
         this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.returnUrl = returnUrl;
         this.mandateReference = mandateReference;
+        this.mandateType = mandateType;
         this.createdDate = createdDate;
         this.transaction = initTransaction(transaction);
         this.payer = initPayer(payer);
@@ -175,6 +180,10 @@ public class DirectDebitInfoFrontendResponse {
 
     public String getMandateReference() {
         return mandateReference;
+    }
+
+    public String getMandateType() {
+        return mandateType;
     }
 
     public TransactionDetails getTransaction() {
@@ -231,6 +240,9 @@ public class DirectDebitInfoFrontendResponse {
         if (!mandateReference.equals(that.mandateReference)) {
             return false;
         }
+        if (!mandateType.equals(that.mandateType)) {
+            return false;
+        }
         if (!createdDate.equals(that.createdDate)) {
             return false;
         }
@@ -246,6 +258,7 @@ public class DirectDebitInfoFrontendResponse {
         result = 31 * result + gatewayAccountId.hashCode();
         result = 31 * result + gatewayAccountExternalId.hashCode();
         result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
+        result = 31 * result + mandateType.hashCode();
         result = 31 * result + createdDate.hashCode();
         result = 31 * result + state.hashCode();
         return result;
@@ -253,13 +266,14 @@ public class DirectDebitInfoFrontendResponse {
 
     @Override
     public String toString() {
-        return "PaymentInfoFrontend{" +
+        return "DirectDebitInfoFrontendResponse{" +
                 "payerId='" + payer.externalId + "'" +
                 ", transactionId='" + transaction.externalId + "'" +
                 ", mandateId='" + mandateExternalId + "'" +
                 ", state='" + state.getState() + "'" +
                 ", returnUrl='" + returnUrl + "'" +
                 ", mandateReference='" + mandateReference + "'" +
+                ", mandateType='" + mandateType + "'" +
                 ", createdDate='" + createdDate + "'" +
                 "}";
     }
