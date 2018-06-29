@@ -161,8 +161,8 @@ public class MandateResourceIT {
 
         TransactionFixture transactionFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
 
-        String frontendMandateWithTransationPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
-        String requestPath = frontendMandateWithTransationPath
+        String frontendMandateWithTransactionPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
+        String requestPath = frontendMandateWithTransactionPath
                 .replace("{accountId}", accountExternalId)
                 .replace("{mandateExternalId}", mandateFixture.getExternalId())
                 .replace("{transactionExternalId}", transactionFixture.getExternalId());
@@ -177,6 +177,7 @@ public class MandateResourceIT {
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference()))
+                .body("mandate_type", is(mandateFixture.getMandateType().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().toString()))
                 .body("transaction." + JSON_AMOUNT_KEY, isNumber(transactionFixture.getAmount()))
                 .body("transaction." + JSON_REFERENCE_KEY, is(transactionFixture.getReference()))
@@ -213,6 +214,7 @@ public class MandateResourceIT {
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference()))
+                .body("mandate_type", is(mandateFixture.getMandateType().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().toString()))
                 .body("$", not(hasKey("transaction")))
                 .body("payer.payer_external_id", is(payerFixture.getExternalId()))
