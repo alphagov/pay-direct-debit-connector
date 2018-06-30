@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.mandate.model;
 
-public class GoCardlessMandate {
+public final class GoCardlessMandate {
 
     private Long id;
     private final Long mandateId;

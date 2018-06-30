@@ -9,6 +9,7 @@ import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
@@ -24,8 +25,11 @@ import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
+import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.models.PaymentProviderConfirmation;
 import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
@@ -66,22 +70,24 @@ public class MandateService {
     private final TransactionService transactionService;
     private final DirectDebitEventService directDebitEventService;
     private final UserNotificationService userNotificationService;
+    private final PaymentProviderFactory paymentProviderFactory;
 
     @Inject
-    public MandateService(
-            DirectDebitConfig directDebitConfig,
-            MandateDao mandateDao, GatewayAccountDao gatewayAccountDao,
-            TokenService tokenService,
-            TransactionService transactionService,
-            DirectDebitEventService directDebitEventService,
-            UserNotificationService userNotificationService) {
+    public MandateService(MandateDao mandateDao, 
+                          LinksConfig linksConfig, 
+                          GatewayAccountDao gatewayAccountDao, 
+                          TokenService tokenService, TransactionService transactionService, 
+                          DirectDebitEventService directDebitEventService, 
+                          UserNotificationService userNotificationService, 
+                          PaymentProviderFactory paymentProviderFactory) {
+        this.mandateDao = mandateDao;
+        this.linksConfig = linksConfig;
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
         this.transactionService = transactionService;
         this.directDebitEventService = directDebitEventService;
-        this.mandateDao = mandateDao;
         this.userNotificationService = userNotificationService;
-        this.linksConfig = directDebitConfig.getLinks();
+        this.paymentProviderFactory = paymentProviderFactory;
     }
 
     public Mandate createMandate(Map<String, String> mandateRequestMap, String accountExternalId) {
@@ -342,7 +348,7 @@ public class MandateService {
      *
      * @param mandateExternalId
      */
-    public ConfirmationDetails confirm(String mandateExternalId, Map<String, String> confirmDetailsRequest) {
+    public void confirm(GatewayAccount gatewayAccount, String mandateExternalId, Map<String, String> confirmDetailsRequest) {
         String sortCode = confirmDetailsRequest.get("sort_code");
         String accountNumber = confirmDetailsRequest.get("account_number");
         Mandate mandate = confirmedDirectDebitDetailsFor(mandateExternalId);
@@ -350,6 +356,24 @@ public class MandateService {
                 .ofNullable(confirmDetailsRequest.get("transaction_external_id"))
                 .map(transactionService::findTransactionForExternalId)
                 .orElse(null);
-        return new ConfirmationDetails(mandate, transaction, accountNumber, sortCode);
+        
+        ConfirmationDetails confirmationDetails = new ConfirmationDetails(mandate, transaction, accountNumber, sortCode);
+        
+        paymentProviderFactory
+                .getServiceFor(gatewayAccount.getPaymentProvider(), mandate.getType())
+                .confirm(confirmationDetails);
+
+    }
+    
+    public void collect(GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequest) {
+        
+        Mandate mandate = findByExternalId(collectPaymentRequest.get("agreement_id"));
+        
+        paymentProviderFactory
+                .getServiceFor(gatewayAccount.getPaymentProvider(), mandate.getType())
+                .collect(gatewayAccount, collectPaymentRequest);
+        
+        
+        
     }
 }

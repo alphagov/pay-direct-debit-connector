@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.payers.model;
 
-public class GoCardlessCustomer {
+public class GoCardlessCustomer implements Entity {
     private Long id;
     private final Long payerId;
     private final String customerId;

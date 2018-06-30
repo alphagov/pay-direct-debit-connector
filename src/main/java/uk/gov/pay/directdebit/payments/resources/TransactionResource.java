@@ -79,8 +79,7 @@ public class TransactionResource {
     public Response collectPaymentFromMandate(@PathParam("accountId") GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequest, @Context UriInfo uriInfo) {
         LOGGER.info("Received collect payment from mandate request");
         collectPaymentRequestValidator.validate(collectPaymentRequest);
-        DirectDebitPaymentProvider service = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
-        Transaction transaction = service.collect(gatewayAccount, collectPaymentRequest);
+        Transaction transaction = mandateService.collect(gatewayAccount, collectPaymentRequest);
         CollectPaymentResponse response = transactionService.collectPaymentResponseWithSelfLink(transaction, gatewayAccount.getExternalId(), uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }

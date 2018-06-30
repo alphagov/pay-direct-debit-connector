@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 
@@ -22,13 +23,13 @@ import static javax.ws.rs.core.Response.noContent;
 public class ConfirmMandateSetupResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmMandateSetupResource.class);
-    private final PaymentProviderFactory paymentProviderFactory;
+    private final MandateService mandateService;
 
     private final BankAccountDetailsValidator bankAccountDetailsValidator = new BankAccountDetailsValidator();
 
     @Inject
-    public ConfirmMandateSetupResource(PaymentProviderFactory paymentProviderFactory) {
-        this.paymentProviderFactory = paymentProviderFactory;
+    public ConfirmMandateSetupResource(MandateService mandateService) {
+        this.mandateService = mandateService;
     }
     
     @POST
@@ -38,8 +39,7 @@ public class ConfirmMandateSetupResource {
     public Response confirm(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("mandateExternalId") String mandateExternalId, Map<String, String> confirmDetailsRequest) {
         LOGGER.info("Confirming direct debit details for mandate with id: {}", mandateExternalId);
         bankAccountDetailsValidator.validate(confirmDetailsRequest);
-        DirectDebitPaymentProvider service = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
-        service.confirm(mandateExternalId, gatewayAccount, confirmDetailsRequest);
+        mandateService.confirm(gatewayAccount, mandateExternalId, confirmDetailsRequest);
         LOGGER.info("Confirmed direct debit details for mandate with id: {}", mandateExternalId);
 
         return noContent().build();
