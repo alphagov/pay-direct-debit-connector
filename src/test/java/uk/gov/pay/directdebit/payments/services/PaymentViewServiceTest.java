@@ -70,7 +70,8 @@ public class PaymentViewServiceTest {
                     createdDate,
                     "John Doe" + i,
                     "doe@mail.mail",
-                    PaymentState.NEW);
+                    PaymentState.NEW,
+                    RandomIdGenerator.newId());
             paymentViewList.add(paymentView);
         }
         gatewayAccount = new GatewayAccount(1L, gatewayAccountExternalId, null, null, null, null, null);
@@ -98,7 +99,9 @@ public class PaymentViewServiceTest {
         for (PaymentView paymentView : paymentViewList){
             listResponses.add(new PaymentViewResultResponse(paymentView.getTransactionExternalId(),
                     paymentView.getAmount(), paymentView.getReference(), paymentView.getDescription(),
-                    paymentView.getCreatedDate().toString(), paymentView.getName(), paymentView.getEmail(), paymentView.getState().toExternal()));
+                    paymentView.getCreatedDate().toString(), paymentView.getName(), 
+                    paymentView.getEmail(), paymentView.getState().toExternal(),
+                    paymentView.getMandateExternalId()));
         }
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
@@ -152,7 +155,8 @@ public class PaymentViewServiceTest {
                     transaction.getCreatedDate(), 
                     payer.getName(), 
                     payer.getEmail(),
-                    transaction.getState()));
+                    transaction.getState(),
+                    RandomIdGenerator.newId()));
         }
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(50L);

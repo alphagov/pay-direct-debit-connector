@@ -12,6 +12,7 @@ public class PaymentView {
     private String name;
     private String email;
     private PaymentState state;
+    private String mandateExternalId;
 
     public PaymentView(String gatewayExternalId,
                        String transactionExternalId,
@@ -21,7 +22,8 @@ public class PaymentView {
                        ZonedDateTime createdDate,
                        String name,
                        String email,
-                       PaymentState state) {
+                       PaymentState state,
+                       String mandateExternalId) {
         this.gatewayExternalId = gatewayExternalId;
         this.transactionExternalId = transactionExternalId;
         this.amount = amount;
@@ -31,6 +33,7 @@ public class PaymentView {
         this.name = name;
         this.email = email;
         this.state = state;
+        this.mandateExternalId = mandateExternalId;
     }
 
     public String getGatewayExternalId() {
@@ -69,6 +72,8 @@ public class PaymentView {
         return state;
     }
 
+    public String getMandateExternalId() { return mandateExternalId; }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -84,6 +89,7 @@ public class PaymentView {
         if (!createdDate.equals(that.createdDate)) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (email != null ? !email.equalsIgnoreCase(that.email) : that.email != null) return false;
+        if (mandateExternalId != null ? !mandateExternalId.equalsIgnoreCase(that.mandateExternalId) : that.mandateExternalId != null) return false;
         return state == that.state;
     }
 
@@ -95,9 +101,10 @@ public class PaymentView {
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (reference != null ? reference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + email.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + state.hashCode();
+        result = 31 * result + (mandateExternalId != null ? mandateExternalId.hashCode() : 0);
         return result;
     }
 }

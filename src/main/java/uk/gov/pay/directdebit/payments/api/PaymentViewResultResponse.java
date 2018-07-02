@@ -26,6 +26,9 @@ public class PaymentViewResultResponse {
 
     @JsonProperty("created_date")
     private String createdDate;
+    
+    @JsonProperty("agreement_id")
+    private String mandateExternalId;
 
     @JsonProperty
     private String name;
@@ -47,7 +50,8 @@ public class PaymentViewResultResponse {
                                      String createdDate,
                                      String name,
                                      String email,
-                                     ExternalPaymentState state) {
+                                     ExternalPaymentState state,
+                                     String mandateExternalId) {
         this.transactionId = transactionId;
         this.amount = amount;
         this.reference = reference;
@@ -56,6 +60,7 @@ public class PaymentViewResultResponse {
         this.name = name;
         this.email = email;
         this.state = state;
+        this.mandateExternalId = mandateExternalId;
     }
 
     public String getTransactionId() {
@@ -111,6 +116,7 @@ public class PaymentViewResultResponse {
         if (!createdDate.equals(that.createdDate)) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (email != null ? !email.equalsIgnoreCase(that.email) : that.email != null) return false;
+        if (mandateExternalId != null ? !transactionId.equalsIgnoreCase(that.mandateExternalId) : that.transactionId != null) return false;
         return state == that.state;
     }
 
@@ -122,9 +128,10 @@ public class PaymentViewResultResponse {
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (reference != null ? reference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + email.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + state.hashCode();
+        result = 31 * result + (mandateExternalId != null ? mandateExternalId.hashCode() : 0);
         return result;
     }
 
