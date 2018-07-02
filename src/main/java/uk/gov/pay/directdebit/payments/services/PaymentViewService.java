@@ -80,7 +80,8 @@ public class PaymentViewService {
                 paymentView.getCreatedDate().toString(),
                 paymentView.getName(),
                 paymentView.getEmail(),
-                paymentView.getState().toExternal());
+                paymentView.getState().toExternal(),
+                paymentView.getMandateExternalId());
     }
     
     private PaymentViewResultResponse decorateWithSelfLink(PaymentViewResultResponse listResponse, String gatewayAccountId) {

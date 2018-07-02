@@ -20,7 +20,8 @@ public class PaymentViewDao {
             "t.created_date as created_date, " +
             "t.state AS state, " +
             "pa.name AS name, " +
-            "pa.email AS email " +
+            "pa.email AS email, " +
+            "m.external_id as mandate_external_id " +
             "FROM transactions t " +
             "INNER JOIN mandates m ON t.mandate_id = m.id " +
             "INNER JOIN gateway_accounts ga ON ga.id = m.gateway_account_id " +

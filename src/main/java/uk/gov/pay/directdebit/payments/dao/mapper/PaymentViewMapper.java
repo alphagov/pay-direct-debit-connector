@@ -20,6 +20,7 @@ public class PaymentViewMapper implements RowMapper<PaymentView> {
     private static final String NAME_COLUMN = "name";
     private static final String EMAIL_COLUMN = "email";
     private static final String STATE_COLUMN = "state";
+    private static final String MANDATE_EXTERNAL_ID_COLUMN = "mandate_external_id";
 
     @Override
     public PaymentView map(ResultSet rs, StatementContext ctx) throws SQLException {
@@ -32,7 +33,8 @@ public class PaymentViewMapper implements RowMapper<PaymentView> {
                 ZonedDateTime.ofInstant(rs.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
                 rs.getString(NAME_COLUMN),
                 rs.getString(EMAIL_COLUMN),
-                PaymentState.valueOf(rs.getString(STATE_COLUMN)
-                ));
+                PaymentState.valueOf(rs.getString(STATE_COLUMN)),
+                rs.getString(MANDATE_EXTERNAL_ID_COLUMN)
+                );
     }
 }
