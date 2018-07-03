@@ -25,23 +25,13 @@ import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
-import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
-import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
-import static uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED;
-import static uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID_OUT;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.common.util.URIBuilder.*;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.*;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.chargeCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
@@ -60,12 +50,12 @@ public class TransactionService {
 
     @Inject
     public TransactionService(TokenService tokenService,
-            GatewayAccountDao gatewayAccountDao,
-            DirectDebitConfig directDebitConfig,
-            TransactionDao transactionDao,
-            DirectDebitEventService directDebitEventService,
-            UserNotificationService userNotificationService,
-            CreatePaymentParser createPaymentParser) {
+                              GatewayAccountDao gatewayAccountDao,
+                              DirectDebitConfig directDebitConfig,
+                              TransactionDao transactionDao,
+                              DirectDebitEventService directDebitEventService,
+                              UserNotificationService userNotificationService,
+                              CreatePaymentParser createPaymentParser) {
         this.tokenService = tokenService;
         this.gatewayAccountDao = gatewayAccountDao;
         this.directDebitConfig = directDebitConfig;
@@ -127,7 +117,7 @@ public class TransactionService {
         );
         return CollectPaymentResponse.from(transaction, dataLinks);
     }
-    
+
     public TransactionResponse getPaymentWithExternalId(String accountExternalId, String paymentExternalId, UriInfo uriInfo) {
         Transaction transaction = findTransactionForExternalId(paymentExternalId);
         return createPaymentResponseWithAllLinks(transaction, accountExternalId, uriInfo);
@@ -209,6 +199,10 @@ public class TransactionService {
 
     public DirectDebitEvent payoutPaidFor(Transaction transaction) {
         return directDebitEventService.registerPayoutPaidEventFor(transaction);
+    }
+
+    void onDemandMandateConfirmedFor(Mandate mandate) {
+        userNotificationService.sendOnDemandMandateCreatedEmailFor(mandate);
     }
 
     private Transaction updateStateFor(Transaction transaction, SupportedEvent event) {

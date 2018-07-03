@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.LocalDate;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,12 +15,13 @@ import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
+import java.time.LocalDate;
+import java.util.Map;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.ConfirmationDetailsFixture.confirmationDetails;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -72,7 +71,7 @@ public class SandboxServiceTest {
     }
 
     @Test
-    public void confirm_shouldNotRegisterAPaymentSubmittedToProviderEventWhenSuccessfullyConfirmingOnDemandMandate() {
+    public void confirm_shouldSendAnEmailWhenConfirmationForOnDemandMandate() {
         MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(gatewayAccountFixture);
         ConfirmationDetails confirmationDetails = confirmationDetails()
                 .withMandateFixture(mandateFixture)
@@ -83,7 +82,7 @@ public class SandboxServiceTest {
                 .thenReturn(confirmationDetails);
 
         service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
-        verifyNoMoreInteractions(mockedTransactionService);
+        verify(mockedTransactionService).onDemandMandateConfirmedFor(mandateFixture.toEntity());
     }
 
     @Test
