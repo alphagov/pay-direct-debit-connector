@@ -25,13 +25,21 @@ import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static uk.gov.pay.directdebit.common.util.URIBuilder.*;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.*;
+import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
+import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
+import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID_OUT;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.chargeCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
@@ -155,7 +163,7 @@ public class TransactionService {
 
     public DirectDebitEvent onDemandPaymentSubmittedToProviderFor(Transaction transaction, LocalDate earliestChargeDate) {
         updateStateFor(transaction, PAYMENT_SUBMITTED_TO_PROVIDER);
-        userNotificationService.sendOndDemandPaymentConfirmedEmailFor(transaction, earliestChargeDate);
+        userNotificationService.sendOnDemandPaymentConfirmedEmailFor(transaction, earliestChargeDate);
         return directDebitEventService.registerPaymentSubmittedToProviderEventFor(transaction);
     }
 
