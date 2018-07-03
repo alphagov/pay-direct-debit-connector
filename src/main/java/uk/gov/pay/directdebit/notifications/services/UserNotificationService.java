@@ -14,7 +14,8 @@ import java.time.format.DateTimeFormatter;
 
 public class UserNotificationService {
 
-    private static final String PLACEHOLDER_STATEMENT_NAME = "THE-CAKE-IS-A-LIE";
+    public static final String PLACEHOLDER_STATEMENT_NAME = "THE-CAKE-IS-A-LIE";
+    public static final String BANK_ACCOUNT_MASK_PREFIX = "******";
 
     private static final String DD_GUARANTEE_KEY = "dd guarantee link";
     private static final String MANDATE_REFERENCE_KEY = "mandate reference";
@@ -44,10 +45,12 @@ public class UserNotificationService {
 
     public void sendOnDemandMandateCreatedEmailFor(Mandate mandate) {
         adminUsersClient.sendEmail(EmailTemplate.ON_DEMAND_MANDATE_CREATED, mandate,
-                ImmutableMap.of(
-                        MANDATE_REFERENCE_KEY, mandate.getMandateReference(),
-                        DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
-                )
+                ImmutableMap.<String, String>builder()
+                        .put(MANDATE_REFERENCE_KEY, mandate.getMandateReference())
+                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, BANK_ACCOUNT_MASK_PREFIX + mandate.getPayer().getAccountNumberLastTwoDigits())
+                        .put(STATEMENT_NAME_KEY, PLACEHOLDER_STATEMENT_NAME)
+                        .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
+                        .build()
         );
     }
 
@@ -64,7 +67,7 @@ public class UserNotificationService {
         sendPaymentConfirmedEmailFor(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, transaction, earliestChargeDate);
     }
 
-    public void sendOndDemandPaymentConfirmedEmailFor(Transaction transaction, LocalDate earliestChargeDate) {
+    public void sendOnDemandPaymentConfirmedEmailFor(Transaction transaction, LocalDate earliestChargeDate) {
         sendPaymentConfirmedEmailFor(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, transaction, earliestChargeDate);
     }
 
@@ -74,7 +77,7 @@ public class UserNotificationService {
                         .put(AMOUNT_KEY, formatToPounds(transaction.getAmount()))
                         .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate))
                         .put(MANDATE_REFERENCE_KEY, transaction.getMandate().getMandateReference())
-                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, "******" + transaction.getMandate().getPayer().getAccountNumberLastTwoDigits())
+                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, BANK_ACCOUNT_MASK_PREFIX + transaction.getMandate().getPayer().getAccountNumberLastTwoDigits())
                         .put(STATEMENT_NAME_KEY, PLACEHOLDER_STATEMENT_NAME)
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
                         .build());
