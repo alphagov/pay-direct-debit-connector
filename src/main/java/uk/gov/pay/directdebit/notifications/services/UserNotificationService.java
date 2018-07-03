@@ -42,6 +42,15 @@ public class UserNotificationService {
         );
     }
 
+    public void sendOnDemandMandateCreatedEmailFor(Mandate mandate) {
+        adminUsersClient.sendEmail(EmailTemplate.ON_DEMAND_MANDATE_CREATED, mandate,
+                ImmutableMap.of(
+                        MANDATE_REFERENCE_KEY, mandate.getMandateReference(),
+                        DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
+                )
+        );
+    }
+
     public void sendMandateCancelledEmailFor(Mandate mandate) {
         adminUsersClient.sendEmail(EmailTemplate.MANDATE_CANCELLED, mandate,
                 ImmutableMap.of(
@@ -58,7 +67,7 @@ public class UserNotificationService {
     public void sendOndDemandPaymentConfirmedEmailFor(Transaction transaction, LocalDate earliestChargeDate) {
         sendPaymentConfirmedEmailFor(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, transaction, earliestChargeDate);
     }
-    
+
     private void sendPaymentConfirmedEmailFor(EmailTemplate template, Transaction transaction, LocalDate earliestChargeDate) {
         adminUsersClient.sendEmail(template, transaction.getMandate(),
                 ImmutableMap.<String, String>builder()
@@ -70,7 +79,7 @@ public class UserNotificationService {
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
                         .build());
     }
-    
+
     public void sendPaymentFailedEmailFor(Transaction transaction) {
         adminUsersClient.sendEmail(EmailTemplate.PAYMENT_FAILED, transaction.getMandate(),
                 ImmutableMap.of(

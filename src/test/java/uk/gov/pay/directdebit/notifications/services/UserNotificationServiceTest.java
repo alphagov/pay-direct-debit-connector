@@ -8,6 +8,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -62,6 +64,22 @@ public class UserNotificationServiceTest {
     }
 
     @Test
+    public void shouldSendOnDemandMandateCreatedEmail() {
+        Mandate mandate = MandateFixture.aMandateFixture()
+                .withMandateType(MandateType.ON_DEMAND)
+                .withPayerFixture(payerFixture)
+                .toEntity();
+        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
+        HashMap<String, String> emailPersonalisation = new HashMap<>();
+        emailPersonalisation.put("mandate reference", mandate.getMandateReference());
+        emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
+
+        userNotificationService.sendOnDemandMandateCreatedEmailFor(mandate);
+
+        verify(mockAdminUsersClient).sendEmail(EmailTemplate.ON_DEMAND_MANDATE_CREATED, mandate, emailPersonalisation);
+    }
+
+    @Test
     public void shouldSendMandateCancelledEmail() {
         userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
         HashMap<String, String> emailPersonalisation = new HashMap<>();
@@ -84,7 +102,7 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("bank account last 2 digits", "******" + payerFixture.getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
-        
+
         userNotificationService.sendOneOffPaymentConfirmedEmailFor(transaction, LocalDate.parse("2018-05-21"));
 
         verify(mockAdminUsersClient).sendEmail(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, mandateFixture.toEntity(), emailPersonalisation);

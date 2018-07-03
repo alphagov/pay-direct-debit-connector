@@ -1,38 +1,26 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import java.util.Map;
-import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
-import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.*;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
-import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
-import uk.gov.pay.directdebit.payers.model.BankAccountDetailsParser;
-import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
-import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
-import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payers.model.*;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
-import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
-import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
-import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
-import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
-import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
-import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.*;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import javax.inject.Inject;
+import java.util.Map;
 
 public class GoCardlessService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessService.class);
@@ -50,15 +38,15 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     @Inject
     public GoCardlessService(PayerService payerService,
-            TransactionService transactionService, 
-            MandateService mandateService,
-            GoCardlessClientFacade goCardlessClientFacade,
-            GoCardlessCustomerDao goCardlessCustomerDao,
-            GoCardlessPaymentDao goCardlessPaymentDao,
-            GoCardlessMandateDao goCardlessMandateDao,
-            GoCardlessEventDao goCardlessEventDao,
-            MandateDao mandateDao,
-            BankAccountDetailsParser bankAccountDetailsParser) {
+                             TransactionService transactionService,
+                             MandateService mandateService,
+                             GoCardlessClientFacade goCardlessClientFacade,
+                             GoCardlessCustomerDao goCardlessCustomerDao,
+                             GoCardlessPaymentDao goCardlessPaymentDao,
+                             GoCardlessMandateDao goCardlessMandateDao,
+                             GoCardlessEventDao goCardlessEventDao,
+                             MandateDao mandateDao,
+                             BankAccountDetailsParser bankAccountDetailsParser) {
         this.payerService = payerService;
         this.transactionService = transactionService;
         this.mandateService = mandateService;
@@ -86,13 +74,15 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         createCustomerBankAccount(mandateExternalId, customer, mandate.getPayer(), confirmationDetails.getSortCode(), confirmationDetails.getAccountNumber());
         GoCardlessMandate goCardlessMandate = createMandate(mandate, customer);
 
-        if (mandate.getType().equals(MandateType.ONE_OFF)) {
+        if (MandateType.ONE_OFF.equals(mandate.getType())) {
             Transaction transaction = confirmationDetails.getTransaction();
             GoCardlessPayment payment = createPayment(transaction, goCardlessMandate);
             transactionService.oneOffPaymentSubmittedToProviderFor(transaction, payment.getChargeDate());
+        } else if (MandateType.ON_DEMAND.equals(mandate.getType())) {
+            transactionService.onDemandMandateConfirmedFor(mandate);
         }
     }
-    
+
     @Override
     public Transaction collect(GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequest) {
         String mandateExternalId = collectPaymentRequest.get("agreement_id");
@@ -122,7 +112,6 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         }
     }
 
-    
     private GoCardlessCustomer createCustomer(String mandateExternalId, Payer payer) {
         try {
             LOGGER.info("Attempting to call gocardless to create a customer, mandate id: {}", mandateExternalId);
@@ -165,7 +154,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
             LOGGER.info("Attempting to call gocardless to create a mandate, pay mandate id: {}", mandate.getExternalId());
 
             GoCardlessMandate goCardlessMandate = goCardlessClientFacade.createMandate(mandate, goCardlessCustomer);
-            LOGGER.info("Created mandate in gocardless, pay mandate id: {}, gocardless mandate id: {}", 
+            LOGGER.info("Created mandate in gocardless, pay mandate id: {}, gocardless mandate id: {}",
                     mandate.getExternalId(),
                     goCardlessMandate.getGoCardlessMandateId());
 
@@ -181,17 +170,17 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
 
     private GoCardlessPayment createPayment(Transaction transaction, GoCardlessMandate goCardlessMandate) {
         try {
-            LOGGER.info("Attempting to call gocardless to create a payment, mandate id: {}, transaction id: {}", 
-                    transaction.getMandate().getExternalId(), 
+            LOGGER.info("Attempting to call gocardless to create a payment, mandate id: {}, transaction id: {}",
+                    transaction.getMandate().getExternalId(),
                     transaction.getExternalId());
 
             GoCardlessPayment goCardlessPayment = goCardlessClientFacade.createPayment(transaction, goCardlessMandate);
 
-            LOGGER.info("Created payment in gocardless, mandate id: {}, transaction id: {}, gocardless payment id: {}", 
-                    transaction.getMandate().getExternalId(), 
-                    transaction.getExternalId(), 
+            LOGGER.info("Created payment in gocardless, mandate id: {}, transaction id: {}, gocardless payment id: {}",
+                    transaction.getMandate().getExternalId(),
+                    transaction.getExternalId(),
                     goCardlessPayment.getPaymentId());
-            
+
             Long id = goCardlessPaymentDao.insert(goCardlessPayment);
             goCardlessPayment.setId(id);
             return goCardlessPayment;
@@ -210,7 +199,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         goCardlessEventDao.updateEventId(event.getId(), event.getEventId());
         LOGGER.info("Updated gocardless event with gocardless event id {}, internal event id {} ", event.getGoCardlessEventId(), event.getEventId());
     }
-    
+
     public GoCardlessPayment findPaymentForEvent(GoCardlessEvent event) {
         return goCardlessPaymentDao
                 .findByEventResourceId(event.getResourceId())
@@ -237,6 +226,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
                     return new GoCardlessMandateNotFoundException("mandate id", mandate.getExternalId());
                 });
     }
+
     private void logException(Exception exc, String resource, String id) {
         if (exc.getCause() != null) {
             LOGGER.error("Failed to create a {} in gocardless, id : {}, error: {}, cause: {}", resource, id, exc.getMessage(), exc.getCause().getMessage());
@@ -245,5 +235,5 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         }
     }
 
-    
+
 }

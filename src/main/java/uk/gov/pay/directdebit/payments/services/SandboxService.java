@@ -1,8 +1,5 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import java.time.LocalDate;
-import java.util.Map;
-import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.exception.validation.ValidationException;
@@ -17,6 +14,10 @@ import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import javax.inject.Inject;
+import java.time.LocalDate;
+import java.util.Map;
 
 public class SandboxService implements DirectDebitPaymentProvider {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(SandboxService.class);
@@ -50,6 +51,8 @@ public class SandboxService implements DirectDebitPaymentProvider {
         if (mandate.getType().equals(MandateType.ONE_OFF)) {
             Transaction transaction = confirmationDetails.getTransaction();
             transactionService.oneOffPaymentSubmittedToProviderFor(transaction, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
+        } else if(MandateType.ON_DEMAND.equals(mandate.getType())) {
+            transactionService.onDemandMandateConfirmedFor(mandate);
         }
     }
 
