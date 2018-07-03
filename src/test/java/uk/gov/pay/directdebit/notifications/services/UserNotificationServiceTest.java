@@ -72,7 +72,7 @@ public class UserNotificationServiceTest {
         userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("mandate reference", mandate.getMandateReference());
-        emailPersonalisation.put("bank account last 2 digits", UserNotificationService.BANK_ACCOUNT_MASK_PREFIX + mandate.getPayer().getAccountNumberLastTwoDigits());
+        emailPersonalisation.put("bank account last 2 digits", mandate.getPayer().getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", UserNotificationService.PLACEHOLDER_STATEMENT_NAME);
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
@@ -101,7 +101,7 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("amount", "123.45");
         emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
         emailPersonalisation.put("collection date", "21/05/2018");
-        emailPersonalisation.put("bank account last 2 digits", UserNotificationService.BANK_ACCOUNT_MASK_PREFIX + payerFixture.getAccountNumberLastTwoDigits());
+        emailPersonalisation.put("bank account last 2 digits", payerFixture.getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
@@ -118,7 +118,7 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("amount", "123.45");
         emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
         emailPersonalisation.put("collection date", "21/05/2018");
-        emailPersonalisation.put("bank account last 2 digits", UserNotificationService.BANK_ACCOUNT_MASK_PREFIX + payerFixture.getAccountNumberLastTwoDigits());
+        emailPersonalisation.put("bank account last 2 digits", payerFixture.getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 

@@ -164,7 +164,7 @@ public class TransactionResourceIT {
                 "{" +
                 "\"amount\": \"" + BigDecimal.valueOf(AMOUNT, 2).toString() + "\", " +
                 "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-                "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
+                "\"bank account last 2 digits\": \"" +  lastTwoDigitsBankAccount + "\", " +
                 "\"collection date\": \"" +  chargeDate + "\", " +
                 "\"statement name\": \"THE-CAKE-IS-A-LIE\", " +
                 "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
@@ -231,7 +231,7 @@ public class TransactionResourceIT {
                 "{" +
                 "\"amount\": \"" + BigDecimal.valueOf(AMOUNT, 2).toString() + "\", " +
                 "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-                "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
+                "\"bank account last 2 digits\": \"" +  lastTwoDigitsBankAccount + "\", " +
                 "\"collection date\": \"21/05/2014\", " +
                 "\"statement name\": \"THE-CAKE-IS-A-LIE\", " +
                 "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
