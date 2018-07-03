@@ -15,7 +15,6 @@ import java.time.format.DateTimeFormatter;
 public class UserNotificationService {
 
     public static final String PLACEHOLDER_STATEMENT_NAME = "THE-CAKE-IS-A-LIE";
-    public static final String BANK_ACCOUNT_MASK_PREFIX = "******";
 
     private static final String DD_GUARANTEE_KEY = "dd guarantee link";
     private static final String MANDATE_REFERENCE_KEY = "mandate reference";
@@ -47,7 +46,7 @@ public class UserNotificationService {
         adminUsersClient.sendEmail(EmailTemplate.ON_DEMAND_MANDATE_CREATED, mandate,
                 ImmutableMap.<String, String>builder()
                         .put(MANDATE_REFERENCE_KEY, mandate.getMandateReference())
-                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, BANK_ACCOUNT_MASK_PREFIX + mandate.getPayer().getAccountNumberLastTwoDigits())
+                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().getAccountNumberLastTwoDigits())
                         .put(STATEMENT_NAME_KEY, PLACEHOLDER_STATEMENT_NAME)
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
                         .build()
@@ -77,7 +76,7 @@ public class UserNotificationService {
                         .put(AMOUNT_KEY, formatToPounds(transaction.getAmount()))
                         .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate))
                         .put(MANDATE_REFERENCE_KEY, transaction.getMandate().getMandateReference())
-                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, BANK_ACCOUNT_MASK_PREFIX + transaction.getMandate().getPayer().getAccountNumberLastTwoDigits())
+                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, transaction.getMandate().getPayer().getAccountNumberLastTwoDigits())
                         .put(STATEMENT_NAME_KEY, PLACEHOLDER_STATEMENT_NAME)
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
                         .build());

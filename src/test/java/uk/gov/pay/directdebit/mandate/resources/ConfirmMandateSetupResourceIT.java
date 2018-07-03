@@ -73,6 +73,7 @@ public class ConfirmMandateSetupResourceIT {
         wireMockAdminUsers.start();
         gatewayAccountFixture.insert(testContext.getJdbi());
     }
+
     @Test
     public void confirm_shouldCreateAMandateAndUpdateCharge_ifMandateIsOneOff() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
@@ -87,7 +88,7 @@ public class ConfirmMandateSetupResourceIT {
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());
 
-        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
+        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
         String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
                 "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
@@ -96,8 +97,8 @@ public class ConfirmMandateSetupResourceIT {
                 "{" +
                 "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
                 "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-                "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
-                "\"collection date\": \"" +  chargeDate + "\", " +
+                "\"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\", " +
+                "\"collection date\": \"" + chargeDate + "\", " +
                 "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
                 "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
                 "}" +
@@ -146,7 +147,7 @@ public class ConfirmMandateSetupResourceIT {
 //                "{" +
 //                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
 //                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-//                "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
+//                "\"bank account last 2 digits\": \"" +  lastTwoDigitsBankAccount + "\", " +
 //                "\"collection date\": \"" +  chargeDate + "\", " +
 //                "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
 //                "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
@@ -199,7 +200,7 @@ public class ConfirmMandateSetupResourceIT {
         stubCreateMandate(mandateFixture.getExternalId(), goCardlessCustomerFixture);
         stubCreatePayment(transactionFixture.getAmount(), "MD123", transactionFixture.getExternalId());
 
-        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
+        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
                 "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
                 "\"template\": \"ONE_OFF_PAYMENT_CONFIRMED\"," +
@@ -207,7 +208,7 @@ public class ConfirmMandateSetupResourceIT {
                 "{" +
                 "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
                 "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-                "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
+                "\"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\", " +
                 "\"collection date\": \"2014-05-21\", " +
                 "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
                 "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
@@ -215,7 +216,7 @@ public class ConfirmMandateSetupResourceIT {
                 "}";
 
         String confirmDetails =
-                "{\"sort_code\": \"" + payerFixture.getSortCode() + "\", " + 
+                "{\"sort_code\": \"" + payerFixture.getSortCode() + "\", " +
                         "\"account_number\": \"" + payerFixture.getAccountNumber() + "\", " +
                         "\"transaction_external_id\": \"" + transactionFixture.getExternalId() + "\"}";
 
@@ -270,7 +271,7 @@ public class ConfirmMandateSetupResourceIT {
 //                "{" +
 //                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
 //                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-//                "\"bank account last 2 digits\": \"******" +  lastTwoDigitsBankAccount + "\", " +
+//                "\"bank account last 2 digits\": \"" +  lastTwoDigitsBankAccount + "\", " +
 //                "\"collection date\": \"2014-05-21\", " +
 //                "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
 //                "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
