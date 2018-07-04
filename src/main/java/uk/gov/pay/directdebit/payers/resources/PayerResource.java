@@ -1,7 +1,17 @@
 package uk.gov.pay.directdebit.payers.resources;
 
-import java.net.URI;
-import java.util.Map;
+import org.slf4j.Logger;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.common.util.URIBuilder;
+import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
+import uk.gov.pay.directdebit.payers.api.CreatePayerResponse;
+import uk.gov.pay.directdebit.payers.api.CreatePayerValidator;
+import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -12,16 +22,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.common.util.URIBuilder;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
-import uk.gov.pay.directdebit.payers.api.CreatePayerResponse;
-import uk.gov.pay.directdebit.payers.api.CreatePayerValidator;
-import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
-import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
+import java.net.URI;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -30,6 +32,8 @@ public class PayerResource {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(PayerResource.class);
     private final PaymentProviderFactory paymentProviderFactory;
     private final CreatePayerValidator createPayerValidator = new CreatePayerValidator();
+    private final BankAccountDetailsValidator bankAccountDetailsValidator = new BankAccountDetailsValidator();
+
     @Inject
     public PayerResource(PaymentProviderFactory paymentProviderFactory) {
         this.paymentProviderFactory = paymentProviderFactory;
@@ -63,6 +67,7 @@ public class PayerResource {
             @PathParam("accountId") GatewayAccount gatewayAccount,
             @PathParam("mandateExternalId") String mandateExternalId,
             Map<String, String> bankAccountDetails) {
+        bankAccountDetailsValidator.validate(bankAccountDetails);
         LOGGER.info("Validating bank account details for mandate with id: {}", mandateExternalId);
         DirectDebitPaymentProvider payerService = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
         BankAccountValidationResponse response = payerService.validate(mandateExternalId, bankAccountDetails);
