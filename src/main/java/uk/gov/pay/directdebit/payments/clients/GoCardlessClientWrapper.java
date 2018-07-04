@@ -8,6 +8,7 @@ import com.gocardless.resources.Mandate;
 import com.gocardless.resources.Payment;
 import com.gocardless.services.PaymentService;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -34,11 +35,11 @@ public class GoCardlessClientWrapper {
     }
 
     public CustomerBankAccount createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer customer,
-                                                         String accountHolderName, SortCode sortCode, String accountNumber){
+                                                         String accountHolderName, SortCode sortCode, AccountNumber accountNumber){
         return goCardlessClient.customerBankAccounts()
                 .create()
                 .withAccountHolderName(accountHolderName)
-                .withAccountNumber(accountNumber)
+                .withAccountNumber(accountNumber.toString())
                 .withBranchCode(sortCode.toString())
                 .withCountryCode("GB")
                 .withLinksCustomer(customer.getCustomerId())
@@ -66,7 +67,7 @@ public class GoCardlessClientWrapper {
 
     public BankDetailsLookup validate(BankAccountDetails bankAccountDetails) {
         return goCardlessClient.bankDetailsLookups().create()
-                .withAccountNumber(bankAccountDetails.getAccountNumber())
+                .withAccountNumber(bankAccountDetails.getAccountNumber().toString())
                 .withBranchCode(bankAccountDetails.getSortCode().toString())
                 .withCountryCode("GB")
                 .execute();

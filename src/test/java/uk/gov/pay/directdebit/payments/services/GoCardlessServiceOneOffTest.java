@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
+import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
@@ -151,11 +152,11 @@ public class GoCardlessServiceOneOffTest extends GoCardlessServiceTest {
 
     @Test
     public void shouldValidateBankAccountDetails() {
-        String accountNumber = "12345678";
+        AccountNumber accountNumber = AccountNumber.of("12345678");
         SortCode sortCode = SortCode.of("123456");
         BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
         Map<String, String> bankAccountDetailsRequest = ImmutableMap.of(
-                "account_number", accountNumber,
+                "account_number", accountNumber.toString(),
                 "sort_code", sortCode.toString()
         );
         GoCardlessBankAccountLookup goCardlessBankAccountLookup = new GoCardlessBankAccountLookup("Great Bank of Cake", true);
@@ -168,11 +169,11 @@ public class GoCardlessServiceOneOffTest extends GoCardlessServiceTest {
 
     @Test
     public void shouldValidateBankAccountDetails_ifGoCardlessReturnsInvalidLookup() {
-        String accountNumber = "12345678";
+        AccountNumber accountNumber = AccountNumber.of("12345678");
         SortCode sortCode = SortCode.of("123467");
         BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
         Map<String, String> bankAccountDetailsRequest = ImmutableMap.of(
-                "account_number", accountNumber,
+                "account_number", accountNumber.toString(),
                 "sort_code", sortCode.toString()
         );
         GoCardlessBankAccountLookup goCardlessBankAccountLookup = new GoCardlessBankAccountLookup(null, false);
@@ -185,11 +186,11 @@ public class GoCardlessServiceOneOffTest extends GoCardlessServiceTest {
 
     @Test
     public void shouldValidateBankAccountDetails_ifExceptionIsThrownFromGC() {
-        String accountNumber = "12345678";
+        AccountNumber accountNumber = AccountNumber.of("12345678");
         SortCode sortCode = SortCode.of("123467");
         BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
         Map<String, String> bankAccountDetailsRequest = ImmutableMap.of(
-                "account_number", accountNumber,
+                "account_number", accountNumber.toString(),
                 "sort_code", sortCode.toString()
         );
         when(mockedBankAccountDetailsParser.parse(bankAccountDetailsRequest)).thenReturn(bankAccountDetails);

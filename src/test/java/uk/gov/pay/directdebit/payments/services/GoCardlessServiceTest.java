@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetailsParser;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.SortCode;
@@ -35,7 +36,7 @@ public abstract class GoCardlessServiceTest {
     static final String MANDATE_ID = "sdkfhsdkjfhjdks";
     static final String TRANSACTION_ID = "sdkfhsd2jfhjdks";
     static final SortCode SORT_CODE = SortCode.of("123456");
-    static final String ACCOUNT_NUMBER = "12345678";
+    static final AccountNumber ACCOUNT_NUMBER = AccountNumber.of("12345678");
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -76,7 +77,7 @@ public abstract class GoCardlessServiceTest {
             .toEntity();
     Map<String, String> confirmDetails = ImmutableMap.of(
             "sort_code", SORT_CODE.toString(),
-            "account_number", ACCOUNT_NUMBER,
+            "account_number", ACCOUNT_NUMBER.toString(),
             "transaction_external_id", TRANSACTION_ID
     );
     GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().withTransactionId(transaction.getId()).toEntity();

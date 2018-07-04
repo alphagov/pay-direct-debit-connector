@@ -23,6 +23,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
@@ -401,7 +402,7 @@ public class MandateServiceTest {
         ConfirmationDetails confirmationDetails = service.confirm(mandateExternalId, confirmMandateRequest);
         assertThat(confirmationDetails.getMandate(), is(mandate));
         assertThat(confirmationDetails.getSortCode(), is(SortCode.of("123456")));
-        assertThat(confirmationDetails.getAccountNumber(), is("12345678"));
+        assertThat(confirmationDetails.getAccountNumber(), is(AccountNumber.of("12345678")));
         assertThat(confirmationDetails.getTransaction(), is(nullValue()));
     }
 
@@ -419,7 +420,7 @@ public class MandateServiceTest {
         ConfirmationDetails confirmationDetails = service.confirm(mandateExternalId, confirmMandateRequest);
         assertThat(confirmationDetails.getMandate(), is(mandate));
         assertThat(confirmationDetails.getSortCode(), is(SortCode.of("123456")));
-        assertThat(confirmationDetails.getAccountNumber(), is("12345678"));
+        assertThat(confirmationDetails.getAccountNumber(), is(AccountNumber.of("12345678")));
         assertThat(confirmationDetails.getTransaction(), is(transaction));
     }
 

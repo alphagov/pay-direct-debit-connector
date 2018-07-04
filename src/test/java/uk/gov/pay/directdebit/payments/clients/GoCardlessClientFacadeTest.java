@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.SortCode;
@@ -27,7 +28,7 @@ public class GoCardlessClientFacadeTest {
 
     private static final String BANK_NAME = "Awesome Bank";
 
-    private final BankAccountDetails bankAccountDetails = new BankAccountDetails("12345678", SortCode.of("123456"));
+    private final BankAccountDetails bankAccountDetails = new BankAccountDetails(AccountNumber.of("12345678"), SortCode.of("123456"));
 
     @Mock
     private GoCardlessClientWrapper mockGoCardlessClientWrapper;
