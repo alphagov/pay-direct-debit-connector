@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,6 +23,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -178,7 +177,7 @@ public class MandateServiceTest {
 
         verify(mockedDirectDebitEventService).registerPayerEditedEventFor(mandate);
         verifyZeroInteractions(mockedMandateDao);
-        assertThat(mandate.getState(), Matchers.is(AWAITING_DIRECT_DEBIT_DETAILS));
+        assertThat(mandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
@@ -191,7 +190,7 @@ public class MandateServiceTest {
                 .thenReturn(Optional.of(mandate));
         service.receiveDirectDebitDetailsFor(mandate.getExternalId());
         verify(mockedDirectDebitEventService).registerDirectDebitReceivedEventFor(mandate);
-        assertThat(mandate.getState(), Matchers.is(AWAITING_DIRECT_DEBIT_DETAILS));
+        assertThat(mandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
@@ -400,10 +399,10 @@ public class MandateServiceTest {
         Mandate mandate = MandateFixture.aMandateFixture().withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS).withExternalId(mandateExternalId).toEntity();
         when(mockedMandateDao.findByExternalId(mandateExternalId)).thenReturn(Optional.of(mandate));
         ConfirmationDetails confirmationDetails = service.confirm(mandateExternalId, confirmMandateRequest);
-        assertThat(confirmationDetails.getMandate(), Is.is(mandate));
-        assertThat(confirmationDetails.getSortCode(), Is.is("123456"));
-        assertThat(confirmationDetails.getAccountNumber(), Is.is("12345678"));
-        assertThat(confirmationDetails.getTransaction(), Is.is(nullValue()));
+        assertThat(confirmationDetails.getMandate(), is(mandate));
+        assertThat(confirmationDetails.getSortCode(), is(SortCode.of("123456")));
+        assertThat(confirmationDetails.getAccountNumber(), is("12345678"));
+        assertThat(confirmationDetails.getTransaction(), is(nullValue()));
     }
 
     @Test
@@ -418,10 +417,10 @@ public class MandateServiceTest {
         when(mockedMandateDao.findByExternalId(mandateExternalId)).thenReturn(Optional.of(mandate));
         when(mockedTransactionService.findTransactionForExternalId(transactionExternaId)).thenReturn(transaction);
         ConfirmationDetails confirmationDetails = service.confirm(mandateExternalId, confirmMandateRequest);
-        assertThat(confirmationDetails.getMandate(), Is.is(mandate));
-        assertThat(confirmationDetails.getSortCode(), Is.is("123456"));
-        assertThat(confirmationDetails.getAccountNumber(), Is.is("12345678"));
-        assertThat(confirmationDetails.getTransaction(), Is.is(transaction));
+        assertThat(confirmationDetails.getMandate(), is(mandate));
+        assertThat(confirmationDetails.getSortCode(), is(SortCode.of("123456")));
+        assertThat(confirmationDetails.getAccountNumber(), is("12345678"));
+        assertThat(confirmationDetails.getTransaction(), is(transaction));
     }
 
     private Map<String, String> getMandateRequestPayload() {

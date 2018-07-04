@@ -1,8 +1,10 @@
 package uk.gov.pay.directdebit.payers.api;
 
-import java.util.Map;
 import org.mindrot.jbcrypt.BCrypt;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payers.model.SortCode;
+
+import java.util.Map;
 
 public class PayerParser {
 
@@ -12,13 +14,13 @@ public class PayerParser {
 
     public Payer parse(Map<String, String> createPayerMap, Long mandateId) {
         String accountNumber = createPayerMap.get("account_number");
-        String sortCode = createPayerMap.get("sort_code");
+        SortCode sortCode = SortCode.of(createPayerMap.get("sort_code"));
         String bankName = createPayerMap.getOrDefault("bank_name", null);
         return new Payer(
                 mandateId,
                 createPayerMap.get("account_holder_name"),
                 createPayerMap.get("email"),
-                encrypt(sortCode),
+                encrypt(sortCode.toString()),
                 encrypt(accountNumber),
                 accountNumber.substring(accountNumber.length()-2),
                 bankName,

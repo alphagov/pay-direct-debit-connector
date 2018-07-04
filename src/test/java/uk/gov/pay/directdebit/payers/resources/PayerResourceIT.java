@@ -6,8 +6,6 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import java.util.Map;
-import javax.ws.rs.core.Response;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +19,9 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+
+import javax.ws.rs.core.Response;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -97,7 +98,7 @@ public class PayerResourceIT {
     }
 
     @Test
-    public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
+    public void shouldReturn400IfMandatoryFieldsMissingWhenCreatingPayer() throws JsonProcessingException {
         createGatewayAccountWithTransactionAndRequestPath(SANDBOX);
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
@@ -115,6 +116,25 @@ public class PayerResourceIT {
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
                 .body("message", is("Field(s) missing: [account_number]"));
+    }
+
+    @Test
+    public void shouldReturn400IfMandatoryFieldsMissingWhenValidatingBankAccount() throws JsonProcessingException {
+        createGatewayAccountWithTransactionAndRequestPath(SANDBOX);
+        String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers/bank-account/validate"
+                .replace("{accountId}", testGatewayAccount.getExternalId())
+                .replace("{mandateExternalId}", testMandate.getExternalId());
+        String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
+                .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
+                .build());
+
+        givenSetup()
+                .body(putBody)
+                .post(requestPath)
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .contentType(JSON)
+                .body("message", is("Field(s) missing: [sort_code]"));
     }
 
     private RequestSpecification givenSetup() {

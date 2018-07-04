@@ -11,6 +11,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 //thin abstraction over the client provided in the SDK
@@ -33,12 +34,12 @@ public class GoCardlessClientWrapper {
     }
 
     public CustomerBankAccount createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer customer,
-                                                         String accountHolderName, String sortCode, String accountNumber){
+                                                         String accountHolderName, SortCode sortCode, String accountNumber){
         return goCardlessClient.customerBankAccounts()
                 .create()
                 .withAccountHolderName(accountHolderName)
                 .withAccountNumber(accountNumber)
-                .withBranchCode(sortCode)
+                .withBranchCode(sortCode.toString())
                 .withCountryCode("GB")
                 .withLinksCustomer(customer.getCustomerId())
                 .withIdempotencyKey(mandateExternalId)
@@ -66,7 +67,7 @@ public class GoCardlessClientWrapper {
     public BankDetailsLookup validate(BankAccountDetails bankAccountDetails) {
         return goCardlessClient.bankDetailsLookups().create()
                 .withAccountNumber(bankAccountDetails.getAccountNumber())
-                .withBranchCode(bankAccountDetails.getSortCode())
+                .withBranchCode(bankAccountDetails.getSortCode().toString())
                 .withCountryCode("GB")
                 .execute();
     }

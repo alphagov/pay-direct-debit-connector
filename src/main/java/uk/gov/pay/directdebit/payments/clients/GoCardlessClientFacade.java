@@ -4,8 +4,6 @@ import com.gocardless.resources.BankDetailsLookup;
 import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Payment;
-import java.time.LocalDate;
-import javax.inject.Inject;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -13,7 +11,11 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.model.Transaction;
+
+import javax.inject.Inject;
+import java.time.LocalDate;
 
 import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.BACS;
 
@@ -34,7 +36,7 @@ public class GoCardlessClientFacade {
     }
 
     public GoCardlessCustomer createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer customer,
-                                                        String accountHolderName, String sortCode, String accountNumber) {
+                                                        String accountHolderName, SortCode sortCode, String accountNumber) {
         CustomerBankAccount gcCustomerBankAccount = goCardlessClientWrapper.createCustomerBankAccount(mandateExternalId, customer,
                 accountHolderName, sortCode, accountNumber);
         customer.setCustomerBankAccountId(gcCustomerBankAccount.getId());

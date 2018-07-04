@@ -6,15 +6,29 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
-import uk.gov.pay.directdebit.mandate.model.*;
+import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
-import uk.gov.pay.directdebit.payers.model.*;
+import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
+import uk.gov.pay.directdebit.payers.model.BankAccountDetailsParser;
+import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
+import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
+import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
-import uk.gov.pay.directdebit.payments.exception.*;
+import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
+import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
+import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
+import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
+import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -128,7 +142,8 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
         }
     }
 
-    private void createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer, String sortCode, String accountNumber) {
+    private void createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer,
+                                           SortCode sortCode, String accountNumber) {
         try {
             LOGGER.info("Attempting to call gocardless to create a customer bank account, mandate id: {}", mandateExternalId);
 
