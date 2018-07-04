@@ -90,24 +90,28 @@ public class ConfirmMandateSetupResourceIT {
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
         String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
-                "\"template\": \"ONE_OFF_PAYMENT_CONFIRMED\"," +
-                "\"personalisation\": " +
-                "{" +
-                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
-                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-                "\"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\", " +
-                "\"collection date\": \"" + chargeDate + "\", " +
-                "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
-                "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
-                "}" +
+
+        // language=JSON
+        String emailPayloadBody = "{\n" +
+                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
+                "  \"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\",\n" +
+                "  \"template\": \"ONE_OFF_PAYMENT_CONFIRMED\",\n" +
+                "  \"personalisation\": {\n" +
+                "    \"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\",\n" +
+                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
+                "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
+                "    \"collection date\": \"" + chargeDate + "\",\n" +
+                "    \"statement name\": \"THE-CAKE-IS-A-LIE\",\n" +
+                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
+                "  }\n" +
                 "}";
 
-        String confirmDetails =
-                "{\"sort_code\": \"" + payerFixture.getSortCode() + "\", " +
-                        "\"account_number\": \"" + payerFixture.getAccountNumber() + "\", " +
-                        "\"transaction_external_id\": \"" + transactionFixture.getExternalId() + "\"}";
+        // language=JSON
+        String confirmDetails = "{\n" +
+                "  \"sort_code\": \"" + payerFixture.getSortCode() + "\",\n" +
+                "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\",\n" +
+                "  \"transaction_external_id\": \"" + transactionFixture.getExternalId() + "\"\n" +
+                "}\n";
 
         wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
                 .withRequestBody(equalToJson(emailPayloadBody))
@@ -136,30 +140,29 @@ public class ConfirmMandateSetupResourceIT {
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
 
-        //fixme not asserting on the email rn, we should do this we play the story to add email for on-demand. Consider payment vs mandate reference
+        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
 
-//        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
-//        String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-//        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-//                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
-//                "\"template\": \"ONE_OFF_PAYMENT_CONFIRMED\"," +
-//                "\"personalisation\": " +
-//                "{" +
-//                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
-//                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-//                "\"bank account last 2 digits\": \"" +  lastTwoDigitsBankAccount + "\", " +
-//                "\"collection date\": \"" +  chargeDate + "\", " +
-//                "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
-//                "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
-//                "}" +
-//                "}";
+        // language=JSON
+        String emailPayloadBody = "{\n" +
+                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
+                "  \"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\",\n" +
+                "  \"template\": \"ON_DEMAND_MANDATE_CREATED\",\n" +
+                "  \"personalisation\": {\n" +
+                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
+                "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
+                "    \"statement name\": \"THE-CAKE-IS-A-LIE\",\n" +
+                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
+                "  }\n" +
+                "}\n";
         wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
-//                .withRequestBody(equalToJson(emailPayloadBody))
-                .willReturn(
-                        aResponse().withStatus(200)));
+                .withRequestBody(equalToJson(emailPayloadBody))
+                .willReturn(aResponse().withStatus(200)));
 
-        String confirmDetails = "{\"sort_code\": \"" + payerFixture.getSortCode() + "\", " +
-                "\"account_number\": \"" + payerFixture.getAccountNumber() + "\"}";
+        // language=JSON
+        String confirmDetails = "{\n" +
+                "  \"sort_code\": \"" + payerFixture.getSortCode() + "\",\n" +
+                "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\"\n" +
+                "}\n";
 
         String requestPath = String.format("/v1/api/accounts/%s/mandates/%s/confirm", gatewayAccountFixture.getExternalId(), mandateFixture.getExternalId());
         given().port(testContext.getPort())
@@ -201,25 +204,29 @@ public class ConfirmMandateSetupResourceIT {
         stubCreatePayment(transactionFixture.getAmount(), "MD123", transactionFixture.getExternalId());
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
-        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
-                "\"template\": \"ONE_OFF_PAYMENT_CONFIRMED\"," +
-                "\"personalisation\": " +
-                "{" +
-                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
-                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-                "\"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\", " +
-                "\"collection date\": \"2014-05-21\", " +
-                "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
-                "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
-                "}" +
-                "}";
 
-        String confirmDetails =
-                "{\"sort_code\": \"" + payerFixture.getSortCode() + "\", " +
-                        "\"account_number\": \"" + payerFixture.getAccountNumber() + "\", " +
-                        "\"transaction_external_id\": \"" + transactionFixture.getExternalId() + "\"}";
+        // language=JSON
+        String emailPayloadBody = "{\n" +
+                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
+                "  \"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\",\n" +
+                "  \"template\": \"ONE_OFF_PAYMENT_CONFIRMED\",\n" +
+                "  \"personalisation\": {\n" +
+                "    \"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\",\n" +
+                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
+                "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
+                "    \"collection date\": \"2014-05-21\",\n" +
+                "    \"statement name\": \"THE-CAKE-IS-A-LIE\",\n" +
+                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
+                "  }\n" +
+                "}\n";
 
+        // language=JSON
+        String confirmDetails = "{\n" +
+                "  \"sort_code\": \"" + payerFixture.getSortCode() + "\",\n" +
+                "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\",\n" +
+                "  \"transaction_external_id\": \"" + transactionFixture.getExternalId() + "\"\n" +
+                "}\n";
+        
         wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
                 .withRequestBody(equalToJson(emailPayloadBody))
                 .willReturn(
@@ -260,30 +267,28 @@ public class ConfirmMandateSetupResourceIT {
         stubCreateCustomerBankAccount(mandateFixture.getExternalId(), payerFixture, customerId, customerBankAccountId);
         stubCreateMandate(mandateFixture.getExternalId(), goCardlessCustomerFixture);
 
-//        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
-
-        //fixme not asserting on the email rn, we should do this we play the story to add email for on-demand. Consider payment vs mandate reference
-
-//        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-//                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
-//                "\"template\": \"ONE_OFF_PAYMENT_CONFIRMED\"," +
-//                "\"personalisation\": " +
-//                "{" +
-//                "\"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\", " +
-//                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-//                "\"bank account last 2 digits\": \"" +  lastTwoDigitsBankAccount + "\", " +
-//                "\"collection date\": \"2014-05-21\", " +
-//                "\"SUN\": \"THE-CAKE-IS-A-LIE\", " +
-//                "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
-//                "}" +
-//                "}";
+        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
+        // language=JSON
+        String emailPayloadBody = "{\n" +
+                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
+                "  \"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\",\n" +
+                "  \"template\": \"ON_DEMAND_MANDATE_CREATED\",\n" +
+                "  \"personalisation\": {\n" +
+                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
+                "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
+                "    \"statement name\": \"THE-CAKE-IS-A-LIE\",\n" +
+                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
+                "  }\n" +
+                "}\n";
         wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
-//                .withRequestBody(equalToJson(emailPayloadBody))
-                .willReturn(
-                        aResponse().withStatus(200)));
+                .withRequestBody(equalToJson(emailPayloadBody))
+                .willReturn(aResponse().withStatus(200)));
 
-        String confirmDetails = "{\"sort_code\": \"" + payerFixture.getSortCode() + "\", " +
-                "\"account_number\": \"" + payerFixture.getAccountNumber() + "\"}";
+        // language=JSON
+        String confirmDetails = "{\n" +
+                "  \"sort_code\": \"" + payerFixture.getSortCode() + "\",\n" +
+                "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\"\n" +
+                "}\n";
 
         String requestPath = String.format("/v1/api/accounts/%s/mandates/%s/confirm",
                 gatewayAccountFixture.getExternalId(), mandateFixture.getExternalId());
