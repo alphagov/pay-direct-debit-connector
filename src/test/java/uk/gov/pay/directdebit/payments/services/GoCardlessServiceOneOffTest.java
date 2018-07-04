@@ -16,7 +16,13 @@ import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
-import uk.gov.pay.directdebit.payments.exception.*;
+import uk.gov.pay.directdebit.payers.model.SortCode;
+import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
+import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
+import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
+import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
+import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -28,7 +34,9 @@ import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 
@@ -144,11 +152,11 @@ public class GoCardlessServiceOneOffTest extends GoCardlessServiceTest {
     @Test
     public void shouldValidateBankAccountDetails() {
         String accountNumber = "12345678";
-        String sortCode = "123456";
+        SortCode sortCode = SortCode.of("123456");
         BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
         Map<String, String> bankAccountDetailsRequest = ImmutableMap.of(
                 "account_number", accountNumber,
-                "sort_code", sortCode
+                "sort_code", sortCode.toString()
         );
         GoCardlessBankAccountLookup goCardlessBankAccountLookup = new GoCardlessBankAccountLookup("Great Bank of Cake", true);
         when(mockedBankAccountDetailsParser.parse(bankAccountDetailsRequest)).thenReturn(bankAccountDetails);
@@ -161,11 +169,11 @@ public class GoCardlessServiceOneOffTest extends GoCardlessServiceTest {
     @Test
     public void shouldValidateBankAccountDetails_ifGoCardlessReturnsInvalidLookup() {
         String accountNumber = "12345678";
-        String sortCode = "123467";
+        SortCode sortCode = SortCode.of("123467");
         BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
         Map<String, String> bankAccountDetailsRequest = ImmutableMap.of(
                 "account_number", accountNumber,
-                "sort_code", sortCode
+                "sort_code", sortCode.toString()
         );
         GoCardlessBankAccountLookup goCardlessBankAccountLookup = new GoCardlessBankAccountLookup(null, false);
         when(mockedBankAccountDetailsParser.parse(bankAccountDetailsRequest)).thenReturn(bankAccountDetails);
@@ -178,11 +186,11 @@ public class GoCardlessServiceOneOffTest extends GoCardlessServiceTest {
     @Test
     public void shouldValidateBankAccountDetails_ifExceptionIsThrownFromGC() {
         String accountNumber = "12345678";
-        String sortCode = "123467";
+        SortCode sortCode = SortCode.of("123467");
         BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
         Map<String, String> bankAccountDetailsRequest = ImmutableMap.of(
                 "account_number", accountNumber,
-                "sort_code", sortCode
+                "sort_code", sortCode.toString()
         );
         when(mockedBankAccountDetailsParser.parse(bankAccountDetailsRequest)).thenReturn(bankAccountDetails);
         when(mockedGoCardlessClientFacade.validate(bankAccountDetails)).thenThrow(new RuntimeException());

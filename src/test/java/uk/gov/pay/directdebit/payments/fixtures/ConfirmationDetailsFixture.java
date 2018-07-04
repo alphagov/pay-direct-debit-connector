@@ -3,12 +3,13 @@ package uk.gov.pay.directdebit.payments.fixtures;
 import org.apache.commons.lang.RandomStringUtils;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
+import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 public class ConfirmationDetailsFixture {
 
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture();
-    private String sortCode = RandomStringUtils.randomNumeric(6);
+    private SortCode sortCode = SortCode.of(RandomStringUtils.randomNumeric(6));
     private String accountNumber = RandomStringUtils.randomNumeric(8);
     private TransactionFixture transactionFixture = null;
     
@@ -29,7 +30,7 @@ public class ConfirmationDetailsFixture {
         return this;
     }
     
-    public ConfirmationDetailsFixture withSortCode(String sortCode) {
+    public ConfirmationDetailsFixture withSortCode(SortCode sortCode) {
         this.sortCode = sortCode;
         return this;
     }

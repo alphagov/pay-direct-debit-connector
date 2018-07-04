@@ -1,16 +1,17 @@
 package uk.gov.pay.directdebit.mandate.model;
 
+import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 public class ConfirmationDetails {
     private Mandate mandate;
     private Transaction transaction;
     private String accountNumber;
-    private String sortCode;
+    private SortCode sortCode;
 
     public ConfirmationDetails(Mandate mandate,
             Transaction transaction, String accountNumber,
-            String sortCode) {
+            SortCode sortCode) {
         this.mandate = mandate;
         this.transaction = transaction;
         this.accountNumber = accountNumber;
@@ -29,7 +30,7 @@ public class ConfirmationDetails {
         return accountNumber;
     }
 
-    public String getSortCode() {
+    public SortCode getSortCode() {
         return sortCode;
     }
 }
