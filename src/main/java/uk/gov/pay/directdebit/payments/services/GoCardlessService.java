@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
+import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetailsParser;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
@@ -143,7 +144,7 @@ public class GoCardlessService implements DirectDebitPaymentProvider {
     }
 
     private void createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer goCardlessCustomer, Payer payer,
-                                           SortCode sortCode, String accountNumber) {
+                                           SortCode sortCode, AccountNumber accountNumber) {
         try {
             LOGGER.info("Attempting to call gocardless to create a customer bank account, mandate id: {}", mandateExternalId);
 

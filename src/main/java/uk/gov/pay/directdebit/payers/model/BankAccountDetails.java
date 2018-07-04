@@ -2,15 +2,15 @@ package uk.gov.pay.directdebit.payers.model;
 
 public class BankAccountDetails {
 
-    private final String accountNumber;
+    private final AccountNumber accountNumber;
     private final SortCode sortCode;
 
-    public BankAccountDetails(String accountNumber, SortCode sortCode) {
+    public BankAccountDetails(AccountNumber accountNumber, SortCode sortCode) {
         this.accountNumber = accountNumber;
         this.sortCode = sortCode;
     }
 
-    public String getAccountNumber() {
+    public AccountNumber getAccountNumber() {
         return accountNumber;
     }
 

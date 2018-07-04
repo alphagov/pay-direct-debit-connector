@@ -22,6 +22,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
+import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
@@ -345,7 +346,7 @@ public class MandateService {
      */
     public ConfirmationDetails confirm(String mandateExternalId, Map<String, String> confirmDetailsRequest) {
         SortCode sortCode = SortCode.of(confirmDetailsRequest.get("sort_code"));
-        String accountNumber = confirmDetailsRequest.get("account_number");
+        AccountNumber accountNumber = AccountNumber.of(confirmDetailsRequest.get("account_number"));
         Mandate mandate = confirmedDirectDebitDetailsFor(mandateExternalId);
         Transaction transaction = Optional
                 .ofNullable(confirmDetailsRequest.get("transaction_external_id"))
