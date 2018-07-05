@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -18,7 +19,7 @@ import java.time.ZonedDateTime;
 public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-    private String externalId = RandomIdGenerator.newId();
+    private MandateExternalId mandateExternalId = MandateExternalId.of(RandomIdGenerator.newId());
     private String mandateReference = RandomStringUtils.randomAlphanumeric(18);
     private String serviceReference = RandomStringUtils.randomAlphanumeric(18);
     private MandateState state = MandateState.CREATED;
@@ -69,12 +70,12 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return this;
     }
 
-    public String getExternalId() {
-        return externalId;
+    public MandateExternalId getExternalId() {
+        return mandateExternalId;
     }
 
-    public MandateFixture withExternalId(String externalId) {
-        this.externalId = externalId;
+    public MandateFixture withExternalId(MandateExternalId externalId) {
+        this.mandateExternalId = externalId;
         return this;
     }
 
@@ -142,7 +143,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                                 ")\n",
                         id,
                         gatewayAccountFixture.getId(),
-                        externalId,
+                        mandateExternalId.toString(),
                         mandateType.toString(),
                         mandateReference,
                         serviceReference,
@@ -165,7 +166,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                 id,
                 gatewayAccountFixture.toEntity(),
                 mandateType,
-                externalId,
+                mandateExternalId,
                 mandateReference,
                 serviceReference,
                 state,

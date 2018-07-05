@@ -11,6 +11,8 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.OneOffConfirmationDetails;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
@@ -111,7 +113,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
     }
 
     private GoCardlessCustomer createCustomer(Mandate mandate) {
-        String mandateExternalId = mandate.getExternalId();
+        MandateExternalId mandateExternalId = mandate.getExternalId();
         Payer payer = mandate.getPayer();
         try {
             LOGGER.info("Attempting to call gocardless to create a customer, mandate id: {}", mandateExternalId);
@@ -121,13 +123,13 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
             return customer;
         } catch (Exception exc) {
-            logException(exc, "customer", mandateExternalId);
+            logException(exc, "customer", mandateExternalId.toString());
             throw new CreateCustomerFailedException(mandateExternalId, payer.getExternalId());
         }
     }
 
     private GoCardlessCustomer createCustomerBankAccount(Mandate mandate, GoCardlessCustomer goCardlessCustomer, BankAccountDetails bankAccountDetails) {
-        String mandateExternalId = mandate.getExternalId();
+        MandateExternalId mandateExternalId = mandate.getExternalId();
         Payer payer = mandate.getPayer();
 
         try {
@@ -145,7 +147,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
             return customerWithBankAccount;
         } catch (Exception exc) {
-            logException(exc, "bank account", mandateExternalId);
+            logException(exc, "bank account", mandateExternalId.toString());
             throw new CreateCustomerBankAccountFailedException(mandateExternalId, payer.getExternalId());
         }
     }
@@ -162,8 +164,8 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
             return goCardlessMandate;
         } catch (Exception exc) {
-            logException(exc, "mandate", mandate.getExternalId());
-            throw new CreateMandateFailedException(mandate.getExternalId());
+            logException(exc, "mandate", mandate.getExternalId().toString());
+            throw new CreateMandateFailedException(mandate.getExternalId().toString());
         }
     }
 
@@ -183,7 +185,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
             return goCardlessPayment;
         } catch (Exception exc) {
             logException(exc, "payment", transaction.getExternalId());
-            throw new CreatePaymentFailedException(transaction.getMandate().getExternalId(), transaction.getExternalId());
+            throw new CreatePaymentFailedException(transaction.getMandate().getExternalId().toString(), transaction.getExternalId());
         }
     }
 
@@ -192,7 +194,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
                 .findByMandateId(mandate.getId())
                 .orElseThrow(() -> {
                     LOGGER.error("Couldn't find gocardless mandate for mandate with id: {}", mandate.getExternalId());
-                    return new GoCardlessMandateNotFoundException("mandate id", mandate.getExternalId());
+                    return new GoCardlessMandateNotFoundException("mandate id", mandate.getExternalId().toString());
                 });
     }
 

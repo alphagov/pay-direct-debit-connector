@@ -24,7 +24,7 @@ import static uk.gov.pay.directdebit.util.TestRequestResponsesLoader.GOCARDLESS_
 import static uk.gov.pay.directdebit.util.TestRequestResponsesLoader.load;
 
 public class GoCardlessStubs {
-    public static void stubCreateCustomer(String mandateExternalId, PayerFixture payerFixture, String goCardlessCustomerId) {
+    public static void stubCreateCustomer(String idempotencyKey, PayerFixture payerFixture, String goCardlessCustomerId) {
         String customerRequestExpectedBody = load(GOCARDLESS_CREATE_CUSTOMER_REQUEST)
                 .replace("{{email}}", payerFixture.getEmail())
                 .replace("{{family_name}}", payerFixture.getName())
@@ -35,10 +35,10 @@ public class GoCardlessStubs {
                 .replace("{{given_name}}", payerFixture.getName())
                 .replace("{{gocardless_customer_id}}", goCardlessCustomerId);
 
-        stubCallsFor("/customers", 200, mandateExternalId, customerRequestExpectedBody, customerResponseBody);
+        stubCallsFor("/customers", 200, idempotencyKey, customerRequestExpectedBody, customerResponseBody);
     }
 
-    public static void stubCreateCustomerBankAccount(String mandateExternalId, PayerFixture payerFixture, String goCardlessCustomerId, String goCardlessBankAccountId) {
+    public static void stubCreateCustomerBankAccount(String idempotencyKey, PayerFixture payerFixture, String goCardlessCustomerId, String goCardlessBankAccountId) {
         String customerBankAccountRequestExpectedBody = load(GOCARDLESS_CREATE_CUSTOMER_BANK_ACCOUNT_REQUEST)
                 .replace("{{account_holder_name}}", payerFixture.getName())
                 .replace("{{account_number}}", payerFixture.getAccountNumber())
@@ -49,10 +49,10 @@ public class GoCardlessStubs {
                 .replace("{{account_holder_name}}", payerFixture.getName())
                 .replace("{{gocardless_customer_id}}", goCardlessCustomerId)
                 .replace("{{gocardless_customer_bank_account_id}}", goCardlessBankAccountId);
-        stubCallsFor("/customer_bank_accounts", 200, mandateExternalId, customerBankAccountRequestExpectedBody, customerBankAccountResponseBody);
+        stubCallsFor("/customer_bank_accounts", 200, idempotencyKey, customerBankAccountRequestExpectedBody, customerBankAccountResponseBody);
     }
 
-    public static void stubCreateMandate(String mandateExternalId, GoCardlessCustomerFixture goCardlessCustomerFixture) {
+    public static void stubCreateMandate(String idempotencyKey, GoCardlessCustomerFixture goCardlessCustomerFixture) {
         String mandateRequestExpectedBody = load(GOCARDLESS_CREATE_MANDATE_REQUEST)
                 .replace("{{customer_bank_account_id}}", goCardlessCustomerFixture.getCustomerBankAccountId());
 
@@ -60,7 +60,7 @@ public class GoCardlessStubs {
                 .replace("{{customer_bank_account_id}}", goCardlessCustomerFixture.getCustomerBankAccountId())
                 .replace("{{customer_id}}", goCardlessCustomerFixture.getCustomerId())
                 .replace("{{gocardless_customer_bank_account_id}}", goCardlessCustomerFixture.getCustomerBankAccountId());
-        stubCallsFor("/mandates", 200, mandateExternalId, mandateRequestExpectedBody, mandateResponseBody);
+        stubCallsFor("/mandates", 200, idempotencyKey, mandateRequestExpectedBody, mandateResponseBody);
     }
 
     public static void stubCreatePayment(Long amount, String goCardlessMandateId, String idempotencyKey) {

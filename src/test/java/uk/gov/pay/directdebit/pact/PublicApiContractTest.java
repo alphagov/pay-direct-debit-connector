@@ -15,6 +15,7 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
@@ -55,7 +56,7 @@ public class PublicApiContractTest {
     @State("a gateway account with external id and a mandate with external id exist")
     public void aGatewayAccountWithExternalIdAndAMandateWithExternalIdExist(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
-        testMandate.withGatewayAccountFixture(testGatewayAccount).withExternalId(params.get("mandate_id")).insert(app.getTestContext().getJdbi());
+        testMandate.withGatewayAccountFixture(testGatewayAccount).withExternalId(MandateExternalId.of(params.get("mandate_id"))).insert(app.getTestContext().getJdbi());
     }
 
     @State("three transaction records exist")
@@ -63,7 +64,7 @@ public class PublicApiContractTest {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
-                .withExternalId(params.get("agreement_id"));
+                .withExternalId(MandateExternalId.of(params.get("agreement_id")));
         testMandate.insert(app.getTestContext().getJdbi());
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
         testPayer.insert(app.getTestContext().getJdbi());
@@ -76,7 +77,7 @@ public class PublicApiContractTest {
     public void aDirectDebitEventExists(Map<String, String> params) {
 
         String transactionExternalId = params.getOrDefault("transaction_external_id", RandomIdGenerator.newId());
-        String mandateExternalId = params.getOrDefault("mandate_external_id", RandomIdGenerator.newId());
+        MandateExternalId mandateExternalId = MandateExternalId.of(params.getOrDefault("mandate_external_id", RandomIdGenerator.newId()));
 
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .insert(app.getTestContext().getJdbi());
@@ -84,7 +85,7 @@ public class PublicApiContractTest {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId);
-        
+
         MandateDao mandateDao = app.getTestContext().getJdbi().onDemand(MandateDao.class);
         Optional<Mandate> mandateByExternalId = mandateDao.findByExternalId(mandateExternalId);
         if (!mandateByExternalId.isPresent()) {

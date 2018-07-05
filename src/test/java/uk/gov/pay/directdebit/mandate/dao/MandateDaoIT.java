@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 
@@ -56,7 +57,7 @@ public class MandateDaoIT {
                         null,
                         gatewayAccountFixture.toEntity(),
                         MandateType.ONE_OFF,
-                        RandomIdGenerator.newId(),
+                        MandateExternalId.of(RandomIdGenerator.newId()),
                         "test-reference",
                         null,
                         MandateState.PENDING,
@@ -84,7 +85,7 @@ public class MandateDaoIT {
                         null,
                         gatewayAccountFixture.toEntity(),
                         MandateType.ONE_OFF,
-                        RandomIdGenerator.newId(),
+                        MandateExternalId.of(RandomIdGenerator.newId()),
                         "test-reference",
                         "test-service-reference",
                         MandateState.PENDING,
@@ -173,7 +174,7 @@ public class MandateDaoIT {
 
     @Test
     public void shouldNotFindAMandateByExternalId_ifExternalIdIsInvalid() {
-        String invalidMandateId = "invalid1d";
+        MandateExternalId invalidMandateId = MandateExternalId.of("invalid1d");
         assertThat(mandateDao.findByExternalId(invalidMandateId), is(Optional.empty()));
     }
 
@@ -186,7 +187,7 @@ public class MandateDaoIT {
         Map<String, Object> mandateAfterUpdate = testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
         assertThat(numOfUpdatedMandates, is(1));
         assertThat(mandateAfterUpdate.get("id"), is(testMandate.getId()));
-        assertThat(mandateAfterUpdate.get("external_id"), is(testMandate.getExternalId()));
+        assertThat(mandateAfterUpdate.get("external_id"), is(testMandate.getExternalId().toString()));
         assertThat(mandateAfterUpdate.get("mandate_reference"), is(testMandate.getMandateReference()));
         assertThat(mandateAfterUpdate.get("service_reference"), is(testMandate.getServiceReference()));
         assertThat(mandateAfterUpdate.get("state"), is(newState.toString()));
@@ -208,7 +209,7 @@ public class MandateDaoIT {
         Map<String, Object> mandateAfterUpdate = testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
         assertThat(numOfUpdatedMandates, is(1));
         assertThat(mandateAfterUpdate.get("id"), is(testMandate.getId()));
-        assertThat(mandateAfterUpdate.get("external_id"), is(testMandate.getExternalId()));
+        assertThat(mandateAfterUpdate.get("external_id"), is(testMandate.getExternalId().toString()));
         assertThat(mandateAfterUpdate.get("mandate_reference"), is(newMandateReference));
         assertThat(mandateAfterUpdate.get("state"), is(testMandate.getState().toString()));
         assertThat(mandateAfterUpdate.get("type"), is(testMandate.getType().toString()));

@@ -35,17 +35,19 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
@@ -152,7 +154,7 @@ public class TransactionResourceIT {
                 .put(JSON_REFERENCE_KEY, expectedReference)
                 .put(JSON_DESCRIPTION_KEY, expectedDescription)
                 .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
-                .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId())
+                .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId().toString())
                 .build());
 
         String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
@@ -221,7 +223,7 @@ public class TransactionResourceIT {
                 .put(JSON_REFERENCE_KEY, expectedReference)
                 .put(JSON_DESCRIPTION_KEY, expectedDescription)
                 .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
-                .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId())
+                .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId().toString())
                 .build());
 
         String requestPath = "/v1/api/accounts/{accountId}/charges/collect"

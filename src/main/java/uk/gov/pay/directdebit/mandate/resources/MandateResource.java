@@ -22,6 +22,7 @@ import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
 
@@ -59,7 +60,7 @@ public class MandateResource {
     @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getMandate(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId, @Context UriInfo uriInfo) {
+    public Response getMandate(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") MandateExternalId mandateExternalId, @Context UriInfo uriInfo) {
         LOGGER.info("Retrieving mandate {} for frontend", mandateExternalId);
         GetMandateResponse response = mandateService.populateGetMandateResponse(accountExternalId, mandateExternalId, uriInfo);
         return Response.ok(response).build();
@@ -69,7 +70,7 @@ public class MandateResource {
     @Path("/v1/accounts/{accountId}/mandates/{mandateExternalId}")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getMandateFrontend(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId) {
+    public Response getMandateFrontend(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") MandateExternalId mandateExternalId) {
         LOGGER.info("Retrieving mandate {} for frontend", mandateExternalId);
         DirectDebitInfoFrontendResponse response = mandateService.populateGetMandateResponseForFrontend(accountExternalId, mandateExternalId);
         return Response.ok(response).build();
@@ -89,7 +90,7 @@ public class MandateResource {
     @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/cancel")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response userCancelSetup(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId) {
+    public Response userCancelSetup(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") MandateExternalId mandateExternalId) {
         LOGGER.info("User wants to cancel setup of mandate with external id - {}", mandateExternalId);
         mandateService.cancelMandateCreation(mandateExternalId);
         return Response.noContent().build();
@@ -99,7 +100,7 @@ public class MandateResource {
     @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/change-payment-method")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response userChangePaymentMethod(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId) {
+    public Response userChangePaymentMethod(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") MandateExternalId mandateExternalId) {
         LOGGER.info("User wants to change payment method for mandate with external id - {}", mandateExternalId);
         mandateService.changePaymentMethodFor(mandateExternalId);
         return Response.noContent().build();
@@ -111,7 +112,7 @@ public class MandateResource {
     @Produces(APPLICATION_JSON)
     @Timed
     public Response confirm(@PathParam("accountId") GatewayAccount gatewayAccount,
-            @PathParam("mandateExternalId") String mandateExternalId,
+            @PathParam("mandateExternalId") MandateExternalId mandateExternalId,
             Map<String, String> mandateConfirmationRequestMap) {
 
         LOGGER.info("Confirming direct debit details for mandate with id: {}", mandateExternalId);

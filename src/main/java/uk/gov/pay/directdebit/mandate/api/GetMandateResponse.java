@@ -3,7 +3,10 @@ package uk.gov.pay.directdebit.mandate.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +17,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class GetMandateResponse {
     @JsonProperty("mandate_id")
-    private String mandateId;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private MandateExternalId mandateId;
 
     @JsonProperty("mandate_type")
     private MandateType mandateType;
@@ -34,7 +38,7 @@ public class GetMandateResponse {
     @JsonProperty("mandate_reference")
     private String mandateReference;
 
-    public GetMandateResponse(String mandateId,
+    public GetMandateResponse(MandateExternalId mandateId,
                               MandateType mandateType, String returnUrl,
                               List<Map<String, Object>> dataLinks,
                               ExternalMandateState state,
@@ -53,7 +57,7 @@ public class GetMandateResponse {
         return returnUrl;
     }
 
-    public String getMandateId() {
+    public MandateExternalId getMandateId() {
         return mandateId;
     }
 

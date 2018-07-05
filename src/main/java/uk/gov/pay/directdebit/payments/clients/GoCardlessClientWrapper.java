@@ -8,6 +8,7 @@ import com.gocardless.resources.Mandate;
 import com.gocardless.resources.Payment;
 import com.gocardless.services.PaymentService;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
@@ -24,17 +25,17 @@ public class GoCardlessClientWrapper {
         this.goCardlessClient = goCardlessClient;
     }
 
-    public Customer createCustomer(String mandateExternalId, Payer payer) {
+    public Customer createCustomer(MandateExternalId mandateExternalId, Payer payer) {
         return goCardlessClient.customers()
                 .create()
                 .withEmail(payer.getEmail())
                 .withGivenName(payer.getName())
                 .withFamilyName(payer.getName())
-                .withIdempotencyKey(mandateExternalId)
+                .withIdempotencyKey(mandateExternalId.toString())
                 .execute();
     }
 
-    public CustomerBankAccount createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer customer,
+    public CustomerBankAccount createCustomerBankAccount(MandateExternalId mandateExternalId, GoCardlessCustomer customer,
                                                          String accountHolderName, SortCode sortCode, AccountNumber accountNumber){
         return goCardlessClient.customerBankAccounts()
                 .create()
@@ -43,15 +44,15 @@ public class GoCardlessClientWrapper {
                 .withBranchCode(sortCode.toString())
                 .withCountryCode("GB")
                 .withLinksCustomer(customer.getCustomerId())
-                .withIdempotencyKey(mandateExternalId)
+                .withIdempotencyKey(mandateExternalId.toString())
                 .execute();
     }
 
-    public Mandate createMandate(String mandateExternalId, GoCardlessCustomer customer) {
+    public Mandate createMandate(MandateExternalId mandateExternalId, GoCardlessCustomer customer) {
         return goCardlessClient.mandates()
                 .create()
                 .withLinksCustomerBankAccount(customer.getCustomerBankAccountId())
-                .withIdempotencyKey(mandateExternalId)
+                .withIdempotencyKey(mandateExternalId.toString())
                 .execute();
     }
 
