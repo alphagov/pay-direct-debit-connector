@@ -17,6 +17,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -122,6 +123,86 @@ public class GatewayAccountDaoIT {
         assertThat(first.getDescription(), is(DESCRIPTION));
         assertThat(first.getAnalyticsId(), is(ANALYTICS_ID));
         assertThat(first.getType(), is(TYPE));
+
+        assertThat(second.getId(), is(notNullValue()));
+        assertThat(second.getExternalId(), is(externalId2));
+        assertThat(second.getPaymentProvider(), is(paymentProvider2));
+        assertThat(second.getServiceName(), is(serviceName2));
+        assertThat(second.getDescription(), is(description2));
+        assertThat(second.getAnalyticsId(), is(analyticsId2));
+        assertThat(second.getType(), is(TYPE));
+    }
+
+    @Test
+    public void shouldFindGatewayAccounts() {
+        testGatewayAccount.insert(testContext.getJdbi());
+
+        List<GatewayAccount> gatewayAccounts;
+        GatewayAccount first;
+        GatewayAccount second;
+
+        PaymentProvider paymentProvider  = PaymentProvider.GOCARDLESS;
+        String serviceName               = "aservice";
+        String externalId                = "single";
+        String description               = "tests pls";
+        String analyticsId               = "DD_234099_TOOLONGWONTREAD";
+
+        PaymentProvider paymentProvider2 = PaymentProvider.GOCARDLESS;
+        String serviceName2              = "aservice";
+        String externalId2               = "multiple";
+        String description2              = "tests pls";
+        String analyticsId2              = "DD_234199_TOOLONGWONTREAD";
+
+        GatewayAccountFixture
+          .aGatewayAccountFixture()
+          .withExternalId(externalId)
+          .withServiceName(serviceName)
+          .withDescription(description)
+          .withPaymentProvider(paymentProvider)
+          .withAnalyticsId(analyticsId)
+          .insert(testContext.getJdbi());
+
+        GatewayAccountFixture
+          .aGatewayAccountFixture()
+          .withExternalId(externalId2)
+          .withServiceName(serviceName2)
+          .withDescription(description2)
+          .withPaymentProvider(paymentProvider2)
+          .withAnalyticsId(analyticsId2)
+          .insert(testContext.getJdbi());
+
+        gatewayAccounts = gatewayAccountDao.find(
+          Arrays.asList(externalId)
+        );
+
+        assertThat(gatewayAccounts.size(), is(1));
+
+        first = gatewayAccounts.get(0);
+
+        assertThat(first.getId(),              is(notNullValue()));
+        assertThat(first.getExternalId(),      is(externalId));
+        assertThat(first.getPaymentProvider(), is(paymentProvider));
+        assertThat(first.getServiceName(),     is(serviceName));
+        assertThat(first.getDescription(),     is(description));
+        assertThat(first.getAnalyticsId(),     is(analyticsId));
+        assertThat(first.getType(),            is(TYPE));
+
+        gatewayAccounts = gatewayAccountDao.find(
+          Arrays.asList(externalId, externalId2)
+        );
+
+        assertThat(gatewayAccounts.size(), is(2));
+
+        first = gatewayAccounts.get(0);
+        second = gatewayAccounts.get(1);
+
+        assertThat(first.getId(),              is(notNullValue()));
+        assertThat(first.getExternalId(),      is(externalId));
+        assertThat(first.getPaymentProvider(), is(paymentProvider));
+        assertThat(first.getServiceName(),     is(serviceName));
+        assertThat(first.getDescription(),     is(description));
+        assertThat(first.getAnalyticsId(),     is(analyticsId));
+        assertThat(first.getType(),            is(TYPE));
 
         assertThat(second.getId(), is(notNullValue()));
         assertThat(second.getExternalId(), is(externalId2));

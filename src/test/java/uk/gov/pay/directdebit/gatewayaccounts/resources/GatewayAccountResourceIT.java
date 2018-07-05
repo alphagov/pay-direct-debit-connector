@@ -18,6 +18,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -27,6 +28,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNTS_API_PATH;
+import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNTS_FRONTEND_PATH;
 import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNT_API_PATH;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
@@ -113,8 +115,9 @@ public class GatewayAccountResourceIT {
         return "http://localhost:" + testContext.getPort() + GATEWAY_ACCOUNT_API_PATH
                 .replace("{accountId}", accountId);
     }
+
     @Test
-    public void shouldReturnAllGatewayAccounts() {
+    public void shouldReturnGatewayAccounts() {
         PaymentProvider paymentProvider2 = PaymentProvider.GOCARDLESS;
         String serviceName2 = "silvia";
         String description2 = "can't type and is not drunk maybe";
@@ -129,33 +132,107 @@ public class GatewayAccountResourceIT {
                 .withAnalyticsId(analyticsId2)
                 .insert(testContext.getJdbi());
 
-        givenSetup()
-                .get(GATEWAY_ACCOUNTS_API_PATH)
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body("accounts", hasSize(2))
+        Arrays
+          .asList(GATEWAY_ACCOUNTS_API_PATH, GATEWAY_ACCOUNTS_FRONTEND_PATH)
+          .forEach(path -> {
+            givenSetup()
+              .get(path)
+              .then()
+              .statusCode(Response.Status.OK.getStatusCode())
+              .contentType(JSON)
+              .body("accounts", hasSize(2))
 
-                .body(format("accounts[0].%s", PAYMENT_PROVIDER_KEY), is(PAYMENT_PROVIDER.toString()))
-                .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(SERVICE_NAME))
-                .body(format("accounts[0].%s", DESCRIPTION_KEY), is(DESCRIPTION))
-                .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(ANALYTICS_ID))
-                .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(EXTERNAL_ID))
-                .body(format("accounts[0].%s", TYPE_KEY), is(TYPE.toString()))
-                .body("accounts[0].links", containsLink("self",
-                        "GET",
-                        expectedGatewayAccountLocationFor(testGatewayAccount.getExternalId())))
+              .body(format("accounts[0].%s", PAYMENT_PROVIDER_KEY), is(PAYMENT_PROVIDER.toString()))
+              .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(SERVICE_NAME))
+              .body(format("accounts[0].%s", DESCRIPTION_KEY), is(DESCRIPTION))
+              .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(ANALYTICS_ID))
+              .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(EXTERNAL_ID))
+              .body(format("accounts[0].%s", TYPE_KEY), is(TYPE.toString()))
+              .body("accounts[0].links", containsLink("self",
+                    "GET",
+                    expectedGatewayAccountLocationFor(testGatewayAccount.getExternalId())))
 
-                .body(format("accounts[1].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider2.toString()))
-                .body(format("accounts[1].%s", SERVICE_NAME_KEY), is(serviceName2))
-                .body(format("accounts[1].%s", DESCRIPTION_KEY), is(description2))
-                .body(format("accounts[1].%s", ANALYTICS_ID_KEY), is(analyticsId2))
-                .body(format("accounts[1].%s", EXTERNAL_ID_KEY), is(externalId2))
-                .body(format("accounts[1].%s", TYPE_KEY), is(TYPE.toString()))
-                .body("accounts[1].links", containsLink("self",
-                        "GET",
-                        expectedGatewayAccountLocationFor(testGatewayAccount2.getExternalId())));
+              .body(format("accounts[1].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider2.toString()))
+              .body(format("accounts[1].%s", SERVICE_NAME_KEY), is(serviceName2))
+              .body(format("accounts[1].%s", DESCRIPTION_KEY), is(description2))
+              .body(format("accounts[1].%s", ANALYTICS_ID_KEY), is(analyticsId2))
+              .body(format("accounts[1].%s", EXTERNAL_ID_KEY), is(externalId2))
+              .body(format("accounts[1].%s", TYPE_KEY), is(TYPE.toString()))
+              .body("accounts[1].links", containsLink("self",
+                    "GET",
+                    expectedGatewayAccountLocationFor(testGatewayAccount2.getExternalId())));
 
+            givenSetup()
+              .queryParam("externalAccountIds", externalId2)
+              .get(path)
+              .then()
+              .statusCode(Response.Status.OK.getStatusCode())
+              .contentType(JSON)
+              .body("accounts", hasSize(1))
+
+              .body(format("accounts[0].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider2.toString()))
+              .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(serviceName2))
+              .body(format("accounts[0].%s", DESCRIPTION_KEY), is(description2))
+              .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(analyticsId2))
+              .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(externalId2))
+              .body(format("accounts[0].%s", TYPE_KEY), is(TYPE.toString()))
+              .body("accounts[0].links", containsLink("self",
+                    "GET",
+                    expectedGatewayAccountLocationFor(testGatewayAccount2.getExternalId())));
+          });
+
+    }
+
+    @Test
+    public void shouldReturnSomeGatewayAccounts() {
+        PaymentProvider paymentProvider3 = PaymentProvider.GOCARDLESS;
+        String serviceName3 = "toby";
+        String description3 = "can't type and is not hungover maybe";
+        String analyticsId3 = "DD_234099_BBBLABLA";
+        String externalId3 = "DD_234099_BBBLABLA";
+
+        GatewayAccountFixture testGatewayAccount3 = GatewayAccountFixture.aGatewayAccountFixture()
+                .withExternalId(externalId3)
+                .withServiceName(serviceName3)
+                .withDescription(description3)
+                .withPaymentProvider(paymentProvider3)
+                .withAnalyticsId(analyticsId3)
+                .insert(testContext.getJdbi());
+
+        Arrays
+          .asList(GATEWAY_ACCOUNTS_API_PATH, GATEWAY_ACCOUNTS_FRONTEND_PATH)
+          .forEach(path -> {
+            givenSetup()
+              .queryParam(
+                  "externalAccountIds",
+                  String.format("%s,%s", EXTERNAL_ID, externalId3)
+                  )
+              .get(path)
+              .then()
+              .statusCode(Response.Status.OK.getStatusCode())
+              .contentType(JSON)
+              .body("accounts", hasSize(2))
+
+              .body(format("accounts[0].%s", PAYMENT_PROVIDER_KEY), is(PAYMENT_PROVIDER.toString()))
+              .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(SERVICE_NAME))
+              .body(format("accounts[0].%s", DESCRIPTION_KEY), is(DESCRIPTION))
+              .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(ANALYTICS_ID))
+              .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(EXTERNAL_ID))
+              .body(format("accounts[0].%s", TYPE_KEY), is(TYPE.toString()))
+              .body("accounts[0].links", containsLink("self",
+                    "GET",
+                    expectedGatewayAccountLocationFor(testGatewayAccount.getExternalId())))
+
+              .body(format("accounts[1].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider3.toString()))
+              .body(format("accounts[1].%s", SERVICE_NAME_KEY), is(serviceName3))
+              .body(format("accounts[1].%s", DESCRIPTION_KEY), is(description3))
+              .body(format("accounts[1].%s", ANALYTICS_ID_KEY), is(analyticsId3))
+              .body(format("accounts[1].%s", EXTERNAL_ID_KEY), is(externalId3))
+              .body(format("accounts[1].%s", TYPE_KEY), is(TYPE.toString()))
+              .body("accounts[1].links", containsLink("self",
+                    "GET",
+                    expectedGatewayAccountLocationFor(testGatewayAccount3.getExternalId())));
+          });
     }
 
     @Test
