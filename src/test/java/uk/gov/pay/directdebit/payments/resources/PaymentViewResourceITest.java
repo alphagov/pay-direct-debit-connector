@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -325,8 +326,8 @@ public class PaymentViewResourceITest {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        String mandateExternalId = "a-mandate-external-id";
-        String anotherMandateExternalId = "another-external-id";
+        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
+        MandateExternalId anotherMandateExternalId = MandateExternalId.of("another-external-id");
         MandateFixture mandateFixture1 = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)
@@ -358,7 +359,7 @@ public class PaymentViewResourceITest {
         }
         String requestPath = "/v1/api/accounts/{accountId}/transactions/view?agreement_id=:mandateId"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
-                .replace(":mandateId", mandateFixture1.getExternalId());
+                .replace(":mandateId", mandateFixture1.getExternalId().toString());
         givenSetup()
                 .get(requestPath)
                 .then()
@@ -375,7 +376,7 @@ public class PaymentViewResourceITest {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        String mandateExternalId = "a-mandate-external-id";
+        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)

@@ -30,6 +30,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -119,7 +120,7 @@ public class MandateResourceIT {
                 .body("return_url", is(returnUrl))
                 .body("created_date", is(notNullValue()))
                 .contentType(JSON);
-        String externalMandateId = response.extract().path(JSON_MANDATE_ID_KEY).toString();
+        MandateExternalId externalMandateId = MandateExternalId.of(response.extract().path(JSON_MANDATE_ID_KEY).toString());
 
         String documentLocation = expectedMandateLocationFor(accountExternalId, externalMandateId);
         String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(externalMandateId).get("secure_redirect_token").toString();
@@ -172,7 +173,7 @@ public class MandateResourceIT {
                 .body("service_reference", is("test-service-reference"))
                 .body("mandate_reference", is(notNullValue()))
                 .contentType(JSON);
-        String externalMandateId = response.extract().path(JSON_MANDATE_ID_KEY).toString();
+        MandateExternalId externalMandateId = MandateExternalId.of(response.extract().path(JSON_MANDATE_ID_KEY).toString());
 
         String documentLocation = expectedMandateLocationFor(accountExternalId, externalMandateId);
         String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(externalMandateId).get("secure_redirect_token").toString();
@@ -226,7 +227,7 @@ public class MandateResourceIT {
         String frontendMandateWithTransactionPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
         String requestPath = frontendMandateWithTransactionPath
                 .replace("{accountId}", accountExternalId)
-                .replace("{mandateExternalId}", mandateFixture.getExternalId())
+                .replace("{mandateExternalId}", mandateFixture.getExternalId().toString())
                 .replace("{transactionExternalId}", transactionFixture.getExternalId());
 
         givenSetup()
@@ -234,7 +235,7 @@ public class MandateResourceIT {
                 .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
-                .body("external_id", is(mandateFixture.getExternalId()))
+                .body("external_id", is(mandateFixture.getExternalId().toString()))
                 .body("gateway_account_id", isNumber(gatewayAccountFixture.getId()))
                 .body("gateway_account_external_id", is(gatewayAccountFixture.getExternalId()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
@@ -265,14 +266,14 @@ public class MandateResourceIT {
         String frontendMandatePath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}";
         String requestPath = frontendMandatePath
                 .replace("{accountId}", accountExternalId)
-                .replace("{mandateExternalId}", mandateFixture.getExternalId());
+                .replace("{mandateExternalId}", mandateFixture.getExternalId().toString());
 
         givenSetup()
                 .get(requestPath)
                 .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
-                .body("external_id", is(mandateFixture.getExternalId()))
+                .body("external_id", is(mandateFixture.getExternalId().toString()))
                 .body("gateway_account_id", isNumber(gatewayAccountFixture.getId()))
                 .body("gateway_account_external_id", is(gatewayAccountFixture.getExternalId()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
@@ -299,14 +300,14 @@ public class MandateResourceIT {
         String publicApiMandatePath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}";
         String requestPath = publicApiMandatePath
                 .replace("{accountId}", accountExternalId)
-                .replace("{mandateExternalId}", mandateFixture.getExternalId());
+                .replace("{mandateExternalId}", mandateFixture.getExternalId().toString());
 
         ValidatableResponse getMandateResponse = givenSetup()
                 .get(requestPath)
                 .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
-                .body("mandate_id", is(mandateFixture.getExternalId()))
+                .body("mandate_id", is(mandateFixture.getExternalId().toString()))
                 .body("mandate_type", is(mandateFixture.getMandateType().toString()))
                 .body("return_url", is(mandateFixture.getReturnUrl()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
@@ -339,7 +340,7 @@ public class MandateResourceIT {
 
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/cancel"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
-                .replace("{mandateExternalId}", mandateFixture.getExternalId());
+                .replace("{mandateExternalId}", mandateFixture.getExternalId().toString());
 
         givenSetup()
                 .post(requestPath)
@@ -365,7 +366,7 @@ public class MandateResourceIT {
 
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/cancel"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
-                .replace("{mandateExternalId}", mandateFixture.getExternalId());
+                .replace("{mandateExternalId}", mandateFixture.getExternalId().toString());
 
         givenSetup()
                 .post(requestPath)
@@ -388,7 +389,7 @@ public class MandateResourceIT {
 
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/change-payment-method"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
-                .replace("{mandateExternalId}", testMandate.getExternalId());
+                .replace("{mandateExternalId}", testMandate.getExternalId().toString());
 
         givenSetup()
                 .post(requestPath)
@@ -414,7 +415,7 @@ public class MandateResourceIT {
 
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/change-payment-method"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
-                .replace("{mandateExternalId}", testMandate.getExternalId());
+                .replace("{mandateExternalId}", testMandate.getExternalId().toString());
 
         givenSetup()
                 .post(requestPath)
@@ -551,9 +552,9 @@ public class MandateResourceIT {
                 withCustomerId(customerId)
                 .withCustomerBankAccountId(customerBankAccountId)
                 .withPayerId(payerFixture.getId());
-        stubCreateCustomer(mandateFixture.getExternalId(), payerFixture, customerId);
-        stubCreateCustomerBankAccount(mandateFixture.getExternalId(), payerFixture, customerId, customerBankAccountId);
-        stubCreateMandate(mandateFixture.getExternalId(), goCardlessCustomerFixture);
+        stubCreateCustomer(mandateFixture.getExternalId().toString(), payerFixture, customerId);
+        stubCreateCustomerBankAccount(mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
+        stubCreateMandate(mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
         stubCreatePayment(transactionFixture.getAmount(), "MD123", transactionFixture.getExternalId());
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
@@ -616,9 +617,9 @@ public class MandateResourceIT {
                 withCustomerId(customerId)
                 .withCustomerBankAccountId(customerBankAccountId)
                 .withPayerId(payerFixture.getId());
-        stubCreateCustomer(mandateFixture.getExternalId(), payerFixture, customerId);
-        stubCreateCustomerBankAccount(mandateFixture.getExternalId(), payerFixture, customerId, customerBankAccountId);
-        stubCreateMandate(mandateFixture.getExternalId(), goCardlessCustomerFixture);
+        stubCreateCustomer(mandateFixture.getExternalId().toString(), payerFixture, customerId);
+        stubCreateCustomerBankAccount(mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
+        stubCreateMandate(mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
         // language=JSON
@@ -663,10 +664,10 @@ public class MandateResourceIT {
                 .insert(testContext.getJdbi());
     }
 
-    private String expectedMandateLocationFor(String accountId, String mandateExternalId) {
+    private String expectedMandateLocationFor(String accountId, MandateExternalId mandateExternalId) {
         return "http://localhost:" + testContext.getPort() + "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}"
                 .replace("{accountId}", accountId)
-                .replace("{mandateExternalId}", mandateExternalId);
+                .replace("{mandateExternalId}", mandateExternalId.toString());
     }
 
     private RequestSpecification givenSetup() {

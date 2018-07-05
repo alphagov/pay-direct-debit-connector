@@ -1,16 +1,18 @@
 package uk.gov.pay.directdebit.payers.services;
 
-import java.util.Map;
-import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.model.Payer;
+
+import javax.inject.Inject;
+import java.util.Map;
 
 public class PayerService {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(PayerService.class);
@@ -33,7 +35,7 @@ public class PayerService {
                 .findByMandateId(mandate.getId())
                 .orElseThrow(() -> new PayerNotFoundException(mandate.getExternalId()));
     }
-    public Payer createOrUpdatePayer(String mandateExternalId, Map<String, String> createPayerRequest) {
+    public Payer createOrUpdatePayer(MandateExternalId mandateExternalId, Map<String, String> createPayerRequest) {
         Mandate mandate = mandateServiceFactory.getMandateQueryService().findByExternalId(mandateExternalId);
         mandateServiceFactory.getMandateStateUpdateService().receiveDirectDebitDetailsFor(mandate);
         Payer payerDetails = payerParser.parse(createPayerRequest, mandate.getId());

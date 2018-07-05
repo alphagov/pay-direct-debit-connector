@@ -15,10 +15,12 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
+import uk.gov.pay.directdebit.payments.api.CreatePaymentRequest;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
@@ -130,22 +132,23 @@ public class TransactionServiceTest {
                 "description", "a description",
                 "reference", "a reference"
         );
-        CollectPaymentRequest collectPaymentRequest = CollectPaymentRequest.of(createTransactionRequest);
+        CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.of(createTransactionRequest);
         
         when(mockedGatewayAccountDao.findByExternalId(gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of((gatewayAccountFixture.toEntity())));
+        final Mandate mandate = mandateFixture.toEntity();
         Transaction transaction = service.createTransaction(
-                collectPaymentRequest, 
-                mandateFixture.toEntity(), 
+                createPaymentRequest,
+                mandate, 
                 gatewayAccountFixture.getExternalId());
         
         assertThat(transaction.getId(), is(notNullValue()));
         assertThat(transaction.getExternalId(), is(notNullValue()));
-        assertThat(transaction.getMandate(), is(mandateFixture.toEntity()));
+        assertThat(transaction.getMandate(), is(mandate));
         assertThat(transaction.getState(), is(NEW));
-        assertThat(transaction.getAmount(), is(collectPaymentRequest.getAmount()));
-        assertThat(transaction.getDescription(), is(collectPaymentRequest.getDescription()));
-        assertThat(transaction.getReference(), is(collectPaymentRequest.getReference()));
+        assertThat(transaction.getAmount(), is(createPaymentRequest.getAmount()));
+        assertThat(transaction.getDescription(), is(createPaymentRequest.getDescription()));
+        assertThat(transaction.getReference(), is(createPaymentRequest.getReference()));
         assertThat(transaction.getCreatedDate(), ZonedDateTimeMatchers
                 .within(10, ChronoUnit.SECONDS, ZonedDateTime.now()));
         

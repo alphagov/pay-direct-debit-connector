@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
 import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
@@ -55,7 +56,7 @@ public class PayerServiceTest {
             "account_number", ACCOUNT_NUMBER,
             "bank_name", BANK_NAME
     );
-    private String mandateExternalId = "sdkfhsdkjfhjdks";
+    private MandateExternalId mandateExternalId = MandateExternalId.of("sdkfhsdkjfhjdks");
 
     private Payer payer = PayerFixture.aPayerFixture()
             .withName("mr payment").toEntity();

@@ -88,7 +88,7 @@ public class DirectDebitDirectDebitEventDaoIT {
         assertThat(foundDirectDebitEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
         assertThat(foundDirectDebitEvent.getEventType(), is(MANDATE));
         assertThat(foundDirectDebitEvent.getExternalId(), is(directDebitEventFixture.getExternalId()));
-        assertThat(foundDirectDebitEvent.getMandateExternalId(), is(testMandate.getExternalId()));
+        assertThat(foundDirectDebitEvent.getMandateExternalId(), is(testMandate.getExternalId().toString()));
         assertThat(foundDirectDebitEvent.getTransactionExternalId(), is(testTransaction.getExternalId()));
     }
 

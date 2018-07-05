@@ -1,8 +1,10 @@
 package uk.gov.pay.directdebit.util;
 
+import org.jdbi.v3.core.Jdbi;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+
 import java.util.List;
 import java.util.Map;
-import org.jdbi.v3.core.Jdbi;
 
 public class DatabaseTestHelper {
 
@@ -12,7 +14,7 @@ public class DatabaseTestHelper {
         this.jdbi = jdbi;
     }
 
-    public Map<String, Object> getTokenByMandateExternalId(String externalId) {
+    public Map<String, Object> getTokenByMandateExternalId(MandateExternalId externalId) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT * from tokens t JOIN mandates m ON t.mandate_id = m.id WHERE m.external_id = :external_id ORDER BY t.id DESC")
@@ -78,7 +80,7 @@ public class DatabaseTestHelper {
     }
     
 
-    public List<Map<String, Object>> getTransactionsForMandate(String mandateExternalId) {
+    public List<Map<String, Object>> getTransactionsForMandate(MandateExternalId mandateExternalId) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT * from transactions t JOIN mandates m ON t.mandate_id = m.id WHERE m.external_id = :mandateExternalId")
@@ -99,7 +101,7 @@ public class DatabaseTestHelper {
         );
     }
 
-    public Map<String, Object> getPayerByMandateExternalId(String externalId) {
+    public Map<String, Object> getPayerByMandateExternalId(MandateExternalId externalId) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT p.* from payers p INNER JOIN mandates m ON p.mandate_id = m.id WHERE m.external_id = :externalId")
@@ -121,7 +123,7 @@ public class DatabaseTestHelper {
         );
     }
     
-    public Map<String, Object> getMandateByExternalId(String externalId) {
+    public Map<String, Object> getMandateByExternalId(MandateExternalId externalId) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT * from mandates m WHERE m.external_id = :externalId")

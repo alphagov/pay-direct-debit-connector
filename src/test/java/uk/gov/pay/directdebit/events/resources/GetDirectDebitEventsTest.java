@@ -126,7 +126,7 @@ public class GetDirectDebitEventsTest {
                 .body("results[0].event", is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER.toString()))
                 .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(DateTimeFormatter.ISO_INSTANT).toString()))
                 .body("results[0].external_id", is("externalId"))
-                .body("results[0].mandate_external_id", is(testMandate.getExternalId()))
+                .body("results[0].mandate_external_id", is(testMandate.getExternalId().toString()))
                 .body("results[0].transaction_external_id", is(testTransaction.getExternalId()))
         ;
     }

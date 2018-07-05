@@ -1,11 +1,13 @@
 package uk.gov.pay.directdebit.payments.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+
 import java.util.Map;
 
 public class CollectPaymentRequest implements CollectRequest {
     @JsonProperty("agreement_id")
-    private String mandateExternalId;
+    private MandateExternalId mandateExternalId;
     
     @JsonProperty("amount")
     private Long amount;
@@ -16,7 +18,7 @@ public class CollectPaymentRequest implements CollectRequest {
     @JsonProperty("reference")
     private String reference;
 
-    public CollectPaymentRequest(String mandateExternalId, Long amount, String description,
+    public CollectPaymentRequest(MandateExternalId mandateExternalId, Long amount, String description,
             String reference) {
         this.mandateExternalId = mandateExternalId;
         this.amount = amount;
@@ -26,14 +28,14 @@ public class CollectPaymentRequest implements CollectRequest {
 
     public static CollectPaymentRequest of(Map<String, String> collectPaymentRequest) {
         return new CollectPaymentRequest(
-                collectPaymentRequest.get("agreement_id"),
+                MandateExternalId.of(collectPaymentRequest.get("agreement_id")),
                 Long.valueOf(collectPaymentRequest.get("amount")),
                 collectPaymentRequest.get("description"),
                 collectPaymentRequest.get("reference")
         );
     }
 
-    public String getMandateExternalId() {
+    public MandateExternalId getMandateExternalId() {
         return mandateExternalId;
     }
 

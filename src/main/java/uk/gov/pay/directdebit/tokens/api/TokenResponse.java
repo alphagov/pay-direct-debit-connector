@@ -3,14 +3,18 @@ package uk.gov.pay.directdebit.tokens.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class TokenResponse {
 
     @JsonProperty("external_id")
-    private String mandateExternalId;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private MandateExternalId mandateExternalId;
 
     @JsonProperty("state")
     private String state;
@@ -33,7 +37,7 @@ public class TokenResponse {
     @JsonProperty("transaction_external_id")
     private String transactionExternalId;
 
-    private TokenResponse(String paymentExternalId,
+    private TokenResponse(MandateExternalId mandateExternalId,
                           Long gatewayAccountId,
                           String gatewayAccountExternalId,
                           String mandateReference,
@@ -41,7 +45,7 @@ public class TokenResponse {
                           String mandateType,
                           String state,
                           String transactionExternalId) {
-        this.mandateExternalId = paymentExternalId;
+        this.mandateExternalId = mandateExternalId;
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.mandateType = mandateType;

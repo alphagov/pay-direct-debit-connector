@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
 public class MandateQueryService {
     private MandateDao mandateDao;
@@ -17,7 +18,7 @@ public class MandateQueryService {
         this.mandateDao = mandateDao;
     }
 
-    public Mandate findByExternalId(String externalId) {
+    public Mandate findByExternalId(MandateExternalId externalId) {
         return mandateDao
                 .findByExternalId(externalId)
                 .orElseThrow(() -> new MandateNotFoundException(externalId));
