@@ -33,7 +33,6 @@ pipeline {
           def long stepBuildTime = System.currentTimeMillis()
 
           sh 'mvn clean verify'
-          runProviderContractTests()
           postSuccessfulMetrics("directdebit-connector.maven-build", stepBuildTime)
         }
       }
@@ -48,6 +47,7 @@ pipeline {
         branch 'master'
       }
       steps {
+        runProviderContractTests()
         sh 'mvn -Dmaven.test.skip=true clean package'
       }
     }
