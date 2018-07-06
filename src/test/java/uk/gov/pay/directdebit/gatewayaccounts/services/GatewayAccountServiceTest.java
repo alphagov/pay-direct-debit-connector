@@ -121,6 +121,33 @@ public class GatewayAccountServiceTest {
     }
 
     @Test
+    public void shouldReturnAListOfGatewayAccountsSingle() {
+        GatewayAccount fixture = gatewayAccountFixture.toEntity();
+        List<String> ids = Arrays.asList(fixture.getExternalId());
+
+        when(mockedGatewayAccountDao.find(ids))
+          .thenReturn(Arrays.asList(fixture));
+
+        List<GatewayAccount> gatewayAccounts = service.getGatewayAccounts(ids);
+
+        assertThat(gatewayAccounts.size(), is(1));
+    }
+
+    @Test
+    public void shouldReturnAListOfGatewayAccountsMultiple() {
+        GatewayAccount fixture1 = gatewayAccountFixture.toEntity();
+        GatewayAccount fixture2 = gatewayAccountFixture.toEntity();
+        List<String> ids = Arrays.asList(fixture1.getExternalId(), fixture2.getExternalId());
+
+        when(mockedGatewayAccountDao.find(ids))
+          .thenReturn(Arrays.asList(fixture1, fixture2));
+
+        List<GatewayAccount> gatewayAccounts = service.getGatewayAccounts(ids);
+
+        assertThat(gatewayAccounts.size(), is(2));
+    }
+
+    @Test
     public void shouldStoreAGatewayAccount() {
         GatewayAccount parsedGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().toEntity();
         when(mockedGatewayAccountParser.parse(createTransactionRequest)).thenReturn(parsedGatewayAccount);

@@ -1,7 +1,10 @@
 package uk.gov.pay.directdebit.gatewayaccounts.dao;
 
+import java.util.List;
+
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
@@ -27,4 +30,9 @@ public interface GatewayAccountDao {
             "VALUES (:externalId, :paymentProvider, :type, :serviceName, :description, :analyticsId)")
     @GetGeneratedKeys
     Long insert(@BindBean GatewayAccount gatewayAccount);
+
+    @SqlQuery("SELECT * FROM gateway_accounts WHERE external_id IN (<externalAccountIds>)")
+    List<GatewayAccount> find(
+      @BindList("externalAccountIds") List<String> externalAccountIds
+    );
 }

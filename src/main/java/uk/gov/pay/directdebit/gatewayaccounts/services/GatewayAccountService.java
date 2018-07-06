@@ -39,6 +39,10 @@ public class GatewayAccountService {
         return gatewayAccountDao.findAll();
     }
 
+    public List<GatewayAccount> getGatewayAccounts(List<String> externalAccountIds) {
+        return gatewayAccountDao.find(externalAccountIds);
+    }
+
     public GatewayAccount create(Map<String, String> createGatewayAccountRequest) {
         GatewayAccount gatewayAccount = gatewayAccountParser.parse(createGatewayAccountRequest);
         Long id = gatewayAccountDao.insert(gatewayAccount);
