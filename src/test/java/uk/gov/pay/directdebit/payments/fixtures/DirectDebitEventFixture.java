@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
+import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
@@ -15,6 +16,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE
 
 public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixture, DirectDebitEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
+    private String externalId = RandomIdGenerator.newId();
     private Long mandateId = RandomUtils.nextLong(1, 99999);
     private Long transactionId = null;
     private Type eventType = CHARGE;
@@ -34,6 +36,11 @@ public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixtur
 
     public DirectDebitEventFixture withId(Long id) {
         this.id = id;
+        return this;
+    }
+    
+    public DirectDebitEventFixture withExteranlId(String externalId){
+        this.externalId = externalId;
         return this;
     }
 
@@ -89,14 +96,16 @@ public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixtur
                         "INSERT INTO" +
                                 "    events(\n" +
                                 "        id,\n" +
+                                "        external_id,\n" +
                                 "        mandate_id,\n" +
                                 "        transaction_id,\n" +
                                 "        event_type,\n" +
                                 "        event,\n" +
                                 "        event_date\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?)\n",
                         id,
+                        externalId,
                         mandateId,
                         transactionId,
                         eventType.toString(),
@@ -109,7 +118,7 @@ public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixtur
 
     @Override
     public DirectDebitEvent toEntity() {
-        return new DirectDebitEvent(id, mandateId, transactionId, eventType, event, eventDate);
+        return new DirectDebitEvent(id, externalId, mandateId, transactionId, eventType, event, eventDate);
     }
 
 }
