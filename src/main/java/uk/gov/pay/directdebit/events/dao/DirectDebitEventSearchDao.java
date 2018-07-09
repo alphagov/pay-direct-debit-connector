@@ -5,6 +5,11 @@ import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.payments.dao.mapper.EventMapper;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
@@ -12,6 +17,7 @@ import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -76,7 +82,27 @@ public class DirectDebitEventSearchDao {
                     .findOnly();
         });
     }
+    
+    public Long insert(DirectDebitEvent directDebitEvent) {
+        return (long) jdbi.withHandle(handle -> {
+            return handle.createUpdate("INSERT INTO events(mandate_id, external_id, transaction_id, event_type, " +
+                    "event, event_date) VALUES (:mandateId, :externalId, :transactionId, :eventType, :event, :eventDate)")
+                    .bindBean(directDebitEvent)
+                    .execute();
+        });
+    }
 
+    public Optional<DirectDebitEvent> findByMandateIdAndEvent(Long mandateId, DirectDebitEvent.Type eventType, DirectDebitEvent.SupportedEvent event) {
+        return jdbi.withHandle(handle -> handle.createQuery("SELECT e.id, e.mandate_id, e.transaction_id, e.event_type, e.event, e.event_date, e.version, m.external_id " +
+                "FROM events e WHERE e.mandate_id = :mandateId and " +
+                "e.event_type = :eventType and e.event = :event INNER JOIN mandates m ON (e.mandate_id = m.id)")
+                .bind("mandateId", mandateId)
+                .bind("eventType", eventType)
+                .bind("event", event)
+                .mapToBean(DirectDebitEvent.class)
+                .findFirst());
+    }
+    
     @AllArgsConstructor
     private class QueryStringAndQueryMap {
         public final String queryString; 

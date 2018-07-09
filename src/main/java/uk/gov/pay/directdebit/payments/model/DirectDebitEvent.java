@@ -50,9 +50,15 @@ public class DirectDebitEvent {
     
     @JsonProperty("mandate_id")
     private Long mandateId;
+    
+    @JsonProperty("mandate_external_id")
+    private String mandateExternalId;
 
     @JsonProperty("transaction_id")
     private Long transactionId;
+    
+    @JsonProperty("transaction_external_id")
+    private String transactionExternalId;
 
     @JsonProperty("event_type")
     private Type eventType;
@@ -63,8 +69,9 @@ public class DirectDebitEvent {
     @JsonProperty("event_date")
     @JsonSerialize(using = CustomDateSerializer.class)
     private ZonedDateTime eventDate;
-    
 
+    public DirectDebitEvent(){};
+    
     public DirectDebitEvent(Long id, String externalId, Long mandateId, Long transactionId, Type eventType, SupportedEvent event, ZonedDateTime eventDate) {
         this.id = id;
         this.externalId = externalId;
@@ -162,10 +169,6 @@ public class DirectDebitEvent {
     
     public static DirectDebitEvent paymentExpired(Long mandateId, Long transactionId) {
         return new DirectDebitEvent(mandateId, transactionId, CHARGE, PAYMENT_EXPIRED_BY_SYSTEM);
-    }
-
-    public String getExteranlId() {
-        return externalId;
     }
 
     public enum Type {
