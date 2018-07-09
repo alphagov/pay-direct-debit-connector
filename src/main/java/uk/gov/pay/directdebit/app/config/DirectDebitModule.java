@@ -10,7 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import javax.net.ssl.SSLSocketFactory;
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.directdebit.events.dao.DirectDebitEventSearchDao;
+import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
@@ -20,7 +20,6 @@ import uk.gov.pay.directdebit.notifications.clients.ClientFactory;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
-import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
@@ -97,7 +96,7 @@ public class DirectDebitModule extends AbstractModule {
     @Provides
     @Singleton
     public DirectDebitEventDao provideDirectDebitEventDao() {
-        return jdbi.onDemand(DirectDebitEventDao.class);
+        return new DirectDebitEventDao(jdbi);
     }
 
     @Provides
@@ -152,11 +151,5 @@ public class DirectDebitModule extends AbstractModule {
     @Singleton
     public PaymentViewDao providePaymentViewDao() {
         return new PaymentViewDao(jdbi);
-    }
-
-    @Provides
-    @Singleton
-    public DirectDebitEventSearchDao provideDirectDebitEventSearchDao() {
-        return new DirectDebitEventSearchDao(jdbi);
     }
 }

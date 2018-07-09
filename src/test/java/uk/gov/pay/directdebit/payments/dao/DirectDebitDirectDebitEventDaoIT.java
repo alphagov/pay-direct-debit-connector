@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.events.dao.DirectDebitEventSearchDao;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -18,6 +19,7 @@ import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+import unfiltered.response.Found;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
@@ -35,7 +37,7 @@ public class DirectDebitDirectDebitEventDaoIT {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-    private DirectDebitEventDao directDebitEventDao;
+    private DirectDebitEventSearchDao directDebitEventDao;
 
     private MandateFixture testMandate;
     private TransactionFixture testTransaction;
@@ -45,7 +47,8 @@ public class DirectDebitDirectDebitEventDaoIT {
 
     @Before
     public void setup() {
-        directDebitEventDao = testContext.getJdbi().onDemand(DirectDebitEventDao.class);
+        //directDebitEventDao = testContext.getJdbi().onDemand(DirectDebitEventDao.class);
+        directDebitEventDao = new DirectDebitEventSearchDao(testContext.getJdbi());
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .insert(testContext.getJdbi());
         this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(
@@ -69,13 +72,13 @@ public class DirectDebitDirectDebitEventDaoIT {
         assertThat(foundDirectDebitEvent.get("event_type"), is(directDebitEvent.getEventType().toString()));
         assertThat(foundDirectDebitEvent.get("event"), is(directDebitEvent.getEvent().toString()));
         assertThat((Timestamp) foundDirectDebitEvent.get("event_date"), isDate(directDebitEvent.getEventDate()));
-        assertNotNull(foundDirectDebitEvent.get("external_id"));
     }
 
     @Test
     public void shouldFindByMandateIdAndEvent() {
-        aDirectDebitEventFixture()
+        DirectDebitEventFixture insert = aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
+                .withTransactionId(testTransaction.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .insert(testContext.getJdbi());
@@ -87,6 +90,9 @@ public class DirectDebitDirectDebitEventDaoIT {
         assertThat(foundDirectDebitEvent.getMandateId(), is(testMandate.getId()));
         assertThat(foundDirectDebitEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
         assertThat(foundDirectDebitEvent.getEventType(), is(MANDATE));
+        assertThat(foundDirectDebitEvent.getExternalId(), is(insert.getExternalId()));
+        assertThat(foundDirectDebitEvent.getMandateExternalId(), is(testMandate.getExternalId()));
+        assertThat(foundDirectDebitEvent.getTransactionExternalId(), is(testTransaction.getExternalId()));
     }
 
     @Test
