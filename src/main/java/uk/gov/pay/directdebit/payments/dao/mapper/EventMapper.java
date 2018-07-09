@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
 public class EventMapper implements RowMapper<DirectDebitEvent> {
     private static final String ID_COLUMN = "id";
+    private static final String EXTERNAL_ID_COLUMN = "external_id";
     private static final String MANDATE_ID_COLUMN = "mandate_id";
     private static final String TRANSACTION_ID_COLUMN = "transaction_id";
     private static final String EVENT_TYPE_COLUMN = "event_type";
@@ -20,6 +21,7 @@ public class EventMapper implements RowMapper<DirectDebitEvent> {
     public DirectDebitEvent map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         return new DirectDebitEvent(
                 resultSet.getLong(ID_COLUMN),
+                resultSet.getString(EXTERNAL_ID_COLUMN),
                 resultSet.getLong(MANDATE_ID_COLUMN),
                 resultSet.getLong(TRANSACTION_ID_COLUMN),
                 DirectDebitEvent.Type.valueOf(resultSet.getString(EVENT_TYPE_COLUMN)),

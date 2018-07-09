@@ -101,6 +101,7 @@ public class GetDirectDebitEventsTest {
     public void shouldReturnAnEventWithAllSearchParameters() {
         DirectDebitEventFixture directDebitEventFixture = aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
+                .withExteranlId("externalId")
                 .withTransactionId(testTransaction.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
@@ -126,6 +127,7 @@ public class GetDirectDebitEventsTest {
                 .body("results[0].event_type", is(MANDATE.toString()))
                 .body("results[0].event", is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER.toString()))
                 .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(DateTimeFormatter.ISO_INSTANT).toString()))
+                .body("results[0].external_id", is("externalId"))
         ;
     }
 

@@ -20,6 +20,7 @@ import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture.aDirectDebitEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -68,6 +69,7 @@ public class DirectDebitDirectDebitEventDaoIT {
         assertThat(foundDirectDebitEvent.get("event_type"), is(directDebitEvent.getEventType().toString()));
         assertThat(foundDirectDebitEvent.get("event"), is(directDebitEvent.getEvent().toString()));
         assertThat((Timestamp) foundDirectDebitEvent.get("event_date"), isDate(directDebitEvent.getEventDate()));
+        assertNotNull(foundDirectDebitEvent.get("external_id"));
     }
 
     @Test

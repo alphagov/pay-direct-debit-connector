@@ -17,7 +17,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
 @RegisterRowMapper(EventMapper.class)
 public interface DirectDebitEventDao {
 
-    @SqlUpdate("INSERT INTO events(mandate_id, transaction_id, event_type, event, event_date) VALUES (:mandateId, :transactionId, :eventType, :event, :eventDate)")
+    @SqlUpdate("INSERT INTO events(mandate_id, external_id, transaction_id, event_type, event, event_date) VALUES (:mandateId, :externalId, :transactionId, :eventType, :event, :eventDate)")
     @GetGeneratedKeys
     Long insert(@BindBean DirectDebitEvent directDebitEvent);
 
