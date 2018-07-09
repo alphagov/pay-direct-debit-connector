@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.payments.exception.UnsupportedDirectDebitEventExce
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.CHARGE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
@@ -240,5 +241,12 @@ public class DirectDebitEventTest {
         assertThat(directDebitEvent.getEvent(), is(PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE));
         assertThat(directDebitEvent.getEventType(), is(MANDATE));
         assertThat(directDebitEvent.getMandateId(), is(mandateId));
+    }
+    
+    @Test
+    public void external_id_should_be_set() {
+        long mandateId = 2L;
+        DirectDebitEvent directDebitEvent = DirectDebitEvent.paymentMethodChanged(mandateId);
+        assertNotNull(directDebitEvent.getExternalId());
     }
 }

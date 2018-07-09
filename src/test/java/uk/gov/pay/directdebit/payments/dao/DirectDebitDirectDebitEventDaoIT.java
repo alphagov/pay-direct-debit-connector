@@ -1,8 +1,5 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import java.sql.Timestamp;
-import java.util.Map;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,6 +15,10 @@ import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+
+import java.sql.Timestamp;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -44,7 +45,7 @@ public class DirectDebitDirectDebitEventDaoIT {
 
     @Before
     public void setup() {
-        directDebitEventDao = testContext.getJdbi().onDemand(DirectDebitEventDao.class);
+        directDebitEventDao = new DirectDebitEventDao(testContext.getJdbi());
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .insert(testContext.getJdbi());
         this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(
@@ -72,8 +73,9 @@ public class DirectDebitDirectDebitEventDaoIT {
 
     @Test
     public void shouldFindByMandateIdAndEvent() {
-        aDirectDebitEventFixture()
+        DirectDebitEventFixture insert = aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
+                .withTransactionId(testTransaction.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .insert(testContext.getJdbi());
@@ -85,6 +87,9 @@ public class DirectDebitDirectDebitEventDaoIT {
         assertThat(foundDirectDebitEvent.getMandateId(), is(testMandate.getId()));
         assertThat(foundDirectDebitEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
         assertThat(foundDirectDebitEvent.getEventType(), is(MANDATE));
+        assertThat(foundDirectDebitEvent.getExternalId(), is(insert.getExternalId()));
+        assertThat(foundDirectDebitEvent.getMandateExternalId(), is(testMandate.getExternalId()));
+        assertThat(foundDirectDebitEvent.getTransactionExternalId(), is(testTransaction.getExternalId()));
     }
 
     @Test

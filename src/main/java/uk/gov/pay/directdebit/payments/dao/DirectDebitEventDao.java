@@ -1,26 +1,114 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
-import org.jdbi.v3.sqlobject.customizer.Bind;
-import org.jdbi.v3.sqlobject.customizer.BindBean;
-import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
-import org.jdbi.v3.sqlobject.statement.SqlQuery;
-import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import lombok.AllArgsConstructor;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.directdebit.payments.dao.mapper.EventMapper;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
 
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
-@RegisterRowMapper(EventMapper.class)
-public interface DirectDebitEventDao {
+public class DirectDebitEventDao {
 
-    @SqlUpdate("INSERT INTO events(mandate_id, transaction_id, event_type, event, event_date) VALUES (:mandateId, :transactionId, :eventType, :event, :eventDate)")
-    @GetGeneratedKeys
-    Long insert(@BindBean DirectDebitEvent directDebitEvent);
+    private static final String QUERY = "SELECT e.id, e.mandate_id, e.transaction_id, e.event_type, e.event, e.event_date, e.version, e.external_id, m.external_id AS mandate_external_id, t.external_id AS transaction_external_id " +
+            "FROM events e LEFT OUTER JOIN mandates m ON (e.mandate_id = m.id) " +
+            "LEFT OUTER JOIN transactions t ON (e.transaction_id = t.id) " +
+            ":searchFields ORDER BY e.id DESC LIMIT :limit OFFSET :offset";
+    private static final String COUNT_QUERY = "SELECT count(*) " +
+            "FROM events e LEFT OUTER JOIN mandates m ON (e.mandate_id = m.id) " +
+            "LEFT OUTER JOIN transactions t ON (e.transaction_id = t.id) " +
+            ":searchFields";
+    
+    private final Jdbi jdbi;
 
-    @SqlQuery("SELECT * FROM events e WHERE e.mandate_id = :mandateId and e.event_type = :eventType and e.event = :event")
-    Optional<DirectDebitEvent> findByMandateIdAndEvent(@Bind("mandateId") Long mandateId, @Bind("eventType") Type eventType, @Bind("event") SupportedEvent event);
+    @Inject
+    public DirectDebitEventDao(Jdbi jdbi) {
+        this.jdbi = jdbi;
+    }
+    
+    public List<DirectDebitEvent> findEvents(DirectDebitEventSearchParams searchParams) {
+        QueryStringAndQueryMap queryStringAndQueryMap = generateQuery(searchParams);
+        String limit = isNull(searchParams.getPageSize()) ? "NULL" : searchParams.getPageSize().toString();
+        String offset = searchParams.getPage() == null ? "0" : Integer.toString((searchParams.getPage() - 1) * searchParams.getPageSize());
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(QUERY
+                    .replace(":searchFields", queryStringAndQueryMap.queryString)
+                    .replace(":limit", limit)
+                    .replace(":offset", offset));
+            queryStringAndQueryMap.queryMap.forEach(query::bind);
+            return query.map(new EventMapper()).list();
+        });
+    }
+
+    private QueryStringAndQueryMap generateQuery(DirectDebitEventSearchParams searchParams) {
+        List<String> searchStrings = Lists.newArrayList();
+        Map<String, Object> queryMap = Maps.newHashMap();
+        if (nonNull(searchParams.getMandateExternalId())) {
+            searchStrings.add("m.external_id = :mandate_id");
+            queryMap.put("mandate_id", searchParams.getMandateExternalId());
+        }
+        if (nonNull(searchParams.getTransactionExternalId())) {
+            searchStrings.add("t.external_id = :transaction_id");
+            queryMap.put("transaction_id", searchParams.getTransactionExternalId());
+        }
+        if (nonNull(searchParams.getBeforeDate())) {
+            searchStrings.add("e.event_date < :before_date");
+            queryMap.put("before_date", searchParams.getBeforeDate());
+        }
+        if (nonNull(searchParams.getAfterDate())) {
+            searchStrings.add("e.event_date > :after_date");
+            queryMap.put("after_date", searchParams.getAfterDate());
+        }
+        String queryString = searchStrings.isEmpty() ? "" : "WHERE " + searchStrings.stream().collect(Collectors.joining(" AND "));
+        return new QueryStringAndQueryMap(queryString, queryMap);
+    }
+
+    public int getTotalNumberOfEvents(DirectDebitEventSearchParams searchParams) {
+        QueryStringAndQueryMap queryStringAndQueryMap = generateQuery(searchParams);
+        return jdbi.withHandle(handle -> {
+            Query query = handle.createQuery(COUNT_QUERY.replace(":searchFields", queryStringAndQueryMap.queryString));
+            queryStringAndQueryMap.queryMap.forEach(query::bind);
+            return query
+                    .mapTo(Integer.class)
+                    .findOnly();
+        });
+    }
+    
+    public Long insert(DirectDebitEvent directDebitEvent) {
+        return (long) jdbi.withHandle(handle -> {
+            return handle.createUpdate("INSERT INTO events(mandate_id, external_id, transaction_id, event_type, " +
+                    "event, event_date) VALUES (:mandateId, :externalId, :transactionId, :eventType, :event, :eventDate)")
+                    .bindBean(directDebitEvent)
+                    .execute();
+        });
+    }
+
+    public Optional<DirectDebitEvent> findByMandateIdAndEvent(Long mandateId, DirectDebitEvent.Type eventType, DirectDebitEvent.SupportedEvent event) {
+        return jdbi.withHandle(handle -> handle.createQuery("SELECT e.id, e.mandate_id, e.transaction_id, e.event_type, e.event, e.event_date, e.version, e.external_id, " +
+                "m.external_id AS mandate_external_id, t.external_id AS transaction_external_id " +
+                "FROM events e LEFT OUTER JOIN mandates m ON (e.mandate_id = m.id) " + 
+                "LEFT OUTER JOIN transactions t ON (e.transaction_id = t.id) " + 
+                "WHERE e.mandate_id = :mandateId and e.event_type = :eventType and e.event = :event")
+                .bind("mandateId", mandateId)
+                .bind("eventType", eventType)
+                .bind("event", event)
+                .mapToBean(DirectDebitEvent.class)
+                .findFirst());
+    }
+    
+    @AllArgsConstructor
+    private class QueryStringAndQueryMap {
+        public final String queryString; 
+        public final Map<String, Object> queryMap;
+    }
 }

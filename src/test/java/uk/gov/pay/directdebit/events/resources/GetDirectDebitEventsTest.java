@@ -101,6 +101,7 @@ public class GetDirectDebitEventsTest {
     public void shouldReturnAnEventWithAllSearchParameters() {
         DirectDebitEventFixture directDebitEventFixture = aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
+                .withExternalId("externalId")
                 .withTransactionId(testTransaction.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
@@ -110,8 +111,8 @@ public class GetDirectDebitEventsTest {
         String requestPath = format("/v1/events?before=%s&after=%s&page_size=100&page=1&mandate_id=%s&transaction_id=%s",
                 ZonedDateTime.now().plusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
                 ZonedDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
-                testMandate.getId().toString(),
-                testTransaction.getId().toString());
+                testMandate.getExternalId(),
+                testTransaction.getExternalId());
         
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -126,6 +127,9 @@ public class GetDirectDebitEventsTest {
                 .body("results[0].event_type", is(MANDATE.toString()))
                 .body("results[0].event", is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER.toString()))
                 .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(DateTimeFormatter.ISO_INSTANT).toString()))
+                .body("results[0].external_id", is("externalId"))
+                .body("results[0].mandate_external_id", is(testMandate.getExternalId()))
+                .body("results[0].transaction_external_id", is(testTransaction.getExternalId()))
         ;
     }
 
@@ -211,7 +215,7 @@ public class GetDirectDebitEventsTest {
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?mandate_id=%s", testMandate.getId());
+        String requestPath = format("/v1/events?mandate_id=%s", testMandate.getExternalId());
 
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -233,7 +237,7 @@ public class GetDirectDebitEventsTest {
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?transaction_id=%s", testTransaction.getId());
+        String requestPath = format("/v1/events?transaction_id=%s", testTransaction.getExternalId());
 
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -257,7 +261,7 @@ public class GetDirectDebitEventsTest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = format("/v1/events?transaction_id=%s&page_size=2", testTransaction.getId());
+        String requestPath = format("/v1/events?transaction_id=%s&page_size=2", testTransaction.getExternalId());
 
         given().port(testContext.getPort())
                 .contentType(JSON)
