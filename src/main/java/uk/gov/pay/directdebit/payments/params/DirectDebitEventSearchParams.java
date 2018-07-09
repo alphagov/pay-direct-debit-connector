@@ -14,13 +14,13 @@ import java.util.Map;
 public class DirectDebitEventSearchParams {
     @Getter private final ZonedDateTime beforeDate;
     @Getter private final ZonedDateTime afterDate;
-    @Getter private final Long mandateId;
-    @Getter private final Long transactionId;
+    @Getter private final String mandateExternalId;
+    @Getter private final String transactionExternalId;
     @Getter private final Integer pageSize;
     @Getter private final Integer page;
 
     public DirectDebitEventSearchParamsBuilder copy() {
-        return new DirectDebitEventSearchParamsBuilder().page(page).pageSize(pageSize).transactionId(transactionId).mandateId(mandateId).afterDate(afterDate).beforeDate(beforeDate);
+        return new DirectDebitEventSearchParamsBuilder().page(page).pageSize(pageSize).transactionExternalId(transactionExternalId).mandateExternalId(mandateExternalId).afterDate(afterDate).beforeDate(beforeDate);
     }
 
     public Map<String, String> getParamsAsMap() {
@@ -32,11 +32,11 @@ public class DirectDebitEventSearchParams {
         if (afterDate != null)
             params.put("after", afterDate.format(DateTimeFormatter.ISO_INSTANT));
         
-        if (mandateId != null)
-            params.put("mandate_id", mandateId.toString());
+        if (mandateExternalId != null)
+            params.put("mandate_id", mandateExternalId.toString());
         
-        if (transactionId != null)
-            params.put("transaction_id", transactionId.toString());
+        if (transactionExternalId != null)
+            params.put("transaction_id", transactionExternalId.toString());
         
         params.put("page_size", pageSize.toString());
         params.put("page", page.toString());

@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.events.service;
 
 import uk.gov.pay.directdebit.events.api.DirectDebitEventsPagination;
 import uk.gov.pay.directdebit.events.api.DirectDebitEventsResponse;
-import uk.gov.pay.directdebit.events.dao.DirectDebitEventSearchDao;
+import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
 
@@ -12,10 +12,10 @@ import java.util.List;
 
 public class DirectDebitEventsSearchService {
     
-    private final DirectDebitEventSearchDao dao;
+    private final DirectDebitEventDao dao;
 
     @Inject
-    public DirectDebitEventsSearchService(DirectDebitEventSearchDao dao) {
+    public DirectDebitEventsSearchService(DirectDebitEventDao dao) {
         this.dao = dao;
     }
 

@@ -16,6 +16,8 @@ public class EventMapper implements RowMapper<DirectDebitEvent> {
     private static final String EVENT_TYPE_COLUMN = "event_type";
     private static final String EVENT_COLUMN = "event";
     private static final String EVENT_DATE_COLUMN = "event_date";
+    private static final String MANDATE_EXTERNAL_ID_COLUMN = "mandate_external_id";
+    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "transaction_external_id";
 
     @Override
     public DirectDebitEvent map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
@@ -23,7 +25,9 @@ public class EventMapper implements RowMapper<DirectDebitEvent> {
                 resultSet.getLong(ID_COLUMN),
                 resultSet.getString(EXTERNAL_ID_COLUMN),
                 resultSet.getLong(MANDATE_ID_COLUMN),
+                resultSet.getString(MANDATE_EXTERNAL_ID_COLUMN),
                 resultSet.getLong(TRANSACTION_ID_COLUMN),
+                resultSet.getString(TRANSACTION_EXTERNAL_ID_COLUMN),
                 DirectDebitEvent.Type.valueOf(resultSet.getString(EVENT_TYPE_COLUMN)),
                 DirectDebitEvent.SupportedEvent.valueOf(resultSet.getString(EVENT_COLUMN)),
                 ZonedDateTime.ofInstant(resultSet.getTimestamp(EVENT_DATE_COLUMN).toInstant(), ZoneOffset.UTC));

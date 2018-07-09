@@ -3,6 +3,8 @@ package uk.gov.pay.directdebit.payments.fixtures;
 import java.sql.Timestamp;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+
+import lombok.Getter;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
@@ -14,6 +16,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
 
+@Getter
 public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixture, DirectDebitEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private String externalId = RandomIdGenerator.newId();
@@ -30,22 +33,14 @@ public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixtur
         return new DirectDebitEventFixture();
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public DirectDebitEventFixture withId(Long id) {
         this.id = id;
         return this;
     }
     
-    public DirectDebitEventFixture withExteranlId(String externalId){
+    public DirectDebitEventFixture withExternalId(String externalId){
         this.externalId = externalId;
         return this;
-    }
-
-    public Long getTransactionId() {
-        return transactionId;
     }
 
     public DirectDebitEventFixture withTransactionId(Long transactionId) {
@@ -53,17 +48,9 @@ public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixtur
         return this;
     }
 
-    public Long getMandateId() {
-        return mandateId;
-    }
-
     public DirectDebitEventFixture withMandateId(Long mandateId) {
         this.mandateId = mandateId;
         return this;
-    }
-    
-    public Type getEventType() {
-        return eventType;
     }
 
     public DirectDebitEventFixture withEventType(Type eventType) {
@@ -71,17 +58,9 @@ public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixtur
         return this;
     }
 
-    public SupportedEvent getEvent() {
-        return event;
-    }
-
     public DirectDebitEventFixture withEvent(SupportedEvent event) {
         this.event = event;
         return this;
-    }
-
-    public ZonedDateTime getEventDate() {
-        return eventDate;
     }
 
     public DirectDebitEventFixture withEventDate(ZonedDateTime eventDate) {
