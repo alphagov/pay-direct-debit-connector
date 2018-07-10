@@ -122,8 +122,6 @@ public class GetDirectDebitEventsTest {
                 .contentType(JSON)
                 .body("results", hasSize(1))
                 .body("count", is(1))
-                .body("results[0].mandate_id", is(Math.toIntExact(testMandate.getId())))
-                .body("results[0].transaction_id", is(Math.toIntExact(testTransaction.getId())))
                 .body("results[0].event_type", is(MANDATE.toString()))
                 .body("results[0].event", is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER.toString()))
                 .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(DateTimeFormatter.ISO_INSTANT).toString()))
@@ -281,6 +279,7 @@ public class GetDirectDebitEventsTest {
         for (int i = 1; i < 4; i++) {
             aDirectDebitEventFixture()
                     .withId(Long.valueOf(i))
+                    .withExternalId("testId" + i)
                     .withMandateId(testMandate.getId())
                     .withTransactionId(testTransaction.getId())
                     .withEventType(MANDATE)
@@ -299,8 +298,7 @@ public class GetDirectDebitEventsTest {
                 .contentType(JSON)
                 .body("count", is(1))
                 .body("total", is(3))
-                .body("results", hasSize(1))
-                .body("results[0].id", is(1) );
+                .body("results", hasSize(1));
     }
     
     @Test

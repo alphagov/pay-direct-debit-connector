@@ -7,7 +7,7 @@ import uk.gov.pay.directdebit.payments.exception.UnparsableDateException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Builder
@@ -24,7 +24,7 @@ public class DirectDebitEventSearchParams {
     }
 
     public Map<String, String> getParamsAsMap() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new LinkedHashMap<>();
         
         if (beforeDate != null) 
             params.put("before", beforeDate.format(DateTimeFormatter.ISO_INSTANT));
@@ -33,19 +33,20 @@ public class DirectDebitEventSearchParams {
             params.put("after", afterDate.format(DateTimeFormatter.ISO_INSTANT));
         
         if (mandateExternalId != null)
-            params.put("mandate_external_id", mandateExternalId.toString());
+            params.put("mandate_external_id", mandateExternalId);
         
         if (transactionExternalId != null)
-            params.put("transaction_external_id", transactionExternalId.toString());
-        
-        params.put("page_size", pageSize.toString());
+            params.put("transaction_external_id", transactionExternalId);
+
         params.put("page", page.toString());
+        params.put("page_size", pageSize.toString());
         
         return params;
     }
 
     public static class DirectDebitEventSearchParamsBuilder {
         
+        // These are required as defaults to the lombok builder.
         private Integer pageSize = 500;
         private Integer page = 1;
         

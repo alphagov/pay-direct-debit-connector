@@ -43,15 +43,15 @@ public class DirectDebitEventsPaginationTest {
                 .build();
         DirectDebitEventsPagination pagination = new DirectDebitEventsPagination(searchParams, 100, mockUriInfo);
         
-        assertEquals(PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&before=2018-06-29T09%3A00%3A00Z&mandate_external_id=1234L&after=2018-06-29T08%3A00%3A00Z&page=2&page_size=10")
+        assertEquals(PaginationLink.ofValue(testUrl + "/test/?before=2018-06-29T09%3A00%3A00Z&after=2018-06-29T08%3A00%3A00Z&mandate_external_id=1234L&transaction_external_id=5678L&page=2&page_size=10")
                 , pagination.getSelfLink());
-        assertEquals(PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&before=2018-06-29T09%3A00%3A00Z&mandate_external_id=1234L&after=2018-06-29T08%3A00%3A00Z&page=3&page_size=10")
+        assertEquals(PaginationLink.ofValue(testUrl + "/test/?before=2018-06-29T09%3A00%3A00Z&after=2018-06-29T08%3A00%3A00Z&mandate_external_id=1234L&transaction_external_id=5678L&page=3&page_size=10")
                 , pagination.getNextLink());
-        assertEquals(PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&before=2018-06-29T09%3A00%3A00Z&mandate_external_id=1234L&after=2018-06-29T08%3A00%3A00Z&page=1&page_size=10")
+        assertEquals(PaginationLink.ofValue(testUrl + "/test/?before=2018-06-29T09%3A00%3A00Z&after=2018-06-29T08%3A00%3A00Z&mandate_external_id=1234L&transaction_external_id=5678L&page=1&page_size=10")
                 , pagination.getFirstLink());
-        assertEquals(PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&before=2018-06-29T09%3A00%3A00Z&mandate_external_id=1234L&after=2018-06-29T08%3A00%3A00Z&page=10&page_size=10")
+        assertEquals(PaginationLink.ofValue(testUrl + "/test/?before=2018-06-29T09%3A00%3A00Z&after=2018-06-29T08%3A00%3A00Z&mandate_external_id=1234L&transaction_external_id=5678L&page=10&page_size=10")
                 , pagination.getLastLink());
-        assertEquals(PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&before=2018-06-29T09%3A00%3A00Z&mandate_external_id=1234L&after=2018-06-29T08%3A00%3A00Z&page=1&page_size=10")
+        assertEquals(PaginationLink.ofValue(testUrl + "/test/?before=2018-06-29T09%3A00%3A00Z&after=2018-06-29T08%3A00%3A00Z&mandate_external_id=1234L&transaction_external_id=5678L&page=1&page_size=10")
                 , pagination.getPrevLink());
     }
 
@@ -65,14 +65,14 @@ public class DirectDebitEventsPaginationTest {
                 .build();
         DirectDebitEventsPagination pagination = new DirectDebitEventsPagination(searchParams, 100, mockUriInfo);
 
-        assertEquals(pagination.getSelfLink(), PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&mandate_external_id=1234L&page=3&page_size=10"));
-        assertEquals(PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&mandate_external_id=1234L&page=4&page_size=10")
+        assertEquals(pagination.getSelfLink(), PaginationLink.ofValue(testUrl + "/test/?mandate_external_id=1234L&transaction_external_id=5678L&page=3&page_size=10"));
+        assertEquals(PaginationLink.ofValue(testUrl + "/test/?mandate_external_id=1234L&transaction_external_id=5678L&page=4&page_size=10")
                 , pagination.getNextLink());
-        assertEquals(PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&mandate_external_id=1234L&page=1&page_size=10")
+        assertEquals(PaginationLink.ofValue(testUrl + "/test/?mandate_external_id=1234L&transaction_external_id=5678L&page=1&page_size=10")
                 , pagination.getFirstLink());
-        assertEquals(PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&mandate_external_id=1234L&page=10&page_size=10")
+        assertEquals(PaginationLink.ofValue(testUrl + "/test/?mandate_external_id=1234L&transaction_external_id=5678L&page=10&page_size=10")
                 , pagination.getLastLink());
-        assertEquals(PaginationLink.ofValue(testUrl + "/test/?transaction_external_id=5678L&mandate_external_id=1234L&page=2&page_size=10")
+        assertEquals(PaginationLink.ofValue(testUrl + "/test/?mandate_external_id=1234L&transaction_external_id=5678L&page=2&page_size=10")
                 , pagination.getPrevLink());
     }
 

@@ -1,9 +1,5 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
@@ -36,38 +32,18 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.MANDATE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.PAYER;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @Data
 public class DirectDebitEvent {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(DirectDebitEvent.class);
 
-    @JsonProperty("id")
     private Long id;
-    
-    @JsonProperty("external_id")
     private String externalId;
-    
-    @JsonProperty("mandate_id")
     private Long mandateId;
-    
-    @JsonProperty("mandate_external_id")
     private String mandateExternalId;
-
-    @JsonProperty("transaction_id")
     private Long transactionId;
-    
-    @JsonProperty("transaction_external_id")
     private String transactionExternalId;
-
-    @JsonProperty("event_type")
     private Type eventType;
-
-    @JsonProperty
     private SupportedEvent event;
-
-    @JsonProperty("event_date")
-    @JsonSerialize(using = CustomDateSerializer.class)
     private ZonedDateTime eventDate;
 
     public DirectDebitEvent(){};
