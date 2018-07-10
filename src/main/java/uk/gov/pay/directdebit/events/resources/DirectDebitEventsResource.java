@@ -31,8 +31,8 @@ public class DirectDebitEventsResource {
                                @QueryParam("after") String afterDate,
                                @QueryParam("page_size") Integer pageSize,
                                @QueryParam("page") Integer page,
-                               @QueryParam("mandate_id") String mandateId,
-                               @QueryParam("transaction_id") String transactionId,
+                               @QueryParam("mandate_external_id") String mandateId,
+                               @QueryParam("transaction_external_id") String transactionId,
                                @Context UriInfo uriInfo) {
 
         DirectDebitEventSearchParams searchParams = DirectDebitEventSearchParams.builder()

@@ -33,10 +33,10 @@ public class DirectDebitEventSearchParams {
             params.put("after", afterDate.format(DateTimeFormatter.ISO_INSTANT));
         
         if (mandateExternalId != null)
-            params.put("mandate_id", mandateExternalId.toString());
+            params.put("mandate_external_id", mandateExternalId.toString());
         
         if (transactionExternalId != null)
-            params.put("transaction_id", transactionExternalId.toString());
+            params.put("transaction_external_id", transactionExternalId.toString());
         
         params.put("page_size", pageSize.toString());
         params.put("page", page.toString());

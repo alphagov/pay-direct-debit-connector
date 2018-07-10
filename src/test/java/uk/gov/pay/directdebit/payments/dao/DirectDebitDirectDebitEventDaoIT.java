@@ -1,15 +1,11 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import java.sql.Timestamp;
-import java.util.Map;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.events.dao.DirectDebitEventSearchDao;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -19,10 +15,12 @@ import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
-import unfiltered.response.Found;
+
+import java.sql.Timestamp;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture.aDirectDebitEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -37,7 +35,7 @@ public class DirectDebitDirectDebitEventDaoIT {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-    private DirectDebitEventSearchDao directDebitEventDao;
+    private DirectDebitEventDao directDebitEventDao;
 
     private MandateFixture testMandate;
     private TransactionFixture testTransaction;
@@ -47,8 +45,7 @@ public class DirectDebitDirectDebitEventDaoIT {
 
     @Before
     public void setup() {
-        //directDebitEventDao = testContext.getJdbi().onDemand(DirectDebitEventDao.class);
-        directDebitEventDao = new DirectDebitEventSearchDao(testContext.getJdbi());
+        directDebitEventDao = new DirectDebitEventDao(testContext.getJdbi());
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .insert(testContext.getJdbi());
         this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(
