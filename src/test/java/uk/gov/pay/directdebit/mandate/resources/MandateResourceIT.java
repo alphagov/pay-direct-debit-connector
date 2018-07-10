@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import javax.ws.rs.core.Response.Status;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -150,6 +151,29 @@ public class MandateResourceIT {
                 }}));
     }
 
+    @Test
+    public void shouldNotCreateAOneOffMandate() throws Exception {
+        String accountExternalId = testGatewayAccount.getExternalId();
+        String agreementType = MandateType.ONE_OFF.toString();
+        String returnUrl = "http://example.com/success-page/";
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put("agreement_type", agreementType)
+                .put("return_url", returnUrl)
+                .put("service_reference", "test-service-reference")
+                .build());
+
+        String requestPath = "/v1/api/accounts/{accountId}/mandates"
+                .replace("{accountId}", accountExternalId);
+
+        givenSetup()
+                .body(postBody)
+                .post(requestPath)
+                .then()
+                .statusCode(Status.PRECONDITION_FAILED.getStatusCode())
+                .contentType(JSON)
+                .body("message", is("Invalid operation on mandate of type ONE_OFF"));
+    }
+    
     @Test
     public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenATransactionHasBeenCreated() {
         String accountExternalId = testGatewayAccount.getExternalId();

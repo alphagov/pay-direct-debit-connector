@@ -65,9 +65,8 @@ public class TransactionResource {
     public Response createOneOffPayment(@PathParam("accountId") String accountExternalId, Map<String, String> transactionRequest, @Context UriInfo uriInfo) {
         LOGGER.info("Received new one-off payment request");
         transactionRequestValidator.validate(transactionRequest);
-        transactionRequest.put("agreement_type", MandateType.ONE_OFF.toString());
         Mandate mandate = mandateService
-                .createMandate(transactionRequest, accountExternalId);
+                .createMandate(transactionRequest, accountExternalId, MandateType.ONE_OFF);
         Transaction transaction = transactionService.createTransaction(transactionRequest, mandate, accountExternalId);
         TransactionResponse response = transactionService.createPaymentResponseWithAllLinks(transaction, accountExternalId, uriInfo);
         return created(response.getLink("self")).entity(response).build();
@@ -79,6 +78,7 @@ public class TransactionResource {
     public Response collectPaymentFromMandate(@PathParam("accountId") GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequest, @Context UriInfo uriInfo) {
         LOGGER.info("Received collect payment from mandate request");
         collectPaymentRequestValidator.validate(collectPaymentRequest);
+        
         DirectDebitPaymentProvider service = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
         Transaction transaction = service.collect(gatewayAccount, collectPaymentRequest);
         CollectPaymentResponse response = transactionService.collectPaymentResponseWithSelfLink(transaction, gatewayAccount.getExternalId(), uriInfo);
