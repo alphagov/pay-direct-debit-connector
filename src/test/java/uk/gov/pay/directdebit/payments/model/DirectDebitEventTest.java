@@ -244,7 +244,7 @@ public class DirectDebitEventTest {
     }
     
     @Test
-    public void external_id_should_be_set() {
+    public void externalIdShouldBeSet() {
         long mandateId = 2L;
         DirectDebitEvent directDebitEvent = DirectDebitEvent.paymentMethodChanged(mandateId);
         assertNotNull(directDebitEvent.getExternalId());
