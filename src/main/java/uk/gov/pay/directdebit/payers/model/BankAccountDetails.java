@@ -17,4 +17,22 @@ public class BankAccountDetails {
     public SortCode getSortCode() {
         return sortCode;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BankAccountDetails that = (BankAccountDetails) o;
+
+        if (!accountNumber.equals(that.accountNumber)) return false;
+        return sortCode.equals(that.sortCode);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = accountNumber.hashCode();
+        result = 31 * result + sortCode.hashCode();
+        return result;
+    }
 }

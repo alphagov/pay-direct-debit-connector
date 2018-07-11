@@ -16,7 +16,6 @@ import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneOffMandateException;
-import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
@@ -337,21 +336,5 @@ public class MandateService {
                     ImmutableMap.of("chargeTokenId", token.getToken())));
         }
         return dataLinks;
-    }
-
-    /**
-     * Creates a mandate. If this is sandbox, also updates it to pending.
-     *
-     * @param mandateExternalId
-     */
-    public ConfirmationDetails confirm(String mandateExternalId, Map<String, String> confirmDetailsRequest) {
-        SortCode sortCode = SortCode.of(confirmDetailsRequest.get("sort_code"));
-        AccountNumber accountNumber = AccountNumber.of(confirmDetailsRequest.get("account_number"));
-        Mandate mandate = confirmedDirectDebitDetailsFor(mandateExternalId);
-        Transaction transaction = Optional
-                .ofNullable(confirmDetailsRequest.get("transaction_external_id"))
-                .map(transactionService::findTransactionForExternalId)
-                .orElse(null);
-        return new ConfirmationDetails(mandate, transaction, accountNumber, sortCode);
     }
 }

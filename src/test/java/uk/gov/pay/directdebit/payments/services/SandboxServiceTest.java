@@ -7,8 +7,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
+import uk.gov.pay.directdebit.mandate.model.MandateConfirmationDetails;
+import uk.gov.pay.directdebit.mandate.model.MandateConfirmationRequest;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.OneOffMandateConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.services.PayerService;
@@ -23,7 +25,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.ConfirmationDetailsFixture.confirmationDetails;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -57,32 +58,20 @@ public class SandboxServiceTest {
     public void confirm_shouldRegisterAPaymentSubmittedToProviderEventWhenSuccessfullyConfirmingOneOffMandate() {
         MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ONE_OFF).withGatewayAccountFixture(gatewayAccountFixture);
         TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
-        ConfirmationDetails confirmationDetails = confirmationDetails()
-                .withMandateFixture(mandateFixture)
-                .withTransactionFixture(transactionFixture)
-                .build();
         Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678", "transaction_external_id", transactionFixture.getExternalId());
-        when(mockedMandateService
-                .confirm(mandateFixture.getExternalId(), details))
-                .thenReturn(confirmationDetails);
 
-        service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
+        service.confirmMandate(OneOffMandateConfirmationDetails.from(mandateFixture.toEntity(), transactionFixture.toEntity(),
+                MandateConfirmationRequest.of(details)));
         verify(mockedTransactionService).oneOffPaymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
     }
 
     @Test
     public void confirm_shouldSendAnEmailWhenConfirmationForOnDemandMandate() {
         MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(gatewayAccountFixture);
-        ConfirmationDetails confirmationDetails = confirmationDetails()
-                .withMandateFixture(mandateFixture)
-                .build();
         Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678");
-        when(mockedMandateService
-                .confirm(mandateFixture.getExternalId(), details))
-                .thenReturn(confirmationDetails);
 
-        service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
-        verify(mockedTransactionService).onDemandMandateConfirmedFor(mandateFixture.toEntity());
+        service.confirmMandate(MandateConfirmationDetails.from(mandateFixture.toEntity(), MandateConfirmationRequest.of(details)));
+        verifyNoMoreInteractions(mockedTransactionService);
     }
 
     @Test

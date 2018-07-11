@@ -70,22 +70,22 @@ public class DirectDebitDirectDebitEventDaoIT {
         assertThat((Timestamp) foundDirectDebitEvent.get("event_date"), isDate(directDebitEvent.getEventDate()));
     }
 
-    @Test
-    public void shouldFindByMandateIdAndEvent() {
-        aDirectDebitEventFixture()
-                .withMandateId(testMandate.getId())
-                .withEventType(MANDATE)
-                .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
-                .insert(testContext.getJdbi());
-
-        DirectDebitEvent foundDirectDebitEvent = directDebitEventDao
-                .findByMandateIdAndEvent(testMandate.getId(), MANDATE,
-                        PAYMENT_ACKNOWLEDGED_BY_PROVIDER).get();
-
-        assertThat(foundDirectDebitEvent.getMandateId(), is(testMandate.getId()));
-        assertThat(foundDirectDebitEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
-        assertThat(foundDirectDebitEvent.getEventType(), is(MANDATE));
-    }
+//    @Test
+//    public void shouldFindByMandateIdAndEvent() {
+//        aDirectDebitEventFixture()
+//                .withMandateId(testMandate.getId())
+//                .withEventType(MANDATE)
+//                .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
+//                .insert(testContext.getJdbi());
+//
+//        DirectDebitEvent foundDirectDebitEvent = directDebitEventDao
+//                .findByMandateIdAndEvent(testMandate.getId(), MANDATE,
+//                        PAYMENT_ACKNOWLEDGED_BY_PROVIDER).get();
+//
+//        assertThat(foundDirectDebitEvent.getMandateId(), is(testMandate.getId()));
+//        assertThat(foundDirectDebitEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
+//        assertThat(foundDirectDebitEvent.getEventType(), is(MANDATE));
+//    }
 
     @Test
     public void shouldNotFindByMandateIdAndEvent_ifMandateDoesNotExist() {

@@ -10,8 +10,6 @@ public interface DirectDebitPaymentProvider {
 
     Payer createPayer(String mandateExternalId, GatewayAccount gatewayAccount, Map<String, String> createPayerRequest);
     
-    void confirm(String mandateExternalId, GatewayAccount gatewayAccount, Map<String, String> confirmDetailsRequest);
-
     Transaction collect(GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequest);
     
     BankAccountValidationResponse validate(String mandateExternalId, Map<String,String> bankAccountDetails);

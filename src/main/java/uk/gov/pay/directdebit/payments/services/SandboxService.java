@@ -5,13 +5,14 @@ import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.exception.validation.ValidationException;
 import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.MandateConfirmationDetails;
+import uk.gov.pay.directdebit.mandate.model.OneOffMandateConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.services.PayerService;
+import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvideCommandService;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
@@ -19,14 +20,14 @@ import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.Map;
 
-public class SandboxService implements DirectDebitPaymentProvider {
+public class SandboxService implements DirectDebitPaymentProvider, DirectDebitPaymentProvideCommandService {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(SandboxService.class);
     private static final int DAYS_TO_COLLECTION = 4;
     private final PayerService payerService;
     private final TransactionService transactionService;
     private final MandateService mandateService;
     private final BankAccountDetailsValidator bankAccountDetailsValidator = new BankAccountDetailsValidator();
-    
+
     @Inject
     public SandboxService(PayerService payerService,
                           MandateService mandateService,
@@ -43,17 +44,16 @@ public class SandboxService implements DirectDebitPaymentProvider {
     }
 
     @Override
-    public void confirm(String mandateExternalId, GatewayAccount gatewayAccount, Map<String, String> confirmDetailsRequest) {
-        LOGGER.info("Confirming payment for SANDBOX, mandate with id: {}", mandateExternalId);
-        ConfirmationDetails confirmationDetails = mandateService
-                .confirm(mandateExternalId, confirmDetailsRequest);
-        Mandate mandate = confirmationDetails.getMandate();
-        if (mandate.getType().equals(MandateType.ONE_OFF)) {
-            Transaction transaction = confirmationDetails.getTransaction();
-            transactionService.oneOffPaymentSubmittedToProviderFor(transaction, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
-        } else if(MandateType.ON_DEMAND.equals(mandate.getType())) {
-            transactionService.onDemandMandateConfirmedFor(mandate);
-        }
+    public void confirmMandate(OneOffMandateConfirmationDetails oneOffMandateConfirmationDetails) {
+        Mandate mandate = oneOffMandateConfirmationDetails.getMandate();
+        LOGGER.info("Confirming payment for SANDBOX, mandate with id: {}", mandate.getExternalId());
+        Transaction transaction = oneOffMandateConfirmationDetails.getTransaction();
+        transactionService.oneOffPaymentSubmittedToProviderFor(transaction, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
+    }
+
+    @Override
+    public void confirmMandate(MandateConfirmationDetails mandateConfirmationDetails) {
+        //no op
     }
 
     @Override
@@ -74,7 +74,7 @@ public class SandboxService implements DirectDebitPaymentProvider {
     public BankAccountValidationResponse validate(String mandateExternalId, Map<String, String> bankAccountDetailsPayload) {
         LOGGER.info("Validating bank account details for SANDBOX, mandate with id: {}", mandateExternalId);
         try {
-             bankAccountDetailsValidator.validate(bankAccountDetailsPayload);
+            bankAccountDetailsValidator.validate(bankAccountDetailsPayload);
         } catch (ValidationException exception) {
             LOGGER.warn("Bank details are invalid, mandate with id: {}", mandateExternalId);
             return new BankAccountValidationResponse(false);
