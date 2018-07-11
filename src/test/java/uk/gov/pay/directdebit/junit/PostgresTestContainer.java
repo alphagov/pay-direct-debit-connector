@@ -37,16 +37,20 @@ final class PostgresTestContainer {
 
     private volatile boolean stopped = false;
 
-    PostgresTestContainer(DockerClient docker, String host, String dockerImage) throws Exception {
-        Class.forName("org.postgresql.Driver");
+    PostgresTestContainer(DockerClient docker, String dockerImage) throws Exception {
+        loadPostgresDriver();
         this.dockerImage = dockerImage;
         failsafeDockerPull(docker, this.dockerImage);
         this.docker = docker;
         this.containerId = createContainer(docker);
         docker.startContainer(containerId);
-        this.postgresUri = "jdbc:postgresql://" + host + ":" + getContainerPortBy(docker, containerId) + "/";
+        this.postgresUri = "jdbc:postgresql://" + docker.getHost() + ":" + getContainerPortBy(docker, containerId) + "/";
         registerShutdownHook();
         waitForPostgresToStart();
+    }
+
+    private void loadPostgresDriver() throws ClassNotFoundException {
+        Class.forName("org.postgresql.Driver");
     }
 
     String getPostgresDbUri() {
