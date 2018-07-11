@@ -32,7 +32,8 @@ public class PaymentViewValidator {
                 .withAmount(searchParams.getAmount())
                 .withMandateId(searchParams.getMandateId())
                 .withPaginationParams(paginationParams)
-                .withSearchDateParams(searchDateParams);
+                .withSearchDateParams(searchDateParams)
+                .withState(searchParams.getState());
     }
 
     private PaginationParams validatePagination(PaymentViewSearchParams searchParams) {

@@ -40,8 +40,9 @@ public class PaymentViewResource {
             @QueryParam("reference") String reference,
             @QueryParam("amount") Long amount,
             @QueryParam("agreement_id") String mandateId,
-            @Context UriInfo uriInfo){
-        
+            @QueryParam("state") String state,
+            @Context UriInfo uriInfo) {
+
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(accountExternalId)
                 .withPage(pageNumber)
                 .withDisplaySize(displaySize)
@@ -50,8 +51,8 @@ public class PaymentViewResource {
                 .withEmail(email)
                 .withReference(reference)
                 .withAmount(amount)
-                .withMandateId(mandateId);
-        
+                .withMandateId(mandateId)
+                .withState(state);
         return Response.ok().entity(paymentViewService
                 .withUriInfo(uriInfo)
                 .getPaymentViewResponse(searchParams)).build();

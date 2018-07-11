@@ -30,7 +30,7 @@ public class PaymentViewDao {
             ":searchExtraFields " +
             "ORDER BY t.id DESC OFFSET :offset LIMIT :limit";
 
-    private final String COUNT_QUERY_STRING = "SELECT count(*) " +
+    private final String COUNT_QUERY_STRING = "SELECT count(t.id) " +
             "FROM transactions t " +
             "INNER JOIN mandates m ON t.mandate_id = m.id " +
             "INNER JOIN gateway_accounts ga ON ga.id = m.gateway_account_id " +

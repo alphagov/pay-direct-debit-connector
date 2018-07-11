@@ -84,7 +84,7 @@ GET /v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?r
 | Field                     | required | Description                               |
 | ------------------------  |:--------:| ----------------------------------------- |
 | `reference`               | - | There (partial or full) reference issued by the government service for this payment. |
-| `status`                  | - | The transaction of this payment |
+| `state`                   | - | The current state of the payment |
 | `from_date`               | - | The initial date for search payments |
 | `to_date`                 | - | The end date for search payments|
 | `page`                    | - | To get the results from the specified page number, should be a non zero +ve number (optional, defaults to 1)|
@@ -121,19 +121,19 @@ GET /v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?r
     ],
     "_links": {
         "next_page": {
-            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page_number=3&display_size=100"
+            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page=3&display_size=100"
         },
         "self": {
-            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page_number=2&display_size=100"
+            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page=2&display_size=100"
         },
         "prev_page": {
-            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page_number=1&display_size=100"
+            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page=1&display_size=100"
         },
         "last_page": {
-            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page_number=3&display_size=100"
+            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page=3&display_size=100"
         },
         "first_page": {
-            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page_number=1&display_size=100"
+            "href": "https://direct-debit-connector.example.com/v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?reference=MBK&page=1&display_size=100"
         }
     }
 }
@@ -147,7 +147,7 @@ GET /v1/api/accounts/DIRECT_DEBIT:r6oe9rd7mm1u9r43bi6u1p0qd9/transactions/view?r
 | `page`                                | Yes            | Page number of the current recordset                              |
 | `results`                             | Yes            | List of payments                                                  |
 | `results[i].amount`                   | Yes            | The amount of this payment in pence                               |
-| `results[i].state`                    | Yes            | The current external status of the payment                        |
+| `results[i].state`                    | Yes            | The current state of the payment                        |
 | `results[i].description`              | Yes            | The payment description                                           |
 | `results[i].reference`                | Yes            | There reference issued by the government service for this payment |
 | `results[i].email`                    | Yes            | The email address of the user of this payment                     |

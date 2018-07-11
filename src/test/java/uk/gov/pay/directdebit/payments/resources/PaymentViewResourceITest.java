@@ -11,7 +11,9 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
 import java.time.ZoneOffset;
@@ -317,11 +319,6 @@ public class PaymentViewResourceITest {
                 .contentType(JSON)
                 .body("results", hasSize(6));
     }
-
-    private RequestSpecification givenSetup() {
-        return given().port(testContext.getPort())
-                .contentType(JSON);
-    }
     
     @Test
     public void shouldReturn3Records_whenSearchingByMandateId(){
@@ -340,12 +337,12 @@ public class PaymentViewResourceITest {
                 .insert(testContext.getJdbi());
         PayerFixture payerFixture1 = aPayerFixture()
                 .withMandateId(mandateFixture1.getId())
-                .withEmail("j.citizen@mail.fake")
+                .withEmail("j.citizen@mail.test")
                 .withName("J. Citizen")
                 .insert(testContext.getJdbi());
         aPayerFixture()
                 .withMandateId(mandateFixture2.getId())
-                .withEmail("j.doe@mail.fake")
+                .withEmail("j.doe@mail.test")
                 .withName("J. Doe")
                 .insert(testContext.getJdbi());
         for (int i = 0; i < 6; i++) {
@@ -371,5 +368,56 @@ public class PaymentViewResourceITest {
                 .body("results", hasSize(3))
                 .body("results[0].email", is(payerFixture1.getEmail()))
                 .body("results[1].name", is("J. Citizen"));
+    }
+
+    @Test
+    public void shouldReturn6Records_whenSearchingByFailedExternalState(){
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
+                .withExternalId("gateway-external-id")
+                .insert(testContext.getJdbi());
+        String mandateExternalId = "a-mandate-external-id";
+        MandateFixture mandateFixture = aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withExternalId(mandateExternalId)
+                .insert(testContext.getJdbi());
+        aPayerFixture()
+                .withMandateId(mandateFixture.getId())
+                .withEmail("j.citizen@mail.test")
+                .withName("J. Citizen")
+                .insert(testContext.getJdbi());
+        aTransactionFixture()
+                .withMandateFixture(mandateFixture)
+                .withState(PaymentState.NEW)
+                .insert(testContext.getJdbi());
+        for (int i = 0; i < 6; i++) {
+            if (i % 2 == 0) {
+                aTransactionFixture()
+                        .withMandateFixture(mandateFixture)
+                        .withState(PaymentState.CANCELLED)
+                        .insert(testContext.getJdbi());
+                continue;
+            }
+            aTransactionFixture()
+                    .withMandateFixture(mandateFixture)
+                    .withState(PaymentState.EXPIRED)
+                    .insert(testContext.getJdbi());
+        }
+        String requestPath = "/v1/api/accounts/{accountId}/transactions/view?state=:state"
+                .replace("{accountId}", gatewayAccountFixture.getExternalId())
+                .replace(":state", ExternalPaymentState.EXTERNAL_FAILED.getState());
+        givenSetup()
+                .get(requestPath)
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .contentType(JSON)
+                .body("count", is(6))
+                .body("results", hasSize(6))
+                .body("results[0].state.finished", is(true))
+                .body("results[0].state.status", is("failed"));
+    }
+
+    private RequestSpecification givenSetup() {
+        return given().port(testContext.getPort())
+                .contentType(JSON);
     }
 }
