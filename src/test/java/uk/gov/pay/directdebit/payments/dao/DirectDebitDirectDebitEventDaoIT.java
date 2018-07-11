@@ -73,7 +73,7 @@ public class DirectDebitDirectDebitEventDaoIT {
 
     @Test
     public void shouldFindByMandateIdAndEvent() {
-        DirectDebitEventFixture insert = aDirectDebitEventFixture()
+        DirectDebitEventFixture directDebitEventFixture = aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
                 .withTransactionId(testTransaction.getId())
                 .withEventType(MANDATE)
@@ -87,7 +87,7 @@ public class DirectDebitDirectDebitEventDaoIT {
         assertThat(foundDirectDebitEvent.getMandateId(), is(testMandate.getId()));
         assertThat(foundDirectDebitEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
         assertThat(foundDirectDebitEvent.getEventType(), is(MANDATE));
-        assertThat(foundDirectDebitEvent.getExternalId(), is(insert.getExternalId()));
+        assertThat(foundDirectDebitEvent.getExternalId(), is(directDebitEventFixture.getExternalId()));
         assertThat(foundDirectDebitEvent.getMandateExternalId(), is(testMandate.getExternalId()));
         assertThat(foundDirectDebitEvent.getTransactionExternalId(), is(testTransaction.getExternalId()));
     }
