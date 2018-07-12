@@ -1,11 +1,10 @@
 package uk.gov.pay.directdebit.payments.model;
 
+import javax.inject.Inject;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidPaymentProviderException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.payments.services.GoCardlessService;
+import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.SandboxService;
-
-import javax.inject.Inject;
 
 public class PaymentProviderFactory {
 
@@ -13,13 +12,12 @@ public class PaymentProviderFactory {
     private GoCardlessService goCardlessService;
 
     @Inject
-    public PaymentProviderFactory(SandboxService sandboxService, GoCardlessService goCardlessService) {
-        this.goCardlessService = goCardlessService;
+    public PaymentProviderFactory(SandboxService sandboxService, GoCardlessService goCardlessCommandService) {
         this.sandboxService = sandboxService;
+        this.goCardlessService = goCardlessCommandService;
     }
 
-
-    public DirectDebitPaymentProvider getServiceFor(PaymentProvider paymentProvider) {
+    public DirectDebitPaymentProviderCommandService getCommandServiceFor(PaymentProvider paymentProvider) {
         switch (paymentProvider) {
             case GOCARDLESS:
                 return goCardlessService;

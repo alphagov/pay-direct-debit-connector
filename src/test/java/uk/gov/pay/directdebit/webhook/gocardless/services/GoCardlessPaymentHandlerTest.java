@@ -20,7 +20,7 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.GoCardlessService;
+import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
@@ -37,7 +37,7 @@ public class GoCardlessPaymentHandlerTest {
     @Mock
     private PayerService mockedPayerService;
     @Mock
-    private GoCardlessService mockedGoCardlessService;
+    private GoCardlessEventService mockedGoCardlessService;
     @Captor
     private ArgumentCaptor<GoCardlessEvent> geCaptor;
 

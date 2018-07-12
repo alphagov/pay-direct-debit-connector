@@ -122,7 +122,7 @@ public class DirectDebitEvent {
         return new DirectDebitEvent(mandateId, null, MANDATE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
     }
 
-    public static DirectDebitEvent chargeCreated(Long mandateId, Long transactionId) {
+    public static DirectDebitEvent transactionCreated(Long mandateId, Long transactionId) {
         return new DirectDebitEvent(mandateId, transactionId, CHARGE, CHARGE_CREATED);
     }
     

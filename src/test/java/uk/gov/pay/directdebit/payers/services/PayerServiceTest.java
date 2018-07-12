@@ -1,6 +1,8 @@
 package uk.gov.pay.directdebit.payers.services;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,18 +10,17 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
+import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
+import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
-
-import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -27,7 +28,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PayerServiceTest {
@@ -36,8 +36,11 @@ public class PayerServiceTest {
     private
     PayerDao mockedPayerDao;
     @Mock
-    private
-    MandateService mockedMandateService;
+    private MandateServiceFactory mockedMandateServiceFactory;
+    @Mock
+    private MandateQueryService mockedMandateQueryService;
+    @Mock
+    private MandateStateUpdateService mockedMandateStateUpdateService;
     @Mock
     private
     PayerParser mockedPayerParser;
@@ -56,7 +59,6 @@ public class PayerServiceTest {
 
     private Payer payer = PayerFixture.aPayerFixture()
             .withName("mr payment").toEntity();
-    private GatewayAccount gatewayAccount = aGatewayAccountFixture().toEntity();
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withExternalId(mandateExternalId);
 
     @Rule
@@ -64,19 +66,21 @@ public class PayerServiceTest {
 
     @Before
     public void setUp() {
-        service = new PayerService(mockedPayerDao, mockedMandateService, mockedPayerParser);
-
-        when(mockedMandateService.receiveDirectDebitDetailsFor(mandateExternalId)).thenReturn(mandateFixture.toEntity());
+        service = new PayerService(mockedPayerDao, mockedMandateServiceFactory, mockedPayerParser);
+        when(mockedMandateServiceFactory.getMandateQueryService()).thenReturn(mockedMandateQueryService);
+        when(mockedMandateServiceFactory.getMandateStateUpdateService()).thenReturn(mockedMandateStateUpdateService);
+        when(mockedMandateQueryService.findByExternalId(mandateExternalId)).thenReturn(mandateFixture.toEntity());
+        when(mockedMandateStateUpdateService.receiveDirectDebitDetailsFor(mandateFixture.toEntity())).thenReturn(mandateFixture.toEntity());
         when(mockedPayerParser.parse(createPayerRequest, mandateFixture.getId())).thenReturn(payer);
     }
 
     @Test
     public void shouldCreateAndStoreAPayerWhenReceivingCreatePayerRequest() {
-        service.createOrUpdatePayer(mandateExternalId, gatewayAccount, createPayerRequest);
+        service.createOrUpdatePayer(mandateExternalId, createPayerRequest);
         Mandate mandate = mandateFixture.toEntity();
         verify(mockedPayerDao).insert(payer);
-        verify(mockedMandateService).payerCreatedFor(mandate);
-        verify(mockedMandateService, never()).payerEditedFor(mandate);
+        verify(mockedMandateStateUpdateService).payerCreatedFor(mandate);
+        verify(mockedMandateStateUpdateService, never()).payerEditedFor(mandate);
     }
 
     @Test
@@ -91,10 +95,10 @@ public class PayerServiceTest {
         Payer editedPayer = mock(Payer.class);
         when(mockedPayerParser.parse(createPayerRequest, mandateFixture.getId())).thenReturn(editedPayer);
 
-        service.createOrUpdatePayer(mandateExternalId, gatewayAccount, createPayerRequest);
+        service.createOrUpdatePayer(mandateExternalId, createPayerRequest);
         verify(mockedPayerDao).updatePayerDetails(originalPayer.getId(), editedPayer);
-        verify(mockedMandateService).payerEditedFor(mandate);
-        verify(mockedMandateService, never()).payerCreatedFor(mandate);
+        verify(mockedMandateStateUpdateService).payerEditedFor(mandate);
+        verify(mockedMandateStateUpdateService, never()).payerCreatedFor(mandate);
     }
 
     @Test

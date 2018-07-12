@@ -97,7 +97,7 @@ public class DirectDebitEventTest {
         long transactionId = 1L;
         long mandateId = 2L;
         DirectDebitEvent directDebitEvent = DirectDebitEvent
-                .chargeCreated(mandateId, transactionId);
+                .transactionCreated(mandateId, transactionId);
 
         assertThat(directDebitEvent.getEvent(), is(CHARGE_CREATED));
         assertThat(directDebitEvent.getEventType(), is(CHARGE));

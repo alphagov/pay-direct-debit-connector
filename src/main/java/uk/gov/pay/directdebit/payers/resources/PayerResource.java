@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.payers.resources;
 
+import java.net.URI;
+import java.util.Map;
 import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
@@ -23,8 +25,20 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.net.URI;
-import java.util.Map;
+import org.slf4j.Logger;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.common.util.URIBuilder;
+import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
+import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
+import uk.gov.pay.directdebit.payers.api.CreatePayerResponse;
+import uk.gov.pay.directdebit.payers.api.CreatePayerValidator;
+import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
+import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payers.services.PayerService;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -34,10 +48,16 @@ public class PayerResource {
     private final PaymentProviderFactory paymentProviderFactory;
     private final CreatePayerValidator createPayerValidator = new CreatePayerValidator();
     private final BankAccountDetailsValidator bankAccountDetailsValidator = new BankAccountDetailsValidator();
+    private final PayerService payerService;
+    private final MandateServiceFactory mandateServiceFactory;
 
     @Inject
-    public PayerResource(PaymentProviderFactory paymentProviderFactory) {
+    public PayerResource(PaymentProviderFactory paymentProviderFactory,
+            PayerService payerService,
+            MandateServiceFactory mandateServiceFactory) {
         this.paymentProviderFactory = paymentProviderFactory;
+        this.payerService = payerService;
+        this.mandateServiceFactory = mandateServiceFactory;
     }
     
     @PUT
@@ -50,8 +70,7 @@ public class PayerResource {
 
         LOGGER.info("Received create payer request for mandate with id: {}", mandateExternalId);
 
-        DirectDebitPaymentProvider payerService = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
-        Payer payer = payerService.createPayer(mandateExternalId, gatewayAccount, createPayerRequest);
+        Payer payer = payerService.createOrUpdatePayer(mandateExternalId, createPayerRequest);
 
         CreatePayerResponse createPayerResponse = CreatePayerResponse.from(payer);
 
@@ -72,8 +91,13 @@ public class PayerResource {
             Map<String, String> bankAccountDetails) {
         bankAccountDetailsValidator.validate(bankAccountDetails);
         LOGGER.info("Validating bank account details for mandate with id: {}", mandateExternalId);
-        DirectDebitPaymentProvider payerService = paymentProviderFactory.getServiceFor(gatewayAccount.getPaymentProvider());
-        BankAccountValidationResponse response = payerService.validate(mandateExternalId, bankAccountDetails);
+        Mandate mandate = mandateServiceFactory
+                .getMandateQueryService()
+                .findByExternalId(mandateExternalId);        
+        
+        BankAccountValidationResponse response = paymentProviderFactory
+                .getCommandServiceFor(gatewayAccount.getPaymentProvider())
+                .validate(mandate, BankAccountDetails.of(bankAccountDetails));
         LOGGER.info("Bank account details are valid: {}, mandate with id: {}", response.isValid(), mandateExternalId);
         return Response.ok(response).build();
     }

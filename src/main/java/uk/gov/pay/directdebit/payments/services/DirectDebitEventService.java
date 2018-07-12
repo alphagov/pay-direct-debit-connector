@@ -50,6 +50,11 @@ public class DirectDebitEventService {
         return insertEventFor(transaction, directDebitEvent);
     }
 
+    public DirectDebitEvent registerTransactionCreatedEventFor(Transaction transaction) {
+        DirectDebitEvent directDebitEvent = transactionCreated(transaction.getMandate().getId(), transaction.getId());
+        return insertEventFor(transaction.getMandate(), directDebitEvent);
+    }
+    
     public DirectDebitEvent registerPaymentSubmittedToProviderEventFor(Transaction transaction) {
         DirectDebitEvent directDebitEvent = paymentSubmittedToProvider(transaction.getMandate().getId(), transaction.getId());
         return insertEventFor(transaction.getMandate(), directDebitEvent);
@@ -143,7 +148,7 @@ public class DirectDebitEventService {
     public DirectDebitEvent registerPayerEditedEventFor(Mandate mandate) {
         return insertEventFor(mandate, payerEdited(mandate.getId()));
     }
-    
+
     public Optional<DirectDebitEvent> findBy(Long mandateId, DirectDebitEvent.Type type, DirectDebitEvent.SupportedEvent event) {
         return directDebitEventDao.findByMandateIdAndEvent(mandateId, type, event);
     }

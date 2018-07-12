@@ -12,7 +12,7 @@ import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.GoCardlessService;
+import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
@@ -21,7 +21,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
 
     @Inject
     public GoCardlessPaymentHandler(TransactionService transactionService,
-            GoCardlessService goCardlessService) {
+            GoCardlessEventService goCardlessService) {
         super(transactionService, goCardlessService);
     }
 
