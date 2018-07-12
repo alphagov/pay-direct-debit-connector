@@ -30,6 +30,8 @@ import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.PreconditionFailedException;
+import uk.gov.pay.directdebit.common.exception.PreconditionFailedExceptionMapper;
 import uk.gov.pay.directdebit.events.resources.DirectDebitEventsResource;
 import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
@@ -109,6 +111,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new NotFoundExceptionMapper());
         environment.jersey().register(new ConflictExceptionMapper());
         environment.jersey().register(new InternalServerErrorExceptionMapper());
+        environment.jersey().register(new PreconditionFailedExceptionMapper());
         setupSSL(configuration, socketFactory);
         initialiseMetrics(configuration, environment);
     }

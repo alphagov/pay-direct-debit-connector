@@ -24,6 +24,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.SortCode;
+import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -86,7 +87,7 @@ public class MandateService {
         this.linksConfig = directDebitConfig.getLinks();
     }
 
-    public Mandate createMandate(Map<String, String> mandateRequestMap, String accountExternalId) {
+    public Mandate createMandate(Map<String, String> mandateRequestMap, String accountExternalId, MandateType mandateType) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     // TODO:
@@ -99,7 +100,7 @@ public class MandateService {
                     Mandate mandate = new Mandate(
                             null,
                             gatewayAccount,
-                            MandateType.valueOf(mandateRequestMap.get("agreement_type")),
+                            mandateType,
                             RandomIdGenerator.newId(),
                             mandateReference,
                             mandateRequestMap.get("service_reference"),
@@ -188,8 +189,12 @@ public class MandateService {
                 mandate.getMandateReference());
     }
 
-    public CreateMandateResponse createMandateResponse(Map<String, String> mandateRequestMap, String accountExternalId, UriInfo uriInfo) {
-        Mandate mandate = createMandate(mandateRequestMap, accountExternalId);
+    public CreateMandateResponse createMandate(Map<String, String> mandateRequestMap, String accountExternalId, UriInfo uriInfo) {
+        MandateType mandateType = MandateType.fromString(mandateRequestMap.get("agreement_type"));
+        if (MandateType.ONE_OFF.equals(mandateType)) {
+            throw new InvalidMandateTypeException(mandateType);
+        }
+        Mandate mandate = createMandate(mandateRequestMap, accountExternalId, mandateType);
         String mandateExternalId = mandate.getExternalId();
         List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
 

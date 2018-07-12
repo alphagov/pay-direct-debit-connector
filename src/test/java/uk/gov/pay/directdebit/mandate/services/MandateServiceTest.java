@@ -438,6 +438,6 @@ public class MandateServiceTest {
         when(mockedGatewayAccountDao.findByExternalId(anyString())).thenReturn(Optional.of(gatewayAccount));
         when(mockedMandateDao.insert(any(Mandate.class))).thenReturn(1L);
 
-        return service.createMandate(getMandateRequestPayload(), gatewayAccount.getExternalId());
+        return service.createMandate(getMandateRequestPayload(), gatewayAccount.getExternalId(), MandateType.ON_DEMAND);
     }
 }
