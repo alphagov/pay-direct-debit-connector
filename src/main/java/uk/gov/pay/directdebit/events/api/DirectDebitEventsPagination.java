@@ -26,7 +26,7 @@ public class DirectDebitEventsPagination {
     public DirectDebitEventsPagination(DirectDebitEventSearchParams searchParams, int total, UriInfo uriInfo) {
         selfLink = PaginationLink.ofValue(uriWithParams(searchParams, uriInfo).toString());
         firstLink = PaginationLink.ofValue(uriWithParams(searchParams.copy().page(1).build(), uriInfo).toString());
-        int lastPage = Math.round(total / searchParams.getPageSize());
+        int lastPage = (int) Math.ceil(total / Integer.valueOf(searchParams.getPageSize()).doubleValue());
         lastLink = PaginationLink.ofValue(uriWithParams(searchParams.copy().page(lastPage).build(), uriInfo).toString());
         Integer currentPage = searchParams.getPage();
         prevLink = currentPage == 1 ? null : 

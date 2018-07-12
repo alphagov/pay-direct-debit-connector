@@ -7,24 +7,24 @@ import uk.gov.pay.directdebit.payments.exception.UnparsableDateException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Builder
 public class DirectDebitEventSearchParams {
     @Getter private final ZonedDateTime beforeDate;
     @Getter private final ZonedDateTime afterDate;
-    @Getter private final Long mandateId;
-    @Getter private final Long transactionId;
+    @Getter private final String mandateExternalId;
+    @Getter private final String transactionExternalId;
     @Getter private final Integer pageSize;
     @Getter private final Integer page;
 
     public DirectDebitEventSearchParamsBuilder copy() {
-        return new DirectDebitEventSearchParamsBuilder().page(page).pageSize(pageSize).transactionId(transactionId).mandateId(mandateId).afterDate(afterDate).beforeDate(beforeDate);
+        return new DirectDebitEventSearchParamsBuilder().page(page).pageSize(pageSize).transactionExternalId(transactionExternalId).mandateExternalId(mandateExternalId).afterDate(afterDate).beforeDate(beforeDate);
     }
 
     public Map<String, String> getParamsAsMap() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new LinkedHashMap<>();
         
         if (beforeDate != null) 
             params.put("before", beforeDate.format(DateTimeFormatter.ISO_INSTANT));
@@ -32,20 +32,21 @@ public class DirectDebitEventSearchParams {
         if (afterDate != null)
             params.put("after", afterDate.format(DateTimeFormatter.ISO_INSTANT));
         
-        if (mandateId != null)
-            params.put("mandate_id", mandateId.toString());
+        if (mandateExternalId != null)
+            params.put("mandate_external_id", mandateExternalId);
         
-        if (transactionId != null)
-            params.put("transaction_id", transactionId.toString());
-        
-        params.put("page_size", pageSize.toString());
+        if (transactionExternalId != null)
+            params.put("transaction_external_id", transactionExternalId);
+
         params.put("page", page.toString());
+        params.put("page_size", pageSize.toString());
         
         return params;
     }
 
     public static class DirectDebitEventSearchParamsBuilder {
         
+        // These are required as defaults to the lombok builder.
         private Integer pageSize = 500;
         private Integer page = 1;
         

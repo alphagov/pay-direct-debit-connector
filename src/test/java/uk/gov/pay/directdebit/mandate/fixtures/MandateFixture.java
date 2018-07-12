@@ -114,6 +114,11 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return this;
     }
 
+    public MandateFixture withId(Long id) {
+        this.id = id;
+        return this;
+    }
+
     public ZonedDateTime getCreatedDate() {
         return createdDate;
     }

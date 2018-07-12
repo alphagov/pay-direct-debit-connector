@@ -31,15 +31,15 @@ public class DirectDebitEventsResource {
                                @QueryParam("after") String afterDate,
                                @QueryParam("page_size") Integer pageSize,
                                @QueryParam("page") Integer page,
-                               @QueryParam("mandate_id") Long mandateId,
-                               @QueryParam("transaction_id") Long transactionId,
+                               @QueryParam("mandate_external_id") String mandateId,
+                               @QueryParam("transaction_external_id") String transactionId,
                                @Context UriInfo uriInfo) {
 
         DirectDebitEventSearchParams searchParams = DirectDebitEventSearchParams.builder()
                 .beforeDate(beforeDate)
                 .afterDate(afterDate)
-                .mandateId(mandateId)
-                .transactionId(transactionId)
+                .mandateExternalId(mandateId)
+                .transactionExternalId(transactionId)
                 .pageSize(pageSize)
                 .page(page)
                 .build();
