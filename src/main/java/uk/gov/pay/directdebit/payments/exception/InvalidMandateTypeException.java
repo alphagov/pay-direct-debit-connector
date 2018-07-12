@@ -7,6 +7,10 @@ import static java.lang.String.format;
 
 public class InvalidMandateTypeException extends PreconditionFailedException {
 
+    public InvalidMandateTypeException(String externalId, MandateType mandateType) {
+        super(format("Invalid operation on mandate with id %s of type %s", externalId, mandateType.toString()));
+    }
+
     public InvalidMandateTypeException(MandateType mandateType) {
         super(format("Invalid operation on mandate of type %s", mandateType.toString()));
     }

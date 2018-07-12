@@ -1,40 +1,32 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import com.google.common.collect.ImmutableMap;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import org.exparity.hamcrest.date.LocalDateMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.ConfirmationDetails;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
-import uk.gov.pay.directdebit.mandate.services.MandateService;
+import uk.gov.pay.directdebit.mandate.model.OneOffConfirmationDetails;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
-import uk.gov.pay.directdebit.payers.services.PayerService;
+import uk.gov.pay.directdebit.payers.model.AccountNumber;
+import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
+import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-
-import java.time.LocalDate;
-import java.util.Map;
+import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.ConfirmationDetailsFixture.confirmationDetails;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SandboxServiceTest {
 
-    @Mock
-    private PayerService mockedPayerService;
-    @Mock
-    private TransactionService mockedTransactionService;
-    @Mock
-    private MandateService mockedMandateService;
 
     private SandboxService service;
 
@@ -43,103 +35,53 @@ public class SandboxServiceTest {
 
     @Before
     public void setUp() {
-        service = new SandboxService(mockedPayerService, mockedMandateService, mockedTransactionService);
+        service = new SandboxService();
     }
 
-    @Test
-    public void createPayer_shouldCreatePayerWhenReceivingPayerRequest() {
-        Map<String, String> createPayerRequest = ImmutableMap.of();
-        service.createPayer(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), createPayerRequest);
-        verify(mockedPayerService).createOrUpdatePayer(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), createPayerRequest);
-    }
+
 
     @Test
-    public void confirm_shouldRegisterAPaymentSubmittedToProviderEventWhenSuccessfullyConfirmingOneOffMandate() {
+    public void confirmOnDemand_shouldNotDoAnything() {
         MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ONE_OFF).withGatewayAccountFixture(gatewayAccountFixture);
+        BankAccountDetails bankAccountDetails = new BankAccountDetails(AccountNumber.of("12345678"), SortCode.of("123456"));
+        Mandate mandate = service
+                .confirmOnDemandMandate(mandateFixture.toEntity(), bankAccountDetails);
+        assertThat(mandate, is(mandateFixture.toEntity()));
+    }
+
+    @Test
+    public void confirmOneOff_shouldCreateConfirmationDetails() {
+        MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ONE_OFF).withGatewayAccountFixture(gatewayAccountFixture);
+        BankAccountDetails bankAccountDetails = new BankAccountDetails(AccountNumber.of("12345678"), SortCode.of("123456"));
         TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
-        ConfirmationDetails confirmationDetails = confirmationDetails()
-                .withMandateFixture(mandateFixture)
-                .withTransactionFixture(transactionFixture)
-                .build();
-        Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678", "transaction_external_id", transactionFixture.getExternalId());
-        when(mockedMandateService
-                .confirm(mandateFixture.getExternalId(), details))
-                .thenReturn(confirmationDetails);
+        
+        OneOffConfirmationDetails confirmationDetails = service
+                .confirmOneOffMandate(mandateFixture.toEntity(), bankAccountDetails, transactionFixture.toEntity());
+        
+        assertThat(confirmationDetails.getMandate(), is(mandateFixture.toEntity()));
+        assertThat(confirmationDetails.getChargeDate(), is(LocalDateMatchers
+                .within(1, ChronoUnit.DAYS, LocalDate.now().plusDays(4))));
+    }
 
-        service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
-        verify(mockedTransactionService).oneOffPaymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
+
+    @Test
+    public void collect_shouldReturnCollectionDate() {
+        Mandate mandate = aMandateFixture().withMandateType(MandateType.ONE_OFF).withGatewayAccountFixture(gatewayAccountFixture).toEntity();
+        Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
+        
+        LocalDate chargeDate = service.collect(mandate, transaction);
+        
+        assertThat(chargeDate, is(LocalDateMatchers
+                .within(1, ChronoUnit.DAYS, LocalDate.now().plusDays(4))));
     }
 
     @Test
-    public void confirm_shouldSendAnEmailWhenConfirmationForOnDemandMandate() {
-        MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(gatewayAccountFixture);
-        ConfirmationDetails confirmationDetails = confirmationDetails()
-                .withMandateFixture(mandateFixture)
-                .build();
-        Map<String, String> details = ImmutableMap.of("sort_code", "123456", "account_number", "12345678");
-        when(mockedMandateService
-                .confirm(mandateFixture.getExternalId(), details))
-                .thenReturn(confirmationDetails);
+    public void shouldValidateBankAccountDetails() {
+        BankAccountDetails bankAccountDetails = new BankAccountDetails(AccountNumber.of("12345678"), SortCode
+                .of("123456"));
 
-        service.confirm(mandateFixture.getExternalId(), gatewayAccountFixture.toEntity(), details);
-        verify(mockedTransactionService).onDemandMandateConfirmedFor(mandateFixture.toEntity());
-    }
-
-    @Test
-    public void collect_shouldRegisterAPaymentSubmittedToProviderEvent() {
-        MandateFixture mandateFixture = aMandateFixture().withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(gatewayAccountFixture);
-        TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
-        Map<String, String> collectPaymentRequest = ImmutableMap.of(
-                "amount", "123456",
-                "reference", "a reference",
-                "description", "a description",
-                "agreement_id", mandateFixture.getExternalId());
-        when(mockedMandateService
-                .findByExternalId(mandateFixture.getExternalId()))
-                .thenReturn(mandateFixture.toEntity());
-        when(mockedTransactionService.createTransaction(collectPaymentRequest, mandateFixture.toEntity(), gatewayAccountFixture.getExternalId()))
-                .thenReturn(transactionFixture.toEntity());
-        service.collect(gatewayAccountFixture.toEntity(), collectPaymentRequest);
-        verify(mockedTransactionService).onDemandPaymentSubmittedToProviderFor(transactionFixture.toEntity(), LocalDate.now().plusDays(4));
-    }
-    
-    @Test
-    public void shouldValidateBankAccountDetails_ifSortCodeAndAccountNumberAreValid() {
-        Map<String, String> bankAccountDetails = ImmutableMap.of(
-                "account_number", "12345678",
-                "sort_code", "123456",
-                "transaction_external_id", "12asdasd3456" 
-        );
-
-        BankAccountValidationResponse response = service.validate(mandateFixture.getExternalId(), bankAccountDetails);
+        BankAccountValidationResponse response = service.validate(aMandateFixture().toEntity(), bankAccountDetails);
         assertThat(response.isValid(), is(true));
         assertThat(response.getBankName(), is("Sandbox Bank"));
     }
-
-    @Test
-    public void shouldValidateBankAccountDetails_ifSortCodeIsInvalid() {
-        Map<String, String> bankAccountDetails = ImmutableMap.of(
-                "account_number", "12345678",
-                "sort_code", "12345s",
-                "transaction_external_id", "fsdfsdf343"
-        );
-
-        BankAccountValidationResponse response = service.validate(mandateFixture.getExternalId(), bankAccountDetails);
-        assertThat(response.isValid(), is(false));
-        assertThat(response.getBankName(), is(nullValue()));
-    }
-
-    @Test
-    public void shouldValidateBankAccountDetails_ifAccountNumberIsInvalid() {
-        Map<String, String> bankAccountDetails = ImmutableMap.of(
-                "account_number", "1234567r",
-                "sort_code", "123456",
-                "transaction_external_id", "fsdfsdf343"
-        );
-
-        BankAccountValidationResponse response = service.validate(mandateFixture.getExternalId(), bankAccountDetails);
-        assertThat(response.isValid(), is(false));
-        assertThat(response.getBankName(), is(nullValue()));
-    }
-    
 }

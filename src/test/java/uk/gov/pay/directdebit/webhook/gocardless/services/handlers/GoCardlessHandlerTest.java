@@ -14,7 +14,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.GoCardlessService;
+import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
@@ -29,7 +29,7 @@ public class GoCardlessHandlerTest {
     TransactionService mockedTransactionService;
 
     @Mock
-    GoCardlessService mockedGoCardlessService;
+    GoCardlessEventService mockedGoCardlessService;
 
     @Spy
     GoCardlessEvent goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture().toEntity();

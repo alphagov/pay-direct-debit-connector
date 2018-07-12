@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.time.ZoneOffset;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
@@ -11,12 +12,14 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
+import uk.gov.pay.directdebit.payments.api.CollectRequest;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -41,7 +44,6 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.chargeCreated;
 import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
 import static uk.gov.pay.directdebit.payments.resources.TransactionResource.CHARGE_API_PATH;
 
@@ -54,7 +56,6 @@ public class TransactionService {
     private final TransactionDao transactionDao;
     private final DirectDebitEventService directDebitEventService;
     private final UserNotificationService userNotificationService;
-    private final CreatePaymentParser createPaymentParser;
 
     @Inject
     public TransactionService(TokenService tokenService,
@@ -62,15 +63,13 @@ public class TransactionService {
                               DirectDebitConfig directDebitConfig,
                               TransactionDao transactionDao,
                               DirectDebitEventService directDebitEventService,
-                              UserNotificationService userNotificationService,
-                              CreatePaymentParser createPaymentParser) {
+                              UserNotificationService userNotificationService) {
         this.tokenService = tokenService;
         this.gatewayAccountDao = gatewayAccountDao;
         this.directDebitConfig = directDebitConfig;
         this.directDebitEventService = directDebitEventService;
         this.transactionDao = transactionDao;
         this.userNotificationService = userNotificationService;
-        this.createPaymentParser = createPaymentParser;
     }
 
     public Transaction findTransactionForExternalId(String externalId) {
@@ -79,17 +78,22 @@ public class TransactionService {
         LOGGER.info("Found charge for transaction with id: {}", externalId);
         return transaction;
     }
-
-    public Transaction createTransaction(Map<String, String> createTransaction, Mandate mandate, String accountExternalId) {
+    
+    public Transaction createTransaction(CollectRequest collectRequest, Mandate mandate, String accountExternalId) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     LOGGER.info("Creating transaction for mandate {}", mandate.getExternalId());
-                    Transaction transaction = createPaymentParser
-                            .parse(createTransaction, mandate);
+                    Transaction transaction = new Transaction(
+                            collectRequest.getAmount(),
+                            PaymentStatesGraph.initialState(),
+                            collectRequest.getDescription(),
+                            collectRequest.getReference(),
+                            mandate,
+                            ZonedDateTime.now(ZoneOffset.UTC)
+                    );
                     Long id = transactionDao.insert(transaction);
                     transaction.setId(id);
-                    directDebitEventService
-                            .insertEventFor(mandate, chargeCreated(mandate.getId(), transaction.getId()));
+                    transactionCreatedFor(transaction);
                     LOGGER.info("Created transaction with external id {}", transaction.getExternalId());
                     return transaction;
                 })
@@ -146,10 +150,15 @@ public class TransactionService {
                 .orElseThrow(() -> new ChargeNotFoundException("transaction id" + transactionId.toString()));
     }
 
+    // todo we might want to split this service in query / state update like mandate
     public List<Transaction> findTransactionsForMandate(String mandateExternalId) {
         return transactionDao.findAllByMandateExternalId(mandateExternalId);
     }
 
+    public DirectDebitEvent transactionCreatedFor(Transaction transaction) {
+        return directDebitEventService.registerTransactionCreatedEventFor(transaction);
+    }
+    
     public DirectDebitEvent paymentExpired(Transaction transaction) {
         Transaction updateTransaction = updateStateFor(transaction, SupportedEvent.PAYMENT_EXPIRED_BY_SYSTEM);
         return directDebitEventService.registerPaymentExpiredEventFor(updateTransaction);
@@ -207,10 +216,6 @@ public class TransactionService {
 
     public DirectDebitEvent payoutPaidFor(Transaction transaction) {
         return directDebitEventService.registerPayoutPaidEventFor(transaction);
-    }
-
-    void onDemandMandateConfirmedFor(Mandate mandate) {
-        userNotificationService.sendOnDemandMandateCreatedEmailFor(mandate);
     }
 
     private Transaction updateStateFor(Transaction transaction, SupportedEvent event) {

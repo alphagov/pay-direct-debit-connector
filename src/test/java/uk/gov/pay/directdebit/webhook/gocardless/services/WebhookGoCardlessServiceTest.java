@@ -16,9 +16,7 @@ import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundExcept
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.GoCardlessService;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
@@ -29,11 +27,7 @@ import java.util.List;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.MANDATES;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
 import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.UNHANDLED;
@@ -42,7 +36,7 @@ import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.UNHAN
 
 public class WebhookGoCardlessServiceTest {
     @Mock
-    private GoCardlessService mockedGoCardlessService;
+    private GoCardlessEventService mockedGoCardlessEventService;
     @Mock
     private GoCardlessPaymentHandler mockedGoCardlessPaymentHandler;
     @Mock
@@ -52,7 +46,7 @@ public class WebhookGoCardlessServiceTest {
 
     @Before
     public void setUp() {
-        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessService, mockedGoCardlessPaymentHandler, mockedGoCardlessMandateHandler);
+        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessEventService, mockedGoCardlessPaymentHandler, mockedGoCardlessMandateHandler);
     }
 
     @Test
@@ -61,8 +55,8 @@ public class WebhookGoCardlessServiceTest {
         GoCardlessEvent secondGoCardlessEvent = aGoCardlessEventFixture().toEntity();
         List<GoCardlessEvent> events = Arrays.asList(firstGoCardlessEvent, secondGoCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessService).storeEvent(firstGoCardlessEvent);
-        verify(mockedGoCardlessService).storeEvent(secondGoCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvent(firstGoCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvent(secondGoCardlessEvent);
     }
 
     @Test
@@ -71,7 +65,7 @@ public class WebhookGoCardlessServiceTest {
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
     }
 
     @Test
@@ -80,7 +74,7 @@ public class WebhookGoCardlessServiceTest {
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
     }
 
     @Test
@@ -89,7 +83,7 @@ public class WebhookGoCardlessServiceTest {
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
     }
 
     @Test
@@ -103,7 +97,7 @@ public class WebhookGoCardlessServiceTest {
             webhookGoCardlessService.handleEvents(events);
             fail("Expected GoCardlessPaymentNotFoundException.");
         } catch (GoCardlessPaymentNotFoundException expected) { }
-        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
     }
 
     @Test
@@ -117,7 +111,7 @@ public class WebhookGoCardlessServiceTest {
             webhookGoCardlessService.handleEvents(events);
             fail("Expected GoCardlessMandateNotFoundException.");
         } catch (GoCardlessMandateNotFoundException expected) { }
-        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
     }
 
     @Test
@@ -126,7 +120,7 @@ public class WebhookGoCardlessServiceTest {
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
     }
 
     @Test
@@ -135,6 +129,6 @@ public class WebhookGoCardlessServiceTest {
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessService).storeEvent(goCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
     }
 }
