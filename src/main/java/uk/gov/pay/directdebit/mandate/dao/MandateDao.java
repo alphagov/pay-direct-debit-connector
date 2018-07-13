@@ -58,6 +58,8 @@ public interface MandateDao {
             "  g.type AS gateway_account_type," +
             "  g.description AS gateway_account_description," +
             "  g.analytics_id AS gateway_account_analytics_id," +
+            "  g.access_token AS gateway_account_access_token," +
+            "  g.organisation AS gateway_account_organisation," +
             "  p.id AS payer_id," +
             "  p.mandate_id AS payer_mandate_id," +
             "  p.external_id AS payer_external_id," +

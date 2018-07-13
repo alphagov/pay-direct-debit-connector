@@ -3,6 +3,8 @@ package uk.gov.pay.directdebit.gatewayaccounts.model;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountException;
 
+import java.util.Optional;
+
 public class GatewayAccount {
 
     public enum Type {
@@ -24,8 +26,11 @@ public class GatewayAccount {
     private String serviceName;
     private String description;
     private String analyticsId;
+    private PaymentProviderAccessToken accessToken;
+    private PaymentProviderOrganisationIdentifier organisation;
 
-    public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
+    public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId,
+                          PaymentProviderAccessToken accessToken, PaymentProviderOrganisationIdentifier organisation) {
         this.id = id;
         this.externalId = externalId;
         this.paymentProvider = paymentProvider;
@@ -33,10 +38,16 @@ public class GatewayAccount {
         this.serviceName = serviceName;
         this.description = description;
         this.analyticsId = analyticsId;
+        this.accessToken = accessToken;
+        this.organisation = organisation;
     }
 
+    public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
+        this(id, externalId, paymentProvider, type, serviceName, description, analyticsId, null, null);
+    }
+    
     public GatewayAccount(PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
-        this(null, generateExternalId(), paymentProvider, type, serviceName, description, analyticsId);
+        this(null, generateExternalId(), paymentProvider, type, serviceName, description, analyticsId, null, null);
     }
 
     private static String generateExternalId() {
@@ -103,6 +114,24 @@ public class GatewayAccount {
         return this;
     }
 
+    public Optional<PaymentProviderAccessToken> getAccessToken() {
+        return Optional.ofNullable(accessToken);
+    }
+
+    public GatewayAccount setAccessToken(PaymentProviderAccessToken accessToken) {
+        this.accessToken = accessToken;
+        return this;
+    }
+
+    public Optional<PaymentProviderOrganisationIdentifier> getOrganisation() {
+        return Optional.ofNullable(organisation);
+    }
+
+    public GatewayAccount setOrganisation(PaymentProviderOrganisationIdentifier organisation) {
+        this.organisation = organisation;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -134,6 +163,14 @@ public class GatewayAccount {
                 : that.description != null) {
             return false;
         }
+        if (accessToken != null ? !accessToken.equals(that.accessToken)
+                : that.accessToken != null) {
+            return false;
+        }
+        if (organisation != null ? !organisation.equals(that.organisation)
+                : that.organisation != null) {
+            return false;
+        }
         return analyticsId != null ? analyticsId.equals(that.analyticsId)
                 : that.analyticsId == null;
     }
@@ -147,6 +184,9 @@ public class GatewayAccount {
         result = 31 * result + (serviceName != null ? serviceName.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (analyticsId != null ? analyticsId.hashCode() : 0);
+        result = 31 * result + (accessToken != null ? accessToken.hashCode() : 0);
+        result = 31 * result + (organisation != null ? organisation.hashCode() : 0);
+
         return result;
     }
 }
