@@ -47,18 +47,17 @@ public class PaymentViewSearchParams {
     private static Map<String, String> externalPaymentToInternalStateQueryMap = new HashMap<>(4);
 
     static {
-        String andStateCondition = " AND t.state = '%s'";
         // see uk.gov.pay.directdebit.payments.model.PaymentState for mappings
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_STARTED.getState(), format(andStateCondition, NEW));
+                .put(ExternalPaymentState.EXTERNAL_STARTED.getState(), NEW.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_PENDING.getState(), format(andStateCondition, PENDING));
+                .put(ExternalPaymentState.EXTERNAL_PENDING.getState(), PENDING.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE.getState(), format(andStateCondition, USER_CANCEL_NOT_ELIGIBLE));
+                .put(ExternalPaymentState.EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE.getState(), USER_CANCEL_NOT_ELIGIBLE.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_SUCCESS.getState(), format(andStateCondition, SUCCESS));
+                .put(ExternalPaymentState.EXTERNAL_SUCCESS.getState(), SUCCESS.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_FAILED.getState(), format("AND t.state IN('%s', '%s', '%s')", FAILED, CANCELLED, EXPIRED));
+                .put(ExternalPaymentState.EXTERNAL_FAILED.getState(), FAILED.toSingleQuoteString() + ", " + CANCELLED.toSingleQuoteString() + ", " + EXPIRED.toSingleQuoteString());
     }
 
     public PaymentViewSearchParams(String gatewayExternalId) {
@@ -172,7 +171,7 @@ public class PaymentViewSearchParams {
             sb.append(" AND t.amount = :" + AMOUNT_FIELD);
         }
         if (isNotBlank(state) && externalPaymentToInternalStateQueryMap.containsKey(state)) {
-            sb.append(externalPaymentToInternalStateQueryMap.get(state));
+            sb.append(format(" AND t.state IN(%s)", externalPaymentToInternalStateQueryMap.get(state)));
         }
         return sb.toString();
     }
