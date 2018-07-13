@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
@@ -32,6 +33,7 @@ public class WebhookGoCardlessResource {
     }
 
     @POST
+    @Timed
     public Response handleWebhook(@HeaderParam("Webhook-Signature") String webhookSignature,
                                   String body) {
         webhookVerifier.verify(body, webhookSignature);

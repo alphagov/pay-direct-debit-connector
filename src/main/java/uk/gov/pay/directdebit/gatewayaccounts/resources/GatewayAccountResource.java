@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.gatewayaccounts.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ public class GatewayAccountResource {
     @GET
     @Path(GATEWAY_ACCOUNT_API_PATH)
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response getGatewayAccount(@PathParam("accountId") String accountExternalId) {
         LOGGER.debug("Getting gateway account for account external id {}", accountExternalId);
         GatewayAccountResponse gatewayAccountResponse = GatewayAccountResponse.from(gatewayAccountService.getGatewayAccountForId(accountExternalId));
@@ -55,6 +57,7 @@ public class GatewayAccountResource {
     @GET
     @Path(GATEWAY_ACCOUNTS_API_PATH)
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response getApiGatewayAccounts(
         @DefaultValue("") @QueryParam("externalAccountIds") String externalAccountIdsArg,
         @Context UriInfo uriInfo
@@ -65,6 +68,7 @@ public class GatewayAccountResource {
     @GET
     @Path(GATEWAY_ACCOUNTS_FRONTEND_PATH)
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response getFrontendGatewayAccounts(
         @DefaultValue("") @QueryParam("externalAccountIds") String externalAccountIdsArg,
         @Context UriInfo uriInfo
@@ -98,6 +102,7 @@ public class GatewayAccountResource {
     @Path(GATEWAY_ACCOUNTS_API_PATH)
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response createNewGatewayAccount(Map<String, String> request, @Context UriInfo uriInfo) {
         createGatewayAccountValidator.validate(request);
         GatewayAccount gatewayAccount = gatewayAccountService.create(request);

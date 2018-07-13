@@ -5,6 +5,8 @@ import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+
+import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -23,6 +25,7 @@ public class WebhookSandboxResource {
     }
 
     @POST
+    @Timed
     public Response handleWebhook() {
         List<Transaction> pendingTransactions = transactionService.findAllByPaymentStateAndProvider(PaymentState.PENDING, PaymentProvider.SANDBOX);
         pendingTransactions.forEach(transactionService::paymentPaidOutFor);

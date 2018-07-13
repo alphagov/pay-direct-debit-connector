@@ -7,6 +7,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+
+import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.tokens.api.TokenResponse;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
@@ -28,6 +30,7 @@ public class SecurityTokensResource {
     @GET
     @Path("/v1/tokens/{token}/mandate")
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response getMandateForToken(@PathParam("token") String token) {
         TokenExchangeDetails tokenExchangeDetails = mandateService.getMandateFor(token);
         TokenResponse response = TokenResponse.from(
@@ -40,6 +43,7 @@ public class SecurityTokensResource {
     
     @DELETE
     @Path("/v1/tokens/{token}")
+    @Timed
     public Response deleteToken(@PathParam("token") String token) {
         tokenService.deleteToken(token);
         return Response.noContent().build();

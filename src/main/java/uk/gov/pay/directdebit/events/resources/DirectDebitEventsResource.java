@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.events.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.directdebit.events.api.DirectDebitEventsResponse;
 import uk.gov.pay.directdebit.events.service.DirectDebitEventsSearchService;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
@@ -27,6 +28,7 @@ public class DirectDebitEventsResource {
 
     @GET
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response findEvents(@QueryParam("before") String beforeDate,
                                @QueryParam("after") String afterDate,
                                @QueryParam("page_size") Integer pageSize,

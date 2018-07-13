@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.tasks.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.pay.directdebit.tasks.services.ExpireService;
@@ -25,6 +26,7 @@ public class ExpireResource {
     @POST
     @Path("/v1/api/tasks/expire-payments-and-mandates")
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response expirePaymentsAndMandates() {
         int numberOfExpiredPayments = expireService.expirePayments();
         int numberOfExpiredMandates = expireService.expireMandates();

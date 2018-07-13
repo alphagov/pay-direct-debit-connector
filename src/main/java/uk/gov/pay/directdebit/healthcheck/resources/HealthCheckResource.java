@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.healthcheck.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import com.codahale.metrics.health.HealthCheck;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
@@ -31,6 +32,7 @@ public class HealthCheckResource {
     @GET
     @Path("healthcheck")
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response healthCheck() throws JsonProcessingException {
         SortedMap<String, HealthCheck.Result> results = environment.healthChecks().runHealthChecks();
 
