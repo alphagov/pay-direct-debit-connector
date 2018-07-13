@@ -1,1 +1,0 @@
-ALTER TABLE events ADD COLUMN external_id VARCHAR(26);
