@@ -8,6 +8,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
+
+import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
@@ -35,6 +37,7 @@ public class ConfirmMandateSetupResource {
     @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/confirm")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response confirm(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("mandateExternalId") String mandateExternalId, Map<String, String> confirmDetailsRequest) {
         LOGGER.info("Confirming direct debit details for mandate with id: {}", mandateExternalId);
         bankAccountDetailsValidator.validate(confirmDetailsRequest);

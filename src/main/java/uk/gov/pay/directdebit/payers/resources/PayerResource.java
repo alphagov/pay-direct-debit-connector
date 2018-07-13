@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payers.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.util.URIBuilder;
@@ -43,6 +44,7 @@ public class PayerResource {
     @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response createPayer(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("mandateExternalId") String mandateExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
         createPayerValidator.validate(mandateExternalId, createPayerRequest);
 
@@ -63,6 +65,7 @@ public class PayerResource {
     @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers/bank-account/validate")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
+    @Timed
     public Response validateBankAccount(
             @PathParam("accountId") GatewayAccount gatewayAccount,
             @PathParam("mandateExternalId") String mandateExternalId,

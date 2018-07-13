@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -54,6 +55,7 @@ public class TransactionResource {
     @GET
     @Path(CHARGE_API_PATH)
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response getCharge(@PathParam("accountId") String accountExternalId, @PathParam("transactionExternalId") String transactionExternalId, @Context UriInfo uriInfo) {
         TransactionResponse response = transactionService.getPaymentWithExternalId(accountExternalId, transactionExternalId, uriInfo);
         return Response.ok(response).build();
@@ -62,6 +64,7 @@ public class TransactionResource {
     @POST
     @Path(CHARGES_API_PATH)
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response createOneOffPayment(@PathParam("accountId") String accountExternalId, Map<String, String> transactionRequest, @Context UriInfo uriInfo) {
         LOGGER.info("Received new one-off payment request");
         transactionRequestValidator.validate(transactionRequest);
@@ -75,6 +78,7 @@ public class TransactionResource {
     @POST
     @Path("/v1/api/accounts/{accountId}/charges/collect")
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response collectPaymentFromMandate(@PathParam("accountId") GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequest, @Context UriInfo uriInfo) {
         LOGGER.info("Received collect payment from mandate request");
         collectPaymentRequestValidator.validate(collectPaymentRequest);

@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.resources;
 
+import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 import uk.gov.pay.directdebit.payments.services.PaymentViewService;
 
@@ -28,6 +29,7 @@ public class PaymentViewResource {
     @GET
     @Path("/v1/api/accounts/{accountId}/transactions/view")
     @Produces(APPLICATION_JSON)
+    @Timed
     public Response getPaymentView(
             @PathParam("accountId") String accountExternalId,
             @QueryParam("page") Long pageNumber,
