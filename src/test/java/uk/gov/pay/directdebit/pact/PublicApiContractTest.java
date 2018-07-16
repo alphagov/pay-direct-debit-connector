@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -58,6 +59,15 @@ public class PublicApiContractTest {
         testMandate.withGatewayAccountFixture(testGatewayAccount).withExternalId(params.get("mandate_id")).insert(app.getTestContext().getJdbi());
     }
 
+    @State("a gateway account with external id and a mandate with external id and type exist")
+    public void aGatewayAccountWithExternalIdAndAMandateWithExternalIdAndTypeExist(Map<String, String> params) {
+        testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
+        testMandate.withGatewayAccountFixture(testGatewayAccount)
+                .withExternalId(params.get("mandate_id"))
+                .withMandateType(MandateType.fromString(params.get("mandate_type")))
+                .insert(app.getTestContext().getJdbi());
+    }
+    
     @State("three transaction records exist")
     public void threeTransactionRecordsExist(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
