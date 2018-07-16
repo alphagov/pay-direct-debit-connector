@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -169,10 +170,32 @@ public class PaymentViewServiceTest {
         assertThat(paymentViewResponse.getPage(), is(2L));
         assertThat(paymentViewResponse.getTotal(), is(50L));
         assertThat(paymentViewResponse.getPaymentViewResponses().get(0).getLinks().get(0).getRel(), is("self"));
-        assertThat(paymentViewResponse.getPaginationBuilder().getFirstLink().getHref().contains("&page_number=1"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getLastLink().getHref().contains("&page_number=3"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getPrevLink().getHref().contains("&page_number=1"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getNextLink().getHref().contains("&page_number=3"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getSelfLink().getHref().contains("&page_number=2"), is(true));
+        assertThat(paymentViewResponse.getPaginationBuilder().getFirstLink().getHref().contains("?page=1"), is(true));
+        assertThat(paymentViewResponse.getPaginationBuilder().getLastLink().getHref().contains("?page=3"), is(true));
+        assertThat(paymentViewResponse.getPaginationBuilder().getPrevLink().getHref().contains("?page=1"), is(true));
+        assertThat(paymentViewResponse.getPaginationBuilder().getNextLink().getHref().contains("?page=3"), is(true));
+        assertThat(paymentViewResponse.getPaginationBuilder().getSelfLink().getHref().contains("?page=2"), is(true));
+    }
+
+    @Test
+    public void shouldReturnNoRecords_whenPaginationSetToPage2AndNoDisplaySize() {
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withExternalId(gatewayAccountExternalId);
+        GatewayAccount testGatewayAccount = gatewayAccountFixture.toEntity();
+        List<PaymentView> paymentViewList = new ArrayList<>();
+        when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
+        when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(18L);
+        when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
+        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
+                .withPage(2L);
+        PaymentViewResponse paymentViewResponse = paymentViewService.getPaymentViewResponse(searchParams);
+        assertThat(paymentViewResponse.getCount(), is(0L));
+        assertThat(paymentViewResponse.getPage(), is(2L));
+        assertThat(paymentViewResponse.getTotal(), is(18L));
+        assertThat(paymentViewResponse.getPaymentViewResponses().size(), is(0));
+        assertThat(paymentViewResponse.getPaginationBuilder().getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
+        assertThat(paymentViewResponse.getPaginationBuilder().getLastLink().getHref().contains("?page=1&display_size=500"), is(true));
+        assertThat(paymentViewResponse.getPaginationBuilder().getPrevLink().getHref().contains("?page=1&display_size=500"), is(true));
+        assertThat(paymentViewResponse.getPaginationBuilder().getNextLink(), is(nullValue()));
+        assertThat(paymentViewResponse.getPaginationBuilder().getSelfLink().getHref().contains("?page=2&display_size=500"), is(true));
     }
 }

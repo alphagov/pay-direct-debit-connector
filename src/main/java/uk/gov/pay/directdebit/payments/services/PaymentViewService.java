@@ -2,8 +2,8 @@ package uk.gov.pay.directdebit.payments.services;
 
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
-import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
+import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewValidator;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.links.Link;
@@ -42,7 +42,7 @@ public class PaymentViewService {
                         viewListResponse =
                                 getPaymentViewResultResponse(validatedSearchParams, gatewayAccount.getExternalId());
                     }
-                    ViewPaginationBuilder paginationBuilder = new ViewPaginationBuilder(validatedSearchParams, viewListResponse, uriInfo);
+                    ViewPaginationBuilder paginationBuilder = new ViewPaginationBuilder(validatedSearchParams, uriInfo);
                     return new PaymentViewResponse(validatedSearchParams.getGatewayExternalId(),
                             total,
                             validatedSearchParams.getPage(),

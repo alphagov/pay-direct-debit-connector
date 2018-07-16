@@ -27,4 +27,8 @@ public enum PaymentState implements DirectDebitState {
     public ExternalPaymentState toExternal() {
         return externalState;
     }
+
+    public String toSingleQuoteString() {
+        return "'" + this + "'";
+    }
 }
