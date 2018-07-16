@@ -2,13 +2,11 @@ package uk.gov.pay.directdebit.events.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Getter;
 import uk.gov.pay.directdebit.payments.model.CustomDateSerializer;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
 import java.time.ZonedDateTime;
 
-@Getter
 public class DirectDebitEventExternalView {
 
     @JsonProperty("external_id")
@@ -37,5 +35,29 @@ public class DirectDebitEventExternalView {
         this.event = directDebitEvent.getEvent();
         this.eventType = directDebitEvent.getEventType();
         this.eventDate = directDebitEvent.getEventDate();
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public String getMandateExternalId() {
+        return mandateExternalId;
+    }
+
+    public String getTransactionExternalId() {
+        return transactionExternalId;
+    }
+
+    public DirectDebitEvent.Type getEventType() {
+        return eventType;
+    }
+
+    public DirectDebitEvent.SupportedEvent getEvent() {
+        return event;
+    }
+
+    public ZonedDateTime getEventDate() {
+        return eventDate;
     }
 }

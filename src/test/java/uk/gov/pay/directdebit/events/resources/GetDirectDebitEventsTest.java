@@ -88,7 +88,7 @@ public class GetDirectDebitEventsTest {
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?before=%s", "invalid_format");
+        String requestPath = format("/v1/events?to_date=%s", "invalid_format");
 
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -108,7 +108,7 @@ public class GetDirectDebitEventsTest {
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?before=%s&after=%s&page_size=100&page=1&mandate_external_id=%s&transaction_external_id=%s",
+        String requestPath = format("/v1/events?to_date=%s&from_date=%s&display_size=100&page=1&mandate_external_id=%s&transaction_external_id=%s",
                 ZonedDateTime.now().plusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
                 ZonedDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
                 testMandate.getExternalId(),
@@ -141,7 +141,7 @@ public class GetDirectDebitEventsTest {
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?before=%s&after=%s&page_size=100&page=1&mandate_external_id=%s&transaction_external_id=%s",
+        String requestPath = format("/v1/events?to_date=%s&from_date=%s&display_size=100&page=1&mandate_external_id=%s&transaction_external_id=%s",
                 ZonedDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
                 ZonedDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
                 testMandate.getId().toString(),
@@ -167,7 +167,7 @@ public class GetDirectDebitEventsTest {
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?before=%s",
+        String requestPath = format("/v1/events?to_date=%s",
                 ZonedDateTime.now().plusMinutes(5).format(DateTimeFormatter.ISO_INSTANT));
 
         given().port(testContext.getPort())
@@ -190,7 +190,7 @@ public class GetDirectDebitEventsTest {
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?after=%s",
+        String requestPath = format("/v1/events?from_date=%s",
                 ZonedDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_INSTANT));
 
         given().port(testContext.getPort())
@@ -259,7 +259,7 @@ public class GetDirectDebitEventsTest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = format("/v1/events?transaction_external_id=%s&page_size=2", testTransaction.getExternalId());
+        String requestPath = format("/v1/events?transaction_external_id=%s&display_size=2", testTransaction.getExternalId());
 
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -288,7 +288,7 @@ public class GetDirectDebitEventsTest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = format("/v1/events?page_size=2&page=2");
+        String requestPath = format("/v1/events?display_size=2&page=2");
 
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -320,7 +320,7 @@ public class GetDirectDebitEventsTest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = format("/v1/events?page_size=2&page=%s", currentPage);
+        String requestPath = format("/v1/events?display_size=2&page=%s", currentPage);
 
         String body = given().port(testContext.getPort())
                 .contentType(JSON)
@@ -329,20 +329,20 @@ public class GetDirectDebitEventsTest {
         String directDebitConnectorUrl = format("http://localhost:%s", app.getLocalPort());
         
         JsonAssert.with(body)
-                .assertThat("_links.self.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, currentPage)))
-                .assertThat("_links.first_page.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, firstPage)))
-                .assertThat("_links.last_page.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, lastPage)));
+                .assertThat("_links.self.href", is(format("%s/v1/events?page=%s&display_size=2", directDebitConnectorUrl, currentPage)))
+                .assertThat("_links.first_page.href", is(format("%s/v1/events?page=%s&display_size=2", directDebitConnectorUrl, firstPage)))
+                .assertThat("_links.last_page.href", is(format("%s/v1/events?page=%s&display_size=2", directDebitConnectorUrl, lastPage)));
                 
         if (nextPage == null) {
             JsonAssert.with(body).assertNotDefined("_links.next_page.href");
         } else {
-            JsonAssert.with(body).assertThat("_links.next_page.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, nextPage)));
+            JsonAssert.with(body).assertThat("_links.next_page.href", is(format("%s/v1/events?page=%s&display_size=2", directDebitConnectorUrl, nextPage)));
         }
         
         if (prevPage == null) {
             JsonAssert.with(body).assertNotDefined("_links.prev_page.href");
         } else{
-            JsonAssert.with(body).assertThat("_links.prev_page.href", is(format("%s/v1/events?page=%s&page_size=2", directDebitConnectorUrl, prevPage)));
+            JsonAssert.with(body).assertThat("_links.prev_page.href", is(format("%s/v1/events?page=%s&display_size=2", directDebitConnectorUrl, prevPage)));
         }
     }
     
@@ -359,7 +359,7 @@ public class GetDirectDebitEventsTest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = format("/v1/events?page_size=501");
+        String requestPath = format("/v1/events?display_size=501");
 
         given().port(testContext.getPort())
                 .contentType(JSON)

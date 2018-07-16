@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.events.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
 import uk.gov.pay.directdebit.payments.links.PaginationLink;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
 
@@ -12,21 +11,21 @@ import java.net.URI;
 
 public class DirectDebitEventsPagination {
 
-    @JsonProperty("self") @Getter
+    @JsonProperty("self")
     private PaginationLink selfLink;
-    @JsonProperty("first_page") @Getter
+    @JsonProperty("first_page")
     private PaginationLink firstLink;
-    @JsonProperty("last_page") @Getter
+    @JsonProperty("last_page")
     private PaginationLink lastLink;
-    @JsonProperty("prev_page") @Getter
+    @JsonProperty("prev_page")
     private PaginationLink prevLink;
-    @JsonProperty("next_page") @Getter
+    @JsonProperty("next_page")
     private PaginationLink nextLink;
 
     public DirectDebitEventsPagination(DirectDebitEventSearchParams searchParams, int total, UriInfo uriInfo) {
         selfLink = PaginationLink.ofValue(uriWithParams(searchParams, uriInfo).toString());
         firstLink = PaginationLink.ofValue(uriWithParams(searchParams.copy().page(1).build(), uriInfo).toString());
-        int lastPage = (int) Math.ceil(total / Integer.valueOf(searchParams.getPageSize()).doubleValue());
+        int lastPage = (int) Math.ceil(total / Integer.valueOf(searchParams.getDisplaySize()).doubleValue());
         lastLink = PaginationLink.ofValue(uriWithParams(searchParams.copy().page(lastPage).build(), uriInfo).toString());
         Integer currentPage = searchParams.getPage();
         prevLink = currentPage == 1 ? null : 
@@ -39,5 +38,25 @@ public class DirectDebitEventsPagination {
         UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path(uriInfo.getPath());
         params.getParamsAsMap().forEach((k, v) -> uriBuilder.queryParam(k, v));
         return uriBuilder.build();
+    }
+
+    public PaginationLink getSelfLink() {
+        return selfLink;
+    }
+
+    public PaginationLink getFirstLink() {
+        return firstLink;
+    }
+
+    public PaginationLink getLastLink() {
+        return lastLink;
+    }
+
+    public PaginationLink getPrevLink() {
+        return prevLink;
+    }
+
+    public PaginationLink getNextLink() {
+        return nextLink;
     }
 }

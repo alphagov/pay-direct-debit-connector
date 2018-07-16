@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import lombok.Data;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
@@ -32,7 +31,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.MANDATE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.PAYER;
 
-@Data
+
 public class DirectDebitEvent {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(DirectDebitEvent.class);
 
@@ -157,6 +156,82 @@ public class DirectDebitEvent {
     
     public static DirectDebitEvent paymentExpired(Long mandateId, Long transactionId) {
         return new DirectDebitEvent(mandateId, transactionId, CHARGE, PAYMENT_EXPIRED_BY_SYSTEM);
+    }
+
+    public static Logger getLOGGER() {
+        return LOGGER;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public Long getMandateId() {
+        return mandateId;
+    }
+
+    public String getMandateExternalId() {
+        return mandateExternalId;
+    }
+
+    public Long getTransactionId() {
+        return transactionId;
+    }
+
+    public String getTransactionExternalId() {
+        return transactionExternalId;
+    }
+
+    public Type getEventType() {
+        return eventType;
+    }
+
+    public SupportedEvent getEvent() {
+        return event;
+    }
+
+    public ZonedDateTime getEventDate() {
+        return eventDate;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
+    public void setMandateId(Long mandateId) {
+        this.mandateId = mandateId;
+    }
+
+    public void setMandateExternalId(String mandateExternalId) {
+        this.mandateExternalId = mandateExternalId;
+    }
+
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public void setTransactionExternalId(String transactionExternalId) {
+        this.transactionExternalId = transactionExternalId;
+    }
+
+    public void setEventType(Type eventType) {
+        this.eventType = eventType;
+    }
+
+    public void setEvent(SupportedEvent event) {
+        this.event = event;
+    }
+
+    public void setEventDate(ZonedDateTime eventDate) {
+        this.eventDate = eventDate;
     }
 
     public enum Type {
