@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.payments.dao;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import lombok.AllArgsConstructor;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.directdebit.payments.dao.mapper.EventMapper;
@@ -38,8 +37,8 @@ public class DirectDebitEventDao {
     
     public List<DirectDebitEvent> findEvents(DirectDebitEventSearchParams searchParams) {
         QueryStringAndQueryMap queryStringAndQueryMap = generateQuery(searchParams);
-        String limit = isNull(searchParams.getPageSize()) ? "NULL" : searchParams.getPageSize().toString();
-        String offset = searchParams.getPage() == null ? "0" : Integer.toString((searchParams.getPage() - 1) * searchParams.getPageSize());
+        String limit = isNull(searchParams.getDisplaySize()) ? "NULL" : searchParams.getDisplaySize().toString();
+        String offset = searchParams.getPage() == null ? "0" : Integer.toString((searchParams.getPage() - 1) * searchParams.getDisplaySize());
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(QUERY
                     .replace(":searchFields", queryStringAndQueryMap.queryString)
@@ -61,13 +60,13 @@ public class DirectDebitEventDao {
             searchStrings.add("t.external_id = :transaction_id");
             queryMap.put("transaction_id", searchParams.getTransactionExternalId());
         }
-        if (nonNull(searchParams.getBeforeDate())) {
+        if (nonNull(searchParams.getToDate())) {
             searchStrings.add("e.event_date < :before_date");
-            queryMap.put("before_date", searchParams.getBeforeDate());
+            queryMap.put("before_date", searchParams.getToDate());
         }
-        if (nonNull(searchParams.getAfterDate())) {
+        if (nonNull(searchParams.getFromDate())) {
             searchStrings.add("e.event_date >= :after_date");
-            queryMap.put("after_date", searchParams.getAfterDate());
+            queryMap.put("after_date", searchParams.getFromDate());
         }
         String queryString = searchStrings.isEmpty() ? "" : "WHERE " + searchStrings.stream().collect(Collectors.joining(" AND "));
         return new QueryStringAndQueryMap(queryString, queryMap);
@@ -106,9 +105,13 @@ public class DirectDebitEventDao {
                 .findFirst());
     }
     
-    @AllArgsConstructor
     private class QueryStringAndQueryMap {
         public final String queryString; 
         public final Map<String, Object> queryMap;
+        
+        QueryStringAndQueryMap(String queryString, Map<String, Object> queryMap) {
+            this.queryString = queryString;
+            this.queryMap = queryMap;
+        }
     }
 }

@@ -29,20 +29,20 @@ public class DirectDebitEventsResource {
     @GET
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response findEvents(@QueryParam("before") String beforeDate,
-                               @QueryParam("after") String afterDate,
-                               @QueryParam("page_size") Integer pageSize,
+    public Response findEvents(@QueryParam("to_date") String toDate,
+                               @QueryParam("from_date") String fromDate,
+                               @QueryParam("display_size") Integer displaySize,
                                @QueryParam("page") Integer page,
                                @QueryParam("mandate_external_id") String mandateId,
                                @QueryParam("transaction_external_id") String transactionId,
                                @Context UriInfo uriInfo) {
 
-        DirectDebitEventSearchParams searchParams = DirectDebitEventSearchParams.builder()
-                .beforeDate(beforeDate)
-                .afterDate(afterDate)
+        DirectDebitEventSearchParams searchParams = new DirectDebitEventSearchParams.DirectDebitEventSearchParamsBuilder()
+                .toDate(toDate)
+                .fromDate(fromDate)
                 .mandateExternalId(mandateId)
                 .transactionExternalId(transactionId)
-                .pageSize(pageSize)
+                .pageSize(displaySize)
                 .page(page)
                 .build();
 

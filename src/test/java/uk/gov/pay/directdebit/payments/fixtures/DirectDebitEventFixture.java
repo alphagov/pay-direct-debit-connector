@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-import lombok.Getter;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
@@ -16,7 +15,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
 
-@Getter
+
 public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixture, DirectDebitEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private String externalId = RandomIdGenerator.newId();
@@ -83,13 +82,13 @@ public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixtur
                                 "        event_date\n" +
                                 "    )\n" +
                                 "   VALUES(?, ?, ?, ?, ?, ?, ?)\n",
-                        id,
-                        externalId,
-                        mandateId,
-                        transactionId,
-                        eventType.toString(),
-                        event.toString(),
-                        Timestamp.from(eventDate.toInstant())
+                        getId(),
+                        getExternalId(),
+                        getMandateId(),
+                        getTransactionId(),
+                        getEventType().toString(),
+                        getEvent().toString(),
+                        Timestamp.from(getEventDate().toInstant())
                 )
         );
         return this;
@@ -97,7 +96,34 @@ public class DirectDebitEventFixture implements DbFixture<DirectDebitEventFixtur
 
     @Override
     public DirectDebitEvent toEntity() {
-        return new DirectDebitEvent(id, externalId, mandateId, transactionId, eventType, event, eventDate);
+        return new DirectDebitEvent(getId(), getExternalId(), getMandateId(), getTransactionId(), getEventType(), getEvent(), getEventDate());
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public Long getMandateId() {
+        return mandateId;
+    }
+
+    public Long getTransactionId() {
+        return transactionId;
+    }
+
+    public Type getEventType() {
+        return eventType;
+    }
+
+    public SupportedEvent getEvent() {
+        return event;
+    }
+
+    public ZonedDateTime getEventDate() {
+        return eventDate;
+    }
 }
