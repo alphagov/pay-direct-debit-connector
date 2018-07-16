@@ -7,6 +7,8 @@ import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 
 public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, GatewayAccount> {
 
@@ -17,6 +19,8 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
     private String serviceName = RandomStringUtils.randomAlphabetic(25);
     private String description = RandomStringUtils.randomAlphabetic(25);
     private String analyticsId = RandomStringUtils.randomAlphanumeric(25);
+    private PaymentProviderAccessToken accessToken = PaymentProviderAccessToken.of(RandomStringUtils.randomAlphabetic(25));
+    private PaymentProviderOrganisationIdentifier organisation = PaymentProviderOrganisationIdentifier.of(RandomStringUtils.randomAlphanumeric(25));
 
     private GatewayAccountFixture() {
     }
@@ -52,6 +56,16 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
 
     public GatewayAccountFixture withAnalyticsId(String analyticsId) {
         this.analyticsId = analyticsId;
+        return this;
+    }
+
+    public GatewayAccountFixture withAccessToken(PaymentProviderAccessToken accessToken) {
+        this.accessToken = accessToken;
+        return this;
+    }
+
+    public GatewayAccountFixture withOrganisation(PaymentProviderOrganisationIdentifier organisation) {
+        this.organisation = organisation;
         return this;
     }
 
@@ -95,16 +109,20 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
                                 "        service_name,\n" +
                                 "        type,\n" +
                                 "        description,\n" +
-                                "        analytics_id\n" +
+                                "        analytics_id,\n" +
+                                "        access_token,\n" +
+                                "        organisation\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         externalId,
                         paymentProvider.toString(),
                         serviceName,
                         type.toString(),
                         description,
-                        analyticsId
+                        analyticsId,
+                        accessToken != null ? accessToken.toString() : null,
+                        organisation != null ? organisation.toString() : null
                 )
         );
         return this;
@@ -112,7 +130,7 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
 
     @Override
     public GatewayAccount toEntity() {
-        return new GatewayAccount(id, externalId, paymentProvider, type, serviceName, description, analyticsId);
+        return new GatewayAccount(id, externalId, paymentProvider, type, serviceName, description, analyticsId, accessToken, organisation);
     }
 
 }

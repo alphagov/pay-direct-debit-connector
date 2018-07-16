@@ -8,6 +8,8 @@ import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -15,9 +17,10 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -147,11 +150,13 @@ public class GatewayAccountDaoIT {
         String description               = "tests pls";
         String analyticsId               = "DD_234099_TOOLONGWONTREAD";
 
-        PaymentProvider paymentProvider2 = PaymentProvider.GOCARDLESS;
-        String serviceName2              = "aservice";
-        String externalId2               = "multiple";
-        String description2              = "tests pls";
-        String analyticsId2              = "DD_234199_TOOLONGWONTREAD";
+        PaymentProvider paymentProvider2                   = PaymentProvider.GOCARDLESS;
+        String serviceName2                                = "aservice";
+        String externalId2                                 = "multiple";
+        String description2                                = "tests pls";
+        String analyticsId2                                = "DD_234199_TOOLONGWONTREAD";
+        PaymentProviderAccessToken accessToken             = PaymentProviderAccessToken.of("gimmeaccess");
+        PaymentProviderOrganisationIdentifier organisation = PaymentProviderOrganisationIdentifier.of("organisation");
 
         GatewayAccountFixture
           .aGatewayAccountFixture()
@@ -169,6 +174,8 @@ public class GatewayAccountDaoIT {
           .withDescription(description2)
           .withPaymentProvider(paymentProvider2)
           .withAnalyticsId(analyticsId2)
+          .withAccessToken(accessToken)
+          .withOrganisation(organisation)          
           .insert(testContext.getJdbi());
 
         gatewayAccounts = gatewayAccountDao.find(
@@ -211,6 +218,8 @@ public class GatewayAccountDaoIT {
         assertThat(second.getDescription(), is(description2));
         assertThat(second.getAnalyticsId(), is(analyticsId2));
         assertThat(second.getType(), is(TYPE));
+        assertThat(second.getAccessToken(), is(Optional.of(accessToken)));
+        assertThat(second.getOrganisation(), is(Optional.of(organisation)));
     }
 
     @Test

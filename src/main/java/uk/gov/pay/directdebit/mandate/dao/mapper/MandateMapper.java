@@ -1,17 +1,20 @@
 package uk.gov.pay.directdebit.mandate.dao.mapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.model.Payer;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class MandateMapper implements RowMapper<Mandate> {
 
@@ -30,6 +33,8 @@ public class MandateMapper implements RowMapper<Mandate> {
     private static final String GATEWAY_ACCOUNT_SERVICE_NAME_COLUMN = "gateway_account_service_name";
     private static final String GATEWAY_ACCOUNT_DESCRIPTION_COLUMN = "gateway_account_description";
     private static final String GATEWAY_ACCOUNT_ANALYTICS_ID_COLUMN = "gateway_account_analytics_id";
+    private static final String GATEWAY_ACCOUNT_ACCESS_TOKEN_COLUMN = "gateway_account_access_token";
+    private static final String GATEWAY_ACCOUNT_ORGANISATION_COLUMN = "gateway_account_organisation";
     private static final String PAYER_ID_COLUMN = "payer_id";
     private static final String PAYER_MANDATE_ID_COLUMN = "payer_mandate_id";
     private static final String PAYER_EXTERNAL_ID_COLUMN = "payer_external_id";
@@ -59,6 +64,7 @@ public class MandateMapper implements RowMapper<Mandate> {
                     resultSet.getString(PAYER_BANK_NAME_COLUMN),
                     ZonedDateTime.ofInstant(resultSet.getTimestamp(PAYER_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC));
         }
+        
         GatewayAccount gatewayAccount = new GatewayAccount(
                 resultSet.getLong(GATEWAY_ACCOUNT_ID_COLUMN),
                 resultSet.getString(GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN),
@@ -68,6 +74,15 @@ public class MandateMapper implements RowMapper<Mandate> {
                 resultSet.getString(GATEWAY_ACCOUNT_DESCRIPTION_COLUMN),
                 resultSet.getString(GATEWAY_ACCOUNT_ANALYTICS_ID_COLUMN)
         );
+        String accessToken = resultSet.getString(GATEWAY_ACCOUNT_ACCESS_TOKEN_COLUMN);
+        if (accessToken != null) {
+            gatewayAccount.setAccessToken(PaymentProviderAccessToken.of(accessToken));
+        }
+        String organisation = resultSet.getString(GATEWAY_ACCOUNT_ORGANISATION_COLUMN);
+        if (organisation != null) {
+            gatewayAccount.setOrganisation(PaymentProviderOrganisationIdentifier.of(organisation));
+        }
+        
         return new Mandate(
                 resultSet.getLong(ID_COLUMN),
                 gatewayAccount,
