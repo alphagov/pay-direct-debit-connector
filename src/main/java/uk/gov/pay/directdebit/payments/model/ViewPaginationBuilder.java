@@ -3,13 +3,11 @@ package uk.gov.pay.directdebit.payments.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
 import uk.gov.pay.directdebit.payments.links.PaginationLink;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -23,7 +21,6 @@ public class ViewPaginationBuilder {
     private static final String NEXT_LINK = "next_page";
     private PaymentViewSearchParams searchParams;
     private UriInfo uriInfo;
-    private List<PaymentViewResultResponse> viewResponses;
 
     @JsonIgnore
     private Long totalCount;
@@ -40,9 +37,8 @@ public class ViewPaginationBuilder {
     @JsonProperty(NEXT_LINK)
     private PaginationLink nextLink;
 
-    public ViewPaginationBuilder(PaymentViewSearchParams searchParams, List<PaymentViewResultResponse> chargeResponses, UriInfo uriInfo) {
+    public ViewPaginationBuilder(PaymentViewSearchParams searchParams, UriInfo uriInfo) {
         this.searchParams = searchParams;
-        this.viewResponses = chargeResponses;
         this.uriInfo = uriInfo;
         selfPageNum = searchParams.getPage();
     }
@@ -59,10 +55,6 @@ public class ViewPaginationBuilder {
         
         return this;
     }
-
-    public Long getTotalCount() { return totalCount; }
-
-    public Long getSelfPageNum() { return selfPageNum; }
 
     public PaginationLink getSelfLink() { return selfLink; }
 
