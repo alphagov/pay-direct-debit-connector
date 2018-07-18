@@ -51,7 +51,13 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 .map((handledAction) -> {
                     GoCardlessPayment goCardlessPayment = goCardlessService.findPaymentForEvent(event);
                     Transaction transaction = transactionService.findTransaction(goCardlessPayment.getTransactionId());
-                    return handledAction.apply(transaction);
+                    if (isValidOrganisation(transaction, event)) {
+                        return handledAction.apply(transaction);
+                    } else {
+                        LOGGER.info("Event from GoCardless with goCardlessEventId: {} has unrecognised organisation: {}",
+                                event.getGoCardlessEventId(), event.getOrganisationIdentifier());
+                        return null;
+                    }
                 });
     }
 
@@ -66,5 +72,12 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 .put(GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor)
                 .put(GoCardlessPaymentAction.PAID, transactionService::payoutPaidFor)
                 .build();
+    }
+
+    private boolean isValidOrganisation(Transaction transaction, GoCardlessEvent event) {
+        
+        return transaction.getMandate().getGatewayAccount().getOrganisation()
+                .map(organisationIdentifier -> organisationIdentifier.equals(event.getOrganisationIdentifier()))
+                .orElse(false);
     }
 }

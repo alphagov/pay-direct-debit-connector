@@ -3,16 +3,18 @@ package uk.gov.pay.directdebit.webhook.gocardless.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
+
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -42,7 +44,8 @@ public class GoCardlessWebhookParserTest {
 
     @Test
     public void shouldParseASingleEvent() throws IOException {
-        String validEvent = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, "payment", CREATED_AT);
+        PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of("test_organisation_identifier");
+        String validEvent = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, "payment", CREATED_AT, organisationIdentifier);
         String payload = buildEvents(validEvent);
 
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
@@ -53,10 +56,13 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
         assertThat(firstEvent.getCreatedAt(), is(CREATED_AT));
+        assertThat(firstEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(firstEvent.getJson(), is(objectMapper.readTree(validEvent).toString()));
     }
+
     @Test
     public void shouldParseMultipleEvents() throws IOException {
+
         String secondEventId = "AAA345";
         GoCardlessResourceType secondEventResourceType = MANDATES;
         String secondEventAction = "action";
@@ -66,10 +72,11 @@ public class GoCardlessWebhookParserTest {
         String thirdEventAction = "action";
 
         ZonedDateTime eventCreatedAt = ZonedDateTime.now();
+        PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of("test_organisation_identifier");
 
-        String firstEventPayload = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, "payment", CREATED_AT);
-        String secondEventPayload = buildValidEvent(secondEventId, secondEventAction, secondEventResourceType, "mandate", eventCreatedAt);
-        String thirdEventPayload = buildValidEvent(thirdEventId, thirdEventAction, thirdEventResourceType, "payout", eventCreatedAt);
+        String firstEventPayload = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, "payment", CREATED_AT, organisationIdentifier);
+        String secondEventPayload = buildValidEvent(secondEventId, secondEventAction, secondEventResourceType, "mandate", eventCreatedAt, organisationIdentifier);
+        String thirdEventPayload = buildValidEvent(thirdEventId, thirdEventAction, thirdEventResourceType, "payout", eventCreatedAt, organisationIdentifier);
         String payload = buildEvents(firstEventPayload, secondEventPayload, thirdEventPayload);
 
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
@@ -80,6 +87,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
         assertThat(firstEvent.getCreatedAt(), is(CREATED_AT));
+        assertThat(firstEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(firstEvent.getJson(), is(objectMapper.readTree(firstEventPayload).toString()));
 
         GoCardlessEvent secondEvent = parsedEvents.get(1);
@@ -88,6 +96,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(secondEvent.getAction(), is(secondEventAction));
         assertThat(secondEvent.getResourceType(), is(secondEventResourceType));
         assertThat(secondEvent.getCreatedAt(), is(eventCreatedAt));
+        assertThat(secondEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(secondEvent.getJson(), is(objectMapper.readTree(secondEventPayload).toString()));
 
         GoCardlessEvent thirdEvent = parsedEvents.get(2);
@@ -96,6 +105,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(thirdEvent.getAction(), is(thirdEventAction));
         assertThat(thirdEvent.getResourceType(), is(thirdEventResourceType));
         assertThat(thirdEvent.getCreatedAt(), is(eventCreatedAt));
+        assertThat(thirdEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(thirdEvent.getJson(), is(objectMapper.readTree(thirdEventPayload).toString()));
     }
 
@@ -113,26 +123,30 @@ public class GoCardlessWebhookParserTest {
         thrown.reportMissingExceptionWithMessage("WebhookParserException expected");
         parser.parse("");
     }
-    private String buildValidEvent(String eventId, String action, GoCardlessResourceType resourceType, String linkKey, ZonedDateTime createdAt) {
+
+    private String buildValidEvent(String eventId, String action, GoCardlessResourceType resourceType, String linkKey,
+                                   ZonedDateTime createdAt, PaymentProviderOrganisationIdentifier organisationIdentifier) {
+        // language=JSON
         return String.format("{\n" +
                 "      \"id\": \"%s\",\n" +
                 "      \"created_at\": \"%s\",\n" +
                 "      \"action\": \"%s\",\n" +
                 "      \"resource_type\": \"%s\",\n" +
                 "      \"links\": {\n" +
-                "        \"%s\": \"PM123\"\n" +
+                "        \"%s\": \"PM123\",\n" +
+                "        \"organisation\": \"%s\"\n" +
                 "      },\n" +
                 "      \"details\": {\n" +
                 "        \"origin\": \"gocardless\",\n" +
                 "        \"cause\": \"payment_confirmed\",\n" +
                 "        \"description\": \"Payment was confirmed as collected\"\n" +
                 "      }\n" +
-                "    }", eventId, createdAt.toString(), action, resourceType.toString().toLowerCase(), linkKey);
+                "    }", eventId, createdAt.toString(), action, resourceType.toString().toLowerCase(), linkKey, organisationIdentifier);
     }
 
     private String buildEvents(String... events) throws IOException {
         ArrayNode eventsArray = objectMapper.createArrayNode();
-        for (String event: events) {
+        for (String event : events) {
             eventsArray.add(objectMapper.readTree(event));
         }
         ObjectNode eventsNode = objectMapper.createObjectNode();

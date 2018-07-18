@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
@@ -37,7 +38,8 @@ public class GoCardlessWebhookParser {
                         eventNode.get("action").asText(),
                         handledGoCardlessResourceType,
                         eventNode.toString(),
-                        ZonedDateTime.parse(eventNode.get("created_at").asText())
+                        ZonedDateTime.parse(eventNode.get("created_at").asText()),
+                        PaymentProviderOrganisationIdentifier.of(eventNode.get("links").get("organisation").asText())
                 );
                 extractResourceIdFrom(eventNode, handledGoCardlessResourceType)
                         .ifPresent(event::setResourceId);

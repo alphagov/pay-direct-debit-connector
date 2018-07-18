@@ -65,7 +65,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                             .findTransactionsForMandate(mandate.getExternalId())
                             .forEach(transactionService::paymentFailedWithoutEmailFor);
 
-                    return  mandateService.mandateFailedFor(mandate);
+                    return mandateService.mandateFailedFor(mandate);
                 });
     }
 
@@ -76,12 +76,24 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 .map((handledAction -> {
                     GoCardlessMandate goCardlessMandate = goCardlessService.findGoCardlessMandateForEvent(event);
                     Mandate mandate = mandateService.findById(goCardlessMandate.getMandateId());
-                    return handledAction.apply(mandate);
+                    if (isValidOrganisation(mandate, event)) {
+                        return handledAction.apply(mandate);
+                    } else {
+                        LOGGER.info("Event from GoCardless with goCardlessEventId: {} has unrecognised organisation: {}",
+                                event.getGoCardlessEventId(), event.getOrganisationIdentifier());
+                        return null;
+                    }
                 }));
     }
 
     private DirectDebitEvent findMandatePendingEventOrInsertOneIfItDoesNotExist(Mandate mandate) {
         return mandateService.findMandatePendingEventFor(mandate)
                 .orElseGet(() -> mandateService.mandatePendingFor(mandate));
+    }
+
+    private boolean isValidOrganisation(Mandate mandate, GoCardlessEvent event) {
+        return mandate.getGatewayAccount().getOrganisation()
+                .map(organisationIdentifier -> organisationIdentifier.equals(event.getOrganisationIdentifier()))
+                .orElse(false);
     }
 }

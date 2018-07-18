@@ -97,6 +97,8 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
         return analyticsId;
     }
 
+    public PaymentProviderOrganisationIdentifier getOrganisation() { return organisation; }
+
     @Override
     public GatewayAccountFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->

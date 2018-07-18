@@ -1,15 +1,17 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
-import java.sql.Timestamp;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
+
+import java.sql.Timestamp;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture, GoCardlessEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
@@ -20,6 +22,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     private String resourceId = RandomStringUtils.randomAlphabetic(20);
     private String json = "{\"id\": \"somejson\"}";
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
+    private PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of(RandomStringUtils.randomAlphanumeric(25));
 
     private GoCardlessEventFixture() {
     }
@@ -100,6 +103,11 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
+    public GoCardlessEventFixture withOrganisationIdentifier(PaymentProviderOrganisationIdentifier organisationIdentifier) {
+        this.organisationIdentifier = organisationIdentifier;
+        return this;
+    }
+
     @Override
     public GoCardlessEventFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -129,7 +137,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
 
     @Override
     public GoCardlessEvent toEntity() {
-        return new GoCardlessEvent(id, eventId, goCardlessEventId, action, resourceType, json, createdAt);
+        return new GoCardlessEvent(id, eventId, goCardlessEventId, action, resourceType, json, createdAt, organisationIdentifier);
     }
 
 }

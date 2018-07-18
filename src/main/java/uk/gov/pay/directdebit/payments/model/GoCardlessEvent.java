@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.payments.model;
 
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
+
 import java.time.ZonedDateTime;
 
 public class GoCardlessEvent {
@@ -13,8 +15,16 @@ public class GoCardlessEvent {
     private String json;
     private ZonedDateTime createdAt;
     private String resourceId;
+    private PaymentProviderOrganisationIdentifier organisationIdentifier;
 
-    public GoCardlessEvent(Long id, Long directDebitEventId, String goCardlessEventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
+    public GoCardlessEvent(Long id,
+                           Long directDebitEventId,
+                           String goCardlessEventId,
+                           String action,
+                           GoCardlessResourceType resourceType,
+                           String json,
+                           ZonedDateTime createdAt,
+                           PaymentProviderOrganisationIdentifier organisationIdentifier) {
         this.id = id;
         this.eventId = directDebitEventId;
         this.goCardlessEventId = goCardlessEventId;
@@ -22,10 +32,26 @@ public class GoCardlessEvent {
         this.resourceType = resourceType;
         this.json = json;
         this.createdAt = createdAt;
+        this.organisationIdentifier = organisationIdentifier;
     }
 
-    public GoCardlessEvent(String goCardlessEventId, String action, GoCardlessResourceType resourceType, String json, ZonedDateTime createdAt) {
-        this(null, null, goCardlessEventId, action,  resourceType, json, createdAt);
+    public GoCardlessEvent(Long id,
+                           Long directDebitEventId,
+                           String goCardlessEventId,
+                           String action,
+                           GoCardlessResourceType resourceType,
+                           String json,
+                           ZonedDateTime createdAt) {
+        this(id, directDebitEventId, goCardlessEventId, action, resourceType, json, createdAt, null);
+    }
+
+    public GoCardlessEvent(String goCardlessEventId, 
+                           String action, 
+                           GoCardlessResourceType resourceType, 
+                           String json, 
+                           ZonedDateTime createdAt, 
+                           PaymentProviderOrganisationIdentifier organisationIdentifier) {
+        this(null, null, goCardlessEventId, action, resourceType, json, createdAt, organisationIdentifier);
     }
 
     public Long getId() {
@@ -103,5 +129,13 @@ public class GoCardlessEvent {
     public GoCardlessEvent setResourceId(String resourceId) {
         this.resourceId = resourceId;
         return this;
+    }
+
+    public PaymentProviderOrganisationIdentifier getOrganisationIdentifier() {
+        return organisationIdentifier;
+    }
+
+    public void setOrganisationIdentifier(PaymentProviderOrganisationIdentifier organisationIdentifier) {
+        this.organisationIdentifier = organisationIdentifier;
     }
 }
