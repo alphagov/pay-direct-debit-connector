@@ -6,8 +6,8 @@ import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 
 public class MandateServiceFactory {
 
-    private final OnDemandMandateService onDemandMandateService;
-    private final OneOffMandateService oneOffMandateService;
+    private final MandateService onDemandMandateService;
+    private final MandateService oneOffMandateService;
     private final MandateQueryService mandateQueryService;
     private final MandateService mandateService;
     private final MandateStateUpdateService mandateStateUpdateService;
@@ -26,15 +26,7 @@ public class MandateServiceFactory {
         this.mandateStateUpdateService = mandateStateUpdateService;
     }
 
-    public OnDemandMandateService getOnDemandMandateService() {
-        return onDemandMandateService;
-    }
-
-    public OneOffMandateService getOneOffMandateService() {
-        return oneOffMandateService;
-    }
-
-    public MandateCommandService getMandateControlService(MandateType mandateType) {
+    public MandateService getMandateControlService(MandateType mandateType) {
         switch(mandateType) {
             case ONE_OFF:
                 return oneOffMandateService;

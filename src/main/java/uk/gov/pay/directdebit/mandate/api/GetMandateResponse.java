@@ -13,6 +13,9 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class GetMandateResponse {
+    @JsonProperty("links")
+    private List<Map<String, Object>> dataLinks;
+    
     @JsonProperty("mandate_id")
     private String mandateId;
 
@@ -21,9 +24,6 @@ public class GetMandateResponse {
 
     @JsonProperty("return_url")
     private String returnUrl;
-
-    @JsonProperty("links")
-    private List<Map<String, Object>> dataLinks;
 
     @JsonProperty
     private ExternalMandateState state;

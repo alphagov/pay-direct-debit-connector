@@ -1,12 +1,18 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
+
+import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
+import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
@@ -17,25 +23,26 @@ import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.tokens.services.TokenService;
 
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 
-public class OnDemandMandateService implements MandateCommandService {
+public class OnDemandMandateService extends MandateService{
     private PaymentProviderFactory paymentProviderFactory;
-    private TransactionService transactionService;
     private MandateStateUpdateService mandateStateUpdateService;
-    private MandateService mandateService;
+
 
     @Inject
     public OnDemandMandateService(
-            PaymentProviderFactory paymentProviderFactory,
-            MandateStateUpdateService mandateStateUpdateService,
+            DirectDebitConfig directDebitConfig,
+            MandateDao mandateDao, GatewayAccountDao gatewayAccountDao,
+            TokenService tokenService,
             TransactionService transactionService,
-            MandateService mandateService) {
+            MandateStateUpdateService mandateStateUpdateService,
+            PaymentProviderFactory paymentProviderFactory) {
+        super(directDebitConfig, mandateDao, gatewayAccountDao, tokenService, transactionService, mandateStateUpdateService);
         this.paymentProviderFactory = paymentProviderFactory;
         this.mandateStateUpdateService = mandateStateUpdateService;
-        this.transactionService = transactionService;
-        this.mandateService = mandateService;
     }
 
     @Override
@@ -56,8 +63,8 @@ public class OnDemandMandateService implements MandateCommandService {
         mandateStateUpdateService.confirmedDirectDebitDetailsFor(confirmedMandate);
     }
 
-    public Transaction collect(GatewayAccount gatewayAccount, Mandate mandate,
-            CollectPaymentRequest collectPaymentRequest) {
+/*    public Transaction collect(GatewayAccount gatewayAccount, Mandate mandate,
+                               CollectPaymentRequest collectPaymentRequest) {
         if (MandateType.ONE_OFF.equals(mandate.getType())) {
             throw new InvalidMandateTypeException(mandate.getExternalId(), MandateType.ONE_OFF);
         }
@@ -65,20 +72,24 @@ public class OnDemandMandateService implements MandateCommandService {
                 collectPaymentRequest,
                 mandate,
                 gatewayAccount.getExternalId());
-        
+
         LocalDate chargeDate = paymentProviderFactory
                 .getCommandServiceFor(gatewayAccount.getPaymentProvider())
                 .collect(mandate, transaction);
         transactionService.onDemandPaymentSubmittedToProviderFor(transaction, chargeDate);
         return transaction;
-    }
+    }*/
 
-    public CreateMandateResponse create(GatewayAccount gatewayAccount, CreateMandateRequest createMandateRequest,
-            UriInfo uriInfo) {
+/*    public CreateMandateResponse create(GatewayAccount gatewayAccount, CreateMandateRequest createMandateRequest,
+                                        UriInfo uriInfo) {
         if (MandateType.ONE_OFF.equals(createMandateRequest.getMandateType())) {
             throw new InvalidMandateTypeException(MandateType.ONE_OFF);
         }
-        return mandateService.createMandate(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
-    }
+
+        String gatewayAccountExternalId = gatewayAccount.getExternalId();
+        Mandate mandate = mandateService.createMandate(createMandateRequest, gatewayAccountExternalId);
+
+        return mandateService.populateCreateMandateResponse(mandate, gatewayAccountExternalId, uriInfo);
+    }*/
 
 }

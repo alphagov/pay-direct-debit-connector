@@ -8,16 +8,21 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.CollectRequest;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -56,6 +61,7 @@ public class TransactionService {
     private final TransactionDao transactionDao;
     private final DirectDebitEventService directDebitEventService;
     private final UserNotificationService userNotificationService;
+    private final PaymentProviderFactory paymentProviderFactory;
 
     @Inject
     public TransactionService(TokenService tokenService,
@@ -63,13 +69,14 @@ public class TransactionService {
                               DirectDebitConfig directDebitConfig,
                               TransactionDao transactionDao,
                               DirectDebitEventService directDebitEventService,
-                              UserNotificationService userNotificationService) {
+                              UserNotificationService userNotificationService, PaymentProviderFactory paymentProviderFactory) {
         this.tokenService = tokenService;
         this.gatewayAccountDao = gatewayAccountDao;
         this.directDebitConfig = directDebitConfig;
         this.directDebitEventService = directDebitEventService;
         this.transactionDao = transactionDao;
         this.userNotificationService = userNotificationService;
+        this.paymentProviderFactory = paymentProviderFactory;
     }
 
     public Transaction findTransactionForExternalId(String externalId) {
@@ -232,5 +239,22 @@ public class TransactionService {
 
     public Optional<DirectDebitEvent> findPaymentSubmittedEventFor(Transaction transaction) {
         return directDebitEventService.findBy(transaction.getId(), CHARGE, PAYMENT_SUBMITTED_TO_BANK);
+    }
+
+    public Transaction collectOnDemand(GatewayAccount gatewayAccount, Mandate mandate,
+                               CollectPaymentRequest collectPaymentRequest) {
+        if (MandateType.ONE_OFF.equals(mandate.getType())) {
+            throw new InvalidMandateTypeException(mandate.getExternalId(), MandateType.ONE_OFF);
+        }
+        Transaction transaction = createTransaction(
+                collectPaymentRequest,
+                mandate,
+                gatewayAccount.getExternalId());
+
+        LocalDate chargeDate = paymentProviderFactory
+                .getCommandServiceFor(gatewayAccount.getPaymentProvider())
+                .collect(mandate, transaction);
+        onDemandPaymentSubmittedToProviderFor(transaction, chargeDate);
+        return transaction;
     }
 }

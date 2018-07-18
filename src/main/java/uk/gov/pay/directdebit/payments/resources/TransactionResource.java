@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequestValidator;
@@ -38,15 +39,17 @@ public class TransactionResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
     private final TransactionService transactionService;
     private final MandateServiceFactory mandateServiceFactory;
+    private MandateService mandateService;
 
     private final TransactionRequestValidator transactionRequestValidator = new TransactionRequestValidator();
     private final CollectPaymentRequestValidator collectPaymentRequestValidator = new CollectPaymentRequestValidator();
 
     @Inject
     public TransactionResource(TransactionService transactionService,
-            MandateServiceFactory mandateServiceFactory) {
+                               MandateServiceFactory mandateServiceFactory, MandateService mandateService) {
         this.transactionService = transactionService;
         this.mandateServiceFactory = mandateServiceFactory;
+        this.mandateService = mandateService;
     }
 
     @GET
@@ -66,7 +69,9 @@ public class TransactionResource {
         LOGGER.info("Received new one-off payment request");
         transactionRequestValidator.validate(transactionRequestMap);
         CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.of(transactionRequestMap);
-        Transaction transaction = mandateServiceFactory.getOneOffMandateService().create(gatewayAccount, createPaymentRequest);
+        
+        Mandate mandate = mandateService.createMandate(createPaymentRequest, gatewayAccount.getExternalId());
+        Transaction transaction = transactionService.createTransaction(createPaymentRequest, mandate, gatewayAccount.getExternalId());
         TransactionResponse response = transactionService.createPaymentResponseWithAllLinks(transaction, gatewayAccount.getExternalId(), uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }
@@ -79,10 +84,8 @@ public class TransactionResource {
         LOGGER.info("Received collect payment from mandate request");
         collectPaymentRequestValidator.validate(collectPaymentRequestMap);
         CollectPaymentRequest collectPaymentRequest = CollectPaymentRequest.of(collectPaymentRequestMap);
-        Mandate mandate = mandateServiceFactory
-                .getMandateQueryService()
-                .findByExternalId(collectPaymentRequest.getMandateExternalId());
-        Transaction paymentToCollect = mandateServiceFactory.getOnDemandMandateService().collect(gatewayAccount, mandate, collectPaymentRequest);
+        Mandate mandate = mandateService.findByExternalId(collectPaymentRequest.getMandateExternalId());
+        Transaction paymentToCollect = transactionService.collectOnDemand(gatewayAccount, mandate, collectPaymentRequest);
         CollectPaymentResponse response = transactionService.collectPaymentResponseWithSelfLink(paymentToCollect, gatewayAccount.getExternalId(), uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }

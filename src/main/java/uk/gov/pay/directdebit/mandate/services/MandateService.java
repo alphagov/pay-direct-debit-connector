@@ -1,6 +1,8 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
+
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -16,7 +18,9 @@ import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
 import uk.gov.pay.directdebit.mandate.api.CreateRequest;
@@ -28,6 +32,8 @@ import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneO
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
+import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -43,7 +49,7 @@ import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
 
-public class MandateService {
+public abstract class MandateService {
 
     private static final Logger LOGGER = PayLoggerFactory.getLogger(MandateService.class);
     private final MandateDao mandateDao;
@@ -53,7 +59,6 @@ public class MandateService {
     private final TransactionService transactionService;
     private final MandateStateUpdateService mandateStateUpdateService;
     
-    @Inject
     public MandateService(
             DirectDebitConfig directDebitConfig,
             MandateDao mandateDao, GatewayAccountDao gatewayAccountDao,
@@ -67,6 +72,8 @@ public class MandateService {
         this.mandateStateUpdateService = mandateStateUpdateService;
         this.linksConfig = directDebitConfig.getLinks();
     }
+
+    public abstract void confirm(GatewayAccount gatewayAccount, Mandate mandate, ConfirmMandateRequest confirmDetailsRequest);
     
     public Mandate createMandate(CreateRequest createRequest, String accountExternalId) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
@@ -100,7 +107,7 @@ public class MandateService {
                 });
     }
 
-    public CreateMandateResponse createMandate(CreateMandateRequest createMandateRequest, String accountExternalId, UriInfo uriInfo) {
+/*    public CreateMandateResponse createMandate(CreateMandateRequest createMandateRequest, String accountExternalId, UriInfo uriInfo) {
         Mandate mandate = createMandate(createMandateRequest, accountExternalId);
         String mandateExternalId = mandate.getExternalId();
         List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
@@ -114,7 +121,7 @@ public class MandateService {
                 dataLinks,
                 mandate.getServiceReference(),
                 mandate.getMandateReference());
-    }
+    }*/
 
     public TokenExchangeDetails getMandateFor(String token) {
         Mandate mandate = mandateDao
@@ -173,6 +180,20 @@ public class MandateService {
                 mandate.getReturnUrl(),
                 dataLinks,
                 mandate.getState().toExternal(),
+                mandate.getServiceReference(),
+                mandate.getMandateReference());
+    }
+    
+    public CreateMandateResponse populateCreateMandateResponse(Mandate mandate, String accountExternalId, UriInfo uriInfo) {
+        List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
+
+        return new CreateMandateResponse(
+                mandate.getExternalId(),
+                mandate.getType(),
+                mandate.getReturnUrl(),
+                mandate.getCreatedDate().toString(),
+                mandate.getState().toExternal(),
+                dataLinks,
                 mandate.getServiceReference(),
                 mandate.getMandateReference());
     }

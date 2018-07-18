@@ -92,7 +92,7 @@ public class TransactionServiceTest {
     @Before
     public void setUp() throws URISyntaxException {
         service = new TransactionService(mockedTokenService, mockedGatewayAccountDao, mockedDirectDebitConfig, mockedTransactionDao,
-                mockedDirectDebitEventService, mockedUserNotificationService);
+                mockedDirectDebitEventService, mockedUserNotificationService, paymentProviderFactory);
         when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
         when(mockedLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
         when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
