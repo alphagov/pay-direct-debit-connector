@@ -1,11 +1,9 @@
 package uk.gov.pay.directdebit.gatewayaccounts.dao;
 
-import java.util.List;
-
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
-import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -26,13 +24,11 @@ public interface GatewayAccountDao {
     @SqlQuery("SELECT * FROM gateway_accounts")
     List<GatewayAccount> findAll();
 
-    @SqlUpdate("INSERT INTO gateway_accounts(external_id, payment_provider, type, service_name, description, analytics_id) " +
-            "VALUES (:externalId, :paymentProvider, :type, :serviceName, :description, :analyticsId)")
+    @SqlUpdate("INSERT INTO gateway_accounts(external_id, payment_provider, type, service_name, description, analytics_id, access_token, organisation) " +
+            "VALUES (:externalId, :paymentProvider, :type, :serviceName, :description, :analyticsId, :accessToken.value, :organisation.value)")
     @GetGeneratedKeys
     Long insert(@BindBean GatewayAccount gatewayAccount);
 
     @SqlQuery("SELECT * FROM gateway_accounts WHERE external_id IN (<externalAccountIds>)")
-    List<GatewayAccount> find(
-      @BindList("externalAccountIds") List<String> externalAccountIds
-    );
+    List<GatewayAccount> find(@BindList("externalAccountIds") List<String> externalAccountIds);
 }

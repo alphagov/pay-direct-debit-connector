@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -92,6 +91,7 @@ public class GatewayAccountDaoIT {
         assertThat(gatewayAccount.getDescription(), is(DESCRIPTION));
         assertThat(gatewayAccount.getType(), is(TYPE));
     }
+
     @Test
     public void shouldNotFindAGatewayAccount_ifIdIsNotValid() {
         assertThat(gatewayAccountDao.findById(3L).isPresent(), is(false));
@@ -144,58 +144,58 @@ public class GatewayAccountDaoIT {
         GatewayAccount first;
         GatewayAccount second;
 
-        PaymentProvider paymentProvider  = PaymentProvider.GOCARDLESS;
-        String serviceName               = "aservice";
-        String externalId                = "single";
-        String description               = "tests pls";
-        String analyticsId               = "DD_234099_TOOLONGWONTREAD";
+        PaymentProvider paymentProvider = PaymentProvider.GOCARDLESS;
+        String serviceName = "aservice";
+        String externalId = "single";
+        String description = "tests pls";
+        String analyticsId = "DD_234099_TOOLONGWONTREAD";
 
-        PaymentProvider paymentProvider2                   = PaymentProvider.GOCARDLESS;
-        String serviceName2                                = "aservice";
-        String externalId2                                 = "multiple";
-        String description2                                = "tests pls";
-        String analyticsId2                                = "DD_234199_TOOLONGWONTREAD";
-        PaymentProviderAccessToken accessToken             = PaymentProviderAccessToken.of("gimmeaccess");
+        PaymentProvider paymentProvider2 = PaymentProvider.GOCARDLESS;
+        String serviceName2 = "aservice";
+        String externalId2 = "multiple";
+        String description2 = "tests pls";
+        String analyticsId2 = "DD_234199_TOOLONGWONTREAD";
+        PaymentProviderAccessToken accessToken = PaymentProviderAccessToken.of("gimmeaccess");
         PaymentProviderOrganisationIdentifier organisation = PaymentProviderOrganisationIdentifier.of("organisation");
 
         GatewayAccountFixture
-          .aGatewayAccountFixture()
-          .withExternalId(externalId)
-          .withServiceName(serviceName)
-          .withDescription(description)
-          .withPaymentProvider(paymentProvider)
-          .withAnalyticsId(analyticsId)
-          .insert(testContext.getJdbi());
+                .aGatewayAccountFixture()
+                .withExternalId(externalId)
+                .withServiceName(serviceName)
+                .withDescription(description)
+                .withPaymentProvider(paymentProvider)
+                .withAnalyticsId(analyticsId)
+                .insert(testContext.getJdbi());
 
         GatewayAccountFixture
-          .aGatewayAccountFixture()
-          .withExternalId(externalId2)
-          .withServiceName(serviceName2)
-          .withDescription(description2)
-          .withPaymentProvider(paymentProvider2)
-          .withAnalyticsId(analyticsId2)
-          .withAccessToken(accessToken)
-          .withOrganisation(organisation)          
-          .insert(testContext.getJdbi());
+                .aGatewayAccountFixture()
+                .withExternalId(externalId2)
+                .withServiceName(serviceName2)
+                .withDescription(description2)
+                .withPaymentProvider(paymentProvider2)
+                .withAnalyticsId(analyticsId2)
+                .withAccessToken(accessToken)
+                .withOrganisation(organisation)
+                .insert(testContext.getJdbi());
 
         gatewayAccounts = gatewayAccountDao.find(
-          Arrays.asList(externalId)
+                Arrays.asList(externalId)
         );
 
         assertThat(gatewayAccounts.size(), is(1));
 
         first = gatewayAccounts.get(0);
 
-        assertThat(first.getId(),              is(notNullValue()));
-        assertThat(first.getExternalId(),      is(externalId));
+        assertThat(first.getId(), is(notNullValue()));
+        assertThat(first.getExternalId(), is(externalId));
         assertThat(first.getPaymentProvider(), is(paymentProvider));
-        assertThat(first.getServiceName(),     is(serviceName));
-        assertThat(first.getDescription(),     is(description));
-        assertThat(first.getAnalyticsId(),     is(analyticsId));
-        assertThat(first.getType(),            is(TYPE));
+        assertThat(first.getServiceName(), is(serviceName));
+        assertThat(first.getDescription(), is(description));
+        assertThat(first.getAnalyticsId(), is(analyticsId));
+        assertThat(first.getType(), is(TYPE));
 
         gatewayAccounts = gatewayAccountDao.find(
-          Arrays.asList(externalId, externalId2)
+                Arrays.asList(externalId, externalId2)
         );
 
         assertThat(gatewayAccounts.size(), is(2));
@@ -203,13 +203,13 @@ public class GatewayAccountDaoIT {
         first = gatewayAccounts.get(0);
         second = gatewayAccounts.get(1);
 
-        assertThat(first.getId(),              is(notNullValue()));
-        assertThat(first.getExternalId(),      is(externalId));
+        assertThat(first.getId(), is(notNullValue()));
+        assertThat(first.getExternalId(), is(externalId));
         assertThat(first.getPaymentProvider(), is(paymentProvider));
-        assertThat(first.getServiceName(),     is(serviceName));
-        assertThat(first.getDescription(),     is(description));
-        assertThat(first.getAnalyticsId(),     is(analyticsId));
-        assertThat(first.getType(),            is(TYPE));
+        assertThat(first.getServiceName(), is(serviceName));
+        assertThat(first.getDescription(), is(description));
+        assertThat(first.getAnalyticsId(), is(analyticsId));
+        assertThat(first.getType(), is(TYPE));
 
         assertThat(second.getId(), is(notNullValue()));
         assertThat(second.getExternalId(), is(externalId2));
@@ -218,8 +218,8 @@ public class GatewayAccountDaoIT {
         assertThat(second.getDescription(), is(description2));
         assertThat(second.getAnalyticsId(), is(analyticsId2));
         assertThat(second.getType(), is(TYPE));
-        assertThat(second.getAccessToken(), is(Optional.of(accessToken)));
-        assertThat(second.getOrganisation(), is(Optional.of(organisation)));
+        assertThat(second.getAccessToken(), is(accessToken));
+        assertThat(second.getOrganisation(), is(organisation));
     }
 
     @Test

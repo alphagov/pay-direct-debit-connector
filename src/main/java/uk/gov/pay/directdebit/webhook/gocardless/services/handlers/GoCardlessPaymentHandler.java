@@ -1,10 +1,6 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
@@ -16,12 +12,17 @@ import uk.gov.pay.directdebit.payments.services.GoCardlessService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
+import javax.inject.Inject;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+
 public class GoCardlessPaymentHandler extends GoCardlessHandler {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessPaymentHandler.class);
 
     @Inject
     public GoCardlessPaymentHandler(TransactionService transactionService,
-            GoCardlessService goCardlessService) {
+                                    GoCardlessService goCardlessService) {
         super(transactionService, goCardlessService);
     }
 
@@ -75,9 +76,6 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     }
 
     private boolean isValidOrganisation(Transaction transaction, GoCardlessEvent event) {
-        
-        return transaction.getMandate().getGatewayAccount().getOrganisation()
-                .map(organisationIdentifier -> organisationIdentifier.equals(event.getOrganisationIdentifier()))
-                .orElse(false);
+        return event.getOrganisationIdentifier().equals(transaction.getMandate().getGatewayAccount().getOrganisation());
     }
 }
