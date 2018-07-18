@@ -1,15 +1,13 @@
 package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.Response;
 import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -21,6 +19,10 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
@@ -50,7 +52,8 @@ public class WebhookGoCardlessResourceIT {
             "      \"resource_type\": \"payments\",\n" +
             "      \"action\": \"submitted\",\n" +
             "      \"links\": {\n" +
-            "        \"payment\": \"PM00008Q30R2BR\"\n" +
+            "        \"payment\": \"PM00008Q30R2BR\",\n" +
+            "        \"organisation\": \"test_organisation_id\"\n" +
             "      },\n" +
             "      \"details\": {\n" +
             "        \"origin\": \"gocardless\",\n" +
@@ -65,7 +68,8 @@ public class WebhookGoCardlessResourceIT {
             "      \"resource_type\": \"payments\",\n" +
             "      \"action\": \"paid_out\",\n" +
             "      \"links\": {\n" +
-            "        \"payment\": \"PM00008Q30R2BR\"\n" +
+            "        \"payment\": \"PM00008Q30R2BR\",\n" +
+            "        \"organisation\": \"test_organisation_id\"\n" +
             "      },\n" +
             "      \"details\": {\n" +
             "        \"origin\": \"gocardless\",\n" +
@@ -76,7 +80,7 @@ public class WebhookGoCardlessResourceIT {
             "    }\n" +
             "  ]\n" +
             "}";
-    private final static String WEBHOOK_SUCCESS_SIGNATURE = "2ee77401450fdd31490079c0fb0abf19bd1863f98108a67a18968e7eeac1c902";
+    private final static String WEBHOOK_SUCCESS_SIGNATURE = "48da9fe6ac1ff84558d91895d1f10d971e391a43e9991440e97761e1003ffe09";
 
     // language=JSON
     private final static String WEBHOOK_FAILED = "{\n" +
@@ -87,7 +91,8 @@ public class WebhookGoCardlessResourceIT {
             "      \"resource_type\": \"payments\",\n" +
             "      \"action\": \"submitted\",\n" +
             "      \"links\": {\n" +
-            "        \"payment\": \"PM00008Q30R2BR\"\n" +
+            "        \"payment\": \"PM00008Q30R2BR\",\n" +
+            "        \"organisation\": \"test_organisation_id\"\n" +
             "      },\n" +
             "      \"details\": {\n" +
             "        \"origin\": \"gocardless\",\n" +
@@ -102,7 +107,8 @@ public class WebhookGoCardlessResourceIT {
             "      \"resource_type\": \"mandates\",\n" +
             "      \"action\": \"failed\",\n" +
             "      \"links\": {\n" +
-            "        \"mandate\": \"MD00008Q30R2BR\"\n" +
+            "        \"mandate\": \"MD00008Q30R2BR\",\n" +
+            "        \"organisation\": \"test_organisation_id\"\n" +
             "      },\n" +
             "      \"details\": {\n" +
             "        \"origin\": \"gocardless\",\n" +
@@ -113,21 +119,23 @@ public class WebhookGoCardlessResourceIT {
             "    }\n" +
             "  ]\n" +
             "}";
-    private final static String WEBHOOK_FAILED_SIGNATURE = "f0b956da5de3d69ea7ad078e57d1f9d7c7fabe9848e079d399d84c8adb7c0a36";
+    private final static String WEBHOOK_FAILED_SIGNATURE = "c01e874cafffa3d4cce4b35b003be0be14b9a9c933f3b04045980afb27c54421";
 
     @DropwizardTestContext
     private TestContext testContext;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(10110);
-    
-    private GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture();
+
+    private PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of("test_organisation_id");
+
+    private GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().withOrganisation(organisationIdentifier);
 
     @Before
     public void setUp() {
         testGatewayAccount.insert(testContext.getJdbi());
     }
-    
+
     @Test
     public void handleWebhook_whenAPaidOutWebhookArrives_shouldInsertGoCardlessEventsUpdatePaymentToSuccessAndReturn200() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
@@ -171,7 +179,7 @@ public class WebhookGoCardlessResourceIT {
                 .withState(MandateState.PENDING)
                 .withMandateType(MandateType.ONE_OFF)
                 .insert(testContext.getJdbi());
-        TransactionFixture transactionFixture = aTransactionFixture()                
+        TransactionFixture transactionFixture = aTransactionFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.PENDING)
                 .insert(testContext.getJdbi());
@@ -202,7 +210,6 @@ public class WebhookGoCardlessResourceIT {
                         aResponse().withStatus(200))
         );
 
-
         given().port(testContext.getPort())
                 .body(WEBHOOK_FAILED)
                 .header("Webhook-Signature", WEBHOOK_FAILED_SIGNATURE)
@@ -225,7 +232,7 @@ public class WebhookGoCardlessResourceIT {
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         MatcherAssert.assertThat(mandate.get("state"), is("FAILED"));
-        
+
         Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
         MatcherAssert.assertThat(transaction.get("state"), is("FAILED"));
     }
