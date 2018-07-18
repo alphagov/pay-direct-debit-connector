@@ -64,7 +64,8 @@ public class GoCardlessMandateHandlerTest {
     private TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture()
             .withMandateFixture(mandateFixture);
     private GoCardlessMandateHandler goCardlessMandateHandler;
-    private GoCardlessEventFixture goCardlessEventFixture = GoCardlessEventFixture.aGoCardlessEventFixture().withOrganisationIdentifier(organisationIdentifier);
+    private GoCardlessEventFixture goCardlessEventFixture = GoCardlessEventFixture.aGoCardlessEventFixture()
+            .withOrganisationIdentifier(organisationIdentifier);
 
     @Before
     public void setUp() {
@@ -76,9 +77,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Test
     public void handle_onCreateMandateGoCardlessEvent_shouldRegisterEventAsMandatePending_whenDoesNotPreviouslyExist() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withAction("created")
-                .toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("created").toEntity());
 
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedMandateService.mandatePendingFor(mandateFixture.toEntity())).thenReturn(
@@ -94,9 +93,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Test
     public void handle_onCreateMandateGoCardlessEvent_shouldNotRegisterAnEventAsMandatePending_whenAPreviousMandatePendingEventExists() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withAction("created")
-                .toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("created").toEntity());
 
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedMandateService.findMandatePendingEventFor(mandateFixture.toEntity())).thenReturn(Optional.of(
@@ -113,9 +110,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Test
     public void handle_onActiveMandateGoCardlessEvent_shouldSetAPayEventAsMandateActive_whenDoesNotPreviouslyExist() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withAction("active")
-                .toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("active").toEntity());
 
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedMandateService.mandateActiveFor(mandateFixture.toEntity())).thenReturn(
@@ -131,9 +126,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Test
     public void handle_onActiveMandateGoCardlessEvent_shouldNotRegisterAnEventAsMandatePending_whenAPreviousMandatePendingEventExists() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withAction("active")
-                .toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("active").toEntity());
 
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
 
@@ -152,9 +145,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Test
     public void handle_onSubmittedMandateGoCardlessEvent_shouldSetAPayEventAsMandatePending_whenDoesNotPreviouslyExist() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withAction("submitted")
-                .toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("submitted").toEntity());
 
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedMandateService.mandatePendingFor(mandateFixture.toEntity())).thenReturn(
@@ -171,9 +162,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Test
     public void handle_onSubmittedMandateGoCardlessEvent_shouldNotRegisterAnEventAsMandatePending_whenAPreviousMandatePendingEventExists() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withAction("submitted")
-                .toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("submitted").toEntity());
 
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedMandateService.findMandatePendingEventFor(mandateFixture.toEntity())).thenReturn(Optional.of(
@@ -190,9 +179,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Test
     public void handle_onAFailedMandateGoCardlessEvent_shouldRegisterAPayEventAsMandateFailed() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withAction("failed")
-                .toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("failed").toEntity());
 
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedMandateService.mandateFailedFor(mandateFixture.toEntity())).thenReturn(
@@ -213,9 +200,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Test
     public void handle_onACancelledMandateGoCardlessEvent_shouldRegisterAPayEventAsMandateCancelled_AndFailPaymentIfNotSubmittedToGC() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withAction("cancelled")
-                .toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("cancelled").toEntity());
 
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedTransactionService.findPaymentSubmittedEventFor(transactionFixture.toEntity())).thenReturn(Optional.empty());
@@ -237,9 +222,7 @@ public class GoCardlessMandateHandlerTest {
 
     @Test
     public void handle_onACancelledMandateGoCardlessEvent_shouldRegisterAPayEventAsMandateCancelled_withoutFailingPaymentIfSubmittedToGC() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withAction("cancelled")
-                .toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("cancelled").toEntity());
 
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
         when(mockedTransactionService.findPaymentSubmittedEventFor(transactionFixture.toEntity())).thenReturn(Optional.of(
@@ -268,7 +251,7 @@ public class GoCardlessMandateHandlerTest {
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandate);
         Mandate mockedMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(GatewayAccountFixture.aGatewayAccountFixture()
-                        .withOrganisation(PaymentProviderOrganisationIdentifier.of("non_existing_organisation")))
+                .withOrganisation(PaymentProviderOrganisationIdentifier.of("non_existing_organisation")))
                 .toEntity();
         when(mockedMandateService.findById(goCardlessMandate.getMandateId())).thenReturn(mockedMandate);
 

@@ -11,9 +11,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payers.services.PayerService;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
@@ -96,7 +93,8 @@ public class GoCardlessPaymentHandlerTest {
 
     @Test
     public void handle_onPayoutPaidGoCardlessEvent_shouldSetRegisterPayoutPaidEvent() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("paid").withResourceType(GoCardlessResourceType.PAYOUTS).toEntity());
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("paid")
+                .withResourceType(GoCardlessResourceType.PAYOUTS).toEntity());
 
         when(mockedGoCardlessService.findPaymentForEvent(goCardlessEvent)).thenReturn(goCardlessPaymentFixture.toEntity());
         when(mockedTransactionService.payoutPaidFor(transaction)).thenReturn(directDebitEvent);
