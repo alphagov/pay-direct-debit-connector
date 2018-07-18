@@ -3,8 +3,6 @@ package uk.gov.pay.directdebit.gatewayaccounts.model;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountException;
 
-import java.util.Optional;
-
 public class GatewayAccount {
 
     public enum Type {
@@ -19,6 +17,7 @@ public class GatewayAccount {
             throw new InvalidGatewayAccountException(type);
         }
     }
+
     private Long id;
     private String externalId;
     private PaymentProvider paymentProvider;
@@ -43,16 +42,17 @@ public class GatewayAccount {
     }
 
     public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
-        this(id, externalId, paymentProvider, type, serviceName, description, analyticsId, null, null);
+        this(id, externalId, paymentProvider, type, serviceName, description, analyticsId, PaymentProviderAccessToken.of(""), PaymentProviderOrganisationIdentifier.of(""));
     }
-    
+
     public GatewayAccount(PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
-        this(null, generateExternalId(), paymentProvider, type, serviceName, description, analyticsId, null, null);
+        this(null, generateExternalId(), paymentProvider, type, serviceName, description, analyticsId, PaymentProviderAccessToken.of(""), PaymentProviderOrganisationIdentifier.of(""));
     }
 
     private static String generateExternalId() {
         return "DIRECT_DEBIT:" + RandomIdGenerator.newId();
     }
+
     public Long getId() {
         return id;
     }
@@ -114,8 +114,8 @@ public class GatewayAccount {
         return this;
     }
 
-    public Optional<PaymentProviderAccessToken> getAccessToken() {
-        return Optional.ofNullable(accessToken);
+    public PaymentProviderAccessToken getAccessToken() {
+        return accessToken;
     }
 
     public GatewayAccount setAccessToken(PaymentProviderAccessToken accessToken) {
@@ -123,8 +123,8 @@ public class GatewayAccount {
         return this;
     }
 
-    public Optional<PaymentProviderOrganisationIdentifier> getOrganisation() {
-        return Optional.ofNullable(organisation);
+    public PaymentProviderOrganisationIdentifier getOrganisation() {
+        return organisation;
     }
 
     public GatewayAccount setOrganisation(PaymentProviderOrganisationIdentifier organisation) {
