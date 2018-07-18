@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.gatewayaccounts.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
@@ -16,17 +15,16 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
 @Path("/")
 public class GatewayAccountResource {
     public static final String GATEWAY_ACCOUNT_API_PATH = "/v1/api/accounts/{accountId}";
@@ -34,7 +32,6 @@ public class GatewayAccountResource {
     static final String GATEWAY_ACCOUNTS_FRONTEND_PATH = "/v1/frontend/accounts";
 
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GatewayAccountResource.class);
-    private static final Splitter COMMA_SEPARATOR = Splitter.on(',').trimResults().omitEmptyStrings();
 
     private GatewayAccountService gatewayAccountService;
     private final CreateGatewayAccountValidator createGatewayAccountValidator = new CreateGatewayAccountValidator();
@@ -58,44 +55,20 @@ public class GatewayAccountResource {
     @Path(GATEWAY_ACCOUNTS_API_PATH)
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getApiGatewayAccounts(
-        @DefaultValue("") @QueryParam("externalAccountIds") String externalAccountIdsArg,
-        @Context UriInfo uriInfo
-    ) {
-      return getGatewayAccounts(externalAccountIdsArg, uriInfo);
+    public Response getApiGatewayAccounts(@DefaultValue("") @QueryParam("externalAccountIds") String externalAccountIdsArg,
+                                          @Context UriInfo uriInfo) {
+        LOGGER.debug("Getting all api gateway accounts");
+        return getGatewayAccounts(externalAccountIdsArg, uriInfo);
     }
 
     @GET
     @Path(GATEWAY_ACCOUNTS_FRONTEND_PATH)
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getFrontendGatewayAccounts(
-        @DefaultValue("") @QueryParam("externalAccountIds") String externalAccountIdsArg,
-        @Context UriInfo uriInfo
-    ) {
-      return getGatewayAccounts(externalAccountIdsArg, uriInfo);
-    }
-
-    private Response getGatewayAccounts(
-        String externalAccountIdsArg,
-        UriInfo uriInfo
-    ) {
-        LOGGER.debug("Getting all gateway accounts");
-
-        List<String> externalAccountIds = COMMA_SEPARATOR.splitToList(externalAccountIdsArg);
-
-        List<GatewayAccountResponse> gatewayAccounts = (
-          externalAccountIds.isEmpty()
-          ? gatewayAccountService.getAllGatewayAccounts()
-          : gatewayAccountService.getGatewayAccounts(externalAccountIds)
-        )
-          .stream()
-          .map(gatewayAccount -> GatewayAccountResponse.from(gatewayAccount).withSelfLink(uriInfo))
-          .collect(Collectors.toList());
-
-        return Response
-                .ok(ImmutableMap.of("accounts", gatewayAccounts))
-                .build();
+    public Response getFrontendGatewayAccounts(@DefaultValue("") @QueryParam("externalAccountIds") String externalAccountIdsArg,
+                                               @Context UriInfo uriInfo) {
+        LOGGER.debug("Getting all frontend gateway accounts");
+        return getGatewayAccounts(externalAccountIdsArg, uriInfo);
     }
 
     @POST
@@ -108,5 +81,11 @@ public class GatewayAccountResource {
         GatewayAccount gatewayAccount = gatewayAccountService.create(request);
         GatewayAccountResponse gatewayAccountResponse = GatewayAccountResponse.from(gatewayAccount).withSelfLink(uriInfo);
         return Response.created(gatewayAccountResponse.getSelfLink()).entity(gatewayAccountResponse).build();
+    }
+
+    private Response getGatewayAccounts(String externalAccountIdsArg, UriInfo uriInfo) {
+        return Response
+                .ok(ImmutableMap.of("accounts", gatewayAccountService.getAllGatewayAccounts(externalAccountIdsArg, uriInfo)))
+                .build();
     }
 }
