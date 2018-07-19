@@ -3,11 +3,15 @@ package uk.gov.pay.directdebit.gatewayaccounts.dao;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.Update;
+import org.jdbi.v3.sqlobject.config.RegisterArgumentFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 
 import javax.inject.Inject;
 import java.util.Optional;
 
+@RegisterArgumentFactory(PaymentProviderAccessTokenArgumentFactory.class)
 public class GatewayAccountCommandDao {
 
     private final Jdbi jdbi;
@@ -24,7 +28,11 @@ public class GatewayAccountCommandDao {
     }
     
     public Optional<Long> insert(GatewayAccount gatewayAccount) {
+        
         return jdbi.withHandle(handle -> {
+            handle.registerArgument(new PaymentProviderAccessTokenArgumentFactory());
+            handle.registerArgument(new PaymentProviderOrganisationIdentifierArgumentFactory());
+            
             Update update = handle.createUpdate(INSERT_QUERY)
                     .bind("externalId", gatewayAccount.getExternalId())
                     .bind("paymentProvider", gatewayAccount.getPaymentProvider())
@@ -32,10 +40,8 @@ public class GatewayAccountCommandDao {
                     .bind("serviceName", gatewayAccount.getServiceName())
                     .bind("description", gatewayAccount.getDescription())
                     .bind("analyticsId", gatewayAccount.getAnalyticsId())
-                    .bind("accessToken", gatewayAccount.getAccessToken().isPresent() ? 
-                                                    gatewayAccount.getAccessToken().get().toString() : null)
-                    .bind("organisation", gatewayAccount.getOrganisation().isPresent() ?
-                                                    gatewayAccount.getOrganisation().get().toString() : null);
+                    .bind("accessToken", gatewayAccount.getAccessToken())
+                    .bind("organisation", gatewayAccount.getOrganisation());
             update.execute();
             return handle.createQuery(SELECT_ID_QUERY)
                     .bind("externalId", gatewayAccount.getExternalId())
