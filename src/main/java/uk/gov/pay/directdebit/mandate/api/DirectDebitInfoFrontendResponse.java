@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.mandate.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -128,10 +129,13 @@ public class DirectDebitInfoFrontendResponse {
     @JsonProperty
     private ExternalMandateState state;
 
+    @JsonProperty("internal_state")
+    private MandateState internalState;
+
     public DirectDebitInfoFrontendResponse(String paymentExternalId,
                                            Long gatewayAccountId,
                                            String gatewayAccountExternalId,
-                                           ExternalMandateState state,
+                                           MandateState internalState,
                                            String returnUrl,
                                            String mandateReference,
                                            String mandateType,
@@ -139,7 +143,8 @@ public class DirectDebitInfoFrontendResponse {
                                            Payer payer,
                                            Transaction transaction) {
         this.mandateExternalId = paymentExternalId;
-        this.state = state;
+        this.internalState = internalState;
+        this.state = internalState.toExternal();
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.returnUrl = returnUrl;
@@ -246,6 +251,9 @@ public class DirectDebitInfoFrontendResponse {
         if (!createdDate.equals(that.createdDate)) {
             return false;
         }
+        if (!internalState.equals(that.internalState)) {
+            return false;
+        }
         return state == that.state;
     }
 
@@ -260,6 +268,7 @@ public class DirectDebitInfoFrontendResponse {
         result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
         result = 31 * result + mandateType.hashCode();
         result = 31 * result + createdDate.hashCode();
+        result = 31 * result + internalState.hashCode();
         result = 31 * result + state.hashCode();
         return result;
     }
@@ -271,6 +280,7 @@ public class DirectDebitInfoFrontendResponse {
                 ", transactionId='" + transaction.externalId + "'" +
                 ", mandateId='" + mandateExternalId + "'" +
                 ", state='" + state.getState() + "'" +
+                ", internalState='" + internalState + "'" +
                 ", returnUrl='" + returnUrl + "'" +
                 ", mandateReference='" + mandateReference + "'" +
                 ", mandateType='" + mandateType + "'" +
