@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RegisterRowMapper(GatewayAccountMapper.class)
-public interface GatewayAccountDao {
+public interface GatewayAccountSelectDao {
     @SqlQuery("SELECT * FROM gateway_accounts p WHERE p.id = :id")
     Optional<GatewayAccount> findById(@Bind("id") Long id);
 

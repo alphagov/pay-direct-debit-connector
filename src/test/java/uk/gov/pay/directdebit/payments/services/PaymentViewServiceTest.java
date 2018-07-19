@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
@@ -53,7 +53,7 @@ public class PaymentViewServiceTest {
     @Mock
     private PaymentViewDao paymentViewDao;
     @Mock
-    private GatewayAccountDao gatewayAccountDao;
+    private GatewayAccountSelectDao gatewayAccountSelectDao;
     @Mock
     UriInfo mockUriInfo;
     private PaymentViewService paymentViewService;
@@ -85,7 +85,7 @@ public class PaymentViewServiceTest {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        paymentViewService = new PaymentViewService(paymentViewDao, gatewayAccountDao)
+        paymentViewService = new PaymentViewService(paymentViewDao, gatewayAccountSelectDao)
                                     .withUriInfo(mockUriInfo);
     }
 
@@ -104,7 +104,7 @@ public class PaymentViewServiceTest {
                     paymentView.getEmail(), paymentView.getState().toExternal(),
                     paymentView.getMandateExternalId()));
         }
-        when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
+        when(gatewayAccountSelectDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(4L);
         PaymentViewResponse response = paymentViewService.getPaymentViewResponse(searchParams);
@@ -123,7 +123,7 @@ public class PaymentViewServiceTest {
                 .withToDateString(createdDate.toString());
         thrown.expect(GatewayAccountNotFoundException.class);
         thrown.expectMessage("Unknown gateway account: " + gatewayAccountExternalId);
-        when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.empty());
+        when(gatewayAccountSelectDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.empty());
         paymentViewService.getPaymentViewResponse(searchParams);
     }
 
@@ -159,7 +159,7 @@ public class PaymentViewServiceTest {
                     transaction.getState(),
                     RandomIdGenerator.newId()));
         }
-        when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
+        when(gatewayAccountSelectDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(50L);
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
@@ -182,7 +182,7 @@ public class PaymentViewServiceTest {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withExternalId(gatewayAccountExternalId);
         GatewayAccount testGatewayAccount = gatewayAccountFixture.toEntity();
         List<PaymentView> paymentViewList = new ArrayList<>();
-        when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
+        when(gatewayAccountSelectDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(18L);
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)

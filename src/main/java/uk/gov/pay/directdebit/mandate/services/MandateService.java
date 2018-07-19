@@ -7,7 +7,7 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
@@ -64,7 +64,7 @@ public class MandateService {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(MandateService.class);
     private final MandateDao mandateDao;
     private final LinksConfig linksConfig;
-    private final GatewayAccountDao gatewayAccountDao;
+    private final GatewayAccountSelectDao gatewayAccountSelectDao;
     private final TokenService tokenService;
     private final TransactionService transactionService;
     private final DirectDebitEventService directDebitEventService;
@@ -73,12 +73,12 @@ public class MandateService {
     @Inject
     public MandateService(
             DirectDebitConfig directDebitConfig,
-            MandateDao mandateDao, GatewayAccountDao gatewayAccountDao,
+            MandateDao mandateDao, GatewayAccountSelectDao gatewayAccountSelectDao,
             TokenService tokenService,
             TransactionService transactionService,
             DirectDebitEventService directDebitEventService,
             UserNotificationService userNotificationService) {
-        this.gatewayAccountDao = gatewayAccountDao;
+        this.gatewayAccountSelectDao = gatewayAccountSelectDao;
         this.tokenService = tokenService;
         this.transactionService = transactionService;
         this.directDebitEventService = directDebitEventService;
@@ -88,7 +88,7 @@ public class MandateService {
     }
 
     public Mandate createMandate(Map<String, String> mandateRequestMap, String accountExternalId, MandateType mandateType) {
-        return gatewayAccountDao.findByExternalId(accountExternalId)
+        return gatewayAccountSelectDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     // TODO:
                     // when we introduce GoCardless gateway accounts to work with create mandate,

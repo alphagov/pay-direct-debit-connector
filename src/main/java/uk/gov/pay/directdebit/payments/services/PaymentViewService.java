@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
@@ -21,19 +21,19 @@ import java.util.stream.Collectors;
 public class PaymentViewService {
 
     private final PaymentViewDao paymentViewDao;
-    private final GatewayAccountDao gatewayAccountDao;
+    private final GatewayAccountSelectDao gatewayAccountSelectDao;
     private final PaymentViewValidator paymentViewValidator = new PaymentViewValidator();
     private UriInfo uriInfo;
     private UriBuilder uriBuilder;
 
     @Inject
-    public PaymentViewService(PaymentViewDao paymentViewDao, GatewayAccountDao gatewayAccountDao) {
+    public PaymentViewService(PaymentViewDao paymentViewDao, GatewayAccountSelectDao gatewayAccountSelectDao) {
         this.paymentViewDao = paymentViewDao;
-        this.gatewayAccountDao = gatewayAccountDao;
+        this.gatewayAccountSelectDao = gatewayAccountSelectDao;
     }
 
     public PaymentViewResponse getPaymentViewResponse(PaymentViewSearchParams searchParams) {
-        return gatewayAccountDao.findByExternalId(searchParams.getGatewayExternalId())
+        return gatewayAccountSelectDao.findByExternalId(searchParams.getGatewayExternalId())
                 .map(gatewayAccount -> {
                     PaymentViewSearchParams validatedSearchParams = paymentViewValidator.validateParams(searchParams);
                     List<PaymentViewResultResponse> viewListResponse = Collections.emptyList();

@@ -11,7 +11,7 @@ import java.net.Proxy;
 import javax.net.ssl.SSLSocketFactory;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -107,8 +107,8 @@ public class DirectDebitModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public GatewayAccountDao provideGatewayAccountDao() {
-        return jdbi.onDemand(GatewayAccountDao.class);
+    public GatewayAccountSelectDao provideGatewayAccountSelectDao() {
+        return jdbi.onDemand(GatewayAccountSelectDao.class);
     }
 
     @Provides

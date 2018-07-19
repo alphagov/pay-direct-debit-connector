@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
@@ -73,7 +73,7 @@ public class MandateServiceTest {
     @Mock
     private MandateDao mockedMandateDao;
     @Mock
-    private GatewayAccountDao mockedGatewayAccountDao;
+    private GatewayAccountSelectDao mockedGatewayAccountSelectDao;
     @Mock
     private TokenService mockedTokenService;
     @Mock
@@ -94,7 +94,7 @@ public class MandateServiceTest {
     @Before
     public void setUp() throws URISyntaxException {
         when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
-        service = new MandateService(mockedDirectDebitConfig, mockedMandateDao, mockedGatewayAccountDao, mockedTokenService,
+        service = new MandateService(mockedDirectDebitConfig, mockedMandateDao, mockedGatewayAccountSelectDao, mockedTokenService,
                 mockedTransactionService, mockedDirectDebitEventService, mockedUserNotificationService);
         when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
         when(mockedUriBuilder.path(anyString())).thenReturn(mockedUriBuilder);
@@ -435,7 +435,7 @@ public class MandateServiceTest {
     private Mandate getMandateForProvider(PaymentProvider paymentProvider) {
         GatewayAccount gatewayAccount =
                 GatewayAccountFixture.aGatewayAccountFixture().withPaymentProvider(paymentProvider).toEntity();
-        when(mockedGatewayAccountDao.findByExternalId(anyString())).thenReturn(Optional.of(gatewayAccount));
+        when(mockedGatewayAccountSelectDao.findByExternalId(anyString())).thenReturn(Optional.of(gatewayAccount));
         when(mockedMandateDao.insert(any(Mandate.class))).thenReturn(1L);
 
         return service.createMandate(getMandateRequestPayload(), gatewayAccount.getExternalId(), MandateType.ON_DEMAND);

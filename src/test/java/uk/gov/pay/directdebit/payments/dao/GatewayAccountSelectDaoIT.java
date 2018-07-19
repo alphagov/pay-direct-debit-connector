@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
@@ -29,7 +29,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class GatewayAccountDaoIT {
+public class GatewayAccountSelectDaoIT {
 
     private static final String EXTERNAL_ID = "external1d";
     private static final PaymentProvider PAYMENT_PROVIDER = PaymentProvider.SANDBOX;
@@ -41,12 +41,12 @@ public class GatewayAccountDaoIT {
     @DropwizardTestContext
     private TestContext testContext;
 
-    private GatewayAccountDao gatewayAccountDao;
+    private GatewayAccountSelectDao gatewayAccountSelectDao;
     private GatewayAccountFixture testGatewayAccount;
 
     @Before
     public void setup() throws IOException, LiquibaseException {
-        gatewayAccountDao = testContext.getJdbi().onDemand(GatewayAccountDao.class);
+        gatewayAccountSelectDao = testContext.getJdbi().onDemand(GatewayAccountSelectDao.class);
         this.testGatewayAccount = aGatewayAccountFixture()
                 .withExternalId(EXTERNAL_ID)
                 .withPaymentProvider(PAYMENT_PROVIDER)
@@ -58,7 +58,7 @@ public class GatewayAccountDaoIT {
 
     @Test
     public void shouldInsertAGatewayAccount() {
-        Long id = gatewayAccountDao.insert(testGatewayAccount.toEntity());
+        Long id = gatewayAccountSelectDao.insert(testGatewayAccount.toEntity());
         Map<String, Object> foundGatewayAccount = testContext.getDatabaseTestHelper().getGatewayAccountById(id);
         assertThat(foundGatewayAccount.get("id"), is(id));
         assertThat(foundGatewayAccount.get("external_id"), is(EXTERNAL_ID));
@@ -72,7 +72,7 @@ public class GatewayAccountDaoIT {
     @Test
     public void shouldFindAGatewayAccountById() {
         testGatewayAccount.insert(testContext.getJdbi());
-        GatewayAccount gatewayAccount = gatewayAccountDao.findById(testGatewayAccount.getId()).get();
+        GatewayAccount gatewayAccount = gatewayAccountSelectDao.findById(testGatewayAccount.getId()).get();
         assertThat(gatewayAccount.getId(), is(notNullValue()));
         assertThat(gatewayAccount.getExternalId(), is(EXTERNAL_ID));
         assertThat(gatewayAccount.getPaymentProvider(), is(PAYMENT_PROVIDER));
@@ -84,7 +84,7 @@ public class GatewayAccountDaoIT {
     @Test
     public void shouldFindAGatewayAccountByExternalId() {
         testGatewayAccount.insert(testContext.getJdbi());
-        GatewayAccount gatewayAccount = gatewayAccountDao.findByExternalId(EXTERNAL_ID).get();
+        GatewayAccount gatewayAccount = gatewayAccountSelectDao.findByExternalId(EXTERNAL_ID).get();
         assertThat(gatewayAccount.getId(), is(notNullValue()));
         assertThat(gatewayAccount.getExternalId(), is(EXTERNAL_ID));
         assertThat(gatewayAccount.getPaymentProvider(), is(PAYMENT_PROVIDER));
@@ -94,7 +94,7 @@ public class GatewayAccountDaoIT {
     }
     @Test
     public void shouldNotFindAGatewayAccount_ifIdIsNotValid() {
-        assertThat(gatewayAccountDao.findById(3L).isPresent(), is(false));
+        assertThat(gatewayAccountSelectDao.findById(3L).isPresent(), is(false));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class GatewayAccountDaoIT {
                 .withAnalyticsId(analyticsId2)
                 .insert(testContext.getJdbi());
 
-        List<GatewayAccount> gatewayAccounts = gatewayAccountDao.findAll();
+        List<GatewayAccount> gatewayAccounts = gatewayAccountSelectDao.findAll();
 
         assertThat(gatewayAccounts.size(), is(2));
         GatewayAccount first = gatewayAccounts.get(0);
@@ -178,7 +178,7 @@ public class GatewayAccountDaoIT {
           .withOrganisation(organisation)          
           .insert(testContext.getJdbi());
 
-        gatewayAccounts = gatewayAccountDao.find(
+        gatewayAccounts = gatewayAccountSelectDao.find(
           Arrays.asList(externalId)
         );
 
@@ -194,7 +194,7 @@ public class GatewayAccountDaoIT {
         assertThat(first.getAnalyticsId(),     is(analyticsId));
         assertThat(first.getType(),            is(TYPE));
 
-        gatewayAccounts = gatewayAccountDao.find(
+        gatewayAccounts = gatewayAccountSelectDao.find(
           Arrays.asList(externalId, externalId2)
         );
 
@@ -224,7 +224,7 @@ public class GatewayAccountDaoIT {
 
     @Test
     public void shouldReturnAnEmptyListIfNoGatewayAccountsExist() {
-        List<GatewayAccount> gatewayAccounts = gatewayAccountDao.findAll();
+        List<GatewayAccount> gatewayAccounts = gatewayAccountSelectDao.findAll();
         assertThat(gatewayAccounts.isEmpty(), is(true));
     }
 }
