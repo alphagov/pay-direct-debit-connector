@@ -10,9 +10,8 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import javax.net.ssl.SSLSocketFactory;
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountCommandDao;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -108,7 +107,9 @@ public class DirectDebitModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public GatewayAccountSelectDao provideGatewayAccountSelectDao() { return jdbi.onDemand(GatewayAccountSelectDao.class); }
+    public GatewayAccountDao provideGatewayAccountDao() {
+        return jdbi.onDemand(GatewayAccountDao.class);
+    }
 
     @Provides
     @Singleton
@@ -148,9 +149,7 @@ public class DirectDebitModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PaymentViewDao providePaymentViewDao() { return new PaymentViewDao(jdbi); }
-    
-    @Provides
-    @Singleton
-    public GatewayAccountCommandDao provideGatewayAccountCommandDao() {return new GatewayAccountCommandDao(jdbi); }
+    public PaymentViewDao providePaymentViewDao() {
+        return new PaymentViewDao(jdbi);
+    }
 }

@@ -6,18 +6,18 @@ import javax.inject.Inject;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 
 @Provider
 public class GatewayAccountParamConverterProvider implements ParamConverterProvider {
 
-    private GatewayAccountSelectDao gatewayAccountSelectDao;
+    private GatewayAccountDao gatewayAccountDao;
 
     @Inject
-    public GatewayAccountParamConverterProvider(GatewayAccountSelectDao gatewayAccountSelectDao) {
-        this.gatewayAccountSelectDao = gatewayAccountSelectDao;
+    public GatewayAccountParamConverterProvider(GatewayAccountDao gatewayAccountDao) {
+        this.gatewayAccountDao = gatewayAccountDao;
     }
 
     public GatewayAccountConverter createGatewayAccountConverter() {
@@ -27,7 +27,7 @@ public class GatewayAccountParamConverterProvider implements ParamConverterProvi
 
         @Override
         public GatewayAccount fromString(String externalAccountId) {
-            return gatewayAccountSelectDao
+            return gatewayAccountDao
                     .findByExternalId(externalAccountId)
                     .orElseThrow(() -> new GatewayAccountNotFoundException(externalAccountId));
         }

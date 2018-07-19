@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -66,7 +66,7 @@ public class TransactionServiceTest {
     @Mock
     private TokenService mockedTokenService;
     @Mock
-    private GatewayAccountSelectDao mockedGatewayAccountSelectDao;
+    private GatewayAccountDao mockedGatewayAccountDao;
     @Mock
     private DirectDebitConfig mockedDirectDebitConfig;
     @Mock
@@ -89,7 +89,7 @@ public class TransactionServiceTest {
     private TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
     @Before
     public void setUp() throws URISyntaxException {
-        service = new TransactionService(mockedTokenService, mockedGatewayAccountSelectDao, mockedDirectDebitConfig, mockedTransactionDao,
+        service = new TransactionService(mockedTokenService, mockedGatewayAccountDao, mockedDirectDebitConfig, mockedTransactionDao,
                 mockedDirectDebitEventService, mockedUserNotificationService, mockedCreatePaymentParser);
         when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
         when(mockedLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
@@ -128,7 +128,7 @@ public class TransactionServiceTest {
                 "description", "a description",
                 "reference", "a reference"
         );
-        when(mockedGatewayAccountSelectDao.findByExternalId(gatewayAccountFixture.getExternalId()))
+        when(mockedGatewayAccountDao.findByExternalId(gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of((gatewayAccountFixture.toEntity())));
         when(mockedCreatePaymentParser.parse(createTransactionRequest, mandateFixture.toEntity()))
                 .thenReturn(transactionFixture.toEntity());

@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -49,7 +49,7 @@ public class TransactionService {
 
     private static final Logger LOGGER = PayLoggerFactory.getLogger(TransactionService.class);
     private final TokenService tokenService;
-    private final GatewayAccountSelectDao gatewayAccountSelectDao;
+    private final GatewayAccountDao gatewayAccountDao;
     private final DirectDebitConfig directDebitConfig;
     private final TransactionDao transactionDao;
     private final DirectDebitEventService directDebitEventService;
@@ -58,14 +58,14 @@ public class TransactionService {
 
     @Inject
     public TransactionService(TokenService tokenService,
-                              GatewayAccountSelectDao gatewayAccountSelectDao,
+                              GatewayAccountDao gatewayAccountDao,
                               DirectDebitConfig directDebitConfig,
                               TransactionDao transactionDao,
                               DirectDebitEventService directDebitEventService,
                               UserNotificationService userNotificationService,
                               CreatePaymentParser createPaymentParser) {
         this.tokenService = tokenService;
-        this.gatewayAccountSelectDao = gatewayAccountSelectDao;
+        this.gatewayAccountDao = gatewayAccountDao;
         this.directDebitConfig = directDebitConfig;
         this.directDebitEventService = directDebitEventService;
         this.transactionDao = transactionDao;
@@ -81,7 +81,7 @@ public class TransactionService {
     }
 
     public Transaction createTransaction(Map<String, String> createTransaction, Mandate mandate, String accountExternalId) {
-        return gatewayAccountSelectDao.findByExternalId(accountExternalId)
+        return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     LOGGER.info("Creating transaction for mandate {}", mandate.getExternalId());
                     Transaction transaction = createPaymentParser

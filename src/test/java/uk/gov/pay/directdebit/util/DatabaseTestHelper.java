@@ -154,17 +154,6 @@ public class DatabaseTestHelper {
         );
     }
 
-    public Map<String, Object> getGatewayAccountByExternalId(String externalId) {
-        return jdbi.withHandle(handle ->
-                handle
-                        .createQuery("SELECT * from gateway_accounts t WHERE t.external_id = :externalId")
-                        .bind("externalId", externalId)
-                        .mapToMap()
-                        .findFirst()
-                        .get()
-        );
-    }
-
     public Map<String, Object> getGoCardlessCustomerById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
