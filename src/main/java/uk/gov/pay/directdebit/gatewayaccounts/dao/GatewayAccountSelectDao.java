@@ -26,11 +26,6 @@ public interface GatewayAccountSelectDao {
     @SqlQuery("SELECT * FROM gateway_accounts")
     List<GatewayAccount> findAll();
 
-    @SqlUpdate("INSERT INTO gateway_accounts(external_id, payment_provider, type, service_name, description, analytics_id) " +
-            "VALUES (:externalId, :paymentProvider, :type, :serviceName, :description, :analyticsId)")
-    @GetGeneratedKeys
-    Long insert(@BindBean GatewayAccount gatewayAccount);
-
     @SqlQuery("SELECT * FROM gateway_accounts WHERE external_id IN (<externalAccountIds>)")
     List<GatewayAccount> find(
       @BindList("externalAccountIds") List<String> externalAccountIds

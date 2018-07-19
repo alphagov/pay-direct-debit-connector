@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountCommandDao;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -13,10 +14,12 @@ import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GatewayAccountService {
 
+    private GatewayAccountCommandDao gatewayAccountCommandDao;
     private GatewayAccountSelectDao gatewayAccountSelectDao;
 
     private static final Splitter COMMA_SEPARATOR = Splitter.on(',').trimResults().omitEmptyStrings();
@@ -25,8 +28,11 @@ public class GatewayAccountService {
     private GatewayAccountParser gatewayAccountParser;
 
     @Inject
-    public GatewayAccountService(GatewayAccountSelectDao gatewayAccountSelectDao, GatewayAccountParser gatewayAccountParser) {
+    public GatewayAccountService(GatewayAccountSelectDao gatewayAccountSelectDao, 
+                                 GatewayAccountCommandDao gatewayAccountCommandDao,
+                                 GatewayAccountParser gatewayAccountParser) {
         this.gatewayAccountSelectDao = gatewayAccountSelectDao;
+        this.gatewayAccountCommandDao = gatewayAccountCommandDao;
         this.gatewayAccountParser = gatewayAccountParser;
     }
 
@@ -59,8 +65,8 @@ public class GatewayAccountService {
 
     public GatewayAccount create(Map<String, String> createGatewayAccountRequest) {
         GatewayAccount gatewayAccount = gatewayAccountParser.parse(createGatewayAccountRequest);
-        Long id = gatewayAccountSelectDao.insert(gatewayAccount);
-        gatewayAccount.setId(id);
+        Optional<Long> id = gatewayAccountCommandDao.insert(gatewayAccount);
+        gatewayAccount.setId(id.get());
         LOGGER.info("Created Gateway Account with id {}", id);
         return gatewayAccount;
     }

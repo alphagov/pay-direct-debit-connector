@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountCommandDao;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountSelectDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -55,6 +56,9 @@ public class GatewayAccountServiceTest {
             .withGatewayAccountFixture(gatewayAccountFixture);
     @Mock
     private GatewayAccountSelectDao mockedGatewayAccountSelectDao;
+    
+    @Mock
+    private GatewayAccountCommandDao mockedGatewayAccountCommandDao;
 
     @Mock
     private GatewayAccountParser mockedGatewayAccountParser;
@@ -74,7 +78,7 @@ public class GatewayAccountServiceTest {
 
     @Before
     public void setUp() throws URISyntaxException {
-        service = new GatewayAccountService(mockedGatewayAccountSelectDao, mockedGatewayAccountParser);
+        service = new GatewayAccountService(mockedGatewayAccountSelectDao, mockedGatewayAccountCommandDao, mockedGatewayAccountParser);
         when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
         when(mockedUriBuilder.path(anyString())).thenReturn(mockedUriBuilder);
         when(mockedUriBuilder.build(any())).thenReturn(new URI("http://www.example.com/"));
@@ -176,8 +180,8 @@ public class GatewayAccountServiceTest {
     public void shouldStoreAGatewayAccount() {
         GatewayAccount parsedGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().toEntity();
         when(mockedGatewayAccountParser.parse(createTransactionRequest)).thenReturn(parsedGatewayAccount);
+        when(mockedGatewayAccountCommandDao.insert(parsedGatewayAccount)).thenReturn(Optional.of(1L));
         service.create(createTransactionRequest);
-        verify(mockedGatewayAccountSelectDao).insert(parsedGatewayAccount);
+        verify(mockedGatewayAccountCommandDao).insert(parsedGatewayAccount);
     }
-
 }
