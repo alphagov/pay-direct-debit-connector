@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.gatewayaccounts.services;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,6 +13,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -178,5 +181,20 @@ public class GatewayAccountServiceTest {
         when(mockedGatewayAccountParser.parse(createTransactionRequest)).thenReturn(parsedGatewayAccount);
         service.create(createTransactionRequest);
         verify(mockedGatewayAccountDao).insert(parsedGatewayAccount);
+    }
+    
+    @Test
+    public void shouldUpdateAGatewayAccount() {
+        String externalAccountId = "an-external-id";
+        GatewayAccount gatewayAccount = GatewayAccountFixture
+                .aGatewayAccountFixture()
+                .withExternalId(externalAccountId)
+                .toEntity();
+        when(mockedGatewayAccountDao.findByExternalId(externalAccountId)).thenReturn(Optional.of(gatewayAccount));
+        Map<String, String> request = ImmutableMap
+                .of("access_token", "nlkdsjlkd79f2jjakssdalksd", "organisation", "12345678");
+        service.updateGatewayAccount(externalAccountId, request);
+        verify(mockedGatewayAccountDao).updateAccessTokenAndOrganisation(anyString(), 
+                any(PaymentProviderAccessToken.class), any(PaymentProviderOrganisationIdentifier.class));
     }
 }
