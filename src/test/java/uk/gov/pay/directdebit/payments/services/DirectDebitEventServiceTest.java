@@ -11,14 +11,17 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_FAILED;
@@ -65,6 +68,19 @@ public class DirectDebitEventServiceTest {
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }
 
+    @Test
+    public void registerTransactionCreatedEventFor_shouldInsertAnEventWhenTransactionIsCreated() {
+        service.registerTransactionCreatedEventFor(transactionFixture.toEntity());
+
+        verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
+        DirectDebitEvent directDebitEvent = prCaptor.getValue();
+        assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(directDebitEvent.getEvent(), is(SupportedEvent.CHARGE_CREATED));
+        assertThat(directDebitEvent.getEventType(), is(CHARGE));
+        assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
+    }
+    
     @Test
     public void registerDirectDebitReceivedEventFor_shouldInsertAnEventWhenDDDetailsAreReceived() {
         service.registerDirectDebitReceivedEventFor(mandateFixture.toEntity());
@@ -259,4 +275,16 @@ public class DirectDebitEventServiceTest {
         assertThat(directDebitEvent.getEventType(), is(MANDATE));
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }
+
+    @Test
+    public void findBy_shouldDelegateToDaoToFindEvent() {
+        Mandate mandate = MandateFixture
+                .aMandateFixture()
+                .withState(PENDING)
+                .toEntity();
+        service.findBy(mandate.getId(), MANDATE, MANDATE_PENDING);
+        verify(mockedDirectDebitEventDao)
+                .findByMandateIdAndEvent(mandate.getId(), DirectDebitEvent.Type.MANDATE, MANDATE_PENDING);
+    }
+
 }

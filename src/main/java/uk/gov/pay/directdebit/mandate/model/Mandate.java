@@ -12,7 +12,7 @@ public class Mandate {
     private final GatewayAccount gatewayAccount;
     private final String returnUrl;
     private final MandateType type;
-    private final String mandateReference;
+    private String mandateReference;
     private final String serviceReference;
     private final ZonedDateTime createdDate;
     private Payer payer;
@@ -87,6 +87,10 @@ public class Mandate {
 
     public MandateType getType() {
         return type;
+    }
+
+    public void setMandateReference(String mandateReference) {
+        this.mandateReference = mandateReference;
     }
 
     @Override

@@ -6,6 +6,7 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
+import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -25,15 +26,15 @@ public class ExpireService {
     private final long MIN_EXPIRY_AGE_MINUTES = 90l;
     private final PaymentState PAYMENT_EXPIRY_CUTOFF_STATUS = PaymentState.PENDING;
     private final MandateState MANDATE_EXPIRY_CUTOFF_STATUS = MandateState.PENDING;
-    private MandateService mandateService;
+    private MandateServiceFactory mandateServiceFactory;
 
 
     @Inject
     ExpireService(TransactionService transactionService, MandateStatesGraph mandateStatesGraph,
-                         PaymentStatesGraph paymentStatesGraph, MandateService mandateService) {
+                         PaymentStatesGraph paymentStatesGraph, MandateServiceFactory mandateServiceFactory) {
         this.transactionService = transactionService;
         this.paymentStatesGraph = paymentStatesGraph;
-        this.mandateService = mandateService;
+        this.mandateServiceFactory = mandateServiceFactory;
         this.mandateStatesGraph = mandateStatesGraph;
     }
 
@@ -57,7 +58,7 @@ public class ExpireService {
         LOGGER.info("Starting expire mandates process.");
         List<Mandate> mandatesToExpire = getMandatesForExpiration();
         for (Mandate mandate : mandatesToExpire) {
-            mandateService.mandateExpiredFor(mandate);
+            mandateServiceFactory.getMandateStateUpdateService().mandateExpiredFor(mandate);
             LOGGER.info("Expired mandate " + mandate.getId());
         }
         return mandatesToExpire.size();
@@ -66,6 +67,6 @@ public class ExpireService {
     private List<Mandate> getMandatesForExpiration() {
         Set<MandateState> states = mandateStatesGraph.getPriorStates(MANDATE_EXPIRY_CUTOFF_STATUS);
         ZonedDateTime cutOffTime = ZonedDateTime.now().minusMinutes(MIN_EXPIRY_AGE_MINUTES);
-        return mandateService.findAllMandatesBySetOfStatesAndMaxCreationTime(states, cutOffTime);
+        return mandateServiceFactory.getMandateQueryService().findAllMandatesBySetOfStatesAndMaxCreationTime(states, cutOffTime);
     }
 }

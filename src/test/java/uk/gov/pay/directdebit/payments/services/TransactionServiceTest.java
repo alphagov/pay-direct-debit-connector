@@ -1,6 +1,9 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableMap;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,6 +17,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
@@ -70,8 +74,6 @@ public class TransactionServiceTest {
     @Mock
     private DirectDebitConfig mockedDirectDebitConfig;
     @Mock
-    private CreatePaymentParser mockedCreatePaymentParser;
-    @Mock
     private DirectDebitEventService mockedDirectDebitEventService;
     @Mock
     private LinksConfig mockedLinksConfig;
@@ -90,7 +92,7 @@ public class TransactionServiceTest {
     @Before
     public void setUp() throws URISyntaxException {
         service = new TransactionService(mockedTokenService, mockedGatewayAccountDao, mockedDirectDebitConfig, mockedTransactionDao,
-                mockedDirectDebitEventService, mockedUserNotificationService, mockedCreatePaymentParser);
+                mockedDirectDebitEventService, mockedUserNotificationService);
         when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
         when(mockedLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
         when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
@@ -122,28 +124,33 @@ public class TransactionServiceTest {
     }
     
     @Test
-    public void shouldCreateATransactionFromAValidCreateTransactionRequest() {
+    public void shouldCreateAndStoreATransactionFromAValidCreateTransactionRequest() {
         Map<String, String> createTransactionRequest = ImmutableMap.of(
                 "amount", "2333",
                 "description", "a description",
                 "reference", "a reference"
         );
+        CollectPaymentRequest collectPaymentRequest = CollectPaymentRequest.of(createTransactionRequest);
+        
         when(mockedGatewayAccountDao.findByExternalId(gatewayAccountFixture.getExternalId()))
                 .thenReturn(Optional.of((gatewayAccountFixture.toEntity())));
-        when(mockedCreatePaymentParser.parse(createTransactionRequest, mandateFixture.toEntity()))
-                .thenReturn(transactionFixture.toEntity());
         Transaction transaction = service.createTransaction(
-                createTransactionRequest, 
+                collectPaymentRequest, 
                 mandateFixture.toEntity(), 
                 gatewayAccountFixture.getExternalId());
+        
         assertThat(transaction.getId(), is(notNullValue()));
-        assertThat(transaction.getExternalId(), is(transactionFixture.getExternalId()));
+        assertThat(transaction.getExternalId(), is(notNullValue()));
         assertThat(transaction.getMandate(), is(mandateFixture.toEntity()));
-        assertThat(transaction.getState(), is(transactionFixture.getState()));
-        assertThat(transaction.getAmount(), is(transactionFixture.getAmount()));
-        assertThat(transaction.getDescription(), is(transactionFixture.getDescription()));
-        assertThat(transaction.getReference(), is(transactionFixture.getReference()));
-        assertThat(transaction.getCreatedDate(), is(transactionFixture.getCreatedDate()));
+        assertThat(transaction.getState(), is(NEW));
+        assertThat(transaction.getAmount(), is(collectPaymentRequest.getAmount()));
+        assertThat(transaction.getDescription(), is(collectPaymentRequest.getDescription()));
+        assertThat(transaction.getReference(), is(collectPaymentRequest.getReference()));
+        assertThat(transaction.getCreatedDate(), ZonedDateTimeMatchers
+                .within(10, ChronoUnit.SECONDS, ZonedDateTime.now()));
+        
+        verify(mockedTransactionDao).insert(transaction);
+        verify(mockedDirectDebitEventService).registerTransactionCreatedEventFor(transaction);
     }
 
     @Test

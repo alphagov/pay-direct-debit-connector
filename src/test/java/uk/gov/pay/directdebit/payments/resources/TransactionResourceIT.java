@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -28,6 +29,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -139,6 +141,7 @@ public class TransactionResourceIT {
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
+                .withMandateType(MandateType.ON_DEMAND)
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
         String accountExternalId = testGatewayAccount.getExternalId();
@@ -202,6 +205,7 @@ public class TransactionResourceIT {
                 .withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withMandateType(MandateType.ON_DEMAND)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
@@ -263,6 +267,37 @@ public class TransactionResourceIT {
         assertThat(createdTransaction.get("amount"), is(AMOUNT));
     }
 
+    @Test
+    public void shouldNotCollectAPaymentFromOneOff() throws Exception {
+        PayerFixture payerFixture = PayerFixture.aPayerFixture();
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .withMandateType(MandateType.ONE_OFF)
+                .withPayerFixture(payerFixture)
+                .insert(testContext.getJdbi());
+        String accountExternalId = testGatewayAccount.getExternalId();
+        String expectedReference = "Test reference";
+        String expectedDescription = "Test description";
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put(JSON_AMOUNT_KEY, AMOUNT)
+                .put(JSON_REFERENCE_KEY, expectedReference)
+                .put(JSON_DESCRIPTION_KEY, expectedDescription)
+                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
+                .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId())
+                .build());
+
+        String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
+                .replace("{accountId}", accountExternalId);
+
+        givenSetup()
+                .body(postBody)
+                .post(requestPath)
+                .then()
+                .statusCode(Status.PRECONDITION_FAILED.getStatusCode())
+                .contentType(JSON);
+    }
+
+    
     @Test
     public void shouldRetrieveATransaction_fromPublicApiEndpoint() {
 
@@ -338,7 +373,7 @@ public class TransactionResourceIT {
 
     @Test
     public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
-        String accountId = testGatewayAccount.getId().toString();
+        String accountId = testGatewayAccount.getExternalId();
 
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, AMOUNT)
@@ -360,7 +395,7 @@ public class TransactionResourceIT {
 
     @Test
     public void shouldReturn400IfFieldsInvalidSize() throws JsonProcessingException {
-        String accountId = testGatewayAccount.getId().toString();
+        String accountId = testGatewayAccount.getExternalId();
 
         String postBody =  new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, AMOUNT)
@@ -383,8 +418,7 @@ public class TransactionResourceIT {
 
     @Test
     public void shouldReturn400IfFieldsInvalid() throws JsonProcessingException {
-        String accountId = testGatewayAccount.getId().toString();
-
+        String accountId = testGatewayAccount.getExternalId();
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, 10000001)
                 .put(JSON_REFERENCE_KEY, "reference")

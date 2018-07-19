@@ -11,7 +11,10 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
+import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
+import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
+import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
@@ -26,6 +29,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
@@ -37,26 +41,28 @@ public class ExpireServiceTest {
 
     private PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
     private MandateStatesGraph mandateStatesGraph = new MandateStatesGraph();
-    
     @Mock
-    private TransactionService transactionService;
-    
+    private MandateServiceFactory mockedMandateServiceFactory;
     @Mock
-    private MandateService mandateService;
-    
+    private TransactionService mockedTransactionService;
     @Mock
+    private MandateQueryService mockedMandateQueryService;
+    @Mock
+    private MandateStateUpdateService mockedMandateStateUpdateService;
     private ExpireService expireService;
     
     @Before
     public void setup() {
-        expireService = new ExpireService(transactionService, mandateStatesGraph, paymentStatesGraph, mandateService);
+        expireService = new ExpireService(mockedTransactionService, mandateStatesGraph, paymentStatesGraph, mockedMandateServiceFactory);
+        when(mockedMandateServiceFactory.getMandateQueryService()).thenReturn(mockedMandateQueryService);
+        when(mockedMandateServiceFactory.getMandateStateUpdateService()).thenReturn(mockedMandateStateUpdateService);
     }
     
     
     @Test
     public void expirePayments_shouldCallTransactionServiceWithPriorStatesToPending() {
         Transaction transaction = TransactionFixture.aTransactionFixture().withState(PaymentState.NEW).toEntity();
-        when(transactionService
+        when(mockedTransactionService
                 .findAllPaymentsBySetOfStatesAndCreationTime(eq(paymentStatesGraph.getPriorStates(PaymentState.PENDING)), any()))
                 .thenReturn(Collections.singletonList(transaction));
         
@@ -67,7 +73,7 @@ public class ExpireServiceTest {
     @Test
     public void expireMandates_shouldCallMandateServiceWithPriorStatesToPending() {
         Mandate mandate = MandateFixture.aMandateFixture().withState(MandateState.CREATED).toEntity();
-        when(mandateService
+        when(mockedMandateQueryService
                 .findAllMandatesBySetOfStatesAndMaxCreationTime(eq(mandateStatesGraph.getPriorStates(MandateState.PENDING)), any()))
                 .thenReturn(Collections.singletonList(mandate));
         int numberOfExpiredMandates = expireService.expireMandates();

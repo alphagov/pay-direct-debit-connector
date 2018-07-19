@@ -36,7 +36,6 @@ import uk.gov.pay.directdebit.events.resources.DirectDebitEventsResource;
 import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
-import uk.gov.pay.directdebit.mandate.resources.ConfirmMandateSetupResource;
 import uk.gov.pay.directdebit.mandate.resources.MandateResource;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payments.resources.PaymentViewResource;
@@ -97,7 +96,6 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(injector.getInstance(WebhookGoCardlessResource.class));
         environment.jersey().register(injector.getInstance(SecurityTokensResource.class));
         environment.jersey().register(injector.getInstance(PayerResource.class));
-        environment.jersey().register(injector.getInstance(ConfirmMandateSetupResource.class));
         environment.jersey().register(injector.getInstance(GatewayAccountResource.class));
         environment.jersey().register(injector.getInstance(TransactionResource.class));
         environment.jersey().register(injector.getInstance(PaymentViewResource.class));
