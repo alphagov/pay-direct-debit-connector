@@ -1,11 +1,10 @@
 package uk.gov.pay.directdebit.gatewayaccounts.dao;
 
-import java.util.List;
-
+import org.jdbi.v3.sqlobject.config.RegisterArgumentFactory;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
-import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -16,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RegisterRowMapper(GatewayAccountMapper.class)
+@RegisterArgumentFactory(PaymentProviderAccessTokenArgumentFactory.class)
+@RegisterArgumentFactory(PaymentProviderOrganisationIdentifierArgumentFactory.class)
 public interface GatewayAccountDao {
     @SqlQuery("SELECT * FROM gateway_accounts p WHERE p.id = :id")
     Optional<GatewayAccount> findById(@Bind("id") Long id);
@@ -26,8 +27,10 @@ public interface GatewayAccountDao {
     @SqlQuery("SELECT * FROM gateway_accounts")
     List<GatewayAccount> findAll();
 
-    @SqlUpdate("INSERT INTO gateway_accounts(external_id, payment_provider, type, service_name, description, analytics_id) " +
-            "VALUES (:externalId, :paymentProvider, :type, :serviceName, :description, :analyticsId)")
+    @SqlUpdate("INSERT INTO gateway_accounts(external_id, payment_provider, " +
+            "type, service_name, description, analytics_id, access_token, organisation) " +
+            "VALUES (:externalId, :paymentProvider, " +
+            ":type, :serviceName, :description, :analyticsId, :accessToken, :organisation)")
     @GetGeneratedKeys
     Long insert(@BindBean GatewayAccount gatewayAccount);
 

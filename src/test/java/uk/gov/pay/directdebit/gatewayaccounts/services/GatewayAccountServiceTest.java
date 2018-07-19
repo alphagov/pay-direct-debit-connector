@@ -179,5 +179,4 @@ public class GatewayAccountServiceTest {
         service.create(createTransactionRequest);
         verify(mockedGatewayAccountDao).insert(parsedGatewayAccount);
     }
-
 }

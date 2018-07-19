@@ -10,11 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
-import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
