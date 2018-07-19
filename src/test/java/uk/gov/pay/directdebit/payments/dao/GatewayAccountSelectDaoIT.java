@@ -57,19 +57,6 @@ public class GatewayAccountSelectDaoIT {
     }
 
     @Test
-    public void shouldInsertAGatewayAccount() {
-        Long id = gatewayAccountSelectDao.insert(testGatewayAccount.toEntity());
-        Map<String, Object> foundGatewayAccount = testContext.getDatabaseTestHelper().getGatewayAccountById(id);
-        assertThat(foundGatewayAccount.get("id"), is(id));
-        assertThat(foundGatewayAccount.get("external_id"), is(EXTERNAL_ID));
-        assertThat(foundGatewayAccount.get("payment_provider"), is(PAYMENT_PROVIDER.toString()));
-        assertThat(foundGatewayAccount.get("service_name"), is(SERVICE_NAME));
-        assertThat(foundGatewayAccount.get("analytics_id"), is(ANALYTICS_ID));
-        assertThat(foundGatewayAccount.get("type"), is(TYPE.toString()));
-        assertThat(foundGatewayAccount.get("description"), is(DESCRIPTION));
-    }
-
-    @Test
     public void shouldFindAGatewayAccountById() {
         testGatewayAccount.insert(testContext.getJdbi());
         GatewayAccount gatewayAccount = gatewayAccountSelectDao.findById(testGatewayAccount.getId()).get();
