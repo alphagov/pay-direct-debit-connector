@@ -1,7 +1,9 @@
 package uk.gov.pay.directdebit.gatewayaccounts.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
+import io.dropwizard.jersey.PATCH;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.api.CreateGatewayAccountValidator;
@@ -82,7 +84,18 @@ public class GatewayAccountResource {
         GatewayAccountResponse gatewayAccountResponse = GatewayAccountResponse.from(gatewayAccount).withSelfLink(uriInfo);
         return Response.created(gatewayAccountResponse.getSelfLink()).entity(gatewayAccountResponse).build();
     }
-
+    
+    @PATCH
+    @Path("/v1/api/accounts/{accountId}")
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    @Timed
+    
+    public Response updateGatewayAccount(@PathParam("accountId") String accountExternalId, JsonNode payload) {
+        GatewayAccountResponse gatewayAccountResponse = GatewayAccountResponse.from(gatewayAccountService.patch(accountExternalId, payload));
+        return Response.ok().entity(gatewayAccountResponse).build();
+    }
+    
     private Response getGatewayAccounts(String externalAccountIdsArg, UriInfo uriInfo) {
         return Response
                 .ok(ImmutableMap.of("accounts", gatewayAccountService.getAllGatewayAccounts(externalAccountIdsArg, uriInfo)))
