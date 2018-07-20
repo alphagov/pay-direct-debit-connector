@@ -326,21 +326,23 @@ public class GatewayAccountResourceIT {
                 .body(payload)
                 .patch(requestPath)
                 .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body(PAYMENT_PROVIDER_KEY, is(PaymentProvider.GOCARDLESS.toString()))
-                .body(TYPE_KEY, is(GatewayAccount.Type.TEST.toString()))
-                .body(SERVICE_NAME_KEY, is(serviceName4))
-                .body(EXTERNAL_ID_KEY, is(externalId4))
-                .body("payment_method", is("DIRECT_DEBIT"))
-                .body(DESCRIPTION_KEY, is(description4))
-                .body(ANALYTICS_ID_KEY, is(analyticsId4))
-                .body("containsKey('access_token')", is(false))
-                .body("containsKey('organisation')", is(false));
+                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
         DatabaseTestHelper databaseTestHelper = new DatabaseTestHelper(testContext.getJdbi());
         Map<String, Object> foundGatewayAccount = databaseTestHelper.getGatewayAccountById(testGatewayAccount4.getId());
         assertThat(foundGatewayAccount.get("access_token"), Matchers.is("abcde1234"));
         assertThat(foundGatewayAccount.get("organisation"), Matchers.is("1234abcde"));
+    }
+    
+    @Test
+    public void shouldFailWithBadRequest_whenNoPayload() {
+        String requestPath = GATEWAY_ACCOUNT_API_PATH.replace("{accountId}", "an-external_id");
+        givenSetup()
+                .when()
+                .accept(APPLICATION_JSON)
+                .body("")
+                .patch(requestPath)
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
     }
 
     private RequestSpecification givenSetup() {

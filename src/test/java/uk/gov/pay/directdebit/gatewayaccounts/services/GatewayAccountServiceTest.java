@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.gatewayaccounts.services;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
@@ -13,7 +12,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
-import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidPayloadException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
@@ -208,51 +206,8 @@ public class GatewayAccountServiceTest {
                         .put("value", "1234abcde")
                         .build();
 
-        JsonNode payload = objectMapper.valueToTree(Arrays.asList(accessTokenPayload, organisationPayload));
-
-        service.patch(externalAccountId, payload);
+        service.patch(externalAccountId, Arrays.asList(accessTokenPayload, organisationPayload));
         verify(mockedGatewayAccountDao).updateAccessTokenAndOrganisation(anyString(), 
                 any(PaymentProviderAccessToken.class), any(PaymentProviderOrganisationIdentifier.class));
-    }
-    
-    @Test
-    public void shouldThrowInvalidPayloadException_whenPayloadContainsThreeOperations() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ImmutableMap<String, String> map1 = ImmutableMap.<String, String>builder()
-                .put("op", "replace")
-                .put("path", "organisation")
-                .put("value", "1234abcde")
-                .build();
-        ImmutableMap<String, String> map2 = ImmutableMap.<String, String>builder()
-                .put("op", "replace")
-                .put("path", "access_token")
-                .put("value", "abcde1234")
-                .build();
-        ImmutableMap<String, String> map3 =
-                ImmutableMap.<String, String>builder()
-                        .put("op", "replace")
-                        .put("path", "organisation")
-                        .put("value", "1234abcde")
-                        .build();
-        JsonNode payload = objectMapper.valueToTree(Arrays.asList(map1, map2, map3));
-        
-        thrown.expect(InvalidPayloadException.class);
-        thrown.expectMessage("Patch payload contains wrong size of operations (3)");
-        thrown.reportMissingExceptionWithMessage("InvalidPayloadException expected");
-        service.patch("an-external-id", payload);
-    }
-
-    @Test
-    public void shouldThrowInvalidPayloadException_whenPayloadIsNotArray() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode payload = objectMapper.valueToTree(ImmutableMap.<String, String>builder()
-                .put("op", "replace")
-                .put("path", "organisation")
-                .put("value", "1234abcde")
-                .build());
-        thrown.expect(InvalidPayloadException.class);
-        thrown.expectMessage("Patch payload is not an array of operations");
-        thrown.reportMissingExceptionWithMessage("InvalidPayloadException expected");
-        service.patch("an-external-id", payload);
     }
 }

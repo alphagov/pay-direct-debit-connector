@@ -23,6 +23,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -86,14 +87,13 @@ public class GatewayAccountResource {
     }
     
     @PATCH
-    @Path("/v1/api/accounts/{accountId}")
+    @Path(GATEWAY_ACCOUNT_API_PATH)
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @Timed
-    
-    public Response updateGatewayAccount(@PathParam("accountId") String accountExternalId, JsonNode payload) {
-        GatewayAccountResponse gatewayAccountResponse = GatewayAccountResponse.from(gatewayAccountService.patch(accountExternalId, payload));
-        return Response.ok().entity(gatewayAccountResponse).build();
+    public Response updateGatewayAccount(@PathParam("accountId") String accountExternalId, List<Map<String, String>> request) {
+        gatewayAccountService.patch(accountExternalId, request);
+        return Response.noContent().build();
     }
     
     private Response getGatewayAccounts(String externalAccountIdsArg, UriInfo uriInfo) {
