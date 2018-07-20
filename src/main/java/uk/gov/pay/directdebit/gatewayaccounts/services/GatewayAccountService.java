@@ -4,9 +4,12 @@ import com.google.common.base.Splitter;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
+import uk.gov.pay.directdebit.gatewayaccounts.api.PatchGatewayAccountValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
@@ -23,6 +26,7 @@ public class GatewayAccountService {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GatewayAccountService.class);
 
     private GatewayAccountParser gatewayAccountParser;
+    private PatchGatewayAccountValidator validator = new PatchGatewayAccountValidator();
 
     @Inject
     public GatewayAccountService(GatewayAccountDao gatewayAccountDao, GatewayAccountParser gatewayAccountParser) {
@@ -63,5 +67,23 @@ public class GatewayAccountService {
         gatewayAccount.setId(id);
         LOGGER.info("Created Gateway Account with id {}", id);
         return gatewayAccount;
+    }
+    
+    public GatewayAccount patch(String externalId, List<Map<String, String>> request) {
+        validator.validatePatchRequest(externalId, request);
+        PaymentProviderAccessToken accessToken = null;
+        PaymentProviderOrganisationIdentifier organisation = null;
+        for (int i = 0; i < request.size(); i++) {
+            Map<String, String> operation = request.get(i);
+            if (operation.get("path").equals("access_token")) {
+                accessToken = PaymentProviderAccessToken.of(operation.get("value"));
+            } else {
+                organisation = PaymentProviderOrganisationIdentifier.of(operation.get("value"));
+            }
+        }
+        
+        gatewayAccountDao.updateAccessTokenAndOrganisation(externalId, accessToken, organisation);
+        
+        return this.getGatewayAccountForId(externalId);
     }
 }

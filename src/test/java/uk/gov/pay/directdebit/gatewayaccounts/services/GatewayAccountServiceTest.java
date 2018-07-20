@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.gatewayaccounts.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,6 +14,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -94,7 +98,7 @@ public class GatewayAccountServiceTest {
     }
 
     @Test
-    public void shouldThrowIfGatewayAccountDoesNotExist() {
+    public void shouldThrowGatewayAccountNotFoundExceptionIfGatewayAccountDoesNotExist() {
         String accountId = "10sadsadsadL";
         when(mockedGatewayAccountDao.findByExternalId(accountId)).thenReturn(Optional.empty());
         thrown.expect(GatewayAccountNotFoundException.class);
@@ -178,5 +182,32 @@ public class GatewayAccountServiceTest {
         when(mockedGatewayAccountParser.parse(createTransactionRequest)).thenReturn(parsedGatewayAccount);
         service.create(createTransactionRequest);
         verify(mockedGatewayAccountDao).insert(parsedGatewayAccount);
+    }
+    
+    @Test
+    public void shouldUpdateAGatewayAccount() {
+        String externalAccountId = "an-external-id";
+        GatewayAccount gatewayAccount = GatewayAccountFixture
+                .aGatewayAccountFixture()
+                .withExternalId(externalAccountId)
+                .toEntity();
+        when(mockedGatewayAccountDao.findByExternalId(externalAccountId)).thenReturn(Optional.of(gatewayAccount));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ImmutableMap<String, String> accessTokenPayload = ImmutableMap.<String, String>builder()
+                .put("op", "replace")
+                .put("path", "access_token")
+                .put("value", "abcde1234")
+                .build();
+        ImmutableMap<String, String> organisationPayload =
+                ImmutableMap.<String, String>builder()
+                        .put("op", "replace")
+                        .put("path", "organisation")
+                        .put("value", "1234abcde")
+                        .build();
+
+        service.patch(externalAccountId, Arrays.asList(accessTokenPayload, organisationPayload));
+        verify(mockedGatewayAccountDao).updateAccessTokenAndOrganisation(anyString(), 
+                any(PaymentProviderAccessToken.class), any(PaymentProviderOrganisationIdentifier.class));
     }
 }

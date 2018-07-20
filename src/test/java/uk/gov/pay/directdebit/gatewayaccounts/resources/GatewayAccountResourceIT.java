@@ -1,10 +1,12 @@
 package uk.gov.pay.directdebit.gatewayaccounts.resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,17 +18,21 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNTS_API_PATH;
 import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNTS_FRONTEND_PATH;
 import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNT_API_PATH;
@@ -282,6 +288,61 @@ public class GatewayAccountResourceIT {
                 .contentType(JSON)
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .body("message", is("Field(s) missing: [service_name]"));
+    }
+    
+    @Test
+    public void shouldUpdateAGatewayAccount_withAccessTokenAndOrganisation() {
+        PaymentProvider paymentProvider3 = PaymentProvider.GOCARDLESS;
+        String externalId4 = "DD_234099_BBBLABLA";
+        String serviceName4 = "wilhelmina";
+        String description4 = "can't type and is not hungover maybe";
+        String analyticsId4 = "DD_234099_BBBLABLA";
+        
+        GatewayAccountFixture testGatewayAccount4 = GatewayAccountFixture.aGatewayAccountFixture()
+                .withExternalId(externalId4)
+                .withServiceName(serviceName4)
+                .withDescription(description4)
+                .withPaymentProvider(paymentProvider3)
+                .withAnalyticsId(analyticsId4)
+                .withAccessToken(null)
+                .withOrganisation(null)
+                .insert(testContext.getJdbi());
+        ImmutableMap<String, String> accessTokenLoad = ImmutableMap.<String, String>builder()
+                .put("op", "replace")
+                .put("path", "access_token")
+                .put("value", "abcde1234")
+                .build();
+        ImmutableMap<String, String> organisationLoad = ImmutableMap.<String, String>builder()
+                .put("op", "replace")
+                .put("path", "organisation")
+                .put("value", "1234abcde")
+                .build();
+        JsonNode payload = new ObjectMapper().valueToTree(Arrays.asList(accessTokenLoad, organisationLoad));
+
+        String requestPath = GATEWAY_ACCOUNT_API_PATH.replace("{accountId}", testGatewayAccount4.getExternalId());
+        givenSetup()
+                .when()
+                .accept(APPLICATION_JSON)
+                .body(payload)
+                .patch(requestPath)
+                .then()
+                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
+        DatabaseTestHelper databaseTestHelper = new DatabaseTestHelper(testContext.getJdbi());
+        Map<String, Object> foundGatewayAccount = databaseTestHelper.getGatewayAccountById(testGatewayAccount4.getId());
+        assertThat(foundGatewayAccount.get("access_token"), Matchers.is("abcde1234"));
+        assertThat(foundGatewayAccount.get("organisation"), Matchers.is("1234abcde"));
+    }
+    
+    @Test
+    public void shouldFailWithBadRequest_whenNoPayload() {
+        String requestPath = GATEWAY_ACCOUNT_API_PATH.replace("{accountId}", "an-external_id");
+        givenSetup()
+                .when()
+                .accept(APPLICATION_JSON)
+                .body("")
+                .patch(requestPath)
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
     }
 
     private RequestSpecification givenSetup() {
