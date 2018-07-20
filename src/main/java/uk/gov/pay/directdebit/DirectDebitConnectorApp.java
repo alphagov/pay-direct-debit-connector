@@ -37,6 +37,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvid
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.mandate.resources.MandateResource;
+import uk.gov.pay.directdebit.oauth.OauthInitatorCommand;
+import uk.gov.pay.directdebit.oauth.OauthTokenExchangeCommand;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payments.resources.PaymentViewResource;
 import uk.gov.pay.directdebit.payments.resources.TransactionResource;
@@ -71,6 +73,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
             }
         });
         bootstrap.addCommand(new DependentResourcesWaitCommand());
+        bootstrap.addCommand(new OauthInitatorCommand());
+        bootstrap.addCommand(new OauthTokenExchangeCommand());
     }
 
     @Override
