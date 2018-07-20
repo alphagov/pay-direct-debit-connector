@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.dao;
 
+import org.jdbi.v3.sqlobject.config.RegisterArgumentFactory;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -8,6 +9,8 @@ import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.dao.mapper.TransactionMapper;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -18,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @RegisterRowMapper(TransactionMapper.class)
+@RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
 public interface TransactionDao {
 
     String joinQuery = "SELECT" +
@@ -73,7 +77,7 @@ public interface TransactionDao {
     List<Transaction> findAllByPaymentStateAndProvider(@Bind("state") PaymentState paymentState, @Bind("paymentProvider") PaymentProvider paymentProvider);
 
     @SqlQuery(joinQuery + " WHERE m.external_id = :mandateExternalId")
-    List<Transaction> findAllByMandateExternalId(@Bind("mandateExternalId") String mandateExternalId);
+    List<Transaction> findAllByMandateExternalId(@Bind("mandateExternalId") MandateExternalId mandateExternalId);
 
     @SqlUpdate("UPDATE transactions t SET state = :state WHERE t.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") PaymentState paymentState);

@@ -1,13 +1,14 @@
 package uk.gov.pay.directdebit.mandate.model;
 
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
 import java.time.ZonedDateTime;
 
 public class Mandate {
     private Long id;
-    private final String externalId;
+    private final MandateExternalId externalId;
     private MandateState state;
     private final GatewayAccount gatewayAccount;
     private final String returnUrl;
@@ -21,7 +22,7 @@ public class Mandate {
             Long id,
             GatewayAccount gatewayAccount,
             MandateType type,
-            String externalId,
+            MandateExternalId externalId,
             String mandateReference,
             String serviceReference,
             MandateState state,
@@ -65,7 +66,7 @@ public class Mandate {
         this.id = id;
     }
 
-    public String getExternalId() {
+    public MandateExternalId getExternalId() {
         return externalId;
     }
 

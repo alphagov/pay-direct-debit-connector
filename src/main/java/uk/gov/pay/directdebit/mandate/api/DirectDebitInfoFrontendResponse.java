@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -132,7 +133,7 @@ public class DirectDebitInfoFrontendResponse {
     @JsonProperty("internal_state")
     private MandateState internalState;
 
-    public DirectDebitInfoFrontendResponse(String paymentExternalId,
+    public DirectDebitInfoFrontendResponse(MandateExternalId paymentExternalId,
                                            Long gatewayAccountId,
                                            String gatewayAccountExternalId,
                                            MandateState internalState,
@@ -142,7 +143,7 @@ public class DirectDebitInfoFrontendResponse {
                                            String createdDate,
                                            Payer payer,
                                            Transaction transaction) {
-        this.mandateExternalId = paymentExternalId;
+        this.mandateExternalId = paymentExternalId.toString();
         this.internalState = internalState;
         this.state = internalState.toExternal();
         this.gatewayAccountId = gatewayAccountId;

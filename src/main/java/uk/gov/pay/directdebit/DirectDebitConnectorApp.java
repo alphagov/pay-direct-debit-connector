@@ -13,6 +13,7 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -30,7 +31,6 @@ import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
-import uk.gov.pay.directdebit.common.exception.PreconditionFailedException;
 import uk.gov.pay.directdebit.common.exception.PreconditionFailedExceptionMapper;
 import uk.gov.pay.directdebit.events.resources.DirectDebitEventsResource;
 import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
@@ -76,12 +76,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     @Override
     public void run(DirectDebitConfig configuration, Environment environment) throws Exception {
         DataSourceFactory dataSourceFactory = configuration.getDataSourceFactory();
-        final Jdbi jdbi = Jdbi.create(
-                dataSourceFactory.getUrl(),
-                dataSourceFactory.getUser(),
-                dataSourceFactory.getPassword()
-        );
-        jdbi.installPlugin(new SqlObjectPlugin());
+        final Jdbi jdbi = createJdbi(dataSourceFactory);
+        
 
         SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
         final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment, jdbi, socketFactory));
@@ -114,6 +110,17 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         initialiseMetrics(configuration, environment);
     }
 
+    private Jdbi createJdbi(DataSourceFactory dataSourceFactory) {
+        final Jdbi jdbi = Jdbi.create(
+                dataSourceFactory.getUrl(),
+                dataSourceFactory.getUser(),
+                dataSourceFactory.getPassword()
+        );
+        jdbi.installPlugin(new SqlObjectPlugin());
+        
+        return jdbi;
+    }
+    
     @Inject
     private void setupSSL(DirectDebitConfig configuration, SSLSocketFactory sslSocketFactory) {
         HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);

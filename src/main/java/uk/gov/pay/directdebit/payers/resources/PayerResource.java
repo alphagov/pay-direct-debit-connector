@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.util.URIBuilder;
 import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.api.CreatePayerResponse;
 import uk.gov.pay.directdebit.payers.api.CreatePayerValidator;
@@ -65,8 +66,8 @@ public class PayerResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response createPayer(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("mandateExternalId") String mandateExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
-        createPayerValidator.validate(mandateExternalId, createPayerRequest);
+    public Response createPayer(@PathParam("accountId") GatewayAccount gatewayAccount, @PathParam("mandateExternalId") MandateExternalId mandateExternalId, Map<String, String> createPayerRequest, @Context UriInfo uriInfo) {
+        createPayerValidator.validate(mandateExternalId.toString(), createPayerRequest);
 
         LOGGER.info("Received create payer request for mandate with id: {}", mandateExternalId);
 
@@ -76,7 +77,7 @@ public class PayerResource {
 
         URI newPayerLocation = URIBuilder.selfUriFor(uriInfo,
                 "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers/{payerExternalId}",
-                gatewayAccount.getExternalId(), mandateExternalId, createPayerResponse.getPayerExternalId());
+                gatewayAccount.getExternalId(), mandateExternalId.toString(), createPayerResponse.getPayerExternalId());
         return Response.created(newPayerLocation).entity(createPayerResponse).build();
     }
 
@@ -87,7 +88,7 @@ public class PayerResource {
     @Timed
     public Response validateBankAccount(
             @PathParam("accountId") GatewayAccount gatewayAccount,
-            @PathParam("mandateExternalId") String mandateExternalId,
+            @PathParam("mandateExternalId") MandateExternalId mandateExternalId,
             Map<String, String> bankAccountDetails) {
         bankAccountDetailsValidator.validate(bankAccountDetails);
         LOGGER.info("Validating bank account details for mandate with id: {}", mandateExternalId);

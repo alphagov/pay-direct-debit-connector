@@ -7,6 +7,7 @@ import com.gocardless.resources.Payment;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
@@ -29,14 +30,14 @@ public class GoCardlessClientFacade {
         this.goCardlessClientWrapper = goCardlessClientWrapper;
     }
 
-    public GoCardlessCustomer createCustomer(String mandateExternalId, Payer payer) {
+    public GoCardlessCustomer createCustomer(MandateExternalId mandateExternalId, Payer payer) {
         Customer customer = goCardlessClientWrapper.createCustomer(mandateExternalId, payer);
         return new GoCardlessCustomer(
                 payer.getId(),
                 customer.getId());
     }
 
-    public GoCardlessCustomer createCustomerBankAccount(String mandateExternalId, GoCardlessCustomer customer,
+    public GoCardlessCustomer createCustomerBankAccount(MandateExternalId mandateExternalId, GoCardlessCustomer customer,
                                                         String accountHolderName, SortCode sortCode, AccountNumber accountNumber) {
         CustomerBankAccount gcCustomerBankAccount = goCardlessClientWrapper.createCustomerBankAccount(mandateExternalId, customer,
                 accountHolderName, sortCode, accountNumber);

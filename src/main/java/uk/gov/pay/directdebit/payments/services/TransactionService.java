@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.CollectRequest;
@@ -151,7 +152,7 @@ public class TransactionService {
     }
 
     // todo we might want to split this service in query / state update like mandate
-    public List<Transaction> findTransactionsForMandate(String mandateExternalId) {
+    public List<Transaction> findTransactionsForMandate(MandateExternalId mandateExternalId) {
         return transactionDao.findAllByMandateExternalId(mandateExternalId);
     }
 

@@ -12,6 +12,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
@@ -43,7 +44,7 @@ import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFix
 public abstract class GoCardlessServiceTest {
     static final String CUSTOMER_ID = "CU328471";
     static final String BANK_ACCOUNT_ID = "BA34983496";
-    static final String MANDATE_ID = "sdkfhsdkjfhjdks";
+    static final MandateExternalId MANDATE_ID = MandateExternalId.of("sdkfhsdkjfhjdks");
     static final String TRANSACTION_ID = "sdkfhsd2jfhjdks";
     static final SortCode SORT_CODE = SortCode.of("123456");
     static final AccountNumber ACCOUNT_NUMBER = AccountNumber.of("12345678");

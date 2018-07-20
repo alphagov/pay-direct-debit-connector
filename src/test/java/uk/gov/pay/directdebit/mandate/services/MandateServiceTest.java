@@ -20,6 +20,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
@@ -84,6 +85,7 @@ public class MandateServiceTest {
     private UriBuilder mockedUriBuilder;
 
     private MandateService service;
+    private static final MandateExternalId MANDATE_EXTERNAL_ID = MandateExternalId.of("test-mandate-ext-id");
 
     @Before
     public void setUp() throws URISyntaxException {
@@ -96,7 +98,7 @@ public class MandateServiceTest {
         when(mockedUriBuilder.build(any())).thenReturn(new URI("aaa"));
         when(mockedLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
     }
-    
+
     @Test
     public void findMandateForToken_shouldUpdateTransactionStateAndRegisterEventWhenExchangingTokens() {
         String token = "token";
@@ -153,8 +155,8 @@ public class MandateServiceTest {
                 .aTransactionFixture()
                 .withMandateFixture(mandateFixture);
         Mandate mandate = mandateFixture.toEntity();
-        when(mockedTransactionService.findTransactionForExternalId(mandateFixture.getExternalId())).thenReturn(transactionFixture.toEntity());
-        DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateWithTransactionResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId());
+        when(mockedTransactionService.findTransactionForExternalId(mandateFixture.getExternalId().toString())).thenReturn(transactionFixture.toEntity());
+        DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateWithTransactionResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId().toString());
         assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
         assertThat(mandateResponseForFrontend.getMandateType(), is(mandate.getType().toString()));
         assertThat(mandateResponseForFrontend.getGatewayAccountExternalId(), is(mandate.getGatewayAccount().getExternalId()));
@@ -172,7 +174,6 @@ public class MandateServiceTest {
         assertThat(mandateResponseForFrontend.getTransaction().getState(), is(transactionFixture.getState().toExternal()));
         assertThat(mandateResponseForFrontend.getTransaction().getReference(), is(transactionFixture.getReference()));
     }
-    
 
     @Test
     public void shouldCreateAMandateForSandbox_withCustomGeneratedReference() {

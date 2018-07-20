@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -56,7 +57,7 @@ public class PayerResourceIT {
         createGatewayAccountWithTransactionAndRequestPath(paymentProvider);
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
-                .replace("{mandateExternalId}", testMandate.getExternalId());
+                .replace("{mandateExternalId}", testMandate.getExternalId().toString());
         String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .put(SORT_CODE_KEY, payerFixture.getSortCode())
@@ -90,10 +91,10 @@ public class PayerResourceIT {
         createPayerFor(GOCARDLESS);
     }
 
-    private String expectedPayerRequestLocationFor(String mandateExternalId, String payerExternalId) {
+    private String expectedPayerRequestLocationFor(MandateExternalId mandateExternalId, String payerExternalId) {
         return "http://localhost:" + testContext.getPort() + "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers/{payerExternalId}"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
-                .replace("{mandateExternalId}", mandateExternalId)
+                .replace("{mandateExternalId}", mandateExternalId.toString())
                 .replace("{payerExternalId}", payerExternalId);
     }
 
@@ -102,7 +103,7 @@ public class PayerResourceIT {
         createGatewayAccountWithTransactionAndRequestPath(SANDBOX);
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
-                .replace("{mandateExternalId}", testMandate.getExternalId());
+                .replace("{mandateExternalId}", testMandate.getExternalId().toString());
         String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(SORT_CODE_KEY, payerFixture.getSortCode())
                 .put(NAME_KEY, payerFixture.getName())
@@ -123,7 +124,7 @@ public class PayerResourceIT {
         createGatewayAccountWithTransactionAndRequestPath(SANDBOX);
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/payers/bank-account/validate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
-                .replace("{mandateExternalId}", testMandate.getExternalId());
+                .replace("{mandateExternalId}", testMandate.getExternalId().toString());
         String putBody = OBJECT_MAPPER.writeValueAsString(ImmutableMap.builder()
                 .put(ACCOUNT_NUMBER_KEY, payerFixture.getAccountNumber())
                 .build());
