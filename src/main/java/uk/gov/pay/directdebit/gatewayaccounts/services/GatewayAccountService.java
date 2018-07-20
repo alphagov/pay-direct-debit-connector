@@ -4,12 +4,9 @@ import com.google.common.base.Splitter;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
-import uk.gov.pay.directdebit.gatewayaccounts.api.UpdateGatewayAccountValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
@@ -25,7 +22,6 @@ public class GatewayAccountService {
     private static final Splitter COMMA_SEPARATOR = Splitter.on(',').trimResults().omitEmptyStrings();
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GatewayAccountService.class);
 
-    private UpdateGatewayAccountValidator validator = new UpdateGatewayAccountValidator();
     private GatewayAccountParser gatewayAccountParser;
 
     @Inject
@@ -67,13 +63,5 @@ public class GatewayAccountService {
         gatewayAccount.setId(id);
         LOGGER.info("Created Gateway Account with id {}", id);
         return gatewayAccount;
-    }
-    
-    public GatewayAccount updateGatewayAccount(String accountExternalId, Map<String, String> request) {
-        validator.validate(accountExternalId, request);
-        PaymentProviderAccessToken accessToken = PaymentProviderAccessToken.of(request.get("access_token"));
-        PaymentProviderOrganisationIdentifier organisation = PaymentProviderOrganisationIdentifier.of(request.get("organisation"));
-        gatewayAccountDao.updateAccessTokenAndOrganisation(accountExternalId, accessToken, organisation);
-        return this.getGatewayAccountForId(accountExternalId);
     }
 }

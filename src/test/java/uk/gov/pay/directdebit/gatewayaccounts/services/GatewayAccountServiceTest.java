@@ -182,19 +182,4 @@ public class GatewayAccountServiceTest {
         service.create(createTransactionRequest);
         verify(mockedGatewayAccountDao).insert(parsedGatewayAccount);
     }
-    
-    @Test
-    public void shouldUpdateAGatewayAccount() {
-        String externalAccountId = "an-external-id";
-        GatewayAccount gatewayAccount = GatewayAccountFixture
-                .aGatewayAccountFixture()
-                .withExternalId(externalAccountId)
-                .toEntity();
-        when(mockedGatewayAccountDao.findByExternalId(externalAccountId)).thenReturn(Optional.of(gatewayAccount));
-        Map<String, String> request = ImmutableMap
-                .of("access_token", "nlkdsjlkd79f2jjakssdalksd", "organisation", "12345678");
-        service.updateGatewayAccount(externalAccountId, request);
-        verify(mockedGatewayAccountDao).updateAccessTokenAndOrganisation(anyString(), 
-                any(PaymentProviderAccessToken.class), any(PaymentProviderOrganisationIdentifier.class));
-    }
 }
