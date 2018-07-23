@@ -30,7 +30,7 @@ public class GoCardlessWebhookParser {
             List<GoCardlessEvent> events = new ArrayList<>();
             JsonNode webhookJson = objectMapper.readTree(webhookPayload);
             JsonNode eventsPayload = webhookJson.get("events");
-            for (JsonNode eventNode: eventsPayload) {
+            for (JsonNode eventNode : eventsPayload) {
                 String resourceType = eventNode.get("resource_type").asText();
                 GoCardlessResourceType handledGoCardlessResourceType = GoCardlessResourceType.fromString(resourceType);
                 GoCardlessEvent event = new GoCardlessEvent(
@@ -39,7 +39,7 @@ public class GoCardlessWebhookParser {
                         handledGoCardlessResourceType,
                         eventNode.toString(),
                         ZonedDateTime.parse(eventNode.get("created_at").asText()),
-                        PaymentProviderOrganisationIdentifier.of(eventNode.get("links").get("organisation").asText())
+                        getOrganisationField(eventNode)
                 );
                 extractResourceIdFrom(eventNode, handledGoCardlessResourceType)
                         .ifPresent(event::setResourceId);
@@ -52,6 +52,17 @@ public class GoCardlessWebhookParser {
             return events;
         } catch (Exception exc) {
             throw new WebhookParserException("Failed to parse webhooks, body: " + webhookPayload);
+        }
+    }
+
+    private PaymentProviderOrganisationIdentifier getOrganisationField(JsonNode eventNode) {
+        /* todo: remove the check for missing node after going live
+        Now is used for backward compatibility as when live we will get the organisation in the payload
+        */
+        if (eventNode.get("links").has("organisation")) {
+            return PaymentProviderOrganisationIdentifier.of(eventNode.get("links").get("organisation").asText());
+        } else {
+            return null;
         }
     }
 
