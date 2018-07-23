@@ -228,7 +228,7 @@ public class TransactionResourceIT {
 
         String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
                 .replace("{accountId}", accountExternalId);
-        stubCreatePayment(AMOUNT, goCardlessMandate.getGoCardlessMandateId(), null);
+        stubCreatePayment(gatewayAccountFixture.getAccessToken().toString(), AMOUNT, goCardlessMandate.getGoCardlessMandateId(), null);
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
         String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
                 "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +

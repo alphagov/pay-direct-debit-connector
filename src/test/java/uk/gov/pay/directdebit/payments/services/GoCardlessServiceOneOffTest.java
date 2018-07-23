@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import java.time.LocalDate;
-import org.junit.Assert;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,8 +13,7 @@ import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessService;
 import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -27,7 +25,8 @@ public class GoCardlessServiceOneOffTest extends GoCardlessServiceTest {
     @Before
     public void setUp() {
         mandateFixture.withMandateType(MandateType.ONE_OFF);
-        service = new GoCardlessService(mockedGoCardlessClientFacade, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao);
+        service = new GoCardlessService(mockedGoCardlessClientFactory, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao);
+        when(mockedGoCardlessClientFactory.getClientFor(Optional.of(gatewayAccountFixture.getAccessToken()))).thenReturn(mockedGoCardlessClientFacade);
         when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity())).thenReturn(goCardlessCustomer);
         when(mockedGoCardlessClientFacade.createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE, ACCOUNT_NUMBER)).thenReturn(goCardlessCustomer);
     }

@@ -25,6 +25,7 @@ import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.clients.GoCardlessClientFacade;
+import uk.gov.pay.directdebit.payments.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
@@ -63,7 +64,8 @@ public abstract class GoCardlessServiceTest {
     protected GoCardlessPaymentDao mockedGoCardlessPaymentDao;
     @Mock
     protected MandateService mockedMandateService;
-
+    @Mock
+    protected GoCardlessClientFactory mockedGoCardlessClientFactory;
     GoCardlessService service;
 
     GatewayAccountFixture gatewayAccountFixture =  GatewayAccountFixture
