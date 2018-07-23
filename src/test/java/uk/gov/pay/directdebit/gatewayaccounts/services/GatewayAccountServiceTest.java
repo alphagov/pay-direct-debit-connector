@@ -193,7 +193,6 @@ public class GatewayAccountServiceTest {
                 .toEntity();
         when(mockedGatewayAccountDao.findByExternalId(externalAccountId)).thenReturn(Optional.of(gatewayAccount));
 
-        ObjectMapper objectMapper = new ObjectMapper();
         ImmutableMap<String, String> accessTokenPayload = ImmutableMap.<String, String>builder()
                 .put("op", "replace")
                 .put("path", "access_token")
@@ -207,7 +206,7 @@ public class GatewayAccountServiceTest {
                         .build();
 
         service.patch(externalAccountId, Arrays.asList(accessTokenPayload, organisationPayload));
-        verify(mockedGatewayAccountDao).updateAccessTokenAndOrganisation(anyString(), 
-                any(PaymentProviderAccessToken.class), any(PaymentProviderOrganisationIdentifier.class));
+        verify(mockedGatewayAccountDao).updateAccessTokenAndOrganisation(externalAccountId,
+                PaymentProviderAccessToken.of("abcde1234"), PaymentProviderOrganisationIdentifier.of("1234abcde"));
     }
 }
