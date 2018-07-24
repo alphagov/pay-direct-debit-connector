@@ -40,10 +40,6 @@ pipeline {
         failure {
           postMetric("directdebit-connector.maven-build.failure", 1)
         }
-        always {
-          junit 'target/surefire-reports/*.xml'
-          junit 'target/failsafe-reports/*.xml'
-        }
       }
     }
     stage('Maven Build Without Tests') {
@@ -53,11 +49,6 @@ pipeline {
       steps {
         runProviderContractTests()
         sh 'mvn -Dmaven.test.skip=true clean package'
-      }
-      post {
-        always {
-          junit 'target/surefire-reports/*.xml'
-        }
       }
     }
     stage('Docker Build') {
