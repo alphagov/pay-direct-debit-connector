@@ -28,12 +28,12 @@ public class GoCardlessClientFactory {
         //backward compatibility for now, will use the token in the config if it's not there
         PaymentProviderAccessToken accessToken = maybeAccessToken.orElse(PaymentProviderAccessToken.of(configuration.getGoCardless().getAccessToken()));
         return clients.computeIfAbsent(accessToken, token -> {
-            GoCardlessClientWrapper clientWrapper = new GoCardlessClientWrapper(createGoCardlessClient(configuration, sslSocketFactory, token));
+            GoCardlessClientWrapper clientWrapper = new GoCardlessClientWrapper(createGoCardlessClient(token));
             return new GoCardlessClientFacade(clientWrapper);
         });
     }
 
-    private GoCardlessClient createGoCardlessClient(DirectDebitConfig configuration, SSLSocketFactory sslSocketFactory, PaymentProviderAccessToken accessToken) {
+    private GoCardlessClient createGoCardlessClient(PaymentProviderAccessToken accessToken) {
         GoCardlessFactory goCardlessFactory = configuration.getGoCardless();
         GoCardlessClient.Builder builder = GoCardlessClient.newBuilder(accessToken.toString());
 
