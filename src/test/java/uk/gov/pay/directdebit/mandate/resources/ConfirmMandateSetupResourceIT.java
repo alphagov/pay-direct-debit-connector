@@ -198,10 +198,10 @@ public class ConfirmMandateSetupResourceIT {
                 withCustomerId(customerId)
                 .withCustomerBankAccountId(customerBankAccountId)
                 .withPayerId(payerFixture.getId());
-        stubCreateCustomer(mandateFixture.getExternalId().toString(), payerFixture, customerId);
-        stubCreateCustomerBankAccount(mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
-        stubCreateMandate(mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
-        stubCreatePayment(transactionFixture.getAmount(), "MD123", transactionFixture.getExternalId());
+        stubCreateCustomer(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId);
+        stubCreateCustomerBankAccount(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
+        stubCreateMandate(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
+        stubCreatePayment(gatewayAccountFixture.getAccessToken().toString(), transactionFixture.getAmount(), "MD123", transactionFixture.getExternalId());
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
 
@@ -263,9 +263,9 @@ public class ConfirmMandateSetupResourceIT {
                 withCustomerId(customerId)
                 .withCustomerBankAccountId(customerBankAccountId)
                 .withPayerId(payerFixture.getId());
-        stubCreateCustomer(mandateFixture.getExternalId().toString(), payerFixture, customerId);
-        stubCreateCustomerBankAccount(mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
-        stubCreateMandate(mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
+        stubCreateCustomer(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId);
+        stubCreateCustomerBankAccount(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
+        stubCreateMandate(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
         // language=JSON

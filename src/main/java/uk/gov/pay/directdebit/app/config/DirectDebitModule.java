@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import javax.net.ssl.SSLSocketFactory;
 import org.jdbi.v3.core.Jdbi;
+import uk.gov.pay.directdebit.payments.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
@@ -47,25 +48,12 @@ public class DirectDebitModule extends AbstractModule {
         bind(Environment.class).toInstance(environment);
     }
 
-    private GoCardlessClient createGoCardlessClient() {
-        GoCardlessFactory goCardlessFactory = configuration.getGoCardless();
-        GoCardlessClient.Builder builder = GoCardlessClient.newBuilder(
-                goCardlessFactory.getAccessToken());
 
-        if (goCardlessFactory.isCallingStubs()) {
-            return builder.withBaseUrl(goCardlessFactory.getClientUrl())
-                    .withSslSocketFactory(sslSocketFactory)
-                    .build();
-        }
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(configuration.getProxyConfig().getHost(), configuration.getProxyConfig().getPort()));
-        return builder.withEnvironment(goCardlessFactory.getEnvironment())
-                .withProxy(proxy).build();
-    }
 
     @Provides
     @Singleton
-    public GoCardlessClientWrapper provideGoCardlessClientWrapper()  {
-        return new GoCardlessClientWrapper(createGoCardlessClient());
+    public GoCardlessClientFactory provideGoCardlessClientFactory()  {
+        return new GoCardlessClientFactory(configuration, sslSocketFactory);
     }
 
     @Provides

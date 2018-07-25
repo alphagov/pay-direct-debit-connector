@@ -97,6 +97,10 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
         return analyticsId;
     }
 
+    public PaymentProviderAccessToken getAccessToken() {
+        return accessToken;
+    }
+
     public PaymentProviderOrganisationIdentifier getOrganisation() { return organisation; }
 
     @Override
