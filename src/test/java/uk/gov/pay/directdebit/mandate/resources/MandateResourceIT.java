@@ -533,7 +533,8 @@ public class MandateResourceIT {
     @Test
     public void confirm_shouldCreateACustomerBankAccountMandateAndUpdateCharge_ForGoCardless_ifMandateIsOneOff() {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
-                .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
+                .withPaymentProvider(GOCARDLESS)
+                .insert(testContext.getJdbi());
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withMandateType(MandateType.ONE_OFF)
                 .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
@@ -566,9 +567,9 @@ public class MandateResourceIT {
                 "  \"template\": \"ONE_OFF_PAYMENT_CONFIRMED\",\n" +
                 "  \"personalisation\": {\n" +
                 "    \"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\",\n" +
-                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
+                "    \"mandate reference\": \"REF-123\",\n" +
                 "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
-                "    \"collection date\": \"2014-05-21\",\n" +
+                "    \"collection date\": \"21/05/2014\",\n" +
                 "    \"statement name\": \"THE-CAKE-IS-A-LIE\",\n" +
                 "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
                 "  }\n" +

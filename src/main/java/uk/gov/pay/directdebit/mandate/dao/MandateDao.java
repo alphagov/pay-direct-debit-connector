@@ -90,7 +90,7 @@ public interface MandateDao {
     Optional<Mandate> findByExternalId(@Bind("mandateExternalId") MandateExternalId mandateExternalId);
 
     @SqlQuery(query + "WHERE m.state IN (<states>) AND m.created_date < :maxDateTime")
-    List<Mandate> findAllMandatesBySetOfStatesAndMaxCreationTime(@BindList("states") Set<MandateState> states, @Bind("maxDateTime")ZonedDateTime maxDateTime);
+    List<Mandate> findAllMandatesBySetOfStatesAndMaxCreationTime(@BindList("states") Set<MandateState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
     
     @SqlUpdate("UPDATE mandates m SET state = :state WHERE m.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
