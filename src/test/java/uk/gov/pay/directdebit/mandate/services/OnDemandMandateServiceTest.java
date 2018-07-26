@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.LocalDate;
-import javax.ws.rs.core.UriInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,9 +22,10 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.SandboxService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import javax.ws.rs.core.UriInfo;
+import java.time.LocalDate;
+
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OnDemandMandateServiceTest {
@@ -78,7 +77,7 @@ public class OnDemandMandateServiceTest {
         when(mockedSandboxService.confirmOnDemandMandate(mandate, bankAccountDetails)).thenReturn(mandate);
         service.confirm(gatewayAccountFixture.toEntity(), mandate, mandateConfirmationRequest);
 
-        verify(mockedMandateStateUpdateService).confirmedDirectDebitDetailsFor(mandate);
+        verify(mockedMandateStateUpdateService).confirmedOnDemandDirectDebitDetailsFor(mandate);
     }
     
     @Test

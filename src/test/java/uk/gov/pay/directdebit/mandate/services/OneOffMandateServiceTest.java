@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +21,8 @@ import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.SandboxService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
+
+import java.time.LocalDate;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -86,7 +87,7 @@ public class OneOffMandateServiceTest {
                 .thenReturn(oneOffConfirmationDetails);
         service.confirm(gatewayAccountFixture.toEntity(), mandate, mandateConfirmationRequest);
 
-        verify(mockedMandateStateUpdateService).confirmedDirectDebitDetailsFor(mandate);
+        verify(mockedMandateStateUpdateService).confirmedOneOffDirectDebitDetailsFor(mandate);
         verify(mockedTransactionService)
                 .oneOffPaymentSubmittedToProviderFor(transaction, oneOffConfirmationDetails.getChargeDate());
     }
