@@ -77,6 +77,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
         );
         GoCardlessMandate goCardlessMandate = createMandate(mandate, goCardlessCustomerWithBankAccount);
         mandate.setMandateReference(goCardlessMandate.getGoCardlessReference());
+        transaction.setMandate(mandate);
         GoCardlessPayment goCardlessPayment = createPayment(transaction, goCardlessMandate);
 
         persist(goCardlessCustomer);
