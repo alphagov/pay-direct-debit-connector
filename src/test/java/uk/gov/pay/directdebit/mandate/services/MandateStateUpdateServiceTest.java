@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.mandate.services;
 
-import java.time.ZonedDateTime;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,16 +16,12 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 
+import java.time.ZonedDateTime;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
+import static org.mockito.Mockito.*;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MandateStateUpdateServiceTest {
@@ -39,14 +34,16 @@ public class MandateStateUpdateServiceTest {
     @Mock
     private UserNotificationService mockedUserNotificationService;
     private MandateStateUpdateService service;
-    private Mandate mandate = MandateFixture
+    private Mandate onDemandMandate = MandateFixture
             .aMandateFixture()
             .withState(AWAITING_DIRECT_DEBIT_DETAILS)
             .toEntity();
+
     @Before
     public void setUp() {
         service = new MandateStateUpdateService(mockedMandateDao, mockedDirectDebitEventService, mockedUserNotificationService);
     }
+
     @Test
     public void shouldUpdateMandateStateRegisterEventAndSendEmail_whenMandateFails() {
         Mandate mandate = MandateFixture
@@ -84,27 +81,27 @@ public class MandateStateUpdateServiceTest {
     @Test
     public void payerCreatedFor_shouldRegisterAPayerCreatedEvent() {
 
-        service.payerCreatedFor(mandate);
+        service.payerCreatedFor(onDemandMandate);
 
-        verify(mockedDirectDebitEventService).registerPayerCreatedEventFor(mandate);
+        verify(mockedDirectDebitEventService).registerPayerCreatedEventFor(onDemandMandate);
         verifyZeroInteractions(mockedMandateDao);
-        assertThat(mandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
+        assertThat(onDemandMandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
     public void payerEditedFor_shouldRegisterAPayerEditedEvent() {
-        service.payerEditedFor(mandate);
+        service.payerEditedFor(onDemandMandate);
 
-        verify(mockedDirectDebitEventService).registerPayerEditedEventFor(mandate);
+        verify(mockedDirectDebitEventService).registerPayerEditedEventFor(onDemandMandate);
         verifyZeroInteractions(mockedMandateDao);
-        assertThat(mandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
+        assertThat(onDemandMandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
     public void shouldRegisterEventWhenReceivingDirectDebitDetails() {
-        service.receiveDirectDebitDetailsFor(mandate);
-        verify(mockedDirectDebitEventService).registerDirectDebitReceivedEventFor(mandate);
-        assertThat(mandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
+        service.receiveDirectDebitDetailsFor(onDemandMandate);
+        verify(mockedDirectDebitEventService).registerDirectDebitReceivedEventFor(onDemandMandate);
+        assertThat(onDemandMandate.getState(), is(AWAITING_DIRECT_DEBIT_DETAILS));
     }
 
     @Test
@@ -119,26 +116,25 @@ public class MandateStateUpdateServiceTest {
     }
 
     @Test
-    public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails() {
-        Mandate newMandate = service.confirmedDirectDebitDetailsFor(mandate);
-        
-        assertThat(newMandate, is(mandate));
-        verify(mockedMandateDao).updateMandateReference(newMandate.getId(), mandate.getMandateReference());
+    public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails_IfOneOff() {
+        Mandate oneOffMandate = MandateFixture
+                .aMandateFixture()
+                .withMandateType(MandateType.ONE_OFF)
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .toEntity();
+        Mandate newMandate = service.confirmedOneOffDirectDebitDetailsFor(oneOffMandate);
+
+        assertThat(newMandate, is(oneOffMandate));
+        verify(mockedMandateDao).updateMandateReference(newMandate.getId(), oneOffMandate.getMandateReference());
     }
 
     @Test
     public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails_andSendEmail_IfOnDemand() {
-        Mandate mandate = MandateFixture
-                .aMandateFixture()
-                .withMandateType(MandateType.ON_DEMAND)
-                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
-                .toEntity();
-        
-        Mandate newMandate = service.confirmedDirectDebitDetailsFor(mandate);
-        
-        assertThat(newMandate, is(mandate));
-        verify(mockedUserNotificationService).sendOnDemandMandateCreatedEmailFor(mandate);
-        verify(mockedMandateDao).updateMandateReference(newMandate.getId(), mandate.getMandateReference());
+        Mandate newMandate = service.confirmedOnDemandDirectDebitDetailsFor(onDemandMandate);
+
+        assertThat(newMandate, is(onDemandMandate));
+        verify(mockedUserNotificationService).sendOnDemandMandateCreatedEmailFor(onDemandMandate);
+        verify(mockedMandateDao).updateMandateReference(newMandate.getId(), onDemandMandate.getMandateReference());
 
     }
 
@@ -159,12 +155,12 @@ public class MandateStateUpdateServiceTest {
     public void shouldThrowWhenSubmittingTheSameDetailsSeveralTimes_andCreateOnlyOneEvent_whenConfirmingDirectDebitDetails() {
 
         // first call with confirmation details
-        service.confirmedDirectDebitDetailsFor(mandate);
+        service.confirmedOnDemandDirectDebitDetailsFor(onDemandMandate);
 
         thrown.expect(InvalidStateTransitionException.class);
         thrown.expectMessage("Transition DIRECT_DEBIT_DETAILS_CONFIRMED from state SUBMITTED is not valid");
         // second call with same details that should throw and prevent adding a new event
-        Mandate newMandate = service.confirmedDirectDebitDetailsFor(mandate);
+        Mandate newMandate = service.confirmedOnDemandDirectDebitDetailsFor(onDemandMandate);
 
         assertThat(newMandate.getState(), is(SUBMITTED));
         verify(mockedDirectDebitEventService, times(1)).registerDirectDebitConfirmedEventFor(newMandate);
