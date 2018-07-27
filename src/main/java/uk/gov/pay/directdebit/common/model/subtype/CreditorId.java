@@ -22,13 +22,15 @@ public class CreditorId {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         CreditorId that = (CreditorId) o;
-        return Objects.equals(creditorId, that.creditorId);
+
+        return creditorId.equals(that.creditorId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(creditorId);
+        return creditorId.hashCode();
     }
 
     @Override
