@@ -27,7 +27,6 @@ import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.SE
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -126,7 +125,7 @@ public class GoCardlessClientFacadeTest {
         given(mockMandate.getLinks()).willReturn(mockMandateLinks);
         given(mockMandateLinks.getCreditor()).willReturn(creditorId.toString());
 
-        given(mockGoCardlessClientWrapper.createMandate(any(), any())).willReturn(mockMandate);
+        given(mockGoCardlessClientWrapper.createMandate(mandate.getExternalId(), goCardlessCustomer)).willReturn(mockMandate);
 
         GoCardlessMandate result = goCardlessClientFacade.createMandate(mandate, goCardlessCustomer);
 
