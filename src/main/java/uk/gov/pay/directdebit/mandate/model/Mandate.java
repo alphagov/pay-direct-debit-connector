@@ -1,10 +1,12 @@
 package uk.gov.pay.directdebit.mandate.model;
 
+import uk.gov.pay.directdebit.common.model.subtype.CreditorId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 public class Mandate {
     private Long id;
@@ -17,6 +19,7 @@ public class Mandate {
     private final String serviceReference;
     private final ZonedDateTime createdDate;
     private Payer payer;
+    private CreditorId creditorId;
 
     public Mandate(
             Long id,
@@ -28,7 +31,8 @@ public class Mandate {
             MandateState state,
             String returnUrl,
             ZonedDateTime createdDate,
-            Payer payer
+            Payer payer,
+            CreditorId creditorId
     ) {
         this.id = id;
         this.gatewayAccount = gatewayAccount;
@@ -40,6 +44,7 @@ public class Mandate {
         this.returnUrl = returnUrl;
         this.createdDate = createdDate;
         this.payer = payer;
+        this.creditorId = creditorId;
     }
 
     public Payer getPayer() {
@@ -94,6 +99,14 @@ public class Mandate {
         this.mandateReference = mandateReference;
     }
 
+    public Optional<CreditorId> getCreditorId() {
+        return Optional.ofNullable(creditorId);
+    }
+
+    public void setCreditorId(CreditorId creditorId) {
+        this.creditorId = creditorId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -132,6 +145,10 @@ public class Mandate {
         if (payer != null ? !payer.equals(mandate.payer) : mandate.payer != null) {
             return false;
         }
+        if (creditorId != null ? !creditorId.equals(mandate.creditorId) : mandate.creditorId != null) {
+            return false;
+        }
+
         return createdDate.equals(mandate.createdDate);
     }
 
@@ -147,6 +164,7 @@ public class Mandate {
         result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
         result = 31 * result + (serviceReference != null ? serviceReference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
+        result = 31 * result + (creditorId != null ? creditorId.hashCode() : 0);
         return result;
     }
 }

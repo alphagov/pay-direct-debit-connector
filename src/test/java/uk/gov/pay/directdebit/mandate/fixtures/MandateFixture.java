@@ -4,6 +4,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
+import uk.gov.pay.directdebit.common.model.subtype.CreditorId;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
@@ -28,6 +29,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private PayerFixture payerFixture = null;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+    private CreditorId creditorId = CreditorId.of(RandomIdGenerator.newId());
 
     private MandateFixture() {
     }
@@ -120,6 +122,11 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return this;
     }
 
+    public MandateFixture withCreditorId(CreditorId creditorId) {
+        this.creditorId = creditorId;
+        return this;
+    }
+
     public ZonedDateTime getCreatedDate() {
         return createdDate;
     }
@@ -137,9 +144,10 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                                 "  service_reference,\n" +
                                 "  return_url,\n" +
                                 "  state,\n" +
-                                "  created_date\n" +
+                                "  created_date,\n" +
+                                "  creditor_id\n" +
                                 ") VALUES (\n" +
-                                "  ?, ?, ?, ?, ?, ?, ?, ?, ?\n" +
+                                "  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?\n" +
                                 ")\n",
                         id,
                         gatewayAccountFixture.getId(),
@@ -149,7 +157,8 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                         serviceReference,
                         returnUrl,
                         state.toString(),
-                        createdDate
+                        createdDate,
+                        creditorId.toString()
                 )
         );
         if (payerFixture != null) {
@@ -172,7 +181,8 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                 state,
                 returnUrl,
                 createdDate,
-                payer
+                payer,
+                creditorId
         );
     }
 }

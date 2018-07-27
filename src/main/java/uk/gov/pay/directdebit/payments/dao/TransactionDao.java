@@ -8,6 +8,7 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import uk.gov.pay.directdebit.common.model.subtype.CreditorIdArgumentFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
@@ -22,6 +23,7 @@ import java.util.Set;
 
 @RegisterRowMapper(TransactionMapper.class)
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
+@RegisterArgumentFactory(CreditorIdArgumentFactory.class)
 public interface TransactionDao {
 
     String joinQuery = "SELECT" +
@@ -42,6 +44,7 @@ public interface TransactionDao {
             "  m.type AS mandate_type," +
             "  m.state AS mandate_state," +
             "  m.created_date AS mandate_created_date," +
+            "  m.creditor_id AS mandate_creditor_id," +
             "  g.id AS gateway_account_id," +
             "  g.external_id AS gateway_account_external_id," +
             "  g.payment_provider AS gateway_account_payment_provider," +
@@ -62,11 +65,11 @@ public interface TransactionDao {
             "  y.bank_account_sort_code AS payer_bank_account_sort_code," +
             "  y.bank_name AS payer_bank_name," +
             "  y.created_date AS payer_created_date" +
-            " FROM transactions t " + 
+            " FROM transactions t " +
             "  JOIN mandates m ON t.mandate_id = m.id" +
             "  JOIN gateway_accounts g ON m.gateway_account_id = g.id" +
             "  LEFT JOIN payers y ON y.mandate_id = t.mandate_id";
-    
+
     @SqlQuery(joinQuery + " WHERE t.id = :id")
     Optional<Transaction> findById(@Bind("id") Long id);
 
@@ -85,8 +88,8 @@ public interface TransactionDao {
     @SqlUpdate("INSERT INTO transactions(mandate_id, external_id, amount, state, description, reference, created_date) VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate)")
     @GetGeneratedKeys
     Long insert(@BindBean Transaction transaction);
-    
+
     @SqlQuery(joinQuery + " WHERE t.state IN (<states>) AND t.created_date < :maxDateTime")
     List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(@BindList("states") Set<PaymentState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
-    
+
 }

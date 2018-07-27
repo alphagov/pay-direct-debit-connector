@@ -11,6 +11,7 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long mandateId = RandomUtils.nextLong(1, 99999);
     private String goCardlessMandateId = RandomIdGenerator.newId();
+    private Links links;
 
     private GoCardlessMandateFixture() {
 
@@ -47,6 +48,11 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
         return this;
     }
 
+    public GoCardlessMandateFixture withLinks(Links links) {
+        this.links = links;
+        return this;
+    }
+
     @Override
     public GoCardlessMandateFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -68,6 +74,21 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
 
     @Override
     public GoCardlessMandate toEntity() {
-        return new GoCardlessMandate(id, mandateId, goCardlessMandateId, null);
+        return new GoCardlessMandate(id, mandateId, goCardlessMandateId, null, null);
     }
+
+    public static class Links {
+
+        public Links(String creditor) {
+            this.creditor = creditor;
+        }
+
+        private String creditor;
+
+        public String getCreditor() {
+            return creditor;
+        }
+
+    }
+
 }

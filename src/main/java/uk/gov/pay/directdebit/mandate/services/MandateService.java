@@ -1,13 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
-import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
@@ -26,9 +19,9 @@ import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneOffMandateException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -36,6 +29,14 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.UriInfo;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -53,7 +54,7 @@ public class MandateService {
     private final TokenService tokenService;
     private final TransactionService transactionService;
     private final MandateStateUpdateService mandateStateUpdateService;
-    
+
     @Inject
     public MandateService(
             DirectDebitConfig directDebitConfig,
@@ -68,7 +69,7 @@ public class MandateService {
         this.mandateStateUpdateService = mandateStateUpdateService;
         this.linksConfig = directDebitConfig.getLinks();
     }
-    
+
     public Mandate createMandate(CreateRequest createRequest, String accountExternalId) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
@@ -89,6 +90,7 @@ public class MandateService {
                             MandateState.CREATED,
                             createRequest.getReturnUrl(),
                             ZonedDateTime.now(ZoneOffset.UTC),
+                            null,
                             null);
                     LOGGER.info("Creating mandate external id {}", mandate.getExternalId());
                     Long id = mandateDao.insert(mandate);
@@ -123,9 +125,9 @@ public class MandateService {
                 .findByTokenId(token)
                 .map(mandateStateUpdateService::tokenExchangedFor)
                 .orElseThrow(TokenNotFoundException::new);
-        
-        String transactionExternalId = mandate.getType().equals(MandateType.ONE_OFF) 
-                ? retrieveTransactionForOneOffMandate(mandate.getExternalId()).getExternalId() 
+
+        String transactionExternalId = mandate.getType().equals(MandateType.ONE_OFF)
+                ? retrieveTransactionForOneOffMandate(mandate.getExternalId()).getExternalId()
                 : null;
         return new TokenExchangeDetails(mandate, transactionExternalId);
 

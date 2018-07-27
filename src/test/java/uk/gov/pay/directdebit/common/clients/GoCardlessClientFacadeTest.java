@@ -1,14 +1,20 @@
 package uk.gov.pay.directdebit.common.clients;
 
 import com.gocardless.resources.BankDetailsLookup;
+import com.gocardless.resources.Mandate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.common.model.subtype.CreditorId;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
+import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.SortCode;
 
 import java.util.Arrays;
@@ -21,6 +27,7 @@ import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.SE
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -35,6 +42,12 @@ public class GoCardlessClientFacadeTest {
 
     @Mock
     private BankDetailsLookup mockBankDetailsLookup;
+
+    @Mock
+    private Mandate mockMandate;
+
+    @Mock
+    private Mandate.Links mockMandateLinks;
 
     private GoCardlessClientFacade goCardlessClientFacade;
 
@@ -100,4 +113,23 @@ public class GoCardlessClientFacadeTest {
         assertThat(result.isBacs(), is(false));
     }
 
+    @Test
+    public void createMandateReturnsGoCardlessMandateWithCreditorId() {
+        CreditorId creditorId = CreditorId.of("test-creditor-id-here");
+        uk.gov.pay.directdebit.mandate.model.Mandate mandate =
+                MandateFixture.aMandateFixture().toEntity();
+        GoCardlessCustomer goCardlessCustomer =
+                GoCardlessCustomerFixture.aGoCardlessCustomerFixture().toEntity();
+
+        given(mockMandate.getId()).willReturn("test-mandate-id-here");
+        given(mockMandate.getReference()).willReturn("test-mandate-reference-here");
+        given(mockMandate.getLinks()).willReturn(mockMandateLinks);
+        given(mockMandateLinks.getCreditor()).willReturn(creditorId.toString());
+
+        given(mockGoCardlessClientWrapper.createMandate(any(), any())).willReturn(mockMandate);
+
+        GoCardlessMandate result = goCardlessClientFacade.createMandate(mandate, goCardlessCustomer);
+
+        assertThat(result.getCreditorId(), is(creditorId));
+    }
 }

@@ -8,6 +8,7 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import uk.gov.pay.directdebit.common.model.subtype.CreditorIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
+@RegisterArgumentFactory(CreditorIdArgumentFactory.class)
 @RegisterRowMapper(MandateMapper.class)
 public interface MandateDao {
 
@@ -31,7 +33,8 @@ public interface MandateDao {
             "  state,\n" +
             "  type,\n" +
             "  return_url,\n" +
-            "  created_date\n" +
+            "  created_date,\n" +
+            "  creditor_id\n" +
             ") VALUES (\n" +
             "  :externalId,\n" +
             "  :gatewayAccount.id,\n" +
@@ -40,7 +43,8 @@ public interface MandateDao {
             "  :state,\n" +
             "  :type,\n" +
             "  :returnUrl,\n" +
-            "  :createdDate\n" +
+            "  :createdDate,\n" +
+            "  :creditorId\n" +
             ")")
     @GetGeneratedKeys
     Long insert(@BindBean Mandate mandate);
@@ -55,6 +59,7 @@ public interface MandateDao {
             "  m.type AS mandate_type," +
             "  m.state AS mandate_state," +
             "  m.created_date AS mandate_created_date," +
+            "  m.creditor_id AS mandate_creditor_id," +
             "  g.id AS gateway_account_id," +
             "  g.external_id AS gateway_account_external_id," +
             "  g.payment_provider AS gateway_account_payment_provider," +
@@ -78,11 +83,11 @@ public interface MandateDao {
             " FROM mandates m" +
             "  JOIN gateway_accounts g ON g.id = m.gateway_account_id " +
             "  LEFT JOIN payers p ON p.mandate_id = m.id ";
-    
-    
+
+
     @SqlQuery(query + "JOIN tokens t ON t.mandate_id = m.id WHERE t.secure_redirect_token = :tokenId")
     Optional<Mandate> findByTokenId(@Bind("tokenId") String tokenId);
-    
+
     @SqlQuery(query + "WHERE m.id = :mandateId")
     Optional<Mandate> findById(@Bind("mandateId") Long mandateId);
 
@@ -91,7 +96,7 @@ public interface MandateDao {
 
     @SqlQuery(query + "WHERE m.state IN (<states>) AND m.created_date < :maxDateTime")
     List<Mandate> findAllMandatesBySetOfStatesAndMaxCreationTime(@BindList("states") Set<MandateState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
-    
+
     @SqlUpdate("UPDATE mandates m SET state = :state WHERE m.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
 
