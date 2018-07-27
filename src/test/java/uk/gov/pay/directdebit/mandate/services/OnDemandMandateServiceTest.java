@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.LocalDate;
-import javax.ws.rs.core.UriInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,9 +22,13 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.SandboxService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
+import javax.ws.rs.core.UriInfo;
+import java.time.LocalDate;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class OnDemandMandateServiceTest {
@@ -38,9 +40,9 @@ public class OnDemandMandateServiceTest {
     private MandateService mockedMandateService;
     @Mock
     private MandateStateUpdateService mockedMandateStateUpdateService;
-    @Mock 
+    @Mock
     private PaymentProviderFactory mockedPaymentProviderFactory;
-    
+
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture
             .aGatewayAccountFixture().withPaymentProvider(PaymentProvider.SANDBOX);
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture()
@@ -53,7 +55,7 @@ public class OnDemandMandateServiceTest {
             .of("sort_code", "123456", "account_number", "12345678");
 
     private OnDemandMandateService service;
-    
+
     @Before
     public void setUp() {
         service = new OnDemandMandateService(mockedPaymentProviderFactory, mockedMandateStateUpdateService, mockedTransactionService, mockedMandateService);
@@ -68,7 +70,7 @@ public class OnDemandMandateServiceTest {
 
         verify(mockedMandateService).createMandate(mandateCreationRequest, gatewayAccountFixture.getExternalId(), mockedUriInfo);
     }
-    
+
     @Test
     public void confirm_shouldConfirmOnDemandMandate() {
         Mandate mandate = mandateFixture.toEntity();
@@ -78,9 +80,9 @@ public class OnDemandMandateServiceTest {
         when(mockedSandboxService.confirmOnDemandMandate(mandate, bankAccountDetails)).thenReturn(mandate);
         service.confirm(gatewayAccountFixture.toEntity(), mandate, mandateConfirmationRequest);
 
-        verify(mockedMandateStateUpdateService).confirmedDirectDebitDetailsFor(mandate);
+        verify(mockedMandateStateUpdateService).confirmedOnDemandDirectDebitDetailsFor(mandate);
     }
-    
+
     @Test
     public void collect_shouldCreateATransactionAPaymentAndRegisterOnDemandPaymentSubmittedEvent() {
         Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
@@ -98,9 +100,8 @@ public class OnDemandMandateServiceTest {
         when(mockedSandboxService.collect(mandate, transaction)).thenReturn(chargeDate);
 
         service.collect(gatewayAccountFixture.toEntity(), mandate, collectPaymentRequest);
-        
+
         verify(mockedTransactionService).onDemandPaymentSubmittedToProviderFor(transaction, chargeDate);
     }
-    
-    
+
 }
