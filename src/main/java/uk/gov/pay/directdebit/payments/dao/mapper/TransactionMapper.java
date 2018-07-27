@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.payments.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.directdebit.common.model.subtype.CreditorId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
@@ -57,7 +56,6 @@ public class TransactionMapper implements RowMapper<Transaction> {
     private static final String MANDATE_MANDATE_REFERENCE_COLUMN = "mandate_mandate_reference";
     private static final String MANDATE_SERVICE_REFERENCE_COLUMN = "mandate_service_reference";
     private static final String MANDATE_CREATED_DATE_COLUMN = "mandate_created_date";
-    private static final String MANDATE_CREDITOR_ID_COLUMN = "mandate_creditor_id";
 
     @Override
     public Transaction map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
@@ -94,11 +92,6 @@ public class TransactionMapper implements RowMapper<Transaction> {
             gatewayAccount.setOrganisation(PaymentProviderOrganisationIdentifier.of(organisation));
         }
 
-        CreditorId creditorId = null;
-        if (resultSet.getString(MANDATE_CREDITOR_ID_COLUMN) != null) {
-            creditorId = CreditorId.of(resultSet.getString(MANDATE_CREDITOR_ID_COLUMN));
-        }
-
         Mandate mandate = new Mandate(
                 resultSet.getLong(MANDATE_ID_COLUMN),
                 gatewayAccount,
@@ -109,8 +102,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
                 MandateState.valueOf(resultSet.getString(MANDATE_STATE_COLUMN)),
                 resultSet.getString(MANDATE_RETURN_URL_COLUMN),
                 ZonedDateTime.ofInstant(resultSet.getTimestamp(MANDATE_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
-                payer,
-                creditorId);
+                payer);
 
         return new Transaction(
                 resultSet.getLong(TRANSACTION_ID_COLUMN),

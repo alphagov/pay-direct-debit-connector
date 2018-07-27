@@ -90,7 +90,6 @@ public class MandateService {
                             MandateState.CREATED,
                             createRequest.getReturnUrl(),
                             ZonedDateTime.now(ZoneOffset.UTC),
-                            null,
                             null);
                     LOGGER.info("Creating mandate external id {}", mandate.getExternalId());
                     Long id = mandateDao.insert(mandate);

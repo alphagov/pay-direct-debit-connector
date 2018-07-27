@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.common.model.subtype.CreditorId;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
@@ -30,7 +29,6 @@ import static java.time.ZonedDateTime.now;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
@@ -65,7 +63,6 @@ public class MandateDaoIT {
                         MandateState.PENDING,
                         "https://www.example.com/return_url",
                         createdDate,
-                        null,
                         null
                 )
         );
@@ -78,7 +75,6 @@ public class MandateDaoIT {
         assertThat(mandate.get("type"), is("ONE_OFF"));
         assertThat(mandate.get("state"), is("PENDING"));
         assertThat((Timestamp) mandate.get("created_date"), isDate(createdDate));
-        assertThat(mandate.get("creditor_id"), is(nullValue()));
     }
 
     @Test
@@ -95,7 +91,6 @@ public class MandateDaoIT {
                         MandateState.PENDING,
                         "https://www.example.com/return_url",
                         createdDate,
-                        null,
                         null
                 )
         );
@@ -108,25 +103,6 @@ public class MandateDaoIT {
         assertThat(mandate.get("type"), is("ONE_OFF"));
         assertThat(mandate.get("state"), is("PENDING"));
         assertThat((Timestamp) mandate.get("created_date"), isDate(createdDate));
-        assertThat(mandate.get("creditor_id"), is(nullValue()));
-    }
-
-    @Test
-    public void shouldInsertAMandateWithCreditorId() {
-        MandateExternalId externalId = MandateExternalId.of("testExternalId");
-        CreditorId creditorId = CreditorId.of("testCreditorId");
-        Mandate expectedMandate = MandateFixture.aMandateFixture()
-                .withExternalId(externalId)
-                .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
-                .withGatewayAccountFixture(gatewayAccountFixture)
-                .withCreatedDate(ZonedDateTime.now().minusMinutes(200L))
-                .withCreditorId(creditorId)
-                .toEntity();
-
-        mandateDao.insert(expectedMandate);
-
-        Optional<Mandate> actualMandate = mandateDao.findByExternalId(externalId);
-        assertEquals(actualMandate.get().getCreditorId().get(), creditorId);
     }
 
     @Test

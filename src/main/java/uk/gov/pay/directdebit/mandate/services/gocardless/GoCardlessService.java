@@ -62,7 +62,6 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
         );
         GoCardlessMandate goCardlessMandate = createMandate(mandate, goCardlessCustomerWithBankAccount);
         mandate.setMandateReference(goCardlessMandate.getGoCardlessReference());
-        mandate.setCreditorId(goCardlessMandate.getCreditorId());
         persist(goCardlessCustomer);
         persist(goCardlessMandate);
         return mandate;
@@ -79,7 +78,6 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
         );
         GoCardlessMandate goCardlessMandate = createMandate(mandate, goCardlessCustomerWithBankAccount);
         mandate.setMandateReference(goCardlessMandate.getGoCardlessReference());
-        mandate.setCreditorId(goCardlessMandate.getCreditorId());
         transaction.setMandate(mandate);
         GoCardlessPayment goCardlessPayment = createPayment(transaction, goCardlessMandate);
 

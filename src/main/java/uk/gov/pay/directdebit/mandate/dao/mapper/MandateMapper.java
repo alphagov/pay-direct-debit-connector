@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.mandate.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.directdebit.common.model.subtype.CreditorId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
@@ -48,7 +47,6 @@ public class MandateMapper implements RowMapper<Mandate> {
     private static final String PAYER_BANK_ACCOUNT_SORT_CODE_COLUMN = "payer_bank_account_sort_code";
     private static final String PAYER_BANK_NAME_COLUMN = "payer_bank_name";
     private static final String PAYER_CREATED_DATE_COLUMN = "payer_created_date";
-    private static final String MANDATE_CREDITOR_ID_COLUMN = "mandate_creditor_id";
 
 
     @Override
@@ -87,11 +85,6 @@ public class MandateMapper implements RowMapper<Mandate> {
             gatewayAccount.setOrganisation(PaymentProviderOrganisationIdentifier.of(organisation));
         }
 
-        CreditorId creditorId = null;
-        if (resultSet.getString(MANDATE_CREDITOR_ID_COLUMN) != null) {
-            creditorId = CreditorId.of(resultSet.getString(MANDATE_CREDITOR_ID_COLUMN));
-        }
-
         return new Mandate(
                 resultSet.getLong(ID_COLUMN),
                 gatewayAccount,
@@ -102,7 +95,6 @@ public class MandateMapper implements RowMapper<Mandate> {
                 MandateState.valueOf(resultSet.getString(STATE_COLUMN)),
                 resultSet.getString(RETURN_URL_COLUMN),
                 ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
-                payer,
-                creditorId);
+                payer);
     }
 }

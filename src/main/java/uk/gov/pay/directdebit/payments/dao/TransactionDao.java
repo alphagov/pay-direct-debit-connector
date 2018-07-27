@@ -8,7 +8,6 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
-import uk.gov.pay.directdebit.common.model.subtype.CreditorIdArgumentFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
@@ -23,7 +22,6 @@ import java.util.Set;
 
 @RegisterRowMapper(TransactionMapper.class)
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
-@RegisterArgumentFactory(CreditorIdArgumentFactory.class)
 public interface TransactionDao {
 
     String joinQuery = "SELECT" +
@@ -44,7 +42,6 @@ public interface TransactionDao {
             "  m.type AS mandate_type," +
             "  m.state AS mandate_state," +
             "  m.created_date AS mandate_created_date," +
-            "  m.creditor_id AS mandate_creditor_id," +
             "  g.id AS gateway_account_id," +
             "  g.external_id AS gateway_account_external_id," +
             "  g.payment_provider AS gateway_account_payment_provider," +

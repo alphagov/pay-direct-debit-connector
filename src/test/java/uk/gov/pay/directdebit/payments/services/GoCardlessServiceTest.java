@@ -6,7 +6,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
-import uk.gov.pay.directdebit.common.model.subtype.CreditorId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
@@ -50,7 +49,6 @@ public abstract class GoCardlessServiceTest {
     static final String TRANSACTION_ID = "sdkfhsd2jfhjdks";
     static final SortCode SORT_CODE = SortCode.of("123456");
     static final AccountNumber ACCOUNT_NUMBER = AccountNumber.of("12345678");
-    static final CreditorId CREDITOR_ID = CreditorId.of("test-creditor-id");
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -90,7 +88,6 @@ public abstract class GoCardlessServiceTest {
     GoCardlessMandate goCardlessMandate =
             GoCardlessMandateFixture.aGoCardlessMandateFixture()
                     .withMandateId(mandateFixture.getId())
-                    .withLinks(new GoCardlessMandateFixture.Links(CREDITOR_ID.toString()))
                     .toEntity();
     GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().withTransactionId(transaction.getId()).toEntity();
     BankAccountDetails bankAccountDetails = new BankAccountDetails(ACCOUNT_NUMBER, SORT_CODE);

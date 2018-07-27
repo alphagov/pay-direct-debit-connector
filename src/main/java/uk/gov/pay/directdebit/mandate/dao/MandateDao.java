@@ -8,7 +8,6 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
-import uk.gov.pay.directdebit.common.model.subtype.CreditorIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
@@ -21,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
-@RegisterArgumentFactory(CreditorIdArgumentFactory.class)
 @RegisterRowMapper(MandateMapper.class)
 public interface MandateDao {
 
@@ -33,8 +31,7 @@ public interface MandateDao {
             "  state,\n" +
             "  type,\n" +
             "  return_url,\n" +
-            "  created_date,\n" +
-            "  creditor_id\n" +
+            "  created_date\n" +
             ") VALUES (\n" +
             "  :externalId,\n" +
             "  :gatewayAccount.id,\n" +
@@ -43,8 +40,7 @@ public interface MandateDao {
             "  :state,\n" +
             "  :type,\n" +
             "  :returnUrl,\n" +
-            "  :createdDate,\n" +
-            "  :creditorId\n" +
+            "  :createdDate" +
             ")")
     @GetGeneratedKeys
     Long insert(@BindBean Mandate mandate);
@@ -59,7 +55,6 @@ public interface MandateDao {
             "  m.type AS mandate_type," +
             "  m.state AS mandate_state," +
             "  m.created_date AS mandate_created_date," +
-            "  m.creditor_id AS mandate_creditor_id," +
             "  g.id AS gateway_account_id," +
             "  g.external_id AS gateway_account_external_id," +
             "  g.payment_provider AS gateway_account_payment_provider," +

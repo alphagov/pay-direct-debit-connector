@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.common.model.subtype.CreditorId;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
@@ -113,22 +113,26 @@ public class GoCardlessClientFacadeTest {
     }
 
     @Test
-    public void createMandateReturnsGoCardlessMandateWithCreditorId() {
-        CreditorId creditorId = CreditorId.of("test-creditor-id-here");
+    public void createMandateReturnsGoCardlessMandate() {
+        GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.of("gocardless-test-creditor-id-here");
         uk.gov.pay.directdebit.mandate.model.Mandate mandate =
                 MandateFixture.aMandateFixture().toEntity();
         GoCardlessCustomer goCardlessCustomer =
                 GoCardlessCustomerFixture.aGoCardlessCustomerFixture().toEntity();
 
-        given(mockMandate.getId()).willReturn("test-mandate-id-here");
-        given(mockMandate.getReference()).willReturn("test-mandate-reference-here");
+        String goCardlessReference = "test-gocardless-mandate-reference-here";
+        String goCardlessMandateId = "test-gocardless-mandate-id-here";
+        given(mockMandate.getId()).willReturn(goCardlessMandateId);
+        given(mockMandate.getReference()).willReturn(goCardlessReference);
         given(mockMandate.getLinks()).willReturn(mockMandateLinks);
-        given(mockMandateLinks.getCreditor()).willReturn(creditorId.toString());
+        given(mockMandateLinks.getCreditor()).willReturn(goCardlessCreditorId.toString());
 
         given(mockGoCardlessClientWrapper.createMandate(mandate.getExternalId(), goCardlessCustomer)).willReturn(mockMandate);
 
         GoCardlessMandate result = goCardlessClientFacade.createMandate(mandate, goCardlessCustomer);
 
-        assertThat(result.getCreditorId(), is(creditorId));
+        assertThat(result.getGoCardlessMandateId(), is(goCardlessMandateId));
+        assertThat(result.getGoCardlessReference(), is(goCardlessReference));
+        assertThat(result.getGoCardlessCreditorId(), is(goCardlessCreditorId));
     }
 }
