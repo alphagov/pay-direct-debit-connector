@@ -20,8 +20,14 @@ import java.time.ZonedDateTime;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MandateStateUpdateServiceTest {
@@ -169,7 +175,7 @@ public class MandateStateUpdateServiceTest {
     @Test
     public void shouldSetMandateStatusToExpired_FromCreated() {
         Mandate mandate = MandateFixture.aMandateFixture()
-                .withState(MandateState.CREATED)
+                .withState(CREATED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
                 .toEntity();
         service.mandateExpiredFor(mandate);
@@ -181,7 +187,7 @@ public class MandateStateUpdateServiceTest {
     @Test
     public void shouldSetMandateStatusToExpired_FromSubmitted() {
         Mandate mandate = MandateFixture.aMandateFixture()
-                .withState(MandateState.SUBMITTED)
+                .withState(SUBMITTED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
                 .toEntity();
         service.mandateExpiredFor(mandate);
@@ -193,7 +199,7 @@ public class MandateStateUpdateServiceTest {
     @Test
     public void shouldSetMandateStatusToExpired_FromDdDetails() {
         Mandate mandate = MandateFixture.aMandateFixture()
-                .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
                 .toEntity();
         service.mandateExpiredFor(mandate);
@@ -205,7 +211,7 @@ public class MandateStateUpdateServiceTest {
     @Test(expected = InvalidStateTransitionException.class)
     public void shouldNotExpireMandateSinceWrongState_PENDING() {
         Mandate mandate = MandateFixture.aMandateFixture()
-                .withState(MandateState.PENDING)
+                .withState(PENDING)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
                 .toEntity();
         service.mandateExpiredFor(mandate);

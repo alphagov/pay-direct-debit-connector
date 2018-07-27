@@ -32,8 +32,7 @@ public class OneOffMandateService implements MandateCommandService {
         this.mandateService = mandateService;
     }
 
-    public Transaction create(GatewayAccount gatewayAccount,
-                              CreatePaymentRequest createPaymentRequest) {
+    public Transaction create(GatewayAccount gatewayAccount, CreatePaymentRequest createPaymentRequest) {
         Mandate mandate = mandateService.createMandate(createPaymentRequest, gatewayAccount.getExternalId());
         return transactionService.createTransaction(createPaymentRequest, mandate, gatewayAccount.getExternalId());
     }
