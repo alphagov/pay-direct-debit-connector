@@ -65,6 +65,11 @@ public class DirectDebitEventService {
         return insertEventFor(mandate, directDebitEvent);
     }
 
+    public DirectDebitEvent registerMandateCreatedEventFor(Mandate mandate) {
+        DirectDebitEvent directDebitEvent = mandateCreated(mandate.getId());
+        return insertEventFor(mandate, directDebitEvent);
+    }
+    
     public DirectDebitEvent registerMandateFailedEventFor(Mandate mandate) {
         DirectDebitEvent directDebitEvent = mandateFailed(mandate.getId());
         return insertEventFor(mandate, directDebitEvent);

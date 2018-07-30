@@ -85,7 +85,6 @@ public class MandateServiceTest {
     private UriBuilder mockedUriBuilder;
 
     private MandateService service;
-    private static final MandateExternalId MANDATE_EXTERNAL_ID = MandateExternalId.of("test-mandate-ext-id");
 
     @Before
     public void setUp() throws URISyntaxException {
@@ -178,7 +177,7 @@ public class MandateServiceTest {
     @Test
     public void shouldCreateAMandateForSandbox_withCustomGeneratedReference() {
         Mandate mandate = getMandateForProvider(PaymentProvider.SANDBOX);
-
+       
         assertThat(mandate.getMandateReference(), is(not("gocardless-default")));
     }
 
@@ -204,6 +203,10 @@ public class MandateServiceTest {
         when(mockedMandateDao.insert(any(Mandate.class))).thenReturn(1L);
 
         CreateMandateRequest createMandateRequest = CreateMandateRequest.of(getMandateRequestPayload());
-        return service.createMandate(createMandateRequest, gatewayAccount.getExternalId());
+        
+        Mandate mandate = service.createMandate(createMandateRequest, gatewayAccount.getExternalId());
+        
+        verify(mockedMandateStateUpdateService).mandateCreatedFor(mandate);
+        return mandate;
     }
 }

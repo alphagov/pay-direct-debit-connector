@@ -93,6 +93,7 @@ public class MandateService {
                     LOGGER.info("Creating mandate external id {}", mandate.getExternalId());
                     Long id = mandateDao.insert(mandate);
                     mandate.setId(id);
+                    mandateStateUpdateService.mandateCreatedFor(mandate);
                     return mandate;
                 })
                 .orElseThrow(() -> {
