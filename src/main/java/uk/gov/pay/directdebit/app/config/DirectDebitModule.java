@@ -1,17 +1,12 @@
 package uk.gov.pay.directdebit.app.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gocardless.GoCardlessClient;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import io.dropwizard.setup.Environment;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import javax.net.ssl.SSLSocketFactory;
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.directdebit.payments.clients.GoCardlessClientFactory;
-import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
+import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
@@ -20,13 +15,14 @@ import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.clients.ClientFactory;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
-import uk.gov.pay.directdebit.payments.clients.GoCardlessClientWrapper;
+import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
-import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
+
+import javax.net.ssl.SSLSocketFactory;
 
 public class DirectDebitModule extends AbstractModule {
 
@@ -49,10 +45,9 @@ public class DirectDebitModule extends AbstractModule {
     }
 
 
-
     @Provides
     @Singleton
-    public GoCardlessClientFactory provideGoCardlessClientFactory()  {
+    public GoCardlessClientFactory provideGoCardlessClientFactory() {
         return new GoCardlessClientFactory(configuration, sslSocketFactory);
     }
 

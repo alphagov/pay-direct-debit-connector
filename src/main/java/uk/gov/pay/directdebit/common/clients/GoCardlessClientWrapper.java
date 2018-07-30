@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.clients;
+package uk.gov.pay.directdebit.common.clients;
 
 
 import com.gocardless.resources.BankDetailsLookup;
@@ -36,7 +36,7 @@ public class GoCardlessClientWrapper {
     }
 
     public CustomerBankAccount createCustomerBankAccount(MandateExternalId mandateExternalId, GoCardlessCustomer customer,
-                                                         String accountHolderName, SortCode sortCode, AccountNumber accountNumber){
+                                                         String accountHolderName, SortCode sortCode, AccountNumber accountNumber) {
         return goCardlessClient.customerBankAccounts()
                 .create()
                 .withAccountHolderName(accountHolderName)

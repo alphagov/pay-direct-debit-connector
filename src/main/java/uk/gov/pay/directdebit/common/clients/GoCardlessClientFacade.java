@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.clients;
+package uk.gov.pay.directdebit.common.clients;
 
 import com.gocardless.resources.BankDetailsLookup;
 import com.gocardless.resources.Customer;
