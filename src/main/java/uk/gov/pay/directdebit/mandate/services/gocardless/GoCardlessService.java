@@ -1,9 +1,9 @@
 package uk.gov.pay.directdebit.mandate.services.gocardless;
 
-import java.time.LocalDate;
-import javax.inject.Inject;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
+import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
@@ -18,8 +18,6 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.clients.GoCardlessClientFacade;
-import uk.gov.pay.directdebit.payments.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
@@ -30,6 +28,9 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProviderCommandSe
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 
+import javax.inject.Inject;
+import java.time.LocalDate;
+
 public class GoCardlessService implements DirectDebitPaymentProviderCommandService {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessEventService.class);
 
@@ -37,6 +38,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
     private final GoCardlessCustomerDao goCardlessCustomerDao;
     private final GoCardlessMandateDao goCardlessMandateDao;
     private final GoCardlessPaymentDao goCardlessPaymentDao;
+
     @Inject
     public GoCardlessService(
             GoCardlessClientFactory goCardlessClientFactory,
