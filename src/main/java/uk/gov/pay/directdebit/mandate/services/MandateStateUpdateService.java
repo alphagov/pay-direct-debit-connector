@@ -58,10 +58,6 @@ public class MandateStateUpdateService {
         return directDebitEventService.registerMandateCancelledEventFor(newMandate);
     }
 
-    public DirectDebitEvent awaitingDirectDebitDetailsFor(Mandate mandate) {
-        return directDebitEventService.registerAwaitingDirectDebitDetailsEventFor(mandate);
-    }
-
     public DirectDebitEvent mandateActiveFor(Mandate mandate) {
         updateStateFor(mandate, MANDATE_ACTIVE);
         return directDebitEventService.registerMandateActiveEventFor(mandate);

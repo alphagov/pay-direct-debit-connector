@@ -37,8 +37,6 @@ public class SecurityTokensResource {
         TokenResponse response = TokenResponse.from(
                 tokenExchangeDetails.getMandate(), 
                 tokenExchangeDetails.getTransactionExternalId());
-        mandateServiceFactory.getMandateStateUpdateService()
-                .awaitingDirectDebitDetailsFor(tokenExchangeDetails.getMandate());
         return Response.ok().entity(response).build();
     }
 

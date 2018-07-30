@@ -126,11 +126,6 @@ public class DirectDebitEventService {
         return insertEventFor(mandate, directDebitEvent);
     }
 
-    public DirectDebitEvent registerAwaitingDirectDebitDetailsEventFor(Mandate mandate) {
-        DirectDebitEvent directDebitEvent = awaitingDirectDebitDetails(mandate.getId());
-        return insertEventFor(mandate, directDebitEvent);
-    }
-    
     public void registerPayerCreatedEventFor(Mandate mandate) {
         DirectDebitEvent directDebitEvent = payerCreated(mandate.getId());
         insertEventFor(mandate, directDebitEvent);

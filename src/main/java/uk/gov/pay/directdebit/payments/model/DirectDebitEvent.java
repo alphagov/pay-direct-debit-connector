@@ -112,10 +112,6 @@ public class DirectDebitEvent {
     public static DirectDebitEvent mandateActive(Long mandateId) {
         return new DirectDebitEvent(mandateId, null, MANDATE, MANDATE_ACTIVE);
     }
-
-    public static DirectDebitEvent awaitingDirectDebitDetails(Long mandateId) {
-        return new DirectDebitEvent(mandateId, null, MANDATE, TOKEN_EXCHANGED);
-    }
     
     public static DirectDebitEvent paymentMethodChanged(Long mandateId) {
         return new DirectDebitEvent(mandateId, null, MANDATE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
