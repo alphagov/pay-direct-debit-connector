@@ -85,6 +85,18 @@ public class MandateStateUpdateServiceTest {
     }
 
     @Test
+    public void mandateCreatedFor_shouldRegisterAMandateCreatedEvent() {
+        Mandate mandate = MandateFixture
+                .aMandateFixture()
+                .withState(CREATED)
+                .toEntity();
+        service.mandateCreatedFor(mandate);
+        
+        verify(mockedDirectDebitEventService).registerMandateCreatedEventFor(mandate);
+        assertThat(mandate.getState(), is(CREATED));
+    }
+    
+    @Test
     public void payerCreatedFor_shouldRegisterAPayerCreatedEvent() {
 
         service.payerCreatedFor(onDemandMandate);

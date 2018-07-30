@@ -41,6 +41,10 @@ public class MandateStateUpdateService {
     Mandate confirmedOneOffDirectDebitDetailsFor(Mandate mandate) {
         return confirmedDetailsFor(mandate);
     }
+    
+    DirectDebitEvent mandateCreatedFor(Mandate mandate) {
+        return directDebitEventService.registerMandateCreatedEventFor(mandate);
+    }
 
     Mandate confirmedOnDemandDirectDebitDetailsFor(Mandate mandate) {
         Mandate updatedMandate = confirmedDetailsFor(mandate);
@@ -48,12 +52,12 @@ public class MandateStateUpdateService {
         return updatedMandate;
     }
 
-    public DirectDebitEvent changePaymentMethodFor(Mandate mandate) {
+    DirectDebitEvent changePaymentMethodFor(Mandate mandate) {
         Mandate newMandate = updateStateFor(mandate, SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
         return directDebitEventService.registerPaymentMethodChangedEventFor(newMandate);
     }
 
-    public DirectDebitEvent cancelMandateCreation(Mandate mandate) {
+    DirectDebitEvent cancelMandateCreation(Mandate mandate) {
         Mandate newMandate = updateStateFor(mandate, SupportedEvent.PAYMENT_CANCELLED_BY_USER);
         return directDebitEventService.registerMandateCancelledEventFor(newMandate);
     }

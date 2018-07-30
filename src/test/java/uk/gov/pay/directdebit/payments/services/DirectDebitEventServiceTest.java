@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CANCELLED;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_FAILED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID;
@@ -224,6 +225,19 @@ public class DirectDebitEventServiceTest {
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
     }
 
+    @Test
+    public void registerMandateCreatedEventFor_shouldCreateExpectedEvent() {
+        service.registerMandateCreatedEventFor(mandateFixture.toEntity());
+
+        verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
+        DirectDebitEvent directDebitEvent = prCaptor.getValue();
+        assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(nullValue()));
+        assertThat(directDebitEvent.getEvent(), is(MANDATE_CREATED));
+        assertThat(directDebitEvent.getEventType(), is(MANDATE));
+        assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
+    }
+    
     @Test
     public void registerMandateActiveEventFor_shouldCreateExpectedEvent() {
         service.registerMandateActiveEventFor(mandateFixture.toEntity());
