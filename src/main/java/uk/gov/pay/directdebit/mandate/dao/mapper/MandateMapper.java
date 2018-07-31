@@ -47,7 +47,8 @@ public class MandateMapper implements RowMapper<Mandate> {
     private static final String PAYER_BANK_ACCOUNT_SORT_CODE_COLUMN = "payer_bank_account_sort_code";
     private static final String PAYER_BANK_NAME_COLUMN = "payer_bank_name";
     private static final String PAYER_CREATED_DATE_COLUMN = "payer_created_date";
-    
+
+
     @Override
     public Mandate map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         Payer payer = null;
@@ -65,7 +66,7 @@ public class MandateMapper implements RowMapper<Mandate> {
                     resultSet.getString(PAYER_BANK_NAME_COLUMN),
                     ZonedDateTime.ofInstant(resultSet.getTimestamp(PAYER_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC));
         }
-        
+
         GatewayAccount gatewayAccount = new GatewayAccount(
                 resultSet.getLong(GATEWAY_ACCOUNT_ID_COLUMN),
                 resultSet.getString(GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN),
@@ -83,7 +84,7 @@ public class MandateMapper implements RowMapper<Mandate> {
         if (organisation != null) {
             gatewayAccount.setOrganisation(PaymentProviderOrganisationIdentifier.of(organisation));
         }
-        
+
         return new Mandate(
                 resultSet.getLong(ID_COLUMN),
                 gatewayAccount,

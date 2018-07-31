@@ -1,20 +1,25 @@
 package uk.gov.pay.directdebit.mandate.model;
 
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.GoCardlessCreditorId;
+
 public class GoCardlessMandate {
 
     private Long id;
     private final Long mandateId;
     private final String goCardlessMandateId;
     private final String goCardlessReference;
+    private final GoCardlessCreditorId goCardlessCreditorId;
 
-    public GoCardlessMandate(Long id, Long mandateId, String goCardlessMandateId, String goCardlessReference) {
+    public GoCardlessMandate(Long id, Long mandateId, String goCardlessMandateId, String goCardlessReference, GoCardlessCreditorId goCardlessCreditorId) {
         this.id = id;
         this.mandateId = mandateId;
         this.goCardlessMandateId = goCardlessMandateId;
         this.goCardlessReference = goCardlessReference;
+        this.goCardlessCreditorId = goCardlessCreditorId;
     }
-    public GoCardlessMandate(Long mandateId, String goCardlessMandateId, String goCardlessReference) {
-        this(null, mandateId, goCardlessMandateId, goCardlessReference);
+
+    public GoCardlessMandate(Long mandateId, String goCardlessMandateId, String goCardlessReference, GoCardlessCreditorId goCardlessCreditorId) {
+        this(null, mandateId, goCardlessMandateId, goCardlessReference, goCardlessCreditorId);
     }
 
     public Long getId() {
@@ -24,7 +29,7 @@ public class GoCardlessMandate {
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public Long getMandateId() {
         return mandateId;
     }
@@ -37,6 +42,10 @@ public class GoCardlessMandate {
         return goCardlessReference;
     }
 
+    public GoCardlessCreditorId getGoCardlessCreditorId() {
+        return goCardlessCreditorId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -47,6 +56,7 @@ public class GoCardlessMandate {
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (!mandateId.equals(that.mandateId)) return false;
         if (!goCardlessReference.equals(that.goCardlessReference)) return false;
+        if (!goCardlessCreditorId.equals(that.goCardlessCreditorId)) return false;
         return goCardlessMandateId.equals(that.goCardlessMandateId);
     }
 
@@ -56,6 +66,8 @@ public class GoCardlessMandate {
         result = 31 * result + mandateId.hashCode();
         result = 31 * result + goCardlessReference.hashCode();
         result = 31 * result + goCardlessMandateId.hashCode();
+        result = 31 * result + goCardlessCreditorId.hashCode();
         return result;
     }
+
 }

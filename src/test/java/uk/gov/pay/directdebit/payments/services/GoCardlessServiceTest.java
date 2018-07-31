@@ -85,7 +85,10 @@ public abstract class GoCardlessServiceTest {
             .withExternalId(TRANSACTION_ID)
             .toEntity();
 
-    GoCardlessMandate goCardlessMandate = GoCardlessMandateFixture.aGoCardlessMandateFixture().withMandateId(mandateFixture.getId()).toEntity();
+    GoCardlessMandate goCardlessMandate =
+            GoCardlessMandateFixture.aGoCardlessMandateFixture()
+                    .withMandateId(mandateFixture.getId())
+                    .toEntity();
     GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().withTransactionId(transaction.getId()).toEntity();
     BankAccountDetails bankAccountDetails = new BankAccountDetails(ACCOUNT_NUMBER, SORT_CODE);
 

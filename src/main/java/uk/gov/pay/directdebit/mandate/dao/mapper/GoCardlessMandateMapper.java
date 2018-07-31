@@ -1,15 +1,18 @@
 package uk.gov.pay.directdebit.mandate.dao.mapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class GoCardlessMandateMapper implements RowMapper<GoCardlessMandate> {
     private static final String ID_COLUMN = "id";
     private static final String MANDATE_ID_COLUMN = "mandate_id";
     private static final String GOCARDLESS_MANDATE_ID_COLUMN = "gocardless_mandate_id";
+    private static final String GOCARDLESS_CREDITOR_ID = "gocardless_creditor_id";
 
     @Override
     public GoCardlessMandate map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
@@ -17,6 +20,7 @@ public class GoCardlessMandateMapper implements RowMapper<GoCardlessMandate> {
                 resultSet.getLong(ID_COLUMN),
                 resultSet.getLong(MANDATE_ID_COLUMN),
                 resultSet.getString(GOCARDLESS_MANDATE_ID_COLUMN),
-                null);
+                null,
+                GoCardlessCreditorId.of(resultSet.getString(GOCARDLESS_CREDITOR_ID)));
     }
 }

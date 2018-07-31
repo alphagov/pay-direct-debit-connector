@@ -135,7 +135,7 @@ public class MandateDaoIT {
                 .withServiceReference("test-service-reference")
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
-        
+
         TokenFixture token = aTokenFixture()
                 .withMandateId(mandateFixture.getId())
                 .insert(testContext.getJdbi());

@@ -40,7 +40,7 @@ public interface MandateDao {
             "  :state,\n" +
             "  :type,\n" +
             "  :returnUrl,\n" +
-            "  :createdDate\n" +
+            "  :createdDate" +
             ")")
     @GetGeneratedKeys
     Long insert(@BindBean Mandate mandate);
@@ -78,11 +78,11 @@ public interface MandateDao {
             " FROM mandates m" +
             "  JOIN gateway_accounts g ON g.id = m.gateway_account_id " +
             "  LEFT JOIN payers p ON p.mandate_id = m.id ";
-    
-    
+
+
     @SqlQuery(query + "JOIN tokens t ON t.mandate_id = m.id WHERE t.secure_redirect_token = :tokenId")
     Optional<Mandate> findByTokenId(@Bind("tokenId") String tokenId);
-    
+
     @SqlQuery(query + "WHERE m.id = :mandateId")
     Optional<Mandate> findById(@Bind("mandateId") Long mandateId);
 
@@ -91,7 +91,7 @@ public interface MandateDao {
 
     @SqlQuery(query + "WHERE m.state IN (<states>) AND m.created_date < :maxDateTime")
     List<Mandate> findAllMandatesBySetOfStatesAndMaxCreationTime(@BindList("states") Set<MandateState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
-    
+
     @SqlUpdate("UPDATE mandates m SET state = :state WHERE m.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
 

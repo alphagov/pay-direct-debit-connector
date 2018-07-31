@@ -132,6 +132,7 @@ public class Mandate {
         if (payer != null ? !payer.equals(mandate.payer) : mandate.payer != null) {
             return false;
         }
+
         return createdDate.equals(mandate.createdDate);
     }
 
