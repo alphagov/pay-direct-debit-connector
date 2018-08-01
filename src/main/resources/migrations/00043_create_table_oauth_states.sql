@@ -1,15 +1,14 @@
 --liquibase formatted sql
 
---changeset uk.gov.pay:add_table-oauth_states
-CREATE TABLE oauth_states (
+--changeset uk.gov.pay:add_table-gocardless_partner_app_account_connect_tokens
+CREATE TABLE gocardless_partner_app_account_connect_tokens (
   id BIGSERIAL PRIMARY KEY,
-  gateway_account_external_id VARCHAR(26) NOT NULL,
-  state VARCHAR(26) NOT NULL,
-  active BOOLEAN DEFAULT TRUE,
-  version INTEGER DEFAULT 0 NOT NULL
+  gateway_account_id BIGSERIAL NOT NULL,
+  token VARCHAR(26) NOT NULL,
+  active BOOLEAN DEFAULT TRUE
 );
---rollback drop table oauth_states;
+--rollback drop table gocardless_partner_app_account_connect_tokens;
 
---changeset uk.gov.pay:add_oauth_states_gateway_accounts_fk
-ALTER TABLE oauth_states ADD CONSTRAINT oauth_states_gateway_accounts_fk FOREIGN KEY (gateway_account_external_id) REFERENCES gateway_accounts (external_id);
---rollback drop constraint oauth_states_gateway_accounts_fk;
+--changeset uk.gov.pay:add_gocardless_partner_app_account_connect_tokens_gateway_accounts_fk
+ALTER TABLE gocardless_partner_app_account_connect_tokens ADD CONSTRAINT gocardless_partner_app_account_connect_tokens_gateway_accounts_fk FOREIGN KEY (gateway_account_id) REFERENCES gateway_accounts (id);
+--rollback drop constraint gocardless_partner_app_account_connect_tokens_gateway_accounts_fk;
