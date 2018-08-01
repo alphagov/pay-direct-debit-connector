@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.clients.ClientFactory;
+import uk.gov.pay.directdebit.partnerapp.dao.PartnerAppTokenDao;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
@@ -135,4 +136,8 @@ public class DirectDebitModule extends AbstractModule {
     public PaymentViewDao providePaymentViewDao() {
         return new PaymentViewDao(jdbi);
     }
+    
+    @Provides
+    @Singleton
+    public PartnerAppTokenDao providePartnerAppTokenDao() { return jdbi.onDemand(PartnerAppTokenDao.class); }
 }
