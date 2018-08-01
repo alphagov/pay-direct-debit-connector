@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessServiceUserName;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
@@ -30,8 +31,10 @@ import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class GoCardlessService implements DirectDebitPaymentProviderCommandService {
+
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessEventService.class);
 
     private final GoCardlessClientFactory goCardlessClientFactory;
@@ -101,7 +104,6 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
         return goCardlessPayment.getChargeDate();
     }
 
-
     @Override
     public BankAccountValidationResponse validate(Mandate mandate, BankAccountDetails bankAccountDetails) {
         LOGGER.info("Attempting to call gocardless to validate a bank account, mandate with id: {}", mandate.getExternalId());
@@ -112,6 +114,20 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
         } catch (Exception exc) {
             LOGGER.warn("Exception while validating bank account details in gocardless, message: {}", exc.getMessage());
             return new BankAccountValidationResponse(false);
+        }
+    }
+
+    @Override
+    public Optional<GoCardlessServiceUserName> getServiceUserName(Mandate mandate) {
+        LOGGER.info("Attempting to call gocardless to retrieve service user name from creditor for mandate with id: {}", mandate.getExternalId());
+        try {
+            GoCardlessClientFacade goCardlessClientFacade = goCardlessClientFactory.getClientFor(mandate.getGatewayAccount().getAccessToken());
+            return goCardlessMandateDao.findByMandateId(mandate.getId())
+                    .map(GoCardlessMandate::getGoCardlessCreditorId)
+                    .flatMap(goCardlessClientFacade::getServiceUserName);
+        } catch (Exception exc) {
+            LOGGER.warn("Exception while retrieving service user name from gocardless, message: {}", exc.getMessage());
+            return Optional.empty();
         }
     }
 
@@ -222,4 +238,5 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
             LOGGER.error("Failed to create a {} in gocardless, id: {}, error: {}", resource, id, exc.getMessage());
         }
     }
+
 }

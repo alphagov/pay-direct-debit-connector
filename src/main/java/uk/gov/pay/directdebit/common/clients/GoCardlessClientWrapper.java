@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.common.clients;
 
-
 import com.gocardless.resources.BankDetailsLookup;
+import com.gocardless.resources.Creditor;
 import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Mandate;
@@ -71,6 +71,12 @@ public class GoCardlessClientWrapper {
                 .withAccountNumber(bankAccountDetails.getAccountNumber().toString())
                 .withBranchCode(bankAccountDetails.getSortCode().toString())
                 .withCountryCode("GB")
+                .execute();
+    }
+
+    public Creditor getCreditor(String identity) {
+        return goCardlessClient.creditors()
+                .get(identity)
                 .execute();
     }
 }

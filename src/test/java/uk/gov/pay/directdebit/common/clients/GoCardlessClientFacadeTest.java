@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.common.clients;
 
 import com.gocardless.resources.BankDetailsLookup;
+import com.gocardless.resources.Creditor;
 import com.gocardless.resources.Mandate;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessServiceUserName;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
@@ -19,6 +21,7 @@ import uk.gov.pay.directdebit.payers.model.SortCode;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.AUTOGIRO;
 import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.BACS;
@@ -47,6 +50,12 @@ public class GoCardlessClientFacadeTest {
 
     @Mock
     private Mandate.Links mockMandateLinks;
+
+    @Mock
+    private Creditor mockCreditor;
+
+    @Mock
+    private Creditor.SchemeIdentifier mockSchemeIdentifier;
 
     private GoCardlessClientFacade goCardlessClientFacade;
 
@@ -110,6 +119,32 @@ public class GoCardlessClientFacadeTest {
 
         assertThat(result.getBankName(), is(nullValue()));
         assertThat(result.isBacs(), is(false));
+    }
+
+    @Test
+    public void getServiceUserName_shouldReturnGoCardlessServiceUserNameWhenBacsIsPresent() {
+        String creditorId = "creditor-id-123";
+        GoCardlessServiceUserName goCardlessServiceUserName = GoCardlessServiceUserName.of("testServiceUserName");
+        given(mockGoCardlessClientWrapper.getCreditor(creditorId)).willReturn(mockCreditor);
+        given(mockCreditor.getSchemeIdentifiers()).willReturn(Collections.singletonList(mockSchemeIdentifier));
+        given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.BACS);
+        given(mockSchemeIdentifier.getName()).willReturn(goCardlessServiceUserName.toString());
+
+        Optional<GoCardlessServiceUserName> result = goCardlessClientFacade.getServiceUserName(GoCardlessCreditorId.of(creditorId));
+
+        assertThat(result, is(Optional.of(goCardlessServiceUserName)));
+    }
+
+    @Test
+    public void getServiceUserName_shouldReturnGoCardlessServiceUserNameWhenBacsIsNotPresent() {
+        String creditorId = "creditor-id-123";
+        given(mockGoCardlessClientWrapper.getCreditor(creditorId)).willReturn(mockCreditor);
+        given(mockCreditor.getSchemeIdentifiers()).willReturn(Collections.singletonList(mockSchemeIdentifier));
+        given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.SEPA);
+
+        Optional<GoCardlessServiceUserName> result = goCardlessClientFacade.getServiceUserName(GoCardlessCreditorId.of(creditorId));
+
+        assertThat(result, is(Optional.empty()));
     }
 
     @Test
