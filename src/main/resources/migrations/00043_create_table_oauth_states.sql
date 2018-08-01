@@ -3,7 +3,7 @@
 --changeset uk.gov.pay:add_table-gocardless_partner_app_account_connect_tokens
 CREATE TABLE gocardless_partner_app_account_connect_tokens (
   id BIGSERIAL PRIMARY KEY,
-  gateway_account_id BIGSERIAL NOT NULL,
+  gateway_account_id BIGINT NOT NULL,
   token VARCHAR(26) NOT NULL,
   active BOOLEAN DEFAULT TRUE
 );
