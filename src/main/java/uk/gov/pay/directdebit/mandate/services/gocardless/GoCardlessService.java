@@ -112,7 +112,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
             GoCardlessBankAccountLookup lookup = goCardlessClientFacade.validate(bankAccountDetails);
             return new BankAccountValidationResponse(lookup.isBacs(), lookup.getBankName());
         } catch (Exception exc) {
-            LOGGER.warn("Exception while validating bank account details in GoCardless, message: {}", exc.getMessage());
+            LOGGER.error("Exception while validating bank account details in GoCardless, message: {}", exc.getMessage());
             return new BankAccountValidationResponse(false);
         }
     }
@@ -126,7 +126,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
                     .map(GoCardlessMandate::getGoCardlessCreditorId)
                     .flatMap(goCardlessClientFacade::getServiceUserName);
         } catch (Exception exc) {
-            LOGGER.warn("Exception while retrieving service user name from GoCardless, message: {}", exc.getMessage());
+            LOGGER.error("Exception while retrieving service user name from GoCardless, message: {}", exc.getMessage());
             return Optional.empty();
         }
     }
