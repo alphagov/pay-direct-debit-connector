@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.mandate.model;
 
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.GoCardlessCreditorId;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 
 public class GoCardlessMandate {
 

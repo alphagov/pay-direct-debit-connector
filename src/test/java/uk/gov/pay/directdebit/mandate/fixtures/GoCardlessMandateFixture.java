@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.mandate.fixtures;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.GoCardlessCreditorId;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 

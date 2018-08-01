@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.common.model.subtype.gocardless;
+package uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor;
 
 import java.util.Objects;
 

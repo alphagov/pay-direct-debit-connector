@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.mandate.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.GoCardlessCreditorId;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 
 import java.sql.ResultSet;
