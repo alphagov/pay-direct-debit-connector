@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.junit;
 import io.dropwizard.db.DataSourceFactory;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.GoCardlessCreditorIdArgumentFactory;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 

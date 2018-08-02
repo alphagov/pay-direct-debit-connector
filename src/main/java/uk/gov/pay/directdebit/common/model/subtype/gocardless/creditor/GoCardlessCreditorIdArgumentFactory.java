@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.common.model.subtype.gocardless;
+package uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor;
 
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
 import org.jdbi.v3.core.argument.Argument;

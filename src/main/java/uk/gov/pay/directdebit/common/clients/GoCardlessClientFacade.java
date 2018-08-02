@@ -1,10 +1,14 @@
 package uk.gov.pay.directdebit.common.clients;
 
 import com.gocardless.resources.BankDetailsLookup;
+import com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme;
+import com.gocardless.resources.Creditor;
+import com.gocardless.resources.Creditor.SchemeIdentifier.Scheme;
 import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Payment;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.GoCardlessCreditorId;
+import uk.gov.pay.directdebit.common.model.subtype.SunName;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -19,8 +23,7 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
-
-import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.BACS;
+import java.util.Optional;
 
 public class GoCardlessClientFacade {
 
@@ -67,7 +70,17 @@ public class GoCardlessClientFacade {
         BankDetailsLookup gcBankDetailsLookup = goCardlessClientWrapper.validate(bankAccountDetails);
         return new GoCardlessBankAccountLookup(
                 gcBankDetailsLookup.getBankName(),
-                gcBankDetailsLookup.getAvailableDebitSchemes().contains(BACS));
+                gcBankDetailsLookup.getAvailableDebitSchemes().contains(AvailableDebitScheme.BACS));
     }
 
+    public Optional<SunName> getSunName(GoCardlessCreditorId goCardlessCreditorId) {
+        return goCardlessClientWrapper
+                .getCreditor(goCardlessCreditorId.toString())
+                .getSchemeIdentifiers()
+                .stream()
+                .filter(schemeIdentifier -> Scheme.BACS.equals(schemeIdentifier.getScheme()))
+                .findFirst()
+                .map(Creditor.SchemeIdentifier::getName)
+                .map(SunName::of);
+    }
 }

@@ -7,7 +7,7 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.GoCardlessCreditorIdArgumentFactory;
+import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.dao.mapper.GoCardlessMandateMapper;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 
