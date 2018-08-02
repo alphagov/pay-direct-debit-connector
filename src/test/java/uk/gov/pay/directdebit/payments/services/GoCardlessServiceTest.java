@@ -6,8 +6,8 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
+import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessServiceUserName;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
@@ -138,22 +138,22 @@ public abstract class GoCardlessServiceTest {
     }
 
     @Test
-    public void shouldReturnNotEmptyServiceUserNameOptional_whenBacsSchemeExists() {
-        GoCardlessServiceUserName goCardlessServiceUserName = GoCardlessServiceUserName.of("testServiceUserName");
+    public void shouldReturnSunNameForCreditorId() {
+        SunName sunName = SunName.of("testServiceUserNumber");
         Mandate mandate = mandateFixture.toEntity();
 
         given(mockedGoCardlessMandateDao.findByMandateId(mandateFixture.getId())).willReturn(Optional.of(goCardlessMandate));
-        given(mockedGoCardlessClientFacade.getServiceUserName(goCardlessCreditorId)).willReturn(Optional.of(goCardlessServiceUserName));
+        given(mockedGoCardlessClientFacade.getSunName(goCardlessCreditorId)).willReturn(Optional.of(sunName));
 
-        assertThat(service.getServiceUserName(mandate), is(Optional.of(goCardlessServiceUserName)));
+        assertThat(service.getSunName(mandate), is(Optional.of(sunName)));
     }
 
     @Test
-    public void shouldReturnEmptyServiceUserNameOptional_whenBacsSchemeDoesNotExist() {
+    public void shouldReturnEmptyWhenCreditorIdHasNoSunName() {
         given(mockedGoCardlessMandateDao.findByMandateId(mandateFixture.getId())).willReturn(Optional.of(goCardlessMandate));
-        given(mockedGoCardlessClientFacade.getServiceUserName(goCardlessCreditorId)).willReturn(Optional.empty());
+        given(mockedGoCardlessClientFacade.getSunName(goCardlessCreditorId)).willReturn(Optional.empty());
 
-        assertThat(service.getServiceUserName(mandateFixture.toEntity()), is(Optional.empty()));
+        assertThat(service.getSunName(mandateFixture.toEntity()), is(Optional.empty()));
     }
 
     void verifyMandateFailedException() {

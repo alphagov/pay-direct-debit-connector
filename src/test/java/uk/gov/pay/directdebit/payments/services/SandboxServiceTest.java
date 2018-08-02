@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessServiceUserName;
+import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
@@ -87,10 +87,10 @@ public class SandboxServiceTest {
     }
 
     @Test
-    public void shouldReturnNotEmptyAndPredefinedServiceUserNameOptional() {
-        Optional<GoCardlessServiceUserName> result = service.getServiceUserName(mandateFixture.toEntity());
+    public void shouldReturnSunName() {
+        Optional<SunName> result = service.getSunName(mandateFixture.toEntity());
 
-        assertThat(result, is(Optional.of(GoCardlessServiceUserName.of("Sandbox Service User Name"))));
+        assertThat(result, is(Optional.of(SunName.of("Sandbox SUN Name"))));
     }
 
 }

@@ -8,8 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessServiceUserName;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
@@ -122,27 +122,27 @@ public class GoCardlessClientFacadeTest {
     }
 
     @Test
-    public void getServiceUserName_shouldReturnGoCardlessServiceUserNameWhenBacsIsPresent() {
+    public void getSunName_shouldReturnSunNameWhenBacsIsPresent() {
         String creditorId = "creditor-id-123";
-        GoCardlessServiceUserName goCardlessServiceUserName = GoCardlessServiceUserName.of("testServiceUserName");
+        SunName sunName = SunName.of("testServiceUserNumber");
         given(mockGoCardlessClientWrapper.getCreditor(creditorId)).willReturn(mockCreditor);
         given(mockCreditor.getSchemeIdentifiers()).willReturn(Collections.singletonList(mockSchemeIdentifier));
         given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.BACS);
-        given(mockSchemeIdentifier.getName()).willReturn(goCardlessServiceUserName.toString());
+        given(mockSchemeIdentifier.getName()).willReturn(sunName.toString());
 
-        Optional<GoCardlessServiceUserName> result = goCardlessClientFacade.getServiceUserName(GoCardlessCreditorId.of(creditorId));
+        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.of(creditorId));
 
-        assertThat(result, is(Optional.of(goCardlessServiceUserName)));
+        assertThat(result, is(Optional.of(sunName)));
     }
 
     @Test
-    public void getServiceUserName_shouldReturnGoCardlessServiceUserNameWhenBacsIsNotPresent() {
+    public void getSunName_shouldReturnEmptyWhenCreditorIdHasNoSunName() {
         String creditorId = "creditor-id-123";
         given(mockGoCardlessClientWrapper.getCreditor(creditorId)).willReturn(mockCreditor);
         given(mockCreditor.getSchemeIdentifiers()).willReturn(Collections.singletonList(mockSchemeIdentifier));
         given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.SEPA);
 
-        Optional<GoCardlessServiceUserName> result = goCardlessClientFacade.getServiceUserName(GoCardlessCreditorId.of(creditorId));
+        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.of(creditorId));
 
         assertThat(result, is(Optional.empty()));
     }

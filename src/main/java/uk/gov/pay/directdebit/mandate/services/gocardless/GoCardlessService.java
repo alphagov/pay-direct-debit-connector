@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessServiceUserName;
+import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
@@ -118,13 +118,13 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
     }
 
     @Override
-    public Optional<GoCardlessServiceUserName> getServiceUserName(Mandate mandate) {
+    public Optional<SunName> getSunName(Mandate mandate) {
         LOGGER.info("Attempting to call GoCardless to retrieve service user name from creditor for mandate with id: {}", mandate.getExternalId());
         try {
             GoCardlessClientFacade goCardlessClientFacade = goCardlessClientFactory.getClientFor(mandate.getGatewayAccount().getAccessToken());
             return goCardlessMandateDao.findByMandateId(mandate.getId())
                     .map(GoCardlessMandate::getGoCardlessCreditorId)
-                    .flatMap(goCardlessClientFacade::getServiceUserName);
+                    .flatMap(goCardlessClientFacade::getSunName);
         } catch (Exception exc) {
             LOGGER.error("Exception while retrieving service user name from GoCardless, message: {}", exc.getMessage());
             return Optional.empty();

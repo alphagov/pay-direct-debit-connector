@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessServiceUserName;
+import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.OneOffConfirmationDetails;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
@@ -19,6 +19,6 @@ public interface DirectDebitPaymentProviderCommandService {
 
     BankAccountValidationResponse validate(Mandate mandate, BankAccountDetails bankAccountDetails);
 
-    Optional<GoCardlessServiceUserName> getServiceUserName(Mandate mandate);
+    Optional<SunName> getSunName(Mandate mandate);
 
 }
