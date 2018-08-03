@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.partnerapp.resources;
 
-import io.dropwizard.jersey.params.NonEmptyStringParam;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,12 +35,14 @@ public class PartnerAppTokenResourceTest {
 
     private PartnerAppTokenResource resource;
     private static final String GATEWAY_EXTERNAL_ID = "some-test-id";
+    private static final String REDIRECT_URI = "https://example.com/oauth/complete";
     private static final Map<String, String> REQUEST_MAP = new HashMap<>();
     private PartnerAppTokenEntity tokenEntity;
 
     @Before
     public void SetUp() {
         REQUEST_MAP.put("gateway_account_id", GATEWAY_EXTERNAL_ID);
+        REQUEST_MAP.put("redirect_uri", REDIRECT_URI);
         resource = new PartnerAppTokenResource(mockedTokenService);
         tokenEntity = PartnerAppTokenEntityFixture.aPartnerAppTokenFixture()
                 .withGatewayAccountId(GATEWAY_ACCOUNT_ID)
@@ -50,7 +51,7 @@ public class PartnerAppTokenResourceTest {
 
     @Test
     public void shouldCreateAToken() {
-        when(mockedTokenService.createToken(GATEWAY_EXTERNAL_ID)).thenReturn(Optional.of(tokenEntity));
+        when(mockedTokenService.createToken(GATEWAY_EXTERNAL_ID, REDIRECT_URI)).thenReturn(Optional.of(tokenEntity));
         Response response = resource.createGoCardlessPartnerAppConnectTokenState(REQUEST_MAP);
         String selfLink = "/v1/api/gocardless/partnerapp/tokens/" + tokenEntity.getToken();
 
@@ -64,7 +65,7 @@ public class PartnerAppTokenResourceTest {
 
     @Test
     public void createToken_shouldReturnBadRequest_whenInvalidGatewayAccount() {
-        when(mockedTokenService.createToken(GATEWAY_EXTERNAL_ID)).thenReturn(Optional.empty());
+        when(mockedTokenService.createToken(GATEWAY_EXTERNAL_ID, REDIRECT_URI)).thenReturn(Optional.empty());
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("There is no gateway account with external id [some-test-id]");
         thrown.reportMissingExceptionWithMessage("BadRequestException expected");
@@ -74,33 +75,8 @@ public class PartnerAppTokenResourceTest {
     @Test
     public void createToken_shouldReturnBadRequest_whenMissingGatewayAccountFromRequest() {
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Field(s) missing: [gateway_account_id]");
+        thrown.expectMessage("Field(s) missing: [gateway_account_id, redirect_uri]");
         thrown.reportMissingExceptionWithMessage("BadRequestException expected");
         resource.createGoCardlessPartnerAppConnectTokenState(new HashMap<>());
-    }
-
-    @Test
-    public void disableToken_shouldReturn_OK() {
-        NonEmptyStringParam stringParam = new NonEmptyStringParam(tokenEntity.getToken());
-        when(mockedTokenService.disableToken(stringParam.get().toString(),
-                REQUEST_MAP.get("gateway_account_id"))).thenReturn(Optional.of(1));
-
-        Response response = resource.disableGoCardlessPartnerAppConnectTokenState(stringParam, REQUEST_MAP);
-
-        assertThat(response.getStatus(), is(200));
-    }
-
-    @Test
-    public void getToken_shouldReturnAToken() {
-        NonEmptyStringParam tokenParam = new NonEmptyStringParam(tokenEntity.getToken());
-        NonEmptyStringParam gatewayParam = new NonEmptyStringParam(GATEWAY_EXTERNAL_ID);
-        when(mockedTokenService.findByTokenAndGatewayAccountId(tokenParam.get().toString(),
-                gatewayParam.get().toString())).thenReturn(Optional.of(tokenEntity));
-        Response response = resource.getGoCardlessPartnerAppConnectTokenState(tokenParam, gatewayParam);
-
-        assertThat(response.getStatus(), is(200));
-        PartnerAppTokenResponse entity = (PartnerAppTokenResponse) response.getEntity();
-        assertThat(entity.getToken(), is(tokenEntity.getToken()));
-        assertThat(entity.isActive(), is(tokenEntity.isActive()));
     }
 }

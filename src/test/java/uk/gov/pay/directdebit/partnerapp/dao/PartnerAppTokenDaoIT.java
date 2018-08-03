@@ -48,6 +48,7 @@ public class PartnerAppTokenDaoIT {
         assertThat(mandate.get("token"), is(appTokenEntity.getToken()));
         assertThat(mandate.get("active"), is(true));
         assertThat(mandate.get("gateway_account_id"), is(gatewayAccountFixture.getId()));
+        assertThat(mandate.get("redirect_uri"), is(appTokenEntity.getRedirectUri()));
     }
 
     @Test
@@ -78,5 +79,16 @@ public class PartnerAppTokenDaoIT {
         PartnerAppTokenEntity thatTokenEntity = tokenEntityFixture.toEntity();
         tokenDao.disableToken(thatTokenEntity.getToken(), thatTokenEntity.getGatewayAccountId());
         assertThat(tokenDao.findByGatewayAccountId(gatewayAccountFixture.getId()).isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldFindAnActiveGoCardlessPartnerAppTokenByToken() {
+        tokenEntityFixture.insert(testContext.getJdbi());
+        PartnerAppTokenEntity thatTokenEntity = tokenEntityFixture.toEntity();
+        PartnerAppTokenEntity thisTokenEntity = tokenDao.findActiveTokenByToken(thatTokenEntity.getToken()).get();
+        assertThat(thisTokenEntity.getId(), is(1L));
+        assertThat(thisTokenEntity.getToken(), is(thatTokenEntity.getToken()));
+        assertThat(thisTokenEntity.isActive(), is(true));
+        assertThat(thisTokenEntity.getGatewayAccountId(), is(thatTokenEntity.getGatewayAccountId()));
     }
 }

@@ -38,6 +38,10 @@ executorService:
 adminusers:
   adminUsersUrl: http://localhost:10110
 
+goCardlessConnect:
+  goCardlessConnectTestUrl: https://connect-sandbox.gocardless.com
+  goCardlessConnectLiveUrl: https://connect-sandbox.gocardless.com
+
 jerseyClient:
   timeout: 500ms
   connectionTimeout: 500ms

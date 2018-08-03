@@ -42,11 +42,17 @@ public class DirectDebitConfig extends Configuration {
 
     @NotNull
     private CustomJerseyClientConfiguration customJerseyClient;
+    
+    @NotNull
+    private GoCardlessConnectConfig goCardlessConnectConfig;
 
     @JsonProperty("adminusers")
     public AdminUsersConfig getAdminUsersConfig() {
         return adminUsersConfig;
     }
+    
+    @JsonProperty("goCardlessConnect")
+    public GoCardlessConnectConfig getGoCardlessConnectConfig() { return goCardlessConnectConfig; }
 
     @JsonProperty("database")
     public DataSourceFactory getDataSourceFactory() {

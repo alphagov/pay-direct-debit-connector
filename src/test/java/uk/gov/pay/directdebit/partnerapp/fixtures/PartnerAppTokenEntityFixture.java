@@ -10,6 +10,7 @@ public final class PartnerAppTokenEntityFixture implements DbFixture<PartnerAppT
     private String token = RandomIdGenerator.newId();
     private Long gatewayAccountId;
     private Boolean active;
+    private String redirectUri = "https://example.com/oauth/complete";
 
     private PartnerAppTokenEntityFixture() {
     }
@@ -38,6 +39,11 @@ public final class PartnerAppTokenEntityFixture implements DbFixture<PartnerAppT
         return this;
     }
 
+    public PartnerAppTokenEntityFixture withRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+        return this;
+    }
+
     @Override
     public PartnerAppTokenEntity toEntity() {
         PartnerAppTokenEntity partnerAppTokenEntity = new PartnerAppTokenEntity();
@@ -45,6 +51,8 @@ public final class PartnerAppTokenEntityFixture implements DbFixture<PartnerAppT
         partnerAppTokenEntity.setToken(token);
         partnerAppTokenEntity.setGatewayAccountId(gatewayAccountId);
         partnerAppTokenEntity.setActive(active);
+        partnerAppTokenEntity.setRedirectUri(redirectUri);
+
         return partnerAppTokenEntity;
     }
 
@@ -52,9 +60,9 @@ public final class PartnerAppTokenEntityFixture implements DbFixture<PartnerAppT
     public PartnerAppTokenEntityFixture insert(Jdbi jdbi) {
         jdbi.withHandle(handle ->
                 handle.execute("INSERT INTO \n" +
-                                "  gocardless_partner_app_account_connect_tokens(gateway_account_id, token) \n" +
-                                "  VALUES (?, ?)",
-                        gatewayAccountId, token));
+                                "  gocardless_partner_app_account_connect_tokens(gateway_account_id, token, redirect_uri) \n" +
+                                "  VALUES (?, ?, ?)",
+                        gatewayAccountId, token, redirectUri));
 
         return this;
     }

@@ -15,6 +15,7 @@ public class PartnerAppTokenEntityMapper implements RowMapper<PartnerAppTokenEnt
         partnerAppTokenEntity.setToken(rs.getString("token"));
         partnerAppTokenEntity.setGatewayAccountId(rs.getLong("gateway_account_id"));
         partnerAppTokenEntity.setActive(rs.getBoolean("active"));
+        partnerAppTokenEntity.setRedirectUri(rs.getString("redirect_uri"));
         return partnerAppTokenEntity;
     }
 }

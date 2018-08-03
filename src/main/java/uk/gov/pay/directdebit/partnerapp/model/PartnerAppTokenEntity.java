@@ -7,6 +7,7 @@ public class PartnerAppTokenEntity {
     private String token = RandomIdGenerator.newId();
     private Long gatewayAccountId;
     private Boolean active;
+    private String redirectUri;
 
     //region <Getters/Setters>
 
@@ -41,6 +42,10 @@ public class PartnerAppTokenEntity {
     public void setActive(Boolean active) {
         this.active = active;
     }
+
+    public String getRedirectUri() { return redirectUri; }
+
+    public void setRedirectUri(String redirectUri) { this.redirectUri = redirectUri; }
 
     //endregion
 }

@@ -20,13 +20,14 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class SecurityTokensResource {
     private final TokenService tokenService;
     private final MandateServiceFactory mandateServiceFactory;
+
     @Inject
     public SecurityTokensResource(TokenService tokenService,
-            MandateServiceFactory mandateServiceFactory) {
+                                  MandateServiceFactory mandateServiceFactory) {
         this.tokenService = tokenService;
         this.mandateServiceFactory = mandateServiceFactory;
     }
-    
+
     @GET
     @Path("/v1/tokens/{token}/mandate")
     @Produces(APPLICATION_JSON)
@@ -34,12 +35,11 @@ public class SecurityTokensResource {
     public Response getMandateForToken(@PathParam("token") String token) {
         TokenExchangeDetails tokenExchangeDetails = mandateServiceFactory.getMandateService().getMandateFor(token);
         TokenResponse response = TokenResponse.from(
-                tokenExchangeDetails.getMandate(), 
+                tokenExchangeDetails.getMandate(),
                 tokenExchangeDetails.getTransactionExternalId());
         return Response.ok().entity(response).build();
     }
-    
-    
+
     @DELETE
     @Path("/v1/tokens/{token}")
     @Timed

@@ -14,7 +14,7 @@ import java.util.Optional;
 @RegisterRowMapper(PartnerAppTokenEntityMapper.class)
 public interface PartnerAppTokenDao {
 
-    @SqlUpdate("INSERT INTO gocardless_partner_app_account_connect_tokens(gateway_account_id, token) VALUES (:gatewayAccountId, :token)")
+    @SqlUpdate("INSERT INTO gocardless_partner_app_account_connect_tokens(gateway_account_id, token, redirect_uri) VALUES (:gatewayAccountId, :token, :redirectUri)")
     @GetGeneratedKeys
     Long insert(@BindBean PartnerAppTokenEntity token);
 
@@ -27,5 +27,8 @@ public interface PartnerAppTokenDao {
 
     @SqlQuery("SELECT * FROM gocardless_partner_app_account_connect_tokens g WHERE g.token = :token AND g.gateway_account_id = :gatewayAccountId")
     Optional<PartnerAppTokenEntity> findByTokenAndGatewayAccountId(@Bind("token") String token, @Bind("gatewayAccountId") Long gatewayAccountId);
+
+    @SqlQuery("SELECT * FROM gocardless_partner_app_account_connect_tokens g WHERE g.token = :token AND g.active=TRUE")
+    Optional<PartnerAppTokenEntity> findActiveTokenByToken(@Bind("token") String token);
 
 }
