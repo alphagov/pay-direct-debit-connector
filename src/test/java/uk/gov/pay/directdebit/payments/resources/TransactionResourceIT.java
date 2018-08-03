@@ -7,13 +7,6 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -36,24 +29,32 @@ import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.payments.resources.TransactionResource.CHARGES_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.TransactionResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubGetCreditor;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
@@ -73,6 +74,7 @@ public class TransactionResourceIT {
     private static final String JSON_STATE_KEY = "state.status";
     private static final long AMOUNT = 6234L;
     private GatewayAccountFixture testGatewayAccount;
+
     @DropwizardTestContext
     private TestContext testContext;
 
@@ -85,6 +87,7 @@ public class TransactionResourceIT {
     public void tearDown() {
         wireMockAdminUsers.shutdown();
     }
+
     @Before
     public void setUp() {
         wireMockAdminUsers.start();
@@ -139,7 +142,7 @@ public class TransactionResourceIT {
     }
 
     @Test
-    public void shouldCollectAPayment() throws Exception {
+    public void shouldCollectAPayment_forSandbox() throws Exception {
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
@@ -159,21 +162,21 @@ public class TransactionResourceIT {
 
         String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
                 .replace("{accountId}", accountExternalId);
-
-        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
+        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
         String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-                "\"gateway_account_external_id\": \"" + testGatewayAccount.getExternalId() + "\"," +
-                "\"template\": \"ON_DEMAND_PAYMENT_CONFIRMED\"," +
-                "\"personalisation\": " +
-                "{" +
-                "\"amount\": \"" + BigDecimal.valueOf(AMOUNT, 2).toString() + "\", " +
-                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-                "\"bank account last 2 digits\": \"" +  lastTwoDigitsBankAccount + "\", " +
-                "\"collection date\": \"" +  chargeDate + "\", " +
-                "\"statement name\": \"THE-CAKE-IS-A-LIE\", " +
-                "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
-                "}" +
+        // language=JSON
+        String emailPayloadBody = "{\n" +
+                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
+                "  \"gateway_account_external_id\": \"" + testGatewayAccount.getExternalId() + "\",\n" +
+                "  \"template\": \"ON_DEMAND_PAYMENT_CONFIRMED\",\n" +
+                "  \"personalisation\": {\n" +
+                "    \"amount\": \"" + BigDecimal.valueOf(AMOUNT, 2).toString() + "\",\n" +
+                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
+                "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
+                "    \"collection date\": \"" + chargeDate + "\",\n" +
+                "    \"statement name\": \"Sandbox SUN Name\",\n" +
+                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
+                "  }\n" +
                 "}";
 
         wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
@@ -191,7 +194,7 @@ public class TransactionResourceIT {
                 .body(JSON_REFERENCE_KEY, is(expectedReference))
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
                 .contentType(JSON);
-        
+
         String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
 
         Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getTransactionByExternalId(externalTransactionId);
@@ -226,22 +229,25 @@ public class TransactionResourceIT {
                 .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId().toString())
                 .build());
 
+        String sunName = "Test SUN Name";
         String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
                 .replace("{accountId}", accountExternalId);
         stubCreatePayment(gatewayAccountFixture.getAccessToken().toString(), AMOUNT, goCardlessMandate.getGoCardlessMandateId(), null);
-        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
-        String emailPayloadBody = "{\"address\": \"" + payerFixture.getEmail() + "\", " +
-                "\"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\"," +
-                "\"template\": \"ON_DEMAND_PAYMENT_CONFIRMED\"," +
-                "\"personalisation\": " +
-                "{" +
-                "\"amount\": \"" + BigDecimal.valueOf(AMOUNT, 2).toString() + "\", " +
-                "\"mandate reference\": \"" + mandateFixture.getMandateReference() + "\", " +
-                "\"bank account last 2 digits\": \"" +  lastTwoDigitsBankAccount + "\", " +
-                "\"collection date\": \"21/05/2014\", " +
-                "\"statement name\": \"THE-CAKE-IS-A-LIE\", " +
-                "\"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"" +
-                "}" +
+        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
+        stubGetCreditor(gatewayAccountFixture.getAccessToken().toString(), goCardlessMandate.getGoCardlessCreditorId().toString(), sunName);
+        // language=JSON
+        String emailPayloadBody = "{\n" +
+                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
+                "  \"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\",\n" +
+                "  \"template\": \"ON_DEMAND_PAYMENT_CONFIRMED\",\n" +
+                "  \"personalisation\": {\n" +
+                "    \"amount\": \"" + BigDecimal.valueOf(AMOUNT, 2).toString() + "\",\n" +
+                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
+                "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
+                "    \"collection date\": \"21/05/2014\",\n" +
+                "    \"statement name\": \"" + sunName + "\",\n" +
+                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
+                "  }\n" +
                 "}";
 
         wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
@@ -300,7 +306,6 @@ public class TransactionResourceIT {
                 .contentType(JSON);
     }
 
-    
     @Test
     public void shouldRetrieveATransaction_fromPublicApiEndpoint() {
 
@@ -400,7 +405,7 @@ public class TransactionResourceIT {
     public void shouldReturn400IfFieldsInvalidSize() throws JsonProcessingException {
         String accountId = testGatewayAccount.getExternalId();
 
-        String postBody =  new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(JSON_AMOUNT_KEY, AMOUNT)
                 .put(JSON_REFERENCE_KEY, "reference")
                 .put(JSON_DESCRIPTION_KEY, RandomStringUtils.randomAlphabetic(256))

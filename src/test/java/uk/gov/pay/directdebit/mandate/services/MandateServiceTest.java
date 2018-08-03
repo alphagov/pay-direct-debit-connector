@@ -18,18 +18,11 @@ import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
-import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
-import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
-import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -38,28 +31,20 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_PENDING;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MandateServiceTest {
@@ -177,7 +162,7 @@ public class MandateServiceTest {
     @Test
     public void shouldCreateAMandateForSandbox_withCustomGeneratedReference() {
         Mandate mandate = getMandateForProvider(PaymentProvider.SANDBOX);
-       
+
         assertThat(mandate.getMandateReference(), is(not("gocardless-default")));
     }
 
@@ -203,9 +188,9 @@ public class MandateServiceTest {
         when(mockedMandateDao.insert(any(Mandate.class))).thenReturn(1L);
 
         CreateMandateRequest createMandateRequest = CreateMandateRequest.of(getMandateRequestPayload());
-        
+
         Mandate mandate = service.createMandate(createMandateRequest, gatewayAccount.getExternalId());
-        
+
         verify(mockedMandateStateUpdateService).mandateCreatedFor(mandate);
         return mandate;
     }

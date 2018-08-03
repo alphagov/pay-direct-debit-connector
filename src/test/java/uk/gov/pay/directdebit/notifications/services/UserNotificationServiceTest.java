@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
+import uk.gov.pay.directdebit.common.model.subtype.SunName;
+import uk.gov.pay.directdebit.common.services.SunService;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
@@ -17,8 +19,10 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Optional;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
@@ -34,6 +38,8 @@ public class UserNotificationServiceTest {
     private LinksConfig mockLinksConfig;
     @Mock
     private UserNotificationService userNotificationService;
+    @Mock
+    private SunService mockSunService;
 
     private static final String EMAIL = "ksdfhkjsdh@sdjkfh.test";
     private PayerFixture payerFixture = aPayerFixture().withEmail(EMAIL);
@@ -49,11 +55,11 @@ public class UserNotificationServiceTest {
     public void setUp() {
         when(mockDirectDebitConfig.getLinks()).thenReturn(mockLinksConfig);
         when(mockLinksConfig.getDirectDebitGuaranteeUrl()).thenReturn("https://frontend.url.test/direct-debit-guarantee");
+        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig, mockSunService);
     }
 
     @Test
     public void shouldSendMandateFailedEmail() {
-        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
@@ -69,11 +75,12 @@ public class UserNotificationServiceTest {
                 .withMandateType(MandateType.ON_DEMAND)
                 .withPayerFixture(payerFixture)
                 .toEntity();
-        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
+        SunName sunName = SunName.of("test sun Name");
+        when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("mandate reference", mandate.getMandateReference());
         emailPersonalisation.put("bank account last 2 digits", mandate.getPayer().getAccountNumberLastTwoDigits());
-        emailPersonalisation.put("statement name", UserNotificationService.PLACEHOLDER_STATEMENT_NAME);
+        emailPersonalisation.put("statement name", sunName.toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
         userNotificationService.sendOnDemandMandateCreatedEmailFor(mandate);
@@ -81,9 +88,18 @@ public class UserNotificationServiceTest {
         verify(mockAdminUsersClient).sendEmail(EmailTemplate.ON_DEMAND_MANDATE_CREATED, mandate, emailPersonalisation);
     }
 
+    public void shouldNotSendOnDemandMandateCreatedEmail_whenSunNameUnavailable() {
+        Mandate mandate = MandateFixture.aMandateFixture()
+                .withMandateType(MandateType.ON_DEMAND)
+                .withPayerFixture(payerFixture)
+                .toEntity();
+        when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.empty());
+        userNotificationService.sendOnDemandMandateCreatedEmailFor(mandate);
+        verifyZeroInteractions(mockAdminUsersClient);
+    }
+
     @Test
     public void shouldSendMandateCancelledEmail() {
-        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
@@ -95,41 +111,69 @@ public class UserNotificationServiceTest {
 
     @Test
     public void shouldSendOneOffPaymentConfirmedEmail() {
-        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
+        Mandate mandate = mandateFixture
+                .withMandateType(MandateType.ONE_OFF)
+                .withPayerFixture(payerFixture)
+                .toEntity();
+
+        transaction.setMandate(mandate);
+
+        SunName sunName = SunName.of("test sun Name");
+        when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
 
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("amount", "123.45");
-        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
+        emailPersonalisation.put("mandate reference", mandate.getMandateReference());
         emailPersonalisation.put("collection date", "21/05/2018");
         emailPersonalisation.put("bank account last 2 digits", payerFixture.getAccountNumberLastTwoDigits());
-        emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");
+        emailPersonalisation.put("statement name", sunName.toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
+
 
         userNotificationService.sendOneOffPaymentConfirmedEmailFor(transaction, LocalDate.parse("2018-05-21"));
 
-        verify(mockAdminUsersClient).sendEmail(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, mandateFixture.toEntity(), emailPersonalisation);
+        verify(mockAdminUsersClient).sendEmail(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, mandate, emailPersonalisation);
+    }
+
+    @Test
+    public void shouldNotSendOneOffPaymentConfirmedEmail_whenSunNameUnavailable() {
+        Mandate mandate = mandateFixture
+                .withMandateType(MandateType.ONE_OFF)
+                .withPayerFixture(payerFixture)
+                .toEntity();
+
+        transaction.setMandate(mandate);
+
+        when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.empty());
+        userNotificationService.sendOneOffPaymentConfirmedEmailFor(transaction, LocalDate.parse("2018-05-21"));
+        verifyZeroInteractions(mockAdminUsersClient);
     }
 
     @Test
     public void shouldSendOnDemandPaymentConfirmedEmail() {
-        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
+        Mandate mandate = mandateFixture
+                .withMandateType(MandateType.ON_DEMAND)
+                .withPayerFixture(payerFixture)
+                .toEntity();
 
+        transaction.setMandate(mandate);
+
+        SunName sunName = SunName.of("test sun Name");
+        when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("amount", "123.45");
-        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
+        emailPersonalisation.put("mandate reference", mandate.getMandateReference());
         emailPersonalisation.put("collection date", "21/05/2018");
         emailPersonalisation.put("bank account last 2 digits", payerFixture.getAccountNumberLastTwoDigits());
-        emailPersonalisation.put("statement name", "THE-CAKE-IS-A-LIE");
+        emailPersonalisation.put("statement name", sunName.toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
-
         userNotificationService.sendOnDemandPaymentConfirmedEmailFor(transaction, LocalDate.parse("2018-05-21"));
 
-        verify(mockAdminUsersClient).sendEmail(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, mandateFixture.toEntity(), emailPersonalisation);
+        verify(mockAdminUsersClient).sendEmail(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, mandate, emailPersonalisation);
     }
 
     @Test
     public void shouldSendPaymentFailedEmail() {
-        userNotificationService = new UserNotificationService(mockAdminUsersClient, mockDirectDebitConfig);
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 

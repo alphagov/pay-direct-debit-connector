@@ -6,17 +6,8 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import org.hamcrest.MatcherAssert;
 import org.junit.After;
-import javax.ws.rs.core.Response.Status;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,15 +17,26 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
-import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
@@ -61,6 +63,7 @@ import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateMandate;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
+import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubGetCreditor;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
@@ -212,7 +215,7 @@ public class MandateResourceIT {
                 .contentType(JSON)
                 .body("message", is("Invalid operation on mandate of type ONE_OFF"));
     }
-    
+
     @Test
     public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenATransactionHasBeenCreated() {
         String accountExternalId = gatewayAccountFixture.getExternalId();
@@ -455,7 +458,7 @@ public class MandateResourceIT {
                 "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
                 "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
                 "    \"collection date\": \"" + chargeDate + "\",\n" +
-                "    \"statement name\": \"THE-CAKE-IS-A-LIE\",\n" +
+                "    \"statement name\": \"Sandbox SUN Name\",\n" +
                 "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
                 "  }\n" +
                 "}";
@@ -504,7 +507,7 @@ public class MandateResourceIT {
                 "  \"personalisation\": {\n" +
                 "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
                 "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
-                "    \"statement name\": \"THE-CAKE-IS-A-LIE\",\n" +
+                "    \"statement name\": \"Sandbox SUN Name\",\n" +
                 "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
                 "  }\n" +
                 "}\n";
@@ -541,7 +544,10 @@ public class MandateResourceIT {
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
-
+        GoCardlessMandate goCardlessMandate = GoCardlessMandateFixture.aGoCardlessMandateFixture()
+                .withMandateId(mandateFixture.getId())
+                .insert(testContext.getJdbi())
+                .toEntity();
         TransactionFixture transactionFixture = aTransactionFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.NEW)
@@ -549,6 +555,7 @@ public class MandateResourceIT {
 
         String customerId = "CU000358S3A2FP";
         String customerBankAccountId = "BA0002WR3Z193A";
+        String sunName = "Test SUN Name";
         GoCardlessCustomerFixture goCardlessCustomerFixture = aGoCardlessCustomerFixture().
                 withCustomerId(customerId)
                 .withCustomerBankAccountId(customerBankAccountId)
@@ -559,6 +566,7 @@ public class MandateResourceIT {
         stubCreatePayment(gatewayAccountFixture.getAccessToken().toString(), transactionFixture.getAmount(), "MD123", transactionFixture.getExternalId());
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
+        stubGetCreditor(gatewayAccountFixture.getAccessToken().toString(), goCardlessMandate.getGoCardlessCreditorId().toString(), sunName);
 
         // language=JSON
         String emailPayloadBody = "{\n" +
@@ -570,7 +578,7 @@ public class MandateResourceIT {
                 "    \"mandate reference\": \"REF-123\",\n" +
                 "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
                 "    \"collection date\": \"21/05/2014\",\n" +
-                "    \"statement name\": \"THE-CAKE-IS-A-LIE\",\n" +
+                "    \"statement name\": \"" + sunName + "\",\n" +
                 "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
                 "  }\n" +
                 "}\n";
@@ -611,9 +619,14 @@ public class MandateResourceIT {
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
+        GoCardlessMandate goCardlessMandate = GoCardlessMandateFixture.aGoCardlessMandateFixture()
+                .withMandateId(mandateFixture.getId())
+                .insert(testContext.getJdbi())
+                .toEntity();
 
         String customerId = "CU000358S3A2FP";
         String customerBankAccountId = "BA0002WR3Z193A";
+        String sunName = "Test SUN Name";
         GoCardlessCustomerFixture goCardlessCustomerFixture = aGoCardlessCustomerFixture().
                 withCustomerId(customerId)
                 .withCustomerBankAccountId(customerBankAccountId)
@@ -621,8 +634,9 @@ public class MandateResourceIT {
         stubCreateCustomer(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId);
         stubCreateCustomerBankAccount(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
         stubCreateMandate(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
+        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
+        stubGetCreditor(gatewayAccountFixture.getAccessToken().toString(), goCardlessMandate.getGoCardlessCreditorId().toString(), sunName);
 
-        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length()-2);
         // language=JSON
         String emailPayloadBody = "{\n" +
                 "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
@@ -631,7 +645,7 @@ public class MandateResourceIT {
                 "  \"personalisation\": {\n" +
                 "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
                 "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
-                "    \"statement name\": \"THE-CAKE-IS-A-LIE\",\n" +
+                "    \"statement name\": \"" + sunName + "\",\n" +
                 "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
                 "  }\n" +
                 "}\n";
@@ -657,7 +671,7 @@ public class MandateResourceIT {
         List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
         MatcherAssert.assertThat(transactionsForMandate, is(empty()));
     }
-    
+
     private TransactionFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
         return aTransactionFixture()
                 .withMandateFixture(mandateFixture)

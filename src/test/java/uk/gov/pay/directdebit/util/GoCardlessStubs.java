@@ -3,11 +3,11 @@ package uk.gov.pay.directdebit.util;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -21,9 +21,19 @@ import static uk.gov.pay.directdebit.util.TestRequestResponsesLoader.GOCARDLESS_
 import static uk.gov.pay.directdebit.util.TestRequestResponsesLoader.GOCARDLESS_CREATE_MANDATE_SUCCESS_RESPONSE;
 import static uk.gov.pay.directdebit.util.TestRequestResponsesLoader.GOCARDLESS_CREATE_PAYMENT_REQUEST;
 import static uk.gov.pay.directdebit.util.TestRequestResponsesLoader.GOCARDLESS_CREATE_PAYMENT_SUCCESS_RESPONSE;
+import static uk.gov.pay.directdebit.util.TestRequestResponsesLoader.GOCARDLESS_GET_CREDITOR_WITH_BACS_SUCCESS_RESPONSE;
 import static uk.gov.pay.directdebit.util.TestRequestResponsesLoader.load;
 
 public class GoCardlessStubs {
+
+    public static void stubGetCreditor(String accessToken, String goCardlessCreditorId, String goCardlessSun) {
+        String getCreditorResponseBody = load(GOCARDLESS_GET_CREDITOR_WITH_BACS_SUCCESS_RESPONSE)
+                .replace("{{gocardless_creditor_id}}", goCardlessCreditorId)
+                .replace("{{gocardless_sun}}", goCardlessSun);
+
+        stubGetCallsFor("/creditors/" + goCardlessCreditorId, accessToken, 200, getCreditorResponseBody);
+    }
+
     public static void stubCreateCustomer(String accessToken, String idempotencyKey, PayerFixture payerFixture, String goCardlessCustomerId) {
         String customerRequestExpectedBody = load(GOCARDLESS_CREATE_CUSTOMER_REQUEST)
                 .replace("{{email}}", payerFixture.getEmail())
@@ -35,7 +45,7 @@ public class GoCardlessStubs {
                 .replace("{{given_name}}", payerFixture.getName())
                 .replace("{{gocardless_customer_id}}", goCardlessCustomerId);
 
-        stubCallsFor("/customers", accessToken, 200, idempotencyKey, customerRequestExpectedBody, customerResponseBody);
+        stubPostCallsFor("/customers", accessToken, 200, idempotencyKey, customerRequestExpectedBody, customerResponseBody);
     }
 
     public static void stubCreateCustomerBankAccount(String accessToken, String idempotencyKey, PayerFixture payerFixture, String goCardlessCustomerId, String goCardlessBankAccountId) {
@@ -49,7 +59,7 @@ public class GoCardlessStubs {
                 .replace("{{account_holder_name}}", payerFixture.getName())
                 .replace("{{gocardless_customer_id}}", goCardlessCustomerId)
                 .replace("{{gocardless_customer_bank_account_id}}", goCardlessBankAccountId);
-        stubCallsFor("/customer_bank_accounts", accessToken,200, idempotencyKey, customerBankAccountRequestExpectedBody, customerBankAccountResponseBody);
+        stubPostCallsFor("/customer_bank_accounts", accessToken, 200, idempotencyKey, customerBankAccountRequestExpectedBody, customerBankAccountResponseBody);
     }
 
     public static void stubCreateMandate(String accessToken, String idempotencyKey, GoCardlessCustomerFixture goCardlessCustomerFixture) {
@@ -60,7 +70,7 @@ public class GoCardlessStubs {
                 .replace("{{customer_bank_account_id}}", goCardlessCustomerFixture.getCustomerBankAccountId())
                 .replace("{{customer_id}}", goCardlessCustomerFixture.getCustomerId())
                 .replace("{{gocardless_customer_bank_account_id}}", goCardlessCustomerFixture.getCustomerBankAccountId());
-        stubCallsFor("/mandates", accessToken, 200, idempotencyKey, mandateRequestExpectedBody, mandateResponseBody);
+        stubPostCallsFor("/mandates", accessToken, 200, idempotencyKey, mandateRequestExpectedBody, mandateResponseBody);
     }
 
     public static void stubCreatePayment(String accessToken, Long amount, String goCardlessMandateId, String idempotencyKey) {
@@ -71,10 +81,23 @@ public class GoCardlessStubs {
         String paymentResponseBody = load(GOCARDLESS_CREATE_PAYMENT_SUCCESS_RESPONSE)
                 .replace("{{amount}}", String.valueOf(amount))
                 .replace("{{gocardless_mandate_id}}", goCardlessMandateId);
-        stubCallsFor("/payments", accessToken,200, idempotencyKey, paymentRequestExpectedBody, paymentResponseBody);
+        stubPostCallsFor("/payments", accessToken, 200, idempotencyKey, paymentRequestExpectedBody, paymentResponseBody);
     }
-    
-    private static void stubCallsFor(String url, String accessToken, int statusCode, String idempotencyKey, String requestBody, String responseBody) {
+
+    private static void stubGetCallsFor(String url, String accessToken, int statusCode, String responseBody) {
+        MappingBuilder getRequest = get(urlPathEqualTo(url));
+        getRequest
+                .withHeader("Authorization", equalTo("Bearer " + accessToken))
+                .willReturn(
+                        aResponse()
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                                .withStatus(statusCode)
+                                .withBody(responseBody)
+                );
+        stubFor(getRequest);
+    }
+
+    private static void stubPostCallsFor(String url, String accessToken, int statusCode, String idempotencyKey, String requestBody, String responseBody) {
         MappingBuilder postRequest = post(urlPathEqualTo(url));
         if (idempotencyKey != null) {
             postRequest.withHeader("Idempotency-Key", equalTo(idempotencyKey));
@@ -90,4 +113,5 @@ public class GoCardlessStubs {
                 );
         stubFor(postRequest);
     }
+
 }
