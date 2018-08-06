@@ -1,7 +1,11 @@
 package uk.gov.pay.directdebit.notifications.services;
 
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import uk.gov.pay.directdebit.common.model.subtype.SunName;
+import uk.gov.pay.directdebit.common.services.SunService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
@@ -11,10 +15,9 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 public class UserNotificationService {
-
-    public static final String PLACEHOLDER_STATEMENT_NAME = "THE-CAKE-IS-A-LIE";
 
     private static final String DD_GUARANTEE_KEY = "dd guarantee link";
     private static final String MANDATE_REFERENCE_KEY = "mandate reference";
@@ -22,15 +25,18 @@ public class UserNotificationService {
     private static final String COLLECTION_DATE_KEY = "collection date";
     private static final String AMOUNT_KEY = "amount";
     private static final String BANK_ACCOUNT_LAST_DIGITS_KEY = "bank account last 2 digits";
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(UserNotificationService.class);
 
     private AdminUsersClient adminUsersClient;
     private final DirectDebitConfig directDebitConfig;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private final SunService sunService;
 
     @Inject
-    public UserNotificationService(AdminUsersClient adminUsersClient, DirectDebitConfig directDebitConfig) {
+    public UserNotificationService(AdminUsersClient adminUsersClient, DirectDebitConfig directDebitConfig, SunService sunService) {
         this.adminUsersClient = adminUsersClient;
         this.directDebitConfig = directDebitConfig;
+        this.sunService = sunService;
     }
 
     public void sendMandateFailedEmailFor(Mandate mandate) {
@@ -43,11 +49,18 @@ public class UserNotificationService {
     }
 
     public void sendOnDemandMandateCreatedEmailFor(Mandate mandate) {
-        adminUsersClient.sendEmail(EmailTemplate.ON_DEMAND_MANDATE_CREATED, mandate,
+        EmailTemplate template = EmailTemplate.ON_DEMAND_MANDATE_CREATED;
+        Optional<SunName> sunName = sunService.getSunNameFor(mandate);
+        if (!sunName.isPresent()) {
+            logMissingSunName(template, mandate);
+            return;
+        }
+
+        adminUsersClient.sendEmail(template, mandate,
                 ImmutableMap.<String, String>builder()
                         .put(MANDATE_REFERENCE_KEY, mandate.getMandateReference())
                         .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().getAccountNumberLastTwoDigits())
-                        .put(STATEMENT_NAME_KEY, PLACEHOLDER_STATEMENT_NAME)
+                        .put(STATEMENT_NAME_KEY, sunName.get().toString())
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
                         .build()
         );
@@ -71,13 +84,20 @@ public class UserNotificationService {
     }
 
     private void sendPaymentConfirmedEmailFor(EmailTemplate template, Transaction transaction, LocalDate earliestChargeDate) {
-        adminUsersClient.sendEmail(template, transaction.getMandate(),
+        Mandate mandate = transaction.getMandate();
+        Optional<SunName> sunName = sunService.getSunNameFor(mandate);
+        if (!sunName.isPresent()) {
+            logMissingSunName(template, mandate);
+            return;
+        }
+
+        adminUsersClient.sendEmail(template, mandate,
                 ImmutableMap.<String, String>builder()
                         .put(AMOUNT_KEY, formatToPounds(transaction.getAmount()))
                         .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate))
-                        .put(MANDATE_REFERENCE_KEY, transaction.getMandate().getMandateReference())
-                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, transaction.getMandate().getPayer().getAccountNumberLastTwoDigits())
-                        .put(STATEMENT_NAME_KEY, PLACEHOLDER_STATEMENT_NAME)
+                        .put(MANDATE_REFERENCE_KEY, mandate.getMandateReference())
+                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().getAccountNumberLastTwoDigits())
+                        .put(STATEMENT_NAME_KEY, sunName.get().toString())
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
                         .build());
     }
@@ -91,6 +111,11 @@ public class UserNotificationService {
 
     private static String formatToPounds(long amountInPence) {
         return BigDecimal.valueOf(amountInPence, 2).toString();
+    }
+
+    private void logMissingSunName(EmailTemplate template, Mandate mandate) {
+        LOGGER.error("Mandate {} does not have a Service User Number. " +
+                "Email with template {} is not being sent.", mandate.getExternalId(), template);
     }
 
 }

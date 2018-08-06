@@ -1,0 +1,40 @@
+{
+  "creditors": {
+    "id": "{{gocardless_creditor_id}}",
+    "created_at": "2017-02-16T12:34:56.000Z",
+    "name": "Creditor Name",
+    "address_line1": "123 Street",
+    "address_line2": null,
+    "address_line3": null,
+    "city": "London",
+    "region": null,
+    "postal_code": "AB CDE",
+    "country_code": "GB",
+    "logo_url": null,
+    "verification_status": "successful",
+    "can_create_refunds": false,
+    "scheme_identifiers": [
+      {
+        "name": "{{gocardless_sun}}",
+        "scheme": "bacs",
+        "reference": "420042",
+        "minimum_advance_notice": 3,
+        "currency": "GBP",
+        "address_line1": "123 Example Road",
+        "address_line2": null,
+        "address_line3": null,
+        "city": "London",
+        "region": null,
+        "postal_code": "ABC XYZ",
+        "country_code": "GB",
+        "email": "email@example.com",
+        "phone_number": "+44 3069 990000",
+        "can_specify_mandate_reference": false
+      }
+    ],
+    "links": {
+      "default_gbp_payout_account": "BA123",
+      "default_eur_payout_account": "BA456"
+    }
+  }
+}
