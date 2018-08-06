@@ -13,10 +13,6 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-
-import java.util.concurrent.TimeUnit;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
@@ -45,6 +41,10 @@ import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.EnumSet.of;
 import static javax.servlet.DispatcherType.REQUEST;
@@ -77,7 +77,6 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     public void run(DirectDebitConfig configuration, Environment environment) throws Exception {
         DataSourceFactory dataSourceFactory = configuration.getDataSourceFactory();
         final Jdbi jdbi = createJdbi(dataSourceFactory);
-        
 
         SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
         final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment, jdbi, socketFactory));
@@ -117,10 +116,10 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 dataSourceFactory.getPassword()
         );
         jdbi.installPlugin(new SqlObjectPlugin());
-        
+
         return jdbi;
     }
-    
+
     @Inject
     private void setupSSL(DirectDebitConfig configuration, SSLSocketFactory sslSocketFactory) {
         HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);
