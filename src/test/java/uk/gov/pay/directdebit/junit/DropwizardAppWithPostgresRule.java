@@ -22,12 +22,12 @@ public class DropwizardAppWithPostgresRule implements TestRule {
     private final DropwizardAppRule<DirectDebitConfig> app;
     private final String configFilePath;
     private final RuleChain rules;
-    
+
     private TestContext testContext;
 
     public DropwizardAppWithPostgresRule() {
         configFilePath = resourceFilePath("config/test-it-config.yaml");
-        getOrCreate("govukpay/postgres:9.4.4");
+        getOrCreate("govukpay/postgres:9.6.6");
         ConfigOverride[] configOverride = {config("database.url", getDbUri()), config("database.user", DB_USERNAME), config("database.password", DB_PASSWORD)};
         app = new DropwizardAppRule<>(
                 DirectDebitConnectorApp.class,

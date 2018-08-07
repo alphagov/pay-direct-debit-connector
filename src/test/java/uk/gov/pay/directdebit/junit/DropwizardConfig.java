@@ -59,9 +59,7 @@ public @interface DropwizardConfig {
     /**
      * Docker Postgres image
      *
-     * Notes:
-     *
      * @return String
      */
-    String postgresDockerImage() default "govukpay/postgres:9.4.4";
+    String postgresDockerImage() default "govukpay/postgres:9.6.6";
 }
