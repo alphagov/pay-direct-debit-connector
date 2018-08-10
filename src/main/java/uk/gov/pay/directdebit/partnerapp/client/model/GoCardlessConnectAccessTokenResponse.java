@@ -6,13 +6,9 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoCardlessConnectClientResponse {
+public class GoCardlessConnectAccessTokenResponse {
     @JsonProperty("access_token")
     private PaymentProviderAccessToken accessToken;
-    @JsonProperty("scope")
-    private String scope;
-    @JsonProperty("token_type")
-    private String tokenType;
     @JsonProperty("organisation_id")
     private PaymentProviderOrganisationIdentifier organisationId;
     @JsonProperty("email")
@@ -56,22 +52,6 @@ public class GoCardlessConnectClientResponse {
         this.organisationId = organisationId;
     }
 
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
-
-    public String getTokenType() {
-        return tokenType;
-    }
-
-    public void setTokenType(String tokenType) {
-        this.tokenType = tokenType;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -79,19 +59,16 @@ public class GoCardlessConnectClientResponse {
     public void setEmail(String email) {
         this.email = email;
     }
-    //endregion
-
 
     @Override
     public String toString() {
         return "GoCardlessConnectClientResponse{" +
-                "accessToken=" + accessToken +
-                ", scope='" + scope + '\'' +
-                ", tokenType='" + tokenType + '\'' +
                 ", organisationId=" + organisationId +
-                ", email='" + email + '\'' +
                 ", error='" + error + '\'' +
                 ", errorDescription='" + errorDescription + '\'' +
                 '}';
     }
+
+    //endregion
+
 }

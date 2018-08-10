@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.partnerapp.fixtures;
 
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
-import uk.gov.pay.directdebit.partnerapp.client.model.GoCardlessConnectClientResponse;
+import uk.gov.pay.directdebit.partnerapp.client.model.GoCardlessConnectAccessTokenResponse;
 
 public final class GoCardlessConnectClientResponseBuilder {
     private PaymentProviderAccessToken accessToken = PaymentProviderAccessToken.of("some-access-token");
@@ -43,13 +43,11 @@ public final class GoCardlessConnectClientResponseBuilder {
         return this;
     }
 
-    public GoCardlessConnectClientResponse build() {
-        GoCardlessConnectClientResponse goCardlessConnectClientResponse = new GoCardlessConnectClientResponse();
-        goCardlessConnectClientResponse.setAccessToken(accessToken);
-        goCardlessConnectClientResponse.setScope(scope);
-        goCardlessConnectClientResponse.setTokenType(tokenType);
-        goCardlessConnectClientResponse.setOrganisationId(organisationId);
-        goCardlessConnectClientResponse.setEmail(email);
-        return goCardlessConnectClientResponse;
+    public GoCardlessConnectAccessTokenResponse build() {
+        GoCardlessConnectAccessTokenResponse goCardlessConnectAccessTokenResponse = new GoCardlessConnectAccessTokenResponse();
+        goCardlessConnectAccessTokenResponse.setAccessToken(accessToken);
+        goCardlessConnectAccessTokenResponse.setOrganisationId(organisationId);
+        goCardlessConnectAccessTokenResponse.setEmail(email);
+        return goCardlessConnectAccessTokenResponse;
     }
 }
