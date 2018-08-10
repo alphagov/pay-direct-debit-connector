@@ -6,17 +6,17 @@ import io.dropwizard.Configuration;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class GoCardlessConnectConfig extends Configuration {
+public class GoCardlessAppConnectConfig extends Configuration {
 
     @Valid
     @NotNull
     @JsonProperty
-    private String goCardlessConnectTestUrl;
+    private String goCardlessConnectUrlTest;
 
     @Valid
     @NotNull
     @JsonProperty
-    private String goCardlessConnectLiveUrl;
+    private String goCardlessConnectUrlLive;
 
     @Valid
     @NotNull
@@ -39,13 +39,13 @@ public class GoCardlessConnectConfig extends Configuration {
     private String goCardlessConnectClientIdLive;
 
     @NotNull
-    public String getGoCardlessConnectTestUrl() {
-        return goCardlessConnectTestUrl;
+    public String getGoCardlessConnectUrlTest() {
+        return goCardlessConnectUrlTest;
     }
 
     @NotNull
-    public String getGoCardlessConnectLiveUrl() {
-        return goCardlessConnectLiveUrl;
+    public String getGoCardlessConnectUrlLive() {
+        return goCardlessConnectUrlLive;
     }
 
     @NotNull

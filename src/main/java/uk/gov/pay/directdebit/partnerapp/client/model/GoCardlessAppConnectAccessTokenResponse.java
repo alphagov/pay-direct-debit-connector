@@ -6,7 +6,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoCardlessConnectAccessTokenResponse {
+public class GoCardlessAppConnectAccessTokenResponse {
     @JsonProperty("access_token")
     private PaymentProviderAccessToken accessToken;
     @JsonProperty("organisation_id")

@@ -1,17 +1,17 @@
 package uk.gov.pay.directdebit.partnerapp.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.pay.directdebit.partnerapp.model.PartnerAppTokenEntity;
+import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectTokenEntity;
 
-public class PartnerAppTokenResponse {
+public class GoCardlessAppConnectStateResponse {
 
     @JsonProperty("token")
     private String token;
     @JsonProperty("active")
     private Boolean active;
 
-    public static PartnerAppTokenResponse from(PartnerAppTokenEntity entity) {
-        PartnerAppTokenResponse response = new PartnerAppTokenResponse();
+    public static GoCardlessAppConnectStateResponse from(GoCardlessAppConnectTokenEntity entity) {
+        GoCardlessAppConnectStateResponse response = new GoCardlessAppConnectStateResponse();
         response.setToken(entity.getToken());
         response.setActive(entity.isActive());
         return response;

@@ -39,8 +39,8 @@ adminusers:
   adminUsersUrl: http://localhost:10110
 
 goCardlessConnect:
-  goCardlessConnectTestUrl: https://connect-sandbox.gocardless.com
-  goCardlessConnectLiveUrl: https://connect-sandbox.gocardless.com
+  goCardlessConnectUrlTest: https://connect-sandbox.gocardless.com
+  goCardlessConnectUrlLive: https://connect-sandbox.gocardless.com
 
 jerseyClient:
   timeout: 500ms

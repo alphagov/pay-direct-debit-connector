@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.partnerapp.model;
 
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
-public class PartnerAppTokenEntity {
+public class GoCardlessAppConnectTokenEntity {
     private Long id;
     private String token = RandomIdGenerator.newId();
     private Long gatewayAccountId;
@@ -43,9 +43,13 @@ public class PartnerAppTokenEntity {
         this.active = active;
     }
 
-    public String getRedirectUri() { return redirectUri; }
+    public String getRedirectUri() {
+        return redirectUri;
+    }
 
-    public void setRedirectUri(String redirectUri) { this.redirectUri = redirectUri; }
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
 
     //endregion
 }
