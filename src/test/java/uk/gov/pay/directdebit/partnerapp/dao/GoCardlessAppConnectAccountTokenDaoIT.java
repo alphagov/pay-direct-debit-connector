@@ -19,19 +19,19 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class PartnerAppTokenDaoIT {
+public class GoCardlessAppConnectAccountTokenDaoIT {
 
     @DropwizardTestContext
     private TestContext testContext;
 
-    private PartnerAppTokenDao tokenDao;
+    private GoCardlessAppConnectAccountTokenDao tokenDao;
 
     private PartnerAppTokenEntityFixture tokenEntityFixture;
     private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
     public void setup() {
-        tokenDao = testContext.getJdbi().onDemand(PartnerAppTokenDao.class);
+        tokenDao = testContext.getJdbi().onDemand(GoCardlessAppConnectAccountTokenDao.class);
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .insert(testContext.getJdbi());
         tokenEntityFixture = PartnerAppTokenEntityFixture

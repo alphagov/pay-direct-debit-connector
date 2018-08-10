@@ -12,7 +12,7 @@ import uk.gov.pay.directdebit.partnerapp.model.PartnerAppTokenEntity;
 import java.util.Optional;
 
 @RegisterRowMapper(PartnerAppTokenEntityMapper.class)
-public interface PartnerAppTokenDao {
+public interface GoCardlessAppConnectAccountTokenDao {
 
     @SqlUpdate("INSERT INTO gocardless_partner_app_account_connect_tokens(gateway_account_id, token, redirect_uri) VALUES (:gatewayAccountId, :token, :redirectUri)")
     @GetGeneratedKeys
