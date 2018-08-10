@@ -4,11 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.GoCardlessConnectConfig;
 import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
-import uk.gov.pay.directdebit.common.exception.BadRequestException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
-import uk.gov.pay.directdebit.partnerapp.client.model.GoCardlessConnectClientResponse;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount.Type;
+import uk.gov.pay.directdebit.partnerapp.client.model.GoCardlessConnectAccessTokenResponse;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -22,83 +20,77 @@ import java.util.Optional;
 
 /**
  * An Http client used to perform OAuth requests to GoCardless
+ * This is required when linking a Partner app to a Merchant account
  */
 public class GoCardlessConnectClient {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessConnectClient.class);
-    private final GoCardlessConnectConfig config;
+    private static final String CLIENT_SECRET_FIELD = "client_secret";
+    private static final String CLIENT_ID_FIELD = "client_id";
 
-    private Client client;
+    private final String testClientId;
+    private final String testClientSecret;
+    private final String testUrl;
+    private final String liveClientId;
+    private final String liveClientSecret;
+    private final String liveUrl;
+
+    private final Client client;
 
     @Inject
     public GoCardlessConnectClient(GoCardlessConnectConfig config, Client client) {
-        this.config = config;
         this.client = client;
+        this.liveClientId = config.getGoCardlessConnectClientIdLive();
+        this.liveClientSecret = config.getGoCardlessConnectClientSecretLive();
+        this.liveUrl = config.getGoCardlessConnectLiveUrl();
+        this.testClientId = config.getGoCardlessConnectClientIdTest();
+        this.testClientSecret = config.getGoCardlessConnectClientSecretTest();
+        this.testUrl = config.getGoCardlessConnectTestUrl();
     }
 
-    public Optional<GoCardlessConnectClientResponse> postAccessCode(String accessCode,
-                                                                    GatewayAccount gatewayAccount,
-                                                                    String redirectUri) {
-        WebTarget webTarget = getWebTarget(gatewayAccount);
-        Form payload = createPostPayload(accessCode, gatewayAccount, redirectUri);
+    public Optional<GoCardlessConnectAccessTokenResponse> postAccessCode(String accessCode,
+                                                                         GatewayAccount gatewayAccount,
+                                                                         String redirectUri) {
+        Form payload = new Form();
+        payload.param("grant_type", "authorization_code");
+        payload.param("code", accessCode);
+        payload.param("redirect_uri", redirectUri);
 
+        return (gatewayAccount.getType().equals(Type.TEST))
+                ? targetTestAccount(payload)
+                : targetLiveAccount(payload);
+    }
+
+    private Optional<GoCardlessConnectAccessTokenResponse> targetTestAccount(Form payload) {
+        WebTarget webTarget = client.target(testUrl);
+        payload.param(CLIENT_ID_FIELD, testClientId);
+        payload.param(CLIENT_SECRET_FIELD, testClientSecret);
+
+        return getAccessToken(webTarget, payload);
+    }
+
+    private Optional<GoCardlessConnectAccessTokenResponse> targetLiveAccount(Form payload) {
+        WebTarget webTarget = client.target(liveUrl);
+        payload.param(CLIENT_ID_FIELD, liveClientId);
+        payload.param(CLIENT_SECRET_FIELD, liveClientSecret);
+
+        return getAccessToken(webTarget, payload);
+    }
+
+    private Optional<GoCardlessConnectAccessTokenResponse> getAccessToken(WebTarget webTarget, Form payload) {
         try {
             Response response = webTarget.path("/oauth/access_token")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED_TYPE),
                             Response.class);
-            GoCardlessConnectClientResponse entity = response.readEntity(GoCardlessConnectClientResponse.class);
+            GoCardlessConnectAccessTokenResponse entity = response.readEntity(GoCardlessConnectAccessTokenResponse.class);
             return Optional.of(entity);
         } catch (Exception exc) {
-            throw new BadRequestException("Error calling GoCardless Connect client");
+            LOGGER.error("Calling GoCardless Connect resulted in an error {}", exc.getMessage());
+            return Optional.empty();
         }
     }
 
-    private Form createPostPayload(String accessCode,
-                                                             GatewayAccount gatewayAccount,
-                                                             String redirectUri) {
-        Form payload = new Form();
-        payload.param("grant_type", "authorization_code");
-        payload.param("code", accessCode);
-        payload.param("redirect_uri", redirectUri);
-        payload.param("client_id", getClientId(gatewayAccount));
-        payload.param("client_secret", getClientSecret(gatewayAccount));
-
-        return payload;
-    }
-
-    private String getClientId(GatewayAccount gatewayAccount) {
-        if (gatewayAccount.getType().equals(GatewayAccount.Type.TEST)) {
-            return config.getGoCardlessConnectClientIdTest();
-        } else {
-            return config.getGoCardlessConnectClientIdLive();
-        }
-    }
-
-    private String getClientSecret(GatewayAccount gatewayAccount) {
-        if (gatewayAccount.getType().equals(GatewayAccount.Type.TEST)) {
-            return config.getGoCardlessConnectClientSecretTest();
-        } else {
-            return config.getGoCardlessConnectClientSecretLive();
-        }
-    }
-
-    private WebTarget getWebTarget(GatewayAccount gatewayAccount) {
-        if (gatewayAccount.getType().equals(GatewayAccount.Type.TEST)) {
-            return client.target(config.getGoCardlessConnectTestUrl());
-        } else {
-            return client.target(config.getGoCardlessConnectLiveUrl());
-        }
-    }
-
-    public static boolean isValidResponse(GoCardlessConnectClientResponse response) {
-        return isValidAccessToken(response.getAccessToken()) && isValidOrganisationIdentifier(response.getOrganisationId());
-    }
-
-    private static boolean isValidAccessToken(PaymentProviderAccessToken accessToken) {
-        return accessToken != null && StringUtils.isNotBlank(accessToken.toString());
-    }
-
-    private static boolean isValidOrganisationIdentifier(PaymentProviderOrganisationIdentifier organisationIdentifier) {
-        return organisationIdentifier != null && StringUtils.isNotBlank(organisationIdentifier.toString());
+    public static boolean isValidResponse(GoCardlessConnectAccessTokenResponse response) {
+        return StringUtils.isNotBlank(response.getAccessToken().toString()) && StringUtils.isNotBlank(response.getOrganisationId().toString());
     }
 }
