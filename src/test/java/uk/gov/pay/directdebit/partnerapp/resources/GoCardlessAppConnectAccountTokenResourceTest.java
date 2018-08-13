@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.partnerapp.resources.GoCardlessAppConnectAccountTokenResource.CODE_FIELD;
-import static uk.gov.pay.directdebit.partnerapp.resources.GoCardlessAppConnectAccountTokenResource.STATE_TOKEN_FIELD;
+import static uk.gov.pay.directdebit.partnerapp.resources.GoCardlessAppConnectAccountTokenResource.STATE_FIELD;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoCardlessAppConnectAccountTokenResourceTest {
@@ -36,7 +36,7 @@ public class GoCardlessAppConnectAccountTokenResourceTest {
     @Before
     public void setUp() {
         REQUEST_MAP.put(CODE_FIELD, ACCESS_CODE);
-        REQUEST_MAP.put(STATE_TOKEN_FIELD, STATE_TOKEN);
+        REQUEST_MAP.put(STATE_FIELD, STATE_TOKEN);
         resource = new GoCardlessAppConnectAccountTokenResource(mockedTokenService);
     }
 
@@ -59,9 +59,9 @@ public class GoCardlessAppConnectAccountTokenResourceTest {
     @Test
     public void shouldReturnBadRequest_whenMissingPartnerState() {
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Field(s) missing: [state_token]");
+        thrown.expectMessage("Field(s) missing: [state]");
         thrown.reportMissingExceptionWithMessage("BadRequestException expected");
-        REQUEST_MAP.remove(STATE_TOKEN_FIELD);
+        REQUEST_MAP.remove(STATE_FIELD);
         resource.getGoCardlessConnectAccessToken(REQUEST_MAP);
     }
 }

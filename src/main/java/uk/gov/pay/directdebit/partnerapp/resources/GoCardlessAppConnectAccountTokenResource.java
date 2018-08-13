@@ -21,7 +21,7 @@ public class GoCardlessAppConnectAccountTokenResource {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessAppConnectAccountTokenResource.class);
 
     public static final String CODE_FIELD = "code";
-    public static final String STATE_TOKEN_FIELD = "state_token";
+    public static final String STATE_FIELD = "state";
     private final GoCardlessAppConnectAccountService service;
 
     @Inject
@@ -30,8 +30,8 @@ public class GoCardlessAppConnectAccountTokenResource {
     }
 
     /**
-     * Resource that will get an access code and will exchange it for an access token.
-     * The access code is issued by GoCardless, but goes to selfservice and then
+     * Resource that will get a code and will exchange it for an access token.
+     * The code is issued by GoCardless, but goes to selfservice and then
      * selfservice will request this resource to finish the OAuth journey of linking
      * a GoCardless merchant account to a GOV.UK Pay Partner app
      *
@@ -39,7 +39,7 @@ public class GoCardlessAppConnectAccountTokenResource {
      *                   <code>state_token</code> which is the code issued by direct-debit-connector
      *                   to validate the request that is received from GoCardless
      * @return 200 OK
-     * @see <a href="https://developer.gocardless.com/getting-started/partners/connecting-your-users-accounts/#getting-an-access-token"/>
+     * @see <a href="https://developer.gocardless.com/getting-started/partners/connecting-your-users-accounts/#getting-an-access-token">GoCardless Developers: Getting an access token</a>
      */
     @POST
     @Path("/v1/api/gocardless/partnerapp/tokens")
@@ -48,10 +48,10 @@ public class GoCardlessAppConnectAccountTokenResource {
     @Timed
     public Response getGoCardlessConnectAccessToken(Map<String, String> requestMap) {
         GoCardlessAppConnectAccountTokenRequestValidator.validateRequest(requestMap);
-        String accessCode = requestMap.get(CODE_FIELD);
-        String partnerState = requestMap.get(STATE_TOKEN_FIELD);
+        String code = requestMap.get(CODE_FIELD);
+        String state = requestMap.get(STATE_FIELD);
         LOGGER.info("Received request to exchange GoCardless connect code [{}] with state [{}] for an access token",
-                accessCode, partnerState);
-        return service.exchangeCodeForToken(accessCode, partnerState);
+                code, state);
+        return service.exchangeCodeForToken(code, state);
     }
 }

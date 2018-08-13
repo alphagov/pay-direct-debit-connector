@@ -9,7 +9,6 @@ public final class GoCardlessAppConnectClientResponseBuilder {
     private String scope = "some-scope";
     private String tokenType = "some-token-type";
     private PaymentProviderOrganisationIdentifier organisationId = PaymentProviderOrganisationIdentifier.of("some-organisation-id");
-    private String email = "org@example.com";
 
     private GoCardlessAppConnectClientResponseBuilder() {
     }
@@ -38,16 +37,10 @@ public final class GoCardlessAppConnectClientResponseBuilder {
         return this;
     }
 
-    public GoCardlessAppConnectClientResponseBuilder withEmail(String email) {
-        this.email = email;
-        return this;
-    }
-
     public GoCardlessAppConnectAccessTokenResponse build() {
         GoCardlessAppConnectAccessTokenResponse goCardlessAppConnectAccessTokenResponse = new GoCardlessAppConnectAccessTokenResponse();
         goCardlessAppConnectAccessTokenResponse.setAccessToken(accessToken);
         goCardlessAppConnectAccessTokenResponse.setOrganisationId(organisationId);
-        goCardlessAppConnectAccessTokenResponse.setEmail(email);
         return goCardlessAppConnectAccessTokenResponse;
     }
 }
