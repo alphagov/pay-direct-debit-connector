@@ -11,8 +11,6 @@ public class GoCardlessAppConnectAccessTokenResponse {
     private PaymentProviderAccessToken accessToken;
     @JsonProperty("organisation_id")
     private PaymentProviderOrganisationIdentifier organisationId;
-    @JsonProperty("email")
-    private String email;
     @JsonProperty("error")
     private String error;
     @JsonProperty("error_description")
@@ -50,14 +48,6 @@ public class GoCardlessAppConnectAccessTokenResponse {
 
     public void setOrganisationId(PaymentProviderOrganisationIdentifier organisationId) {
         this.organisationId = organisationId;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     @Override
