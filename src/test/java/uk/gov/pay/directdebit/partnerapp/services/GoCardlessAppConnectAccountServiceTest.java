@@ -68,10 +68,10 @@ public class GoCardlessAppConnectAccountServiceTest {
         verify(mockedTokenDao, never()).disableToken(anyString(), anyLong());
         verify(mockedTokenDao).insert(captor.capture());
         GoCardlessAppConnectAccountEntity entity = captor.getValue();
-        assertThat(tokenResponse.getToken(), is(entity.getToken()));
+        assertThat(tokenResponse.getState(), is(entity.getToken()));
         assertThat(tokenResponse.isActive(), is(Boolean.TRUE));
         assertThat(response.getStatus(), is(Response.Status.CREATED.getStatusCode()));
-        assertThat(response.getLocation(), is(URI.create("/v1/api/gocardless/partnerapp/tokens/" + tokenResponse.getToken())));
+        assertThat(response.getLocation(), is(URI.create("/v1/api/gocardless/partnerapp/tokens/" + tokenResponse.getState())));
 
     }
 
@@ -85,7 +85,7 @@ public class GoCardlessAppConnectAccountServiceTest {
         verify(mockedTokenDao).disableToken(accountEntity.getToken(), gatewayAccount.getId());
         verify(mockedTokenDao).insert(captor.capture());
         GoCardlessAppConnectAccountEntity entity = captor.getValue();
-        assertThat(response.getToken(), is(entity.getToken()));
+        assertThat(response.getState(), is(entity.getToken()));
         assertThat(response.isActive(), is(Boolean.TRUE));
     }
 

@@ -5,26 +5,26 @@ import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectAccountEntity
 
 public class GoCardlessAppConnectStateResponse {
 
-    @JsonProperty("token")
-    private String token;
+    @JsonProperty("state")
+    private String state;
     @JsonProperty("active")
     private Boolean active;
 
     public static GoCardlessAppConnectStateResponse from(GoCardlessAppConnectAccountEntity entity) {
         GoCardlessAppConnectStateResponse response = new GoCardlessAppConnectStateResponse();
-        response.setToken(entity.getToken());
+        response.setState(entity.getToken());
         response.setActive(entity.isActive());
         return response;
     }
 
     //region <Getters/Setters>
 
-    public String getToken() {
-        return token;
+    public String getState() {
+        return state;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setState(String state) {
+        this.state = state;
     }
 
     public Boolean isActive() {

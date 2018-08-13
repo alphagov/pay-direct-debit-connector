@@ -60,7 +60,8 @@ public class GoCardlessAppConnectAccountService {
             gatewayAccountDao.updateAccessTokenAndOrganisation(gatewayAccount.getExternalId(), response.getAccessToken(), response.getOrganisationId());
             return Response.ok().build();
         } else if (StringUtils.isNotBlank(response.getError())) {
-            return Response.status(500).entity(GoCardlessAppConnectCodeExchangeErrorResponse.from(response)).build();
+            throw new InternalServerErrorException("GoCardless Connect client replied with an error " +
+                    GoCardlessAppConnectCodeExchangeErrorResponse.from(response).toString());
         } else {
             throw new BadRequestException("Received and invalid response from GoCardless Connect");
         }
@@ -79,7 +80,7 @@ public class GoCardlessAppConnectAccountService {
 
     private Response mapEntity(GoCardlessAppConnectAccountEntity newEntity) {
         GoCardlessAppConnectStateResponse response = GoCardlessAppConnectStateResponse.from(newEntity);
-        URI location = URI.create("/v1/api/gocardless/partnerapp/tokens/" + response.getToken());
+        URI location = URI.create("/v1/api/gocardless/partnerapp/tokens/" + response.getState());
         return Response.created(location).entity(response).build();
     }
 }

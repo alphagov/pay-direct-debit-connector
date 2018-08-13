@@ -7,7 +7,7 @@ import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectAccountEntity
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class GoCardlessAppConnectTokenEntityMapper implements RowMapper<GoCardlessAppConnectAccountEntity> {
+public class GoCardlessAppConnectAccountEntityMapper implements RowMapper<GoCardlessAppConnectAccountEntity> {
     @Override
     public GoCardlessAppConnectAccountEntity map(ResultSet rs, StatementContext ctx) throws SQLException {
         GoCardlessAppConnectAccountEntity goCardlessAppConnectAccountEntity = new GoCardlessAppConnectAccountEntity();
