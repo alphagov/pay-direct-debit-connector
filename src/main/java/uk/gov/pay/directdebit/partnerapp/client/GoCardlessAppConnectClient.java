@@ -24,8 +24,6 @@ import java.util.Optional;
  */
 public class GoCardlessAppConnectClient {
     private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessAppConnectClient.class);
-    private static final String CLIENT_SECRET_FIELD = "client_secret";
-    private static final String CLIENT_ID_FIELD = "client_id";
 
     private final String testClientId;
     private final String testClientSecret;
@@ -62,16 +60,16 @@ public class GoCardlessAppConnectClient {
 
     private Optional<GoCardlessAppConnectAccessTokenResponse> targetTestAccount(Form payload) {
         WebTarget webTarget = client.target(testUrl);
-        payload.param(CLIENT_ID_FIELD, testClientId);
-        payload.param(CLIENT_SECRET_FIELD, testClientSecret);
+        payload.param("client_id", testClientId);
+        payload.param("client_secret", testClientSecret);
 
         return getAccessToken(webTarget, payload);
     }
 
     private Optional<GoCardlessAppConnectAccessTokenResponse> targetLiveAccount(Form payload) {
         WebTarget webTarget = client.target(liveUrl);
-        payload.param(CLIENT_ID_FIELD, liveClientId);
-        payload.param(CLIENT_SECRET_FIELD, liveClientSecret);
+        payload.param("client_id", liveClientId);
+        payload.param("client_secret", liveClientSecret);
 
         return getAccessToken(webTarget, payload);
     }
