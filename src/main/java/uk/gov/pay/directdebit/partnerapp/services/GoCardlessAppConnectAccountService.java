@@ -60,7 +60,7 @@ public class GoCardlessAppConnectAccountService {
             gatewayAccountDao.updateAccessTokenAndOrganisation(gatewayAccount.getExternalId(), response.getAccessToken(), response.getOrganisationId());
             return Response.ok().build();
         } else if (StringUtils.isNotBlank(response.getError())) {
-            return Response.status(400).entity(GoCardlessAppConnectCodeExchangeErrorResponse.from(response)).build();
+            return Response.status(500).entity(GoCardlessAppConnectCodeExchangeErrorResponse.from(response)).build();
         } else {
             throw new BadRequestException("Received and invalid response from GoCardless Connect");
         }
