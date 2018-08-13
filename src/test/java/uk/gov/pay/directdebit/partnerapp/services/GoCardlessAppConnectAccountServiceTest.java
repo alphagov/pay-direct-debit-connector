@@ -17,8 +17,8 @@ import uk.gov.pay.directdebit.partnerapp.client.GoCardlessAppConnectClient;
 import uk.gov.pay.directdebit.partnerapp.client.model.GoCardlessAppConnectAccessTokenResponse;
 import uk.gov.pay.directdebit.partnerapp.dao.GoCardlessAppConnectAccountTokenDao;
 import uk.gov.pay.directdebit.partnerapp.fixtures.GoCardlessAppConnectClientResponseBuilder;
-import uk.gov.pay.directdebit.partnerapp.fixtures.GoCardlessAppConnectTokenEntityFixture;
-import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectTokenEntity;
+import uk.gov.pay.directdebit.partnerapp.fixtures.GoCardlessAppConnectAccountEntityFixture;
+import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectAccountEntity;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import javax.ws.rs.core.Response;
@@ -46,7 +46,7 @@ public class GoCardlessAppConnectAccountServiceTest {
     @Mock
     private GoCardlessAppConnectClient mockedConnectClient;
     @Captor
-    private ArgumentCaptor<GoCardlessAppConnectTokenEntity> captor;
+    private ArgumentCaptor<GoCardlessAppConnectAccountEntity> captor;
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -67,7 +67,7 @@ public class GoCardlessAppConnectAccountServiceTest {
         GoCardlessAppConnectStateResponse tokenResponse = (GoCardlessAppConnectStateResponse) response.getEntity();
         verify(mockedTokenDao, never()).disableToken(anyString(), anyLong());
         verify(mockedTokenDao).insert(captor.capture());
-        GoCardlessAppConnectTokenEntity entity = captor.getValue();
+        GoCardlessAppConnectAccountEntity entity = captor.getValue();
         assertThat(tokenResponse.getToken(), is(entity.getToken()));
         assertThat(tokenResponse.isActive(), is(Boolean.TRUE));
         assertThat(response.getStatus(), is(Response.Status.CREATED.getStatusCode()));
@@ -77,14 +77,14 @@ public class GoCardlessAppConnectAccountServiceTest {
 
     @Test
     public void shouldCreateAToken_whenTokenExists_andDisableExistingOne() {
-        GoCardlessAppConnectTokenEntity tokenEntity = GoCardlessAppConnectTokenEntityFixture.aPartnerAppTokenFixture()
+        GoCardlessAppConnectAccountEntity accountEntity = GoCardlessAppConnectAccountEntityFixture.aPartnerAppAccountFixture()
                 .withGatewayAccountId(gatewayAccount.getId()).toEntity();
         when(mockedGatewayAccountDao.findByExternalId(gatewayAccount.getExternalId())).thenReturn(Optional.of(gatewayAccount));
-        when(mockedTokenDao.findByGatewayAccountId(gatewayAccount.getId())).thenReturn(Optional.of(tokenEntity));
+        when(mockedTokenDao.findByGatewayAccountId(gatewayAccount.getId())).thenReturn(Optional.of(accountEntity));
         GoCardlessAppConnectStateResponse response = (GoCardlessAppConnectStateResponse) tokenService.createToken(gatewayAccount.getExternalId(), REDIRECT_URI).getEntity();
-        verify(mockedTokenDao).disableToken(tokenEntity.getToken(), gatewayAccount.getId());
+        verify(mockedTokenDao).disableToken(accountEntity.getToken(), gatewayAccount.getId());
         verify(mockedTokenDao).insert(captor.capture());
-        GoCardlessAppConnectTokenEntity entity = captor.getValue();
+        GoCardlessAppConnectAccountEntity entity = captor.getValue();
         assertThat(response.getToken(), is(entity.getToken()));
         assertThat(response.isActive(), is(Boolean.TRUE));
     }
@@ -102,11 +102,11 @@ public class GoCardlessAppConnectAccountServiceTest {
     public void shouldUpdatedGatewayAccount_afterSuccessfulResponse_fromGoCardlessConnect() {
         String accessCode = "some-test-access-code";
         String partnerToken = "some-test-partner-token";
-        GoCardlessAppConnectTokenEntity tokenEntity = GoCardlessAppConnectTokenEntityFixture.aPartnerAppTokenFixture()
+        GoCardlessAppConnectAccountEntity accountEntity = GoCardlessAppConnectAccountEntityFixture.aPartnerAppAccountFixture()
                 .withGatewayAccountId(gatewayAccount.getId())
                 .withToken(partnerToken)
                 .toEntity();
-        when(mockedTokenDao.findActiveTokenByToken(partnerToken)).thenReturn(Optional.of(tokenEntity));
+        when(mockedTokenDao.findActiveTokenByToken(partnerToken)).thenReturn(Optional.of(accountEntity));
         when(mockedGatewayAccountDao.findById(gatewayAccount.getId())).thenReturn(Optional.of(gatewayAccount));
         GoCardlessAppConnectAccessTokenResponse response = GoCardlessAppConnectClientResponseBuilder
                 .aGoCardlessConnectClientResponse()

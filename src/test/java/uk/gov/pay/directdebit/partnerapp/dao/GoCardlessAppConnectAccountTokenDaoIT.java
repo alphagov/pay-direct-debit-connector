@@ -8,8 +8,8 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
-import uk.gov.pay.directdebit.partnerapp.fixtures.GoCardlessAppConnectTokenEntityFixture;
-import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectTokenEntity;
+import uk.gov.pay.directdebit.partnerapp.fixtures.GoCardlessAppConnectAccountEntityFixture;
+import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectAccountEntity;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import java.util.Map;
@@ -26,7 +26,7 @@ public class GoCardlessAppConnectAccountTokenDaoIT {
 
     private GoCardlessAppConnectAccountTokenDao tokenDao;
 
-    private GoCardlessAppConnectTokenEntityFixture tokenEntityFixture;
+    private GoCardlessAppConnectAccountEntityFixture accountEntityFixture;
     private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
@@ -34,61 +34,61 @@ public class GoCardlessAppConnectAccountTokenDaoIT {
         tokenDao = testContext.getJdbi().onDemand(GoCardlessAppConnectAccountTokenDao.class);
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .insert(testContext.getJdbi());
-        tokenEntityFixture = GoCardlessAppConnectTokenEntityFixture
-                .aPartnerAppTokenFixture()
+        accountEntityFixture = GoCardlessAppConnectAccountEntityFixture
+                .aPartnerAppAccountFixture()
                 .withGatewayAccountId(gatewayAccountFixture.getId());
     }
 
     @Test
     public void shouldInsertAGoCardlessPartnerAppToken() {
-        GoCardlessAppConnectTokenEntity appTokenEntity = tokenEntityFixture.toEntity();
-        Long id = tokenDao.insert(appTokenEntity);
+        GoCardlessAppConnectAccountEntity accountEntity = accountEntityFixture.toEntity();
+        Long id = tokenDao.insert(accountEntity);
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getGoCardlessPartnerAppTokenById(id);
         assertThat(mandate.get("id"), is(id));
-        assertThat(mandate.get("token"), is(appTokenEntity.getToken()));
+        assertThat(mandate.get("token"), is(accountEntity.getToken()));
         assertThat(mandate.get("active"), is(true));
         assertThat(mandate.get("gateway_account_id"), is(gatewayAccountFixture.getId()));
-        assertThat(mandate.get("redirect_uri"), is(appTokenEntity.getRedirectUri()));
+        assertThat(mandate.get("redirect_uri"), is(accountEntity.getRedirectUri()));
     }
 
     @Test
     public void shouldGetAnExistingGoCardlessPartnerAppTokenByGatewayAccountId() {
-        tokenEntityFixture.insert(testContext.getJdbi());
-        GoCardlessAppConnectTokenEntity thatTokenEntity = tokenEntityFixture.toEntity();
-        GoCardlessAppConnectTokenEntity thisTokenEntity = tokenDao.findByGatewayAccountId(gatewayAccountFixture.getId()).get();
-        assertThat(thisTokenEntity.getId(), is(1L));
-        assertThat(thisTokenEntity.getToken(), is(thatTokenEntity.getToken()));
-        assertThat(thisTokenEntity.isActive(), is(true));
-        assertThat(thisTokenEntity.getGatewayAccountId(), is(thatTokenEntity.getGatewayAccountId()));
+        accountEntityFixture.insert(testContext.getJdbi());
+        GoCardlessAppConnectAccountEntity thatAccountEntity = accountEntityFixture.toEntity();
+        GoCardlessAppConnectAccountEntity thisAccountEntity = tokenDao.findByGatewayAccountId(gatewayAccountFixture.getId()).get();
+        assertThat(thisAccountEntity.getId(), is(1L));
+        assertThat(thisAccountEntity.getToken(), is(thatAccountEntity.getToken()));
+        assertThat(thisAccountEntity.isActive(), is(true));
+        assertThat(thisAccountEntity.getGatewayAccountId(), is(thatAccountEntity.getGatewayAccountId()));
     }
 
     @Test
     public void shouldGetAnExistingGoCardlessPartnerAppTokenByTokenAndGatewayAccountId() {
-        tokenEntityFixture.insert(testContext.getJdbi());
-        GoCardlessAppConnectTokenEntity thatTokenEntity = tokenEntityFixture.toEntity();
-        GoCardlessAppConnectTokenEntity thisTokenEntity = tokenDao.findByTokenAndGatewayAccountId(thatTokenEntity.getToken(), gatewayAccountFixture.getId()).get();
-        assertThat(thisTokenEntity.getId(), is(1L));
-        assertThat(thisTokenEntity.getToken(), is(thatTokenEntity.getToken()));
-        assertThat(thisTokenEntity.isActive(), is(true));
-        assertThat(thisTokenEntity.getGatewayAccountId(), is(thatTokenEntity.getGatewayAccountId()));
+        accountEntityFixture.insert(testContext.getJdbi());
+        GoCardlessAppConnectAccountEntity thatAccountEntity = accountEntityFixture.toEntity();
+        GoCardlessAppConnectAccountEntity thisAccountEntity = tokenDao.findByTokenAndGatewayAccountId(thatAccountEntity.getToken(), gatewayAccountFixture.getId()).get();
+        assertThat(thisAccountEntity.getId(), is(1L));
+        assertThat(thisAccountEntity.getToken(), is(thatAccountEntity.getToken()));
+        assertThat(thisAccountEntity.isActive(), is(true));
+        assertThat(thisAccountEntity.getGatewayAccountId(), is(thatAccountEntity.getGatewayAccountId()));
     }
 
     @Test
     public void shouldDisableAnExistingGoCardlessPartnerAppToken() {
-        tokenEntityFixture.insert(testContext.getJdbi());
-        GoCardlessAppConnectTokenEntity thatTokenEntity = tokenEntityFixture.toEntity();
-        tokenDao.disableToken(thatTokenEntity.getToken(), thatTokenEntity.getGatewayAccountId());
+        accountEntityFixture.insert(testContext.getJdbi());
+        GoCardlessAppConnectAccountEntity thatAccountEntity = accountEntityFixture.toEntity();
+        tokenDao.disableToken(thatAccountEntity.getToken(), thatAccountEntity.getGatewayAccountId());
         assertThat(tokenDao.findByGatewayAccountId(gatewayAccountFixture.getId()).isPresent(), is(false));
     }
 
     @Test
     public void shouldFindAnActiveGoCardlessPartnerAppTokenByToken() {
-        tokenEntityFixture.insert(testContext.getJdbi());
-        GoCardlessAppConnectTokenEntity thatTokenEntity = tokenEntityFixture.toEntity();
-        GoCardlessAppConnectTokenEntity thisTokenEntity = tokenDao.findActiveTokenByToken(thatTokenEntity.getToken()).get();
-        assertThat(thisTokenEntity.getId(), is(1L));
-        assertThat(thisTokenEntity.getToken(), is(thatTokenEntity.getToken()));
-        assertThat(thisTokenEntity.isActive(), is(true));
-        assertThat(thisTokenEntity.getGatewayAccountId(), is(thatTokenEntity.getGatewayAccountId()));
+        accountEntityFixture.insert(testContext.getJdbi());
+        GoCardlessAppConnectAccountEntity thatAccountEntity = accountEntityFixture.toEntity();
+        GoCardlessAppConnectAccountEntity thisAccountEntity = tokenDao.findActiveTokenByToken(thatAccountEntity.getToken()).get();
+        assertThat(thisAccountEntity.getId(), is(1L));
+        assertThat(thisAccountEntity.getToken(), is(thatAccountEntity.getToken()));
+        assertThat(thisAccountEntity.isActive(), is(true));
+        assertThat(thisAccountEntity.getGatewayAccountId(), is(thatAccountEntity.getGatewayAccountId()));
     }
 }

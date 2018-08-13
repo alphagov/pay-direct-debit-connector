@@ -11,7 +11,7 @@ import uk.gov.pay.directdebit.partnerapp.client.GoCardlessAppConnectClient;
 import uk.gov.pay.directdebit.partnerapp.client.model.GoCardlessAppConnectAccessTokenResponse;
 import uk.gov.pay.directdebit.partnerapp.dao.GoCardlessAppConnectAccountTokenDao;
 import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectCodeExchangeErrorResponse;
-import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectTokenEntity;
+import uk.gov.pay.directdebit.partnerapp.model.GoCardlessAppConnectAccountEntity;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -66,8 +66,8 @@ public class GoCardlessAppConnectAccountService {
         }
     }
 
-    private GoCardlessAppConnectTokenEntity insertToken(GatewayAccount account, String redirectUri) {
-        GoCardlessAppConnectTokenEntity newToken = new GoCardlessAppConnectTokenEntity();
+    private GoCardlessAppConnectAccountEntity insertToken(GatewayAccount account, String redirectUri) {
+        GoCardlessAppConnectAccountEntity newToken = new GoCardlessAppConnectAccountEntity();
         newToken.setGatewayAccountId(account.getId());
         newToken.setToken(RandomIdGenerator.newId());
         newToken.setActive(Boolean.TRUE);
@@ -77,7 +77,7 @@ public class GoCardlessAppConnectAccountService {
         return newToken;
     }
 
-    private Response mapEntity(GoCardlessAppConnectTokenEntity newEntity) {
+    private Response mapEntity(GoCardlessAppConnectAccountEntity newEntity) {
         GoCardlessAppConnectStateResponse response = GoCardlessAppConnectStateResponse.from(newEntity);
         URI location = URI.create("/v1/api/gocardless/partnerapp/tokens/" + response.getToken());
         return Response.created(location).entity(response).build();

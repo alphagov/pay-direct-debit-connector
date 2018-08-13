@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.partnerapp.model;
 
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 
-public class GoCardlessAppConnectTokenEntity {
+public class GoCardlessAppConnectAccountEntity {
     private Long id;
     private String token = RandomIdGenerator.newId();
     private Long gatewayAccountId;
