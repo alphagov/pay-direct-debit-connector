@@ -20,7 +20,7 @@ public class GoCardlessAppConnectAccountStateRequestValidator extends ApiValidat
         validators.put(GATEWAY_ACCOUNT_ID_FIELD, ApiValidation::isNotNullOrEmpty);
         validators.put(REDIRECT_URI_FIELD, ApiValidation::isNotNullOrEmpty);
 
-        fieldSizes.put(GATEWAY_ACCOUNT_ID_FIELD, new FieldSize(26, 26));
+        fieldSizes.put(GATEWAY_ACCOUNT_ID_FIELD, new FieldSize(26, 255));
         fieldSizes.put(REDIRECT_URI_FIELD, new FieldSize(1, 255));
     }
 
