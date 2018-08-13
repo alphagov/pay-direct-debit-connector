@@ -25,6 +25,14 @@ links:
 adminusers:
   adminUsersUrl: ${ADMINUSERS_URL:-}
 
+goCardlessConnect:
+  goCardlessConnectUrlTest:          ${GOCARDLESS_TEST_OAUTH_BASE_URL:-}
+  goCardlessConnectUrlLive:          ${GOCARDLESS_LIVE_OAUTH_BASE_URL:-}
+  goCardlessConnectClientIdTest:     ${GOCARDLESS_TEST_CLIENT_ID:-}
+  goCardlessConnectClientSecretTest: ${GOCARDLESS_TEST_CLIENT_SECRET:-}
+  goCardlessConnectClientIdLive:     ${GOCARDLESS_LIVE_CLIENT_ID:-}
+  goCardlessConnectClientSecretLive: ${GOCARDLESS_LIVE_CLIENT_SECRET:-}
+
 graphite:
   host: ${METRICS_HOST:-localhost}
   port: ${METRICS_PORT:-8092}

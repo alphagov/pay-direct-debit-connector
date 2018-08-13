@@ -13,6 +13,8 @@ import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.clients.ClientFactory;
+import uk.gov.pay.directdebit.partnerapp.client.GoCardlessAppConnectClient;
+import uk.gov.pay.directdebit.partnerapp.dao.GoCardlessAppConnectAccountTokenDao;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
@@ -49,6 +51,14 @@ public class DirectDebitModule extends AbstractModule {
     @Singleton
     public GoCardlessClientFactory provideGoCardlessClientFactory() {
         return new GoCardlessClientFactory(configuration, sslSocketFactory);
+    }
+
+    @Provides
+    @Singleton
+    public GoCardlessAppConnectClient provideGoCardlessConnectClient(ClientFactory clientFactory) {
+        return new GoCardlessAppConnectClient(
+                configuration.getGoCardlessAppConnectConfig(),
+                clientFactory.createWithDropwizardClient("gocardless-appconnect-client"));
     }
 
     @Provides
@@ -134,5 +144,11 @@ public class DirectDebitModule extends AbstractModule {
     @Singleton
     public PaymentViewDao providePaymentViewDao() {
         return new PaymentViewDao(jdbi);
+    }
+
+    @Provides
+    @Singleton
+    public GoCardlessAppConnectAccountTokenDao providePartnerAppTokenDao() {
+        return jdbi.onDemand(GoCardlessAppConnectAccountTokenDao.class);
     }
 }

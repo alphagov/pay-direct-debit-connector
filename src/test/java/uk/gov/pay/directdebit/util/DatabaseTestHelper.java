@@ -35,6 +35,7 @@ public class DatabaseTestHelper {
                         .get()
         );
     }
+
     public String getTokenByTransactionExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
@@ -45,7 +46,7 @@ public class DatabaseTestHelper {
                         .get()
         );
     }
-    
+
     public Map<String, Object> getEventById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
@@ -78,7 +79,7 @@ public class DatabaseTestHelper {
                         .get()
         );
     }
-    
+
 
     public List<Map<String, Object>> getTransactionsForMandate(MandateExternalId mandateExternalId) {
         return jdbi.withHandle(handle ->
@@ -122,7 +123,7 @@ public class DatabaseTestHelper {
                         .get()
         );
     }
-    
+
     public Map<String, Object> getMandateByExternalId(MandateExternalId externalId) {
         return jdbi.withHandle(handle ->
                 handle
@@ -144,7 +145,7 @@ public class DatabaseTestHelper {
                         .get()
         );
     }
-    
+
     public Map<String, Object> getGatewayAccountById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
@@ -207,5 +208,14 @@ public class DatabaseTestHelper {
                         .mapToMap()
                         .list()
         );
+    }
+
+    public Map<String, Object> getGoCardlessPartnerAppTokenById(Long id) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("SELECT * FROM gocardless_partner_app_account_connect_tokens g WHERE g.id= :id")
+                        .bind("id", id)
+                        .mapToMap()
+                        .findFirst()
+                        .get());
     }
 }
