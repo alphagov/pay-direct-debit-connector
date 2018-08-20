@@ -39,6 +39,9 @@ public class GoCardlessAppConnectConfig extends Configuration {
     private String goCardlessConnectClientIdLive;
 
     @NotNull
+    private ProxyConfig proxyConfig;
+
+    @NotNull
     public String getGoCardlessConnectUrlTest() {
         return goCardlessConnectUrlTest;
     }
@@ -67,4 +70,8 @@ public class GoCardlessAppConnectConfig extends Configuration {
     public String getGoCardlessConnectClientIdLive() {
         return goCardlessConnectClientIdLive;
     }
+
+    @NotNull
+    public ProxyConfig getProxyConfig() {
+        return proxyConfig; }
 }
