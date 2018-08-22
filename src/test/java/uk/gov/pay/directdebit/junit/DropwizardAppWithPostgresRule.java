@@ -8,6 +8,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
+import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
@@ -24,6 +25,7 @@ public class DropwizardAppWithPostgresRule implements TestRule {
     private final RuleChain rules;
 
     private TestContext testContext;
+    private DatabaseTestHelper databaseTestHelper;
 
     public DropwizardAppWithPostgresRule() {
         configFilePath = resourceFilePath("config/test-it-config.yaml");
@@ -43,7 +45,8 @@ public class DropwizardAppWithPostgresRule implements TestRule {
             public void evaluate() throws Throwable {
                 app.getApplication().run("db", "migrate", configFilePath);
                 createTemplate(getDbUri(), DB_USERNAME, DB_PASSWORD);
-                testContext = new TestContext(app.getLocalPort(), ((DirectDebitConfig) app.getConfiguration()).getDataSourceFactory());
+                testContext = new TestContext(app.getLocalPort(), app.getConfiguration().getDataSourceFactory());
+                databaseTestHelper = new DatabaseTestHelper(testContext.getJdbi());
                 base.evaluate();
             }
         }, description);
@@ -55,5 +58,9 @@ public class DropwizardAppWithPostgresRule implements TestRule {
 
     public TestContext getTestContext() {
         return testContext;
+    }
+
+    public DatabaseTestHelper getDatabaseTestHelper() {
+        return databaseTestHelper;
     }
 }

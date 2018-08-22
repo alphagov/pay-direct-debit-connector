@@ -7,6 +7,7 @@ import au.com.dius.pact.provider.junit.loader.PactBrokerAuth;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
@@ -15,8 +16,8 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -29,9 +30,11 @@ import java.util.Optional;
 
 @RunWith(PayPactRunner.class)
 @Provider("direct-debit-connector")
-@PactBroker(protocol = "https", host = "pact-broker-test.cloudapps.digital", port = "443", tags = {"${PACT_CONSUMER_TAG}"},
+@PactBroker(protocol = "https", host = "pact-broker-test.cloudapps.digital", port = "443", tags = {"master", "test", "staging", "production"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"))
-//@PactFolder("pacts") <-- this is useful for testing pacts locally
+//uncommenting the below is useful for testing pacts locally. grab the pact from the broker and put it in /pacts
+//@PactFolder("pacts")
+//@RunWith(PactRunner.class)
 public class PublicApiContractTest {
 
     @ClassRule
@@ -46,6 +49,11 @@ public class PublicApiContractTest {
     @BeforeClass
     public static void setUpService() {
         target = new HttpTarget(app.getLocalPort());
+    }
+
+    @Before
+    public void resetDatabase() {
+        app.getDatabaseTestHelper().truncateAllData();
     }
 
     @State("a gateway account with external id exists")

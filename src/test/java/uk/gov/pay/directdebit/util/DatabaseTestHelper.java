@@ -218,4 +218,11 @@ public class DatabaseTestHelper {
                         .findFirst()
                         .get());
     }
+
+    public void truncateAllData() {
+        jdbi.withHandle(h -> h.createScript(
+                "TRUNCATE TABLE events CASCADE; " +
+                "TRUNCATE TABLE gateway_accounts CASCADE"
+        ).execute());
+    }
 }
