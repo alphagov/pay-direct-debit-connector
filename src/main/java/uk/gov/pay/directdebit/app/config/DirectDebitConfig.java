@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.app.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientConfiguration;
+import io.dropwizard.client.proxy.ProxyConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 
@@ -27,7 +28,7 @@ public class DirectDebitConfig extends Configuration {
     private GraphiteConfig graphiteConfig;
 
     @NotNull
-    private ProxyConfig proxyConfig;
+    private ProxyConfiguration proxyConfig;
 
 
     @NotNull
@@ -79,7 +80,7 @@ public class DirectDebitConfig extends Configuration {
     }
 
     @JsonProperty("proxy")
-    public ProxyConfig getProxyConfig() {
+    public ProxyConfiguration getProxyConfig() {
         return proxyConfig;
     }
 

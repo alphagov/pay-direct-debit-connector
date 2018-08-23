@@ -76,6 +76,8 @@ public class GoCardlessAppConnectClient {
 
     private Optional<GoCardlessAppConnectAccessTokenResponse> getAccessToken(WebTarget webTarget, Form payload) {
         try {
+            LOGGER.info("Calling GoCardless Connect on /oauth/access_token");
+
             Response response = webTarget.path("/oauth/access_token")
                     .request()
                     .post(Entity.entity(payload, MediaType.APPLICATION_FORM_URLENCODED_TYPE),
@@ -89,6 +91,10 @@ public class GoCardlessAppConnectClient {
     }
 
     public static boolean isValidResponse(GoCardlessAppConnectAccessTokenResponse response) {
-        return StringUtils.isNotBlank(response.getAccessToken().toString()) && StringUtils.isNotBlank(response.getOrganisationId().toString());
+        return response != null &&
+                response.getAccessToken() != null &&
+                StringUtils.isNotBlank(response.getAccessToken().toString()) &&
+                response.getOrganisationId() != null &&
+                StringUtils.isNotBlank(response.getOrganisationId().toString());
     }
 }

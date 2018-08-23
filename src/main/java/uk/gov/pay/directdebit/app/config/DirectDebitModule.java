@@ -58,7 +58,7 @@ public class DirectDebitModule extends AbstractModule {
     public GoCardlessAppConnectClient provideGoCardlessConnectClient(ClientFactory clientFactory) {
         return new GoCardlessAppConnectClient(
                 configuration.getGoCardlessAppConnectConfig(),
-                clientFactory.createWithDropwizardClient("gocardless-appconnect-client"));
+                clientFactory.createWithDropwizardClientAndProxy("gocardless-appconnect-client"));
     }
 
     @Provides
