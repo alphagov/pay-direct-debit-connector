@@ -16,8 +16,11 @@ logging:
         logFormat: "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %highlight(%-5level) %cyan(%logger{15}) [requestID=%X{X-Request-Id}] - %msg %n"
 
 proxy:
-  host: ${HTTP_PROXY_HOST}
-  port: ${HTTP_PROXY_PORT}
+  host: ${HTTP_PROXY_HOST:-0}
+  port: ${HTTP_PROXY_PORT:-0}
+  scheme: ${HTTP_PROXY_SCHEME:-https}
+  nonProxyHosts:
+    - localhost
 
 links:
   frontendUrl: ${FRONTEND_URL:-}

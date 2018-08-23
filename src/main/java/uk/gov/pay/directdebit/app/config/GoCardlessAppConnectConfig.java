@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.app.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import io.dropwizard.client.proxy.ProxyConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -39,7 +40,7 @@ public class GoCardlessAppConnectConfig extends Configuration {
     private String goCardlessConnectClientIdLive;
 
     @NotNull
-    private ProxyConfig proxyConfig;
+    private ProxyConfiguration proxyConfig;
 
     @NotNull
     public String getGoCardlessConnectUrlTest() {
@@ -72,6 +73,6 @@ public class GoCardlessAppConnectConfig extends Configuration {
     }
 
     @NotNull
-    public ProxyConfig getProxyConfig() {
+    public ProxyConfiguration getProxyConfig() {
         return proxyConfig; }
 }
