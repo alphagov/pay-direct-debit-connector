@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.common.clients;
 
+import com.gocardless.GoCardlessException;
 import com.gocardless.resources.BankDetailsLookup;
 import com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme;
 import com.gocardless.resources.Creditor;
@@ -7,6 +8,8 @@ import com.gocardless.resources.Creditor.SchemeIdentifier.Scheme;
 import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Payment;
+import org.slf4j.Logger;
+import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
@@ -26,6 +29,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public class GoCardlessClientFacade {
+
+    private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessClientFacade.class);
 
     private final GoCardlessClientWrapper goCardlessClientWrapper;
 
@@ -67,10 +72,20 @@ public class GoCardlessClientFacade {
     }
 
     public GoCardlessBankAccountLookup validate(BankAccountDetails bankAccountDetails) {
-        BankDetailsLookup gcBankDetailsLookup = goCardlessClientWrapper.validate(bankAccountDetails);
-        return new GoCardlessBankAccountLookup(
-                gcBankDetailsLookup.getBankName(),
-                gcBankDetailsLookup.getAvailableDebitSchemes().contains(AvailableDebitScheme.BACS));
+        try {
+            BankDetailsLookup gcBankDetailsLookup = goCardlessClientWrapper.validate(bankAccountDetails);
+            return new GoCardlessBankAccountLookup(
+                    gcBankDetailsLookup.getBankName(),
+                    gcBankDetailsLookup.getAvailableDebitSchemes().contains(AvailableDebitScheme.BACS));
+        } catch (GoCardlessException goCardlessException) {
+            // this code is temporary setup for debugging purposes to investigate https://github.com/gocardless/gocardless-pro-java/issues/12
+            LOGGER.error("!!! GOCARDLESS ERROR GoCardlessException !!!", goCardlessException);
+            StackTraceElement[] stackTraceElements = goCardlessException.getStackTrace(); // this can be used with live debugging
+            LOGGER.error("!!! GOCARDLESS ERROR goCardlessException.printStackTrace() !!!");
+            goCardlessException.printStackTrace();
+        }
+
+        return null;
     }
 
     public Optional<SunName> getSunName(GoCardlessCreditorId goCardlessCreditorId) {
