@@ -56,6 +56,10 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     private static final boolean NON_STRICT_VARIABLE_SUBSTITUTOR = false;
 
     public static void main(String[] args) throws Exception {
+        // Initialise java.security options
+        java.security.Security.setProperty("networkaddress.cache.ttl", "1");
+
+        // Run the application
         new DirectDebitConnectorApp().run(args);
     }
 

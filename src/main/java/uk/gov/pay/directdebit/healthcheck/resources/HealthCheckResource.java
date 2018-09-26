@@ -43,7 +43,7 @@ public class HealthCheckResource {
                 .filter(HealthCheck.Result::isHealthy)
                 .count();
 
-        if(healthy) {
+        if (healthy) {
             return Response.ok().entity(response).build();
         }
         return status(503).entity(response).build();
@@ -51,7 +51,7 @@ public class HealthCheckResource {
 
     private Map<String, Map<String, Object>> getResponse(SortedMap<String, HealthCheck.Result> results) {
         Map<String, Map<String, Object>> response = new HashMap<>();
-        for (SortedMap.Entry<String, HealthCheck.Result> entry : results.entrySet() ) {
+        for (SortedMap.Entry<String, HealthCheck.Result> entry : results.entrySet()) {
             response.put(entry.getKey(), ImmutableMap.of(
                     "healthy", entry.getValue().isHealthy(),
                     "message", isBlank(entry.getValue().getMessage()) ? "Healthy" : entry.getValue().getMessage()));
