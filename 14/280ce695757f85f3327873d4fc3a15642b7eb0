@@ -19,3 +19,5 @@ staging-2.tag=alpha_staging-2-170
 staging-2.alpha_staging-2-170.date=2018-09-26:12:18:44
 
 staging-2.alpha_staging-2-170.status=success
+
+production-2.tag=FAILED-170
