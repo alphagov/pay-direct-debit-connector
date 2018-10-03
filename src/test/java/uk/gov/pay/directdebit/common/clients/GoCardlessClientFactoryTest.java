@@ -29,8 +29,6 @@ public class GoCardlessClientFactoryTest {
     @Before
     public void setUp() {
         when(mockedDirectDebitConfig.getGoCardless().getAccessToken()).thenReturn("aaa");
-        when(mockedDirectDebitConfig.getProxyConfig().getHost()).thenReturn("aaa");
-        when(mockedDirectDebitConfig.getProxyConfig().getPort()).thenReturn(0);
         when(mockedDirectDebitConfig.getGoCardless().getEnvironment()).thenReturn(GoCardlessClient.Environment.SANDBOX);
         goCardlessClientFactory = new GoCardlessClientFactory(mockedDirectDebitConfig, mockedSSLSocketFactory);
     }
