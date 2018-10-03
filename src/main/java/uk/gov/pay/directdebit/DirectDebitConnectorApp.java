@@ -28,13 +28,14 @@ import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.PreconditionFailedExceptionMapper;
+import uk.gov.pay.directdebit.common.proxy.CustomInetSocketAddressProxySelector;
 import uk.gov.pay.directdebit.events.resources.DirectDebitEventsResource;
 import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
 import uk.gov.pay.directdebit.mandate.resources.MandateResource;
-import uk.gov.pay.directdebit.partnerapp.resources.GoCardlessAppConnectAccountTokenResource;
 import uk.gov.pay.directdebit.partnerapp.resources.GoCardlessAppConnectAccountStateResource;
+import uk.gov.pay.directdebit.partnerapp.resources.GoCardlessAppConnectAccountTokenResource;
 import uk.gov.pay.directdebit.payers.resources.PayerResource;
 import uk.gov.pay.directdebit.payments.resources.PaymentViewResource;
 import uk.gov.pay.directdebit.payments.resources.TransactionResource;
@@ -46,6 +47,7 @@ import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
+import java.net.ProxySelector;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.EnumSet.of;
@@ -80,10 +82,19 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
     }
 
     @Override
-    public void run(DirectDebitConfig configuration, Environment environment) throws Exception {
+    public void run(DirectDebitConfig configuration, Environment environment) {
+        if (!configuration.getProxyConfig().getHost().isEmpty()) {
+            CustomInetSocketAddressProxySelector customInetSocketAddressProxySelector =
+                    new CustomInetSocketAddressProxySelector(
+                            ProxySelector.getDefault(),
+                            configuration.getProxyConfig().getHost(),
+                            configuration.getProxyConfig().getPort()
+                    );
+            ProxySelector.setDefault(customInetSocketAddressProxySelector);
+        }
+
         DataSourceFactory dataSourceFactory = configuration.getDataSourceFactory();
         final Jdbi jdbi = createJdbi(dataSourceFactory);
-
 
         SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
         final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment, jdbi, socketFactory));

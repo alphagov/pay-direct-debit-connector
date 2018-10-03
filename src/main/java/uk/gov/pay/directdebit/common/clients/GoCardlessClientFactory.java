@@ -7,8 +7,6 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 
 import javax.net.ssl.SSLSocketFactory;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.Map;
 import java.util.Optional;
 
@@ -40,12 +38,14 @@ public class GoCardlessClientFactory {
         GoCardlessClient.Builder builder = GoCardlessClient.newBuilder(accessToken.toString());
 
         if (goCardlessFactory.isCallingStubs()) {
-            return builder.withBaseUrl(goCardlessFactory.getClientUrl())
+            return builder
+                    .withBaseUrl(goCardlessFactory.getClientUrl())
                     .withSslSocketFactory(sslSocketFactory)
                     .build();
         }
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(configuration.getProxyConfig().getHost(), configuration.getProxyConfig().getPort()));
-        return builder.withEnvironment(goCardlessFactory.getEnvironment())
-                .withProxy(proxy).build();
+
+        return builder
+                .withEnvironment(goCardlessFactory.getEnvironment())
+                .build();
     }
 }
