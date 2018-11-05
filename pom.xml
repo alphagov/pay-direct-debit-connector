@@ -29,7 +29,7 @@
         <gocardless.version>3.7.1</gocardless.version>
         <hamcrest.version>1.3</hamcrest.version>
         <rest-assured.version>3.0.7</rest-assured.version>
-        <mockito.version>2.18.0</mockito.version>
+        <mockito.version>2.23.0</mockito.version>
         <docker-client.version>8.11.2</docker-client.version>
         <eclipselink.version>2.6.4</eclipselink.version>
     </properties>
