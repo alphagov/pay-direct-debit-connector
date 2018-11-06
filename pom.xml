@@ -23,7 +23,7 @@
         <wiremock.version>2.19.0</wiremock.version>
         <liquibase.version>3.6.2</liquibase.version>
         <postgresql.version>42.2.2</postgresql.version>
-        <jackson.version>2.9.6</jackson.version>
+        <jackson.version>2.9.7</jackson.version>
         <guice.version>4.2.2</guice.version>
         <guava.version>25.1-jre</guava.version>
         <gocardless.version>3.7.1</gocardless.version>
