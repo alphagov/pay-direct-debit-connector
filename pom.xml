@@ -31,7 +31,6 @@
         <rest-assured.version>3.2.0</rest-assured.version>
         <mockito.version>2.23.0</mockito.version>
         <docker-client.version>8.14.3</docker-client.version>
-        <eclipselink.version>2.6.4</eclipselink.version>
     </properties>
 
     <repositories>
@@ -133,12 +132,6 @@
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
             <version>0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.jpa</artifactId>
-            <version>${eclipselink.version}</version>
-            <scope>compile</scope>
         </dependency>
         <!-- testing -->
         <dependency>
