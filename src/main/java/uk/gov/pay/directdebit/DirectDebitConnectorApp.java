@@ -83,15 +83,16 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
 
     @Override
     public void run(DirectDebitConfig configuration, Environment environment) {
-        if (!configuration.getProxyConfig().getHost().isEmpty()) {
-            CustomInetSocketAddressProxySelector customInetSocketAddressProxySelector =
-                    new CustomInetSocketAddressProxySelector(
-                            ProxySelector.getDefault(),
-                            configuration.getProxyConfig().getHost(),
-                            configuration.getProxyConfig().getPort()
-                    );
-            ProxySelector.setDefault(customInetSocketAddressProxySelector);
-        }
+        // TODO: remove CustomInetSocketAddressProxySelector and it's usage if InetSocketAddress.createUnresolved works
+//        if (!configuration.getProxyConfig().getHost().isEmpty()) {
+//            CustomInetSocketAddressProxySelector customInetSocketAddressProxySelector =
+//                    new CustomInetSocketAddressProxySelector(
+//                            ProxySelector.getDefault(),
+//                            configuration.getProxyConfig().getHost(),
+//                            configuration.getProxyConfig().getPort()
+//                    );
+//            ProxySelector.setDefault(customInetSocketAddressProxySelector);
+//        }
 
         DataSourceFactory dataSourceFactory = configuration.getDataSourceFactory();
         final Jdbi jdbi = createJdbi(dataSourceFactory);
