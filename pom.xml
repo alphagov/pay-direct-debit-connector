@@ -30,7 +30,6 @@
         <hamcrest.version>1.3</hamcrest.version>
         <rest-assured.version>3.2.0</rest-assured.version>
         <mockito.version>2.23.4</mockito.version>
-        <docker-client.version>8.14.5</docker-client.version>
     </properties>
 
     <repositories>
@@ -155,7 +154,7 @@
         <dependency>
             <groupId>uk.gov.pay</groupId>
             <artifactId>testing</artifactId>
-            <version>1.0.0-7</version>
+            <version>1.0.0-f6097986677849386f283bb84072198b57931b1b</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -192,12 +191,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.spotify</groupId>
-            <artifactId>docker-client</artifactId>
-            <version>${docker-client.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

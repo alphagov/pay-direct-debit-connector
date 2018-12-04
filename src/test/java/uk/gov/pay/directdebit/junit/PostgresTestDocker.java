@@ -1,48 +1,52 @@
 package uk.gov.pay.directdebit.junit;
 
-import com.spotify.docker.client.DefaultDockerClient;
+import uk.gov.pay.commons.testing.db.PostgresContainer;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Optional;
 
 import static java.sql.DriverManager.getConnection;
-import static org.junit.Assert.assertNotNull;
-import static uk.gov.pay.directdebit.junit.PostgresTestContainer.DB_PASSWORD;
-import static uk.gov.pay.directdebit.junit.PostgresTestContainer.DB_USERNAME;
 
 final class PostgresTestDocker {
 
-    static final String DB_NAME = "directdebit_connector_tests";
-    private static PostgresTestContainer container;
+    private static final String DB_NAME = "directdebit_connector_tests";
+    private static PostgresContainer container;
 
-    static void getOrCreate(String image) {
+    static void getOrCreate() {
         try {
             if (container == null) {
-                container = new PostgresTestContainer(DefaultDockerClient.fromEnv().build(), image);
-                createDatabase();
+                container = new PostgresContainer();
+                createDatabase(DB_NAME);
             }
         } catch (Exception e) {
             throw new PostgresTestDockerException(e);
         }
     }
     
-    private static void createDatabase() {
-        try (Connection connection = getConnection(container.getPostgresDbUri(), DB_USERNAME, DB_PASSWORD)) {
-            connection.createStatement().execute("CREATE DATABASE " + DB_NAME + " WITH owner=" + DB_USERNAME + " TEMPLATE postgres");
-            connection.createStatement().execute("GRANT ALL PRIVILEGES ON DATABASE " + DB_NAME + " TO " + DB_USERNAME);
+    private static void createDatabase(final String dbName) {
+        final String dbUser = getDbUsername();
+
+        try (Connection connection = getConnection(getDbRootUri(), dbUser, getDbPassword())) {
+            connection.createStatement().execute("CREATE DATABASE " + dbName + " WITH owner=" + dbUser + " TEMPLATE postgres");
+            connection.createStatement().execute("GRANT ALL PRIVILEGES ON DATABASE " + dbName + " TO " + dbUser);
         } catch (SQLException e) {
             throw new PostgresTestDockerException(e);
         }
     }
 
-    static String getDbRootUri() {
-        return container.getPostgresDbUri();
+    private static String getDbRootUri() {
+        return container.getConnectionUrl();
     }
 
     static String getDbUri() {
         return getDbRootUri() + DB_NAME;
+    }
+
+    static String getDbPassword() {
+        return container.getPassword();
+    }
+
+    static String getDbUsername() {
+        return container.getUsername();
     }
 }

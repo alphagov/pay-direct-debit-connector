@@ -13,9 +13,9 @@ import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
 import static uk.gov.pay.directdebit.junit.PostgresTemplate.createTemplate;
-import static uk.gov.pay.directdebit.junit.PostgresTestContainer.DB_PASSWORD;
-import static uk.gov.pay.directdebit.junit.PostgresTestContainer.DB_USERNAME;
+import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbPassword;
 import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbUri;
+import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbUsername;
 import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getOrCreate;
 
 public class DropwizardAppWithPostgresRule implements TestRule {
@@ -29,8 +29,8 @@ public class DropwizardAppWithPostgresRule implements TestRule {
 
     public DropwizardAppWithPostgresRule() {
         configFilePath = resourceFilePath("config/test-it-config.yaml");
-        getOrCreate("govukpay/postgres:9.6.6");
-        ConfigOverride[] configOverride = {config("database.url", getDbUri()), config("database.user", DB_USERNAME), config("database.password", DB_PASSWORD)};
+        getOrCreate();
+        ConfigOverride[] configOverride = {config("database.url", getDbUri()), config("database.user", getDbUsername()), config("database.password", getDbPassword())};
         app = new DropwizardAppRule<>(
                 DirectDebitConnectorApp.class,
                 configFilePath,
@@ -44,7 +44,7 @@ public class DropwizardAppWithPostgresRule implements TestRule {
             @Override
             public void evaluate() throws Throwable {
                 app.getApplication().run("db", "migrate", configFilePath);
-                createTemplate(getDbUri(), DB_USERNAME, DB_PASSWORD);
+                createTemplate(getDbUri(), getDbUsername(), getDbPassword());
                 testContext = new TestContext(app.getLocalPort(), app.getConfiguration().getDataSourceFactory());
                 databaseTestHelper = new DatabaseTestHelper(testContext.getJdbi());
                 base.evaluate();
