@@ -18,9 +18,9 @@ import static java.util.Arrays.stream;
 import static uk.gov.pay.directdebit.junit.DropwizardTestApplications.createIfNotRunning;
 import static uk.gov.pay.directdebit.junit.PostgresTemplate.createTemplate;
 import static uk.gov.pay.directdebit.junit.PostgresTemplate.restorePostgres;
-import static uk.gov.pay.directdebit.junit.PostgresTestContainer.DB_PASSWORD;
-import static uk.gov.pay.directdebit.junit.PostgresTestContainer.DB_USERNAME;
+import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbPassword;
 import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbUri;
+import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbUsername;
 import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getOrCreate;
 
 /**
@@ -57,16 +57,16 @@ public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
         DropwizardConfig dropwizardConfigAnnotation = dropwizardConfigAnnotation();
         List<ConfigOverride> configOverride = newArrayList();
         if (dropwizardConfigAnnotation.withDockerPostgres()) {
-            getOrCreate(dropwizardConfigAnnotation.postgresDockerImage());
+            getOrCreate();
             configOverride.add(config("database.url", getDbUri()));
-            configOverride.add(config("database.user", DB_USERNAME));
-            configOverride.add(config("database.password", DB_PASSWORD));
+            configOverride.add(config("database.user", getDbUsername()));
+            configOverride.add(config("database.password", getDbPassword()));
         }
         Optional<DropwizardTestSupport> createdApp = createIfNotRunning(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config(), configOverride.toArray(new ConfigOverride[0]));
         if (dropwizardConfigAnnotation.withDockerPostgres() && createdApp.isPresent()) {
             try {
                 createdApp.get().getApplication().run("db", "migrate", resourceFilePath(dropwizardConfigAnnotation.config()));
-                createTemplate(getDbUri(), DB_USERNAME, DB_PASSWORD);
+                createTemplate(getDbUri(), getDbUsername(), getDbPassword());
             } catch (Exception e) {
                 throw new DropwizardJUnitRunnerException(e);
             }
