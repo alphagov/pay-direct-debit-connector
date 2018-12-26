@@ -1,2 +1,6 @@
 #!/bin/bash
-mvn -DskipTests clean package && docker build -t govukpay/directdebit-connector:local .
+
+set -e
+
+mvn -DskipITs -DskipTests clean package
+docker build -t govukpay/directdebit-connector:local .
