@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.pact;
 
+import au.com.dius.pact.provider.junit.PactRunner;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.State;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
@@ -11,7 +12,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
-import uk.gov.pay.commons.testing.pact.providers.PayPactRunner;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -28,7 +28,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
-@RunWith(PayPactRunner.class)
+@RunWith(PactRunner.class)
 @Provider("direct-debit-connector")
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"))
