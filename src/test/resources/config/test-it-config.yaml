@@ -21,10 +21,6 @@ graphite:
   host: localhost
   port: 8092
 
-proxy:
-  host: localhost
-  port: 1234
-
 goCardless:
   accessToken: accesstoken
   webhookSecret: ElfJ-3tF9I_zutNVK2lBABQrw-BgAhkZKIlvmbgk

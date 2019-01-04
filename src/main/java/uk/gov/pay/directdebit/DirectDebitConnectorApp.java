@@ -4,7 +4,6 @@ import com.codahale.metrics.graphite.GraphiteReporter;
 import com.codahale.metrics.graphite.GraphiteSender;
 import com.codahale.metrics.graphite.GraphiteUDP;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -113,7 +112,9 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new ConflictExceptionMapper());
         environment.jersey().register(new InternalServerErrorExceptionMapper());
         environment.jersey().register(new PreconditionFailedExceptionMapper());
-        setupSSL(configuration, socketFactory);
+
+        HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory);
+
         initialiseMetrics(configuration, environment);
     }
 
@@ -127,14 +128,6 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
 
         return jdbi;
     }
-
-    @Inject
-    private void setupSSL(DirectDebitConfig configuration, SSLSocketFactory sslSocketFactory) {
-        HttpsURLConnection.setDefaultSSLSocketFactory(sslSocketFactory);
-        System.setProperty("https.proxyHost", configuration.getProxyConfig().getHost());
-        System.setProperty("https.proxyPort", configuration.getProxyConfig().getPort().toString());
-    }
-
 
     private void initialiseMetrics(DirectDebitConfig configuration, Environment environment) {
         GraphiteConfig graphiteConfig = configuration.getGraphiteConfig();
