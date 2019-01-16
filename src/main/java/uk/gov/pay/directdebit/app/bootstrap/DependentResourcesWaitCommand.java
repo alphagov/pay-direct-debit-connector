@@ -4,6 +4,9 @@ import io.dropwizard.cli.ConfiguredCommand;
 import io.dropwizard.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
+
+import uk.gov.pay.commons.utils.startup.ApplicationStartupDependentResourceChecker;
+import uk.gov.pay.commons.utils.startup.DatabaseStartupResource;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 
 public class DependentResourcesWaitCommand extends ConfiguredCommand<DirectDebitConfig> {
@@ -19,7 +22,12 @@ public class DependentResourcesWaitCommand extends ConfiguredCommand<DirectDebit
 
     @Override
     protected void run(Bootstrap<DirectDebitConfig> bs, Namespace ns, DirectDebitConfig conf) {
-        DatabaseResourceWaitCommand databaseResource = new DatabaseResourceWaitCommand(conf);
-        databaseResource.doWait();
+        new ApplicationStartupDependentResourceChecker(new DatabaseStartupResource(conf.getDataSourceFactory()), duration -> {
+            try {
+                Thread.sleep(duration.toNanos() / 1000);
+            } catch (InterruptedException ignored) {
+            }
+        })
+                .checkAndWaitForResource();
     }
 }
