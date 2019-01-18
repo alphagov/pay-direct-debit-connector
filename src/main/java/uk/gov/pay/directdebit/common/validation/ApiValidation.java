@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.common.validation;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.exception.validation.InvalidFieldsException;
 import uk.gov.pay.directdebit.common.exception.validation.InvalidSizeFieldsException;
 import uk.gov.pay.directdebit.common.exception.validation.MissingMandatoryFieldsException;
@@ -17,7 +17,7 @@ import static java.util.Arrays.stream;
 
 public abstract class ApiValidation {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(ApiValidation.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiValidation.class);
 
     private String[] requiredFields;
     private Map<String, FieldSize> fieldSizes;

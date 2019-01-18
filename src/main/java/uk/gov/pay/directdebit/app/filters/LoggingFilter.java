@@ -4,7 +4,7 @@ import com.google.common.base.Stopwatch;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -20,7 +20,7 @@ import static java.lang.String.format;
 public class LoggingFilter implements Filter {
 
     public static final String HEADER_REQUEST_ID = "X-Request-Id";
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(LoggingFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingFilter.class);
 
     public static String currentRequestId() {
         return MDC.get(HEADER_REQUEST_ID);

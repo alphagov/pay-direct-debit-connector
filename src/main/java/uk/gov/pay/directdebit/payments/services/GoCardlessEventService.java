@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.payments.services;
 
 import javax.inject.Inject;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
@@ -13,7 +13,7 @@ import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundExcept
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 
 public class GoCardlessEventService {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessEventService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessEventService.class);
 
     private final GoCardlessMandateDao goCardlessMandateDao;
     private final GoCardlessPaymentDao goCardlessPaymentDao;

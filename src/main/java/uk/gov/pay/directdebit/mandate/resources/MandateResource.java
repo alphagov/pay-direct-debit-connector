@@ -13,7 +13,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
@@ -31,7 +31,7 @@ import static javax.ws.rs.core.Response.created;
 
 @Path("/")
 public class MandateResource {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(MandateResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MandateResource.class);
     private final MandateService mandateService;
     private final CreateMandateRequestValidator createMandateRequestValidator = new CreateMandateRequestValidator();
     private final MandateServiceFactory mandateServiceFactory;

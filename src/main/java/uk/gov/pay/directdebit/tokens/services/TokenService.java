@@ -2,13 +2,13 @@ package uk.gov.pay.directdebit.tokens.services;
 
 import javax.inject.Inject;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 
 public class TokenService {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(TokenService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenService.class);
 
     private final TokenDao tokenDao;
 

@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class GoCardlessMandateHandler extends GoCardlessHandler {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessMandateHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessMandateHandler.class);
     private final MandateServiceFactory mandateServiceFactory;
     private final DirectDebitEventService directDebitEventService;
     @Inject

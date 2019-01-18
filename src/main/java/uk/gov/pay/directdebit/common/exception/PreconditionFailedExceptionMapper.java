@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 public class PreconditionFailedExceptionMapper implements ExceptionMapper<PreconditionFailedException> {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(PreconditionFailedException.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PreconditionFailedException.class);
 
     @Override
     public Response toResponse(PreconditionFailedException exception) {

@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.payers.services;
 
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import java.util.Map;
 
 public class PayerService {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(PayerService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PayerService.class);
 
     private final PayerDao payerDao;
     private final MandateServiceFactory mandateServiceFactory;

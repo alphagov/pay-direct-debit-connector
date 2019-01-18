@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.common.exception;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -11,7 +11,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 public class InternalServerErrorExceptionMapper implements ExceptionMapper<InternalServerErrorException> {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(InternalServerErrorException.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InternalServerErrorException.class);
 
     @Override
     public Response toResponse(InternalServerErrorException exception) {

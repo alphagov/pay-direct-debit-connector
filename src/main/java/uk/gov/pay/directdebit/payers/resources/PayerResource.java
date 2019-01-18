@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.Map;
 import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.util.URIBuilder;
 import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -27,7 +27,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.util.URIBuilder;
 import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -45,7 +45,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/")
 public class PayerResource {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(PayerResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PayerResource.class);
     private final PaymentProviderFactory paymentProviderFactory;
     private final CreatePayerValidator createPayerValidator = new CreatePayerValidator();
     private final BankAccountDetailsValidator bankAccountDetailsValidator = new BankAccountDetailsValidator();

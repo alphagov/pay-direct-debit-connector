@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.tasks.services;
 
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
@@ -22,7 +22,7 @@ public class ExpireService {
     private TransactionService transactionService;
     private PaymentStatesGraph paymentStatesGraph;
     private MandateStatesGraph mandateStatesGraph;
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(ExpireService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExpireService.class);
     private final long MIN_EXPIRY_AGE_MINUTES = 90l;
     private final PaymentState PAYMENT_EXPIRY_CUTOFF_STATUS = PaymentState.PENDING;
     private final MandateState MANDATE_EXPIRY_CUTOFF_STATUS = MandateState.PENDING;

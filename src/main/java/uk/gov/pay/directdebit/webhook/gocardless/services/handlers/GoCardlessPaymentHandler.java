@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import javax.inject.Inject;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
@@ -17,7 +17,7 @@ import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
 public class GoCardlessPaymentHandler extends GoCardlessHandler {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessPaymentHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessPaymentHandler.class);
 
     @Inject
     public GoCardlessPaymentHandler(TransactionService transactionService,

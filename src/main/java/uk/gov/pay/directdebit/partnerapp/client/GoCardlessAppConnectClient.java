@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.partnerapp.client;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.GoCardlessAppConnectConfig;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount.Type;
 import uk.gov.pay.directdebit.partnerapp.client.model.GoCardlessAppConnectAccessTokenResponse;
@@ -23,7 +23,7 @@ import java.util.Optional;
  * This is required when linking a Partner app to a Merchant account
  */
 public class GoCardlessAppConnectClient {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessAppConnectClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessAppConnectClient.class);
 
     private final String testClientId;
     private final String testClientSecret;

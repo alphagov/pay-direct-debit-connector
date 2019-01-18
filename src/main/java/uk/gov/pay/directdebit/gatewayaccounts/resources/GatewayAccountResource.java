@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.jersey.PATCH;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.api.CreateGatewayAccountValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -34,7 +34,7 @@ public class GatewayAccountResource {
     static final String GATEWAY_ACCOUNTS_API_PATH = "/v1/api/accounts";
     static final String GATEWAY_ACCOUNTS_FRONTEND_PATH = "/v1/frontend/accounts";
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(GatewayAccountResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayAccountResource.class);
 
     private GatewayAccountService gatewayAccountService;
     private final CreateGatewayAccountValidator createGatewayAccountValidator = new CreateGatewayAccountValidator();

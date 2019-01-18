@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.notifications.model;
 
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -37,7 +37,7 @@ public class EmailPayload {
         ON_DEMAND_PAYMENT_CONFIRMED,
         PAYMENT_FAILED;
 
-        private static final Logger LOGGER = PayLoggerFactory.getLogger(EmailTemplate.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(EmailTemplate.class);
 
         public static EmailTemplate fromString(String type) {
             for (EmailTemplate typeEnum : values()) {

@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.notifications.services;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.common.services.SunService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -25,7 +25,7 @@ public class UserNotificationService {
     private static final String COLLECTION_DATE_KEY = "collection date";
     private static final String AMOUNT_KEY = "amount";
     private static final String BANK_ACCOUNT_LAST_DIGITS_KEY = "bank account last 2 digits";
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(UserNotificationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserNotificationService.class);
 
     private AdminUsersClient adminUsersClient;
     private final DirectDebitConfig directDebitConfig;

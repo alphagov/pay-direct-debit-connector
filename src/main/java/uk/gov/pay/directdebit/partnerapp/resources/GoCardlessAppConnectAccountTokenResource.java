@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.partnerapp.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.partnerapp.api.GoCardlessAppConnectAccountTokenRequestValidator;
 import uk.gov.pay.directdebit.partnerapp.services.GoCardlessAppConnectAccountService;
 
@@ -18,7 +18,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/")
 public class GoCardlessAppConnectAccountTokenResource {
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessAppConnectAccountTokenResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessAppConnectAccountTokenResource.class);
 
     public static final String CODE_FIELD = "code";
     public static final String STATE_FIELD = "state";

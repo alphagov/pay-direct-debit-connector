@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.gatewayaccounts.services;
 
 import com.google.common.base.Splitter;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
 import uk.gov.pay.directdebit.gatewayaccounts.api.PatchGatewayAccountValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
@@ -23,7 +23,7 @@ public class GatewayAccountService {
     private GatewayAccountDao gatewayAccountDao;
 
     private static final Splitter COMMA_SEPARATOR = Splitter.on(',').trimResults().omitEmptyStrings();
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(GatewayAccountService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayAccountService.class);
 
     private GatewayAccountParser gatewayAccountParser;
     private PatchGatewayAccountValidator validator = new PatchGatewayAccountValidator();

@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import java.time.ZoneOffset;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
@@ -50,7 +50,7 @@ import static uk.gov.pay.directdebit.payments.resources.TransactionResource.CHAR
 
 public class TransactionService {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(TransactionService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
     private final TokenService tokenService;
     private final GatewayAccountDao gatewayAccountDao;
     private final DirectDebitConfig directDebitConfig;

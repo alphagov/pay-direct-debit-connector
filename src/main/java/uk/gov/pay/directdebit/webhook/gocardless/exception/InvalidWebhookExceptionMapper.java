@@ -1,14 +1,14 @@
 package uk.gov.pay.directdebit.webhook.gocardless.exception;
 
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
 public class InvalidWebhookExceptionMapper implements ExceptionMapper<InvalidWebhookException> {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(InvalidWebhookExceptionMapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InvalidWebhookExceptionMapper.class);
 
     /**
      * Map an exception to a {@link javax.ws.rs.core.Response}.
