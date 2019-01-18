@@ -22,12 +22,7 @@ public class DependentResourcesWaitCommand extends ConfiguredCommand<DirectDebit
 
     @Override
     protected void run(Bootstrap<DirectDebitConfig> bs, Namespace ns, DirectDebitConfig conf) {
-        new ApplicationStartupDependentResourceChecker(new DatabaseStartupResource(conf.getDataSourceFactory()), duration -> {
-            try {
-                Thread.sleep(duration.toNanos() / 1000);
-            } catch (InterruptedException ignored) {
-            }
-        })
+        new ApplicationStartupDependentResourceChecker(new DatabaseStartupResource(conf.getDataSourceFactory()))
                 .checkAndWaitForResource();
     }
 }
