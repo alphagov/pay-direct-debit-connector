@@ -14,8 +14,8 @@ import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.apache.connector.ApacheClientProperties;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientProperties;
+import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
-import uk.gov.pay.directdebit.app.filters.LoggingFilter;
 import uk.gov.pay.directdebit.app.ssl.TrustStoreLoader;
 
 import javax.inject.Inject;
