@@ -7,13 +7,14 @@ server:
       port: 0
 
 logging:
-    level: WARN
-    appenders:
-      - type: console
-        threshold: ALL
-        timeZone: UTC
-        target: stdout
-        logFormat: "[%thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n"
+  level: WARN
+  appenders:
+    - type: console
+      threshold: ALL
+      timeZone: UTC
+      target: stdout
+      logFormat: "[%thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n"
+
 links:
   frontendUrl: http://Frontend
 
