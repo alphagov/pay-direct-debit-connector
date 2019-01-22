@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.payments.services;
 import java.util.Optional;
 import javax.inject.Inject;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
@@ -13,7 +13,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.*;
 
 public class DirectDebitEventService {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(DirectDebitEventService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DirectDebitEventService.class);
 
     private final DirectDebitEventDao directDebitEventDao;
 

@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services;
 
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class WebhookGoCardlessService {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(WebhookGoCardlessService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebhookGoCardlessService.class);
 
     private final GoCardlessEventService goCardlessService;
     private final GoCardlessPaymentHandler goCardlessPaymentHandler;

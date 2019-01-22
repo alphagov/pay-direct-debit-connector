@@ -7,14 +7,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.AdminUsersConfig;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.api.EmailPayloadRequest;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 
 public class AdminUsersClient {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(AdminUsersClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdminUsersClient.class);
 
 
     private final Client client;

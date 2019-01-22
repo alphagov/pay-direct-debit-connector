@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.mandate.services.gocardless;
 
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
@@ -35,7 +35,7 @@ import java.util.Optional;
 
 public class GoCardlessService implements DirectDebitPaymentProviderCommandService {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(GoCardlessEventService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessEventService.class);
 
     private final GoCardlessClientFactory goCardlessClientFactory;
     private final GoCardlessCustomerDao goCardlessCustomerDao;

@@ -5,7 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
@@ -47,7 +47,7 @@ import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
 
 public class MandateService {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(MandateService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MandateService.class);
     private final MandateDao mandateDao;
     private final LinksConfig linksConfig;
     private final GatewayAccountDao gatewayAccountDao;

@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.logger.PayLoggerFactory;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
@@ -23,7 +23,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 
 public class MandateStateUpdateService {
 
-    private static final Logger LOGGER = PayLoggerFactory.getLogger(MandateService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MandateService.class);
     private final MandateDao mandateDao;
     private final DirectDebitEventService directDebitEventService;
     private final UserNotificationService userNotificationService;
