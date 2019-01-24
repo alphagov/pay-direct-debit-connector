@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.payments.dao;
 
 import java.util.List;
 import javax.inject.Inject;
-import javax.ws.rs.QueryParam;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;

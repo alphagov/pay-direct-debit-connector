@@ -3,18 +3,7 @@ package uk.gov.pay.directdebit.payers.resources;
 import java.net.URI;
 import java.util.Map;
 import com.codahale.metrics.annotation.Timed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.pay.directdebit.common.util.URIBuilder;
-import uk.gov.pay.directdebit.common.validation.BankAccountDetailsValidator;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
-import uk.gov.pay.directdebit.payers.api.CreatePayerResponse;
-import uk.gov.pay.directdebit.payers.api.CreatePayerValidator;
-import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
-import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
