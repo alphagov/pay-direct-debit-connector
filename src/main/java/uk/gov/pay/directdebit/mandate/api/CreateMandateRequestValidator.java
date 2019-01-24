@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.function.Function;
 import uk.gov.pay.directdebit.common.validation.ApiValidation;
 import uk.gov.pay.directdebit.common.validation.FieldSize;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 
 public class CreateMandateRequestValidator extends ApiValidation {
 

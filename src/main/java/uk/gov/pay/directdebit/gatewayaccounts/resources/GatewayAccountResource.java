@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.gatewayaccounts.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.jersey.PATCH;
 import org.slf4j.Logger;

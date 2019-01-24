@@ -1,7 +1,5 @@
 package uk.gov.pay.directdebit.mandate.api;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Map;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.SortCode;

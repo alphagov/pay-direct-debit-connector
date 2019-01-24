@@ -2,14 +2,10 @@ package uk.gov.pay.directdebit.payments.model;
 
 import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.graph.MutableValueGraph;
-import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
 
 public abstract class DirectDebitStatesGraph<T extends DirectDebitState> {
 

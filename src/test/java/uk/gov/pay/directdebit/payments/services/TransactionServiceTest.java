@@ -18,7 +18,6 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.CreatePaymentRequest;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;

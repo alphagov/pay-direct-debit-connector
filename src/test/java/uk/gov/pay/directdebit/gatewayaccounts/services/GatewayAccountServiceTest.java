@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.gatewayaccounts.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Rule;
