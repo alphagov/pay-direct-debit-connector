@@ -278,7 +278,7 @@ public class GetDirectDebitEventsTest {
         
         for (int i = 1; i < 4; i++) {
             aDirectDebitEventFixture()
-                    .withId(Long.valueOf(i))
+                    .withId((long) i)
                     .withExternalId("testId" + i)
                     .withMandateId(testMandate.getId())
                     .withTransactionId(testTransaction.getId())
@@ -311,7 +311,7 @@ public class GetDirectDebitEventsTest {
 
         for (int i = 1; i < 11; i++) {
             aDirectDebitEventFixture()
-                    .withId(Long.valueOf(i))
+                    .withId((long) i)
                     .withMandateId(testMandate.getId())
                     .withTransactionId(testTransaction.getId())
                     .withEventType(MANDATE)
@@ -350,7 +350,7 @@ public class GetDirectDebitEventsTest {
     public void shouldReturnFiveHundredEventsWhenPageSizeIsFiveHundredAndOne() {
         for (int i = 1; i < 503; i++) {
             aDirectDebitEventFixture()
-                    .withId(Long.valueOf(i))
+                    .withId((long) i)
                     .withMandateId(testMandate.getId())
                     .withTransactionId(testTransaction.getId())
                     .withEventType(MANDATE)
