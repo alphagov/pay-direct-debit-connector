@@ -51,10 +51,10 @@ public class PatchGatewayAccountValidator extends ApiValidation {
         if (request.size() != 2) {
             throw new BadRequestException(format("Patch payload contains wrong size of operations (%s)", request.size()));
         }
-        for (int i = 0; i < request.size(); i++) {
-            super.validate(externalId, request.get(i));
-            isPathAllowed(request.get(i).get(PATH_KEY));
-            isOperationAllowed(request.get(i).get(OPERATION_KEY));
+        for (Map<String, String> stringStringMap : request) {
+            super.validate(externalId, stringStringMap);
+            isPathAllowed(stringStringMap.get(PATH_KEY));
+            isOperationAllowed(stringStringMap.get(OPERATION_KEY));
         }
     }
     

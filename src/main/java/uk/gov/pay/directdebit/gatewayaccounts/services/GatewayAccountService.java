@@ -73,8 +73,7 @@ public class GatewayAccountService {
         validator.validatePatchRequest(externalId, request);
         PaymentProviderAccessToken accessToken = null;
         PaymentProviderOrganisationIdentifier organisation = null;
-        for (int i = 0; i < request.size(); i++) {
-            Map<String, String> operation = request.get(i);
+        for (Map<String, String> operation : request) {
             if (operation.get("path").equals("access_token")) {
                 accessToken = PaymentProviderAccessToken.of(operation.get("value"));
             } else {
