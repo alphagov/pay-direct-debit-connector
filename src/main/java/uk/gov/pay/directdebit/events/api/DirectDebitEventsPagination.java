@@ -36,7 +36,7 @@ public class DirectDebitEventsPagination {
 
     private URI uriWithParams(DirectDebitEventSearchParams params, UriInfo uriInfo) {
         UriBuilder uriBuilder = uriInfo.getBaseUriBuilder().path(uriInfo.getPath());
-        params.getParamsAsMap().forEach((k, v) -> uriBuilder.queryParam(k, v));
+        params.getParamsAsMap().forEach(uriBuilder::queryParam);
         return uriBuilder.build();
     }
 
