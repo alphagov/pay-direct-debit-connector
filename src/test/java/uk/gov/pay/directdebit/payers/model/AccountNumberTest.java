@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class AccountNumberTest {
@@ -68,7 +69,7 @@ public class AccountNumberTest {
         AccountNumber accountNumber1 = AccountNumber.of("12345678");
         AccountNumber accountNumber2 = AccountNumber.of("12345678");
 
-        assertThat(accountNumber1.equals(accountNumber2), is(true));
+        assertThat(accountNumber1, is(accountNumber2));
     }
 
     @Test
@@ -76,8 +77,8 @@ public class AccountNumberTest {
         AccountNumber accountNumber1 = AccountNumber.of("12345678");
         AccountNumber accountNumber2 = AccountNumber.of("87654321");
 
-        assertThat(accountNumber1.equals(accountNumber2), is(false));
-        assertThat(accountNumber2.equals(accountNumber1), is(false));
+        assertThat(accountNumber1, is(not(accountNumber2)));
+        assertThat(accountNumber2, is(not(accountNumber1)));
     }
 
     @Test
@@ -85,22 +86,22 @@ public class AccountNumberTest {
         AccountNumber accountNumber1 = AccountNumber.of("1234567");
         AccountNumber accountNumber2 = AccountNumber.of("01234567");
 
-        assertThat(accountNumber1.equals(accountNumber2), is(false));
-        assertThat(accountNumber2.equals(accountNumber1), is(false));
+        assertThat(accountNumber1, is(not(accountNumber2)));
+        assertThat(accountNumber2, is(not(accountNumber1)));
     }
 
     @Test
     public void accountNumberIsNotEqualToTheStringificationOfItself() {
         AccountNumber accountNumber = AccountNumber.of("12345678");
 
-        assertThat(accountNumber.equals("12345678"), is(false));
+        assertThat(accountNumber, is(not("12345678")));
     }
 
     @Test
     public void accountNumberIsNotEqualToNull() {
         AccountNumber accountNumber = AccountNumber.of("12345678");
 
-        assertThat(accountNumber.equals(null), is(false));
+        assertThat(accountNumber, is(not(nullValue())));
     }
 
     @Test
