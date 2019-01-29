@@ -10,11 +10,11 @@ import java.time.format.DateTimeFormatter;
 
 public class CustomDateSerializer extends StdSerializer<ZonedDateTime> {
 
-    public CustomDateSerializer() {
+    CustomDateSerializer() {
         this(null);
     }
-    
-    protected CustomDateSerializer(Class<ZonedDateTime> t) {
+
+    private CustomDateSerializer(Class<ZonedDateTime> t) {
         super(t);
     }
 
