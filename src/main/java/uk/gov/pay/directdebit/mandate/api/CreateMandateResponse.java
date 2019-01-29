@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-import uk.gov.pay.directdebit.payments.model.CustomDateSerializer;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
@@ -33,7 +33,7 @@ public class CreateMandateResponse {
     private String returnUrl;
 
     @JsonProperty("created_date")
-    @JsonSerialize(using = CustomDateSerializer.class)
+    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private ZonedDateTime createdDate;
 
     @JsonProperty

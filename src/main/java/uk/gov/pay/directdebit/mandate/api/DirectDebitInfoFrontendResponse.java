@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
-import uk.gov.pay.directdebit.payments.model.CustomDateSerializer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.time.ZonedDateTime;
@@ -129,7 +129,7 @@ public class DirectDebitInfoFrontendResponse {
     private String mandateType;
 
     @JsonProperty("created_date")
-    @JsonSerialize(using = CustomDateSerializer.class)
+    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private ZonedDateTime createdDate;
 
     @JsonProperty
