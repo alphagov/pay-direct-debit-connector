@@ -139,6 +139,11 @@
             <artifactId>utils</artifactId>
             <version>${pay-java-commons.version}</version>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.pay</groupId>
+            <artifactId>model</artifactId>
+            <version>${pay-java-commons.version}</version>
+        </dependency>
         <!-- testing -->
         <dependency>
             <groupId>pl.pragmatists</groupId>

@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+
+import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 
 public class CustomDateSerializer extends StdSerializer<ZonedDateTime> {
 
@@ -20,6 +21,6 @@ public class CustomDateSerializer extends StdSerializer<ZonedDateTime> {
 
     @Override
     public void serialize(ZonedDateTime value, JsonGenerator gen, SerializerProvider sp) throws IOException {
-        gen.writeString(value.format(DateTimeFormatter.ISO_INSTANT));
+        gen.writeString(ISO_INSTANT_MILLISECOND_PRECISION.format(value));
     }
 }

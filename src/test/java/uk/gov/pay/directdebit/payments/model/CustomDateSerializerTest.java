@@ -26,7 +26,7 @@ public class CustomDateSerializerTest {
 
     @Test
     public void shouldSerializeWithMillisecondPrecision() throws IOException {
-        ZonedDateTime testValue = ZonedDateTime.parse("2019-01-29T11:34:53.849Z");
+        ZonedDateTime testValue = ZonedDateTime.parse("2019-01-29T11:34:53.849012345Z");
         Writer jsonWriter = new StringWriter();
         JsonGenerator jsonGenerator = new JsonFactory().createGenerator(jsonWriter);
         final SerializerProvider serializerProvider = new ObjectMapper().getSerializerProvider();
