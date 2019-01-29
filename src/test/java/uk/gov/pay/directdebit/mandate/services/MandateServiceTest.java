@@ -145,7 +145,7 @@ public class MandateServiceTest {
         assertThat(mandateResponseForFrontend.getMandateType(), is(mandate.getType().toString()));
         assertThat(mandateResponseForFrontend.getGatewayAccountExternalId(), is(mandate.getGatewayAccount().getExternalId()));
         assertThat(mandateResponseForFrontend.getGatewayAccountId(), is(mandate.getGatewayAccount().getId()));
-        assertThat(mandateResponseForFrontend.getCreatedDate(), is(mandate.getCreatedDate().toString()));
+        assertThat(mandateResponseForFrontend.getCreatedDate(), is(mandate.getCreatedDate()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
         assertThat(mandateResponseForFrontend.getPayer().getExternalId(), is(payerFixture.getExternalId()));

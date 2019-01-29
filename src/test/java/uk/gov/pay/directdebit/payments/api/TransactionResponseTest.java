@@ -1,8 +1,9 @@
 package uk.gov.pay.directdebit.payments.api;
 
+import org.junit.Test;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 
@@ -16,7 +17,6 @@ public class TransactionResponseTest {
         String returnUrl = "http://bla.bla";
         String description = "desc";
         String reference = "ref";
-        String createdDate = ZonedDateTime.now().toString();
         TransactionResponse transactionResponse = new TransactionResponse(
                 transactionId,
                 ExternalPaymentState.EXTERNAL_STARTED,
@@ -24,7 +24,7 @@ public class TransactionResponseTest {
                 returnUrl,
                 description,
                 reference,
-                createdDate,
+                ZonedDateTime.now(),
                 new ArrayList<>()
         );
         assertFalse(transactionResponse.toString().contains(description));

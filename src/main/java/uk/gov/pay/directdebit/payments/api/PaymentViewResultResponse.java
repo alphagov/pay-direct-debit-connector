@@ -3,8 +3,11 @@ package uk.gov.pay.directdebit.payments.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.directdebit.payments.links.Link;
+import uk.gov.pay.directdebit.payments.model.CustomDateSerializer;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +28,9 @@ public class PaymentViewResultResponse {
     private String reference;
 
     @JsonProperty("created_date")
-    private String createdDate;
-    
+    @JsonSerialize(using = CustomDateSerializer.class)
+    private ZonedDateTime createdDate;
+
     @JsonProperty("agreement_id")
     private String mandateExternalId;
 
@@ -38,7 +42,7 @@ public class PaymentViewResultResponse {
 
     @JsonProperty
     private ExternalPaymentState state;
-    
+
     @JsonProperty
     private List<Link> links = new ArrayList<>();
 
@@ -47,7 +51,7 @@ public class PaymentViewResultResponse {
                                      Long amount,
                                      String reference,
                                      String description,
-                                     String createdDate,
+                                     ZonedDateTime createdDate,
                                      String name,
                                      String email,
                                      ExternalPaymentState state,
@@ -79,7 +83,7 @@ public class PaymentViewResultResponse {
         return reference;
     }
 
-    public String getCreatedDate() {
+    public ZonedDateTime getCreatedDate() {
         return createdDate;
     }
 
@@ -95,8 +99,10 @@ public class PaymentViewResultResponse {
         return state;
     }
 
-    public List<Link> getLinks() { return links; }
-    
+    public List<Link> getLinks() {
+        return links;
+    }
+
     public PaymentViewResultResponse withLink(Link link) {
         this.links.add(link);
         return this;
@@ -116,7 +122,8 @@ public class PaymentViewResultResponse {
         if (!createdDate.equals(that.createdDate)) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (email != null ? !email.equalsIgnoreCase(that.email) : that.email != null) return false;
-        if (mandateExternalId != null ? !transactionId.equalsIgnoreCase(that.mandateExternalId) : that.transactionId != null) return false;
+        if (mandateExternalId != null ? !transactionId.equalsIgnoreCase(that.mandateExternalId) : that.transactionId != null)
+            return false;
         return state == that.state;
     }
 

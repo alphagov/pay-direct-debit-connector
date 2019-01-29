@@ -3,9 +3,12 @@ package uk.gov.pay.directdebit.payments.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.pay.directdebit.payments.model.CustomDateSerializer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +29,7 @@ public class CollectPaymentResponse {
 
     @JsonProperty("payment_provider")
     private String paymentProvider;
-    
+
     @JsonProperty
     private String description;
 
@@ -34,12 +37,13 @@ public class CollectPaymentResponse {
     private String reference;
 
     @JsonProperty("created_date")
-    private String createdDate;
+    @JsonSerialize(using = CustomDateSerializer.class)
+    private ZonedDateTime createdDate;
 
     @JsonProperty
     private ExternalPaymentState state;
 
-    public CollectPaymentResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String description, String reference, String createdDate, String paymentProvider, List<Map<String, Object>> dataLinks) {
+    public CollectPaymentResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String description, String reference, ZonedDateTime createdDate, String paymentProvider, List<Map<String, Object>> dataLinks) {
         this.transactionExternalId = transactionExternalId;
         this.state = state;
         this.dataLinks = dataLinks;
@@ -82,7 +86,7 @@ public class CollectPaymentResponse {
                 .get();
     }
 
-    
+
     public static CollectPaymentResponse from(Transaction transaction, List<Map<String, Object>> dataLinks) {
         return new CollectPaymentResponse(
                 transaction.getExternalId(),
@@ -90,7 +94,7 @@ public class CollectPaymentResponse {
                 transaction.getAmount(),
                 transaction.getDescription(),
                 transaction.getReference(),
-                transaction.getCreatedDate().toString(),
+                transaction.getCreatedDate(),
                 transaction.getMandate().getGatewayAccount().getPaymentProvider().toString(),
                 dataLinks);
     }

@@ -47,14 +47,14 @@ public class PaymentViewService {
                             total,
                             validatedSearchParams.getPage(),
                             viewListResponse)
-                                .withPaginationBuilder(paginationBuilder
-                                .withTotalCount(total)
-                                .buildResponse());
+                            .withPaginationBuilder(paginationBuilder
+                                    .withTotalCount(total)
+                                    .buildResponse());
 
                 })
                 .orElseThrow(() -> new GatewayAccountNotFoundException(searchParams.getGatewayExternalId()));
     }
-    
+
     public PaymentViewService withUriInfo(UriInfo uriInfo) {
         this.uriInfo = uriInfo;
         return this;
@@ -77,20 +77,20 @@ public class PaymentViewService {
                 paymentView.getAmount(),
                 paymentView.getReference(),
                 paymentView.getDescription(),
-                paymentView.getCreatedDate().toString(),
+                paymentView.getCreatedDate(),
                 paymentView.getName(),
                 paymentView.getEmail(),
                 paymentView.getState().toExternal(),
                 paymentView.getMandateExternalId());
     }
-    
+
     private PaymentViewResultResponse decorateWithSelfLink(PaymentViewResultResponse listResponse, String gatewayAccountId) {
         if (this.uriBuilder == null) {
             this.uriBuilder = UriBuilder.fromUri(uriInfo.getBaseUri())
-            .path("/v1/api/accounts/{accountId}/charges/{transactionExternalId}");
+                    .path("/v1/api/accounts/{accountId}/charges/{transactionExternalId}");
         }
         String href = uriBuilder.build(gatewayAccountId, listResponse.getTransactionId()).toString();
-        
+
         Link link = Link.ofValue(href, "GET", "self");
         return listResponse.withLink(link);
     }

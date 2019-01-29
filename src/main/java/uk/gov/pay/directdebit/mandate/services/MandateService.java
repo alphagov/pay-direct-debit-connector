@@ -3,9 +3,9 @@ package uk.gov.pay.directdebit.mandate.services;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
-import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
@@ -112,7 +112,7 @@ public class MandateService {
                 mandateExternalId,
                 mandate.getType(),
                 mandate.getReturnUrl(),
-                mandate.getCreatedDate().toString(),
+                mandate.getCreatedDate(),
                 mandate.getState().toExternal(),
                 dataLinks,
                 mandate.getServiceReference(),
@@ -144,7 +144,7 @@ public class MandateService {
                 mandate.getReturnUrl(),
                 mandate.getMandateReference(),
                 mandate.getType().toString(),
-                mandate.getCreatedDate().toString(),
+                mandate.getCreatedDate(),
                 mandate.getPayer(),
                 transaction
         );
@@ -160,7 +160,7 @@ public class MandateService {
                 mandate.getReturnUrl(),
                 mandate.getMandateReference(),
                 mandate.getType().toString(),
-                mandate.getCreatedDate().toString(),
+                mandate.getCreatedDate(),
                 mandate.getPayer(),
                 null
         );
