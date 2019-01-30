@@ -9,7 +9,6 @@ import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +18,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class CollectPaymentResponse {
     @JsonProperty("links")
-    private List<Map<String, Object>> dataLinks = new ArrayList<>();
+    private List<Map<String, Object>> dataLinks;
 
     @JsonProperty("charge_id")
     private String transactionExternalId;
