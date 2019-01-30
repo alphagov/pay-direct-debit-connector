@@ -68,7 +68,7 @@ public class DirectDebitEventDao {
             searchStrings.add("e.event_date >= :after_date");
             queryMap.put("after_date", searchParams.getFromDate());
         }
-        String queryString = searchStrings.isEmpty() ? "" : "WHERE " + searchStrings.stream().collect(Collectors.joining(" AND "));
+        String queryString = searchStrings.isEmpty() ? "" : "WHERE " + String.join(" AND ", searchStrings);
         return new QueryStringAndQueryMap(queryString, queryMap);
     }
 
