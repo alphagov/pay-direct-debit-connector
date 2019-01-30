@@ -207,38 +207,36 @@ public class GatewayAccountResourceIT {
 
         Arrays
           .asList(GATEWAY_ACCOUNTS_API_PATH, GATEWAY_ACCOUNTS_FRONTEND_PATH)
-          .forEach(path -> {
-            givenSetup()
-              .queryParam(
-                  "externalAccountIds",
-                  String.format("%s,%s", EXTERNAL_ID, externalId3)
-                  )
-              .get(path)
-              .then()
-              .statusCode(Response.Status.OK.getStatusCode())
-              .contentType(JSON)
-              .body("accounts", hasSize(2))
+          .forEach(path -> givenSetup()
+            .queryParam(
+                "externalAccountIds",
+                String.format("%s,%s", EXTERNAL_ID, externalId3)
+                )
+            .get(path)
+            .then()
+            .statusCode(Response.Status.OK.getStatusCode())
+            .contentType(JSON)
+            .body("accounts", hasSize(2))
 
-              .body(format("accounts[0].%s", PAYMENT_PROVIDER_KEY), is(PAYMENT_PROVIDER.toString()))
-              .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(SERVICE_NAME))
-              .body(format("accounts[0].%s", DESCRIPTION_KEY), is(DESCRIPTION))
-              .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(ANALYTICS_ID))
-              .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(EXTERNAL_ID))
-              .body(format("accounts[0].%s", TYPE_KEY), is(TYPE.toString()))
-              .body("accounts[0].links", containsLink("self",
-                    "GET",
-                    expectedGatewayAccountLocationFor(testGatewayAccount.getExternalId())))
+            .body(format("accounts[0].%s", PAYMENT_PROVIDER_KEY), is(PAYMENT_PROVIDER.toString()))
+            .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(SERVICE_NAME))
+            .body(format("accounts[0].%s", DESCRIPTION_KEY), is(DESCRIPTION))
+            .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(ANALYTICS_ID))
+            .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(EXTERNAL_ID))
+            .body(format("accounts[0].%s", TYPE_KEY), is(TYPE.toString()))
+            .body("accounts[0].links", containsLink("self",
+                  "GET",
+                  expectedGatewayAccountLocationFor(testGatewayAccount.getExternalId())))
 
-              .body(format("accounts[1].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider3.toString()))
-              .body(format("accounts[1].%s", SERVICE_NAME_KEY), is(serviceName3))
-              .body(format("accounts[1].%s", DESCRIPTION_KEY), is(description3))
-              .body(format("accounts[1].%s", ANALYTICS_ID_KEY), is(analyticsId3))
-              .body(format("accounts[1].%s", EXTERNAL_ID_KEY), is(externalId3))
-              .body(format("accounts[1].%s", TYPE_KEY), is(TYPE.toString()))
-              .body("accounts[1].links", containsLink("self",
-                    "GET",
-                    expectedGatewayAccountLocationFor(testGatewayAccount3.getExternalId())));
-          });
+            .body(format("accounts[1].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider3.toString()))
+            .body(format("accounts[1].%s", SERVICE_NAME_KEY), is(serviceName3))
+            .body(format("accounts[1].%s", DESCRIPTION_KEY), is(description3))
+            .body(format("accounts[1].%s", ANALYTICS_ID_KEY), is(analyticsId3))
+            .body(format("accounts[1].%s", EXTERNAL_ID_KEY), is(externalId3))
+            .body(format("accounts[1].%s", TYPE_KEY), is(TYPE.toString()))
+            .body("accounts[1].links", containsLink("self",
+                  "GET",
+                  expectedGatewayAccountLocationFor(testGatewayAccount3.getExternalId()))));
     }
 
     @Test

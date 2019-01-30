@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payers.model;
 
 import org.junit.Test;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
@@ -58,7 +59,7 @@ public class SortCodeTest {
         SortCode sortCode1 = SortCode.of("123456");
         SortCode sortCode2 = SortCode.of("123456");
         
-        assertThat(sortCode1.equals(sortCode2), is(true));
+        assertThat(sortCode1, is(sortCode2));
     }
 
     @Test
@@ -66,22 +67,22 @@ public class SortCodeTest {
         SortCode sortCode1 = SortCode.of("123456");
         SortCode sortCode2 = SortCode.of("654321");
 
-        assertThat(sortCode1.equals(sortCode2), is(false));
-        assertThat(sortCode2.equals(sortCode1), is(false));
+        assertThat(sortCode1, is(not(sortCode2)));
+        assertThat(sortCode2, is(not(sortCode1)));
     }
 
     @Test
     public void sortCodeIsNotEqualToTheStringificationOfItself() {
         SortCode sortCode = SortCode.of("123456");
 
-        assertThat(sortCode.equals("123456"), is(false));
+        assertThat(sortCode, is(not("123456")));
     }
 
     @Test
     public void sortCodeIsNotEqualToNull() {
         SortCode sortCode = SortCode.of("123456");
 
-        assertThat(sortCode.equals(null), is(false));
+        assertThat(sortCode, is(not(nullValue())));
     }
     
     @Test

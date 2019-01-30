@@ -84,12 +84,10 @@ public class DirectDebitEventDao {
     }
     
     public Long insert(DirectDebitEvent directDebitEvent) {
-        return (long) jdbi.withHandle(handle -> {
-            return handle.createUpdate("INSERT INTO events(mandate_id, external_id, transaction_id, event_type, " +
-                    "event, event_date) VALUES (:mandateId, :externalId, :transactionId, :eventType, :event, :eventDate)")
-                    .bindBean(directDebitEvent)
-                    .execute();
-        });
+        return (long) jdbi.withHandle(handle -> handle.createUpdate("INSERT INTO events(mandate_id, external_id, transaction_id, event_type, " +
+                "event, event_date) VALUES (:mandateId, :externalId, :transactionId, :eventType, :event, :eventDate)")
+                .bindBean(directDebitEvent)
+                .execute());
     }
 
     public Optional<DirectDebitEvent> findByMandateIdAndEvent(Long mandateId, DirectDebitEvent.Type eventType, DirectDebitEvent.SupportedEvent event) {

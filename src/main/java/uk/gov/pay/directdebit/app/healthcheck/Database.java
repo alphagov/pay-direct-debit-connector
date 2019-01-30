@@ -17,21 +17,15 @@ public class Database extends HealthCheck {
     }
 
     @Override
-    protected Result check() throws Exception {
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection(
+    protected Result check() {
+        try (Connection connection = DriverManager.getConnection(
                 configuration.getDataSourceFactory().getUrl(),
                 configuration.getDataSourceFactory().getUser(),
-                configuration.getDataSourceFactory().getPassword());
+                configuration.getDataSourceFactory().getPassword())) {
             connection.setReadOnly(true);
             return connection.isValid(2) ? Result.healthy() : Result.unhealthy("Could not validate the DB connection.");
         } catch (Exception e) {
             return Result.unhealthy(e.getMessage());
-        } finally {
-            if (connection !=null) {
-                connection.close();
-            }
         }
     }
 

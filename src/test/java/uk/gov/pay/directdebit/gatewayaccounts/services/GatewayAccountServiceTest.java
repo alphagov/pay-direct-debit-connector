@@ -25,6 +25,7 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,7 +149,7 @@ public class GatewayAccountServiceTest {
     public void shouldReturnAListOfGatewayAccountsSingle() {
         GatewayAccount fixture = gatewayAccountFixture.toEntity();
         when(mockedGatewayAccountDao.find(any(List.class)))
-                .thenReturn(Arrays.asList(fixture));
+                .thenReturn(Collections.singletonList(fixture));
 
         List<GatewayAccountResponse> gatewayAccounts = service.getAllGatewayAccounts(fixture.getExternalId(), mockedUriInfo);
 

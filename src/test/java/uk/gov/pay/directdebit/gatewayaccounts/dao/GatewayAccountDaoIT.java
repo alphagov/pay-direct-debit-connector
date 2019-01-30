@@ -18,6 +18,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -183,9 +184,7 @@ public class GatewayAccountDaoIT {
           .withOrganisation(organisation)          
           .insert(testContext.getJdbi());
 
-        gatewayAccounts = gatewayAccountDao.find(
-          Arrays.asList(externalId)
-        );
+        gatewayAccounts = gatewayAccountDao.find(Collections.singletonList(externalId));
 
         assertThat(gatewayAccounts.size(), is(1));
 
@@ -199,9 +198,7 @@ public class GatewayAccountDaoIT {
         assertThat(first.getAnalyticsId(),     is(analyticsId));
         assertThat(first.getType(),            is(TYPE));
 
-        gatewayAccounts = gatewayAccountDao.find(
-          Arrays.asList(externalId, externalId2)
-        );
+        gatewayAccounts = gatewayAccountDao.find(Arrays.asList(externalId, externalId2));
 
         assertThat(gatewayAccounts.size(), is(2));
 

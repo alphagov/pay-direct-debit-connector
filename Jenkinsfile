@@ -30,7 +30,7 @@ pipeline {
       }
       steps {
         script {
-          def long stepBuildTime = System.currentTimeMillis()
+          long stepBuildTime = System.currentTimeMillis()
 
           sh 'mvn clean verify'
           runProviderContractTests() 

@@ -18,7 +18,6 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -40,13 +39,12 @@ public class GetDirectDebitEventsTest {
     
     private MandateFixture testMandate;
     private TransactionFixture testTransaction;
-    private GatewayAccountFixture gatewayAccountFixture;
     private TestContext testContext;
 
     @Before
     public void setUp() {
         testContext = app.getTestContext();
-        gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
         this.testTransaction = TransactionFixture.aTransactionFixture().withMandateFixture(testMandate).insert(testContext.getJdbi());
     }
@@ -124,7 +122,7 @@ public class GetDirectDebitEventsTest {
                 .body("count", is(1))
                 .body("results[0].event_type", is(MANDATE.toString()))
                 .body("results[0].event", is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER.toString()))
-                .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(DateTimeFormatter.ISO_INSTANT).toString()))
+                .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(DateTimeFormatter.ISO_INSTANT)))
                 .body("results[0].external_id", is("externalId"))
                 .body("results[0].mandate_external_id", is(testMandate.getExternalId().toString()))
                 .body("results[0].transaction_external_id", is(testTransaction.getExternalId()))
@@ -278,7 +276,7 @@ public class GetDirectDebitEventsTest {
         
         for (int i = 1; i < 4; i++) {
             aDirectDebitEventFixture()
-                    .withId(Long.valueOf(i))
+                    .withId((long) i)
                     .withExternalId("testId" + i)
                     .withMandateId(testMandate.getId())
                     .withTransactionId(testTransaction.getId())
@@ -288,11 +286,9 @@ public class GetDirectDebitEventsTest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = format("/v1/events?display_size=2&page=2");
-
         given().port(testContext.getPort())
                 .contentType(JSON)
-                .get(requestPath)
+                .get("/v1/events?display_size=2&page=2")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
@@ -307,11 +303,11 @@ public class GetDirectDebitEventsTest {
             "2, 3, 1, 1, 5",
             "5, null, 4, 1, 5"
     })
-    public void testLinksForTenEventsWithPageSizeOfTwo(String currentPage, @Nullable String nextPage, @Nullable String prevPage, String firstPage, String lastPage) throws IOException {
+    public void testLinksForTenEventsWithPageSizeOfTwo(String currentPage, @Nullable String nextPage, @Nullable String prevPage, String firstPage, String lastPage) {
 
         for (int i = 1; i < 11; i++) {
             aDirectDebitEventFixture()
-                    .withId(Long.valueOf(i))
+                    .withId((long) i)
                     .withMandateId(testMandate.getId())
                     .withTransactionId(testTransaction.getId())
                     .withEventType(MANDATE)
@@ -350,7 +346,7 @@ public class GetDirectDebitEventsTest {
     public void shouldReturnFiveHundredEventsWhenPageSizeIsFiveHundredAndOne() {
         for (int i = 1; i < 503; i++) {
             aDirectDebitEventFixture()
-                    .withId(Long.valueOf(i))
+                    .withId((long) i)
                     .withMandateId(testMandate.getId())
                     .withTransactionId(testTransaction.getId())
                     .withEventType(MANDATE)
@@ -359,11 +355,9 @@ public class GetDirectDebitEventsTest {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = format("/v1/events?display_size=501");
-
         given().port(testContext.getPort())
                 .contentType(JSON)
-                .get(requestPath)
+                .get("/v1/events?display_size=501")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
