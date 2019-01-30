@@ -86,10 +86,9 @@ public class ViewPaginationBuilder {
     }
 
     private URI uriWithParams(String params) {
-        URI uri = uriInfo.getBaseUriBuilder()
+        return uriInfo.getBaseUriBuilder()
                 .path(uriInfo.getPath())
                 .replaceQuery(params)
                 .build(searchParams.getGatewayExternalId());
-        return uri;
     }
 }
