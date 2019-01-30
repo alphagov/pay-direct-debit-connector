@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.events.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import uk.gov.pay.directdebit.payments.model.CustomDateSerializer;
+import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
 import java.time.ZonedDateTime;
@@ -25,7 +25,7 @@ public class DirectDebitEventExternalView {
     private final DirectDebitEvent.SupportedEvent event;
 
     @JsonProperty("event_date")
-    @JsonSerialize(using = CustomDateSerializer.class)
+    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private final ZonedDateTime eventDate;
     
     public DirectDebitEventExternalView(DirectDebitEvent directDebitEvent) {

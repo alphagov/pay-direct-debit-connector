@@ -3,9 +3,12 @@ package uk.gov.pay.directdebit.payments.api;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,12 +38,13 @@ public class TransactionResponse {
     private String reference;
 
     @JsonProperty("created_date")
-    private String createdDate;
+    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
+    private ZonedDateTime createdDate;
 
     @JsonProperty
     private ExternalPaymentState state;
 
-    public TransactionResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, String createdDate, List<Map<String, Object>> dataLinks) {
+    public TransactionResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, ZonedDateTime createdDate, List<Map<String, Object>> dataLinks) {
         this.transactionExternalId = transactionExternalId;
         this.state = state;
         this.dataLinks = dataLinks;
@@ -83,7 +87,7 @@ public class TransactionResponse {
                 .get();
     }
 
-    
+
     public static TransactionResponse from(Transaction transaction, List<Map<String, Object>> dataLinks) {
         return new TransactionResponse(
                 transaction.getExternalId(),
@@ -92,7 +96,7 @@ public class TransactionResponse {
                 transaction.getMandate().getReturnUrl(),
                 transaction.getDescription(),
                 transaction.getReference(),
-                transaction.getCreatedDate().toString(),
+                transaction.getCreatedDate(),
                 dataLinks);
     }
 

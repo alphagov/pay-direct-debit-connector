@@ -30,7 +30,7 @@
         <hamcrest.version>2.1</hamcrest.version>
         <rest-assured.version>3.3.0</rest-assured.version>
         <mockito.version>2.23.4</mockito.version>
-        <pay-java-commons.version>1.0.20190118181040</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20190129170136</pay-java-commons.version>
         <dependency-check.skip>true</dependency-check.skip>
     </properties>
 
@@ -137,6 +137,11 @@
         <dependency>
             <groupId>uk.gov.pay</groupId>
             <artifactId>utils</artifactId>
+            <version>${pay-java-commons.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.pay</groupId>
+            <artifactId>model</artifactId>
             <version>${pay-java-commons.version}</version>
         </dependency>
         <!-- testing -->

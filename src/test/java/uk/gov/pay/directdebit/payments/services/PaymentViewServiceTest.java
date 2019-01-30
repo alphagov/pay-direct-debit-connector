@@ -14,8 +14,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
+import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -86,21 +86,21 @@ public class PaymentViewServiceTest {
             e.printStackTrace();
         }
         paymentViewService = new PaymentViewService(paymentViewDao, gatewayAccountDao)
-                                    .withUriInfo(mockUriInfo);
+                .withUriInfo(mockUriInfo);
     }
 
     @Test
     public void getPaymentViewList_withGatewayAccountIdAndOffsetAndLimit_shouldPopulateResponse() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
-            .withPage(1L)
-            .withDisplaySize(100L)
-            .withFromDateString(createdDate.toString())
-            .withToDateString(createdDate.toString());    
+                .withPage(1L)
+                .withDisplaySize(100L)
+                .withFromDateString(createdDate.toString())
+                .withToDateString(createdDate.toString());
         List<PaymentViewResultResponse> listResponses = new ArrayList<>();
-        for (PaymentView paymentView : paymentViewList){
+        for (PaymentView paymentView : paymentViewList) {
             listResponses.add(new PaymentViewResultResponse(paymentView.getTransactionExternalId(),
                     paymentView.getAmount(), paymentView.getReference(), paymentView.getDescription(),
-                    paymentView.getCreatedDate().toString(), paymentView.getName(), 
+                    paymentView.getCreatedDate(), paymentView.getName(),
                     paymentView.getEmail(), paymentView.getState().toExternal(),
                     paymentView.getMandateExternalId()));
         }
@@ -111,7 +111,7 @@ public class PaymentViewServiceTest {
         assertThat(response.getPaymentViewResponses().get(3).getAmount(), is(1003L));
         assertThat(response.getPaymentViewResponses().get(1).getName(), is("John Doe1"));
         assertThat(response.getPaymentViewResponses().get(0).getState(), is((PaymentState.NEW.toExternal())));
-        assertThat(response.getPaymentViewResponses().get(2).getCreatedDate(), is(createdDate.toString()));
+        assertThat(response.getPaymentViewResponses().get(2).getCreatedDate(), is(createdDate));
     }
 
     @Test
@@ -148,13 +148,13 @@ public class PaymentViewServiceTest {
                     .withDescription("Description" + i)
                     .withCreatedDate(createdDate)
                     .toEntity();
-            paymentViewList.add(new PaymentView(gatewayAccountExternalId, 
+            paymentViewList.add(new PaymentView(gatewayAccountExternalId,
                     transaction.getExternalId(),
-                    transaction.getAmount(), 
-                    transaction.getReference(), 
+                    transaction.getAmount(),
+                    transaction.getReference(),
                     transaction.getDescription(),
-                    transaction.getCreatedDate(), 
-                    payer.getName(), 
+                    transaction.getCreatedDate(),
+                    payer.getName(),
                     payer.getEmail(),
                     transaction.getState(),
                     RandomIdGenerator.newId()));

@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
 import java.net.URI;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +33,8 @@ public class CreateMandateResponse {
     private String returnUrl;
 
     @JsonProperty("created_date")
-    private String createdDate;
+    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
+    private ZonedDateTime createdDate;
 
     @JsonProperty
     private ExternalMandateState state;
@@ -45,7 +48,7 @@ public class CreateMandateResponse {
     public CreateMandateResponse(MandateExternalId mandateId,
                                  MandateType mandateType,
                                  String returnUrl,
-                                 String createdDate,
+                                 ZonedDateTime createdDate,
                                  ExternalMandateState state,
                                  List<Map<String, Object>> dataLinks,
                                  String serviceReference,
@@ -72,7 +75,7 @@ public class CreateMandateResponse {
         return returnUrl;
     }
 
-    public String getCreatedDate() {
+    public ZonedDateTime getCreatedDate() {
         return createdDate;
     }
 
