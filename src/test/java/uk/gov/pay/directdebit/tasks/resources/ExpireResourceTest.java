@@ -40,7 +40,7 @@ public class ExpireResourceTest {
     }
 
     @Test
-    public void shouldExpireATransactionInStateStartedOlderThanOneDay() throws Exception {
+    public void shouldExpireATransactionInStateStartedOlderThanOneDay() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
         TransactionFixture.aTransactionFixture()
                 .withState(PaymentState.NEW)
@@ -58,7 +58,7 @@ public class ExpireResourceTest {
     }
 
     @Test
-    public void shouldExpireAMandateInState_CREATED_OlderThan_90Minutes() throws Exception {
+    public void shouldExpireAMandateInState_CREATED_OlderThan_90Minutes() {
         Mandate mandate = MandateFixture.aMandateFixture()
                 .withState(MandateState.CREATED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))

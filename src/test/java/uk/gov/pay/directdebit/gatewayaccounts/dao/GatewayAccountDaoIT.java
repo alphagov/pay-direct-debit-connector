@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.gatewayaccounts.dao;
 
-import liquibase.exception.LiquibaseException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +15,6 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +45,7 @@ public class GatewayAccountDaoIT {
     private GatewayAccountFixture testGatewayAccount;
 
     @Before
-    public void setup() throws IOException, LiquibaseException {
+    public void setup() {
         gatewayAccountDao = testContext.getJdbi().onDemand(GatewayAccountDao.class);
         this.testGatewayAccount = aGatewayAccountFixture()
                 .withExternalId(EXTERNAL_ID)

@@ -102,7 +102,7 @@ public class PaymentViewDaoIT {
     }
 
     @Test
-    public void shouldReturnAnEmptyList_whenNoMatchingGatewayAccounts() throws Exception {
+    public void shouldReturnAnEmptyList_whenNoMatchingGatewayAccounts() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams("invalid-external-id");
         List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.isEmpty(), is(true));
