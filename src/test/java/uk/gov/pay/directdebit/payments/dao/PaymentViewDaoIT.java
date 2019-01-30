@@ -38,7 +38,7 @@ public class PaymentViewDaoIT {
 
     private PaymentViewDao paymentViewDao;
     private ZonedDateTime zonedDateTimeNow = ZonedDateTime.now(ZoneOffset.UTC).plusDays(1L);
-    private ZonedDateTime zonedDateTime7DaysAgo = ZonedDateTime.now(ZoneOffset.UTC).minusDays(7l);
+    private ZonedDateTime zonedDateTime7DaysAgo = ZonedDateTime.now(ZoneOffset.UTC).minusDays(7L);
     private SearchDateParams searchDateParams;
 
     @Before
