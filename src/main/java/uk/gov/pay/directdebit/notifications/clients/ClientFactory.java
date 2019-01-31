@@ -16,7 +16,6 @@ import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientProperties;
 import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
-import uk.gov.pay.directdebit.app.ssl.TrustStoreLoader;
 
 import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
@@ -54,7 +53,6 @@ public class ClientFactory {
                                 new SSLConnectionSocketFactory(
                                         SslConfigurator
                                                 .newInstance()
-                                                .trustStore(TrustStoreLoader.getTrustStore())
                                                 .createSSLContext(),
                                         new String[]{"TLSv1.2"},
                                         null,
