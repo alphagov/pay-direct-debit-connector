@@ -22,7 +22,7 @@ public class ExpireService {
     private PaymentStatesGraph paymentStatesGraph;
     private MandateStatesGraph mandateStatesGraph;
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpireService.class);
-    private final long MIN_EXPIRY_AGE_MINUTES = 90l;
+    private final long MIN_EXPIRY_AGE_MINUTES = 90L;
     private final PaymentState PAYMENT_EXPIRY_CUTOFF_STATUS = PaymentState.PENDING;
     private final MandateState MANDATE_EXPIRY_CUTOFF_STATUS = MandateState.PENDING;
     private MandateServiceFactory mandateServiceFactory;

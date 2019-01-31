@@ -49,7 +49,7 @@ public class GatewayAccountService {
     public List<GatewayAccountResponse> getAllGatewayAccounts(String externalAccountIdsArg, UriInfo uriInfo) {
         List<String> externalAccountIds = COMMA_SEPARATOR.splitToList(externalAccountIdsArg);
 
-        List<GatewayAccountResponse> gatewayAccounts = (
+        return (
                 externalAccountIds.isEmpty()
                         ? gatewayAccountDao.findAll()
                         : gatewayAccountDao.find(externalAccountIds)
@@ -57,8 +57,6 @@ public class GatewayAccountService {
                 .stream()
                 .map(gatewayAccount -> GatewayAccountResponse.from(gatewayAccount).withSelfLink(uriInfo))
                 .collect(Collectors.toList());
-
-        return gatewayAccounts;
     }
 
     public GatewayAccount create(Map<String, String> createGatewayAccountRequest) {
