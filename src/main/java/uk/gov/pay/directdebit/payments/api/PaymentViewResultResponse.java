@@ -122,7 +122,7 @@ public class PaymentViewResultResponse {
         if (!createdDate.equals(that.createdDate)) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (email != null ? !email.equalsIgnoreCase(that.email) : that.email != null) return false;
-        if (mandateExternalId != null ? !transactionId.equalsIgnoreCase(that.mandateExternalId) : that.transactionId != null)
+        if (mandateExternalId != null ? !mandateExternalId.equalsIgnoreCase(that.mandateExternalId) : that.mandateExternalId != null)
             return false;
         return state == that.state;
     }
