@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.pay.directdebit.payments.model.ViewPaginationBuilder;
 
 import java.util.List;
+import java.util.Objects;
+
+import static java.lang.String.format;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -51,20 +54,23 @@ public class PaymentViewResponse {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PaymentViewResponse that = (PaymentViewResponse) o;
+        return Objects.equals(gatewayExternalId, that.gatewayExternalId) &&
+                Objects.equals(total, that.total) &&
+                Objects.equals(page, that.page);
+    }
+
+    @Override
     public int hashCode() {
-        int result = gatewayExternalId.hashCode();
-        result = 31 * result + page.hashCode();
-        result = 31 * result + total.hashCode();
-        return result;
+        return Objects.hash(gatewayExternalId, total, page);
     }
 
     @Override
     public String toString() {
-        return "TransactionResponse{" +
-                " gatewayExternalId='" + gatewayExternalId + '\n' +
-                ", page='" + page + '\'' +
-                ", total=" + total + '\'' +
-                ", paymentViewResponses='" + paymentViewResponses.toString() + '\'' +
-                "}";
+        return format("TransactionResponse{gatewayExternalId='%s', page='%s', total='%s', paymentViewResponses='%s'}"
+                        + gatewayExternalId, page, total, paymentViewResponses.toString());
     }
 }
