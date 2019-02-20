@@ -30,7 +30,7 @@
         <hamcrest.version>2.1</hamcrest.version>
         <rest-assured.version>3.3.0</rest-assured.version>
         <mockito.version>2.24.5</mockito.version>
-        <pay-java-commons.version>1.0.20190129170136</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20190220071249</pay-java-commons.version>
         <dependency-check.skip>true</dependency-check.skip>
     </properties>
 
