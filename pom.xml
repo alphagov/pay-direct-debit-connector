@@ -288,9 +288,6 @@
                 <configuration>
                     <junitArtifactName>junit:junit</junitArtifactName>
                     <testFailureIgnore>false</testFailureIgnore>
-                    <excludes>
-                        <exclude>**/*IT.java</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -305,11 +302,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <includes>
-                        <include>**/*IT.java</include>
-                    </includes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

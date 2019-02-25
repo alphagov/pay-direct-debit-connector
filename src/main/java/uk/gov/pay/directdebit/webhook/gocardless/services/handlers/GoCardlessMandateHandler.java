@@ -100,7 +100,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
     private boolean isValidOrganisation(Mandate mandate, GoCardlessEvent event) {
         return mandate.getGatewayAccount().getOrganisation()
                 .map(organisationIdentifier -> organisationIdentifier.equals(event.getOrganisationIdentifier()))
-                // TODO: replace true with false after going live. kept now for backwards compatibilityGetDirectDebitEventsTest 
+                // TODO: replace true with false after going live. kept now for backwards compatibility with GetDirectDebitEventsIT
                 .orElse(true);
     }
 }

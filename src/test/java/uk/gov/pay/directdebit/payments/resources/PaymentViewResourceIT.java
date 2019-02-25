@@ -33,7 +33,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTrans
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class PaymentViewResourceITest {
+public class PaymentViewResourceIT {
 
     private GatewayAccountFixture testGatewayAccount;
 

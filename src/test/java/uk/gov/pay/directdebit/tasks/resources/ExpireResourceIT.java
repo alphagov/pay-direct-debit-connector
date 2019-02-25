@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class ExpireResourceTest {
+public class ExpireResourceIT {
 
     @DropwizardTestContext
     private TestContext testContext;

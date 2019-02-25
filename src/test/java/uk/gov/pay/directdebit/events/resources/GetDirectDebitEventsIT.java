@@ -32,7 +32,7 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.MANDATE;
 
 @RunWith(JUnitParamsRunner.class)
-public class GetDirectDebitEventsTest {
+public class GetDirectDebitEventsIT {
 
     @ClassRule
     public static DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
