@@ -3,7 +3,7 @@ FROM maven:3.6.0-jdk-11-slim as build
 RUN mkdir /build /root/.m2
 
 ADD pom.xml /build/
-ADD src /build/
+ADD src /build/src
 
 WORKDIR /build/
 
@@ -26,7 +26,7 @@ WORKDIR /app
 
 ADD docker-startup.sh /app/docker-startup.sh
 ADD run-with-chamber.sh /app/run-with-chamber.sh
-#COPY --from=build /build/target/*.yaml /app/
+COPY --from=build /build/target/*.yaml /app/
 COPY --from=build /build/target/pay-*-allinone.jar /app/
 
 CMD bash ./docker-startup.sh
