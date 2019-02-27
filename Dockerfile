@@ -1,3 +1,14 @@
+FROM maven:3.6.0-jdk-11-slim as build
+
+RUN mkdir /build /root/.m2
+
+ADD pom.xml /build/
+ADD src /build/
+
+WORKDIR /build/
+
+RUN mvn clean package -DskipTests
+
 FROM govukpay/openjdk:alpine-3.8.1-jre-base-8.191.12
 
 RUN apk --no-cache upgrade
@@ -15,7 +26,7 @@ WORKDIR /app
 
 ADD docker-startup.sh /app/docker-startup.sh
 ADD run-with-chamber.sh /app/run-with-chamber.sh
-ADD target/*.yaml /app/
-ADD target/pay-*-allinone.jar /app/
+#COPY --from=build /build/target/*.yaml /app/
+COPY --from=build /build/target/pay-*-allinone.jar /app/
 
 CMD bash ./docker-startup.sh
