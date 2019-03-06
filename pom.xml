@@ -29,7 +29,7 @@
         <gocardless.version>3.7.3</gocardless.version>
         <hamcrest.version>2.1</hamcrest.version>
         <rest-assured.version>3.3.0</rest-assured.version>
-        <mockito.version>2.24.5</mockito.version>
+        <mockito.version>2.25.0</mockito.version>
         <pay-java-commons.version>1.0.20190226180729</pay-java-commons.version>
         <dependency-check.skip>true</dependency-check.skip>
     </properties>
