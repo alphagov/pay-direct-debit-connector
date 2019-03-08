@@ -6,21 +6,16 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.webhook.gocardless.config.GoCardlessFactory;
 
-import javax.net.ssl.SSLSocketFactory;
 import java.util.Map;
 import java.util.Optional;
 
 public class GoCardlessClientFactory {
 
     private final Map<PaymentProviderAccessToken, GoCardlessClientFacade> clients;
-    private final SSLSocketFactory sslSocketFactory;
     private final DirectDebitConfig configuration;
 
-    public GoCardlessClientFactory(
-            DirectDebitConfig configuration,
-            SSLSocketFactory sslSocketFactory) {
+    public GoCardlessClientFactory(DirectDebitConfig configuration) {
         this.configuration = configuration;
-        this.sslSocketFactory = sslSocketFactory;
         this.clients = Maps.newConcurrentMap();
     }
 
@@ -40,7 +35,6 @@ public class GoCardlessClientFactory {
         if (goCardlessFactory.isCallingStubs()) {
             return builder
                     .withBaseUrl(goCardlessFactory.getClientUrl())
-                    .withSslSocketFactory(sslSocketFactory)
                     .build();
         }
 
