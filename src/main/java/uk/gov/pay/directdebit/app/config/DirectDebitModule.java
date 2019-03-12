@@ -24,16 +24,20 @@ import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
 
+import javax.net.ssl.SSLSocketFactory;
+
 public class DirectDebitModule extends AbstractModule {
 
     private final DirectDebitConfig configuration;
     private final Environment environment;
     private final Jdbi jdbi;
+    private final SSLSocketFactory sslSocketFactory;
 
-    public DirectDebitModule(final DirectDebitConfig configuration, final Environment environment, final Jdbi jdbi) {
+    public DirectDebitModule(final DirectDebitConfig configuration, final Environment environment, final Jdbi jdbi, final SSLSocketFactory socketFactory) {
         this.configuration = configuration;
         this.environment = environment;
         this.jdbi = jdbi;
+        this.sslSocketFactory = socketFactory;
     }
 
     @Override
@@ -46,7 +50,7 @@ public class DirectDebitModule extends AbstractModule {
     @Provides
     @Singleton
     public GoCardlessClientFactory provideGoCardlessClientFactory() {
-        return new GoCardlessClientFactory(configuration);
+        return new GoCardlessClientFactory(configuration, sslSocketFactory);
     }
 
     @Provides

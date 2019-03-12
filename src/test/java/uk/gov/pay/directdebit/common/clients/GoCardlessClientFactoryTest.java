@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
@@ -21,13 +22,15 @@ public class GoCardlessClientFactoryTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private DirectDebitConfig mockedDirectDebitConfig;
+    @Mock
+    private SSLSocketFactory mockedSSLSocketFactory;
     private GoCardlessClientFactory goCardlessClientFactory;
 
     @Before
     public void setUp() {
         when(mockedDirectDebitConfig.getGoCardless().getAccessToken()).thenReturn("aaa");
         when(mockedDirectDebitConfig.getGoCardless().getEnvironment()).thenReturn(GoCardlessClient.Environment.SANDBOX);
-        goCardlessClientFactory = new GoCardlessClientFactory(mockedDirectDebitConfig);
+        goCardlessClientFactory = new GoCardlessClientFactory(mockedDirectDebitConfig, mockedSSLSocketFactory);
     }
 
     @Test
