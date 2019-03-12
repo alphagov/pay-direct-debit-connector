@@ -25,7 +25,7 @@
         <postgresql.version>42.2.5</postgresql.version>
         <jackson.version>2.9.8</jackson.version>
         <guice.version>4.2.2</guice.version>
-        <guava.version>27.0.1-jre</guava.version>
+        <guava.version>27.1-jre</guava.version>
         <gocardless.version>3.7.3</gocardless.version>
         <hamcrest.version>2.1</hamcrest.version>
         <rest-assured.version>3.3.0</rest-assured.version>
