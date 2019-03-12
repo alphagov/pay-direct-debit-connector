@@ -4,5 +4,5 @@ set -e
 
 cd "$(dirname "$0")"
 
-mvn -DskipTests clean package
+mvn -DskipITs clean package
 docker build -t govukpay/directdebit-connector:local .
