@@ -21,6 +21,7 @@ import uk.gov.pay.directdebit.app.config.DirectDebitModule;
 import uk.gov.pay.directdebit.app.config.GraphiteConfig;
 import uk.gov.pay.directdebit.app.healthcheck.Database;
 import uk.gov.pay.directdebit.app.healthcheck.Ping;
+import uk.gov.pay.directdebit.app.ssl.TrustingSSLSocketFactory;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
@@ -44,6 +45,7 @@ import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessReso
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 import java.net.ProxySelector;
 import java.util.concurrent.TimeUnit;
 
@@ -93,7 +95,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         DataSourceFactory dataSourceFactory = configuration.getDataSourceFactory();
         final Jdbi jdbi = createJdbi(dataSourceFactory);
 
-        final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment, jdbi));
+        SSLSocketFactory socketFactory = new TrustingSSLSocketFactory();
+        final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment, jdbi, socketFactory));
 
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
@@ -121,6 +124,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new ConflictExceptionMapper());
         environment.jersey().register(new InternalServerErrorExceptionMapper());
         environment.jersey().register(new PreconditionFailedExceptionMapper());
+
+        HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory);
 
         initialiseMetrics(configuration, environment);
     }
