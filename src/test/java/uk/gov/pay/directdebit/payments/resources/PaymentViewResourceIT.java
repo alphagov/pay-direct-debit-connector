@@ -26,6 +26,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -79,7 +80,7 @@ public class PaymentViewResourceIT {
                 .body("results[0].reference", is("MBK2"))
                 .body("results[0].name", is("J. Doe2"))
                 .body("results[2].description", is("Description0"))
-                .body("results[1].created_date", is(createdDate.toString()));
+                .body("results[1].created_date", is(createdDate.format(ISO_INSTANT_MILLISECOND_PRECISION)));
     }
 
     @Test
@@ -177,7 +178,7 @@ public class PaymentViewResourceIT {
                 .body("results[0].reference", is("MBK4"))
                 .body("results[4].description", is("Description0"))
                 .body("results[1].name", is("J. Doe3"))
-                .body("results[2].created_date", is(createdDate.toString()));
+                .body("results[2].created_date", is(createdDate.format(ISO_INSTANT_MILLISECOND_PRECISION)));
     }
 
     @Test
