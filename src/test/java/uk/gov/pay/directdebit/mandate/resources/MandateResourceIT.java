@@ -55,6 +55,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
@@ -245,7 +246,7 @@ public class MandateResourceIT {
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference()))
                 .body("mandate_type", is(mandateFixture.getMandateType().toString()))
-                .body("created_date", is(mandateFixture.getCreatedDate().toString()))
+                .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
                 .body("transaction." + JSON_AMOUNT_KEY, isNumber(transactionFixture.getAmount()))
                 .body("transaction." + JSON_REFERENCE_KEY, is(transactionFixture.getReference()))
                 .body("transaction." + JSON_DESCRIPTION_KEY, is(transactionFixture.getDescription()))
@@ -283,7 +284,7 @@ public class MandateResourceIT {
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference()))
                 .body("mandate_type", is(mandateFixture.getMandateType().toString()))
-                .body("created_date", is(mandateFixture.getCreatedDate().toString()))
+                .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
                 .body("$", not(hasKey("transaction")))
                 .body("payer.payer_external_id", is(payerFixture.getExternalId()))
                 .body("payer.account_holder_name", is(payerFixture.getName()))

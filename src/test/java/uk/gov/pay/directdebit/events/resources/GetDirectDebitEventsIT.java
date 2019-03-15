@@ -26,6 +26,7 @@ import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture.aDirectDebitEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_ACKNOWLEDGED_BY_PROVIDER;
@@ -122,7 +123,7 @@ public class GetDirectDebitEventsIT {
                 .body("count", is(1))
                 .body("results[0].event_type", is(MANDATE.toString()))
                 .body("results[0].event", is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER.toString()))
-                .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(DateTimeFormatter.ISO_INSTANT)))
+                .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
                 .body("results[0].external_id", is("externalId"))
                 .body("results[0].mandate_external_id", is(testMandate.getExternalId().toString()))
                 .body("results[0].transaction_external_id", is(testTransaction.getExternalId()))
