@@ -19,6 +19,7 @@ pipeline {
   environment {
     DOCKER_HOST = "unix:///var/run/docker.sock"
     RUN_END_TO_END_ON_PR = "${params.runEndToEndOnPR}"
+    JAVA_HOME="/usr/lib/jvm/java-1.11.0-openjdk-amd64"
   }
 
   stages {
@@ -31,7 +32,7 @@ pipeline {
       steps {
         script {
           long stepBuildTime = System.currentTimeMillis()
-
+          sh 'mvn -version'
           sh 'mvn clean verify'
           runProviderContractTests() 
           postSuccessfulMetrics("directdebit-connector.maven-build", stepBuildTime)
