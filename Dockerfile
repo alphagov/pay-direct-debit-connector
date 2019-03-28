@@ -1,11 +1,11 @@
-FROM govukpay/openjdk:adoptopenjdk-jre-11.0.2.9-alpine
+FROM govukpay/openjdk:alpine-3.9-jre-base-8.201.08
 
 RUN apk --no-cache upgrade
 
 # openssl is only here temporarily whilst docker-startup.sh needs it
 RUN apk add --no-cache bash openssl
 
-ENV JAVA_HOME /opt/java/openjdk
+ENV JAVA_HOME /usr/lib/jvm/java-8-*/
 ENV PORT 8080
 ENV ADMIN_PORT 8081
 
