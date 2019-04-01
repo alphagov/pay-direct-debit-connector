@@ -24,6 +24,7 @@ import uk.gov.pay.directdebit.app.healthcheck.Ping;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.JsonMappingExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.PreconditionFailedExceptionMapper;
 import uk.gov.pay.directdebit.common.proxy.CustomInetSocketAddressProxySelector;
@@ -43,7 +44,6 @@ import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExcepti
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.net.ProxySelector;
 import java.util.concurrent.TimeUnit;
 
@@ -121,6 +121,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new ConflictExceptionMapper());
         environment.jersey().register(new InternalServerErrorExceptionMapper());
         environment.jersey().register(new PreconditionFailedExceptionMapper());
+        environment.jersey().register(new JsonMappingExceptionMapper());
 
         initialiseMetrics(configuration, environment);
     }

@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.gatewayaccounts.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidGatewayAccountException;
 
@@ -10,6 +11,7 @@ public class GatewayAccount {
     public enum Type {
         TEST, LIVE;
 
+        @JsonCreator
         public static Type fromString(String type) {
             for (Type typeEnum : Type.values()) {
                 if (typeEnum.toString().equalsIgnoreCase(type)) {
@@ -19,6 +21,7 @@ public class GatewayAccount {
             throw new InvalidGatewayAccountException(type);
         }
     }
+    
     private Long id;
     private String externalId;
     private PaymentProvider paymentProvider;
@@ -45,9 +48,10 @@ public class GatewayAccount {
     public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
         this(id, externalId, paymentProvider, type, serviceName, description, analyticsId, null, null);
     }
-    
-    public GatewayAccount(PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
-        this(null, generateExternalId(), paymentProvider, type, serviceName, description, analyticsId, null, null);
+
+    public GatewayAccount(PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId,
+                          PaymentProviderAccessToken accessToken, PaymentProviderOrganisationIdentifier organisation) {
+        this(null, generateExternalId(), paymentProvider, type, serviceName, description, analyticsId, accessToken, organisation);
     }
 
     private static String generateExternalId() {

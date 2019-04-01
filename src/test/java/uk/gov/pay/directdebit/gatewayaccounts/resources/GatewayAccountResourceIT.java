@@ -30,6 +30,7 @@ import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -56,6 +57,8 @@ public class GatewayAccountResourceIT {
     private static final String SERVICE_NAME_KEY = "service_name";
     private static final String DESCRIPTION_KEY = "description";
     private static final String ANALYTICS_ID_KEY = "analytics_id";
+    private static final String ACCESS_TOKEN_KEY = "access_token";
+    private static final String ORGANISATION_KEY = "organisation";
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -247,6 +250,8 @@ public class GatewayAccountResourceIT {
                 .put(SERVICE_NAME_KEY, SERVICE_NAME)
                 .put(DESCRIPTION_KEY, DESCRIPTION)
                 .put(ANALYTICS_ID_KEY, ANALYTICS_ID)
+                .put(ACCESS_TOKEN_KEY, "123")
+                .put(ORGANISATION_KEY, "anOrganisation")
                 .build());
 
         ValidatableResponse response = givenSetup()
@@ -268,6 +273,40 @@ public class GatewayAccountResourceIT {
                 .body("type", is(TYPE.toString()))
                 .body("description", is(DESCRIPTION))
                 .body("analytics_id", is(ANALYTICS_ID));
+
+        Long gatewayAccountId = response.extract().body().jsonPath().getLong("gateway_account_id");
+        Map<String, Object> gatewayAccountMap = testContext.getDatabaseTestHelper().getGatewayAccountById(gatewayAccountId);
+        assertThat(gatewayAccountMap.get("access_token"), is("123"));
+        assertThat(gatewayAccountMap.get("organisation"), is("anOrganisation"));
+    }
+
+    @Test
+    public void shouldCreateAGatewayAccountWithMinimumDetails() throws JsonProcessingException {
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put(PAYMENT_PROVIDER_KEY, PAYMENT_PROVIDER.toString())
+                .put(TYPE_KEY, TYPE.toString())
+                .put(SERVICE_NAME_KEY, SERVICE_NAME)
+                .build());
+
+        ValidatableResponse response = givenSetup()
+                .body(postBody)
+                .post(GATEWAY_ACCOUNTS_API_PATH)
+                .then()
+                .contentType(JSON)
+                .statusCode(Response.Status.CREATED.getStatusCode());
+
+        String externalId = response.extract().body().jsonPath().getString("gateway_account_external_id");
+        String documentLocation = expectedGatewayAccountLocationFor(externalId);
+
+        response
+                .header("Location", is(documentLocation))
+                .body("gateway_account_id", is(notNullValue()))
+                .body("gateway_account_external_id", startsWith("DIRECT_DEBIT:"))
+                .body("service_name", is(SERVICE_NAME))
+                .body("payment_provider", is(PAYMENT_PROVIDER.toString()))
+                .body("type", is(TYPE.toString()))
+                .body("description", is(nullValue()))
+                .body("analytics_id", is(nullValue()));
     }
 
     @Test
@@ -284,10 +323,29 @@ public class GatewayAccountResourceIT {
                 .post(GATEWAY_ACCOUNTS_API_PATH)
                 .then()
                 .contentType(JSON)
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .body("message", is("Field(s) missing: [service_name]"));
+                .statusCode(422)
+                .body("errors[0]", is("serviceName may not be empty"));
     }
-    
+
+    @Test
+    public void shouldReturnBadRequestIfPaymentProviderIsInvalid() throws JsonProcessingException {
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put(PAYMENT_PROVIDER_KEY, "INVALID")
+                .put(TYPE_KEY, TYPE.toString())
+                .put(SERVICE_NAME_KEY, SERVICE_NAME)
+                .put(DESCRIPTION_KEY, DESCRIPTION)
+                .put(ANALYTICS_ID_KEY, ANALYTICS_ID)
+                .build());
+
+        givenSetup()
+                .body(postBody)
+                .post(GATEWAY_ACCOUNTS_API_PATH)
+                .then()
+                .contentType(JSON)
+                .statusCode(400)
+                .body("message", Matchers.containsString("Unsupported payment provider: INVALID"));
+    }
+
     @Test
     public void shouldUpdateAGatewayAccount_withAccessTokenAndOrganisation() {
         PaymentProvider paymentProvider3 = PaymentProvider.GOCARDLESS;
@@ -295,7 +353,7 @@ public class GatewayAccountResourceIT {
         String serviceName4 = "wilhelmina";
         String description4 = "can't type and is not hungover maybe";
         String analyticsId4 = "DD_234099_BBBLABLA";
-        
+
         GatewayAccountFixture testGatewayAccount4 = GatewayAccountFixture.aGatewayAccountFixture()
                 .withExternalId(externalId4)
                 .withServiceName(serviceName4)
@@ -330,7 +388,7 @@ public class GatewayAccountResourceIT {
         assertThat(foundGatewayAccount.get("access_token"), Matchers.is("abcde1234"));
         assertThat(foundGatewayAccount.get("organisation"), Matchers.is("1234abcde"));
     }
-    
+
     @Test
     public void shouldFailWithBadRequest_whenNoPayload() {
         String requestPath = GATEWAY_ACCOUNT_API_PATH.replace("{accountId}", "an-external_id");
