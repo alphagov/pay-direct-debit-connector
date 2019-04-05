@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.gatewayaccounts.services;
 import com.google.common.base.Splitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.api.CreateGatewayAccountRequest;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
 import uk.gov.pay.directdebit.gatewayaccounts.api.PatchGatewayAccountValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
@@ -25,13 +26,11 @@ public class GatewayAccountService {
     private static final Splitter COMMA_SEPARATOR = Splitter.on(',').trimResults().omitEmptyStrings();
     private static final Logger LOGGER = LoggerFactory.getLogger(GatewayAccountService.class);
 
-    private GatewayAccountParser gatewayAccountParser;
     private PatchGatewayAccountValidator validator = new PatchGatewayAccountValidator();
 
     @Inject
-    public GatewayAccountService(GatewayAccountDao gatewayAccountDao, GatewayAccountParser gatewayAccountParser) {
+    public GatewayAccountService(GatewayAccountDao gatewayAccountDao) {
         this.gatewayAccountDao = gatewayAccountDao;
-        this.gatewayAccountParser = gatewayAccountParser;
     }
 
     public GatewayAccount getGatewayAccountForId(String accountExternalId) {
@@ -59,14 +58,22 @@ public class GatewayAccountService {
                 .collect(Collectors.toList());
     }
 
-    public GatewayAccount create(Map<String, String> createGatewayAccountRequest) {
-        GatewayAccount gatewayAccount = gatewayAccountParser.parse(createGatewayAccountRequest);
+    public GatewayAccount create(CreateGatewayAccountRequest request) {
+        GatewayAccount gatewayAccount = new GatewayAccount(
+                request.getPaymentProvider(),
+                request.getType(),
+                request.getServiceName(),
+                request.getDescription(),
+                request.getAnalyticsId(),
+                request.getAccessToken(),
+                request.getOrganisation());
+
         Long id = gatewayAccountDao.insert(gatewayAccount);
         gatewayAccount.setId(id);
         LOGGER.info("Created Gateway Account with id {}", id);
         return gatewayAccount;
     }
-    
+
     public GatewayAccount patch(String externalId, List<Map<String, String>> request) {
         validator.validatePatchRequest(externalId, request);
         PaymentProviderAccessToken accessToken = null;

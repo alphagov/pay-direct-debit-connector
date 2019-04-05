@@ -5,12 +5,13 @@ import com.google.common.collect.ImmutableMap;
 import io.dropwizard.jersey.PATCH;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.directdebit.gatewayaccounts.api.CreateGatewayAccountValidator;
+import uk.gov.pay.directdebit.gatewayaccounts.api.CreateGatewayAccountRequest;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -36,8 +37,6 @@ public class GatewayAccountResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(GatewayAccountResource.class);
 
     private GatewayAccountService gatewayAccountService;
-    private final CreateGatewayAccountValidator createGatewayAccountValidator = new CreateGatewayAccountValidator();
-
     @Inject
     public GatewayAccountResource(GatewayAccountService gatewayAccountService) {
         this.gatewayAccountService = gatewayAccountService;
@@ -78,8 +77,7 @@ public class GatewayAccountResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response createNewGatewayAccount(Map<String, String> request, @Context UriInfo uriInfo) {
-        createGatewayAccountValidator.validate(request);
+    public Response createNewGatewayAccount(@Valid CreateGatewayAccountRequest request, @Context UriInfo uriInfo) {
         GatewayAccount gatewayAccount = gatewayAccountService.create(request);
         GatewayAccountResponse gatewayAccountResponse = GatewayAccountResponse.from(gatewayAccount).withSelfLink(uriInfo);
         return Response.created(gatewayAccountResponse.getSelfLink()).entity(gatewayAccountResponse).build();

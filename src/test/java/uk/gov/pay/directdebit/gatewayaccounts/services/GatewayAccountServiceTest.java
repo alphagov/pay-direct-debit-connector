@@ -6,8 +6,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.gatewayaccounts.api.CreateGatewayAccountRequest;
 import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
@@ -26,9 +28,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -61,9 +61,6 @@ public class GatewayAccountServiceTest {
     private GatewayAccountDao mockedGatewayAccountDao;
 
     @Mock
-    private GatewayAccountParser mockedGatewayAccountParser;
-
-    @Mock
     private UriInfo mockedUriInfo;
 
     @Mock
@@ -71,14 +68,13 @@ public class GatewayAccountServiceTest {
 
     private GatewayAccountService service;
 
-    private Map<String, String> createTransactionRequest = new HashMap<>();
     private Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws URISyntaxException {
-        service = new GatewayAccountService(mockedGatewayAccountDao, mockedGatewayAccountParser);
+        service = new GatewayAccountService(mockedGatewayAccountDao);
         when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
         when(mockedUriBuilder.path(anyString())).thenReturn(mockedUriBuilder);
         when(mockedUriBuilder.build(any())).thenReturn(new URI("http://www.example.com/"));
@@ -178,10 +174,13 @@ public class GatewayAccountServiceTest {
 
     @Test
     public void shouldStoreAGatewayAccount() {
-        GatewayAccount parsedGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().toEntity();
-        when(mockedGatewayAccountParser.parse(createTransactionRequest)).thenReturn(parsedGatewayAccount);
-        service.create(createTransactionRequest);
-        verify(mockedGatewayAccountDao).insert(parsedGatewayAccount);
+        CreateGatewayAccountRequest request = new CreateGatewayAccountRequest(PaymentProvider.SANDBOX, "aServiceName", GatewayAccount.Type.TEST, 
+                        "aDescription", "123", PaymentProviderAccessToken.of("token"), PaymentProviderOrganisationIdentifier.of("provider"));
+        ArgumentCaptor<GatewayAccount> capturedGatewayAccount = ArgumentCaptor.forClass(GatewayAccount.class);
+        service.create(request);
+        verify(mockedGatewayAccountDao).insert(capturedGatewayAccount.capture());
+        assertThat(capturedGatewayAccount.getValue().getServiceName(), is("aServiceName"));
+        assertThat(capturedGatewayAccount.getValue().getPaymentProvider(), is(PaymentProvider.SANDBOX));
     }
     
     @Test
