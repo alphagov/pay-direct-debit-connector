@@ -486,7 +486,7 @@ public class MandateResourceIT {
 
         List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
         MatcherAssert.assertThat(transactionsForMandate.size(), is(1));
-        MatcherAssert.assertThat(transactionsForMandate.get(0).get("state"), is("SUBMITTED"));
+        MatcherAssert.assertThat(transactionsForMandate.get(0).get("state"), is("PENDING"));
     }
 
     @Test
@@ -607,7 +607,7 @@ public class MandateResourceIT {
 
         List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
         MatcherAssert.assertThat(transactionsForMandate.size(), is(1));
-        MatcherAssert.assertThat(transactionsForMandate.get(0).get("state"), is("SUBMITTED"));
+        MatcherAssert.assertThat(transactionsForMandate.get(0).get("state"), is("PENDING"));
     }
 
     @Test

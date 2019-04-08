@@ -17,7 +17,7 @@ public class DatabaseTestHelper {
     public Map<String, Object> getTokenByMandateExternalId(MandateExternalId externalId) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * from tokens t JOIN mandates m ON t.mandate_id = m.id WHERE m.external_id = :external_id ORDER BY t.id DESC")
+                        .createQuery("SELECT t.* from tokens t JOIN mandates m ON t.mandate_id = m.id WHERE m.external_id = :external_id ORDER BY t.id DESC")
                         .bind("external_id", externalId)
                         .mapToMap()
                         .findFirst()
@@ -84,7 +84,7 @@ public class DatabaseTestHelper {
     public List<Map<String, Object>> getTransactionsForMandate(MandateExternalId mandateExternalId) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * from transactions t JOIN mandates m ON t.mandate_id = m.id WHERE m.external_id = :mandateExternalId")
+                        .createQuery("SELECT t.* from transactions t JOIN mandates m ON t.mandate_id = m.id WHERE m.external_id = :mandateExternalId")
                         .bind("mandateExternalId", mandateExternalId)
                         .mapToMap()
                         .list()
