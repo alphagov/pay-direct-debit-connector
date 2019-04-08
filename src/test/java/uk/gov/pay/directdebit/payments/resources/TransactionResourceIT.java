@@ -23,6 +23,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -34,6 +35,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -132,13 +134,16 @@ public class TransactionResourceIT {
         assertThat(createdTransaction.get("amount"), is(AMOUNT));
 
         Map<String, Object> createdMandate = testContext.getDatabaseTestHelper().getMandateByTransactionExternalId(externalTransactionId);
-
         assertThat(createdMandate.get("external_id"), is(notNullValue()));
-        assertThat(createdMandate.get("reference"), is(expectedReference));
-        assertThat(createdMandate.get("description"), is(expectedDescription));
         assertThat(createdMandate.get("return_url"), is(returnUrl));
         assertThat(createdMandate.get("gateway_account_id"), is(testGatewayAccount.getId()));
-        assertThat(createdMandate.get("payer"), is(nullValue()));
+
+        MandateExternalId mandateExternalId = MandateExternalId.of((String) createdMandate.get("external_id"));
+        List<Map<String, Object>> createdTransactions = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateExternalId);
+        assertThat(createdTransactions.size(), is(1));
+        assertThat(createdTransactions.get(0).get("payer"), is(nullValue()));
+        assertThat(createdTransactions.get(0).get("description"), is(expectedDescription));
+        assertThat(createdTransactions.get(0).get("reference"), is(expectedReference));
     }
 
     @Test

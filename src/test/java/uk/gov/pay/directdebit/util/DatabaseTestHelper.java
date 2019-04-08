@@ -138,7 +138,7 @@ public class DatabaseTestHelper {
     public Map<String, Object> getMandateByTransactionExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * from mandates m JOIN transactions t ON t.mandate_id = m.id WHERE t.external_id = :externalId")
+                        .createQuery("SELECT m.* from mandates m JOIN transactions t ON t.mandate_id = m.id WHERE t.external_id = :externalId")
                         .bind("externalId", externalId)
                         .mapToMap()
                         .findFirst()
