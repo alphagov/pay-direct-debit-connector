@@ -164,6 +164,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>2.5.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>uk.gov.pay</groupId>
             <artifactId>testing</artifactId>
             <version>${pay-java-commons.version}</version>
