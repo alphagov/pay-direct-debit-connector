@@ -30,9 +30,6 @@ public class DirectDebitConfig extends Configuration {
     private AdminUsersConfig adminUsersConfig;
 
     @NotNull
-    private ExecutorServiceConfig executorServiceConfig;
-
-    @NotNull
     @JsonProperty("jerseyClient")
     private JerseyClientConfiguration jerseyClientConfig;
 
@@ -62,11 +59,6 @@ public class DirectDebitConfig extends Configuration {
 
     public LinksConfig getLinks() {
         return links;
-    }
-
-    @JsonProperty("executorService")
-    public ExecutorServiceConfig getExecutorServiceConfig() {
-        return executorServiceConfig;
     }
 
     @JsonProperty("graphite")
