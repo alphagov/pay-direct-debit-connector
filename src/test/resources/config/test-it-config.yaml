@@ -28,10 +28,6 @@ goCardless:
   environment: sandbox
   clientUrl: http://localhost:10107
 
-executorService:
-  timeoutInSeconds: ${AUTH_READ_TIMEOUT_SECONDS:-1}
-  threadsPerCpu: ${NUMBER_OF_THREADS_PER_CPU:-100}
-
 adminusers:
   adminUsersUrl: http://localhost:10110
 

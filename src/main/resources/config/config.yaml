@@ -41,10 +41,6 @@ goCardless:
   webhookSecret: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_WEBHOOK_SECRET:-change-me}
   environment: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ENVIRONMENT:-sandbox}
 
-executorService:
-  timeoutInSeconds: ${AUTH_READ_TIMEOUT_SECONDS:-1}
-  threadsPerCpu: ${NUMBER_OF_THREADS_PER_CPU:-100}
-
 database:
   driverClass: org.postgresql.Driver
   user: ${DB_USER}
