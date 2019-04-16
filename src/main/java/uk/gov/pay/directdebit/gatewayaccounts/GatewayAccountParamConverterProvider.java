@@ -1,14 +1,15 @@
 package uk.gov.pay.directdebit.gatewayaccounts;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+
 import javax.inject.Inject;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
-import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
 @Provider
 public class GatewayAccountParamConverterProvider implements ParamConverterProvider {
@@ -23,6 +24,7 @@ public class GatewayAccountParamConverterProvider implements ParamConverterProvi
     public GatewayAccountConverter createGatewayAccountConverter() {
         return new GatewayAccountConverter();
     }
+
     public class GatewayAccountConverter implements ParamConverter<GatewayAccount> {
 
         @Override
@@ -37,11 +39,14 @@ public class GatewayAccountParamConverterProvider implements ParamConverterProvi
             return gatewayAccount.getId().toString();
         }
     }
+
     @Override
+    @SuppressWarnings("unchecked")
     public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
-        if(rawType.equals(GatewayAccount.class)){
-            return ((ParamConverter<T>) createGatewayAccountConverter());
+        if (rawType.equals(GatewayAccount.class)) {
+            return (ParamConverter<T>) createGatewayAccountConverter();
         }
         return null;
     }
+
 }
