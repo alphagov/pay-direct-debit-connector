@@ -1,8 +1,9 @@
 package uk.gov.pay.directdebit.common.exception;
 
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.common.model.ErrorIdentifier;
+import uk.gov.pay.directdebit.common.model.ErrorResponse;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -16,7 +17,7 @@ public class InternalServerErrorExceptionMapper implements ExceptionMapper<Inter
     @Override
     public Response toResponse(InternalServerErrorException exception) {
         LOGGER.error(exception.getMessage());
-        ImmutableMap<String, String> entity = ImmutableMap.of("message", exception.getMessage());
-        return Response.status(500).entity(entity).type(APPLICATION_JSON).build();
+        ErrorResponse errorResponse = new ErrorResponse(ErrorIdentifier.GENERIC, exception.getMessage());
+        return Response.status(500).entity(errorResponse).type(APPLICATION_JSON).build();
     }
 }

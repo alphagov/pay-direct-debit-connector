@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.common.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
@@ -46,6 +47,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -306,9 +308,9 @@ public class TransactionResourceIT {
                 .body(postBody)
                 .post(requestPath)
                 .then()
-                .body("message", containsString("Invalid operation"))
                 .statusCode(Status.PRECONDITION_FAILED.getStatusCode())
-                .contentType(JSON);
+                .contentType(JSON)
+                .body("message", contains(containsString("Invalid operation")));
     }
 
     @Test
@@ -403,7 +405,8 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("Field(s) missing: [reference]"));
+                .body("message", contains("Field(s) missing: [reference]"))
+                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
     }
 
     @Test
@@ -426,7 +429,8 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("The size of a field(s) is invalid: [description]"));
+                .body("message", contains("The size of a field(s) is invalid: [description]"))
+                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
     }
 
     @Test
@@ -448,7 +452,8 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("Field(s) are invalid: [amount]"));
+                .body("message", contains("Field(s) are invalid: [amount]"))
+                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
     }
 
     private TransactionFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {

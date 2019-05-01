@@ -1,9 +1,10 @@
 package uk.gov.pay.directdebit.common.exception;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.common.model.ErrorIdentifier;
+import uk.gov.pay.directdebit.common.model.ErrorResponse;
 
 import javax.annotation.Priority;
 import javax.ws.rs.core.Response;
@@ -19,7 +20,7 @@ public class JsonMappingExceptionMapper implements ExceptionMapper<JsonMappingEx
     @Override
     public Response toResponse(JsonMappingException exception) {
         LOGGER.error(exception.getMessage());
-        ImmutableMap<String, String> entity = ImmutableMap.of("message", exception.getMessage());
-        return Response.status(400).entity(entity).type(APPLICATION_JSON).build();
+        ErrorResponse errorResponse = new ErrorResponse(ErrorIdentifier.GENERIC, exception.getMessage());
+        return Response.status(400).entity(errorResponse).type(APPLICATION_JSON).build();
     }
 }
