@@ -10,6 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.common.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
@@ -26,6 +27,7 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
@@ -78,9 +80,9 @@ public class PayerResourceIT {
         response
                 .header("Location", is(documentLocation))
                 .body("payer_external_id", is(createdPayerExternalId))
-                .contentType(JSON);  
+                .contentType(JSON);
     }
-    
+
     @Test
     public void shouldCreateAPayer() throws JsonProcessingException {
         createPayerFor(SANDBOX);
@@ -116,7 +118,8 @@ public class PayerResourceIT {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("Field(s) missing: [account_number]"));
+                .body("message", contains("Field(s) missing: [account_number]"))
+                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
     }
 
     @Test
@@ -135,7 +138,8 @@ public class PayerResourceIT {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("Field(s) missing: [sort_code]"));
+                .body("message", contains("Field(s) missing: [sort_code]"))
+                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
     }
 
     private RequestSpecification givenSetup() {

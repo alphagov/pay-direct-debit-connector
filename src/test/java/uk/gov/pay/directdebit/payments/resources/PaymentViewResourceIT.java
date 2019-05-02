@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.common.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
@@ -95,7 +97,8 @@ public class PaymentViewResourceIT {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("Query param 'page' should be a non zero positive integer"));
+                .body("message", contains("Query param 'page' should be a non zero positive integer"))
+                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
     }
 
     @Test
@@ -110,7 +113,8 @@ public class PaymentViewResourceIT {
                 .then()
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("Unknown gateway account: non-existent-id"));
+                .body("message", contains("Unknown gateway account: non-existent-id"))
+                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
     }
 
     @Test
@@ -139,7 +143,7 @@ public class PaymentViewResourceIT {
                 .contentType(JSON)
                 .body("results", hasSize(0));
     }
-    
+
     @Test
     public void shouldReturn5Records_whenPaginationSetTo2PageAnd10DisplaySizeWith15records_withDateRange10days() {
         ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1L);
@@ -238,7 +242,8 @@ public class PaymentViewResourceIT {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
-                .body("message", is("Input toDate (2018-14-08T15:00Z) is wrong format"));
+                .body("message", contains("Input toDate (2018-14-08T15:00Z) is wrong format"))
+                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
     }
 
     @Test
@@ -321,9 +326,9 @@ public class PaymentViewResourceIT {
                 .contentType(JSON)
                 .body("results", hasSize(6));
     }
-    
+
     @Test
-    public void shouldReturn3Records_whenSearchingByMandateId(){
+    public void shouldReturn3Records_whenSearchingByMandateId() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
@@ -348,7 +353,7 @@ public class PaymentViewResourceIT {
                 .withName("J. Doe")
                 .insert(testContext.getJdbi());
         for (int i = 0; i < 6; i++) {
-            if (i%2 == 0) {
+            if (i % 2 == 0) {
                 aTransactionFixture()
                         .withMandateFixture(mandateFixture2)
                         .insert(testContext.getJdbi());
@@ -373,7 +378,7 @@ public class PaymentViewResourceIT {
     }
 
     @Test
-    public void shouldReturn6Records_whenSearchingByFailedExternalState(){
+    public void shouldReturn6Records_whenSearchingByFailedExternalState() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
