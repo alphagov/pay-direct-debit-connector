@@ -17,7 +17,7 @@ public class PreconditionFailedExceptionMapper implements ExceptionMapper<Precon
     @Override
     public Response toResponse(PreconditionFailedException exception) {
         LOGGER.error(exception.getMessage());
-        ErrorResponse errorResponse = new ErrorResponse(ErrorIdentifier.GENERIC, exception.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(exception.getErrorIdentifier(), exception.getMessage());
         return Response.status(412).entity(errorResponse).type(APPLICATION_JSON).build();
     }
 }

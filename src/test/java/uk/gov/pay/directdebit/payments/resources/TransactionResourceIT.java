@@ -310,7 +310,8 @@ public class TransactionResourceIT {
                 .then()
                 .statusCode(Status.PRECONDITION_FAILED.getStatusCode())
                 .contentType(JSON)
-                .body("message", contains(containsString("Invalid operation")));
+                .body("message", contains(containsString("Invalid operation")))
+                .body("error_identifier", is(ErrorIdentifier.INVALID_MANDATE_TYPE.toString()));
     }
 
     @Test

@@ -217,7 +217,7 @@ public class MandateResourceIT {
                 .statusCode(Status.PRECONDITION_FAILED.getStatusCode())
                 .contentType(JSON)
                 .body("message", contains("Invalid operation on mandate of type ONE_OFF"))
-                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
+                .body("error_identifier", is(ErrorIdentifier.INVALID_MANDATE_TYPE.toString()));
     }
 
     @Test
