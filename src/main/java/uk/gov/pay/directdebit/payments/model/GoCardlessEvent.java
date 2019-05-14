@@ -13,7 +13,6 @@ public class GoCardlessEvent {
     private GoCardlessResourceType resourceType;
     private String json;
     private ZonedDateTime createdAt;
-    private String resourceId;
     private PaymentProviderOrganisationIdentifier organisationIdentifier;
     private String detailsCause;
     private String detailsDescription;
@@ -31,18 +30,17 @@ public class GoCardlessEvent {
     private String subscriptionId;
 
     private GoCardlessEvent(Long id, String goCardlessEventId, String action, GoCardlessResourceType resourceType,
-                           String json, ZonedDateTime createdAt, String resourceId,
-                           PaymentProviderOrganisationIdentifier organisationIdentifier, String detailsCause,
-                           String detailsDescription, String detailsOrigin, String detailsReasonCode, String detailsScheme,
-                           String mandateId, String customerId, String newMandateId, String parentEventId,
-                           String paymentId, String payoutId, String previousCustomerBankAccount, String refundId, String subscriptionId) {
+                            String json, ZonedDateTime createdAt,
+                            PaymentProviderOrganisationIdentifier organisationIdentifier, String detailsCause,
+                            String detailsDescription, String detailsOrigin, String detailsReasonCode, String detailsScheme,
+                            String mandateId, String customerId, String newMandateId, String parentEventId,
+                            String paymentId, String payoutId, String previousCustomerBankAccount, String refundId, String subscriptionId) {
         this.id = id;
         this.goCardlessEventId = goCardlessEventId;
         this.action = action;
         this.resourceType = resourceType;
         this.json = json;
         this.createdAt = createdAt;
-        this.resourceId = resourceId;
         this.organisationIdentifier = organisationIdentifier;
         this.detailsCause = detailsCause;
         this.detailsDescription = detailsDescription;
@@ -96,12 +94,7 @@ public class GoCardlessEvent {
         return this;
     }
 
-    public String getResourceId() {
-        return resourceId;
-    }
-
     public GoCardlessEvent withResourceId(String resourceId) {
-        this.resourceId = resourceId;
         return this;
     }
 
@@ -120,11 +113,6 @@ public class GoCardlessEvent {
 
     public GoCardlessEvent setJson(String json) {
         this.json = json;
-        return this;
-    }
-
-    public GoCardlessEvent setResourceId(String resourceId) {
-        this.resourceId = resourceId;
         return this;
     }
 
@@ -320,7 +308,7 @@ public class GoCardlessEvent {
             return this;
         }
 
-        public GoCardlessEventBuilder withPreviousCustomerBankAccount(String previousCustomerBankAccount) {
+        public GoCardlessEventBuilder withPreviousCustomerBankAccountId(String previousCustomerBankAccount) {
             this.previousCustomerBankAccount = previousCustomerBankAccount;
             return this;
         }
@@ -336,7 +324,7 @@ public class GoCardlessEvent {
         }
 
         public GoCardlessEvent build() {
-            return new GoCardlessEvent(id, goCardlessEventId, action, resourceType, json, createdAt, resourceId, organisationIdentifier, detailsCause, detailsDescription, detailsOrigin, detailsReasonCode, detailsScheme, mandateId, customerId, newMandateId, parentEventId, paymentId, payoutId, previousCustomerBankAccount, refundId, subscriptionId);
+            return new GoCardlessEvent(id, goCardlessEventId, action, resourceType, json, createdAt, organisationIdentifier, detailsCause, detailsDescription, detailsOrigin, detailsReasonCode, detailsScheme, mandateId, customerId, newMandateId, parentEventId, paymentId, payoutId, previousCustomerBankAccount, refundId, subscriptionId);
         }
     }
 }

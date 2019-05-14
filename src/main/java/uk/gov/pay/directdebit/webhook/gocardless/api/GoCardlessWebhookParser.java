@@ -31,30 +31,44 @@ public class GoCardlessWebhookParser {
             JsonNode webhookJson = objectMapper.readTree(webhookPayload);
             JsonNode eventsPayload = webhookJson.get("events");
             for (JsonNode eventNode : eventsPayload) {
-                String resourceType = eventNode.get("resource_type").asText();
-                GoCardlessResourceType handledGoCardlessResourceType = GoCardlessResourceType.fromString(resourceType);
-                GoCardlessEvent event = new GoCardlessEvent(
-                        eventNode.get("id").asLong(),
-                        eventNode.get("gocardless_event_id").asText(),
-                        eventNode.get("action").asText(),
-                        handledGoCardlessResourceType,
-                        eventNode.toString(),
-                        ZonedDateTime.parse(eventNode.get("created_at").asText()),
-                        eventNode.get("resource_id").asText(),
-                        getLinkField(eventNode, "organisation").map(PaymentProviderOrganisationIdentifier::of).orElse(null),
-                );
-                extractResourceIdFrom(eventNode, handledGoCardlessResourceType)
-                        .ifPresent(event::setResourceId);
+                GoCardlessEvent event = createGoCardlessEventFromJson(eventNode);
                 events.add(event);
                 LOGGER.info("Successfully parsed gocardless webhook, event resource type: {}, action: {}, resource id {}",
                         event.getResourceType(),
                         event.getAction(),
-                        event.getResourceId());
+                        event.getResourceType());
             }
             return events;
         } catch (Exception exc) {
             throw new WebhookParserException("Failed to parse webhooks, body: " + webhookPayload);
         }
+    }
+
+    private GoCardlessEvent createGoCardlessEventFromJson(JsonNode eventNode) {
+        GoCardlessEvent.GoCardlessEventBuilder eventBuilder = GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
+                .withAction(eventNode.get("action").asText())
+                .withCreatedAt(ZonedDateTime.parse(eventNode.get("created_at").asText()))
+                .withCustomerId(eventNode.get("customer_id").asText())
+                .withDetailsCause(eventNode.get("details.cause").asText())
+                .withDetailsDescription(eventNode.get("details.description").asText())
+                .withDetailsOrigin(eventNode.get("details.origin").asText())
+                .withDetailsReasonCode(eventNode.get("details.reason_code").asText())
+                .withGoCardlessEventId(eventNode.get("gocardless_event_id").asText())
+                .withId(eventNode.get("id").asLong())
+                .withJson(eventNode.get("json").asText())
+                .withResourceType(GoCardlessResourceType.fromString(eventNode.get("resource_type").asText()));
+
+        Optional.ofNullable(eventNode.get("details.scheme")).map(JsonNode::asText).ifPresent(eventBuilder::withDetailsScheme);
+        getLinkField(eventNode, "mandate").ifPresent(eventBuilder::withMandateId);
+        getLinkField(eventNode, "new_mandate").ifPresent(eventBuilder::withNewMandateId);
+        getLinkField(eventNode, "organisation").map(PaymentProviderOrganisationIdentifier::of).ifPresent(eventBuilder::withOrganisationIdentifier);
+        getLinkField(eventNode, "parent_event").ifPresent(eventBuilder::withParentEventId);
+        getLinkField(eventNode, "payment").ifPresent(eventBuilder::withPaymentId);
+        getLinkField(eventNode, "payout").ifPresent(eventBuilder::withPayoutId);
+        getLinkField(eventNode, "previous_customer_bank_account").ifPresent(eventBuilder::withPreviousCustomerBankAccountId);
+        getLinkField(eventNode, "refund").ifPresent(eventBuilder::withRefundId);
+        getLinkField(eventNode, "subscription").ifPresent(eventBuilder::withSubscriptionId);
+        return eventBuilder.build();
     }
 
     private Optional<String> getLinkField(JsonNode eventNode, String link) {

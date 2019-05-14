@@ -34,7 +34,7 @@ public class GoCardlessEventRowMapper implements RowMapper<GoCardlessEvent> {
                 .withPayoutId(resultSet.getString("payout_id"))
                 .withResourceId(resultSet.getString("resource_id"))
                 .withSubscriptionId(resultSet.getString("subscription_id"))
-                .withPreviousCustomerBankAccount(resultSet.getString("previous_customer_bank_account"))
+                .withPreviousCustomerBankAccountId(resultSet.getString("previous_customer_bank_account"))
                 .withRefundId(resultSet.getString("refund_id"))
                 .withResourceType(GoCardlessResourceType.fromString(resultSet.getString("resource_type")))
                 .build();
