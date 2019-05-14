@@ -66,6 +66,7 @@ public class GoCardlessWebhookParser {
         }
     }
 
+    // There are actually more than these and we might want to store them in the interests of not throwing away data
     private Optional<String> extractResourceIdFrom(JsonNode jsonNode, GoCardlessResourceType goCardlessResourceType) {
         switch (goCardlessResourceType) {
             case PAYMENTS:
