@@ -16,43 +16,50 @@ public class GoCardlessEvent {
     private ZonedDateTime createdAt;
     private String resourceId;
     private PaymentProviderOrganisationIdentifier organisationIdentifier;
-    
+    private String detailsCause;
+    private String detailsDescription;
+    private String detailsOrigin;
+    private String detailsReasonCode;
+    private String detailsScheme;
+    private String mandateId;
+    private String customerId;
+    private String newMandateId;
+    private String parentEventId;
+    private String paymentId;
+    private String payoutId;
+    private String previousCustomerBankAccount;
+    private String refundId;
+    private String subscriptionId;
 
-    public GoCardlessEvent(Long id,
-                           Long directDebitEventId,
-                           String goCardlessEventId,
-                           String action,
-                           GoCardlessResourceType resourceType,
-                           String json,
-                           ZonedDateTime createdAt,
-                           PaymentProviderOrganisationIdentifier organisationIdentifier) {
+    public GoCardlessEvent(Long id, Long eventId, String goCardlessEventId, String action, GoCardlessResourceType resourceType,
+                           String json, ZonedDateTime createdAt, String resourceId,
+                           PaymentProviderOrganisationIdentifier organisationIdentifier, String detailsCause,
+                           String detailsDescription, String detailsOrigin, String detailsReasonCode, String detailsScheme,
+                           String mandateId, String customerId, String newMandateId, String parentEventId,
+                           String paymentId, String payoutId, String previousCustomerBankAccount, String refundId, String subscriptionId) {
         this.id = id;
-        this.eventId = directDebitEventId;
+        this.eventId = eventId;
         this.goCardlessEventId = goCardlessEventId;
         this.action = action;
         this.resourceType = resourceType;
         this.json = json;
         this.createdAt = createdAt;
+        this.resourceId = resourceId;
         this.organisationIdentifier = organisationIdentifier;
-    }
-
-    public GoCardlessEvent(Long id,
-                           Long directDebitEventId,
-                           String goCardlessEventId,
-                           String action,
-                           GoCardlessResourceType resourceType,
-                           String json,
-                           ZonedDateTime createdAt) {
-        this(id, directDebitEventId, goCardlessEventId, action, resourceType, json, createdAt, null);
-    }
-
-    public GoCardlessEvent(String goCardlessEventId, 
-                           String action, 
-                           GoCardlessResourceType resourceType, 
-                           String json, 
-                           ZonedDateTime createdAt, 
-                           PaymentProviderOrganisationIdentifier organisationIdentifier) {
-        this(null, null, goCardlessEventId, action, resourceType, json, createdAt, organisationIdentifier);
+        this.detailsCause = detailsCause;
+        this.detailsDescription = detailsDescription;
+        this.detailsOrigin = detailsOrigin;
+        this.detailsReasonCode = detailsReasonCode;
+        this.detailsScheme = detailsScheme;
+        this.mandateId = mandateId;
+        this.customerId = customerId;
+        this.newMandateId = newMandateId;
+        this.parentEventId = parentEventId;
+        this.paymentId = paymentId;
+        this.payoutId = payoutId;
+        this.previousCustomerBankAccount = previousCustomerBankAccount;
+        this.refundId = refundId;
+        this.subscriptionId = subscriptionId;
     }
 
     public Long getId() {
@@ -138,5 +145,61 @@ public class GoCardlessEvent {
 
     public void setOrganisationIdentifier(PaymentProviderOrganisationIdentifier organisationIdentifier) {
         this.organisationIdentifier = organisationIdentifier;
+    }
+
+    public String getDetailsCause() {
+        return detailsCause;
+    }
+
+    public String getDetailsDescription() {
+        return detailsDescription;
+    }
+
+    public String getDetailsOrigin() {
+        return detailsOrigin;
+    }
+
+    public String getDetailsReasonCode() {
+        return detailsReasonCode;
+    }
+
+    public String getDetailsScheme() {
+        return detailsScheme;
+    }
+
+    public String getMandateId() {
+        return mandateId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public String getNewMandateId() {
+        return newMandateId;
+    }
+
+    public String getParentEventId() {
+        return parentEventId;
+    }
+
+    public String getPaymentId() {
+        return paymentId;
+    }
+
+    public String getPayoutId() {
+        return payoutId;
+    }
+
+    public String getPreviousCustomerBankAccount() {
+        return previousCustomerBankAccount;
+    }
+
+    public String getRefundId() {
+        return refundId;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
     }
 }
