@@ -137,7 +137,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
 
     @Override
     public GoCardlessEvent toEntity() {
-        return new GoCardlessEvent(id, eventId, goCardlessEventId, action, resourceType, json, createdAt, organisationIdentifier);
+        return new GoCardlessEvent(id, goCardlessEventId, action, resourceType, json, createdAt, organisationIdentifier);
     }
 
 }

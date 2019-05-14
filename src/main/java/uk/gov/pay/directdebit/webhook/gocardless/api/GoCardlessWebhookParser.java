@@ -34,12 +34,14 @@ public class GoCardlessWebhookParser {
                 String resourceType = eventNode.get("resource_type").asText();
                 GoCardlessResourceType handledGoCardlessResourceType = GoCardlessResourceType.fromString(resourceType);
                 GoCardlessEvent event = new GoCardlessEvent(
-                        eventNode.get("id").asText(),
+                        eventNode.get("id").asLong(),
+                        eventNode.get("gocardless_event_id").asText(),
                         eventNode.get("action").asText(),
                         handledGoCardlessResourceType,
                         eventNode.toString(),
                         ZonedDateTime.parse(eventNode.get("created_at").asText()),
-                        getOrganisationField(eventNode)
+                        eventNode.get("resource_id").asText(),
+                        getLinkField(eventNode, "organisation").map(PaymentProviderOrganisationIdentifier::of).orElse(null),
                 );
                 extractResourceIdFrom(eventNode, handledGoCardlessResourceType)
                         .ifPresent(event::setResourceId);
@@ -55,15 +57,8 @@ public class GoCardlessWebhookParser {
         }
     }
 
-    private PaymentProviderOrganisationIdentifier getOrganisationField(JsonNode eventNode) {
-        /* todo: remove the check for missing node after going live
-        Now is used for backward compatibility as when live we will get the organisation in the payload
-        */
-        if (eventNode.get("links").has("organisation")) {
-            return PaymentProviderOrganisationIdentifier.of(eventNode.get("links").get("organisation").asText());
-        } else {
-            return null;
-        }
+    private Optional<String> getLinkField(JsonNode eventNode, String link) {
+        return Optional.ofNullable(eventNode.get("links").get(link)).map(JsonNode::asText);
     }
 
     // There are actually more than these and we might want to store them in the interests of not throwing away data

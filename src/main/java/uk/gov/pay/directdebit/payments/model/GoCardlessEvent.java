@@ -7,7 +7,6 @@ import java.time.ZonedDateTime;
 public class GoCardlessEvent {
 
     private Long id;
-    private Long eventId;
     private String goCardlessEventId;
     //todo action should be typed (see https://developer.gocardless.com/api-reference/#events-payment-actions and the equivalent for other resource_types
     private String action;
@@ -31,14 +30,13 @@ public class GoCardlessEvent {
     private String refundId;
     private String subscriptionId;
 
-    public GoCardlessEvent(Long id, Long eventId, String goCardlessEventId, String action, GoCardlessResourceType resourceType,
+    private GoCardlessEvent(Long id, String goCardlessEventId, String action, GoCardlessResourceType resourceType,
                            String json, ZonedDateTime createdAt, String resourceId,
                            PaymentProviderOrganisationIdentifier organisationIdentifier, String detailsCause,
                            String detailsDescription, String detailsOrigin, String detailsReasonCode, String detailsScheme,
                            String mandateId, String customerId, String newMandateId, String parentEventId,
                            String paymentId, String payoutId, String previousCustomerBankAccount, String refundId, String subscriptionId) {
         this.id = id;
-        this.eventId = eventId;
         this.goCardlessEventId = goCardlessEventId;
         this.action = action;
         this.resourceType = resourceType;
@@ -68,15 +66,6 @@ public class GoCardlessEvent {
 
     public GoCardlessEvent setId(Long id) {
         this.id = id;
-        return this;
-    }
-
-    public Long getEventId() {
-        return eventId;
-    }
-
-    public GoCardlessEvent setEventId(Long eventId) {
-        this.eventId = eventId;
         return this;
     }
 
@@ -201,5 +190,153 @@ public class GoCardlessEvent {
 
     public String getSubscriptionId() {
         return subscriptionId;
+    }
+
+
+    public static final class GoCardlessEventBuilder {
+        private Long id;
+        private String goCardlessEventId;
+        //todo action should be typed (see https://developer.gocardless.com/api-reference/#events-payment-actions and the equivalent for other resource_types
+        private String action;
+        private GoCardlessResourceType resourceType;
+        private String json;
+        private ZonedDateTime createdAt;
+        private String resourceId;
+        private PaymentProviderOrganisationIdentifier organisationIdentifier;
+        private String detailsCause;
+        private String detailsDescription;
+        private String detailsOrigin;
+        private String detailsReasonCode;
+        private String detailsScheme;
+        private String mandateId;
+        private String customerId;
+        private String newMandateId;
+        private String parentEventId;
+        private String paymentId;
+        private String payoutId;
+        private String previousCustomerBankAccount;
+        private String refundId;
+        private String subscriptionId;
+
+        private GoCardlessEventBuilder() {
+        }
+
+        public static GoCardlessEventBuilder aGoCardlessEvent() {
+            return new GoCardlessEventBuilder();
+        }
+
+        public GoCardlessEventBuilder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withGoCardlessEventId(String goCardlessEventId) {
+            this.goCardlessEventId = goCardlessEventId;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withAction(String action) {
+            this.action = action;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withResourceType(GoCardlessResourceType resourceType) {
+            this.resourceType = resourceType;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withJson(String json) {
+            this.json = json;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withCreatedAt(ZonedDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withResourceId(String resourceId) {
+            this.resourceId = resourceId;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withOrganisationIdentifier(PaymentProviderOrganisationIdentifier organisationIdentifier) {
+            this.organisationIdentifier = organisationIdentifier;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withDetailsCause(String detailsCause) {
+            this.detailsCause = detailsCause;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withDetailsDescription(String detailsDescription) {
+            this.detailsDescription = detailsDescription;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withDetailsOrigin(String detailsOrigin) {
+            this.detailsOrigin = detailsOrigin;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withDetailsReasonCode(String detailsReasonCode) {
+            this.detailsReasonCode = detailsReasonCode;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withDetailsScheme(String detailsScheme) {
+            this.detailsScheme = detailsScheme;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withMandateId(String mandateId) {
+            this.mandateId = mandateId;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withCustomerId(String customerId) {
+            this.customerId = customerId;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withNewMandateId(String newMandateId) {
+            this.newMandateId = newMandateId;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withParentEventId(String parentEventId) {
+            this.parentEventId = parentEventId;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withPaymentId(String paymentId) {
+            this.paymentId = paymentId;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withPayoutId(String payoutId) {
+            this.payoutId = payoutId;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withPreviousCustomerBankAccount(String previousCustomerBankAccount) {
+            this.previousCustomerBankAccount = previousCustomerBankAccount;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withRefundId(String refundId) {
+            this.refundId = refundId;
+            return this;
+        }
+
+        public GoCardlessEventBuilder withSubscriptionId(String subscriptionId) {
+            this.subscriptionId = subscriptionId;
+            return this;
+        }
+
+        public GoCardlessEvent build() {
+            return new GoCardlessEvent(id, goCardlessEventId, action, resourceType, json, createdAt, resourceId, organisationIdentifier, detailsCause, detailsDescription, detailsOrigin, detailsReasonCode, detailsScheme, mandateId, customerId, newMandateId, parentEventId, paymentId, payoutId, previousCustomerBankAccount, refundId, subscriptionId);
+        }
     }
 }
