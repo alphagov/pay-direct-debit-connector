@@ -33,26 +33,21 @@ public class GoCardlessEventService {
         LOGGER.info("Inserted gocardless event with gocardless event id {} ", event.getGoCardlessEventId());
     }
 
-    public void updateInternalEventId(GoCardlessEvent event) {
-        goCardlessEventDao.updateEventId(event.getId(), event.getEventId());
-        LOGGER.info("Updated gocardless event with gocardless event id {}, internal event id {} ", event.getGoCardlessEventId(), event.getEventId());
-    }
-
     public GoCardlessPayment findPaymentForEvent(GoCardlessEvent event) {
         return goCardlessPaymentDao
-                .findByEventResourceId(event.getResourceId())
+                .findByEventResourceId(event.getPaymentId())
                 .orElseThrow(() -> {
                     LOGGER.error("Couldn't find gocardless payment for event: {}", event.getJson());
-                    return new GoCardlessPaymentNotFoundException(event.getResourceId());
+                    return new GoCardlessPaymentNotFoundException(event.getPaymentId());
                 });
     }
 
     public GoCardlessMandate findGoCardlessMandateForEvent(GoCardlessEvent event) {
         return goCardlessMandateDao
-                .findByEventResourceId(event.getResourceId())
+                .findByEventResourceId(event.getMandateId())
                 .orElseThrow(() -> {
                     LOGGER.error("Couldn't find gocardless mandate for event: {}", event.getJson());
-                    return new GoCardlessMandateNotFoundException("resource id", event.getResourceId());
+                    return new GoCardlessMandateNotFoundException("resource id", event.getMandateId());
                 });
     }
 }

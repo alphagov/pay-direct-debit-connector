@@ -40,20 +40,4 @@ public class WebhookGoCardlessService {
 //            handler.handle(event);
 //        });
     }
-
-    private void logUnknownResourceTypeForEvent(GoCardlessEvent event) {
-        LOGGER.info("unhandled resource type for event with id {} ", event.getEventId());
-    }
-
-    private GoCardlessActionHandler getHandlerFor(GoCardlessResourceType goCardlessResourceType) {
-        switch (goCardlessResourceType) {
-            case PAYMENTS:
-            case PAYOUTS:
-                return goCardlessPaymentHandler;
-            case MANDATES:
-                return goCardlessMandateHandler;
-            default:
-                return this::logUnknownResourceTypeForEvent;
-        }
-    }
 }

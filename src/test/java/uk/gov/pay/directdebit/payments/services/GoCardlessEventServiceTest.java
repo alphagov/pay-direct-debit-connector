@@ -49,7 +49,6 @@ public class GoCardlessEventServiceTest {
     public void findPaymentForEvent_shouldThrowIfNoPaymentIsFoundForEvent() {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().toEntity();
         String resourceId = "aaa";
-        goCardlessEvent.setResourceId(resourceId);
         when(mockedGoCardlessPaymentDao.findByEventResourceId(resourceId)).thenReturn(Optional.empty());
         thrown.expect(GoCardlessPaymentNotFoundException.class);
         thrown.expectMessage("No gocardless payment found with resource id: aaa");
@@ -61,7 +60,6 @@ public class GoCardlessEventServiceTest {
     public void findMandateForEvent_shouldThrowIfNoMandateIsFoundForEvent() {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().toEntity();
         String resourceId = "aaa";
-        goCardlessEvent.setResourceId(resourceId);
         when(mockedGoCardlessMandateDao.findByEventResourceId(resourceId)).thenReturn(Optional.empty());
         thrown.expect(GoCardlessMandateNotFoundException.class);
         thrown.expectMessage("No gocardless mandate found with resource id: aaa");
