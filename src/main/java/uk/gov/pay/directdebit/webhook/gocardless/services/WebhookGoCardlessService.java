@@ -31,14 +31,14 @@ public class WebhookGoCardlessService {
 
     public void handleEvents(List<GoCardlessEvent> events) {
         events.forEach(goCardlessService::storeEvent);
-        events.forEach(event -> {
-            GoCardlessActionHandler handler = getHandlerFor(event.getResourceType());
-            LOGGER.info("About to handle event of type: {}, action: {}, resource id: {}",
-                    event.getResourceType(),
-                    event.getAction(),
-                    event.getResourceId());
-            handler.handle(event);
-        });
+//        events.forEach(event -> {
+//            GoCardlessActionHandler handler = getHandlerFor(event.getResourceType());
+//            LOGGER.info("About to handle event of type: {}, action: {}, resource id: {}",
+//                    event.getResourceType(),
+//                    event.getAction(),
+//                    event.getResourceId());
+//            handler.handle(event);
+//        });
     }
 
     private void logUnknownResourceTypeForEvent(GoCardlessEvent event) {

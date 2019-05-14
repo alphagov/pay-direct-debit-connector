@@ -16,6 +16,7 @@ public class GoCardlessEvent {
     private ZonedDateTime createdAt;
     private String resourceId;
     private PaymentProviderOrganisationIdentifier organisationIdentifier;
+    
 
     public GoCardlessEvent(Long id,
                            Long directDebitEventId,
