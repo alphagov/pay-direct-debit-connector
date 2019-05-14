@@ -19,10 +19,149 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     private String goCardlessEventId = RandomIdGenerator.newId();
     private String action = RandomStringUtils.randomAlphabetic(20);
     private GoCardlessResourceType resourceType = GoCardlessResourceType.PAYMENTS;
-    private String resourceId = RandomStringUtils.randomAlphabetic(20);
     private String json = "{\"id\": \"somejson\"}";
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
     private PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of(RandomStringUtils.randomAlphanumeric(25));
+    private String detailsCause = RandomStringUtils.randomAlphabetic(20);
+    private String detailsDescription = RandomStringUtils.randomAlphabetic(20);
+    private String detailsOrigin = RandomStringUtils.randomAlphabetic(20);
+    private String detailsReasonCode = RandomStringUtils.randomAlphabetic(20);
+    private String detailsScheme = RandomStringUtils.randomAlphabetic(20);
+    private String mandateId = RandomStringUtils.randomAlphabetic(20);
+    private String customerId = RandomStringUtils.randomAlphabetic(20);
+    private String newMandateId = RandomStringUtils.randomAlphabetic(20);
+    private String parentEventId = RandomStringUtils.randomAlphabetic(20);
+    private String paymentId = RandomStringUtils.randomAlphabetic(20);
+    private String payoutId = RandomStringUtils.randomAlphabetic(20);
+    private String previousCustomerBankAccount = RandomStringUtils.randomAlphabetic(20);
+    private String refundId = RandomStringUtils.randomAlphabetic(20);
+    private String subscriptionId = RandomStringUtils.randomAlphabetic(20);
+    
+    public String getDetailsCause() {
+        return detailsCause;
+    }
+
+    public GoCardlessEventFixture withDetailsCause(String detailsCause) {
+        this.detailsCause = detailsCause;
+        return this;
+    }
+
+    public String getDetailsDescription() {
+        return detailsDescription;
+    }
+
+    public GoCardlessEventFixture withDetailsDescription(String detailsDescription) {
+        this.detailsDescription = detailsDescription;
+        return this;
+    }
+
+    public String getDetailsOrigin() {
+        return detailsOrigin;
+    }
+
+    public GoCardlessEventFixture withDetailsOrigin(String detailsOrigin) {
+        this.detailsOrigin = detailsOrigin;
+        return this;
+    }
+
+    public String getDetailsReasonCode() {
+        return detailsReasonCode;
+    }
+
+    public GoCardlessEventFixture withDetailsReasonCode(String detailsReasonCode) {
+        this.detailsReasonCode = detailsReasonCode;
+        return this;
+    }
+
+    public String getDetailsScheme() {
+        return detailsScheme;
+    }
+
+    public GoCardlessEventFixture withDetailsScheme(String detailsScheme) {
+        this.detailsScheme = detailsScheme;
+        return this;
+    }
+
+    public String getMandateId() {
+        return mandateId;
+    }
+
+    public GoCardlessEventFixture withMandateId(String mandateId) {
+        this.mandateId = mandateId;
+        return this;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public GoCardlessEventFixture withCustomerId(String customerId) {
+        this.customerId = customerId;
+        return this;
+    }
+
+    public String getNewMandateId() {
+        return newMandateId;
+    }
+
+    public GoCardlessEventFixture withNewMandateId(String newMandateId) {
+        this.newMandateId = newMandateId;
+        return this;
+    }
+
+    public String getParentEventId() {
+        return parentEventId;
+    }
+
+    public GoCardlessEventFixture withParentEventId(String parentEventId) {
+        this.parentEventId = parentEventId;
+        return this;
+    }
+
+    public String getPaymentId() {
+        return paymentId;
+    }
+
+    public GoCardlessEventFixture withPaymentId(String paymentId) {
+        this.paymentId = paymentId;
+        return this;
+    }
+
+    public String getPayoutId() {
+        return payoutId;
+    }
+
+    public GoCardlessEventFixture withPayoutId(String payoutId) {
+        this.payoutId = payoutId;
+        return this;
+    }
+
+    public String getPreviousCustomerBankAccount() {
+        return previousCustomerBankAccount;
+    }
+
+    public GoCardlessEventFixture withPreviousCustomerBankAccount(String previousCustomerBankAccount) {
+        this.previousCustomerBankAccount = previousCustomerBankAccount;
+        return this;
+    }
+
+    public String getRefundId() {
+        return refundId;
+    }
+
+    public GoCardlessEventFixture withRefundId(String refundId) {
+        this.refundId = refundId;
+        return this;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public GoCardlessEventFixture withSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
+        return this;
+    }
 
     private GoCardlessEventFixture() {
     }
@@ -73,15 +212,6 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
 
     public GoCardlessEventFixture withAction(String action) {
         this.action = action;
-        return this;
-    }
-
-    public String getResourceId() {
-        return resourceId;
-    }
-
-    public GoCardlessEventFixture withResourceId(String resourceId) {
-        this.resourceId = resourceId;
         return this;
     }
 
