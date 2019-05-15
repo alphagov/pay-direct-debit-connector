@@ -190,7 +190,6 @@ public class GoCardlessEvent {
         private GoCardlessResourceType resourceType;
         private String json;
         private ZonedDateTime createdAt;
-        private String resourceId;
         private PaymentProviderOrganisationIdentifier organisationIdentifier;
         private String detailsCause;
         private String detailsDescription;
@@ -241,11 +240,6 @@ public class GoCardlessEvent {
 
         public GoCardlessEventBuilder withCreatedAt(ZonedDateTime createdAt) {
             this.createdAt = createdAt;
-            return this;
-        }
-
-        public GoCardlessEventBuilder withResourceId(String resourceId) {
-            this.resourceId = resourceId;
             return this;
         }
 

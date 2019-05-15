@@ -3,12 +3,14 @@ package uk.gov.pay.directdebit.payments.fixtures;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
+import org.postgresql.util.PGobject;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -246,20 +248,24 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                                 "    gocardless_events(\n" +
                                 "        id,\n" +
                                 "        internal_event_id,\n" +
-                                "        event_id,\n" +
+                                "        gocardless_event_id,\n" +
                                 "        action,\n" +
                                 "        resource_type,\n" +
                                 "        json,\n" +
-                                "        created_at\n" +
+                                "        created_at,\n" +
+                                "        mandate_id,\n" +
+                                "        organisation_id\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, to_json(?::json), ?, ?, ?)\n",
                         id,
                         eventId,
                         goCardlessEventId,
                         action,
                         resourceType.toString(),
                         json,
-                        Timestamp.from(createdAt.toInstant())
+                        Timestamp.from(createdAt.toInstant()),
+                        mandateId,
+                        organisationIdentifier.toString()
                 )
         );
         return this;

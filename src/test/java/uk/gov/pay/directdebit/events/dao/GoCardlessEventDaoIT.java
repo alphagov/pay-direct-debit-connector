@@ -22,6 +22,7 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -82,6 +83,23 @@ public class GoCardlessEventDaoIT {
         assertThat(foundGoCardlessEvent.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
         assertThat(objectMapper.readTree(foundGoCardlessEvent.get("json").toString()), is(eventJson));
         assertThat((Timestamp) foundGoCardlessEvent.get("created_at"), isDate(CREATED_AT));
+    }
+    
+    
+    @Test
+    public void shouldFindEventsForMandate() {
+        GoCardlessEventFixture eventFixture = GoCardlessEventFixture.aGoCardlessEventFixture()
+                .withResourceType(GoCardlessResourceType.MANDATES)
+                .withMandateId(testMandate.getExternalId().toString())
+                .withAction("NOT SURE")
+                .insert(testContext.getJdbi());
+        
+        List<GoCardlessEvent> goCardlessEvents = goCardlessEventDao.findEventsForMandate(testMandate.getExternalId().toString());
+        assertThat(goCardlessEvents.size(), is(1));
+        GoCardlessEvent foundGoCardlessEvent = goCardlessEvents.get(0);
+        assertThat(foundGoCardlessEvent.getResourceType(), is(eventFixture.getResourceType()));
+        assertThat(foundGoCardlessEvent.getMandateId(), is(eventFixture.getMandateId()));
+        assertThat(foundGoCardlessEvent.getAction(), is(eventFixture.getAction()));
     }
 
     // TODO I don't think we want to update the eventId in the new approach.

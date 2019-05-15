@@ -16,3 +16,4 @@ ALTER TABLE gocardless_events ADD COLUMN payout_id VARCHAR(255);
 ALTER TABLE gocardless_events ADD COLUMN previous_customer_bank_account_id VARCHAR(255);
 ALTER TABLE gocardless_events ADD COLUMN refund_id VARCHAR(255);
 ALTER TABLE gocardless_events ADD COLUMN subscription_id VARCHAR(255);
+ALTER TABLE gocardless_events ADD COLUMN gocardless_event_id VARCHAR(255);
