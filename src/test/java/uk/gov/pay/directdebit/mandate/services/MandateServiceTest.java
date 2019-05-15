@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
@@ -18,8 +19,10 @@ import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -31,7 +34,9 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,6 +46,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
@@ -68,6 +74,8 @@ public class MandateServiceTest {
     private UriInfo mockedUriInfo;
     @Mock
     private UriBuilder mockedUriBuilder;
+    @Mock
+    private GoCardlessEventDao mockedGoCardlessEventDao;
 
     private MandateService service;
 
@@ -76,7 +84,8 @@ public class MandateServiceTest {
         when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
         service = new MandateService(mockedDirectDebitConfig, mockedMandateDao, mockedGatewayAccountDao, mockedTokenService,
                 mockedTransactionService,
-                mockedMandateStateUpdateService);
+                mockedMandateStateUpdateService,
+                mockedGoCardlessEventDao);
         when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
         when(mockedUriBuilder.path(anyString())).thenReturn(mockedUriBuilder);
         when(mockedUriBuilder.build(any())).thenReturn(new URI("aaa"));
@@ -171,6 +180,22 @@ public class MandateServiceTest {
         Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
 
         assertThat(mandate.getMandateReference(), is("gocardless-default"));
+    }
+    
+    @Test
+    public void shouldUpdateMandateStatusTo_CREATED_ForEventAction_CREATED() {
+        Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
+        List<GoCardlessEvent> goCardlessEvents = List.of(GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
+                .withAction("CREATED")
+                .build());
+        
+        when(mockedGoCardlessEventDao.findEventsForMandate(mandate.getExternalId().toString()))
+                .thenReturn(goCardlessEvents);
+        when(mockedMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
+        
+        service.updateMandateStatus(mandate.getExternalId());
+        
+        verify(mockedMandateDao, times(1)).updateState(mandate.getId(), CREATED);
     }
 
     private Map<String, String> getMandateRequestPayload() {
