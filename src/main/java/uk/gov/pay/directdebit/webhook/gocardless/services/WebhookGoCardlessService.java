@@ -2,10 +2,8 @@ package uk.gov.pay.directdebit.webhook.gocardless.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessActionHandler;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 

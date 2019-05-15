@@ -10,7 +10,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 
 public class GoCardlessEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessEventService.class);

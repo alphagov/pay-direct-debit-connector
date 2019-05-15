@@ -1,6 +1,7 @@
-package uk.gov.pay.directdebit.payments.model;
+package uk.gov.pay.directdebit.events.model;
 
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
+import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import java.time.ZonedDateTime;
 
