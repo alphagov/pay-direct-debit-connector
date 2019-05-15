@@ -92,6 +92,9 @@ public interface MandateDao {
     @SqlQuery(query + "WHERE m.state IN (<states>) AND m.created_date < :maxDateTime")
     List<Mandate> findAllMandatesBySetOfStatesAndMaxCreationTime(@BindList("states") Set<MandateState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
 
+    @SqlQuery(query + "WHERE m.mandate_reference")
+    Optional<Mandate> findMandateByReference(@Bind("mandateReference") String mandateReference);
+    
     @SqlUpdate("UPDATE mandates m SET state = :state WHERE m.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
 

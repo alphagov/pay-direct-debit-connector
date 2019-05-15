@@ -37,6 +37,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -182,6 +183,10 @@ public class MandateService {
                 mandate.getState().toExternal(),
                 mandate.getServiceReference(),
                 mandate.getMandateReference());
+    }
+
+    public Optional<Mandate> findByReference(String mandateReference) {
+        return mandateDao.findMandateByReference(mandateReference); // Should filter by the provider (GoCardless, sandbox) as well
     }
 
     public Mandate findByExternalId(MandateExternalId externalId) {
