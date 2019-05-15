@@ -26,7 +26,7 @@ public class GoCardlessEvent {
     private String parentEventId;
     private String paymentId;
     private String payoutId;
-    private String previousCustomerBankAccount;
+    private String previousCustomerBankAccountId;
     private String refundId;
     private String subscriptionId;
 
@@ -35,7 +35,7 @@ public class GoCardlessEvent {
                             PaymentProviderOrganisationIdentifier organisationIdentifier, String detailsCause,
                             String detailsDescription, String detailsOrigin, String detailsReasonCode, String detailsScheme,
                             String mandateId, String customerId, String newMandateId, String parentEventId,
-                            String paymentId, String payoutId, String previousCustomerBankAccount, String refundId, String subscriptionId) {
+                            String paymentId, String payoutId, String previousCustomerBankAccountId, String refundId, String subscriptionId) {
         this.id = id;
         this.goCardlessEventId = goCardlessEventId;
         this.action = action;
@@ -54,7 +54,7 @@ public class GoCardlessEvent {
         this.parentEventId = parentEventId;
         this.paymentId = paymentId;
         this.payoutId = payoutId;
-        this.previousCustomerBankAccount = previousCustomerBankAccount;
+        this.previousCustomerBankAccountId = previousCustomerBankAccountId;
         this.refundId = refundId;
         this.subscriptionId = subscriptionId;
     }
@@ -169,8 +169,8 @@ public class GoCardlessEvent {
         return payoutId;
     }
 
-    public String getPreviousCustomerBankAccount() {
-        return previousCustomerBankAccount;
+    public String getPreviousCustomerBankAccountId() {
+        return previousCustomerBankAccountId;
     }
 
     public String getRefundId() {

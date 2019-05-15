@@ -63,7 +63,6 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
                 .withId(EVENT_ID)
                 .insert(testContext.getJdbi());
         goCardlessEvent = GoCardlessEventFixture.aGoCardlessEventFixture()
-                .withEventId(EVENT_ID)
                 .withGoCardlessEventId(GOCARDLESS_EVENT_ID)
                 .withAction(GOCARDLESS_ACTION)
                 .withResourceType(GOCARDLESS_RESOURCE_TYPE)
@@ -77,7 +76,6 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
         Long id = goCardlessEventDao.insert(goCardlessEvent);
         Map<String, Object> foundGoCardlessEvent = testContext.getDatabaseTestHelper().getGoCardlessEventById(id);
         assertThat(foundGoCardlessEvent.get("id"), is(id));
-        assertThat(foundGoCardlessEvent.get("internal_event_id"), is(EVENT_ID));
         assertThat(foundGoCardlessEvent.get("event_id"), is(GOCARDLESS_EVENT_ID));
         assertThat(foundGoCardlessEvent.get("action"), is(GOCARDLESS_ACTION));
         assertThat(foundGoCardlessEvent.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
