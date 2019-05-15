@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
@@ -23,7 +22,6 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -39,7 +37,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -57,7 +54,7 @@ public class MandateService {
     private final TokenService tokenService;
     private final TransactionService transactionService;
     private final MandateStateUpdateService mandateStateUpdateService;
-    private final GoCardlessEventDao goCardlessEventDao;
+    private final MandateEventToStatusCalculator mandateEventToStatusCalculator;
 
     @Inject
     public MandateService(
@@ -67,14 +64,14 @@ public class MandateService {
             TokenService tokenService,
             TransactionService transactionService,
             MandateStateUpdateService mandateStateUpdateService,
-            GoCardlessEventDao goCardlessEventDao) {
+            MandateEventToStatusCalculator mandateEventToStatusCalculator) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
         this.transactionService = transactionService;
         this.mandateDao = mandateDao;
         this.mandateStateUpdateService = mandateStateUpdateService;
         this.linksConfig = directDebitConfig.getLinks();
-        this.goCardlessEventDao = goCardlessEventDao;
+        this.mandateEventToStatusCalculator =  mandateEventToStatusCalculator;
     }
 
     public Mandate createMandate(CreateRequest createRequest, String accountExternalId) {
@@ -218,16 +215,9 @@ public class MandateService {
     }
 
     public void updateMandateStatus(MandateExternalId mandateExternalId) {
-        Optional<Mandate> mandate = mandateDao.findByExternalId(mandateExternalId);
-        if (mandate.isPresent()) {
-            MandateState newState = calculateMandateState(mandateExternalId);
-            mandateDao.updateState(mandate.get().getId(), newState);
-        }
-    }
-
-    private MandateState calculateMandateState(MandateExternalId mandateExternalId) {
-        List<GoCardlessEvent> goCardlessEvents = goCardlessEventDao.findEventsForMandate(mandateExternalId.toString());
-        return MandateState.CREATED;
+        mandateDao.findByExternalId(mandateExternalId)
+                .ifPresent(mandate -> mandateEventToStatusCalculator.calculate(mandateExternalId)
+                        .ifPresent(status -> mandateDao.updateState(mandate.getId(), status)));
     }
 
     private Transaction retrieveTransactionForOneOffMandate(MandateExternalId mandateExternalId) {

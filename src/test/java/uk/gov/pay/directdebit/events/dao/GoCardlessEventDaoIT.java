@@ -94,7 +94,7 @@ public class GoCardlessEventDaoIT {
                 .withAction("NOT SURE")
                 .insert(testContext.getJdbi());
         
-        List<GoCardlessEvent> goCardlessEvents = goCardlessEventDao.findEventsForMandate(testMandate.getExternalId().toString());
+        List<GoCardlessEvent> goCardlessEvents = goCardlessEventDao.findEventsForMandateLatestFirst(testMandate.getExternalId().toString());
         assertThat(goCardlessEvents.size(), is(1));
         GoCardlessEvent foundGoCardlessEvent = goCardlessEvents.get(0);
         assertThat(foundGoCardlessEvent.getResourceType(), is(eventFixture.getResourceType()));

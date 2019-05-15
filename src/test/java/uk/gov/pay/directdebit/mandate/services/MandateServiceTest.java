@@ -19,7 +19,6 @@ import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
@@ -34,7 +33,6 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +83,7 @@ public class MandateServiceTest {
         service = new MandateService(mockedDirectDebitConfig, mockedMandateDao, mockedGatewayAccountDao, mockedTokenService,
                 mockedTransactionService,
                 mockedMandateStateUpdateService,
-                mockedGoCardlessEventDao);
+                new MandateEventToStatusCalculator(mockedGoCardlessEventDao));
         when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
         when(mockedUriBuilder.path(anyString())).thenReturn(mockedUriBuilder);
         when(mockedUriBuilder.build(any())).thenReturn(new URI("aaa"));
@@ -186,10 +184,10 @@ public class MandateServiceTest {
     public void shouldUpdateMandateStatusTo_CREATED_ForEventAction_CREATED() {
         Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
         List<GoCardlessEvent> goCardlessEvents = List.of(GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
-                .withAction("CREATED")
+                .withAction("created")
                 .build());
         
-        when(mockedGoCardlessEventDao.findEventsForMandate(mandate.getExternalId().toString()))
+        when(mockedGoCardlessEventDao.findEventsForMandateLatestFirst(mandate.getExternalId().toString()))
                 .thenReturn(goCardlessEvents);
         when(mockedMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
         

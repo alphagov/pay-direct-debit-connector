@@ -7,11 +7,12 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.PaymentProviderOrganisationIdentifierArgumentFactory;
 import uk.gov.pay.directdebit.payments.dao.mapper.GoCardlessEventRowMapper;
-import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 
 import java.util.List;
+import java.util.Optional;
 
 @RegisterArgumentFactory(PaymentProviderOrganisationIdentifierArgumentFactory.class)
 @RegisterRowMapper(GoCardlessEventRowMapper.class)
@@ -25,6 +26,9 @@ public interface GoCardlessEventDao {
     @GetGeneratedKeys
     Long insert(@BindBean GoCardlessEvent goCardlessEvent);
     
-    @SqlQuery("SELECT * FROM gocardless_events WHERE mandate_id = :mandateId")
-    List<GoCardlessEvent> findEventsForMandate(@Bind("mandateId") String mandateId);
+    @SqlQuery("SELECT * FROM gocardless_events WHERE mandate_id = :mandateId ORDER BY created_date DESC")
+    List<GoCardlessEvent> findEventsForMandateLatestFirst(@Bind("mandateId") String mandateId);
+
+    @SqlQuery("SELECT * FROM gocardless_events WHERE mandate_id = :mandateId ORDER BY created_date DESC LIMIT 1")
+    Optional<GoCardlessEvent> findLatestEventForMandate(@Bind("mandateId") String mandateId);
 }
