@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.dao;
+package uk.gov.pay.directdebit.events.dao;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
@@ -32,7 +33,7 @@ import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class GoCardlessDirectDebitDirectDebitEventDaoIT {
+public class GoCardlessEventDaoIT {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
     private GoCardlessEventDao goCardlessEventDao;
