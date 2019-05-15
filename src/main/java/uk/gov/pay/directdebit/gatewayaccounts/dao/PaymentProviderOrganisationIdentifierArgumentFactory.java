@@ -15,8 +15,8 @@ public class PaymentProviderOrganisationIdentifierArgumentFactory extends Abstra
     
     @Override
     protected Argument build(PaymentProviderOrganisationIdentifier value, ConfigRegistry config) {
-        String externalId = value == null ? null : value.toString();
-        return (pos, stmt, context) -> stmt.setString(pos, externalId);
+        String paymentProviderOrganistationId = value == null ? null : value.toString();
+        return (pos, stmt, context) -> stmt.setString(pos, paymentProviderOrganistationId);
     }
 
 }
