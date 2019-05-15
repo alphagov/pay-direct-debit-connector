@@ -83,7 +83,8 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
         assertThat((Timestamp) foundGoCardlessEvent.get("created_at"), isDate(CREATED_AT));
     }
 
-    @Test
+    // TODO I don't think we want to update the eventId in the new approach.
+    /*@Test
     public void shouldUpdateEventIdAndReturnNumberOfAffectedRows() throws IOException {
         Long newEventId = 10L;
         aDirectDebitEventFixture()
@@ -100,7 +101,7 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
         assertThat(eventAfterUpdate.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
         assertThat(objectMapper.readTree(eventAfterUpdate.get("json").toString()), is(eventJson));
         assertThat((Timestamp) eventAfterUpdate.get("created_at"), isDate(CREATED_AT));
-    }
+    }*/
 
 
 }
