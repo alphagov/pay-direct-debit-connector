@@ -5,7 +5,7 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import java.time.ZonedDateTime;
 
-public class GoCardlessEvent {
+public class GoCardlessEvent implements Event {
 
     private Long id;
     private String goCardlessEventId;
@@ -179,6 +179,11 @@ public class GoCardlessEvent {
 
     public String getSubscriptionId() {
         return subscriptionId;
+    }
+
+    @Override
+    public EventType getEventType() {
+        return EventType.GOCARDLESS;
     }
 
 
