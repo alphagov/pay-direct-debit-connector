@@ -232,10 +232,16 @@ public class MandateService {
 
     public void updateMandateStatus(String goCardlessMandateReference) {
         mandateDao.findMandateByReference(goCardlessMandateReference)
-                .ifPresent(mandate -> mandateEventActionToStatusCalculator.calculate(goCardlessMandateReference)
+                .ifPresent(mandate -> mandateEventActionToStatusCalculator.calculate(mandate)
                         .ifPresent(status -> mandateDao.updateState(mandate.getId(), status)));
     }
 
+    public void updateMandateStatus(MandateExternalId mandateExternalId) {
+        mandateDao.findByExternalId(mandateExternalId)
+                .ifPresentOrElse(mandate -> mandateEventActionToStatusCalculator.calculate(mandateExternalId).ifPresent(status -> mandateDao.updateState(mandate.getId(), status)),
+                () -> { throw new IllegalArgumentException("Mandate not found!");} );
+    }
+    
     private Transaction retrieveTransactionForOneOffMandate(MandateExternalId mandateExternalId) {
         List<Transaction> transactions = transactionService.findTransactionsForMandate(mandateExternalId);
         if (transactions.size() != 1) {
