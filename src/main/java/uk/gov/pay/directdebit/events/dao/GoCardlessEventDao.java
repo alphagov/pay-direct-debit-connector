@@ -26,9 +26,9 @@ public interface GoCardlessEventDao {
     @GetGeneratedKeys
     Long insert(@BindBean GoCardlessEvent goCardlessEvent);
     
-    @SqlQuery("SELECT * FROM gocardless_events WHERE mandate_id = :mandateId ORDER BY created_date DESC")
-    List<GoCardlessEvent> findEventsForMandateLatestFirst(@Bind("mandateId") String mandateId);
+    @SqlQuery("SELECT * FROM gocardless_events WHERE mandate_id = :mandateId ORDER BY created_at DESC")
+    List<GoCardlessEvent> findEventsForMandateLatestFirst(@Bind("mandateId") String goCardlessMandateIdOrReferenceOrWhateverItsCalled);
 
-    @SqlQuery("SELECT * FROM gocardless_events WHERE mandate_id = :mandateId ORDER BY created_date DESC LIMIT 1")
+    @SqlQuery("SELECT * FROM gocardless_events WHERE mandate_id = :mandateId ORDER BY created_at DESC LIMIT 1")
     Optional<GoCardlessEvent> findLatestEventForMandate(@Bind("mandateId") String mandateId);
 }

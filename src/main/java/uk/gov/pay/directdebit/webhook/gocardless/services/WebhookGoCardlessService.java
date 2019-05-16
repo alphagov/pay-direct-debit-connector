@@ -40,11 +40,7 @@ public class WebhookGoCardlessService {
         Set<String> idsOfPaymentsAffectedByEvents = getPaymentIds(events);
         // Need to do payouts as well
 
-        idsOfMandatesAffectedByEvents.stream()
-                .map(mandateService::findByReference) // I think the reference field on our Mandate object is the GoCardless mandate ID…
-                .flatMap(Optional::stream)
-                .map(Mandate::getExternalId)
-                .forEach(mandateService::updateMandateStatus);
+        idsOfMandatesAffectedByEvents.forEach(mandateService::updateMandateStatus);
     }
     
     private static Set<String> getMandateIds(List<GoCardlessEvent> events) {

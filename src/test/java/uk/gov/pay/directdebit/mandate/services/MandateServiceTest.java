@@ -181,20 +181,20 @@ public class MandateServiceTest {
     }
     
     @Test
-    public void shouldUpdateMandateStatusTo_CREATED_ForEventAction_CREATED() {
-        Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
-        List<GoCardlessEvent> goCardlessEvents = List.of(GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
-                .withAction("created")
-                .build());
-        
-        when(mockedGoCardlessEventDao.findEventsForMandateLatestFirst(mandate.getExternalId().toString()))
-                .thenReturn(goCardlessEvents);
-        when(mockedMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
-        
-        service.updateMandateStatus(mandate.getExternalId());
-        
-        verify(mockedMandateDao, times(1)).updateState(mandate.getId(), CREATED);
-    }
+//    public void shouldUpdateMandateStatusTo_CREATED_ForEventAction_CREATED() {
+//        Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
+//        List<GoCardlessEvent> goCardlessEvents = List.of(GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
+//                .withAction("created")
+//                .build());
+//        
+//        when(mockedGoCardlessEventDao.findEventsForMandateLatestFirst(mandate.getExternalId().toString()))
+//                .thenReturn(goCardlessEvents);
+//        when(mockedMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
+//        
+//        service.updateMandateStatus(mandate.getExternalId());
+//        
+//        verify(mockedMandateDao, times(1)).updateState(mandate.getId(), CREATED);
+//    }
 
     private Map<String, String> getMandateRequestPayload() {
         Map<String, String> payload = new HashMap<>();

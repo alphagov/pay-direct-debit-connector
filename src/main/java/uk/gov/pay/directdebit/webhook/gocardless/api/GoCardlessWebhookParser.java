@@ -53,9 +53,9 @@ public class GoCardlessWebhookParser {
                 .withDetailsDescription(getAsTextSafely(eventNode.get("details.description")))
                 .withDetailsOrigin(getAsTextSafely(eventNode.get("details.origin")))
                 .withDetailsReasonCode(getAsTextSafely(eventNode.get("details.reason_code")))
-                .withGoCardlessEventId(getAsTextSafely(eventNode.get("gocardless_event_id")))
+                .withGoCardlessEventId(getAsTextSafely(eventNode.get("id")))
                 .withId(getAsLongSafely(eventNode.get("id")))
-                .withJson(getAsTextSafely(eventNode.get("json")))
+                .withJson(eventNode.toString())
                 .withResourceType(GoCardlessResourceType.fromString(getAsTextSafely(eventNode.get("resource_type"))));
 
         Optional.ofNullable(eventNode.get("details.scheme")).map(JsonNode::asText).ifPresent(eventBuilder::withDetailsScheme);

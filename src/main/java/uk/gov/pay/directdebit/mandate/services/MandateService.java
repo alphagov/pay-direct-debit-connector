@@ -219,9 +219,9 @@ public class MandateService {
         return mandateStateUpdateService.cancelMandateCreation(mandate);
     }
 
-    public void updateMandateStatus(MandateExternalId mandateExternalId) {
-        mandateDao.findByExternalId(mandateExternalId)
-                .ifPresent(mandate -> mandateEventToStatusCalculator.calculate(mandateExternalId)
+    public void updateMandateStatus(String goCardlessMandateReference) {
+        mandateDao.findMandateByReference(goCardlessMandateReference)
+                .ifPresent(mandate -> mandateEventToStatusCalculator.calculate(goCardlessMandateReference)
                         .ifPresent(status -> mandateDao.updateState(mandate.getId(), status)));
     }
 

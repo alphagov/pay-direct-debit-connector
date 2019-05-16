@@ -28,8 +28,8 @@ public class MandateEventToStatusCalculator {
         this.goCardlessEventDao = goCardlessEventDao;
     }
 
-    public Optional<MandateState> calculate(MandateExternalId mandateExternalId) {
-        return goCardlessEventDao.findEventsForMandateLatestFirst(mandateExternalId.toString()).stream()
+    public Optional<MandateState> calculate(String goCardlessMandateThingy) {
+        return goCardlessEventDao.findEventsForMandateLatestFirst(goCardlessMandateThingy).stream()
                 .filter(event -> !IGNORED_GOCARDLESS_EVENT_ACTIONS.contains(event.getAction()))
                 .findFirst()
                 .flatMap(this::calculateMandateStateFromAction);
