@@ -1,17 +1,16 @@
-package uk.gov.pay.directdebit.mandate.services;
+package uk.gov.pay.directdebit.events.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.events.model.Event;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
 import javax.inject.Inject;
 import java.util.Optional;
 import java.util.Set;
 
-public class MandateEventToStatusCalculator {
+public class MandateEventActionToStatusCalculator {
 
     private static final Set<String> IGNORED_GOCARDLESS_EVENT_ACTIONS = Set.of(
             "customer_approval_granted",
@@ -19,12 +18,12 @@ public class MandateEventToStatusCalculator {
             "transferred",
             "resubmission_requested"
     );
-    private static final Logger LOGGER = LoggerFactory.getLogger(MandateEventToStatusCalculator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MandateEventActionToStatusCalculator.class);
 
     private final GoCardlessEventDao goCardlessEventDao;
 
     @Inject
-    public MandateEventToStatusCalculator(GoCardlessEventDao goCardlessEventDao) {
+    public MandateEventActionToStatusCalculator(GoCardlessEventDao goCardlessEventDao) {
         this.goCardlessEventDao = goCardlessEventDao;
     }
 

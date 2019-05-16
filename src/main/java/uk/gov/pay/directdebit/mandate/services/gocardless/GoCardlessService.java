@@ -27,7 +27,7 @@ import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundExcept
 import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProviderCommandService;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
+import uk.gov.pay.directdebit.events.service.GoCardlessEventService;
 
 import javax.inject.Inject;
 import java.time.LocalDate;

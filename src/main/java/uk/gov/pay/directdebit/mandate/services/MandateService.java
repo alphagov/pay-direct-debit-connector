@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.events.service.GovUkPayEventFactory;
+import uk.gov.pay.directdebit.events.service.GovUkPayEventService;
+import uk.gov.pay.directdebit.events.service.MandateEventActionToStatusCalculator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
@@ -31,6 +34,7 @@ import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.UriInfo;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -38,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -55,7 +60,9 @@ public class MandateService {
     private final TokenService tokenService;
     private final TransactionService transactionService;
     private final MandateStateUpdateService mandateStateUpdateService;
-    private final MandateEventToStatusCalculator mandateEventToStatusCalculator;
+    private final MandateEventActionToStatusCalculator mandateEventActionToStatusCalculator;
+    private final GovUkPayEventFactory govUkPayEventFactory;
+    private final GovUkPayEventService govUkPayEventService;
 
     @Inject
     public MandateService(
@@ -65,14 +72,16 @@ public class MandateService {
             TokenService tokenService,
             TransactionService transactionService,
             MandateStateUpdateService mandateStateUpdateService,
-            MandateEventToStatusCalculator mandateEventToStatusCalculator) {
+            MandateEventActionToStatusCalculator mandateEventActionToStatusCalculator, GovUkPayEventFactory govUkPayEventFactory, GovUkPayEventService govUkPayEventService) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
         this.transactionService = transactionService;
         this.mandateDao = mandateDao;
         this.mandateStateUpdateService = mandateStateUpdateService;
         this.linksConfig = directDebitConfig.getLinks();
-        this.mandateEventToStatusCalculator =  mandateEventToStatusCalculator;
+        this.mandateEventActionToStatusCalculator = mandateEventActionToStatusCalculator;
+        this.govUkPayEventFactory = govUkPayEventFactory;
+        this.govUkPayEventService = govUkPayEventService;
     }
 
     public Mandate createMandate(CreateRequest createRequest, String accountExternalId) {
@@ -209,19 +218,21 @@ public class MandateService {
         }
         return mandateStateUpdateService.changePaymentMethodFor(mandate);
     }
+    
+    Map<String, Set<MandateState>> permittedOperationsMap = Map.of("CANCEL", Set.of(MandateState.ACTIVE, MandateState.CREATED));
 
-    public DirectDebitEvent cancelMandateCreation(MandateExternalId mandateExternalId) {
+    public void cancelMandateCreation(MandateExternalId mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        if (MandateType.ONE_OFF.equals(mandate.getType())) {
-            Transaction transaction = retrieveTransactionForOneOffMandate(mandateExternalId);
-            transactionService.paymentCancelledFor(transaction);
+        if (permittedOperationsMap.get("CANCEL").contains(mandate.getState())) {
+            govUkPayEventService.handleEvents(List.of(govUkPayEventFactory.createCancelEvent(mandateExternalId)));
+        } else {
+            throw new WebApplicationException("You shall not pass!");
         }
-        return mandateStateUpdateService.cancelMandateCreation(mandate);
     }
 
     public void updateMandateStatus(String goCardlessMandateReference) {
         mandateDao.findMandateByReference(goCardlessMandateReference)
-                .ifPresent(mandate -> mandateEventToStatusCalculator.calculate(goCardlessMandateReference)
+                .ifPresent(mandate -> mandateEventActionToStatusCalculator.calculate(goCardlessMandateReference)
                         .ifPresent(status -> mandateDao.updateState(mandate.getId(), status)));
     }
 

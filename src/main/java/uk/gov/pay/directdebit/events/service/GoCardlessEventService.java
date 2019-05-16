@@ -1,16 +1,17 @@
-package uk.gov.pay.directdebit.payments.services;
+package uk.gov.pay.directdebit.events.service;
 
-import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
-import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
-import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+
+import javax.inject.Inject;
 
 public class GoCardlessEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessEventService.class);
@@ -19,7 +20,7 @@ public class GoCardlessEventService {
     private final GoCardlessPaymentDao goCardlessPaymentDao;
     private final GoCardlessEventDao goCardlessEventDao;
 
-        @Inject
+    @Inject
     public GoCardlessEventService(GoCardlessPaymentDao goCardlessPaymentDao,
             GoCardlessMandateDao goCardlessMandateDao,
             GoCardlessEventDao goCardlessEventDao) {

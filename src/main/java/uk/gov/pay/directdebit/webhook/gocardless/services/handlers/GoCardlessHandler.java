@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
+import uk.gov.pay.directdebit.events.service.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
 public abstract class GoCardlessHandler implements GoCardlessActionHandler {
