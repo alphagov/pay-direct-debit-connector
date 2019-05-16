@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.dao;
+package uk.gov.pay.directdebit.events.dao;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

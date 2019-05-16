@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.events.service;
 
 import uk.gov.pay.directdebit.events.api.DirectDebitEventsPagination;
 import uk.gov.pay.directdebit.events.api.DirectDebitEventsResponse;
-import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
+import uk.gov.pay.directdebit.events.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
 

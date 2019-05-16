@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.dao;
+package uk.gov.pay.directdebit.events.dao;
 
 import org.jdbi.v3.sqlobject.config.RegisterArgumentFactory;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;

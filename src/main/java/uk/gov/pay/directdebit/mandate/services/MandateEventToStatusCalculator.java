@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
+import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
 
 import javax.inject.Inject;
 import java.util.Optional;
