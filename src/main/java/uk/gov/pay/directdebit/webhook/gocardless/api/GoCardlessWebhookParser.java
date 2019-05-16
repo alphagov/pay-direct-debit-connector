@@ -46,17 +46,17 @@ public class GoCardlessWebhookParser {
 
     private GoCardlessEvent createGoCardlessEventFromJson(JsonNode eventNode) {
         GoCardlessEvent.GoCardlessEventBuilder eventBuilder = GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
-                .withAction(eventNode.get("action").asText())
-                .withCreatedAt(ZonedDateTime.parse(eventNode.get("created_at").asText()))
-                .withCustomerId(eventNode.get("customer_id").asText())
-                .withDetailsCause(eventNode.get("details.cause").asText())
-                .withDetailsDescription(eventNode.get("details.description").asText())
-                .withDetailsOrigin(eventNode.get("details.origin").asText())
-                .withDetailsReasonCode(eventNode.get("details.reason_code").asText())
-                .withGoCardlessEventId(eventNode.get("gocardless_event_id").asText())
-                .withId(eventNode.get("id").asLong())
-                .withJson(eventNode.get("json").asText())
-                .withResourceType(GoCardlessResourceType.fromString(eventNode.get("resource_type").asText()));
+                .withAction(getAsTextSafely(eventNode.get("action")))
+                .withCreatedAt(ZonedDateTime.parse(getAsTextSafely(eventNode.get("created_at"))))
+                .withCustomerId(getAsTextSafely(eventNode.get("customer_id")))
+                .withDetailsCause(getAsTextSafely(eventNode.get("details.cause")))
+                .withDetailsDescription(getAsTextSafely(eventNode.get("details.description")))
+                .withDetailsOrigin(getAsTextSafely(eventNode.get("details.origin")))
+                .withDetailsReasonCode(getAsTextSafely(eventNode.get("details.reason_code")))
+                .withGoCardlessEventId(getAsTextSafely(eventNode.get("gocardless_event_id")))
+                .withId(getAsLongSafely(eventNode.get("id")))
+                .withJson(getAsTextSafely(eventNode.get("json")))
+                .withResourceType(GoCardlessResourceType.fromString(getAsTextSafely(eventNode.get("resource_type"))));
 
         Optional.ofNullable(eventNode.get("details.scheme")).map(JsonNode::asText).ifPresent(eventBuilder::withDetailsScheme);
         getLinkField(eventNode, "mandate").ifPresent(eventBuilder::withMandateId);
@@ -73,6 +73,20 @@ public class GoCardlessWebhookParser {
 
     private Optional<String> getLinkField(JsonNode eventNode, String link) {
         return Optional.ofNullable(eventNode.get("links").get(link)).map(JsonNode::asText);
+    }
+    
+    private String getAsTextSafely(JsonNode node) {
+        if (node != null) {
+            return node.asText();
+        }
+        return null;
+    }
+    
+    private Long getAsLongSafely(JsonNode node) {
+        if (node != null) {
+            return node.asLong();
+        }
+        return null;
     }
 
     // There are actually more than these and we might want to store them in the interests of not throwing away data
