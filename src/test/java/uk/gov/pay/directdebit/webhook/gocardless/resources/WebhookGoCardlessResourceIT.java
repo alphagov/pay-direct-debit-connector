@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -189,7 +190,7 @@ public class WebhookGoCardlessResourceIT {
                 .withTransactionId(transactionFixture.getId())
                 .insert(testContext.getJdbi());
         aGoCardlessMandateFixture()
-                .withGoCardlessMandateId("MD00008Q30R2BR")
+                .withGoCardlessMandateId(GoCardlessMandateId.valueOf("MD00008Q30R2BR"))
                 .withMandateId(mandateFixture.getId())
                 .insert(testContext.getJdbi());
 

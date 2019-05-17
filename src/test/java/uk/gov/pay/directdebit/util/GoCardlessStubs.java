@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.util;
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 
@@ -73,14 +74,14 @@ public class GoCardlessStubs {
         stubPostCallsFor("/mandates", accessToken, 200, idempotencyKey, mandateRequestExpectedBody, mandateResponseBody);
     }
 
-    public static void stubCreatePayment(String accessToken, Long amount, String goCardlessMandateId, String idempotencyKey) {
+    public static void stubCreatePayment(String accessToken, Long amount, GoCardlessMandateId goCardlessMandateId, String idempotencyKey) {
         String paymentRequestExpectedBody = load(GOCARDLESS_CREATE_PAYMENT_REQUEST)
                 .replace("{{amount}}", String.valueOf(amount))
-                .replace("{{gocardless_mandate_id}}", goCardlessMandateId);
+                .replace("{{gocardless_mandate_id}}", goCardlessMandateId.toString());
 
         String paymentResponseBody = load(GOCARDLESS_CREATE_PAYMENT_SUCCESS_RESPONSE)
                 .replace("{{amount}}", String.valueOf(amount))
-                .replace("{{gocardless_mandate_id}}", goCardlessMandateId);
+                .replace("{{gocardless_mandate_id}}", goCardlessMandateId.toString());
         stubPostCallsFor("/payments", accessToken, 200, idempotencyKey, paymentRequestExpectedBody, paymentResponseBody);
     }
 

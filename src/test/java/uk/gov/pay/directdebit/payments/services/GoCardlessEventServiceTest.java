@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,10 +9,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+
+import java.util.Optional;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,8 +62,8 @@ public class GoCardlessEventServiceTest {
     @Test
     public void findMandateForEvent_shouldThrowIfNoMandateIsFoundForEvent() {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().toEntity();
-        String resourceId = "aaa";
-        goCardlessEvent.setResourceId(resourceId);
+        GoCardlessMandateId resourceId = GoCardlessMandateId.valueOf("aaa");
+        goCardlessEvent.setResourceId(resourceId.toString());
         when(mockedGoCardlessMandateDao.findByEventResourceId(resourceId)).thenReturn(Optional.empty());
         thrown.expect(GoCardlessMandateNotFoundException.class);
         thrown.expectMessage("No gocardless mandate found with resource id: aaa");

@@ -21,6 +21,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -567,7 +568,7 @@ public class MandateResourceIT {
         stubCreateCustomer(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId);
         stubCreateCustomerBankAccount(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
         stubCreateMandate(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
-        stubCreatePayment(gatewayAccountFixture.getAccessToken().toString(), transactionFixture.getAmount(), "MD123", transactionFixture.getExternalId());
+        stubCreatePayment(gatewayAccountFixture.getAccessToken().toString(), transactionFixture.getAmount(), GoCardlessMandateId.valueOf("MD123"), transactionFixture.getExternalId());
 
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
         stubGetCreditor(gatewayAccountFixture.getAccessToken().toString(), goCardlessMandate.getGoCardlessCreditorId().toString(), sunName);

@@ -4,6 +4,7 @@ import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +20,7 @@ public class GoCardlessMandateMapper implements RowMapper<GoCardlessMandate> {
         return new GoCardlessMandate(
                 resultSet.getLong(ID_COLUMN),
                 resultSet.getLong(MANDATE_ID_COLUMN),
-                resultSet.getString(GOCARDLESS_MANDATE_ID_COLUMN),
+                GoCardlessMandateId.valueOf(resultSet.getString(GOCARDLESS_MANDATE_ID_COLUMN)),
                 null,
                 GoCardlessCreditorId.valueOf(resultSet.getString(GOCARDLESS_CREDITOR_ID)));
     }
