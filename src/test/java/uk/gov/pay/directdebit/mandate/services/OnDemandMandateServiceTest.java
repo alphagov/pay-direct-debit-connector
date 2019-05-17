@@ -103,26 +103,4 @@ public class OnDemandMandateServiceTest {
 
         service.confirm(gatewayAccountFixture.toEntity(), mandate, mandateConfirmationRequest);
     }
-
-    @Test
-    public void collect_shouldCreateATransactionAPaymentAndRegisterOnDemandPaymentSubmittedEvent() {
-        Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
-        Mandate mandate = mandateFixture.toEntity();
-        CollectPaymentRequest collectPaymentRequest = new CollectPaymentRequest(
-                mandateFixture.getExternalId(),
-                123456L,
-                "a description",
-                "a reference"
-        );
-        LocalDate chargeDate = LocalDate.parse("1987-11-16");
-        when(mockedTransactionService
-                .createTransaction(collectPaymentRequest, mandate, gatewayAccountFixture.getExternalId()))
-                .thenReturn(transaction);
-        when(mockedSandboxService.collect(mandate, transaction)).thenReturn(chargeDate);
-
-        service.collect(gatewayAccountFixture.toEntity(), mandate, collectPaymentRequest);
-
-        verify(mockedTransactionService).onDemandPaymentSubmittedToProviderFor(transaction, chargeDate);
-    }
-
 }
