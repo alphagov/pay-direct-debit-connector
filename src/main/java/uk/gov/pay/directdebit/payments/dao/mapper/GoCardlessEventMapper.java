@@ -1,13 +1,15 @@
 package uk.gov.pay.directdebit.payments.dao.mapper;
 
+import org.jdbi.v3.core.mapper.RowMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import org.jdbi.v3.core.mapper.RowMapper;
-import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
     private static final String ID_COLUMN = "id";
@@ -23,7 +25,7 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
         return new GoCardlessEvent(
                 resultSet.getLong(ID_COLUMN),
                 resultSet.getLong(EVENT_ID_COLUMN),
-                resultSet.getString(GOCARDLESS_EVENT_ID_COLUMN),
+                GoCardlessEventId.valueOf(resultSet.getString(GOCARDLESS_EVENT_ID_COLUMN)),
                 resultSet.getString(ACTION_COLUMN),
                 GoCardlessResourceType.fromString(resultSet.getString(RESOURCE_TYPE_COLUMN)),
                 resultSet.getString(JSON_COLUMN),

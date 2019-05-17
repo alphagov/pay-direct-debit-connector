@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import java.sql.Timestamp;
@@ -16,7 +17,7 @@ import java.time.ZonedDateTime;
 public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture, GoCardlessEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long eventId = RandomUtils.nextLong(1, 99999);
-    private String goCardlessEventId = RandomIdGenerator.newId();
+    private GoCardlessEventId goCardlessEventId = GoCardlessEventId.valueOf(RandomIdGenerator.newId());
     private String action = RandomStringUtils.randomAlphabetic(20);
     private GoCardlessResourceType resourceType = GoCardlessResourceType.PAYMENTS;
     private String resourceId = RandomStringUtils.randomAlphabetic(20);
@@ -58,11 +59,11 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public String getGoCardlessEventId() {
+    public GoCardlessEventId getGoCardlessEventId() {
         return goCardlessEventId;
     }
 
-    public GoCardlessEventFixture withGoCardlessEventId(String eventId) {
+    public GoCardlessEventFixture withGoCardlessEventId(GoCardlessEventId eventId) {
         this.goCardlessEventId = eventId;
         return this;
     }
@@ -125,7 +126,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                                 "   VALUES(?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         eventId,
-                        goCardlessEventId,
+                        goCardlessEventId.toString(),
                         action,
                         resourceType.toString(),
                         json,

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
 
@@ -34,7 +35,7 @@ public class GoCardlessWebhookParser {
                 String resourceType = eventNode.get("resource_type").asText();
                 GoCardlessResourceType handledGoCardlessResourceType = GoCardlessResourceType.fromString(resourceType);
                 GoCardlessEvent event = new GoCardlessEvent(
-                        eventNode.get("id").asText(),
+                        GoCardlessEventId.valueOf(eventNode.get("id").asText()),
                         eventNode.get("action").asText(),
                         handledGoCardlessResourceType,
                         eventNode.toString(),

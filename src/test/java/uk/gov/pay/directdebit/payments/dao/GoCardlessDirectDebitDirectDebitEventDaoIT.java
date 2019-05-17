@@ -2,10 +2,6 @@ package uk.gov.pay.directdebit.payments.dao;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,7 +16,13 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
+
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -40,7 +42,7 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
     private TestContext testContext;
 
     private final static Long EVENT_ID = 6L;
-    private final static String GOCARDLESS_EVENT_ID = "dhg2342h3kjh";
+    private final static GoCardlessEventId GOCARDLESS_EVENT_ID = GoCardlessEventId.valueOf("dhg2342h3kjh");
     private final static String GOCARDLESS_ACTION = "something happened";
     private final static GoCardlessResourceType GOCARDLESS_RESOURCE_TYPE = PAYMENTS;
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -77,7 +79,7 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
         Map<String, Object> foundGoCardlessEvent = testContext.getDatabaseTestHelper().getGoCardlessEventById(id);
         assertThat(foundGoCardlessEvent.get("id"), is(id));
         assertThat(foundGoCardlessEvent.get("internal_event_id"), is(EVENT_ID));
-        assertThat(foundGoCardlessEvent.get("event_id"), is(GOCARDLESS_EVENT_ID));
+        assertThat(foundGoCardlessEvent.get("event_id"), is(GOCARDLESS_EVENT_ID.toString()));
         assertThat(foundGoCardlessEvent.get("action"), is(GOCARDLESS_ACTION));
         assertThat(foundGoCardlessEvent.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
         assertThat(objectMapper.readTree(foundGoCardlessEvent.get("json").toString()), is(eventJson));
@@ -96,7 +98,7 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
         Map<String, Object> eventAfterUpdate = testContext.getDatabaseTestHelper().getGoCardlessEventById(id);
         assertThat(numOfUpdatedEvents, is(1));
         assertThat(eventAfterUpdate.get("internal_event_id"), is(newEventId));
-        assertThat(eventAfterUpdate.get("event_id"), is(GOCARDLESS_EVENT_ID));
+        assertThat(eventAfterUpdate.get("event_id"), is(GOCARDLESS_EVENT_ID.toString()));
         assertThat(eventAfterUpdate.get("action"), is(GOCARDLESS_ACTION));
         assertThat(eventAfterUpdate.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
         assertThat(objectMapper.readTree(eventAfterUpdate.get("json").toString()), is(eventJson));
