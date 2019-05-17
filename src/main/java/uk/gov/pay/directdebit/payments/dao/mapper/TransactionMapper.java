@@ -9,6 +9,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.ServiceMandateReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -98,7 +99,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
                 MandateType.valueOf(resultSet.getString(MANDATE_TYPE_COLUMN)),
                 MandateExternalId.valueOf(resultSet.getString(MANDATE_EXTERNAL_ID_COLUMN)),
                 resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN),
-                resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN),
+                ServiceMandateReference.valueOf(resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN)),
                 MandateState.valueOf(resultSet.getString(MANDATE_STATE_COLUMN)),
                 resultSet.getString(MANDATE_RETURN_URL_COLUMN),
                 ZonedDateTime.ofInstant(resultSet.getTimestamp(MANDATE_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),

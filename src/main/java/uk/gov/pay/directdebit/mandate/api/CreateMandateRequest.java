@@ -1,8 +1,10 @@
 package uk.gov.pay.directdebit.mandate.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Map;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.ServiceMandateReference;
+
+import java.util.Map;
 
 public class CreateMandateRequest implements CreateRequest {
 
@@ -13,10 +15,10 @@ public class CreateMandateRequest implements CreateRequest {
     private MandateType mandateType;
 
     @JsonProperty("service_reference")
-    private String reference;
+    private ServiceMandateReference reference;
 
     private CreateMandateRequest(String returnUrl,
-            MandateType mandateType, String reference) {
+            MandateType mandateType, ServiceMandateReference reference) {
         this.returnUrl = returnUrl;
         this.mandateType = mandateType;
         this.reference = reference;
@@ -26,7 +28,7 @@ public class CreateMandateRequest implements CreateRequest {
         return new CreateMandateRequest(
                 createMandateRequest.get("return_url"),
                 MandateType.fromString(createMandateRequest.get("agreement_type")),
-                createMandateRequest.get("service_reference")
+                ServiceMandateReference.valueOf(createMandateRequest.get("service_reference"))
         );
     }
 
@@ -39,6 +41,6 @@ public class CreateMandateRequest implements CreateRequest {
     }
 
     public String getReference() {
-        return reference;
+        return reference.toString();
     }
 }

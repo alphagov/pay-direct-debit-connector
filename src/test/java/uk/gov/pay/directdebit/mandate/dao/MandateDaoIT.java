@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.ServiceMandateReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
@@ -87,7 +88,7 @@ public class MandateDaoIT {
                         MandateType.ONE_OFF,
                         MandateExternalId.valueOf(RandomIdGenerator.newId()),
                         "test-reference",
-                        "test-service-reference",
+                        ServiceMandateReference.valueOf("test-service-reference"),
                         MandateState.PENDING,
                         "https://www.example.com/return_url",
                         createdDate,
@@ -109,7 +110,7 @@ public class MandateDaoIT {
     public void shouldFindAMandateById() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withMandateReference("test-reference")
-                .withServiceReference("test-service-reference")
+                .withServiceReference(ServiceMandateReference.valueOf("test-service-reference"))
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi()
                 );
@@ -117,7 +118,7 @@ public class MandateDaoIT {
         assertThat(mandate.getId(), is(mandateFixture.getId()));
         assertThat(mandate.getExternalId(), is(notNullValue()));
         assertThat(mandate.getMandateReference(), is("test-reference"));
-        assertThat(mandate.getServiceReference(), is("test-service-reference"));
+        assertThat(mandate.getServiceReference(), is(ServiceMandateReference.valueOf("test-service-reference")));
         assertThat(mandate.getState(), is(MandateState.CREATED));
         assertThat(mandate.getType(), is(mandateFixture.getMandateType()));
     }
@@ -132,7 +133,7 @@ public class MandateDaoIT {
     public void shouldFindAMandateByTokenId() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withMandateReference("test-reference")
-                .withServiceReference("test-service-reference")
+                .withServiceReference(ServiceMandateReference.valueOf("test-service-reference"))
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
 
@@ -144,7 +145,7 @@ public class MandateDaoIT {
         assertThat(mandate.getId(), is(mandateFixture.getId()));
         assertThat(mandate.getExternalId(), is(mandateFixture.getExternalId()));
         assertThat(mandate.getMandateReference(), is("test-reference"));
-        assertThat(mandate.getServiceReference(), is("test-service-reference"));
+        assertThat(mandate.getServiceReference(), is(ServiceMandateReference.valueOf("test-service-reference")));
         assertThat(mandate.getState(), is(MandateState.CREATED));
         assertThat(mandate.getType(), is(mandateFixture.getMandateType()));
     }
@@ -159,7 +160,7 @@ public class MandateDaoIT {
     public void shouldFindAMandateByExternalId() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withMandateReference("test-reference")
-                .withServiceReference("test-service-reference")
+                .withServiceReference(ServiceMandateReference.valueOf("test-service-reference"))
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
 
@@ -167,7 +168,7 @@ public class MandateDaoIT {
         assertThat(mandate.getId(), is(mandateFixture.getId()));
         assertThat(mandate.getExternalId(), is(notNullValue()));
         assertThat(mandate.getMandateReference(), is("test-reference"));
-        assertThat(mandate.getServiceReference(), is("test-service-reference"));
+        assertThat(mandate.getServiceReference(), is(ServiceMandateReference.valueOf("test-service-reference")));
         assertThat(mandate.getState(), is(MandateState.CREATED));
         assertThat(mandate.getType(), is(mandateFixture.getMandateType()));
     }
@@ -189,7 +190,7 @@ public class MandateDaoIT {
         assertThat(mandateAfterUpdate.get("id"), is(testMandate.getId()));
         assertThat(mandateAfterUpdate.get("external_id"), is(testMandate.getExternalId().toString()));
         assertThat(mandateAfterUpdate.get("mandate_reference"), is(testMandate.getMandateReference()));
-        assertThat(mandateAfterUpdate.get("service_reference"), is(testMandate.getServiceReference()));
+        assertThat(mandateAfterUpdate.get("service_reference"), is(testMandate.getServiceReference().toString()));
         assertThat(mandateAfterUpdate.get("state"), is(newState.toString()));
         assertThat(mandateAfterUpdate.get("type"), is(testMandate.getType().toString()));
     }

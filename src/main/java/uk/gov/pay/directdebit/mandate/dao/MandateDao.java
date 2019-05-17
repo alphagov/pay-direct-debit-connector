@@ -11,6 +11,7 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.ServiceMandateReferenceArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
 
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
+@RegisterArgumentFactory(ServiceMandateReferenceArgumentFactory.class)
 @RegisterRowMapper(MandateMapper.class)
 public interface MandateDao {
 

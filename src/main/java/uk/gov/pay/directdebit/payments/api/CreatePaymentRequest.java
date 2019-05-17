@@ -1,9 +1,10 @@
 package uk.gov.pay.directdebit.payments.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Map;
 import uk.gov.pay.directdebit.mandate.api.CreateRequest;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+
+import java.util.Map;
 
 public class CreatePaymentRequest implements CreateRequest, CollectRequest {
     @JsonProperty("return_url")

@@ -319,7 +319,7 @@ public class MandateResourceIT {
                 .body("return_url", is(mandateFixture.getReturnUrl()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
                 .body("state.finished", is(mandateFixture.getState().toExternal().isFinished()))
-                .body("service_reference", is(mandateFixture.getServiceReference()))
+                .body("service_reference", is(mandateFixture.getServiceReference().toString()))
                 .body("mandate_reference", is(notNullValue()));
 
         String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(mandateFixture.getExternalId()).get("secure_redirect_token").toString();

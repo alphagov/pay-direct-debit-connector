@@ -21,6 +21,7 @@ import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneO
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.ServiceMandateReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -86,7 +87,7 @@ public class MandateService {
                             createRequest.getMandateType(),
                             MandateExternalId.valueOf(RandomIdGenerator.newId()),
                             mandateReference,
-                            createRequest.getReference(),
+                            ServiceMandateReference.valueOf(createRequest.getReference()),
                             MandateState.CREATED,
                             createRequest.getReturnUrl(),
                             ZonedDateTime.now(ZoneOffset.UTC),

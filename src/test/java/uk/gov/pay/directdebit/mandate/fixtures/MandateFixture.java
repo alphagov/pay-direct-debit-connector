@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
+import uk.gov.pay.directdebit.mandate.model.ServiceMandateReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -21,7 +22,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private MandateExternalId mandateExternalId = MandateExternalId.valueOf(RandomIdGenerator.newId());
     private String mandateReference = RandomStringUtils.randomAlphanumeric(18);
-    private String serviceReference = RandomStringUtils.randomAlphanumeric(18);
+    private ServiceMandateReference serviceReference = ServiceMandateReference.valueOf(RandomStringUtils.randomAlphanumeric(18));
     private MandateState state = MandateState.CREATED;
     private String returnUrl = "http://service.test/success-page";
     private MandateType mandateType = MandateType.ONE_OFF;
@@ -88,11 +89,11 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return this;
     }
 
-    public String getServiceReference() {
+    public ServiceMandateReference getServiceReference() {
         return serviceReference;
     }
 
-    public MandateFixture withServiceReference(String serviceReference) {
+    public MandateFixture withServiceReference(ServiceMandateReference serviceReference) {
         this.serviceReference = serviceReference;
         return this;
     }
@@ -146,7 +147,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                         mandateExternalId.toString(),
                         mandateType.toString(),
                         mandateReference,
-                        serviceReference,
+                        serviceReference.toString(),
                         returnUrl,
                         state.toString(),
                         createdDate

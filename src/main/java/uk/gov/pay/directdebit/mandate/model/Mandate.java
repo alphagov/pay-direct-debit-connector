@@ -14,7 +14,7 @@ public class Mandate {
     private final String returnUrl;
     private final MandateType type;
     private String mandateReference;
-    private final String serviceReference;
+    private final ServiceMandateReference serviceReference;
     private final ZonedDateTime createdDate;
     private Payer payer;
 
@@ -24,7 +24,7 @@ public class Mandate {
             MandateType type,
             MandateExternalId externalId,
             String mandateReference,
-            String serviceReference,
+            ServiceMandateReference serviceReference,
             MandateState state,
             String returnUrl,
             ZonedDateTime createdDate,
@@ -82,7 +82,7 @@ public class Mandate {
         return mandateReference;
     }
 
-    public String getServiceReference() {
+    public ServiceMandateReference getServiceReference() {
         return serviceReference;
     }
 
