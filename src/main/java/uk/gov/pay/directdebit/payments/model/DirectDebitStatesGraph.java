@@ -5,6 +5,7 @@ import com.google.common.graph.MutableValueGraph;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class DirectDebitStatesGraph<T extends DirectDebitState> {
@@ -31,11 +32,10 @@ public abstract class DirectDebitStatesGraph<T extends DirectDebitState> {
         return priorStates;
     }
 
-    public T getNextStateForEvent(T from, DirectDebitEvent.SupportedEvent event) {
+    public Optional<T> getNextStateForEvent(T from, DirectDebitEvent.SupportedEvent event) {
         return graphStates.successors(from).stream()
                 .filter(to -> isValidTransition(from, to, event))
-                .findFirst()
-                .orElseThrow(() -> new InvalidStateTransitionException(event.toString(), from.toString()));
+                .findFirst();
     }
 
     protected void addNodes(MutableValueGraph<T, DirectDebitEvent.SupportedEvent> graph, T[] values) {

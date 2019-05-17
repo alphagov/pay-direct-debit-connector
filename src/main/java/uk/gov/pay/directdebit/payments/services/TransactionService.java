@@ -17,6 +17,7 @@ import uk.gov.pay.directdebit.payments.api.CollectRequest;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -41,6 +42,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
@@ -220,8 +222,10 @@ public class TransactionService {
     }
 
     private Transaction updateStateFor(Transaction transaction, SupportedEvent event) {
-        PaymentState newState = getStates().getNextStateForEvent(transaction.getState(),
-                event);
+        PaymentState newState = getStates()
+                .getNextStateForEvent(transaction.getState(), event)
+                .orElseThrow(() -> new InvalidStateTransitionException(event.toString(), transaction.getState().toString()));
+
         transactionDao.updateState(transaction.getId(), newState);
         LOGGER.info("Updated transaction {} - from {} to {}",
                 transaction.getExternalId(),

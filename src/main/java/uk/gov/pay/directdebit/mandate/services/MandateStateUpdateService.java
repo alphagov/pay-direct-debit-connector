@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
+import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
@@ -110,9 +111,12 @@ public class MandateStateUpdateService {
     }
 
     private Mandate updateStateFor(Mandate mandate, DirectDebitEvent.SupportedEvent event) {
-        MandateState newState = MandateStatesGraph.getStates().getNextStateForEvent(mandate.getState(),
-                event);
-        mandateDao.updateState(mandate.getId(), newState);
+        MandateState newState = MandateStatesGraph
+                .getStates()
+                .getNextStateForEvent(mandate.getState(), event)
+                .orElseThrow(() -> new InvalidStateTransitionException(event.toString(), mandate.getState().toString()));
+
+                mandateDao.updateState(mandate.getId(), newState);
         LOGGER.info("Updating mandate {} - from {} to {}",
                 mandate.getExternalId(),
                 mandate.getState(),
@@ -121,9 +125,8 @@ public class MandateStateUpdateService {
         return mandate;
     }
 
-    void canUpdateStateFor(Mandate mandate, DirectDebitEvent.SupportedEvent event) {
-        MandateStatesGraph.getStates().getNextStateForEvent(mandate.getState(),
-                event);
+    boolean canUpdateStateFor(Mandate mandate, DirectDebitEvent.SupportedEvent event) {
+        return MandateStatesGraph.getStates().getNextStateForEvent(mandate.getState(), event).isPresent();
     }
 
     private Mandate confirmedDetailsFor(Mandate mandate) {
