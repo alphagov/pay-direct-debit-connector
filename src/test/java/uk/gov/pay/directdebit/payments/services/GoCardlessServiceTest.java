@@ -87,7 +87,7 @@ public abstract class GoCardlessServiceTest {
             .withMandateFixture(mandateFixture)
             .withExternalId(TRANSACTION_ID)
             .toEntity();
-    GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.of("test_creditor_id");
+    GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.valueOf("test_creditor_id");
     GoCardlessMandate goCardlessMandate =
             GoCardlessMandateFixture.aGoCardlessMandateFixture()
                     .withGoCardlessCreditorId(goCardlessCreditorId)

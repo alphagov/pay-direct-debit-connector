@@ -10,21 +10,20 @@ public class GoCardlessCreditorId {
         this.goCardlessCreditorId = Objects.requireNonNull(goCardlessCreditorId);
     }
 
-    public static GoCardlessCreditorId of(String goCardlessCreditorId) {
+    public static GoCardlessCreditorId valueOf(String goCardlessCreditorId) {
         return new GoCardlessCreditorId(goCardlessCreditorId);
     }
 
-    public static GoCardlessCreditorId valueOf(String goCardlessCreditorId) {
-        return GoCardlessCreditorId.of(goCardlessCreditorId);
+    @Override
+    public String toString() {
+        return goCardlessCreditorId;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        GoCardlessCreditorId that = (GoCardlessCreditorId) o;
-
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        GoCardlessCreditorId that = (GoCardlessCreditorId) other;
         return goCardlessCreditorId.equals(that.goCardlessCreditorId);
     }
 
@@ -33,8 +32,4 @@ public class GoCardlessCreditorId {
         return goCardlessCreditorId.hashCode();
     }
 
-    @Override
-    public String toString() {
-        return goCardlessCreditorId;
-    }
 }

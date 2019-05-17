@@ -55,7 +55,7 @@ public class GoCardlessClientFacade {
                 mandate.getId(),
                 gcMandate.getId(),
                 gcMandate.getReference(),
-                GoCardlessCreditorId.of(gcMandate.getLinks().getCreditor()));
+                GoCardlessCreditorId.valueOf(gcMandate.getLinks().getCreditor()));
     }
 
     public GoCardlessPayment createPayment(Transaction transaction, GoCardlessMandate mandate) {

@@ -21,6 +21,6 @@ public class GoCardlessMandateMapper implements RowMapper<GoCardlessMandate> {
                 resultSet.getLong(MANDATE_ID_COLUMN),
                 resultSet.getString(GOCARDLESS_MANDATE_ID_COLUMN),
                 null,
-                GoCardlessCreditorId.of(resultSet.getString(GOCARDLESS_CREDITOR_ID)));
+                GoCardlessCreditorId.valueOf(resultSet.getString(GOCARDLESS_CREDITOR_ID)));
     }
 }
