@@ -3,9 +3,9 @@ package uk.gov.pay.directdebit.gatewayaccounts.dao.mapper;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,7 +41,7 @@ public class GatewayAccountMapper implements RowMapper<GatewayAccount> {
         
         String organisation = resultSet.getString(ORGANISATION);
         if (organisation != null) {
-            gatewayAccount.setOrganisation(PaymentProviderOrganisationIdentifier.of(organisation));
+            gatewayAccount.setOrganisation(GoCardlessOrganisationId.valueOf(organisation));
         }
         
         return gatewayAccount;

@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 
 import java.time.ZonedDateTime;
 
@@ -15,7 +15,7 @@ public class GoCardlessEvent {
     private String json;
     private ZonedDateTime createdAt;
     private String resourceId;
-    private PaymentProviderOrganisationIdentifier organisationIdentifier;
+    private GoCardlessOrganisationId organisationIdentifier;
 
     public GoCardlessEvent(Long id,
                            Long directDebitEventId,
@@ -24,7 +24,7 @@ public class GoCardlessEvent {
                            GoCardlessResourceType resourceType,
                            String json,
                            ZonedDateTime createdAt,
-                           PaymentProviderOrganisationIdentifier organisationIdentifier) {
+                           GoCardlessOrganisationId organisationIdentifier) {
         this.id = id;
         this.eventId = directDebitEventId;
         this.goCardlessEventId = goCardlessEventId;
@@ -50,7 +50,7 @@ public class GoCardlessEvent {
                            GoCardlessResourceType resourceType, 
                            String json, 
                            ZonedDateTime createdAt, 
-                           PaymentProviderOrganisationIdentifier organisationIdentifier) {
+                           GoCardlessOrganisationId organisationIdentifier) {
         this(null, null, goCardlessEventId, action, resourceType, json, createdAt, organisationIdentifier);
     }
 
@@ -131,11 +131,11 @@ public class GoCardlessEvent {
         return this;
     }
 
-    public PaymentProviderOrganisationIdentifier getOrganisationIdentifier() {
+    public GoCardlessOrganisationId getOrganisationIdentifier() {
         return organisationIdentifier;
     }
 
-    public void setOrganisationIdentifier(PaymentProviderOrganisationIdentifier organisationIdentifier) {
+    public void setOrganisationIdentifier(GoCardlessOrganisationId organisationIdentifier) {
         this.organisationIdentifier = organisationIdentifier;
     }
 }

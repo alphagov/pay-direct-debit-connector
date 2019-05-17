@@ -3,9 +3,9 @@ package uk.gov.pay.directdebit.payments.dao.mapper;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
@@ -89,7 +89,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
         }
         String organisation = resultSet.getString(GATEWAY_ACCOUNT_ORGANISATION_COLUMN);
         if (organisation != null) {
-            gatewayAccount.setOrganisation(PaymentProviderOrganisationIdentifier.of(organisation));
+            gatewayAccount.setOrganisation(GoCardlessOrganisationId.valueOf(organisation));
         }
 
         Mandate mandate = new Mandate(

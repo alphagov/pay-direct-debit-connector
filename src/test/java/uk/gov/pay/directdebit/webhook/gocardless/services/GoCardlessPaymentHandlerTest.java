@@ -8,7 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
@@ -44,7 +44,7 @@ public class GoCardlessPaymentHandlerTest {
     private GoCardlessPaymentFixture goCardlessPaymentFixture = GoCardlessPaymentFixture.aGoCardlessPaymentFixture();
     private GoCardlessPaymentHandler goCardlessPaymentHandler;
     private DirectDebitEvent directDebitEvent = DirectDebitEventFixture.aDirectDebitEventFixture().toEntity();
-    private PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of("test_org_id");
+    private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_org_id");
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().withOrganisation(organisationIdentifier);
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture);
     private Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
@@ -180,7 +180,7 @@ public class GoCardlessPaymentHandlerTest {
     @Test
     public void handle_doNotProcess_noOrgansiationOnGatewayAccount() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withOrganisationIdentifier(PaymentProviderOrganisationIdentifier.of("i_do_not_exist_id"))
+                .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("i_do_not_exist_id"))
                 .withAction("paid")
                 .toEntity());
 

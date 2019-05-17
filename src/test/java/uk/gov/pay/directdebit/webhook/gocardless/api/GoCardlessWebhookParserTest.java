@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
@@ -44,7 +44,7 @@ public class GoCardlessWebhookParserTest {
 
     @Test
     public void shouldParseASingleEvent() throws IOException {
-        PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of("test_organisation_identifier");
+        GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_organisation_identifier");
         String validEvent = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, "payment", CREATED_AT, organisationIdentifier);
         String payload = buildEvents(validEvent);
 
@@ -72,7 +72,7 @@ public class GoCardlessWebhookParserTest {
         String thirdEventAction = "action";
 
         ZonedDateTime eventCreatedAt = ZonedDateTime.now();
-        PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of("test_organisation_identifier");
+        GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_organisation_identifier");
 
         String firstEventPayload = buildValidEvent(EVENT_ID, ACTION, RESOURCE_TYPE, "payment", CREATED_AT, organisationIdentifier);
         String secondEventPayload = buildValidEvent(secondEventId, secondEventAction, secondEventResourceType, "mandate", eventCreatedAt, organisationIdentifier);
@@ -125,7 +125,7 @@ public class GoCardlessWebhookParserTest {
     }
 
     private String buildValidEvent(String eventId, String action, GoCardlessResourceType resourceType, String linkKey,
-                                   ZonedDateTime createdAt, PaymentProviderOrganisationIdentifier organisationIdentifier) {
+                                   ZonedDateTime createdAt, GoCardlessOrganisationId organisationIdentifier) {
         // language=JSON
         return String.format("{\n" +
                 "      \"id\": \"%s\",\n" +
