@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.dao;
 
+import org.jdbi.v3.sqlobject.config.RegisterArgumentFactory;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -7,7 +8,9 @@ import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.payments.dao.mapper.GoCardlessEventMapper;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
 
+@RegisterArgumentFactory(GoCardlessEventIdArgumentFactory.class)
 @RegisterRowMapper(GoCardlessEventMapper.class)
 public interface GoCardlessEventDao {
 

@@ -8,7 +8,7 @@ public class GoCardlessEvent {
 
     private Long id;
     private Long eventId;
-    private String goCardlessEventId;
+    private GoCardlessEventId goCardlessEventId;
     //todo action should be typed (see https://developer.gocardless.com/api-reference/#events-payment-actions and the equivalent for other resource_types
     private String action;
     private GoCardlessResourceType resourceType;
@@ -19,7 +19,7 @@ public class GoCardlessEvent {
 
     public GoCardlessEvent(Long id,
                            Long directDebitEventId,
-                           String goCardlessEventId,
+                           GoCardlessEventId goCardlessEventId,
                            String action,
                            GoCardlessResourceType resourceType,
                            String json,
@@ -37,7 +37,7 @@ public class GoCardlessEvent {
 
     public GoCardlessEvent(Long id,
                            Long directDebitEventId,
-                           String goCardlessEventId,
+                           GoCardlessEventId goCardlessEventId,
                            String action,
                            GoCardlessResourceType resourceType,
                            String json,
@@ -45,7 +45,7 @@ public class GoCardlessEvent {
         this(id, directDebitEventId, goCardlessEventId, action, resourceType, json, createdAt, null);
     }
 
-    public GoCardlessEvent(String goCardlessEventId, 
+    public GoCardlessEvent(GoCardlessEventId goCardlessEventId, 
                            String action, 
                            GoCardlessResourceType resourceType, 
                            String json, 
@@ -72,11 +72,11 @@ public class GoCardlessEvent {
         return this;
     }
 
-    public String getGoCardlessEventId() {
+    public GoCardlessEventId getGoCardlessEventId() {
         return goCardlessEventId;
     }
 
-    public GoCardlessEvent setGoCardlessEventId(String goCardlessEventId) {
+    public GoCardlessEvent setGoCardlessEventId(GoCardlessEventId goCardlessEventId) {
         this.goCardlessEventId = goCardlessEventId;
         return this;
     }
