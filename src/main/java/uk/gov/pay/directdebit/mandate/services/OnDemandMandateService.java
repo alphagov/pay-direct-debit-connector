@@ -59,23 +59,6 @@ public class OnDemandMandateService implements MandateCommandService {
         }
     }
 
-    public Transaction collect(GatewayAccount gatewayAccount, Mandate mandate,
-            CollectPaymentRequest collectPaymentRequest) {
-        if (MandateType.ONE_OFF.equals(mandate.getType())) {
-            throw new InvalidMandateTypeException(mandate.getExternalId(), MandateType.ONE_OFF);
-        }
-        Transaction transaction = transactionService.createTransaction(
-                collectPaymentRequest,
-                mandate,
-                gatewayAccount.getExternalId());
-        
-        LocalDate chargeDate = paymentProviderFactory
-                .getCommandServiceFor(gatewayAccount.getPaymentProvider())
-                .collect(mandate, transaction);
-        transactionService.onDemandPaymentSubmittedToProviderFor(transaction, chargeDate);
-        return transaction;
-    }
-
     public CreateMandateResponse create(GatewayAccount gatewayAccount, CreateMandateRequest createMandateRequest,
             UriInfo uriInfo) {
         if (MandateType.ONE_OFF.equals(createMandateRequest.getMandateType())) {

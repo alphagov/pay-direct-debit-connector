@@ -16,8 +16,10 @@ import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.CreatePaymentRequest;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
@@ -28,6 +30,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -46,6 +49,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -82,6 +86,10 @@ public class TransactionServiceTest {
     private UriInfo mockedUriInfo;
     @Mock
     private UriBuilder mockedUriBuilder;
+    @Mock
+    private PaymentProviderFactory mockedPaymentProviderFactory;
+    @Mock
+    private SandboxService mockedSandboxService;
     
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
     private TransactionService service;
@@ -93,7 +101,7 @@ public class TransactionServiceTest {
     @Before
     public void setUp() throws URISyntaxException {
         service = new TransactionService(mockedTokenService, mockedGatewayAccountDao, mockedDirectDebitConfig, mockedTransactionDao,
-                mockedDirectDebitEventService, mockedUserNotificationService);
+                mockedDirectDebitEventService, mockedUserNotificationService, mockedPaymentProviderFactory);
         when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
         when(mockedLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
         when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
@@ -345,5 +353,36 @@ public class TransactionServiceTest {
         verify(mockedDirectDebitEventService).registerPaymentExpiredEventFor(transaction);
         verify(mockedTransactionDao).updateState(transaction.getId(), EXPIRED);
         assertThat(transaction.getState(), is(EXPIRED));
+    }
+
+    @Test
+    public void collect_shouldCreateATransactionAPaymentAndRegisterOnDemandPaymentSubmittedEvent() {
+        MandateFixture mandateFixture = this.mandateFixture
+                .withMandateType(MandateType.ON_DEMAND);
+
+        Transaction expectedTransaction = TransactionFixture
+                .aTransactionFixture()
+                .withAmount(123456L)
+                .withMandateFixture(mandateFixture)
+                .withDescription("a description")
+                .withReference("a reference")
+                .withState(NEW)
+                .toEntity();
+
+        CollectPaymentRequest collectPaymentRequest = new CollectPaymentRequest(
+                this.mandateFixture.getExternalId(),
+                expectedTransaction.getAmount(),
+                expectedTransaction.getDescription(),
+                expectedTransaction.getReference());
+
+        when(mockedPaymentProviderFactory.getCommandServiceFor(mandateFixture.toEntity().getGatewayAccount().getPaymentProvider())).thenReturn(mockedSandboxService);
+        when(mockedGatewayAccountDao.findByExternalId(gatewayAccountFixture.getExternalId())).thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
+
+        Transaction returnedTransaction = service.createOnDemandTransaction(gatewayAccountFixture.toEntity(), mandateFixture.toEntity(), collectPaymentRequest);
+
+        verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(returnedTransaction);
+        assertThat(returnedTransaction.getState(), is(PENDING));
+        assertThat(returnedTransaction.getAmount(), is(expectedTransaction.getAmount()));
+        assertThat(returnedTransaction.getMandate(), is(expectedTransaction.getMandate()));
     }
 }

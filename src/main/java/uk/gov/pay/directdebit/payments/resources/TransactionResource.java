@@ -82,7 +82,7 @@ public class TransactionResource {
         Mandate mandate = mandateServiceFactory
                 .getMandateQueryService()
                 .findByExternalId(collectPaymentRequest.getMandateExternalId());
-        Transaction paymentToCollect = mandateServiceFactory.getOnDemandMandateService().collect(gatewayAccount, mandate, collectPaymentRequest);
+        Transaction paymentToCollect = transactionService.createOnDemandTransaction(gatewayAccount, mandate, collectPaymentRequest);
         CollectPaymentResponse response = transactionService.collectPaymentResponseWithSelfLink(paymentToCollect, gatewayAccount.getExternalId(), uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }
