@@ -6,11 +6,11 @@ public class GoCardlessMandate {
 
     private Long id;
     private final Long mandateId;
-    private final String goCardlessMandateId;
+    private final GoCardlessMandateId goCardlessMandateId;
     private final String goCardlessReference;
     private final GoCardlessCreditorId goCardlessCreditorId;
 
-    public GoCardlessMandate(Long id, Long mandateId, String goCardlessMandateId, String goCardlessReference, GoCardlessCreditorId goCardlessCreditorId) {
+    public GoCardlessMandate(Long id, Long mandateId, GoCardlessMandateId goCardlessMandateId, String goCardlessReference, GoCardlessCreditorId goCardlessCreditorId) {
         this.id = id;
         this.mandateId = mandateId;
         this.goCardlessMandateId = goCardlessMandateId;
@@ -18,7 +18,7 @@ public class GoCardlessMandate {
         this.goCardlessCreditorId = goCardlessCreditorId;
     }
 
-    public GoCardlessMandate(Long mandateId, String goCardlessMandateId, String goCardlessReference, GoCardlessCreditorId goCardlessCreditorId) {
+    public GoCardlessMandate(Long mandateId, GoCardlessMandateId goCardlessMandateId, String goCardlessReference, GoCardlessCreditorId goCardlessCreditorId) {
         this(null, mandateId, goCardlessMandateId, goCardlessReference, goCardlessCreditorId);
     }
 
@@ -34,7 +34,7 @@ public class GoCardlessMandate {
         return mandateId;
     }
 
-    public String getGoCardlessMandateId() {
+    public GoCardlessMandateId getGoCardlessMandateId() {
         return goCardlessMandateId;
     }
 

@@ -6,12 +6,13 @@ import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 
 public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixture, GoCardlessMandate> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long mandateId = RandomUtils.nextLong(1, 99999);
-    private String goCardlessMandateId = RandomIdGenerator.newId();
+    private GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf(RandomIdGenerator.newId());
     private GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.valueOf(RandomIdGenerator.newId());
 
     private GoCardlessMandateFixture() {
@@ -39,11 +40,11 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
         return this;
     }
 
-    public String getGoCardlessMandateId() {
+    public GoCardlessMandateId getGoCardlessMandateId() {
         return goCardlessMandateId;
     }
 
-    public GoCardlessMandateFixture withGoCardlessMandateId(String goCardlessMandateId) {
+    public GoCardlessMandateFixture withGoCardlessMandateId(GoCardlessMandateId goCardlessMandateId) {
         this.goCardlessMandateId = goCardlessMandateId;
         return this;
     }
@@ -67,8 +68,8 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
                                 "   VALUES(?, ?, ?, ?)\n",
                         id,
                         mandateId,
-                        goCardlessMandateId,
-                        goCardlessCreditorId
+                        goCardlessMandateId.toString(),
+                        goCardlessCreditorId.toString()
                 )
         );
         return this;

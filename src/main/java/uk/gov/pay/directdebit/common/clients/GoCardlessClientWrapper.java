@@ -61,7 +61,7 @@ public class GoCardlessClientWrapper {
                 .create()
                 .withAmount(Math.toIntExact(transaction.getAmount()))
                 .withCurrency(PaymentService.PaymentCreateRequest.Currency.GBP)
-                .withLinksMandate(mandate.getGoCardlessMandateId())
+                .withLinksMandate(mandate.getGoCardlessMandateId().toString())
                 .withIdempotencyKey(transaction.getExternalId())
                 .execute();
     }

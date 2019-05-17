@@ -12,6 +12,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 
@@ -32,7 +33,7 @@ public class GoCardlessMandateDaoIT {
     private GoCardlessMandateDao mandateDao;
     private MandateFixture mandateFixture;
 
-    private final static String GOCARDLESS_MANDATE_ID = "NA23434";
+    private final static GoCardlessMandateId GOCARDLESS_MANDATE_ID = GoCardlessMandateId.valueOf("NA23434");
     private final static GoCardlessCreditorId GOCARDLESS_CREDITOR_ID = GoCardlessCreditorId.valueOf("CREDITORID123");
 
     private GoCardlessMandateFixture testGoCardlessMandate;
@@ -60,7 +61,7 @@ public class GoCardlessMandateDaoIT {
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getGoCardlessMandateById(id);
         assertThat(mandate.get("id"), is(id));
         assertThat(mandate.get("mandate_id"), is(mandateFixture.getId()));
-        assertThat(mandate.get("gocardless_mandate_id"), is(GOCARDLESS_MANDATE_ID));
+        assertThat(mandate.get("gocardless_mandate_id"), is(GOCARDLESS_MANDATE_ID.toString()));
         assertThat(mandate.get("gocardless_creditor_id"), is(GOCARDLESS_CREDITOR_ID.toString()));
     }
 
@@ -87,7 +88,7 @@ public class GoCardlessMandateDaoIT {
 
     @Test
     public void shouldNotFindAGoCardlessMandateByEventResourceId_ifResourceIdIsInvalid() {
-        String resourceId = "non_existing_resourceId";
+        GoCardlessMandateId resourceId = GoCardlessMandateId.valueOf("non_existing_resourceId");
         assertThat(mandateDao.findByEventResourceId(resourceId), is(Optional.empty()));
     }
 
