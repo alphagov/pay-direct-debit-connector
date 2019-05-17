@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -34,15 +35,12 @@ public class MandateStatesGraphTest {
 
     @Test
     public void getNextStateForEvent_shouldGiveTheNextStateIfEventIsValid() {
-        assertThat(mandateStatesGraph.getNextStateForEvent(PENDING, MANDATE_ACTIVE), is(MandateState.ACTIVE));
+        assertThat(mandateStatesGraph.getNextStateForEvent(PENDING, MANDATE_ACTIVE), is(Optional.of(MandateState.ACTIVE)));
     }
 
     @Test
-    public void getNextStateForEvent_shouldThrowExceptionIfTransitionIsInvalid() {
-        thrown.expect(InvalidStateTransitionException.class);
-        thrown.expectMessage("Transition MANDATE_ACTIVE from state FAILED is not valid");
-        thrown.reportMissingExceptionWithMessage("InvalidStateTransitionException expected");
-        mandateStatesGraph.getNextStateForEvent(FAILED, MANDATE_ACTIVE);
+    public void getNextStateForEvent_shouldReturnEmptyIfTransitionIsInvalid() {
+        assertThat(mandateStatesGraph.getNextStateForEvent(FAILED, MANDATE_ACTIVE), is(Optional.empty()));
     }
 
     @Test

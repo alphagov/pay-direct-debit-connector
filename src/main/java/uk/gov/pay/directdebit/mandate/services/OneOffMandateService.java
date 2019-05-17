@@ -6,6 +6,7 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.OneOffConfirmationDetails;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.api.CreatePaymentRequest;
+import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
@@ -39,23 +40,25 @@ public class OneOffMandateService implements MandateCommandService {
 
     @Override
     public void confirm(GatewayAccount gatewayAccount, Mandate mandate, ConfirmMandateRequest confirmMandateRequest) {
-        mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED);
+        if (mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)) {
+            Transaction transaction = transactionService
+                    .findTransactionForExternalId(confirmMandateRequest.getTransactionExternalId());
 
-        Transaction transaction = transactionService
-                .findTransactionForExternalId(confirmMandateRequest.getTransactionExternalId());
+            OneOffConfirmationDetails oneOffConfirmationDetails = paymentProviderFactory
+                    .getCommandServiceFor(gatewayAccount.getPaymentProvider())
+                    .confirmOneOffMandate(mandate,
+                            new BankAccountDetails(
+                                    confirmMandateRequest.getAccountNumber(),
+                                    confirmMandateRequest.getSortCode()),
+                            transaction
+                    );
 
-        OneOffConfirmationDetails oneOffConfirmationDetails = paymentProviderFactory
-                .getCommandServiceFor(gatewayAccount.getPaymentProvider())
-                .confirmOneOffMandate(mandate,
-                        new BankAccountDetails(
-                                confirmMandateRequest.getAccountNumber(),
-                                confirmMandateRequest.getSortCode()),
-                        transaction
-                );
-
-        mandateStateUpdateService.confirmedOneOffDirectDebitDetailsFor(oneOffConfirmationDetails.getMandate());
-        transactionService.oneOffPaymentSubmittedToProviderFor(
-                transaction,
-                oneOffConfirmationDetails.getChargeDate());
+            mandateStateUpdateService.confirmedOneOffDirectDebitDetailsFor(oneOffConfirmationDetails.getMandate());
+            transactionService.oneOffPaymentSubmittedToProviderFor(
+                    transaction,
+                    oneOffConfirmationDetails.getChargeDate());
+        } else {
+            throw new InvalidStateTransitionException(DIRECT_DEBIT_DETAILS_CONFIRMED.toString(), mandate.getState().toString());
+        }
     }
 }

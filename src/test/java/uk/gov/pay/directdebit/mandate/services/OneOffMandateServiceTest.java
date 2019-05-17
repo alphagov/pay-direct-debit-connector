@@ -17,6 +17,7 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.api.CreatePaymentRequest;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.SandboxService;
@@ -85,6 +86,7 @@ public class OneOffMandateServiceTest {
                 mandateConfirmationRequest.getTransactionExternalId())).thenReturn(transaction);
         when(mockedSandboxService.confirmOneOffMandate(mandate, bankAccountDetails, transaction))
                 .thenReturn(oneOffConfirmationDetails);
+        when(mockedMandateStateUpdateService.canUpdateStateFor(mandate, DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED)).thenReturn(true);
         service.confirm(gatewayAccountFixture.toEntity(), mandate, mandateConfirmationRequest);
 
         verify(mockedMandateStateUpdateService).confirmedOneOffDirectDebitDetailsFor(mandate);

@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
+import java.util.Optional;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.CHARGE_CREATED;
@@ -30,15 +32,12 @@ public class PaymentStatesGraphTest {
 
     @Test
     public void getNextStateForEvent_shouldGiveTheNextStateIfEventIsValid() {
-        assertThat(paymentStatesGraph.getNextStateForEvent(NEW, PAYMENT_SUBMITTED_TO_PROVIDER), is(PaymentState.PENDING));
+        assertThat(paymentStatesGraph.getNextStateForEvent(NEW, PAYMENT_SUBMITTED_TO_PROVIDER), is(Optional.of(PaymentState.PENDING)));
     }
 
     @Test
-    public void getNextStateForEvent_shouldThrowExceptionIfTransitionIsInvalid() {
-        thrown.expect(InvalidStateTransitionException.class);
-        thrown.expectMessage("Transition CHARGE_CREATED from state NEW is not valid");
-        thrown.reportMissingExceptionWithMessage("InvalidStateTransitionException expected");
-        paymentStatesGraph.getNextStateForEvent(NEW, CHARGE_CREATED);
+    public void getNextStateForEvent_shouldReturnEmptyIfTransitionIsInvalid() {
+        assertThat(paymentStatesGraph.getNextStateForEvent(NEW, CHARGE_CREATED), is(Optional.empty()));
     }
 
     @Test
