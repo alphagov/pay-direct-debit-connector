@@ -2,15 +2,15 @@ package uk.gov.pay.directdebit.partnerapp.client.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GoCardlessAppConnectAccessTokenResponse {
     @JsonProperty("access_token")
     private PaymentProviderAccessToken accessToken;
     @JsonProperty("organisation_id")
-    private PaymentProviderOrganisationIdentifier organisationId;
+    private GoCardlessOrganisationId organisationId;
     @JsonProperty("error")
     private String error;
     @JsonProperty("error_description")
@@ -42,11 +42,11 @@ public class GoCardlessAppConnectAccessTokenResponse {
         this.accessToken = accessToken;
     }
 
-    public PaymentProviderOrganisationIdentifier getOrganisationId() {
+    public GoCardlessOrganisationId getOrganisationId() {
         return organisationId;
     }
 
-    public void setOrganisationId(PaymentProviderOrganisationIdentifier organisationId) {
+    public void setOrganisationId(GoCardlessOrganisationId organisationId) {
         this.organisationId = organisationId;
     }
 

@@ -9,8 +9,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.api.PatchGatewayAccountValidator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
@@ -77,12 +77,12 @@ public class GatewayAccountService {
     public GatewayAccount patch(String externalId, List<Map<String, String>> request) {
         validator.validatePatchRequest(externalId, request);
         PaymentProviderAccessToken accessToken = null;
-        PaymentProviderOrganisationIdentifier organisation = null;
+        GoCardlessOrganisationId organisation = null;
         for (Map<String, String> operation : request) {
             if (operation.get("path").equals("access_token")) {
                 accessToken = PaymentProviderAccessToken.of(operation.get("value"));
             } else {
-                organisation = PaymentProviderOrganisationIdentifier.of(operation.get("value"));
+                organisation = GoCardlessOrganisationId.valueOf(operation.get("value"));
             }
         }
         

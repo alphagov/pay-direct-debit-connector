@@ -5,7 +5,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
@@ -22,7 +22,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     private String resourceId = RandomStringUtils.randomAlphabetic(20);
     private String json = "{\"id\": \"somejson\"}";
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
-    private PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of(RandomStringUtils.randomAlphanumeric(25));
+    private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf(RandomStringUtils.randomAlphanumeric(25));
 
     private GoCardlessEventFixture() {
     }
@@ -103,7 +103,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public GoCardlessEventFixture withOrganisationIdentifier(PaymentProviderOrganisationIdentifier organisationIdentifier) {
+    public GoCardlessEventFixture withOrganisationIdentifier(GoCardlessOrganisationId organisationIdentifier) {
         this.organisationIdentifier = organisationIdentifier;
         return this;
     }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
@@ -55,12 +55,12 @@ public class GoCardlessWebhookParser {
         }
     }
 
-    private PaymentProviderOrganisationIdentifier getOrganisationField(JsonNode eventNode) {
+    private GoCardlessOrganisationId getOrganisationField(JsonNode eventNode) {
         /* todo: remove the check for missing node after going live
         Now is used for backward compatibility as when live we will get the organisation in the payload
         */
         if (eventNode.get("links").has("organisation")) {
-            return PaymentProviderOrganisationIdentifier.of(eventNode.get("links").get("organisation").asText());
+            return GoCardlessOrganisationId.valueOf(eventNode.get("links").get("organisation").asText());
         } else {
             return null;
         }

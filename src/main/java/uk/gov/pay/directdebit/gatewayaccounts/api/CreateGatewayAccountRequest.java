@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount.Type;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -31,7 +31,7 @@ public class CreateGatewayAccountRequest {
     private final String analyticsId;
 
     private final PaymentProviderAccessToken accessToken;
-    private final PaymentProviderOrganisationIdentifier organisation;
+    private final GoCardlessOrganisationId organisation;
 
     public CreateGatewayAccountRequest(@JsonProperty("payment_provider") PaymentProvider paymentProvider,
                                        @JsonProperty("service_name") String serviceName,
@@ -39,7 +39,7 @@ public class CreateGatewayAccountRequest {
                                        @JsonProperty("description") String description, 
                                        @JsonProperty("analytics_id") String analyticsId,
                                        @JsonProperty("access_token") PaymentProviderAccessToken accessToken,
-                                       @JsonProperty("organisation") PaymentProviderOrganisationIdentifier organisation) {
+                                       @JsonProperty("organisation") GoCardlessOrganisationId organisation) {
         this.paymentProvider = paymentProvider;
         this.serviceName = serviceName;
         this.type = type;
@@ -73,7 +73,7 @@ public class CreateGatewayAccountRequest {
         return accessToken;
     }
 
-    public PaymentProviderOrganisationIdentifier getOrganisation() {
+    public GoCardlessOrganisationId getOrganisation() {
         return organisation;
     }
 }

@@ -7,7 +7,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -127,7 +127,7 @@ public class WebhookGoCardlessResourceIT {
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(10110);
 
-    private PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of("test_organisation_id");
+    private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_organisation_id");
 
     private GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().withOrganisation(organisationIdentifier);
 

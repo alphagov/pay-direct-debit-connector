@@ -14,9 +14,9 @@ import uk.gov.pay.directdebit.gatewayaccounts.api.GatewayAccountResponse;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -175,7 +175,7 @@ public class GatewayAccountServiceTest {
     @Test
     public void shouldStoreAGatewayAccount() {
         CreateGatewayAccountRequest request = new CreateGatewayAccountRequest(PaymentProvider.SANDBOX, "aServiceName", GatewayAccount.Type.TEST, 
-                        "aDescription", "123", PaymentProviderAccessToken.of("token"), PaymentProviderOrganisationIdentifier.of("provider"));
+                        "aDescription", "123", PaymentProviderAccessToken.of("token"), GoCardlessOrganisationId.valueOf("provider"));
         ArgumentCaptor<GatewayAccount> capturedGatewayAccount = ArgumentCaptor.forClass(GatewayAccount.class);
         service.create(request);
         verify(mockedGatewayAccountDao).insert(capturedGatewayAccount.capture());
@@ -206,6 +206,6 @@ public class GatewayAccountServiceTest {
 
         service.patch(externalAccountId, Arrays.asList(accessTokenPayload, organisationPayload));
         verify(mockedGatewayAccountDao).updateAccessTokenAndOrganisation(externalAccountId,
-                PaymentProviderAccessToken.of("abcde1234"), PaymentProviderOrganisationIdentifier.of("1234abcde"));
+                PaymentProviderAccessToken.of("abcde1234"), GoCardlessOrganisationId.valueOf("1234abcde"));
     }
 }

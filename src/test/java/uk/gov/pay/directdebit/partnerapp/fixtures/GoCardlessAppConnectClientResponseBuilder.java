@@ -1,14 +1,14 @@
 package uk.gov.pay.directdebit.partnerapp.fixtures;
 
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.partnerapp.client.model.GoCardlessAppConnectAccessTokenResponse;
 
 public final class GoCardlessAppConnectClientResponseBuilder {
     private PaymentProviderAccessToken accessToken = PaymentProviderAccessToken.of("some-access-token");
     private String scope = "some-scope";
     private String tokenType = "some-token-type";
-    private PaymentProviderOrganisationIdentifier organisationId = PaymentProviderOrganisationIdentifier.of("some-organisation-id");
+    private GoCardlessOrganisationId organisationId = GoCardlessOrganisationId.valueOf("some-organisation-id");
 
     private GoCardlessAppConnectClientResponseBuilder() {
     }
@@ -32,7 +32,7 @@ public final class GoCardlessAppConnectClientResponseBuilder {
         return this;
     }
 
-    public GoCardlessAppConnectClientResponseBuilder withOrganisationId(PaymentProviderOrganisationIdentifier organisationId) {
+    public GoCardlessAppConnectClientResponseBuilder withOrganisationId(GoCardlessOrganisationId organisationId) {
         this.organisationId = organisationId;
         return this;
     }

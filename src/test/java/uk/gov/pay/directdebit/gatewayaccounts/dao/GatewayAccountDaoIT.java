@@ -4,11 +4,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -160,7 +159,7 @@ public class GatewayAccountDaoIT {
         String description2                                = "tests pls";
         String analyticsId2                                = "DD_234199_TOOLONGWONTREAD";
         PaymentProviderAccessToken accessToken             = PaymentProviderAccessToken.of("gimmeaccess");
-        PaymentProviderOrganisationIdentifier organisation = PaymentProviderOrganisationIdentifier.of("organisation");
+        GoCardlessOrganisationId organisation = GoCardlessOrganisationId.valueOf("organisation");
 
         GatewayAccountFixture
           .aGatewayAccountFixture()
@@ -232,7 +231,7 @@ public class GatewayAccountDaoIT {
     public void shouldInsertAGatewayAccount_withAccessTokenAndOrganisation() {
         testGatewayAccount
                 .withAccessToken(PaymentProviderAccessToken.of("an-access-token"))
-                .withOrganisation(PaymentProviderOrganisationIdentifier.of("an-organisation"));
+                .withOrganisation(GoCardlessOrganisationId.valueOf("an-organisation"));
         Long id = gatewayAccountDao.insert(testGatewayAccount.toEntity());
         Map<String, Object> foundGatewayAccount =
                 testContext.getDatabaseTestHelper().getGatewayAccountById(id);
@@ -256,7 +255,7 @@ public class GatewayAccountDaoIT {
         gatewayAccountDao.updateAccessTokenAndOrganisation(
                                     testGatewayAccount.getExternalId(),
                                     PaymentProviderAccessToken.of("an-access-token"),
-                                    PaymentProviderOrganisationIdentifier.of("an-organisation"));
+                                    GoCardlessOrganisationId.valueOf("an-organisation"));
         foundGatewayAccount = testContext.getDatabaseTestHelper().getGatewayAccountById(id);
         assertThat(foundGatewayAccount.get("id"), is(id));
         assertThat(foundGatewayAccount.get("external_id"), is(EXTERNAL_ID));

@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services;
 
 import com.google.common.collect.ImmutableList;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,7 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderOrganisationIdentifier;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
@@ -29,6 +28,8 @@ import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
+
+import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -60,7 +61,7 @@ public class GoCardlessMandateHandlerTest {
 
     private DirectDebitEvent directDebitEvent = DirectDebitEventFixture.aDirectDebitEventFixture().toEntity();
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
-    private PaymentProviderOrganisationIdentifier organisationIdentifier = PaymentProviderOrganisationIdentifier.of("test_organisation");
+    private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_organisation");
 
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
             .withOrganisation(organisationIdentifier);
@@ -254,7 +255,7 @@ public class GoCardlessMandateHandlerTest {
     @Test
     public void handle_onCreateMandateGoCardlessEvent_shouldNotRegisterEventAsMandatePending_whenOrganisationDoesNotExist() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withOrganisationIdentifier(PaymentProviderOrganisationIdentifier.of("does_not_exist"))
+                .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("does_not_exist"))
                 .withAction("created")
                 .toEntity());
 
@@ -262,7 +263,7 @@ public class GoCardlessMandateHandlerTest {
         when(mockedGoCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandate);
         Mandate mockedMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(GatewayAccountFixture.aGatewayAccountFixture()
-                .withOrganisation(PaymentProviderOrganisationIdentifier.of("non_existing_organisation")))
+                .withOrganisation(GoCardlessOrganisationId.valueOf("non_existing_organisation")))
                 .toEntity();
         when(mockedMandateQueryService.findById(goCardlessMandate.getMandateId())).thenReturn(mockedMandate);
 
