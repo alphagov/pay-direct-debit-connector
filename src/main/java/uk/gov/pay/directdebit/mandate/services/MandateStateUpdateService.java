@@ -14,6 +14,8 @@ import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 
 import javax.inject.Inject;
 
+import java.util.Optional;
+
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CANCELLED;

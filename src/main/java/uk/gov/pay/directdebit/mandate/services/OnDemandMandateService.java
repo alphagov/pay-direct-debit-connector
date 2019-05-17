@@ -9,6 +9,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
+import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
@@ -43,16 +44,19 @@ public class OnDemandMandateService implements MandateCommandService {
             Mandate mandate,
             ConfirmMandateRequest confirmDetailsRequest) {
 
-        mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED);
-        Mandate confirmedMandate = paymentProviderFactory
-                .getCommandServiceFor(gatewayAccount.getPaymentProvider())
-                .confirmOnDemandMandate(
-                        mandate,
-                        new BankAccountDetails(
-                                confirmDetailsRequest.getAccountNumber(),
-                                confirmDetailsRequest.getSortCode())
-                );
-        mandateStateUpdateService.confirmedOnDemandDirectDebitDetailsFor(confirmedMandate);
+        if (mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)) {
+            Mandate confirmedMandate = paymentProviderFactory
+                    .getCommandServiceFor(gatewayAccount.getPaymentProvider())
+                    .confirmOnDemandMandate(
+                            mandate,
+                            new BankAccountDetails(
+                                    confirmDetailsRequest.getAccountNumber(),
+                                    confirmDetailsRequest.getSortCode())
+                    );
+            mandateStateUpdateService.confirmedOnDemandDirectDebitDetailsFor(confirmedMandate);
+        } else {
+            throw new InvalidStateTransitionException(DIRECT_DEBIT_DETAILS_CONFIRMED.toString(), mandate.getState().toString());
+        }
     }
 
     public Transaction collect(GatewayAccount gatewayAccount, Mandate mandate,
