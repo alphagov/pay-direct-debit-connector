@@ -96,7 +96,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
                 resultSet.getLong(MANDATE_ID_COLUMN),
                 gatewayAccount,
                 MandateType.valueOf(resultSet.getString(MANDATE_TYPE_COLUMN)),
-                MandateExternalId.of(resultSet.getString(MANDATE_EXTERNAL_ID_COLUMN)),
+                MandateExternalId.valueOf(resultSet.getString(MANDATE_EXTERNAL_ID_COLUMN)),
                 resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN),
                 resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN),
                 MandateState.valueOf(resultSet.getString(MANDATE_STATE_COLUMN)),

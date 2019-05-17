@@ -126,7 +126,7 @@ public class MandateResourceIT {
                 .body("return_url", is(returnUrl))
                 .body("created_date", is(notNullValue()))
                 .contentType(JSON);
-        MandateExternalId externalMandateId = MandateExternalId.of(response.extract().path(JSON_MANDATE_ID_KEY).toString());
+        MandateExternalId externalMandateId = MandateExternalId.valueOf(response.extract().path(JSON_MANDATE_ID_KEY).toString());
 
         String documentLocation = expectedMandateLocationFor(accountExternalId, externalMandateId);
         String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(externalMandateId).get("secure_redirect_token").toString();
@@ -179,7 +179,7 @@ public class MandateResourceIT {
                 .body("service_reference", is("test-service-reference"))
                 .body("mandate_reference", is(notNullValue()))
                 .contentType(JSON);
-        MandateExternalId externalMandateId = MandateExternalId.of(response.extract().path(JSON_MANDATE_ID_KEY).toString());
+        MandateExternalId externalMandateId = MandateExternalId.valueOf(response.extract().path(JSON_MANDATE_ID_KEY).toString());
 
         String documentLocation = expectedMandateLocationFor(accountExternalId, externalMandateId);
         String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(externalMandateId).get("secure_redirect_token").toString();

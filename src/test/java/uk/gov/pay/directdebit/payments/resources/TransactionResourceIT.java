@@ -140,7 +140,7 @@ public class TransactionResourceIT {
         assertThat(createdMandate.get("return_url"), is(returnUrl));
         assertThat(createdMandate.get("gateway_account_id"), is(testGatewayAccount.getId()));
 
-        MandateExternalId mandateExternalId = MandateExternalId.of((String) createdMandate.get("external_id"));
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf((String) createdMandate.get("external_id"));
         List<Map<String, Object>> createdTransactions = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateExternalId);
         assertThat(createdTransactions.size(), is(1));
         assertThat(createdTransactions.get(0).get("payer"), is(nullValue()));

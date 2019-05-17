@@ -19,7 +19,7 @@ import java.time.ZonedDateTime;
 public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
-    private MandateExternalId mandateExternalId = MandateExternalId.of(RandomIdGenerator.newId());
+    private MandateExternalId mandateExternalId = MandateExternalId.valueOf(RandomIdGenerator.newId());
     private String mandateReference = RandomStringUtils.randomAlphanumeric(18);
     private String serviceReference = RandomStringUtils.randomAlphanumeric(18);
     private MandateState state = MandateState.CREATED;

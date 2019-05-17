@@ -51,7 +51,7 @@ public abstract class GoCardlessServiceTest {
 
     static final String CUSTOMER_ID = "CU328471";
     static final String BANK_ACCOUNT_ID = "BA34983496";
-    static final MandateExternalId MANDATE_ID = MandateExternalId.of("sdkfhsdkjfhjdks");
+    static final MandateExternalId MANDATE_ID = MandateExternalId.valueOf("sdkfhsdkjfhjdks");
     static final String TRANSACTION_ID = "sdkfhsd2jfhjdks";
     static final SortCode SORT_CODE = SortCode.of("123456");
     static final AccountNumber ACCOUNT_NUMBER = AccountNumber.of("12345678");

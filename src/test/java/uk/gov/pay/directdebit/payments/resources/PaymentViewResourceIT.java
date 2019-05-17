@@ -332,8 +332,8 @@ public class PaymentViewResourceIT {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
-        MandateExternalId anotherMandateExternalId = MandateExternalId.of("another-external-id");
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("a-mandate-external-id");
+        MandateExternalId anotherMandateExternalId = MandateExternalId.valueOf("another-external-id");
         MandateFixture mandateFixture1 = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)
@@ -382,7 +382,7 @@ public class PaymentViewResourceIT {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("a-mandate-external-id");
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)
