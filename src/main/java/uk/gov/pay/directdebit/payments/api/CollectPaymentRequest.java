@@ -28,7 +28,7 @@ public class CollectPaymentRequest implements CollectRequest {
 
     public static CollectPaymentRequest of(Map<String, String> collectPaymentRequest) {
         return new CollectPaymentRequest(
-                MandateExternalId.of(collectPaymentRequest.get("agreement_id")),
+                MandateExternalId.valueOf(collectPaymentRequest.get("agreement_id")),
                 Long.valueOf(collectPaymentRequest.get("amount")),
                 collectPaymentRequest.get("description"),
                 collectPaymentRequest.get("reference")

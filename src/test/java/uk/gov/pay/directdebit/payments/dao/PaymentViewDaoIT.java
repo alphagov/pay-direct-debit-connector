@@ -1,10 +1,5 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +16,11 @@ import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 import uk.gov.pay.directdebit.payments.params.SearchDateParams;
+
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -264,8 +264,8 @@ public class PaymentViewDaoIT {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
-        MandateExternalId anotherMandateExternalId = MandateExternalId.of("another-external-id");
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("a-mandate-external-id");
+        MandateExternalId anotherMandateExternalId = MandateExternalId.valueOf("another-external-id");
         MandateFixture mandateFixture1 = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)
@@ -309,7 +309,7 @@ public class PaymentViewDaoIT {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("a-mandate-external-id");
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)
@@ -340,7 +340,7 @@ public class PaymentViewDaoIT {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("a-mandate-external-id");
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)
@@ -371,7 +371,7 @@ public class PaymentViewDaoIT {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("a-mandate-external-id");
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)
@@ -402,7 +402,7 @@ public class PaymentViewDaoIT {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("a-mandate-external-id");
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)
@@ -433,7 +433,7 @@ public class PaymentViewDaoIT {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
                 .insert(testContext.getJdbi());
-        MandateExternalId mandateExternalId = MandateExternalId.of("a-mandate-external-id");
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("a-mandate-external-id");
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withExternalId(mandateExternalId)

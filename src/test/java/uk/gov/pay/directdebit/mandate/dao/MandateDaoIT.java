@@ -57,7 +57,7 @@ public class MandateDaoIT {
                         null,
                         gatewayAccountFixture.toEntity(),
                         MandateType.ONE_OFF,
-                        MandateExternalId.of(RandomIdGenerator.newId()),
+                        MandateExternalId.valueOf(RandomIdGenerator.newId()),
                         "test-reference",
                         null,
                         MandateState.PENDING,
@@ -85,7 +85,7 @@ public class MandateDaoIT {
                         null,
                         gatewayAccountFixture.toEntity(),
                         MandateType.ONE_OFF,
-                        MandateExternalId.of(RandomIdGenerator.newId()),
+                        MandateExternalId.valueOf(RandomIdGenerator.newId()),
                         "test-reference",
                         "test-service-reference",
                         MandateState.PENDING,
@@ -174,7 +174,7 @@ public class MandateDaoIT {
 
     @Test
     public void shouldNotFindAMandateByExternalId_ifExternalIdIsInvalid() {
-        MandateExternalId invalidMandateId = MandateExternalId.of("invalid1d");
+        MandateExternalId invalidMandateId = MandateExternalId.valueOf("invalid1d");
         assertThat(mandateDao.findByExternalId(invalidMandateId), is(Optional.empty()));
     }
 

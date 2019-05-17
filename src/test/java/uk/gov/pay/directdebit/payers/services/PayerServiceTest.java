@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.payers.services;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,14 +11,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
 import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
+
+import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -55,7 +56,7 @@ public class PayerServiceTest {
             "account_number", ACCOUNT_NUMBER,
             "bank_name", BANK_NAME
     );
-    private MandateExternalId mandateExternalId = MandateExternalId.of("sdkfhsdkjfhjdks");
+    private MandateExternalId mandateExternalId = MandateExternalId.valueOf("sdkfhsdkjfhjdks");
 
     private Payer payer = PayerFixture.aPayerFixture()
             .withName("mr payment").toEntity();

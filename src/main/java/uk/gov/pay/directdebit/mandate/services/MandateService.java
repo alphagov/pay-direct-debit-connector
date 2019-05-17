@@ -84,7 +84,7 @@ public class MandateService {
                             null,
                             gatewayAccount,
                             createRequest.getMandateType(),
-                            MandateExternalId.of(RandomIdGenerator.newId()),
+                            MandateExternalId.valueOf(RandomIdGenerator.newId()),
                             mandateReference,
                             createRequest.getReference(),
                             MandateState.CREATED,

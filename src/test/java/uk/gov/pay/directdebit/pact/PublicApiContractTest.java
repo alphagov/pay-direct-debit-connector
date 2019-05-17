@@ -64,7 +64,7 @@ public class PublicApiContractTest {
     @State("a gateway account with external id and a mandate with external id exist")
     public void aGatewayAccountWithExternalIdAndAMandateWithExternalIdExist(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
-        testMandate.withGatewayAccountFixture(testGatewayAccount).withExternalId(MandateExternalId.of(params.get("mandate_id"))).insert(app.getTestContext().getJdbi());
+        testMandate.withGatewayAccountFixture(testGatewayAccount).withExternalId(MandateExternalId.valueOf(params.get("mandate_id"))).insert(app.getTestContext().getJdbi());
     }
 
     @State("three transaction records exist")
@@ -72,7 +72,7 @@ public class PublicApiContractTest {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
-                .withExternalId(MandateExternalId.of(params.get("agreement_id")));
+                .withExternalId(MandateExternalId.valueOf(params.get("agreement_id")));
         testMandate.insert(app.getTestContext().getJdbi());
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
         testPayer.insert(app.getTestContext().getJdbi());
@@ -85,7 +85,7 @@ public class PublicApiContractTest {
     public void aDirectDebitEventExists(Map<String, String> params) {
 
         String transactionExternalId = params.getOrDefault("transaction_external_id", RandomIdGenerator.newId());
-        MandateExternalId mandateExternalId = MandateExternalId.of(params.getOrDefault("mandate_external_id", RandomIdGenerator.newId()));
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf(params.getOrDefault("mandate_external_id", RandomIdGenerator.newId()));
 
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .insert(app.getTestContext().getJdbi());
