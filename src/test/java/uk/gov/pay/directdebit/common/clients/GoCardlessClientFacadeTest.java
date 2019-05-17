@@ -130,7 +130,7 @@ public class GoCardlessClientFacadeTest {
         given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.BACS);
         given(mockSchemeIdentifier.getName()).willReturn(sunName.toString());
 
-        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.of(creditorId));
+        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.valueOf(creditorId));
 
         assertThat(result, is(Optional.of(sunName)));
     }
@@ -142,14 +142,14 @@ public class GoCardlessClientFacadeTest {
         given(mockCreditor.getSchemeIdentifiers()).willReturn(Collections.singletonList(mockSchemeIdentifier));
         given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.SEPA);
 
-        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.of(creditorId));
+        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.valueOf(creditorId));
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
     public void createMandateReturnsGoCardlessMandate() {
-        GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.of("gocardless-test-creditor-id-here");
+        GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.valueOf("gocardless-test-creditor-id-here");
         uk.gov.pay.directdebit.mandate.model.Mandate mandate =
                 MandateFixture.aMandateFixture().toEntity();
         GoCardlessCustomer goCardlessCustomer =

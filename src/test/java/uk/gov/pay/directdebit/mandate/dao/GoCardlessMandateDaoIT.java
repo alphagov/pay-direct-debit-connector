@@ -33,7 +33,7 @@ public class GoCardlessMandateDaoIT {
     private MandateFixture mandateFixture;
 
     private final static String GOCARDLESS_MANDATE_ID = "NA23434";
-    private final static GoCardlessCreditorId GOCARDLESS_CREDITOR_ID = GoCardlessCreditorId.of("CREDITORID123");
+    private final static GoCardlessCreditorId GOCARDLESS_CREDITOR_ID = GoCardlessCreditorId.valueOf("CREDITORID123");
 
     private GoCardlessMandateFixture testGoCardlessMandate;
 

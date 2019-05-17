@@ -12,7 +12,7 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long mandateId = RandomUtils.nextLong(1, 99999);
     private String goCardlessMandateId = RandomIdGenerator.newId();
-    private GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.of(RandomIdGenerator.newId());
+    private GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.valueOf(RandomIdGenerator.newId());
 
     private GoCardlessMandateFixture() {
     }
