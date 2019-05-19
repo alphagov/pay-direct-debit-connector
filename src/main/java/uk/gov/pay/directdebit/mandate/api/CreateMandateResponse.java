@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
@@ -43,7 +44,8 @@ public class CreateMandateResponse {
     private String serviceReference;
 
     @JsonProperty("mandate_reference")
-    private String mandateReference;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private MandateBankStatementReference mandateReference;
 
     public CreateMandateResponse(MandateExternalId mandateId,
                                  MandateType mandateType,
@@ -52,7 +54,7 @@ public class CreateMandateResponse {
                                  ExternalMandateState state,
                                  List<Map<String, Object>> dataLinks,
                                  String serviceReference,
-                                 String mandateReference) {
+                                 MandateBankStatementReference mandateReference) {
         this.dataLinks = dataLinks;
         this.mandateId = mandateId;
         this.mandateType = mandateType;
@@ -87,7 +89,7 @@ public class CreateMandateResponse {
         return serviceReference;
     }
 
-    public String getMandateReference() {
+    public MandateBankStatementReference getMandateReference() {
         return mandateReference;
     }
 

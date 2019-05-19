@@ -2,8 +2,8 @@ package uk.gov.pay.directdebit.notifications.services;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.common.services.SunService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -42,7 +42,7 @@ public class UserNotificationService {
     public void sendMandateFailedEmailFor(Mandate mandate) {
         adminUsersClient.sendEmail(EmailTemplate.MANDATE_FAILED, mandate,
                 ImmutableMap.of(
-                        MANDATE_REFERENCE_KEY, mandate.getMandateReference(),
+                        MANDATE_REFERENCE_KEY, mandate.getMandateReference().toString(),
                         DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
                 )
         );
@@ -58,7 +58,7 @@ public class UserNotificationService {
 
         adminUsersClient.sendEmail(template, mandate,
                 ImmutableMap.<String, String>builder()
-                        .put(MANDATE_REFERENCE_KEY, mandate.getMandateReference())
+                        .put(MANDATE_REFERENCE_KEY, mandate.getMandateReference().toString())
                         .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().getAccountNumberLastTwoDigits())
                         .put(STATEMENT_NAME_KEY, sunName.get().toString())
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
@@ -69,7 +69,7 @@ public class UserNotificationService {
     public void sendMandateCancelledEmailFor(Mandate mandate) {
         adminUsersClient.sendEmail(EmailTemplate.MANDATE_CANCELLED, mandate,
                 ImmutableMap.of(
-                        MANDATE_REFERENCE_KEY, mandate.getMandateReference(),
+                        MANDATE_REFERENCE_KEY, mandate.getMandateReference().toString(),
                         DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
                 )
         );
@@ -95,7 +95,7 @@ public class UserNotificationService {
                 ImmutableMap.<String, String>builder()
                         .put(AMOUNT_KEY, formatToPounds(transaction.getAmount()))
                         .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate))
-                        .put(MANDATE_REFERENCE_KEY, mandate.getMandateReference())
+                        .put(MANDATE_REFERENCE_KEY, mandate.getMandateReference().toString())
                         .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().getAccountNumberLastTwoDigits())
                         .put(STATEMENT_NAME_KEY, sunName.get().toString())
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())

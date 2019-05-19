@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -90,7 +91,7 @@ public class MandateMapper implements RowMapper<Mandate> {
                 gatewayAccount,
                 MandateType.valueOf(resultSet.getString(MANDATE_TYPE_COLUMN)),
                 MandateExternalId.valueOf(resultSet.getString(EXTERNAL_ID_COLUMN)),
-                resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN),
+                MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)),
                 resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN),
                 MandateState.valueOf(resultSet.getString(STATE_COLUMN)),
                 resultSet.getString(RETURN_URL_COLUMN),

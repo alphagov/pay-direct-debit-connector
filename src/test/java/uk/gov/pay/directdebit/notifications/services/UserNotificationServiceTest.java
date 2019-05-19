@@ -61,7 +61,7 @@ public class UserNotificationServiceTest {
     @Test
     public void shouldSendMandateFailedEmail() {
         HashMap<String, String> emailPersonalisation = new HashMap<>();
-        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
+        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference().toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
         userNotificationService.sendMandateFailedEmailFor(mandateFixture.toEntity());
@@ -78,7 +78,7 @@ public class UserNotificationServiceTest {
         SunName sunName = SunName.of("test sun Name");
         when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
         HashMap<String, String> emailPersonalisation = new HashMap<>();
-        emailPersonalisation.put("mandate reference", mandate.getMandateReference());
+        emailPersonalisation.put("mandate reference", mandate.getMandateReference().toString());
         emailPersonalisation.put("bank account last 2 digits", mandate.getPayer().getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", sunName.toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
@@ -101,7 +101,7 @@ public class UserNotificationServiceTest {
     @Test
     public void shouldSendMandateCancelledEmail() {
         HashMap<String, String> emailPersonalisation = new HashMap<>();
-        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference());
+        emailPersonalisation.put("mandate reference", mandateFixture.getMandateReference().toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
         userNotificationService.sendMandateCancelledEmailFor(mandateFixture.toEntity());
@@ -123,7 +123,7 @@ public class UserNotificationServiceTest {
 
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("amount", "123.45");
-        emailPersonalisation.put("mandate reference", mandate.getMandateReference());
+        emailPersonalisation.put("mandate reference", mandate.getMandateReference().toString());
         emailPersonalisation.put("collection date", "21/05/2018");
         emailPersonalisation.put("bank account last 2 digits", payerFixture.getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", sunName.toString());
@@ -162,7 +162,7 @@ public class UserNotificationServiceTest {
         when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("amount", "123.45");
-        emailPersonalisation.put("mandate reference", mandate.getMandateReference());
+        emailPersonalisation.put("mandate reference", mandate.getMandateReference().toString());
         emailPersonalisation.put("collection date", "21/05/2018");
         emailPersonalisation.put("bank account last 2 digits", payerFixture.getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", sunName.toString());

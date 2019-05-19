@@ -19,6 +19,7 @@ import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneOffMandateException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -76,9 +77,9 @@ public class MandateService {
                     // TODO:
                     // when we introduce GoCardless gateway accounts to work with create mandate,
                     // then modify appropriate mandate reference values
-                    String mandateReference = PaymentProvider.SANDBOX.equals(gatewayAccount.getPaymentProvider()) ?
-                            RandomStringUtils.randomAlphanumeric(18) :
-                            "gocardless-default";
+                    MandateBankStatementReference mandateReference = MandateBankStatementReference.valueOf(
+                            PaymentProvider.SANDBOX.equals(gatewayAccount.getPaymentProvider()) ?
+                                RandomStringUtils.randomAlphanumeric(18) : "gocardless-default");
 
                     Mandate mandate = new Mandate(
                             null,

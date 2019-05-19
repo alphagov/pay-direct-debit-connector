@@ -18,6 +18,7 @@ import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -163,14 +164,14 @@ public class MandateServiceTest {
     public void shouldCreateAMandateForSandbox_withCustomGeneratedReference() {
         Mandate mandate = getMandateForProvider(PaymentProvider.SANDBOX);
 
-        assertThat(mandate.getMandateReference(), is(not("gocardless-default")));
+        assertThat(mandate.getMandateReference(), is(not(MandateBankStatementReference.valueOf("gocardless-default"))));
     }
 
     @Test
     public void shouldCreateAMandateForGoCardless_withCustomGeneratedReference() {
         Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
 
-        assertThat(mandate.getMandateReference(), is("gocardless-default"));
+        assertThat(mandate.getMandateReference(), is(MandateBankStatementReference.valueOf("gocardless-default")));
     }
 
     private Map<String, String> getMandateRequestPayload() {
