@@ -10,6 +10,8 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
@@ -20,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
+@RegisterArgumentFactory(MandateBankStatementReferenceArgumentFactory.class)
 @RegisterRowMapper(MandateMapper.class)
 public interface MandateDao {
 
@@ -96,5 +99,5 @@ public interface MandateDao {
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
 
     @SqlUpdate("UPDATE mandates m SET mandate_reference = :mandateReference WHERE m.id = :id")
-    int updateMandateReference(@Bind("id") Long id, @Bind("mandateReference") String mandateReference);
+    int updateMandateReference(@Bind("id") Long id, @Bind("mandateReference") MandateBankStatementReference mandateReference);
 }

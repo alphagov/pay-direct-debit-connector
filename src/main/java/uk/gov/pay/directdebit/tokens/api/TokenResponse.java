@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -29,7 +30,8 @@ public class TokenResponse {
     private String gatewayAccountExternalId;
 
     @JsonProperty("mandate_reference")
-    private String mandateReference;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private MandateBankStatementReference mandateReference;
 
     @JsonProperty("mandate_type")
     private String mandateType;
@@ -40,7 +42,7 @@ public class TokenResponse {
     private TokenResponse(MandateExternalId mandateExternalId,
                           Long gatewayAccountId,
                           String gatewayAccountExternalId,
-                          String mandateReference,
+                          MandateBankStatementReference mandateReference,
                           String returnUrl,
                           String mandateType,
                           String state,
@@ -111,7 +113,7 @@ public class TokenResponse {
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + gatewayAccountId.hashCode();
         result = 31 * result + gatewayAccountExternalId.hashCode();
-        result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
+        result = 31 * result + mandateReference.hashCode();
         result = 31 * result + mandateType.hashCode();
         result = 31 * result + (transactionExternalId != null ? transactionExternalId.hashCode()
                 : 0);

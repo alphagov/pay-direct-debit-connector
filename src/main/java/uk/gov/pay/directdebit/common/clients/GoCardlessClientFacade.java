@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
@@ -23,6 +24,7 @@ import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
+import javax.ws.rs.HEAD;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -55,7 +57,7 @@ public class GoCardlessClientFacade {
         return new GoCardlessMandate(
                 mandate.getId(),
                 GoCardlessMandateId.valueOf(gcMandate.getId()),
-                gcMandate.getReference(),
+                MandateBankStatementReference.valueOf(gcMandate.getReference()),
                 GoCardlessCreditorId.valueOf(gcMandate.getLinks().getCreditor()));
     }
 

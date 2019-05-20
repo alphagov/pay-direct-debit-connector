@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardles
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
@@ -156,10 +157,10 @@ public class GoCardlessClientFacadeTest {
         GoCardlessCustomer goCardlessCustomer =
                 GoCardlessCustomerFixture.aGoCardlessCustomerFixture().toEntity();
 
-        String goCardlessReference = "test-gocardless-mandate-reference-here";
+        MandateBankStatementReference goCardlessReference = MandateBankStatementReference.valueOf("test-gocardless-mandate-reference-here");
         GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("test-gocardless-mandate-id-here");
         given(mockMandate.getId()).willReturn(goCardlessMandateId.toString());
-        given(mockMandate.getReference()).willReturn(goCardlessReference);
+        given(mockMandate.getReference()).willReturn(goCardlessReference.toString());
         given(mockMandate.getLinks()).willReturn(mockMandateLinks);
         given(mockMandateLinks.getCreditor()).willReturn(goCardlessCreditorId.toString());
 

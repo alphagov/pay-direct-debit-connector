@@ -13,7 +13,7 @@ public class Mandate {
     private final GatewayAccount gatewayAccount;
     private final String returnUrl;
     private final MandateType type;
-    private String mandateReference;
+    private MandateBankStatementReference mandateReference;
     private final String serviceReference;
     private final ZonedDateTime createdDate;
     private Payer payer;
@@ -23,7 +23,7 @@ public class Mandate {
             GatewayAccount gatewayAccount,
             MandateType type,
             MandateExternalId externalId,
-            String mandateReference,
+            MandateBankStatementReference mandateReference,
             String serviceReference,
             MandateState state,
             String returnUrl,
@@ -78,7 +78,7 @@ public class Mandate {
         this.state = state;
     }
 
-    public String getMandateReference() {
+    public MandateBankStatementReference getMandateReference() {
         return mandateReference;
     }
 
@@ -90,7 +90,7 @@ public class Mandate {
         return type;
     }
 
-    public void setMandateReference(String mandateReference) {
+    public void setMandateReference(MandateBankStatementReference mandateReference) {
         this.mandateReference = mandateReference;
     }
 
@@ -145,7 +145,7 @@ public class Mandate {
         result = 31 * result + gatewayAccount.hashCode();
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + type.hashCode();
-        result = 31 * result + (mandateReference != null ? mandateReference.hashCode() : 0);
+        result = 31 * result + mandateReference.hashCode();
         result = 31 * result + (serviceReference != null ? serviceReference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();
         return result;
