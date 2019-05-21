@@ -21,11 +21,16 @@ import javax.inject.Inject;
 import javax.net.ssl.HostnameVerifier;
 import javax.ws.rs.client.Client;
 
-public class ClientFactory {
+import static java.lang.String.format;
 
+public class ClientFactory {
+    
     private final Environment environment;
     private final DirectDebitConfig conf;
 
+    private final static String PROXY_HOST_PROPERTY = "https.proxyHost";
+    private final static String PROXY_PORT_PROPERTY = "https.proxyPort";
+    
     @Inject
     public ClientFactory(Environment environment, DirectDebitConfig conf) {
         this.environment = environment;
@@ -39,6 +44,12 @@ public class ClientFactory {
                 .using(clientConfiguration)
                 .withProperty(ClientProperties.READ_TIMEOUT, (int) conf.getCustomJerseyClient().getReadTimeout().toMilliseconds())
                 .withProperty(ApacheClientProperties.CONNECTION_MANAGER, createConnectionManager());
+
+        if (System.getProperty(PROXY_HOST_PROPERTY) != null && System.getProperty(PROXY_PORT_PROPERTY) != null) {
+            defaultClientBuilder.withProperty(ClientProperties.PROXY_URI, format("http://%s:%s",
+                    System.getProperty(PROXY_HOST_PROPERTY), System.getProperty(PROXY_PORT_PROPERTY))
+            );
+        }
 
         Client client = defaultClientBuilder.build(clientName);
         client.register(LoggingFilter.class);
