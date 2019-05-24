@@ -89,7 +89,6 @@ public class GatewayAccountServiceTest {
         assertThat(gatewayAccount.getPaymentProvider(), is(PAYMENT_PROVIDER));
         assertThat(gatewayAccount.getAnalyticsId(), is(ANALYTICS_ID));
         assertThat(gatewayAccount.getDescription(), is(DESCRIPTION));
-        assertThat(gatewayAccount.getServiceName(), is(SERVICE_NAME));
         assertThat(gatewayAccount.getType(), is(TYPE));
     }
 
@@ -112,7 +111,6 @@ public class GatewayAccountServiceTest {
         assertThat(gatewayAccount.getPaymentProvider(), is(PAYMENT_PROVIDER));
         assertThat(gatewayAccount.getAnalyticsId(), is(ANALYTICS_ID));
         assertThat(gatewayAccount.getDescription(), is(DESCRIPTION));
-        assertThat(gatewayAccount.getServiceName(), is(SERVICE_NAME));
         assertThat(gatewayAccount.getType(), is(TYPE));
     }
 
@@ -174,12 +172,11 @@ public class GatewayAccountServiceTest {
 
     @Test
     public void shouldStoreAGatewayAccount() {
-        CreateGatewayAccountRequest request = new CreateGatewayAccountRequest(PaymentProvider.SANDBOX, "aServiceName", GatewayAccount.Type.TEST, 
+        CreateGatewayAccountRequest request = new CreateGatewayAccountRequest(PaymentProvider.SANDBOX, GatewayAccount.Type.TEST, 
                         "aDescription", "123", PaymentProviderAccessToken.of("token"), GoCardlessOrganisationId.valueOf("provider"));
         ArgumentCaptor<GatewayAccount> capturedGatewayAccount = ArgumentCaptor.forClass(GatewayAccount.class);
         service.create(request);
         verify(mockedGatewayAccountDao).insert(capturedGatewayAccount.capture());
-        assertThat(capturedGatewayAccount.getValue().getServiceName(), is("aServiceName"));
         assertThat(capturedGatewayAccount.getValue().getPaymentProvider(), is(PaymentProvider.SANDBOX));
     }
     

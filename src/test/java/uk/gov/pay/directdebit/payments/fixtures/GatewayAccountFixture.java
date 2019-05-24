@@ -136,7 +136,7 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
 
     @Override
     public GatewayAccount toEntity() {
-        return new GatewayAccount(id, externalId, paymentProvider, type, serviceName, description, analyticsId, accessToken, organisation);
+        return new GatewayAccount(id, externalId, paymentProvider, type, description, analyticsId, accessToken, organisation);
     }
 
 }

@@ -30,9 +30,9 @@ public interface GatewayAccountDao {
     List<GatewayAccount> findAll();
 
     @SqlUpdate("INSERT INTO gateway_accounts(external_id, payment_provider, " +
-            "type, service_name, description, analytics_id, access_token, organisation) " +
+            "type, description, analytics_id, access_token, organisation) " +
             "VALUES (:externalId, :paymentProvider, " +
-            ":type, :serviceName, :description, :analyticsId, :accessToken, :organisation)")
+            ":type, :description, :analyticsId, :accessToken, :organisation)")
     @GetGeneratedKeys
     Long insert(@BindBean GatewayAccount gatewayAccount);
 

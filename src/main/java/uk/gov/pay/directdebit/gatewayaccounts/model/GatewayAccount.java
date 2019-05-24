@@ -26,32 +26,30 @@ public class GatewayAccount {
     private String externalId;
     private PaymentProvider paymentProvider;
     private Type type;
-    private String serviceName;
     private String description;
     private String analyticsId;
     private PaymentProviderAccessToken accessToken;
     private GoCardlessOrganisationId organisation;
 
-    public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId,
+    public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String description, String analyticsId,
                           PaymentProviderAccessToken accessToken, GoCardlessOrganisationId organisation) {
         this.id = id;
         this.externalId = externalId;
         this.paymentProvider = paymentProvider;
         this.type = type;
-        this.serviceName = serviceName;
         this.description = description;
         this.analyticsId = analyticsId;
         this.accessToken = accessToken;
         this.organisation = organisation;
     }
 
-    public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId) {
-        this(id, externalId, paymentProvider, type, serviceName, description, analyticsId, null, null);
+    public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String description, String analyticsId) {
+        this(id, externalId, paymentProvider, type, description, analyticsId, null, null);
     }
 
-    public GatewayAccount(PaymentProvider paymentProvider, Type type, String serviceName, String description, String analyticsId,
+    public GatewayAccount(PaymentProvider paymentProvider, Type type, String description, String analyticsId,
                           PaymentProviderAccessToken accessToken, GoCardlessOrganisationId organisation) {
-        this(null, generateExternalId(), paymentProvider, type, serviceName, description, analyticsId, accessToken, organisation);
+        this(null, generateExternalId(), paymentProvider, type, description, analyticsId, accessToken, organisation);
     }
 
     private static String generateExternalId() {
@@ -81,16 +79,7 @@ public class GatewayAccount {
         this.type = type;
         return this;
     }
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    public GatewayAccount setServiceName(String serviceName) {
-        this.serviceName = serviceName;
-        return this;
-    }
-
+    
     public String getDescription() {
         return description;
     }
@@ -159,10 +148,6 @@ public class GatewayAccount {
         if (type != that.type) {
             return false;
         }
-        if (serviceName != null ? !serviceName.equals(that.serviceName)
-                : that.serviceName != null) {
-            return false;
-        }
         if (description != null ? !description.equals(that.description)
                 : that.description != null) {
             return false;
@@ -185,7 +170,6 @@ public class GatewayAccount {
         result = 31 * result + externalId.hashCode();
         result = 31 * result + paymentProvider.hashCode();
         result = 31 * result + type.hashCode();
-        result = 31 * result + (serviceName != null ? serviceName.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (analyticsId != null ? analyticsId.hashCode() : 0);
         result = 31 * result + (accessToken != null ? accessToken.hashCode() : 0);
