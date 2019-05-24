@@ -74,7 +74,7 @@ database:
   # the minimum amount of time an connection must sit idle in the pool before it is eligible for eviction
   minIdleTime: 1 minute
 
-jerseyClient:
+httpClient:
   # Defines the socket timeout (SO_TIMEOUT), which is the
   # timeout for waiting for data or, put differently, a maximum period inactivity
   # between two consecutive data packets).
@@ -90,6 +90,11 @@ jerseyClient:
   keepAlive: 0ms
   retries: 0
   userAgent: directdebit-connector
+  tls:
+    supportedProtocols:
+      - TLSv1.2
+
+jerseyClient:
   gzipEnabledForRequests: false
 
 customJerseyClient:
