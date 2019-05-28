@@ -34,7 +34,6 @@ import java.util.Optional;
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"))
 //uncommenting the below is useful for testing pacts locally. grab the pact from the broker and put it in /pacts
 //@PactFolder("pacts")
-//@RunWith(PactRunner.class)
 public class PublicApiContractTest {
 
     @ClassRule
@@ -64,7 +63,10 @@ public class PublicApiContractTest {
     @State("a gateway account with external id and a mandate with external id exist")
     public void aGatewayAccountWithExternalIdAndAMandateWithExternalIdExist(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
-        testMandate.withGatewayAccountFixture(testGatewayAccount).withExternalId(MandateExternalId.valueOf(params.get("mandate_id"))).insert(app.getTestContext().getJdbi());
+        testMandate.withGatewayAccountFixture(testGatewayAccount)
+                .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
+                .withPayerFixture(PayerFixture.aPayerFixture())
+                .insert(app.getTestContext().getJdbi());
     }
 
     @State("three transaction records exist")
