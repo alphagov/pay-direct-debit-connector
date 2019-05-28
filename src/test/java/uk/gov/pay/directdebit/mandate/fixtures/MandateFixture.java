@@ -25,7 +25,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     private String serviceReference = RandomStringUtils.randomAlphanumeric(18);
     private MandateState state = MandateState.CREATED;
     private String returnUrl = "http://service.test/success-page";
-    private MandateType mandateType = MandateType.ONE_OFF;
+    private MandateType mandateType = MandateType.ON_DEMAND;
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private PayerFixture payerFixture = null;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
