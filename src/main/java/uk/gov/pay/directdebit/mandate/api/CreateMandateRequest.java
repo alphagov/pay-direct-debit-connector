@@ -23,11 +23,12 @@ public class CreateMandateRequest implements CreateRequest {
     }
 
     public static CreateMandateRequest of(Map<String, String> createMandateRequest) {
+        String agreementType = createMandateRequest.getOrDefault("agreement_type", MandateType.ON_DEMAND.toString());
+
         return new CreateMandateRequest(
                 createMandateRequest.get("return_url"),
-                MandateType.fromString(createMandateRequest.get("agreement_type")),
-                createMandateRequest.get("service_reference")
-        );
+                MandateType.fromString(agreementType),
+                createMandateRequest.get("service_reference"));
     }
 
     public String getReturnUrl() {

@@ -19,7 +19,7 @@ public class CreateMandateRequestValidator extends ApiValidation {
                     .put(REFERENCE_KEY, ApiValidation::isNotNullOrEmpty)
                     .build();
 
-    private final static String[] requiredFields = {AGREEMENT_TYPE_KEY, RETURN_URL_KEY};
+    private final static String[] requiredFields = {RETURN_URL_KEY};
 
     private final static Map<String, FieldSize> fieldSizes =
             ImmutableMap.<String, FieldSize>builder()
