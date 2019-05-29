@@ -107,7 +107,6 @@ public class GatewayAccountDaoIT {
         testGatewayAccount.insert(testContext.getJdbi());
         GatewayAccountFixture.aGatewayAccountFixture()
                 .withExternalId(externalId2)
-                .withServiceName(serviceName2)
                 .withDescription(description2)
                 .withPaymentProvider(paymentProvider2)
                 .withAnalyticsId(analyticsId2)
@@ -159,7 +158,6 @@ public class GatewayAccountDaoIT {
         GatewayAccountFixture
           .aGatewayAccountFixture()
           .withExternalId(externalId)
-          .withServiceName(serviceName)
           .withDescription(description)
           .withPaymentProvider(paymentProvider)
           .withAnalyticsId(analyticsId)
@@ -168,7 +166,6 @@ public class GatewayAccountDaoIT {
         GatewayAccountFixture
           .aGatewayAccountFixture()
           .withExternalId(externalId2)
-          .withServiceName(serviceName2)
           .withDescription(description2)
           .withPaymentProvider(paymentProvider2)
           .withAnalyticsId(analyticsId2)

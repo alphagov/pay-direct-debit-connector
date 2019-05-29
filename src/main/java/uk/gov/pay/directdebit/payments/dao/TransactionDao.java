@@ -45,7 +45,6 @@ public interface TransactionDao {
             "  g.id AS gateway_account_id," +
             "  g.external_id AS gateway_account_external_id," +
             "  g.payment_provider AS gateway_account_payment_provider," +
-            "  g.service_name AS gateway_account_service_name," +
             "  g.type AS gateway_account_type," +
             "  g.description AS gateway_account_description," +
             "  g.analytics_id AS gateway_account_analytics_id," +

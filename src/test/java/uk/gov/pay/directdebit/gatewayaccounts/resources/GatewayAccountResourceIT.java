@@ -95,7 +95,6 @@ public class GatewayAccountResourceIT {
     @Test
     public void shouldReturnAGatewayAccountWithMinimalFields() {
         GatewayAccountFixture testGatewayAccount2 = GatewayAccountFixture.aGatewayAccountFixture()
-                .withServiceName("service")
                 .withExternalId("externalId")
                 .withPaymentProvider(PaymentProvider.GOCARDLESS)
                 .withType(GatewayAccount.Type.LIVE)
@@ -132,7 +131,6 @@ public class GatewayAccountResourceIT {
 
         GatewayAccountFixture testGatewayAccount2 = GatewayAccountFixture.aGatewayAccountFixture()
                 .withExternalId(externalId2)
-                .withServiceName(serviceName2)
                 .withDescription(description2)
                 .withPaymentProvider(paymentProvider2)
                 .withAnalyticsId(analyticsId2)
@@ -196,7 +194,6 @@ public class GatewayAccountResourceIT {
 
         GatewayAccountFixture testGatewayAccount3 = GatewayAccountFixture.aGatewayAccountFixture()
                 .withExternalId(externalId3)
-                .withServiceName(serviceName3)
                 .withDescription(description3)
                 .withPaymentProvider(paymentProvider3)
                 .withAnalyticsId(analyticsId3)
@@ -344,7 +341,6 @@ public class GatewayAccountResourceIT {
 
         GatewayAccountFixture testGatewayAccount4 = GatewayAccountFixture.aGatewayAccountFixture()
                 .withExternalId(externalId4)
-                .withServiceName(serviceName4)
                 .withDescription(description4)
                 .withPaymentProvider(paymentProvider3)
                 .withAnalyticsId(analyticsId4)

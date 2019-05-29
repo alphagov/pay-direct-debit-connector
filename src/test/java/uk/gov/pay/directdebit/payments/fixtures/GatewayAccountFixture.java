@@ -16,7 +16,6 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
     private String externalId = RandomIdGenerator.newId();
     private PaymentProvider paymentProvider = PaymentProvider.SANDBOX;
     private GatewayAccount.Type type = GatewayAccount.Type.TEST;
-    private String serviceName = RandomStringUtils.randomAlphabetic(25);
     private String description = RandomStringUtils.randomAlphabetic(25);
     private String analyticsId = RandomStringUtils.randomAlphanumeric(25);
     private PaymentProviderAccessToken accessToken = PaymentProviderAccessToken.of(RandomStringUtils.randomAlphabetic(25));
@@ -41,11 +40,6 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
 
     public GatewayAccountFixture withType(GatewayAccount.Type type) {
         this.type = type;
-        return this;
-    }
-
-    public GatewayAccountFixture withServiceName(String serviceName) {
-        this.serviceName = serviceName;
         return this;
     }
 
@@ -84,11 +78,7 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
     public GatewayAccount.Type getType() {
         return type;
     }
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
+    
     public String getDescription() {
         return description;
     }
@@ -112,18 +102,16 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
                                 "        id,\n" +
                                 "        external_id,\n" +
                                 "        payment_provider," +
-                                "        service_name,\n" +
                                 "        type,\n" +
                                 "        description,\n" +
                                 "        analytics_id,\n" +
                                 "        access_token,\n" +
                                 "        organisation\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         externalId,
                         paymentProvider.toString(),
-                        serviceName,
                         type.toString(),
                         description,
                         analyticsId,
