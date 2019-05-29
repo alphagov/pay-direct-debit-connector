@@ -1,0 +1,1 @@
+ALTER TABLE gateway_accounts DROP COLUMN service_name;
