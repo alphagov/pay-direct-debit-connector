@@ -62,7 +62,6 @@ public class GatewayAccountService {
         GatewayAccount gatewayAccount = new GatewayAccount(
                 request.getPaymentProvider(),
                 request.getType(),
-                request.getServiceName(),
                 request.getDescription(),
                 request.getAnalyticsId(),
                 request.getAccessToken(),

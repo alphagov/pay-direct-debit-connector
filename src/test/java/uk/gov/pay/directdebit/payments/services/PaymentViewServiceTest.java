@@ -75,7 +75,7 @@ public class PaymentViewServiceTest {
                     RandomIdGenerator.newId());
             paymentViewList.add(paymentView);
         }
-        gatewayAccount = new GatewayAccount(1L, gatewayAccountExternalId, null, null, null, null, null);
+        gatewayAccount = new GatewayAccount(1L, gatewayAccountExternalId, null, null, null, null);
         when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://app.com"),
                 UriBuilder.fromUri("http://app.com"));
         when(mockUriInfo.getPath()).thenReturn("/v1/api/accounts/" + gatewayAccount.getExternalId() + "/transactions/view");

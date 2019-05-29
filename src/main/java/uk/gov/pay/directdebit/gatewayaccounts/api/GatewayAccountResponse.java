@@ -25,8 +25,6 @@ public class GatewayAccountResponse {
     private String gatewayAccountExternalId;
     @JsonProperty("payment_method")
     private final String paymentMethod="DIRECT_DEBIT";
-    @JsonProperty("service_name")
-    private String serviceName;
     @JsonProperty("payment_provider")
     private String paymentProvider;
     @JsonProperty("description")
@@ -38,10 +36,9 @@ public class GatewayAccountResponse {
     @JsonProperty("links")
     private List<Map<String, Object>> links = new ArrayList<>();
 
-    public GatewayAccountResponse(Long gatewayAccountId, String gatewayAccountExternalId, String serviceName, String paymentProvider, String description, String type, String analyticsId) {
+    public GatewayAccountResponse(Long gatewayAccountId, String gatewayAccountExternalId, String paymentProvider, String description, String type, String analyticsId) {
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
-        this.serviceName = serviceName;
         this.paymentProvider = paymentProvider;
         this.description = description;
         this.type = type;
@@ -52,7 +49,6 @@ public class GatewayAccountResponse {
         return new GatewayAccountResponse(
                 gatewayAccount.getId(),
                 gatewayAccount.getExternalId(),
-                gatewayAccount.getServiceName(),
                 gatewayAccount.getPaymentProvider().toString(),
                 gatewayAccount.getDescription(),
                 gatewayAccount.getType().toString(),
@@ -74,9 +70,6 @@ public class GatewayAccountResponse {
                 .findFirst()
                 .map(link -> (URI) link.get("href"))
                 .orElse(URI.create(""));
-    }
-    public String getServiceName() {
-        return serviceName;
     }
 
     public Long getGatewayAccountId() {

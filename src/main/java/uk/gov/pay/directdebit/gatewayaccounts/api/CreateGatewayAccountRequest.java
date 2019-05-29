@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.gatewayaccounts.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.NotEmpty;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount.Type;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
@@ -17,10 +16,6 @@ public class CreateGatewayAccountRequest {
     @NotNull
     private final PaymentProvider paymentProvider;
 
-    @NotEmpty
-    @Size(min = 1, max = 50, message = "service_name must be between {min} and {max} characters.")
-    private final String serviceName;
-
     @NotNull
     private final Type type;
 
@@ -34,14 +29,12 @@ public class CreateGatewayAccountRequest {
     private final GoCardlessOrganisationId organisation;
 
     public CreateGatewayAccountRequest(@JsonProperty("payment_provider") PaymentProvider paymentProvider,
-                                       @JsonProperty("service_name") String serviceName,
                                        @JsonProperty("type") Type type, 
                                        @JsonProperty("description") String description, 
                                        @JsonProperty("analytics_id") String analyticsId,
                                        @JsonProperty("access_token") PaymentProviderAccessToken accessToken,
                                        @JsonProperty("organisation") GoCardlessOrganisationId organisation) {
         this.paymentProvider = paymentProvider;
-        this.serviceName = serviceName;
         this.type = type;
         this.description = description;
         this.analyticsId = analyticsId;
@@ -52,11 +45,7 @@ public class CreateGatewayAccountRequest {
     public PaymentProvider getPaymentProvider() {
         return paymentProvider;
     }
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
+    
     public Type getType() {
         return type;
     }

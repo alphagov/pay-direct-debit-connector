@@ -48,7 +48,6 @@ import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLi
 public class GatewayAccountResourceIT {
 
     private static final PaymentProvider PAYMENT_PROVIDER = PaymentProvider.SANDBOX;
-    private static final String SERVICE_NAME = "alex";
     private static final String DESCRIPTION = "is awesome";
     private static final String ANALYTICS_ID = "DD_234098_BBBLA";
     private static final GatewayAccount.Type TYPE = GatewayAccount.Type.TEST;
@@ -57,7 +56,6 @@ public class GatewayAccountResourceIT {
     private static final String PAYMENT_PROVIDER_KEY = "payment_provider";
     private static final String EXTERNAL_ID_KEY = "gateway_account_external_id";
     private static final String TYPE_KEY = "type";
-    private static final String SERVICE_NAME_KEY = "service_name";
     private static final String DESCRIPTION_KEY = "description";
     private static final String ANALYTICS_ID_KEY = "analytics_id";
     private static final String ACCESS_TOKEN_KEY = "access_token";
@@ -70,11 +68,9 @@ public class GatewayAccountResourceIT {
 
     @Before
     public void setUp() {
-        testGatewayAccount =
-                aGatewayAccountFixture()
+        testGatewayAccount = aGatewayAccountFixture()
                         .withExternalId(EXTERNAL_ID)
                         .withPaymentProvider(PAYMENT_PROVIDER)
-                        .withServiceName(SERVICE_NAME)
                         .withDescription(DESCRIPTION)
                         .withType(TYPE)
                         .withAnalyticsId(ANALYTICS_ID)
@@ -92,7 +88,6 @@ public class GatewayAccountResourceIT {
                 .body(PAYMENT_PROVIDER_KEY, is(PAYMENT_PROVIDER.toString()))
                 .body(TYPE_KEY, is(TYPE.toString()))
                 .body(EXTERNAL_ID_KEY, is(EXTERNAL_ID))
-                .body(SERVICE_NAME_KEY, is(SERVICE_NAME))
                 .body(DESCRIPTION_KEY, is(DESCRIPTION))
                 .body(ANALYTICS_ID_KEY, is(ANALYTICS_ID));
     }
@@ -116,7 +111,6 @@ public class GatewayAccountResourceIT {
                 .contentType(JSON)
                 .body(PAYMENT_PROVIDER_KEY, is(PaymentProvider.GOCARDLESS.toString()))
                 .body(TYPE_KEY, is(GatewayAccount.Type.LIVE.toString()))
-                .body(SERVICE_NAME_KEY, is("service"))
                 .body(EXTERNAL_ID_KEY, is("externalId"))
                 .body("payment_method", is("DIRECT_DEBIT"))
                 .body("containsKey('description')", is(false))
@@ -155,7 +149,6 @@ public class GatewayAccountResourceIT {
               .body("accounts", hasSize(2))
 
               .body(format("accounts[0].%s", PAYMENT_PROVIDER_KEY), is(PAYMENT_PROVIDER.toString()))
-              .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(SERVICE_NAME))
               .body(format("accounts[0].%s", DESCRIPTION_KEY), is(DESCRIPTION))
               .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(ANALYTICS_ID))
               .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(EXTERNAL_ID))
@@ -165,7 +158,6 @@ public class GatewayAccountResourceIT {
                     expectedGatewayAccountLocationFor(testGatewayAccount.getExternalId())))
 
               .body(format("accounts[1].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider2.toString()))
-              .body(format("accounts[1].%s", SERVICE_NAME_KEY), is(serviceName2))
               .body(format("accounts[1].%s", DESCRIPTION_KEY), is(description2))
               .body(format("accounts[1].%s", ANALYTICS_ID_KEY), is(analyticsId2))
               .body(format("accounts[1].%s", EXTERNAL_ID_KEY), is(externalId2))
@@ -183,7 +175,6 @@ public class GatewayAccountResourceIT {
               .body("accounts", hasSize(1))
 
               .body(format("accounts[0].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider2.toString()))
-              .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(serviceName2))
               .body(format("accounts[0].%s", DESCRIPTION_KEY), is(description2))
               .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(analyticsId2))
               .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(externalId2))
@@ -225,7 +216,6 @@ public class GatewayAccountResourceIT {
             .body("accounts", hasSize(2))
 
             .body(format("accounts[0].%s", PAYMENT_PROVIDER_KEY), is(PAYMENT_PROVIDER.toString()))
-            .body(format("accounts[0].%s", SERVICE_NAME_KEY), is(SERVICE_NAME))
             .body(format("accounts[0].%s", DESCRIPTION_KEY), is(DESCRIPTION))
             .body(format("accounts[0].%s", ANALYTICS_ID_KEY), is(ANALYTICS_ID))
             .body(format("accounts[0].%s", EXTERNAL_ID_KEY), is(EXTERNAL_ID))
@@ -235,7 +225,6 @@ public class GatewayAccountResourceIT {
                   expectedGatewayAccountLocationFor(testGatewayAccount.getExternalId())))
 
             .body(format("accounts[1].%s", PAYMENT_PROVIDER_KEY), is(paymentProvider3.toString()))
-            .body(format("accounts[1].%s", SERVICE_NAME_KEY), is(serviceName3))
             .body(format("accounts[1].%s", DESCRIPTION_KEY), is(description3))
             .body(format("accounts[1].%s", ANALYTICS_ID_KEY), is(analyticsId3))
             .body(format("accounts[1].%s", EXTERNAL_ID_KEY), is(externalId3))
@@ -250,7 +239,6 @@ public class GatewayAccountResourceIT {
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(PAYMENT_PROVIDER_KEY, PAYMENT_PROVIDER.toString())
                 .put(TYPE_KEY, TYPE.toString())
-                .put(SERVICE_NAME_KEY, SERVICE_NAME)
                 .put(DESCRIPTION_KEY, DESCRIPTION)
                 .put(ANALYTICS_ID_KEY, ANALYTICS_ID)
                 .put(ACCESS_TOKEN_KEY, "123")
@@ -271,7 +259,6 @@ public class GatewayAccountResourceIT {
                 .header("Location", is(documentLocation))
                 .body("gateway_account_id", is(notNullValue()))
                 .body("gateway_account_external_id", startsWith("DIRECT_DEBIT:"))
-                .body("service_name", is(SERVICE_NAME))
                 .body("payment_provider", is(PAYMENT_PROVIDER.toString()))
                 .body("type", is(TYPE.toString()))
                 .body("description", is(DESCRIPTION))
@@ -288,7 +275,6 @@ public class GatewayAccountResourceIT {
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(PAYMENT_PROVIDER_KEY, PAYMENT_PROVIDER.toString())
                 .put(TYPE_KEY, TYPE.toString())
-                .put(SERVICE_NAME_KEY, SERVICE_NAME)
                 .build());
 
         ValidatableResponse response = givenSetup()
@@ -305,7 +291,6 @@ public class GatewayAccountResourceIT {
                 .header("Location", is(documentLocation))
                 .body("gateway_account_id", is(notNullValue()))
                 .body("gateway_account_external_id", startsWith("DIRECT_DEBIT:"))
-                .body("service_name", is(SERVICE_NAME))
                 .body("payment_provider", is(PAYMENT_PROVIDER.toString()))
                 .body("type", is(TYPE.toString()))
                 .body("description", is(nullValue()))
@@ -317,7 +302,7 @@ public class GatewayAccountResourceIT {
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(PAYMENT_PROVIDER_KEY, PAYMENT_PROVIDER.toString())
                 .put(TYPE_KEY, TYPE.toString())
-                .put(DESCRIPTION_KEY, DESCRIPTION)
+                .put(DESCRIPTION_KEY, "verylongdescription".repeat(25))
                 .put(ANALYTICS_ID_KEY, ANALYTICS_ID)
                 .build());
 
@@ -327,15 +312,14 @@ public class GatewayAccountResourceIT {
                 .then()
                 .contentType(JSON)
                 .statusCode(422)
-                .body("errors[0]", is("serviceName may not be empty"));
+                .body("errors[0]", is("description size must be between 0 and 255"));
     }
-
+    
     @Test
     public void shouldReturnBadRequestIfPaymentProviderIsInvalid() throws JsonProcessingException {
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
                 .put(PAYMENT_PROVIDER_KEY, "INVALID")
                 .put(TYPE_KEY, TYPE.toString())
-                .put(SERVICE_NAME_KEY, SERVICE_NAME)
                 .put(DESCRIPTION_KEY, DESCRIPTION)
                 .put(ANALYTICS_ID_KEY, ANALYTICS_ID)
                 .build());

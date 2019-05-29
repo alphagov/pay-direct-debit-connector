@@ -15,7 +15,6 @@ public class GatewayAccountMapper implements RowMapper<GatewayAccount> {
     private static final String ID_COLUMN = "id";
     private static final String EXTERNAL_ID_COLUMN = "external_id";
     private static final String PAYMENT_PROVIDER_COLUMN = "payment_provider";
-    private static final String SERVICE_NAME_COLUMN = "service_name";
     private static final String TYPE_COLUMN = "type";
     private static final String DESCRIPTION_COLUMN = "description";
     private static final String ANALYTICS_ID_COLUMN = "analytics_id";
@@ -29,7 +28,6 @@ public class GatewayAccountMapper implements RowMapper<GatewayAccount> {
                 resultSet.getString(EXTERNAL_ID_COLUMN),
                 PaymentProvider.fromString(resultSet.getString(PAYMENT_PROVIDER_COLUMN)),
                 GatewayAccount.Type.fromString(resultSet.getString(TYPE_COLUMN)),
-                resultSet.getString(SERVICE_NAME_COLUMN),
                 resultSet.getString(DESCRIPTION_COLUMN),
                 resultSet.getString(ANALYTICS_ID_COLUMN)
         );

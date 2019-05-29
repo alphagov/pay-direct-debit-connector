@@ -32,7 +32,6 @@ public class GatewayAccountDaoIT {
 
     private static final String EXTERNAL_ID = "external1d";
     private static final PaymentProvider PAYMENT_PROVIDER = PaymentProvider.SANDBOX;
-    private static final String SERVICE_NAME = "alex";
     private static final String DESCRIPTION = "is awesome";
     private static final String ANALYTICS_ID = "DD_234098_BBBLA";
     private static final GatewayAccount.Type TYPE = GatewayAccount.Type.TEST;
@@ -50,7 +49,6 @@ public class GatewayAccountDaoIT {
                 .withExternalId(EXTERNAL_ID)
                 .withPaymentProvider(PAYMENT_PROVIDER)
                 .withType(TYPE)
-                .withServiceName(SERVICE_NAME)
                 .withAnalyticsId(ANALYTICS_ID)
                 .withDescription(DESCRIPTION)
                 .withAccessToken(null)
@@ -64,7 +62,6 @@ public class GatewayAccountDaoIT {
         assertThat(foundGatewayAccount.get("id"), is(id));
         assertThat(foundGatewayAccount.get("external_id"), is(EXTERNAL_ID));
         assertThat(foundGatewayAccount.get("payment_provider"), is(PAYMENT_PROVIDER.toString()));
-        assertThat(foundGatewayAccount.get("service_name"), is(SERVICE_NAME));
         assertThat(foundGatewayAccount.get("analytics_id"), is(ANALYTICS_ID));
         assertThat(foundGatewayAccount.get("type"), is(TYPE.toString()));
         assertThat(foundGatewayAccount.get("description"), is(DESCRIPTION));
@@ -125,7 +122,6 @@ public class GatewayAccountDaoIT {
         assertThat(first.getId(), is(notNullValue()));
         assertThat(first.getExternalId(), is(EXTERNAL_ID));
         assertThat(first.getPaymentProvider(), is(PAYMENT_PROVIDER));
-        assertThat(first.getServiceName(), is(SERVICE_NAME));
         assertThat(first.getDescription(), is(DESCRIPTION));
         assertThat(first.getAnalyticsId(), is(ANALYTICS_ID));
         assertThat(first.getType(), is(TYPE));
@@ -133,7 +129,6 @@ public class GatewayAccountDaoIT {
         assertThat(second.getId(), is(notNullValue()));
         assertThat(second.getExternalId(), is(externalId2));
         assertThat(second.getPaymentProvider(), is(paymentProvider2));
-        assertThat(second.getServiceName(), is(serviceName2));
         assertThat(second.getDescription(), is(description2));
         assertThat(second.getAnalyticsId(), is(analyticsId2));
         assertThat(second.getType(), is(TYPE));
@@ -190,7 +185,6 @@ public class GatewayAccountDaoIT {
         assertThat(first.getId(),              is(notNullValue()));
         assertThat(first.getExternalId(),      is(externalId));
         assertThat(first.getPaymentProvider(), is(paymentProvider));
-        assertThat(first.getServiceName(),     is(serviceName));
         assertThat(first.getDescription(),     is(description));
         assertThat(first.getAnalyticsId(),     is(analyticsId));
         assertThat(first.getType(),            is(TYPE));
@@ -205,7 +199,6 @@ public class GatewayAccountDaoIT {
         assertThat(first.getId(),              is(notNullValue()));
         assertThat(first.getExternalId(),      is(externalId));
         assertThat(first.getPaymentProvider(), is(paymentProvider));
-        assertThat(first.getServiceName(),     is(serviceName));
         assertThat(first.getDescription(),     is(description));
         assertThat(first.getAnalyticsId(),     is(analyticsId));
         assertThat(first.getType(),            is(TYPE));
@@ -213,7 +206,6 @@ public class GatewayAccountDaoIT {
         assertThat(second.getId(), is(notNullValue()));
         assertThat(second.getExternalId(), is(externalId2));
         assertThat(second.getPaymentProvider(), is(paymentProvider2));
-        assertThat(second.getServiceName(), is(serviceName2));
         assertThat(second.getDescription(), is(description2));
         assertThat(second.getAnalyticsId(), is(analyticsId2));
         assertThat(second.getType(), is(TYPE));
@@ -238,7 +230,6 @@ public class GatewayAccountDaoIT {
         assertThat(foundGatewayAccount.get("id"), is(id));
         assertThat(foundGatewayAccount.get("external_id"), is(EXTERNAL_ID));
         assertThat(foundGatewayAccount.get("payment_provider"), is(PAYMENT_PROVIDER.toString()));
-        assertThat(foundGatewayAccount.get("service_name"), is(SERVICE_NAME));
         assertThat(foundGatewayAccount.get("analytics_id"), is(ANALYTICS_ID));
         assertThat(foundGatewayAccount.get("type"), is(TYPE.toString()));
         assertThat(foundGatewayAccount.get("description"), is(DESCRIPTION));
@@ -260,7 +251,6 @@ public class GatewayAccountDaoIT {
         assertThat(foundGatewayAccount.get("id"), is(id));
         assertThat(foundGatewayAccount.get("external_id"), is(EXTERNAL_ID));
         assertThat(foundGatewayAccount.get("payment_provider"), is(PAYMENT_PROVIDER.toString()));
-        assertThat(foundGatewayAccount.get("service_name"), is(SERVICE_NAME));
         assertThat(foundGatewayAccount.get("analytics_id"), is(ANALYTICS_ID));
         assertThat(foundGatewayAccount.get("type"), is(TYPE.toString()));
         assertThat(foundGatewayAccount.get("description"), is(DESCRIPTION));
