@@ -50,7 +50,6 @@ public class GatewayAccountServiceTest {
 
     private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
             .withPaymentProvider(PAYMENT_PROVIDER)
-            .withServiceName(SERVICE_NAME)
             .withDescription(DESCRIPTION)
             .withType(TYPE)
             .withAnalyticsId(ANALYTICS_ID);
