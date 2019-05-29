@@ -32,16 +32,63 @@ public class GoCardlessWebhookParser {
             JsonNode webhookJson = objectMapper.readTree(webhookPayload);
             JsonNode eventsPayload = webhookJson.get("events");
             for (JsonNode eventNode : eventsPayload) {
-                String resourceType = eventNode.get("resource_type").asText();
+                JsonNode detailsNode = eventNode.get("details");
+                JsonNode linksNode = eventNode.get("links");
+                String detailsCause =  
+                        detailsNode.has("cause") ? detailsNode.get("cause").asText() : null;
+                String detailsDescription =
+                        detailsNode.has("description") ? detailsNode.get("description").asText() : null;
+                String detailsOrigin =
+                        detailsNode.has("origin") ? detailsNode.get("origin").asText() :null;
+                String detailsReasonCode =
+                        detailsNode.has("reason_code") ? detailsNode.get("reason_code").asText() :null;
+                String detailsScheme =
+                        detailsNode.has("scheme") ? detailsNode.get("scheme").asText() :null;
+                String linksMandate 
+                        = detailsNode.has("mandate") ? linksNode.get("mandate").asText() : null;
+                String linksNewCustomerBankAccount 
+                        = detailsNode.has("new_customer_bank_account") 
+                        ? linksNode.get("new_customer_bank_account").asText() : null;
+                String linksNewMandate 
+                        = detailsNode.has("new_mandate") ? linksNode.get("new_mandate").asText() : null;
+                String linksOrganisation
+                        = detailsNode.has("organisation") ? linksNode.get("organisation").asText() : null;
+                String linksParentEvent 
+                        = detailsNode.has("parent_event") ? linksNode.get("parent_event").asText() : null;
+                String linksPayment 
+                        = detailsNode.has("payment") ? linksNode.get("payment").asText() : null;
+                String linksPayout 
+                        = detailsNode.has("payout") ? linksNode.get("payout").asText() : null;
+                String linksPreviousCustomerBankAccount = detailsNode.has("previous_customer_bank_account") 
+                        ? linksNode.get("previous_customer_bank_account").asText() : null;
+                String linksRefund 
+                        = detailsNode.has("refund") ? linksNode.get("refund").asText() : null;
+                String linksSubscription = detailsNode.has("subscription") 
+                        ? linksNode.get("subscription").asText() : null;
+                        String resourceType = eventNode.get("resource_type").asText();
                 GoCardlessResourceType handledGoCardlessResourceType = GoCardlessResourceType.fromString(resourceType);
                 GoCardlessEvent event = new GoCardlessEvent(
                         GoCardlessEventId.valueOf(eventNode.get("id").asText()),
                         eventNode.get("action").asText(),
                         handledGoCardlessResourceType,
                         eventNode.toString(),
+                        detailsCause,
+                        detailsDescription,
+                        detailsOrigin,
+                        detailsReasonCode,
+                        detailsScheme,
+                        linksMandate,
+                        linksNewCustomerBankAccount,
+                        linksNewMandate,
+                        linksOrganisation,
+                        linksParentEvent,
+                        linksPayment,
+                        linksPayout,
+                        linksPreviousCustomerBankAccount,
+                        linksRefund,
+                        linksSubscription,
                         ZonedDateTime.parse(eventNode.get("created_at").asText()),
-                        getOrganisationField(eventNode)
-                );
+                        getOrganisationField(eventNode));
                 extractResourceIdFrom(eventNode, handledGoCardlessResourceType)
                         .ifPresent(event::setResourceId);
                 events.add(event);

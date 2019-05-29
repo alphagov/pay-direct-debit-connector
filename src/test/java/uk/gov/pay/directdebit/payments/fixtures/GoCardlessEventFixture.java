@@ -22,6 +22,22 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     private GoCardlessResourceType resourceType = GoCardlessResourceType.PAYMENTS;
     private String resourceId = RandomStringUtils.randomAlphabetic(20);
     private String json = "{\"id\": \"somejson\"}";
+    private String detailsCause = RandomStringUtils.randomAlphabetic(20);
+    ;
+    private String detailsDescription = RandomStringUtils.randomAlphabetic(20);
+    private String detailsOrigin = RandomStringUtils.randomAlphabetic(20);
+    private String detailsReasonCode = RandomStringUtils.randomAlphabetic(20);
+    private String detailsScheme = RandomStringUtils.randomAlphabetic(20);
+    private String linksMandate = RandomStringUtils.randomAlphabetic(20);
+    private String linksNewCustomerBankAccount = RandomStringUtils.randomAlphabetic(20);
+    private String linksNewMandate = RandomStringUtils.randomAlphabetic(20);
+    private String linksOrganisation = RandomStringUtils.randomAlphabetic(20);
+    private String linksParentEvent = RandomStringUtils.randomAlphabetic(20);
+    private String linksPayment = RandomStringUtils.randomAlphabetic(20);
+    private String linksPayout = RandomStringUtils.randomAlphabetic(20);
+    private String linksPreviousCustomerBankAccount = RandomStringUtils.randomAlphabetic(20);
+    private String linksRefund = RandomStringUtils.randomAlphabetic(20);
+    private String linksSubscription = RandomStringUtils.randomAlphabetic(20);
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
     private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf(RandomStringUtils.randomAlphanumeric(25));
 
@@ -109,6 +125,141 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
+    public String getDetailsCause() {
+        return detailsCause;
+    }
+
+    public GoCardlessEventFixture setDetailsCause(String detailsCause) {
+        this.detailsCause = detailsCause;
+        return this;
+    }
+
+    public String getDetailsDescription() {
+        return detailsDescription;
+    }
+
+    public GoCardlessEventFixture setDetailsDescription(String detailsDescription) {
+        this.detailsDescription = detailsDescription;
+        return this;
+    }
+
+    public String getDetailsOrigin() {
+        return detailsOrigin;
+    }
+
+    public GoCardlessEventFixture setDetailsOrigin(String detailsOrigin) {
+        this.detailsOrigin = detailsOrigin;
+        return this;
+    }
+
+    public String getDetailsReasonCode() {
+        return detailsReasonCode;
+    }
+
+    public GoCardlessEventFixture setDetailsReasonCode(String detailsReasonCode) {
+        this.detailsReasonCode = detailsReasonCode;
+        return this;
+    }
+
+    public String getDetailsScheme() {
+        return detailsScheme;
+    }
+
+    public GoCardlessEventFixture setDetailsScheme(String detailsScheme) {
+        this.detailsScheme = detailsScheme;
+        return this;
+    }
+
+    public String getLinksMandate() {
+        return linksMandate;
+    }
+
+    public GoCardlessEventFixture setLinksMandate(String linksMandate) {
+        this.linksMandate = linksMandate;
+        return this;
+    }
+
+    public String getLinksNewCustomerBankAccount() {
+        return linksNewCustomerBankAccount;
+    }
+
+    public GoCardlessEventFixture setLinksNewCustomerBankAccount(String linksNewCustomerBankAccount) {
+        this.linksNewCustomerBankAccount = linksNewCustomerBankAccount;
+        return this;
+    }
+
+    public String getLinksNewMandate() {
+        return linksNewMandate;
+    }
+
+    public GoCardlessEventFixture setLinksNewMandate(String linksNewMandate) {
+        this.linksNewMandate = linksNewMandate;
+        return this;
+    }
+
+    public String getLinksOrganisation() {
+        return linksOrganisation;
+    }
+
+    public GoCardlessEventFixture setLinksOrganisation(String linksOrganisation) {
+        this.linksOrganisation = linksOrganisation;
+        return this;
+    }
+
+    public String getLinksParentEvent() {
+        return linksParentEvent;
+    }
+
+    public GoCardlessEventFixture setLinksParentEvent(String linksParentEvent) {
+        this.linksParentEvent = linksParentEvent;
+        return this;
+    }
+
+    public String getLinksPayment() {
+        return linksPayment;
+    }
+
+    public GoCardlessEventFixture setLinksPayment(String linksPayment) {
+        this.linksPayment = linksPayment;
+        return this;
+    }
+
+    public String getLinksPayout() {
+        return linksPayout;
+    }
+
+    public GoCardlessEventFixture setLinksPayout(String linksPayout) {
+        this.linksPayout = linksPayout;
+        return this;
+    }
+
+    public String getLinksPreviousCustomerBankAccount() {
+        return linksPreviousCustomerBankAccount;
+    }
+
+    public GoCardlessEventFixture setLinksPreviousCustomerBankAccount(String linksPreviousCustomerBankAccount) {
+        this.linksPreviousCustomerBankAccount = linksPreviousCustomerBankAccount;
+        return this;
+    }
+
+    public String getLinksRefund() {
+        return linksRefund;
+    }
+
+    public GoCardlessEventFixture setLinksRefund(String linksRefund) {
+        this.linksRefund = linksRefund;
+        return this;
+    }
+
+    public String getLinksSubscription() {
+        return linksSubscription;
+    }
+
+    public GoCardlessEventFixture setLinksSubscription(String linksSubscription) {
+        this.linksSubscription = linksSubscription;
+        return this;
+    }
+
     @Override
     public GoCardlessEventFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -121,15 +272,45 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                                 "        action,\n" +
                                 "        resource_type,\n" +
                                 "        json,\n" +
-                                "        created_at\n" +
+                                "        created_at,\n" +
+                                "        details_cause, \n" +
+                                "        details_description, \n" +
+                                "        details_origin, \n" +
+                                "        details_reason_code, \n" +
+                                "        details_scheme, \n" +
+                                "        links_mandate, \n" +
+                                "        links_new_customer_bank_account, \n" +
+                                "        links_new_mandate, \n" +
+                                "        links_organisation, \n" +
+                                "        links_parent_event, \n" +
+                                "        links_payment, \n" +
+                                "        links_payout, \n" +
+                                "        links_previous_customer_bank_account, \n" +
+                                "        links_refund, \n" +
+                                "        links_subscription\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         eventId,
                         goCardlessEventId.toString(),
                         action,
                         resourceType.toString(),
                         json,
+                        detailsCause,
+                        detailsDescription,
+                        detailsOrigin,
+                        detailsReasonCode,
+                        detailsScheme,
+                        linksMandate,
+                        linksNewCustomerBankAccount,
+                        linksNewMandate,
+                        linksOrganisation,
+                        linksParentEvent,
+                        linksPayment,
+                        linksPayout,
+                        linksPreviousCustomerBankAccount,
+                        linksRefund,
+                        linksSubscription,
                         Timestamp.from(createdAt.toInstant())
                 )
         );
@@ -138,7 +319,10 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
 
     @Override
     public GoCardlessEvent toEntity() {
-        return new GoCardlessEvent(id, eventId, goCardlessEventId, action, resourceType, json, createdAt, organisationIdentifier);
+        return new GoCardlessEvent(id, eventId, goCardlessEventId, action, resourceType, json, detailsCause,
+                detailsDescription, detailsOrigin, detailsReasonCode, detailsScheme, linksMandate, 
+                linksNewCustomerBankAccount, linksNewMandate, linksOrganisation, linksParentEvent, linksPayment,
+                linksPayout, linksPreviousCustomerBankAccount, linksRefund, linksSubscription, createdAt, 
+                organisationIdentifier);
     }
-
 }
