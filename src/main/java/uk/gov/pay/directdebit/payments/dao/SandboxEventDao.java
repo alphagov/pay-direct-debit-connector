@@ -11,7 +11,7 @@ import uk.gov.pay.directdebit.payments.model.SandboxEvent;
 public interface SandboxEventDao {
     
     @SqlUpdate("INSERT INTO sandbox_events(created_at, mandate_id, payment_id, event_action, event_cause) " +
-            "VALUES (:mandateId, :paymentId, :eventAction, :eventCause, :createdAt)")
+            "VALUES (:createdAt, :mandateId, :paymentId, :eventAction, :eventCause)")
     @GetGeneratedKeys
     Long insert(@BindBean SandboxEvent sandboxEvent);
 }
