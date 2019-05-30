@@ -54,8 +54,8 @@ public class WebhookSandboxResource {
     private SandboxEvent parseTransaction(Transaction transaction, SandboxEventAction sandboxEventAction,
                                           SandboxEventCause sandboxEventCause){
         return new SandboxEvent(
-                transaction.getMandate().getId().toString(),
-                transaction.getId().toString(),
+                transaction.getMandate().getId(),
+                transaction.getId(),
                 sandboxEventAction.toString(),
                 sandboxEventCause.toString(),
                 ZonedDateTime.now());

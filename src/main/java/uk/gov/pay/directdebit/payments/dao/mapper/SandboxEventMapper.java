@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
 
 public class SandboxEventMapper implements RowMapper<SandboxEvent> {
 
-    private static final String CREATION_TIME_COLUMN = "creation_time";
+    private static final String CREATED_AT_COLUMN = "created_at";
     private static final String MANDATE_ID_COLUMN = "mandate_id";
     private static final String PAYMENT_ID_COLUMN = "payment_id";
     private static final String EVENT_ACTION_COLUMN = "event_action";
@@ -19,8 +19,8 @@ public class SandboxEventMapper implements RowMapper<SandboxEvent> {
 
     @Override
     public SandboxEvent map(ResultSet rs, StatementContext ctx) throws SQLException {
-        return new SandboxEvent(rs.getString(MANDATE_ID_COLUMN),
-                rs.getString(PAYMENT_ID_COLUMN), rs.getString(EVENT_ACTION_COLUMN), rs.getString(EVENT_CAUSE_COLUMN),
-                ZonedDateTime.parse(rs.getString(CREATION_TIME_COLUMN)));
+        return new SandboxEvent(rs.getLong(MANDATE_ID_COLUMN),
+                rs.getLong(PAYMENT_ID_COLUMN), rs.getString(EVENT_ACTION_COLUMN), rs.getString(EVENT_CAUSE_COLUMN),
+                ZonedDateTime.parse(rs.getString(CREATED_AT_COLUMN)));
     }
 }

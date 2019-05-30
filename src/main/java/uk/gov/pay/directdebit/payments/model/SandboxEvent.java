@@ -4,13 +4,13 @@ import java.time.ZonedDateTime;
 
 public class SandboxEvent {
     
-    private String mandateId;
-    private String paymentId;
+    private Long mandateId;
+    private Long paymentId;
     private String eventAction;
     private String eventCause;
     private ZonedDateTime createdAt;
     
-    public SandboxEvent(String mandateId, String paymentId, String eventAction, String eventCause, ZonedDateTime createdAt) {
+    public SandboxEvent(Long mandateId, Long paymentId, String eventAction, String eventCause, ZonedDateTime createdAt) {
         this.mandateId = mandateId;
         this.paymentId = paymentId;
         this.eventAction = eventAction;
@@ -18,20 +18,20 @@ public class SandboxEvent {
         this.createdAt = createdAt;
     }
 
-    public String getMandateId() {
+    public Long getMandateId() {
         return mandateId;
     }
 
-    public SandboxEvent setMandateId(String mandateId) {
+    public SandboxEvent setMandateId(Long mandateId) {
         this.mandateId = mandateId;
         return this;
     }
 
-    public String getPaymentId() {
+    public Long getPaymentId() {
         return paymentId;
     }
 
-    public SandboxEvent setPaymentId(String paymentId) {
+    public SandboxEvent setPaymentId(Long paymentId) {
         this.paymentId = paymentId;
         return this;
     }
