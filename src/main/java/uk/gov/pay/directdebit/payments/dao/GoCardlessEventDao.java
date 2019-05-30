@@ -15,22 +15,22 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
 public interface GoCardlessEventDao {
 
     @SqlUpdate("INSERT INTO gocardless_events(internal_event_id, event_id, action, resource_type, json," +
-            " detailsCause," +
-            " detailsDescription," +
-            " detailsOrigin," +
-            " detailsReasonCode," +
-            " detailsScheme," +
-            " linksMandate," +
-            " linksNewCustomerBankAccount," +
-            " linksNewMandate," +
-            " linksOrganisation," +
-            " linksParentEvent," +
-            " linksPayment," +
-            " linksPayout," +
-            " linksPreviousCustomerBankAccount," +
-            " linksRefund," +
-            " linksSubscription," +
-            " created_at, details_cause)" +
+            " details_cause," +
+            " details_description," +
+            " details_origin," +
+            " details_reason_code," +
+            " details_scheme," +
+            " links_mandate," +
+            " links_new_customer_bank_account," +
+            " links_new_mandate," +
+            " links_organisation," +
+            " links_parent_event," +
+            " links_payment," +
+            " links_payout," +
+            " links_previous_customer_bank_account," +
+            " links_refund," +
+            " links_subscription," +
+            " created_at)" +
             " VALUES (:eventId, :goCardlessEventId, :action, :resourceType, CAST(:json as jsonb)," +
             " :detailsCause," +
             " :detailsDescription," +
