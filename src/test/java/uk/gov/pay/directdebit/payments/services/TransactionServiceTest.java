@@ -1,9 +1,5 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import com.google.common.collect.ImmutableMap;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import org.exparity.hamcrest.date.ZonedDateTimeMatchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,13 +11,11 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
-import uk.gov.pay.directdebit.payments.api.CreatePaymentRequest;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
@@ -41,7 +35,6 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -49,7 +42,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -130,37 +122,6 @@ public class TransactionServiceTest {
         thrown.expectMessage("No charges found for transaction id: not-existing");
         thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
         service.findTransactionForExternalId("not-existing");
-    }
-    
-    @Test
-    public void shouldCreateAndStoreATransactionFromAValidCreateTransactionRequest() {
-        Map<String, String> createTransactionRequest = ImmutableMap.of(
-                "amount", "2333",
-                "description", "a description",
-                "reference", "a reference"
-        );
-        CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.of(createTransactionRequest);
-        
-        when(mockedGatewayAccountDao.findByExternalId(gatewayAccountFixture.getExternalId()))
-                .thenReturn(Optional.of((gatewayAccountFixture.toEntity())));
-        final Mandate mandate = mandateFixture.toEntity();
-        Transaction transaction = service.createTransaction(
-                createPaymentRequest,
-                mandate, 
-                gatewayAccountFixture.getExternalId());
-        
-        assertThat(transaction.getId(), is(notNullValue()));
-        assertThat(transaction.getExternalId(), is(notNullValue()));
-        assertThat(transaction.getMandate(), is(mandate));
-        assertThat(transaction.getState(), is(NEW));
-        assertThat(transaction.getAmount(), is(createPaymentRequest.getAmount()));
-        assertThat(transaction.getDescription(), is(createPaymentRequest.getDescription()));
-        assertThat(transaction.getReference(), is(createPaymentRequest.getReference()));
-        assertThat(transaction.getCreatedDate(), ZonedDateTimeMatchers
-                .within(10, ChronoUnit.SECONDS, ZonedDateTime.now()));
-        
-        verify(mockedTransactionDao).insert(transaction);
-        verify(mockedDirectDebitEventService).registerTransactionCreatedEventFor(transaction);
     }
 
     @Test

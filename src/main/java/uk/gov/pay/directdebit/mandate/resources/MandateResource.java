@@ -120,8 +120,7 @@ public class MandateResource {
                 .getMandateQueryService()
                 .findByExternalId(mandateExternalId);
         ConfirmMandateRequest confirmMandateRequest = ConfirmMandateRequest.of(mandateConfirmationRequestMap); 
-        mandateServiceFactory.getMandateCommandService(mandate.getType())
-                .confirm(gatewayAccount, mandate, confirmMandateRequest);
+        mandateServiceFactory.getMandateCommandService().confirm(gatewayAccount, mandate, confirmMandateRequest);
         LOGGER.info("Confirmed direct debit details for mandate with id: {}", mandateExternalId);
 
         return Response.noContent().build();
