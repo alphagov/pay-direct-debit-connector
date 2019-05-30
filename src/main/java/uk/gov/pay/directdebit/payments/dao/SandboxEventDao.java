@@ -1,9 +1,9 @@
 package uk.gov.pay.directdebit.payments.dao;
 
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
-import org.skife.jdbi.v2.sqlobject.BindBean;
-import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
-import org.skife.jdbi.v2.sqlobject.SqlUpdate;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.payments.dao.mapper.SandboxEventMapper;
 import uk.gov.pay.directdebit.payments.model.SandboxEvent;
 

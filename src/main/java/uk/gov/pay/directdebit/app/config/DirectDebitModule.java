@@ -17,7 +17,11 @@ import uk.gov.pay.directdebit.partnerapp.client.GoCardlessAppConnectClient;
 import uk.gov.pay.directdebit.partnerapp.dao.GoCardlessAppConnectAccountTokenDao;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
-import uk.gov.pay.directdebit.payments.dao.*;
+import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
+import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
+import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
+import uk.gov.pay.directdebit.payments.dao.SandboxEventDao;
+import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
 
@@ -136,19 +140,19 @@ public class DirectDebitModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PaymentViewDao providePaymentViewDao() {
-        return new PaymentViewDao(jdbi);
+    public SandboxEventDao provideSandboxEventDao(){
+        return jdbi.onDemand(SandboxEventDao.class);
     }
 
     @Provides
     @Singleton
-    public GoCardlessAppConnectAccountTokenDao providePartnerAppTokenDao() {
-        return jdbi.onDemand(GoCardlessAppConnectAccountTokenDao.class);
+    public PaymentViewDao providePaymentViewDao() {
+        return new PaymentViewDao(jdbi);
     }
     
     @Provides
     @Singleton
-    public SandboxEventDao provideSandboxEventDao(){
-        return jdbi.onDemand(SandboxEventDao.class);
+    public GoCardlessAppConnectAccountTokenDao providePartnerAppTokenDao() {
+        return jdbi.onDemand(GoCardlessAppConnectAccountTokenDao.class);
     }
 }
