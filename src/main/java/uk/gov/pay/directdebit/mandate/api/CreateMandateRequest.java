@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.mandate.api;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
-public class CreateMandateRequest implements CreateRequest {
+public class CreateMandateRequest {
 
     @JsonProperty("return_url")
     private String returnUrl;

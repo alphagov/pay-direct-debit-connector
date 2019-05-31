@@ -12,7 +12,6 @@ import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundEx
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
-import uk.gov.pay.directdebit.mandate.api.CreateRequest;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -69,7 +68,7 @@ public class MandateService {
         this.linksConfig = directDebitConfig.getLinks();
     }
 
-    public Mandate createMandate(CreateRequest createRequest, String accountExternalId) {
+    public Mandate createMandate(CreateMandateRequest createRequest, String accountExternalId) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     // TODO:
