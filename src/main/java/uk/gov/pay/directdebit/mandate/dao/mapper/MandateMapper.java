@@ -9,7 +9,6 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
@@ -32,7 +31,6 @@ public class MandateMapper implements RowMapper<Mandate> {
     private static final String GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN = "gateway_account_external_id";
     private static final String GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN = "gateway_account_payment_provider";
     private static final String GATEWAY_ACCOUNT_TYPE_COLUMN = "gateway_account_type";
-    private static final String GATEWAY_ACCOUNT_SERVICE_NAME_COLUMN = "gateway_account_service_name";
     private static final String GATEWAY_ACCOUNT_DESCRIPTION_COLUMN = "gateway_account_description";
     private static final String GATEWAY_ACCOUNT_ANALYTICS_ID_COLUMN = "gateway_account_analytics_id";
     private static final String GATEWAY_ACCOUNT_ACCESS_TOKEN_COLUMN = "gateway_account_access_token";
@@ -87,7 +85,6 @@ public class MandateMapper implements RowMapper<Mandate> {
         return new Mandate(
                 resultSet.getLong(ID_COLUMN),
                 gatewayAccount,
-                MandateType.valueOf(resultSet.getString(MANDATE_TYPE_COLUMN)),
                 MandateExternalId.valueOf(resultSet.getString(EXTERNAL_ID_COLUMN)),
                 MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)),
                 resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN),

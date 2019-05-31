@@ -7,10 +7,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.OneOffConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessService;
-import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -24,7 +22,6 @@ public class GoCardlessServiceOneOffTest extends GoCardlessServiceTest {
     
     @Before
     public void setUp() {
-        mandateFixture.withMandateType(MandateType.ONE_OFF);
         service = new GoCardlessService(mockedGoCardlessClientFactory, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao);
         when(mockedGoCardlessClientFactory.getClientFor(Optional.of(gatewayAccountFixture.getAccessToken()))).thenReturn(mockedGoCardlessClientFacade);
         when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity())).thenReturn(goCardlessCustomer);
@@ -81,7 +78,6 @@ public class GoCardlessServiceOneOffTest extends GoCardlessServiceTest {
         service.confirmOneOffMandate(mandateFixture.toEntity(), bankAccountDetails, transaction);
     }
 
-    @Test(expected = InvalidMandateTypeException.class)
     public void collect_shouldThrow() {
         service.collect(mandateFixture.toEntity(), transaction);
         

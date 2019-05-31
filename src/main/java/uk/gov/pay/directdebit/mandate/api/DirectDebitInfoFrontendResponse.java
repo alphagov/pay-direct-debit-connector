@@ -128,9 +128,6 @@ public class DirectDebitInfoFrontendResponse {
     @JsonSerialize(using = ToStringSerializer.class)
     private MandateBankStatementReference mandateReference;
 
-    @JsonProperty("mandate_type")
-    private String mandateType;
-
     @JsonProperty("created_date")
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
     private ZonedDateTime createdDate;
@@ -147,7 +144,6 @@ public class DirectDebitInfoFrontendResponse {
                                            MandateState internalState,
                                            String returnUrl,
                                            MandateBankStatementReference mandateReference,
-                                           String mandateType,
                                            ZonedDateTime createdDate,
                                            Payer payer,
                                            Transaction transaction) {
@@ -158,7 +154,6 @@ public class DirectDebitInfoFrontendResponse {
         this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.returnUrl = returnUrl;
         this.mandateReference = mandateReference;
-        this.mandateType = mandateType;
         this.createdDate = createdDate;
         this.transaction = initTransaction(transaction);
         this.payer = initPayer(payer);
@@ -194,10 +189,6 @@ public class DirectDebitInfoFrontendResponse {
 
     public MandateBankStatementReference getMandateReference() {
         return mandateReference;
-    }
-
-    public String getMandateType() {
-        return mandateType;
     }
 
     public TransactionDetails getTransaction() {
@@ -254,9 +245,6 @@ public class DirectDebitInfoFrontendResponse {
         if (!mandateReference.equals(that.mandateReference)) {
             return false;
         }
-        if (!mandateType.equals(that.mandateType)) {
-            return false;
-        }
         if (!createdDate.equals(that.createdDate)) {
             return false;
         }
@@ -275,7 +263,6 @@ public class DirectDebitInfoFrontendResponse {
         result = 31 * result + gatewayAccountId.hashCode();
         result = 31 * result + gatewayAccountExternalId.hashCode();
         result = 31 * result + mandateReference.hashCode();
-        result = 31 * result + mandateType.hashCode();
         result = 31 * result + createdDate.hashCode();
         result = 31 * result + internalState.hashCode();
         result = 31 * result + state.hashCode();
@@ -292,7 +279,6 @@ public class DirectDebitInfoFrontendResponse {
                 ", internalState='" + internalState + "'" +
                 ", returnUrl='" + returnUrl + "'" +
                 ", mandateReference='" + mandateReference + "'" +
-                ", mandateType='" + mandateType + "'" +
                 ", createdDate='" + createdDate + "'" +
                 "}";
     }

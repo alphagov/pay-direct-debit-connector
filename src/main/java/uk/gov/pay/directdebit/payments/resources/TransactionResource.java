@@ -31,8 +31,6 @@ import static javax.ws.rs.core.Response.created;
 public class TransactionResource {
     //has to be /charges unless we change public api
     public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{transactionExternalId}";
-    public static final String CHARGES_API_PATH = "/v1/api/accounts/{accountId}/charges";
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
     private final TransactionService transactionService;

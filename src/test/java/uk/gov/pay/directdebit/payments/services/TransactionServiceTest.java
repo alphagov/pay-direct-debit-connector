@@ -11,7 +11,6 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
@@ -318,9 +317,6 @@ public class TransactionServiceTest {
 
     @Test
     public void collect_shouldCreateATransactionAPaymentAndRegisterOnDemandPaymentSubmittedEvent() {
-        MandateFixture mandateFixture = this.mandateFixture
-                .withMandateType(MandateType.ON_DEMAND);
-
         Transaction expectedTransaction = TransactionFixture
                 .aTransactionFixture()
                 .withAmount(123456L)
@@ -331,7 +327,7 @@ public class TransactionServiceTest {
                 .toEntity();
 
         CollectPaymentRequest collectPaymentRequest = new CollectPaymentRequest(
-                this.mandateFixture.getExternalId(),
+                mandateFixture.getExternalId(),
                 expectedTransaction.getAmount(),
                 expectedTransaction.getDescription(),
                 expectedTransaction.getReference());

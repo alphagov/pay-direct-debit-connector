@@ -11,7 +11,6 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -44,32 +43,7 @@ public class SecurityTokensResourceIT {
 
     @Test
     public void shouldReturn200WithMandateForValidToken_ifMandateIsOnDemand() {
-        MandateFixture testMandate = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ON_DEMAND).withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-        TokenFixture testToken = aTokenFixture().withMandateId(testMandate.getId()).insert(testContext.getJdbi());
-        String requestPath = "/v1/tokens/{token}/mandate".replace("{token}", testToken.getToken());
-        givenSetup()
-                .get(requestPath)
-                .then()
-                .statusCode(200)
-                .contentType(JSON)
-                .body("external_id", is(testMandate.getExternalId().toString()))
-                .body("mandate_reference", is(testMandate.getMandateReference().toString()))
-                .body("mandate_type", is("ON_DEMAND"))
-                .body("return_url", is(testMandate.getReturnUrl()))
-                .body("gateway_account_id", isNumber(testGatewayAccount.getId()))
-                .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
-                .body("state", is(MandateState.AWAITING_DIRECT_DEBIT_DETAILS.toString()))
-                .body("$", not(hasKey("transaction_external_id")));
-    }
-
-    @Test
-    public void shouldReturn200WithMandateAndTransactionForValidToken_ifMandateIsOneOff() {
-        MandateFixture testMandate = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ONE_OFF).withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-        TransactionFixture testTransaction = aTransactionFixture()
-                .withMandateFixture(testMandate)
-                .withState(PaymentState.NEW)
+        MandateFixture testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
         TokenFixture testToken = aTokenFixture().withMandateId(testMandate.getId()).insert(testContext.getJdbi());
         String requestPath = "/v1/tokens/{token}/mandate".replace("{token}", testToken.getToken());
@@ -80,18 +54,16 @@ public class SecurityTokensResourceIT {
                 .contentType(JSON)
                 .body("external_id", is(testMandate.getExternalId().toString()))
                 .body("mandate_reference", is(testMandate.getMandateReference().toString()))
-                .body("mandate_type", is("ONE_OFF"))
                 .body("return_url", is(testMandate.getReturnUrl()))
                 .body("gateway_account_id", isNumber(testGatewayAccount.getId()))
                 .body("gateway_account_external_id", is(testGatewayAccount.getExternalId()))
                 .body("state", is(MandateState.AWAITING_DIRECT_DEBIT_DETAILS.toString()))
-                .body("transaction_external_id", is(testTransaction.getExternalId()));
+                .body("$", not(hasKey("transaction_external_id")));
     }
-
+    
     @Test
     public void shouldReturnNoContentWhenDeletingToken() {
         MandateFixture testMandate = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ONE_OFF)
                 .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
         TokenFixture testToken = aTokenFixture().withMandateId(testMandate.getId()).insert(testContext.getJdbi());
@@ -102,28 +74,6 @@ public class SecurityTokensResourceIT {
                 .statusCode(204);
     }
 
-    @Test
-    public void shouldReturn409IfMultipleTransactionsAreCreatedForAOneOffMandate() {
-        MandateFixture testMandate = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ONE_OFF)
-                .withGatewayAccountFixture(testGatewayAccount)
-                .insert(testContext.getJdbi());
-        aTransactionFixture()
-                .withMandateFixture(testMandate)
-                .withState(PaymentState.NEW)
-                .insert(testContext.getJdbi());
-       aTransactionFixture()
-                .withMandateFixture(testMandate)
-                .withState(PaymentState.NEW)
-                .insert(testContext.getJdbi());
-        TokenFixture testToken = aTokenFixture().withMandateId(testMandate.getId()).insert(testContext.getJdbi());
-        String requestPath = "/v1/tokens/{token}/mandate".replace("{token}", testToken.getToken());
-        givenSetup()
-                .get(requestPath)
-                .then()
-                .statusCode(409)
-                .contentType(JSON);
-    }
     private RequestSpecification givenSetup() {
         return given().port(testContext.getPort())
                 .contentType(JSON);

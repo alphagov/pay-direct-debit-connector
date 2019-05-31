@@ -1,13 +1,11 @@
 package uk.gov.pay.directdebit.payments.resources;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import org.apache.commons.lang.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -23,8 +21,6 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
-import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -36,7 +32,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -51,17 +46,14 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.payments.resources.TransactionResource.CHARGES_API_PATH;
 import static uk.gov.pay.directdebit.payments.resources.TransactionResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubGetCreditor;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
-
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -99,61 +91,10 @@ public class TransactionResourceIT {
     }
 
     @Test
-    public void shouldCreateAMandateAndATransactionForOneOffTransaction() throws Exception {
-        String accountExternalId = testGatewayAccount.getExternalId();
-        String expectedReference = "Test reference";
-        String expectedDescription = "Test description";
-        String returnUrl = "http://service.url/success-page/";
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-                .put(JSON_AMOUNT_KEY, AMOUNT)
-                .put(JSON_REFERENCE_KEY, expectedReference)
-                .put(JSON_DESCRIPTION_KEY, expectedDescription)
-                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
-                .put(JSON_RETURN_URL_KEY, returnUrl)
-                .build());
-
-        String requestPath = CHARGES_API_PATH
-                .replace("{accountId}", accountExternalId);
-
-        ValidatableResponse response = givenSetup()
-                .body(postBody)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.CREATED.getStatusCode())
-                .body(JSON_CHARGE_KEY, is(notNullValue()))
-                .body(JSON_AMOUNT_KEY, isNumber(AMOUNT))
-                .body(JSON_REFERENCE_KEY, is(expectedReference))
-                .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
-                .body(JSON_RETURN_URL_KEY, is(returnUrl))
-                .contentType(JSON);
-
-        String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
-
-        Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getTransactionByExternalId(externalTransactionId);
-        assertThat(createdTransaction.get("external_id"), is(notNullValue()));
-        assertThat(createdTransaction.get("reference"), is(expectedReference));
-        assertThat(createdTransaction.get("description"), is(expectedDescription));
-        assertThat(createdTransaction.get("amount"), is(AMOUNT));
-
-        Map<String, Object> createdMandate = testContext.getDatabaseTestHelper().getMandateByTransactionExternalId(externalTransactionId);
-        assertThat(createdMandate.get("external_id"), is(notNullValue()));
-        assertThat(createdMandate.get("return_url"), is(returnUrl));
-        assertThat(createdMandate.get("gateway_account_id"), is(testGatewayAccount.getId()));
-
-        MandateExternalId mandateExternalId = MandateExternalId.valueOf((String) createdMandate.get("external_id"));
-        List<Map<String, Object>> createdTransactions = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateExternalId);
-        assertThat(createdTransactions.size(), is(1));
-        assertThat(createdTransactions.get(0).get("payer"), is(nullValue()));
-        assertThat(createdTransactions.get(0).get("description"), is(expectedDescription));
-        assertThat(createdTransactions.get(0).get("reference"), is(expectedReference));
-    }
-
-    @Test
     public void shouldCollectAPayment_forSandbox() throws Exception {
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
-                .withMandateType(MandateType.ON_DEMAND)
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
         String accountExternalId = testGatewayAccount.getExternalId();
@@ -217,7 +158,6 @@ public class TransactionResourceIT {
                 .withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ON_DEMAND)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
@@ -283,38 +223,6 @@ public class TransactionResourceIT {
     }
 
     @Test
-    public void shouldNotCollectAPaymentFromOneOff() throws Exception {
-        PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withGatewayAccountFixture(testGatewayAccount)
-                .withMandateType(MandateType.ONE_OFF)
-                .withPayerFixture(payerFixture)
-                .insert(testContext.getJdbi());
-        String accountExternalId = testGatewayAccount.getExternalId();
-        String expectedReference = "Test reference";
-        String expectedDescription = "Test description";
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-                .put(JSON_AMOUNT_KEY, AMOUNT)
-                .put(JSON_REFERENCE_KEY, expectedReference)
-                .put(JSON_DESCRIPTION_KEY, expectedDescription)
-                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
-                .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId().toString())
-                .build());
-
-        String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
-                .replace("{accountId}", accountExternalId);
-
-        givenSetup()
-                .body(postBody)
-                .post(requestPath)
-                .then()
-                .statusCode(Status.PRECONDITION_FAILED.getStatusCode())
-                .contentType(JSON)
-                .body("message", contains(containsString("Invalid operation")))
-                .body("error_identifier", is(ErrorIdentifier.INVALID_MANDATE_TYPE.toString()));
-    }
-
-    @Test
     public void shouldRetrieveATransaction_fromPublicApiEndpoint() {
 
         String accountExternalId = testGatewayAccount.getExternalId();
@@ -324,7 +232,6 @@ public class TransactionResourceIT {
                 .insert(testContext.getJdbi());
 
         TransactionFixture transactionFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
-
 
         String requestPath = CHARGE_API_PATH
                 .replace("{accountId}", accountExternalId)
@@ -386,77 +293,7 @@ public class TransactionResourceIT {
                     put("chargeTokenId", newChargeToken);
                 }}));
     }
-
-    @Test
-    public void shouldReturn400IfMandatoryFieldsMissing() throws JsonProcessingException {
-        String accountId = testGatewayAccount.getExternalId();
-
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-                .put(JSON_AMOUNT_KEY, AMOUNT)
-                .put(JSON_DESCRIPTION_KEY, "desc")
-                .put(JSON_GATEWAY_ACC_KEY, accountId)
-                .put(JSON_RETURN_URL_KEY, "http://service.url/success-page/")
-                .build());
-        String requestPath = CHARGES_API_PATH
-                .replace("{accountId}", accountId);
-
-        givenSetup()
-                .body(postBody)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .contentType(JSON)
-                .body("message", contains("Field(s) missing: [reference]"))
-                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
-    }
-
-    @Test
-    public void shouldReturn400IfFieldsInvalidSize() throws JsonProcessingException {
-        String accountId = testGatewayAccount.getExternalId();
-
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-                .put(JSON_AMOUNT_KEY, AMOUNT)
-                .put(JSON_REFERENCE_KEY, "reference")
-                .put(JSON_DESCRIPTION_KEY, RandomStringUtils.randomAlphabetic(256))
-                .put(JSON_GATEWAY_ACC_KEY, accountId)
-                .put(JSON_RETURN_URL_KEY, "http://service.url/success-page/")
-                .build());
-        String requestPath = CHARGES_API_PATH
-                .replace("{accountId}", accountId);
-
-        givenSetup()
-                .body(postBody)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .contentType(JSON)
-                .body("message", contains("The size of a field(s) is invalid: [description]"))
-                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
-    }
-
-    @Test
-    public void shouldReturn400IfFieldsInvalid() throws JsonProcessingException {
-        String accountId = testGatewayAccount.getExternalId();
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-                .put(JSON_AMOUNT_KEY, 10000001)
-                .put(JSON_REFERENCE_KEY, "reference")
-                .put(JSON_DESCRIPTION_KEY, "desc")
-                .put(JSON_GATEWAY_ACC_KEY, accountId)
-                .put(JSON_RETURN_URL_KEY, "http://service.url/success-page/")
-                .build());
-        String requestPath = CHARGES_API_PATH
-                .replace("{accountId}", accountId);
-
-        givenSetup()
-                .body(postBody)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .contentType(JSON)
-                .body("message", contains("Field(s) are invalid: [amount]"))
-                .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
-    }
-
+    
     private TransactionFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
         return aTransactionFixture()
                 .withMandateFixture(mandateFixture)

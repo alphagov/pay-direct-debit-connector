@@ -21,7 +21,6 @@ import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneO
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -57,12 +56,11 @@ public class MandateService {
     private final MandateStateUpdateService mandateStateUpdateService;
 
     @Inject
-    public MandateService(
-            DirectDebitConfig directDebitConfig,
-            MandateDao mandateDao, GatewayAccountDao gatewayAccountDao,
-            TokenService tokenService,
-            TransactionService transactionService,
-            MandateStateUpdateService mandateStateUpdateService) {
+    public MandateService(DirectDebitConfig directDebitConfig,
+                          MandateDao mandateDao, GatewayAccountDao gatewayAccountDao,
+                          TokenService tokenService,
+                          TransactionService transactionService,
+                          MandateStateUpdateService mandateStateUpdateService) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
         this.transactionService = transactionService;
@@ -79,12 +77,11 @@ public class MandateService {
                     // then modify appropriate mandate reference values
                     MandateBankStatementReference mandateReference = MandateBankStatementReference.valueOf(
                             PaymentProvider.SANDBOX.equals(gatewayAccount.getPaymentProvider()) ?
-                                RandomStringUtils.randomAlphanumeric(18) : "gocardless-default");
+                                    RandomStringUtils.randomAlphanumeric(18) : "gocardless-default");
 
                     Mandate mandate = new Mandate(
                             null,
                             gatewayAccount,
-                            createRequest.getMandateType(),
                             MandateExternalId.valueOf(RandomIdGenerator.newId()),
                             mandateReference,
                             createRequest.getReference(),
@@ -111,7 +108,6 @@ public class MandateService {
 
         return new CreateMandateResponse(
                 mandateExternalId,
-                mandate.getType(),
                 mandate.getReturnUrl(),
                 mandate.getCreatedDate(),
                 mandate.getState().toExternal(),
@@ -126,10 +122,7 @@ public class MandateService {
                 .map(mandateStateUpdateService::tokenExchangedFor)
                 .orElseThrow(TokenNotFoundException::new);
 
-        String transactionExternalId = mandate.getType().equals(MandateType.ONE_OFF)
-                ? retrieveTransactionForOneOffMandate(mandate.getExternalId()).getExternalId()
-                : null;
-        return new TokenExchangeDetails(mandate, transactionExternalId);
+        return new TokenExchangeDetails(mandate, null);
 
     }
 
@@ -144,7 +137,6 @@ public class MandateService {
                 mandate.getState(),
                 mandate.getReturnUrl(),
                 mandate.getMandateReference(),
-                mandate.getType().toString(),
                 mandate.getCreatedDate(),
                 mandate.getPayer(),
                 transaction
@@ -160,7 +152,6 @@ public class MandateService {
                 mandate.getState(),
                 mandate.getReturnUrl(),
                 mandate.getMandateReference(),
-                mandate.getType().toString(),
                 mandate.getCreatedDate(),
                 mandate.getPayer(),
                 null
@@ -173,7 +164,6 @@ public class MandateService {
 
         return new GetMandateResponse(
                 mandateExternalId,
-                mandate.getType(),
                 mandate.getReturnUrl(),
                 dataLinks,
                 mandate.getState().toExternal(),
@@ -195,19 +185,11 @@ public class MandateService {
 
     public DirectDebitEvent changePaymentMethodFor(MandateExternalId mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        if (MandateType.ONE_OFF.equals(mandate.getType())) {
-            Transaction transaction = retrieveTransactionForOneOffMandate(mandateExternalId);
-            transactionService.paymentMethodChangedFor(transaction);
-        }
         return mandateStateUpdateService.changePaymentMethodFor(mandate);
     }
 
     public DirectDebitEvent cancelMandateCreation(MandateExternalId mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        if (MandateType.ONE_OFF.equals(mandate.getType())) {
-            Transaction transaction = retrieveTransactionForOneOffMandate(mandateExternalId);
-            transactionService.paymentCancelledFor(transaction);
-        }
         return mandateStateUpdateService.cancelMandateCreation(mandate);
     }
 

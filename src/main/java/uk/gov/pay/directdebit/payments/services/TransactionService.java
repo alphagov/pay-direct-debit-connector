@@ -11,7 +11,6 @@ import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundEx
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
@@ -20,7 +19,6 @@ import uk.gov.pay.directdebit.payments.api.CollectRequest;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.dao.TransactionDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
-import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
@@ -90,9 +88,6 @@ public class TransactionService {
 
     public Transaction createOnDemandTransaction(GatewayAccount gatewayAccount, Mandate mandate,
                                                  CollectPaymentRequest collectPaymentRequest) {
-        if (MandateType.ONE_OFF.equals(mandate.getType())) {
-            throw new InvalidMandateTypeException(mandate.getExternalId(), MandateType.ONE_OFF);
-        }
 
         Transaction transaction = createTransaction(collectPaymentRequest, mandate, gatewayAccount.getExternalId());
 

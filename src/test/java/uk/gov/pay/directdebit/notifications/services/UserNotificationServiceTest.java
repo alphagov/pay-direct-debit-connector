@@ -11,7 +11,6 @@ import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.common.services.SunService;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -71,10 +70,7 @@ public class UserNotificationServiceTest {
 
     @Test
     public void shouldSendOnDemandMandateCreatedEmail() {
-        Mandate mandate = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ON_DEMAND)
-                .withPayerFixture(payerFixture)
-                .toEntity();
+        Mandate mandate = MandateFixture.aMandateFixture().withPayerFixture(payerFixture).toEntity();
         SunName sunName = SunName.of("test sun Name");
         when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
         HashMap<String, String> emailPersonalisation = new HashMap<>();
@@ -89,10 +85,7 @@ public class UserNotificationServiceTest {
     }
 
     public void shouldNotSendOnDemandMandateCreatedEmail_whenSunNameUnavailable() {
-        Mandate mandate = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ON_DEMAND)
-                .withPayerFixture(payerFixture)
-                .toEntity();
+        Mandate mandate = MandateFixture.aMandateFixture().withPayerFixture(payerFixture).toEntity();
         when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.empty());
         userNotificationService.sendOnDemandMandateCreatedEmailFor(mandate);
         verifyZeroInteractions(mockAdminUsersClient);
@@ -111,10 +104,7 @@ public class UserNotificationServiceTest {
 
     @Test
     public void shouldSendOneOffPaymentConfirmedEmail() {
-        Mandate mandate = mandateFixture
-                .withMandateType(MandateType.ONE_OFF)
-                .withPayerFixture(payerFixture)
-                .toEntity();
+        Mandate mandate = mandateFixture.withPayerFixture(payerFixture).toEntity();
 
         transaction.setMandate(mandate);
 
@@ -137,10 +127,7 @@ public class UserNotificationServiceTest {
 
     @Test
     public void shouldNotSendOneOffPaymentConfirmedEmail_whenSunNameUnavailable() {
-        Mandate mandate = mandateFixture
-                .withMandateType(MandateType.ONE_OFF)
-                .withPayerFixture(payerFixture)
-                .toEntity();
+        Mandate mandate = mandateFixture.withPayerFixture(payerFixture).toEntity();
 
         transaction.setMandate(mandate);
 
@@ -151,10 +138,7 @@ public class UserNotificationServiceTest {
 
     @Test
     public void shouldSendOnDemandPaymentConfirmedEmail() {
-        Mandate mandate = mandateFixture
-                .withMandateType(MandateType.ON_DEMAND)
-                .withPayerFixture(payerFixture)
-                .toEntity();
+        Mandate mandate = mandateFixture.withPayerFixture(payerFixture).toEntity();
 
         transaction.setMandate(mandate);
 

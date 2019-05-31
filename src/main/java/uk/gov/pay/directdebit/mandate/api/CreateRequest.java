@@ -1,12 +1,9 @@
 package uk.gov.pay.directdebit.mandate.api;
 
-import uk.gov.pay.directdebit.mandate.model.MandateType;
-
+//TODO Useless
 public interface CreateRequest {
     
     String getReference();
     
     String getReturnUrl();
-    
-    MandateType getMandateType();
 }

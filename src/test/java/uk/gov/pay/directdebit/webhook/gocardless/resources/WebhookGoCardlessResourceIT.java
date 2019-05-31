@@ -15,7 +15,6 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -178,7 +177,6 @@ public class WebhookGoCardlessResourceIT {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .withState(MandateState.PENDING)
-                .withMandateType(MandateType.ONE_OFF)
                 .insert(testContext.getJdbi());
         TransactionFixture transactionFixture = aTransactionFixture()
                 .withMandateFixture(mandateFixture)

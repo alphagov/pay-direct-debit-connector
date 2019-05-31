@@ -14,20 +14,15 @@ import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
-import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.SandboxService;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
 
 import javax.ws.rs.core.UriInfo;
-import java.time.LocalDate;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -43,8 +38,6 @@ public class OnDemandMandateServiceTest {
     @Mock
     private SandboxService mockedSandboxService;
     @Mock
-    private TransactionService mockedTransactionService;
-    @Mock
     private MandateService mockedMandateService;
     @Mock
     private MandateStateUpdateService mockedMandateStateUpdateService;
@@ -54,7 +47,6 @@ public class OnDemandMandateServiceTest {
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture
             .aGatewayAccountFixture().withPaymentProvider(PaymentProvider.SANDBOX);
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-            .withMandateType(MandateType.ON_DEMAND)
             .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
             .withGatewayAccountFixture(gatewayAccountFixture);
     private ImmutableMap<String, String> createMandateRequest = ImmutableMap
@@ -66,7 +58,7 @@ public class OnDemandMandateServiceTest {
 
     @Before
     public void setUp() {
-        service = new OnDemandMandateService(mockedPaymentProviderFactory, mockedMandateStateUpdateService, mockedTransactionService, mockedMandateService);
+        service = new OnDemandMandateService(mockedPaymentProviderFactory, mockedMandateStateUpdateService, mockedMandateService);
         when(mockedPaymentProviderFactory.getCommandServiceFor(gatewayAccountFixture.getPaymentProvider())).thenReturn(mockedSandboxService);
     }
 

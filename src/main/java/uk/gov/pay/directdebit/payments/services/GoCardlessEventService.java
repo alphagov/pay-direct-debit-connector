@@ -21,7 +21,7 @@ public class GoCardlessEventService {
     private final GoCardlessPaymentDao goCardlessPaymentDao;
     private final GoCardlessEventDao goCardlessEventDao;
 
-        @Inject
+    @Inject
     public GoCardlessEventService(GoCardlessPaymentDao goCardlessPaymentDao,
             GoCardlessMandateDao goCardlessMandateDao,
             GoCardlessEventDao goCardlessEventDao) {

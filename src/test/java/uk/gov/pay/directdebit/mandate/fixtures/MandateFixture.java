@@ -8,7 +8,6 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -25,7 +24,6 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     private String serviceReference = RandomStringUtils.randomAlphanumeric(18);
     private MandateState state = MandateState.CREATED;
     private String returnUrl = "http://service.test/success-page";
-    private MandateType mandateType = MandateType.ON_DEMAND;
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private PayerFixture payerFixture = null;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
@@ -59,15 +57,6 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
 
     public MandateFixture setId(Long id) {
         this.id = id;
-        return this;
-    }
-
-    public MandateType getMandateType() {
-        return mandateType;
-    }
-
-    public MandateFixture withMandateType(MandateType mandateType) {
-        this.mandateType = mandateType;
         return this;
     }
 
@@ -133,19 +122,17 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                                 "  id,\n" +
                                 "  gateway_account_id,\n" +
                                 "  external_id,\n" +
-                                "  type,\n" +
                                 "  mandate_reference,\n" +
                                 "  service_reference,\n" +
                                 "  return_url,\n" +
                                 "  state,\n" +
                                 "  created_date\n" +
                                 ") VALUES (\n" +
-                                "  ?, ?, ?, ?, ?, ?, ?, ?, ?\n" +
+                                "  ?, ?, ?, ?, ?, ?, ?, ?\n" +
                                 ")\n",
                         id,
                         gatewayAccountFixture.getId(),
                         mandateExternalId.toString(),
-                        mandateType.toString(),
                         mandateReference.toString(),
                         serviceReference,
                         returnUrl,
@@ -166,7 +153,6 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return new Mandate(
                 id,
                 gatewayAccountFixture.toEntity(),
-                mandateType,
                 mandateExternalId,
                 mandateReference,
                 serviceReference,
