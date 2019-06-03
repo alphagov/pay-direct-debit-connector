@@ -14,7 +14,7 @@ import javax.ws.rs.core.UriInfo;
 
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 
-public class OnDemandMandateService implements MandateCommandService {
+public class OnDemandMandateService {
     private PaymentProviderFactory paymentProviderFactory;
     private MandateStateUpdateService mandateStateUpdateService;
     private MandateService mandateService;
@@ -28,7 +28,6 @@ public class OnDemandMandateService implements MandateCommandService {
         this.mandateService = mandateService;
     }
 
-    @Override
     public void confirm(GatewayAccount gatewayAccount, Mandate mandate, ConfirmMandateRequest confirmDetailsRequest) {
 
         if (mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)) {
