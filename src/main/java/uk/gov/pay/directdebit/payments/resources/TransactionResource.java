@@ -1,7 +1,18 @@
 package uk.gov.pay.directdebit.payments.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentRequestValidator;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
+import uk.gov.pay.directdebit.payments.api.TransactionResponse;
+import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.services.TransactionService;
+
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -11,18 +22,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentRequestValidator;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
-import uk.gov.pay.directdebit.payments.api.TransactionRequestValidator;
-import uk.gov.pay.directdebit.payments.api.TransactionResponse;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
@@ -33,17 +33,15 @@ public class TransactionResource {
     public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{transactionExternalId}";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
+    
     private final TransactionService transactionService;
-    private final MandateServiceFactory mandateServiceFactory;
-
-    private final TransactionRequestValidator transactionRequestValidator = new TransactionRequestValidator();
+    private final MandateQueryService mandateQueryService;
     private final CollectPaymentRequestValidator collectPaymentRequestValidator = new CollectPaymentRequestValidator();
 
     @Inject
-    public TransactionResource(TransactionService transactionService,
-            MandateServiceFactory mandateServiceFactory) {
+    public TransactionResource(TransactionService transactionService, MandateQueryService mandateQueryService) {
         this.transactionService = transactionService;
-        this.mandateServiceFactory = mandateServiceFactory;
+        this.mandateQueryService = mandateQueryService;
     }
 
     @GET
@@ -63,9 +61,7 @@ public class TransactionResource {
         LOGGER.info("Received collect payment from mandate request");
         collectPaymentRequestValidator.validate(collectPaymentRequestMap);
         CollectPaymentRequest collectPaymentRequest = CollectPaymentRequest.of(collectPaymentRequestMap);
-        Mandate mandate = mandateServiceFactory
-                .getMandateQueryService()
-                .findByExternalId(collectPaymentRequest.getMandateExternalId());
+        Mandate mandate = mandateQueryService.findByExternalId(collectPaymentRequest.getMandateExternalId());
         Transaction paymentToCollect = transactionService.createOnDemandTransaction(gatewayAccount, mandate, collectPaymentRequest);
         CollectPaymentResponse response = transactionService.collectPaymentResponseWithSelfLink(paymentToCollect, gatewayAccount.getExternalId(), uriInfo);
         return created(response.getLink("self")).entity(response).build();

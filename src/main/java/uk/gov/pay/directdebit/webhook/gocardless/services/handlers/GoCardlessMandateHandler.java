@@ -5,7 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
+import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
+import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
@@ -22,16 +23,20 @@ import java.util.function.Function;
 
 public class GoCardlessMandateHandler extends GoCardlessHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessMandateHandler.class);
-    private final MandateServiceFactory mandateServiceFactory;
     private final DirectDebitEventService directDebitEventService;
+    private final MandateStateUpdateService mandateStateUpdateService;
+    private final MandateQueryService mandateQueryService;
+    
     @Inject
     public GoCardlessMandateHandler(TransactionService transactionService,
-            GoCardlessEventService goCardlessService,
-            MandateServiceFactory mandateServiceFactory,
-            DirectDebitEventService directDebitEventService) {
+                                    GoCardlessEventService goCardlessService,
+                                    DirectDebitEventService directDebitEventService, 
+                                    MandateStateUpdateService mandateStateUpdateService, 
+                                    MandateQueryService mandateQueryService) {
         super(transactionService, goCardlessService);
-        this.mandateServiceFactory = mandateServiceFactory;
         this.directDebitEventService = directDebitEventService;
+        this.mandateStateUpdateService = mandateStateUpdateService;
+        this.mandateQueryService = mandateQueryService;
     }
 
     /**
@@ -58,20 +63,20 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
         return ImmutableMap.of(
                 GoCardlessMandateAction.CREATED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
                 GoCardlessMandateAction.SUBMITTED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
-                GoCardlessMandateAction.ACTIVE, mandateServiceFactory.getMandateStateUpdateService()::mandateActiveFor,
+                GoCardlessMandateAction.ACTIVE, mandateStateUpdateService::mandateActiveFor,
                 GoCardlessMandateAction.CANCELLED, (Mandate mandate) -> {
                     transactionService.findTransactionsForMandate(mandate.getExternalId()).stream()
                             .filter(transaction -> !transactionService.findPaymentSubmittedEventFor(transaction).isPresent())
                             .forEach(transactionService::paymentFailedWithoutEmailFor);
 
-                    return mandateServiceFactory.getMandateStateUpdateService().mandateCancelledFor(mandate);
+                    return mandateStateUpdateService.mandateCancelledFor(mandate);
                 },
                 GoCardlessMandateAction.FAILED, (Mandate mandate) -> {
                     transactionService
                             .findTransactionsForMandate(mandate.getExternalId())
                             .forEach(transactionService::paymentFailedWithoutEmailFor);
 
-                    return mandateServiceFactory.getMandateStateUpdateService().mandateFailedFor(mandate);
+                    return mandateStateUpdateService.mandateFailedFor(mandate);
                 });
     }
 
@@ -81,7 +86,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 .map((action) -> getHandledActions().get(action))
                 .map((handledAction -> {
                     GoCardlessMandate goCardlessMandate = goCardlessService.findGoCardlessMandateForEvent(event);
-                    Mandate mandate = mandateServiceFactory.getMandateQueryService().findById(goCardlessMandate.getMandateId());
+                    Mandate mandate = mandateQueryService.findById(goCardlessMandate.getMandateId());
                     if (isValidOrganisation(mandate, event)) {
                         return handledAction.apply(mandate);
                     } else {
@@ -94,7 +99,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
 
     private DirectDebitEvent findMandatePendingEventOrInsertOneIfItDoesNotExist(Mandate mandate) {
         return directDebitEventService.findBy(mandate.getId(), Type.MANDATE, SupportedEvent.MANDATE_PENDING)
-                .orElseGet(() -> mandateServiceFactory.getMandateStateUpdateService().mandatePendingFor(mandate));
+                .orElseGet(() -> mandateStateUpdateService.mandatePendingFor(mandate));
     }
 
     private boolean isValidOrganisation(Mandate mandate, GoCardlessEvent event) {
