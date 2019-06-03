@@ -92,7 +92,6 @@ public class MandateServiceTest {
         when(mockedMandateStateUpdateService.tokenExchangedFor(mandate)).thenReturn(mandate);
         TokenExchangeDetails tokenExchangeDetails = service.getMandateFor(token);
         assertThat(tokenExchangeDetails.getMandate(), is(mandate));
-        assertThat(tokenExchangeDetails.getTransactionExternalId(), is(nullValue()));
     }
 
     @Test

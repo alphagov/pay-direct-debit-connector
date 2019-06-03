@@ -121,7 +121,7 @@ public class MandateService {
                 .map(mandateStateUpdateService::tokenExchangedFor)
                 .orElseThrow(TokenNotFoundException::new);
 
-        return new TokenExchangeDetails(mandate, null);
+        return new TokenExchangeDetails(mandate);
 
     }
 
