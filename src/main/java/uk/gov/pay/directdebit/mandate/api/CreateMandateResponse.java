@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
 import java.net.URI;
@@ -27,9 +26,6 @@ public class CreateMandateResponse {
     @JsonSerialize(using = ToStringSerializer.class)
     private MandateExternalId mandateId;
 
-    @JsonProperty("mandate_type")
-    private MandateType mandateType;
-
     @JsonProperty("return_url")
     private String returnUrl;
 
@@ -48,7 +44,6 @@ public class CreateMandateResponse {
     private MandateBankStatementReference mandateReference;
 
     public CreateMandateResponse(MandateExternalId mandateId,
-                                 MandateType mandateType,
                                  String returnUrl,
                                  ZonedDateTime createdDate,
                                  ExternalMandateState state,
@@ -57,7 +52,6 @@ public class CreateMandateResponse {
                                  MandateBankStatementReference mandateReference) {
         this.dataLinks = dataLinks;
         this.mandateId = mandateId;
-        this.mandateType = mandateType;
         this.returnUrl = returnUrl;
         this.createdDate = createdDate;
         this.state = state;
@@ -67,10 +61,6 @@ public class CreateMandateResponse {
 
     public MandateExternalId getMandateId() {
         return mandateId;
-    }
-
-    public MandateType getMandateType() {
-        return mandateType;
     }
 
     public String getReturnUrl() {

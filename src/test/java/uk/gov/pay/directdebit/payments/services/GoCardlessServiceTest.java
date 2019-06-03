@@ -16,7 +16,6 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
@@ -80,7 +79,6 @@ public abstract class GoCardlessServiceTest {
             .withCustomerBankAccountId(BANK_ACCOUNT_ID).toEntity();
     MandateFixture mandateFixture = aMandateFixture()
             .withPayerFixture(payerFixture)
-            .withMandateType(MandateType.ON_DEMAND)
             .withGatewayAccountFixture(gatewayAccountFixture)
             .withExternalId(MANDATE_ID);
     Transaction transaction = TransactionFixture.aTransactionFixture()

@@ -34,9 +34,7 @@ public class SecurityTokensResource {
     @Timed
     public Response getMandateForToken(@PathParam("token") String token) {
         TokenExchangeDetails tokenExchangeDetails = mandateServiceFactory.getMandateService().getMandateFor(token);
-        TokenResponse response = TokenResponse.from(
-                tokenExchangeDetails.getMandate(),
-                tokenExchangeDetails.getTransactionExternalId());
+        TokenResponse response = TokenResponse.from(tokenExchangeDetails.getMandate());
         return Response.ok().entity(response).build();
     }
 

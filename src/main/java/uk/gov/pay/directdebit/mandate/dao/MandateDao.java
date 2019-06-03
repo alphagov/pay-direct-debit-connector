@@ -32,7 +32,6 @@ public interface MandateDao {
             "  mandate_reference,\n" +
             "  service_reference,\n" +
             "  state,\n" +
-            "  type,\n" +
             "  return_url,\n" +
             "  created_date\n" +
             ") VALUES (\n" +
@@ -41,7 +40,6 @@ public interface MandateDao {
             "  :mandateReference,\n" +
             "  :serviceReference,\n" +
             "  :state,\n" +
-            "  :type,\n" +
             "  :returnUrl,\n" +
             "  :createdDate" +
             ")")
@@ -55,7 +53,6 @@ public interface MandateDao {
             "  m.service_reference AS mandate_service_reference," +
             "  m.gateway_account_id AS mandate_gateway_account_id," +
             "  m.return_url AS mandate_return_url," +
-            "  m.type AS mandate_type," +
             "  m.state AS mandate_state," +
             "  m.created_date AS mandate_created_date," +
             "  g.id AS gateway_account_id," +

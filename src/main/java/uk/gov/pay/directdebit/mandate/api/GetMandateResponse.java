@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
 import java.util.List;
@@ -20,9 +19,6 @@ public class GetMandateResponse {
     @JsonProperty("mandate_id")
     @JsonSerialize(using = ToStringSerializer.class)
     private MandateExternalId mandateId;
-
-    @JsonProperty("mandate_type")
-    private MandateType mandateType;
 
     @JsonProperty("return_url")
     private String returnUrl;
@@ -41,13 +37,12 @@ public class GetMandateResponse {
     private MandateBankStatementReference mandateReference;
 
     public GetMandateResponse(MandateExternalId mandateId,
-                              MandateType mandateType, String returnUrl,
+                              String returnUrl,
                               List<Map<String, Object>> dataLinks,
                               ExternalMandateState state,
                               String serviceReference,
                               MandateBankStatementReference mandateReference) {
         this.mandateId = mandateId;
-        this.mandateType = mandateType;
         this.returnUrl = returnUrl;
         this.dataLinks = dataLinks;
         this.state = state;
@@ -62,11 +57,7 @@ public class GetMandateResponse {
     public MandateExternalId getMandateId() {
         return mandateId;
     }
-
-    public MandateType getMandateType() {
-        return mandateType;
-    }
-
+    
     public List<Map<String, Object>> getDataLinks() {
         return dataLinks;
     }
@@ -97,9 +88,6 @@ public class GetMandateResponse {
         if (!mandateId.equals(that.mandateId)) {
             return false;
         }
-        if (mandateType != that.mandateType) {
-            return false;
-        }
         if (!returnUrl.equals(that.returnUrl)) {
             return false;
         }
@@ -112,7 +100,6 @@ public class GetMandateResponse {
     @Override
     public int hashCode() {
         int result = mandateId.hashCode();
-        result = 31 * result + mandateType.hashCode();
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + dataLinks.hashCode();
         result = 31 * result + state.hashCode();

@@ -10,7 +10,6 @@ import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.OneOffConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
@@ -24,7 +23,6 @@ import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
-import uk.gov.pay.directdebit.payments.exception.InvalidMandateTypeException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProviderCommandService;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
@@ -35,7 +33,7 @@ import java.util.Optional;
 
 public class GoCardlessService implements DirectDebitPaymentProviderCommandService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessEventService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessService.class);
 
     private final GoCardlessClientFactory goCardlessClientFactory;
     private final GoCardlessCustomerDao goCardlessCustomerDao;
@@ -94,9 +92,6 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
     public LocalDate collect(Mandate mandate, Transaction transaction) {
         LOGGER.info("Collecting payment for GoCardless, mandate with id: {}, transaction with id: {}", mandate.getExternalId(), transaction.getExternalId());
 
-        if (MandateType.ONE_OFF.equals(mandate.getType())) {
-            throw new InvalidMandateTypeException(mandate.getExternalId(), MandateType.ONE_OFF);
-        }
         GoCardlessMandate goCardlessMandate = findGoCardlessMandateForMandate(mandate);
         GoCardlessPayment goCardlessPayment = createPayment(transaction, goCardlessMandate);
 

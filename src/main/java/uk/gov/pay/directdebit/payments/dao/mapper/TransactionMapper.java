@@ -9,7 +9,6 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -94,7 +93,6 @@ public class TransactionMapper implements RowMapper<Transaction> {
         Mandate mandate = new Mandate(
                 resultSet.getLong(MANDATE_ID_COLUMN),
                 gatewayAccount,
-                MandateType.valueOf(resultSet.getString(MANDATE_TYPE_COLUMN)),
                 MandateExternalId.valueOf(resultSet.getString(MANDATE_EXTERNAL_ID_COLUMN)),
                 MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)),
                 resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN),

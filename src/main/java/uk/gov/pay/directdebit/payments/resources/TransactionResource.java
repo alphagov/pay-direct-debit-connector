@@ -19,7 +19,6 @@ import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequestValidator;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
-import uk.gov.pay.directdebit.payments.api.CreatePaymentRequest;
 import uk.gov.pay.directdebit.payments.api.TransactionRequestValidator;
 import uk.gov.pay.directdebit.payments.api.TransactionResponse;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -32,8 +31,6 @@ import static javax.ws.rs.core.Response.created;
 public class TransactionResource {
     //has to be /charges unless we change public api
     public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{transactionExternalId}";
-    public static final String CHARGES_API_PATH = "/v1/api/accounts/{accountId}/charges";
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResource.class);
     private final TransactionService transactionService;
@@ -57,20 +54,7 @@ public class TransactionResource {
         TransactionResponse response = transactionService.getPaymentWithExternalId(accountExternalId, transactionExternalId, uriInfo);
         return Response.ok(response).build();
     }
-
-    @POST
-    @Path(CHARGES_API_PATH)
-    @Produces(APPLICATION_JSON)
-    @Timed
-    public Response createOneOffPayment(@PathParam("accountId") GatewayAccount gatewayAccount, Map<String, String> transactionRequestMap, @Context UriInfo uriInfo) {
-        LOGGER.info("Received new one-off payment request");
-        transactionRequestValidator.validate(transactionRequestMap);
-        CreatePaymentRequest createPaymentRequest = CreatePaymentRequest.of(transactionRequestMap);
-        Transaction transaction = mandateServiceFactory.getOneOffMandateService().create(gatewayAccount, createPaymentRequest);
-        TransactionResponse response = transactionService.createPaymentResponseWithAllLinks(transaction, gatewayAccount.getExternalId(), uriInfo);
-        return created(response.getLink("self")).entity(response).build();
-    }
-
+    
     @POST
     @Path("/v1/api/accounts/{accountId}/charges/collect")
     @Produces(APPLICATION_JSON)

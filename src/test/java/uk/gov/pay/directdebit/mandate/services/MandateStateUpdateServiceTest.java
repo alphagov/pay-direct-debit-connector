@@ -11,7 +11,6 @@ import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
@@ -137,7 +136,6 @@ public class MandateStateUpdateServiceTest {
     public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails_IfOneOff() {
         Mandate oneOffMandate = MandateFixture
                 .aMandateFixture()
-                .withMandateType(MandateType.ONE_OFF)
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .toEntity();
         Mandate newMandate = service.confirmedOneOffDirectDebitDetailsFor(oneOffMandate);

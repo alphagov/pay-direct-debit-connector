@@ -12,27 +12,23 @@ public class Mandate {
     private MandateState state;
     private final GatewayAccount gatewayAccount;
     private final String returnUrl;
-    private final MandateType type;
     private MandateBankStatementReference mandateReference;
     private final String serviceReference;
     private final ZonedDateTime createdDate;
     private Payer payer;
 
-    public Mandate(
-            Long id,
-            GatewayAccount gatewayAccount,
-            MandateType type,
-            MandateExternalId externalId,
-            MandateBankStatementReference mandateReference,
-            String serviceReference,
-            MandateState state,
-            String returnUrl,
-            ZonedDateTime createdDate,
-            Payer payer
+    public Mandate(Long id,
+                   GatewayAccount gatewayAccount,
+                   MandateExternalId externalId,
+                   MandateBankStatementReference mandateReference,
+                   String serviceReference,
+                   MandateState state,
+                   String returnUrl,
+                   ZonedDateTime createdDate,
+                   Payer payer
     ) {
         this.id = id;
         this.gatewayAccount = gatewayAccount;
-        this.type = type;
         this.externalId = externalId;
         this.mandateReference = mandateReference;
         this.serviceReference = serviceReference;
@@ -86,10 +82,6 @@ public class Mandate {
         return serviceReference;
     }
 
-    public MandateType getType() {
-        return type;
-    }
-
     public void setMandateReference(MandateBankStatementReference mandateReference) {
         this.mandateReference = mandateReference;
     }
@@ -120,9 +112,6 @@ public class Mandate {
         if (!returnUrl.equals(mandate.returnUrl)) {
             return false;
         }
-        if (type != mandate.type) {
-            return false;
-        }
         if (mandateReference != null ? !mandateReference.equals(mandate.mandateReference) : mandate.mandateReference != null) {
             return false;
         }
@@ -144,7 +133,6 @@ public class Mandate {
         result = 31 * result + (payer != null ? payer.hashCode() : 0);
         result = 31 * result + gatewayAccount.hashCode();
         result = 31 * result + returnUrl.hashCode();
-        result = 31 * result + type.hashCode();
         result = 31 * result + mandateReference.hashCode();
         result = 31 * result + (serviceReference != null ? serviceReference.hashCode() : 0);
         result = 31 * result + createdDate.hashCode();

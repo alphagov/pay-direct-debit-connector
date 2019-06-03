@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
@@ -21,9 +20,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.MandateType;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -32,7 +29,6 @@ import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -49,7 +45,6 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
@@ -66,7 +61,6 @@ import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTrans
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateMandate;
-import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubGetCreditor;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
@@ -107,10 +101,8 @@ public class MandateResourceIT {
     @Test
     public void shouldCreateAMandateWithoutTransaction_IfMandateIsOnDemand() throws Exception {
         String accountExternalId = gatewayAccountFixture.getExternalId();
-        String agreementType = MandateType.ON_DEMAND.toString();
         String returnUrl = "http://example.com/success-page/";
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-                .put("agreement_type", agreementType)
                 .put("return_url", returnUrl)
                 .build());
 
@@ -123,7 +115,6 @@ public class MandateResourceIT {
                 .then()
                 .statusCode(Response.Status.CREATED.getStatusCode())
                 .body(JSON_MANDATE_ID_KEY, is(notNullValue()))
-                .body("mandate_type", is(agreementType))
                 .body("return_url", is(returnUrl))
                 .body("created_date", is(notNullValue()))
                 .contentType(JSON);
@@ -155,10 +146,8 @@ public class MandateResourceIT {
     @Test
     public void shouldCreateAMandate_withAllFields() throws Exception {
         String accountExternalId = gatewayAccountFixture.getExternalId();
-        String agreementType = MandateType.ON_DEMAND.toString();
         String returnUrl = "http://example.com/success-page/";
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-                .put("agreement_type", agreementType)
                 .put("return_url", returnUrl)
                 .put("service_reference", "test-service-reference")
                 .build());
@@ -172,7 +161,6 @@ public class MandateResourceIT {
                 .then()
                 .statusCode(Response.Status.CREATED.getStatusCode())
                 .body(JSON_MANDATE_ID_KEY, is(notNullValue()))
-                .body("mandate_type", is(agreementType))
                 .body("return_url", is(returnUrl))
                 .body("created_date", is(notNullValue()))
                 .body("state.status", is("created"))
@@ -195,30 +183,6 @@ public class MandateResourceIT {
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
                     put("chargeTokenId", token);
                 }}));
-    }
-
-    @Test
-    public void shouldNotCreateAOneOffMandate() throws Exception {
-        String accountExternalId = gatewayAccountFixture.getExternalId();
-        String agreementType = MandateType.ONE_OFF.toString();
-        String returnUrl = "http://example.com/success-page/";
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-                .put("agreement_type", agreementType)
-                .put("return_url", returnUrl)
-                .put("service_reference", "test-service-reference")
-                .build());
-
-        String requestPath = "/v1/api/accounts/{accountId}/mandates"
-                .replace("{accountId}", accountExternalId);
-
-        givenSetup()
-                .body(postBody)
-                .post(requestPath)
-                .then()
-                .statusCode(Status.PRECONDITION_FAILED.getStatusCode())
-                .contentType(JSON)
-                .body("message", contains("Invalid operation on mandate of type ONE_OFF"))
-                .body("error_identifier", is(ErrorIdentifier.INVALID_MANDATE_TYPE.toString()));
     }
 
     @Test
@@ -249,7 +213,6 @@ public class MandateResourceIT {
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference().toString()))
-                .body("mandate_type", is(mandateFixture.getMandateType().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
                 .body("transaction." + JSON_AMOUNT_KEY, isNumber(transactionFixture.getAmount()))
                 .body("transaction." + JSON_REFERENCE_KEY, is(transactionFixture.getReference()))
@@ -287,7 +250,6 @@ public class MandateResourceIT {
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference().toString()))
-                .body("mandate_type", is(mandateFixture.getMandateType().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
                 .body("$", not(hasKey("transaction")))
                 .body("payer.payer_external_id", is(payerFixture.getExternalId()))
@@ -316,7 +278,6 @@ public class MandateResourceIT {
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
                 .body("mandate_id", is(mandateFixture.getExternalId().toString()))
-                .body("mandate_type", is(mandateFixture.getMandateType().toString()))
                 .body("return_url", is(mandateFixture.getReturnUrl()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
                 .body("state.finished", is(mandateFixture.getState().toExternal().isFinished()))
@@ -341,7 +302,6 @@ public class MandateResourceIT {
     @Test
     public void shouldCancelAMandate() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ON_DEMAND)
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
@@ -360,38 +320,9 @@ public class MandateResourceIT {
     }
 
     @Test
-    public void shouldCancelAMandateAndTransaction_ifMandateIsOneOff() {
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ONE_OFF)
-                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
-                .withGatewayAccountFixture(gatewayAccountFixture)
-                .insert(testContext.getJdbi());
-
-        TransactionFixture transactionFixture = aTransactionFixture()
-                .withMandateFixture(mandateFixture)
-                .withState(PaymentState.NEW)
-                .insert(testContext.getJdbi());
-
-        String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/cancel"
-                .replace("{accountId}", gatewayAccountFixture.getExternalId())
-                .replace("{mandateExternalId}", mandateFixture.getExternalId().toString());
-
-        givenSetup()
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
-
-        Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandate.get("state"), is("CANCELLED"));
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
-        assertThat(transaction.get("state"), is("CANCELLED"));
-    }
-
-    @Test
     public void shouldChangePaymentType() {
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
-                .withMandateType(MandateType.ON_DEMAND)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
 
@@ -409,94 +340,8 @@ public class MandateResourceIT {
     }
 
     @Test
-    public void shouldChangePaymentType_ifMandateIsOneOff() {
-        MandateFixture testMandate = MandateFixture.aMandateFixture()
-                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
-                .withMandateType(MandateType.ONE_OFF)
-                .withGatewayAccountFixture(gatewayAccountFixture)
-                .insert(testContext.getJdbi());
-
-        TransactionFixture transactionFixture = aTransactionFixture()
-                .withMandateFixture(testMandate)
-                .withState(PaymentState.NEW)
-                .insert(testContext.getJdbi());
-
-        String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/change-payment-method"
-                .replace("{accountId}", gatewayAccountFixture.getExternalId())
-                .replace("{mandateExternalId}", testMandate.getExternalId().toString());
-
-        givenSetup()
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
-
-        Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
-        assertThat(mandate.get("state"), is("USER_CANCEL_NOT_ELIGIBLE"));
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
-        assertThat(transaction.get("state"), is("USER_CANCEL_NOT_ELIGIBLE"));
-    }
-
-    @Test
-    public void confirm_shouldCreateAMandateAndUpdateCharge_ifMandateIsOneOff() {
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ONE_OFF)
-                .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
-                .withGatewayAccountFixture(gatewayAccountFixture)
-                .withPayerFixture(payerFixture)
-                .insert(testContext.getJdbi());
-
-        TransactionFixture transactionFixture = aTransactionFixture()
-                .withMandateFixture(mandateFixture)
-                .withState(PaymentState.NEW)
-                .insert(testContext.getJdbi());
-
-        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
-        String chargeDate = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-
-        // language=JSON
-        String emailPayloadBody = "{\n" +
-                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
-                "  \"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\",\n" +
-                "  \"template\": \"ONE_OFF_PAYMENT_CONFIRMED\",\n" +
-                "  \"personalisation\": {\n" +
-                "    \"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\",\n" +
-                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
-                "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
-                "    \"collection date\": \"" + chargeDate + "\",\n" +
-                "    \"statement name\": \"Sandbox SUN Name\",\n" +
-                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
-                "  }\n" +
-                "}";
-
-        // language=JSON
-        String confirmDetails = "{\n" +
-                "  \"sort_code\": \"" + payerFixture.getSortCode() + "\",\n" +
-                "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\",\n" +
-                "  \"transaction_external_id\": \"" + transactionFixture.getExternalId() + "\"\n" +
-                "}\n";
-
-        wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
-                .withRequestBody(equalToJson(emailPayloadBody))
-                .willReturn(
-                        aResponse().withStatus(200)));
-
-        String requestPath = String.format("/v1/api/accounts/%s/mandates/%s/confirm", gatewayAccountFixture.getExternalId(), mandateFixture.getExternalId());
-        given().port(testContext.getPort())
-                .body(confirmDetails)
-                .contentType(APPLICATION_JSON)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
-
-        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
-        MatcherAssert.assertThat(transactionsForMandate.size(), is(1));
-        MatcherAssert.assertThat(transactionsForMandate.get(0).get("state"), is("PENDING"));
-    }
-
-    @Test
     public void confirm_shouldCreateAMandateWithoutTransaction_ifMandateIsOnDemand() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ON_DEMAND)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .withPayerFixture(payerFixture)
@@ -539,87 +384,10 @@ public class MandateResourceIT {
     }
 
     @Test
-    public void confirm_shouldCreateACustomerBankAccountMandateAndUpdateCharge_ForGoCardless_ifMandateIsOneOff() {
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
-                .withPaymentProvider(GOCARDLESS)
-                .insert(testContext.getJdbi());
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ONE_OFF)
-                .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
-                .withGatewayAccountFixture(gatewayAccountFixture)
-                .withPayerFixture(payerFixture)
-                .insert(testContext.getJdbi());
-        GoCardlessMandate goCardlessMandate = GoCardlessMandateFixture.aGoCardlessMandateFixture()
-                .withMandateId(mandateFixture.getId())
-                .insert(testContext.getJdbi())
-                .toEntity();
-        TransactionFixture transactionFixture = aTransactionFixture()
-                .withMandateFixture(mandateFixture)
-                .withState(PaymentState.NEW)
-                .insert(testContext.getJdbi());
-
-        String customerId = "CU000358S3A2FP";
-        String customerBankAccountId = "BA0002WR3Z193A";
-        String sunName = "Test SUN Name";
-        GoCardlessCustomerFixture goCardlessCustomerFixture = aGoCardlessCustomerFixture().
-                withCustomerId(customerId)
-                .withCustomerBankAccountId(customerBankAccountId)
-                .withPayerId(payerFixture.getId());
-        stubCreateCustomer(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId);
-        stubCreateCustomerBankAccount(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
-        stubCreateMandate(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
-        stubCreatePayment(gatewayAccountFixture.getAccessToken().toString(), transactionFixture.getAmount(), GoCardlessMandateId.valueOf("MD123"), transactionFixture.getExternalId());
-
-        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
-        stubGetCreditor(gatewayAccountFixture.getAccessToken().toString(), goCardlessMandate.getGoCardlessCreditorId().toString(), sunName);
-
-        // language=JSON
-        String emailPayloadBody = "{\n" +
-                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
-                "  \"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\",\n" +
-                "  \"template\": \"ONE_OFF_PAYMENT_CONFIRMED\",\n" +
-                "  \"personalisation\": {\n" +
-                "    \"amount\": \"" + BigDecimal.valueOf(transactionFixture.getAmount(), 2).toString() + "\",\n" +
-                "    \"mandate reference\": \"REF-123\",\n" +
-                "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
-                "    \"collection date\": \"21/05/2014\",\n" +
-                "    \"statement name\": \"" + sunName + "\",\n" +
-                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
-                "  }\n" +
-                "}\n";
-
-        // language=JSON
-        String confirmDetails = "{\n" +
-                "  \"sort_code\": \"" + payerFixture.getSortCode() + "\",\n" +
-                "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\",\n" +
-                "  \"transaction_external_id\": \"" + transactionFixture.getExternalId() + "\"\n" +
-                "}\n";
-
-        wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
-                .withRequestBody(equalToJson(emailPayloadBody))
-                .willReturn(
-                        aResponse().withStatus(200)));
-
-        String requestPath = String.format("/v1/api/accounts/%s/mandates/%s/confirm",
-                gatewayAccountFixture.getExternalId(), mandateFixture.getExternalId());
-        given().port(testContext.getPort())
-                .contentType(APPLICATION_JSON)
-                .body(confirmDetails)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
-
-        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
-        MatcherAssert.assertThat(transactionsForMandate.size(), is(1));
-        MatcherAssert.assertThat(transactionsForMandate.get(0).get("state"), is("PENDING"));
-    }
-
-    @Test
     public void confirm_shouldCreateACustomerBankAccountMandateWithNoTransaction_ForGoCardless_ifMandateIsOnDemand() {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withMandateType(MandateType.ON_DEMAND)
                 .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPayerFixture(payerFixture)
@@ -642,7 +410,6 @@ public class MandateResourceIT {
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
         stubGetCreditor(gatewayAccountFixture.getAccessToken().toString(), goCardlessMandate.getGoCardlessCreditorId().toString(), sunName);
 
-        // language=JSON
         String emailPayloadBody = "{\n" +
                 "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
                 "  \"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\",\n" +
@@ -658,7 +425,6 @@ public class MandateResourceIT {
                 .withRequestBody(equalToJson(emailPayloadBody))
                 .willReturn(aResponse().withStatus(200)));
 
-        // language=JSON
         String confirmDetails = "{\n" +
                 "  \"sort_code\": \"" + payerFixture.getSortCode() + "\",\n" +
                 "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\"\n" +
