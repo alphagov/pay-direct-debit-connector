@@ -54,7 +54,7 @@ public class MandateResource {
         LOGGER.info("Received create mandate request with gateway account external id - {}", gatewayAccount.getExternalId());
         createMandateRequestValidator.validate(createMandateRequestMap);
         CreateMandateRequest createMandateRequest = CreateMandateRequest.of(createMandateRequestMap);
-        CreateMandateResponse createMandateResponse = onDemandMandateService.create(gatewayAccount, createMandateRequest, uriInfo);
+        CreateMandateResponse createMandateResponse = mandateService.createMandate(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
         return created(createMandateResponse.getLink("self")).entity(createMandateResponse).build();
     }
 

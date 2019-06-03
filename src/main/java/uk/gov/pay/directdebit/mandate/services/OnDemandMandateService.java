@@ -17,15 +17,12 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 public class OnDemandMandateService {
     private PaymentProviderFactory paymentProviderFactory;
     private MandateStateUpdateService mandateStateUpdateService;
-    private MandateService mandateService;
 
     @Inject
-    public OnDemandMandateService(PaymentProviderFactory paymentProviderFactory,
-                                  MandateStateUpdateService mandateStateUpdateService,
-                                  MandateService mandateService) {
+    public OnDemandMandateService(PaymentProviderFactory paymentProviderFactory, 
+                                  MandateStateUpdateService mandateStateUpdateService) {
         this.paymentProviderFactory = paymentProviderFactory;
         this.mandateStateUpdateService = mandateStateUpdateService;
-        this.mandateService = mandateService;
     }
 
     public void confirm(GatewayAccount gatewayAccount, Mandate mandate, ConfirmMandateRequest confirmDetailsRequest) {
@@ -44,10 +41,4 @@ public class OnDemandMandateService {
             throw new InvalidStateTransitionException(DIRECT_DEBIT_DETAILS_CONFIRMED.toString(), mandate.getState().toString());
         }
     }
-
-    public CreateMandateResponse create(GatewayAccount gatewayAccount, CreateMandateRequest createMandateRequest,
-                                        UriInfo uriInfo) {
-        return mandateService.createMandate(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
-    }
-
 }

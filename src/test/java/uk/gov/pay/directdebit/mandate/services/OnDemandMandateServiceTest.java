@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
-import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
@@ -20,11 +19,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.services.SandboxService;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
 
-import javax.ws.rs.core.UriInfo;
-
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,19 +53,10 @@ public class OnDemandMandateServiceTest {
 
     @Before
     public void setUp() {
-        service = new OnDemandMandateService(mockedPaymentProviderFactory, mockedMandateStateUpdateService, mockedMandateService);
+        service = new OnDemandMandateService(mockedPaymentProviderFactory, mockedMandateStateUpdateService);
         when(mockedPaymentProviderFactory.getCommandServiceFor(gatewayAccountFixture.getPaymentProvider())).thenReturn(mockedSandboxService);
     }
-
-    @Test
-    public void create_shouldDelegateToTheMandateServiceToCreateOnDemandMandate() {
-        CreateMandateRequest mandateCreationRequest = CreateMandateRequest.of(createMandateRequest);
-        UriInfo mockedUriInfo = mock(UriInfo.class);
-        service.create(gatewayAccountFixture.toEntity(), mandateCreationRequest, mockedUriInfo);
-
-        verify(mockedMandateService).createMandate(mandateCreationRequest, gatewayAccountFixture.getExternalId(), mockedUriInfo);
-    }
-
+    
     @Test
     public void confirm_shouldConfirmOnDemandMandate() {
         Mandate mandate = mandateFixture.toEntity();
