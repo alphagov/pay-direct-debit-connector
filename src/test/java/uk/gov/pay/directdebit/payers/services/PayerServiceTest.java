@@ -13,7 +13,6 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
-import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
 import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
@@ -34,14 +33,11 @@ import static org.mockito.Mockito.when;
 public class PayerServiceTest {
 
     @Mock
-    private
-    PayerDao mockedPayerDao;
+    private PayerDao payerDao;
     @Mock
-    private MandateServiceFactory mockedMandateServiceFactory;
+    private MandateQueryService mandateQueryService;
     @Mock
-    private MandateQueryService mockedMandateQueryService;
-    @Mock
-    private MandateStateUpdateService mockedMandateStateUpdateService;
+    private MandateStateUpdateService mandateStateUpdateService;
     @Mock
     private
     PayerParser mockedPayerParser;
@@ -67,11 +63,9 @@ public class PayerServiceTest {
 
     @Before
     public void setUp() {
-        service = new PayerService(mockedPayerDao, mockedMandateServiceFactory, mockedPayerParser);
-        when(mockedMandateServiceFactory.getMandateQueryService()).thenReturn(mockedMandateQueryService);
-        when(mockedMandateServiceFactory.getMandateStateUpdateService()).thenReturn(mockedMandateStateUpdateService);
-        when(mockedMandateQueryService.findByExternalId(mandateExternalId)).thenReturn(mandateFixture.toEntity());
-        when(mockedMandateStateUpdateService.receiveDirectDebitDetailsFor(mandateFixture.toEntity())).thenReturn(mandateFixture.toEntity());
+        service = new PayerService(payerDao, mandateQueryService, mockedPayerParser, mandateStateUpdateService);
+        when(mandateQueryService.findByExternalId(mandateExternalId)).thenReturn(mandateFixture.toEntity());
+        when(mandateStateUpdateService.receiveDirectDebitDetailsFor(mandateFixture.toEntity())).thenReturn(mandateFixture.toEntity());
         when(mockedPayerParser.parse(createPayerRequest, mandateFixture.getId())).thenReturn(payer);
     }
 
@@ -79,9 +73,9 @@ public class PayerServiceTest {
     public void shouldCreateAndStoreAPayerWhenReceivingCreatePayerRequest() {
         service.createOrUpdatePayer(mandateExternalId, createPayerRequest);
         Mandate mandate = mandateFixture.toEntity();
-        verify(mockedPayerDao).insert(payer);
-        verify(mockedMandateStateUpdateService).payerCreatedFor(mandate);
-        verify(mockedMandateStateUpdateService, never()).payerEditedFor(mandate);
+        verify(payerDao).insert(payer);
+        verify(mandateStateUpdateService).payerCreatedFor(mandate);
+        verify(mandateStateUpdateService, never()).payerEditedFor(mandate);
     }
 
     @Test
@@ -90,21 +84,21 @@ public class PayerServiceTest {
                 .withName("mr payment").toEntity();
         Mandate mandate = mandateFixture.toEntity();
 
-        when(mockedPayerDao.findByMandateId(mandate.getId()))
+        when(payerDao.findByMandateId(mandate.getId()))
                 .thenReturn(Optional.of(originalPayer));
 
         Payer editedPayer = mock(Payer.class);
         when(mockedPayerParser.parse(createPayerRequest, mandateFixture.getId())).thenReturn(editedPayer);
 
         service.createOrUpdatePayer(mandateExternalId, createPayerRequest);
-        verify(mockedPayerDao).updatePayerDetails(originalPayer.getId(), editedPayer);
-        verify(mockedMandateStateUpdateService).payerEditedFor(mandate);
-        verify(mockedMandateStateUpdateService, never()).payerCreatedFor(mandate);
+        verify(payerDao).updatePayerDetails(originalPayer.getId(), editedPayer);
+        verify(mandateStateUpdateService).payerEditedFor(mandate);
+        verify(mandateStateUpdateService, never()).payerCreatedFor(mandate);
     }
 
     @Test
     public void shouldReturnPayerForTransactionIfItExists() {
-        when(mockedPayerDao.findByMandateId(mandateFixture.getId())).thenReturn(Optional.of(payer));
+        when(payerDao.findByMandateId(mandateFixture.getId())).thenReturn(Optional.of(payer));
         Payer payer = service.getPayerFor(mandateFixture.toEntity());
         assertThat(payer.getId(), is(payer.getId()));
         assertThat(payer.getExternalId(), is(payer.getExternalId()));
@@ -112,7 +106,7 @@ public class PayerServiceTest {
 
     @Test
     public void shouldThrowIfGatewayAccountDoesNotExist() {
-        when(mockedPayerDao.findByMandateId(mandateFixture.getId())).thenReturn(Optional.empty());
+        when(payerDao.findByMandateId(mandateFixture.getId())).thenReturn(Optional.empty());
         thrown.expect(PayerNotFoundException.class);
         thrown.expectMessage("Couldn't find payer for mandate with external id: sdkfhsdkjfhjdks");
         thrown.reportMissingExceptionWithMessage("PayerNotFoundException expected");

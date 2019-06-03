@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.tokens.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
+import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.tokens.api.TokenResponse;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -19,13 +19,12 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("/")
 public class SecurityTokensResource {
     private final TokenService tokenService;
-    private final MandateServiceFactory mandateServiceFactory;
+    private final MandateService mandateService;
 
     @Inject
-    public SecurityTokensResource(TokenService tokenService,
-                                  MandateServiceFactory mandateServiceFactory) {
+    public SecurityTokensResource(TokenService tokenService, MandateService mandateService) {
         this.tokenService = tokenService;
-        this.mandateServiceFactory = mandateServiceFactory;
+        this.mandateService = mandateService;
     }
 
     @GET
@@ -33,8 +32,8 @@ public class SecurityTokensResource {
     @Produces(APPLICATION_JSON)
     @Timed
     public Response getMandateForToken(@PathParam("token") String token) {
-        TokenExchangeDetails tokenExchangeDetails = mandateServiceFactory.getMandateService().getMandateFor(token);
-        TokenResponse response = TokenResponse.from(tokenExchangeDetails.getMandate());
+        TokenExchangeDetails exchangeDetails = mandateService.getMandateFor(token);
+        TokenResponse response = TokenResponse.from(exchangeDetails.getMandate());
         return Response.ok().entity(response).build();
     }
 

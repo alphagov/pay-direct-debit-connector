@@ -5,7 +5,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-import uk.gov.pay.directdebit.mandate.services.MandateServiceFactory;
+import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
+import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -17,16 +18,18 @@ public class PayerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PayerService.class);
 
     private final PayerDao payerDao;
-    private final MandateServiceFactory mandateServiceFactory;
+    private final MandateQueryService mandateQueryService;
     private final PayerParser payerParser;
+    private final MandateStateUpdateService mandateStateUpdateService;
 
     @Inject
     public PayerService(PayerDao payerDao,
-                        MandateServiceFactory mandateServiceFactory,
-                        PayerParser payerParser) {
+                        MandateQueryService mandateQueryService,
+                        PayerParser payerParser, MandateStateUpdateService mandateStateUpdateService) {
         this.payerDao = payerDao;
-        this.mandateServiceFactory = mandateServiceFactory;
+        this.mandateQueryService = mandateQueryService;
         this.payerParser = payerParser;
+        this.mandateStateUpdateService = mandateStateUpdateService;
     }
     
     public Payer getPayerFor(Mandate mandate) {
@@ -35,8 +38,8 @@ public class PayerService {
                 .orElseThrow(() -> new PayerNotFoundException(mandate.getExternalId()));
     }
     public Payer createOrUpdatePayer(MandateExternalId mandateExternalId, Map<String, String> createPayerRequest) {
-        Mandate mandate = mandateServiceFactory.getMandateQueryService().findByExternalId(mandateExternalId);
-        mandateServiceFactory.getMandateStateUpdateService().receiveDirectDebitDetailsFor(mandate);
+        Mandate mandate = mandateQueryService.findByExternalId(mandateExternalId);
+        mandateStateUpdateService.receiveDirectDebitDetailsFor(mandate);
         Payer payerDetails = payerParser.parse(createPayerRequest, mandate.getId());
 
         return payerDao
@@ -48,7 +51,7 @@ public class PayerService {
     private Payer editPayer(Mandate mandate, Payer oldPayer, Payer newPayer) {
         LOGGER.info("Updating payer with external id {}", oldPayer.getExternalId());
         payerDao.updatePayerDetails(oldPayer.getId(), newPayer);
-        mandateServiceFactory.getMandateStateUpdateService().payerEditedFor(mandate);
+        mandateStateUpdateService.payerEditedFor(mandate);
         return newPayer;
     }
 
@@ -56,7 +59,7 @@ public class PayerService {
         Long id = payerDao.insert(payer);
         payer.setId(id);
         LOGGER.info("Created Payer with external id {}", payer.getExternalId());
-        mandateServiceFactory.getMandateStateUpdateService().payerCreatedFor(mandate);
+        mandateStateUpdateService.payerCreatedFor(mandate);
         return payer;
     }
 

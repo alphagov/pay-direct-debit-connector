@@ -13,4 +13,3 @@ public class TokenExchangeDetails {
         return mandate;
     }
 }
-
