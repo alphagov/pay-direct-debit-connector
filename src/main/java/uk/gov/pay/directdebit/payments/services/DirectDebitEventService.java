@@ -65,9 +65,9 @@ public class DirectDebitEventService {
         return insertEventFor(mandate, directDebitEvent);
     }
 
-    public DirectDebitEvent registerMandateCreatedEventFor(Mandate mandate) {
+    public void registerMandateCreatedEventFor(Mandate mandate) {
         DirectDebitEvent directDebitEvent = mandateCreated(mandate.getId());
-        return insertEventFor(mandate, directDebitEvent);
+        insertEventFor(mandate, directDebitEvent);
     }
     
     public DirectDebitEvent registerMandateFailedEventFor(Mandate mandate) {
@@ -80,9 +80,9 @@ public class DirectDebitEventService {
         return insertEventFor(mandate, directDebitEvent);
     }
 
-    public DirectDebitEvent registerMandateExpiredEventFor(Mandate mandate) {
+    public void registerMandateExpiredEventFor(Mandate mandate) {
         DirectDebitEvent directDebitEvent = mandateExpiredBySystem(mandate.getId());
-        return insertEventFor(mandate, directDebitEvent);
+        insertEventFor(mandate, directDebitEvent);
     }
 
 
@@ -145,8 +145,8 @@ public class DirectDebitEventService {
         insertEventFor(mandate, directDebitDetailsReceived(mandate.getId()));
     }
 
-    public DirectDebitEvent registerPayerEditedEventFor(Mandate mandate) {
-        return insertEventFor(mandate, payerEdited(mandate.getId()));
+    public void registerPayerEditedEventFor(Mandate mandate) {
+        insertEventFor(mandate, payerEdited(mandate.getId()));
     }
 
     public Optional<DirectDebitEvent> findBy(Long mandateId, DirectDebitEvent.Type type, DirectDebitEvent.SupportedEvent event) {

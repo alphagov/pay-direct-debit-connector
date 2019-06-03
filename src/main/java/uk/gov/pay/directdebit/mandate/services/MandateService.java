@@ -16,12 +16,10 @@ import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
-import uk.gov.pay.directdebit.mandate.exception.WrongNumberOfTransactionsForOneOffMandateException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
@@ -126,8 +124,7 @@ public class MandateService {
     }
 
     public DirectDebitInfoFrontendResponse populateGetMandateWithTransactionResponseForFrontend(String accountExternalId, String transactionExternalId) {
-        Transaction transaction = transactionService
-                .findTransactionForExternalId(transactionExternalId);
+        Transaction transaction = transactionService.findTransactionForExternalId(transactionExternalId);
         Mandate mandate = transaction.getMandate();
         return new DirectDebitInfoFrontendResponse(
                 mandate.getExternalId(),
@@ -182,22 +179,14 @@ public class MandateService {
                 .orElseThrow(() -> new MandateNotFoundException(id.toString()));
     }
 
-    public DirectDebitEvent changePaymentMethodFor(MandateExternalId mandateExternalId) {
+    public void changePaymentMethodFor(MandateExternalId mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        return mandateStateUpdateService.changePaymentMethodFor(mandate);
+        mandateStateUpdateService.changePaymentMethodFor(mandate);
     }
 
-    public DirectDebitEvent cancelMandateCreation(MandateExternalId mandateExternalId) {
+    public void cancelMandateCreation(MandateExternalId mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        return mandateStateUpdateService.cancelMandateCreation(mandate);
-    }
-
-    private Transaction retrieveTransactionForOneOffMandate(MandateExternalId mandateExternalId) {
-        List<Transaction> transactions = transactionService.findTransactionsForMandate(mandateExternalId);
-        if (transactions.size() != 1) {
-            throw new WrongNumberOfTransactionsForOneOffMandateException("Found zero or multiple transactions for one off mandate with external id " + mandateExternalId);
-        }
-        return transactions.get(0);
+        mandateStateUpdateService.cancelMandateCreation(mandate);
     }
 
     private List<Map<String, Object>> createLinks(Mandate mandate, String accountExternalId, UriInfo uriInfo) {
