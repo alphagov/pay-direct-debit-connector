@@ -9,7 +9,9 @@ import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
@@ -20,6 +22,9 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
+import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.payments.services.TransactionService;
@@ -41,6 +46,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 
 public class MandateService {
 
@@ -51,19 +57,23 @@ public class MandateService {
     private final TokenService tokenService;
     private final TransactionService transactionService;
     private final MandateStateUpdateService mandateStateUpdateService;
+    private final PaymentProviderFactory paymentProviderFactory;
 
     @Inject
     public MandateService(DirectDebitConfig directDebitConfig,
-                          MandateDao mandateDao, GatewayAccountDao gatewayAccountDao,
+                          MandateDao mandateDao, 
+                          GatewayAccountDao gatewayAccountDao,
                           TokenService tokenService,
                           TransactionService transactionService,
-                          MandateStateUpdateService mandateStateUpdateService) {
+                          MandateStateUpdateService mandateStateUpdateService, 
+                          PaymentProviderFactory paymentProviderFactory) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
         this.transactionService = transactionService;
         this.mandateDao = mandateDao;
         this.mandateStateUpdateService = mandateStateUpdateService;
         this.linksConfig = directDebitConfig.getLinks();
+        this.paymentProviderFactory = paymentProviderFactory;
     }
 
     public Mandate createMandate(CreateMandateRequest createRequest, String accountExternalId) {
@@ -187,6 +197,23 @@ public class MandateService {
     public void cancelMandateCreation(MandateExternalId mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
         mandateStateUpdateService.cancelMandateCreation(mandate);
+    }
+
+    public void confirm(GatewayAccount gatewayAccount, Mandate mandate, ConfirmMandateRequest confirmDetailsRequest) {
+
+        if (mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)) {
+            Mandate confirmedMandate = paymentProviderFactory
+                    .getCommandServiceFor(gatewayAccount.getPaymentProvider())
+                    .confirmOnDemandMandate(
+                            mandate,
+                            new BankAccountDetails(
+                                    confirmDetailsRequest.getAccountNumber(),
+                                    confirmDetailsRequest.getSortCode())
+                    );
+            mandateStateUpdateService.confirmedOnDemandDirectDebitDetailsFor(confirmedMandate);
+        } else {
+            throw new InvalidStateTransitionException(DIRECT_DEBIT_DETAILS_CONFIRMED.toString(), mandate.getState().toString());
+        }
     }
 
     private List<Map<String, Object>> createLinks(Mandate mandate, String accountExternalId, UriInfo uriInfo) {
