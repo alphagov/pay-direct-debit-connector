@@ -32,7 +32,7 @@ public class GoCardlessStubs {
                 .replace("{{gocardless_creditor_id}}", goCardlessCreditorId)
                 .replace("{{gocardless_sun}}", goCardlessSun);
 
-        stubGetCallsFor("/creditors/" + goCardlessCreditorId, accessToken, 200, getCreditorResponseBody);
+        stubGetCallsFor("/creditors", accessToken, 200, getCreditorResponseBody);
     }
 
     public static void stubCreateCustomer(String accessToken, String idempotencyKey, PayerFixture payerFixture, String goCardlessCustomerId) {

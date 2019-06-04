@@ -24,7 +24,6 @@ import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
-import javax.ws.rs.HEAD;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -76,9 +75,9 @@ public class GoCardlessClientFacade {
                 gcBankDetailsLookup.getAvailableDebitSchemes().contains(AvailableDebitScheme.BACS));
     }
 
-    public Optional<SunName> getSunName(GoCardlessCreditorId goCardlessCreditorId) {
+    public Optional<SunName> getSunName() {
         return goCardlessClientWrapper
-                .getCreditor(goCardlessCreditorId.toString())
+                .getCreditor()
                 .getSchemeIdentifiers()
                 .stream()
                 .filter(schemeIdentifier -> Scheme.BACS.equals(schemeIdentifier.getScheme()))

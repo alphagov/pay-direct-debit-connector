@@ -7,11 +7,9 @@ import org.mockito.Mock;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
-import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
@@ -43,15 +41,16 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 
 public abstract class GoCardlessServiceTest {
 
-    static final String CUSTOMER_ID = "CU328471";
-    static final String BANK_ACCOUNT_ID = "BA34983496";
+    private static final String CUSTOMER_ID = "CU328471";
+    private static final String BANK_ACCOUNT_ID = "BA34983496";
     static final MandateExternalId MANDATE_ID = MandateExternalId.valueOf("sdkfhsdkjfhjdks");
-    static final String TRANSACTION_ID = "sdkfhsd2jfhjdks";
+    private static final String TRANSACTION_ID = "sdkfhsd2jfhjdks";
     static final SortCode SORT_CODE = SortCode.of("123456");
     static final AccountNumber ACCOUNT_NUMBER = AccountNumber.of("12345678");
 
@@ -85,12 +84,7 @@ public abstract class GoCardlessServiceTest {
             .withMandateFixture(mandateFixture)
             .withExternalId(TRANSACTION_ID)
             .toEntity();
-    GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.valueOf("test_creditor_id");
-    GoCardlessMandate goCardlessMandate =
-            GoCardlessMandateFixture.aGoCardlessMandateFixture()
-                    .withGoCardlessCreditorId(goCardlessCreditorId)
-                    .withMandateId(mandateFixture.getId())
-                    .toEntity();
+    GoCardlessMandate goCardlessMandate = aGoCardlessMandateFixture().withMandateId(mandateFixture.getId()).toEntity();
     GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().withTransactionId(transaction.getId()).toEntity();
     BankAccountDetails bankAccountDetails = new BankAccountDetails(ACCOUNT_NUMBER, SORT_CODE);
 
@@ -140,17 +134,13 @@ public abstract class GoCardlessServiceTest {
         SunName sunName = SunName.of("testServiceUserNumber");
         Mandate mandate = mandateFixture.toEntity();
 
-        given(mockedGoCardlessMandateDao.findByMandateId(mandateFixture.getId())).willReturn(Optional.of(goCardlessMandate));
-        given(mockedGoCardlessClientFacade.getSunName(goCardlessCreditorId)).willReturn(Optional.of(sunName));
+        given(mockedGoCardlessClientFacade.getSunName()).willReturn(Optional.of(sunName));
 
         assertThat(service.getSunName(mandate), is(Optional.of(sunName)));
     }
 
     @Test
     public void shouldReturnEmptyWhenCreditorIdHasNoSunName() {
-        given(mockedGoCardlessMandateDao.findByMandateId(mandateFixture.getId())).willReturn(Optional.of(goCardlessMandate));
-        given(mockedGoCardlessClientFacade.getSunName(goCardlessCreditorId)).willReturn(Optional.empty());
-
         assertThat(service.getSunName(mandateFixture.toEntity()), is(Optional.empty()));
     }
 

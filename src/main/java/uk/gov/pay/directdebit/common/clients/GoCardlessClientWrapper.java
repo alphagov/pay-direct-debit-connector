@@ -74,9 +74,7 @@ public class GoCardlessClientWrapper {
                 .execute();
     }
 
-    public Creditor getCreditor(String identity) {
-        return goCardlessClient.creditors()
-                .get(identity)
-                .execute();
+    public Creditor getCreditor() {
+        return goCardlessClient.creditors().all().execute().iterator().next();
     }
 }

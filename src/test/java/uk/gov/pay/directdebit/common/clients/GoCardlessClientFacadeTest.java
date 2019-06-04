@@ -125,26 +125,24 @@ public class GoCardlessClientFacadeTest {
 
     @Test
     public void getSunName_shouldReturnSunNameWhenBacsIsPresent() {
-        String creditorId = "creditor-id-123";
         SunName sunName = SunName.of("testServiceUserNumber");
-        given(mockGoCardlessClientWrapper.getCreditor(creditorId)).willReturn(mockCreditor);
+        given(mockGoCardlessClientWrapper.getCreditor()).willReturn(mockCreditor);
         given(mockCreditor.getSchemeIdentifiers()).willReturn(Collections.singletonList(mockSchemeIdentifier));
         given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.BACS);
         given(mockSchemeIdentifier.getName()).willReturn(sunName.toString());
 
-        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.valueOf(creditorId));
+        Optional<SunName> result = goCardlessClientFacade.getSunName();
 
         assertThat(result, is(Optional.of(sunName)));
     }
 
     @Test
     public void getSunName_shouldReturnEmptyWhenCreditorIdHasNoSunName() {
-        String creditorId = "creditor-id-123";
-        given(mockGoCardlessClientWrapper.getCreditor(creditorId)).willReturn(mockCreditor);
+        given(mockGoCardlessClientWrapper.getCreditor()).willReturn(mockCreditor);
         given(mockCreditor.getSchemeIdentifiers()).willReturn(Collections.singletonList(mockSchemeIdentifier));
         given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.SEPA);
 
-        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.valueOf(creditorId));
+        Optional<SunName> result = goCardlessClientFacade.getSunName();
 
         assertThat(result, is(Optional.empty()));
     }
