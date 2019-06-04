@@ -12,23 +12,33 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
-    private static final String ID_COLUMN = "id";
-    private static final String EVENT_ID_COLUMN = "event_id";
-    private static final String GOCARDLESS_EVENT_ID_COLUMN = "gocardless_event_id";
-    private static final String ACTION_COLUMN = "action";
-    private static final String RESOURCE_TYPE_COLUMN = "resource_type";
-    private static final String JSON_COLUMN = "json";
-    private static final String CREATED_AT_COLUMN = "created_at";
 
     @Override
     public GoCardlessEvent map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
-        return new GoCardlessEvent(
-                resultSet.getLong(ID_COLUMN),
-                resultSet.getLong(EVENT_ID_COLUMN),
-                GoCardlessEventId.valueOf(resultSet.getString(GOCARDLESS_EVENT_ID_COLUMN)),
-                resultSet.getString(ACTION_COLUMN),
-                GoCardlessResourceType.fromString(resultSet.getString(RESOURCE_TYPE_COLUMN)),
-                resultSet.getString(JSON_COLUMN),
-                ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_AT_COLUMN).toInstant(), ZoneOffset.UTC));
+        return GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
+                .withId(resultSet.getLong("id"))
+                .withEventId(resultSet.getLong("event_id"))
+                .withGoCardlessEventId(GoCardlessEventId.valueOf(resultSet.getString("gocardless_event_id")))
+                .withAction(resultSet.getString("action"))
+                .withResourceType(GoCardlessResourceType.fromString(resultSet.getString("resource_type")))
+                .withJson(resultSet.getString("json"))
+                .withDetailsCause(resultSet.getString("details_cause"))
+                .withDetailsDescription(resultSet.getString("details_description"))
+                .withDetailsOrigin(resultSet.getString("details_origin"))
+                .withDetailsReasonCode(resultSet.getString("details_reason_code"))
+                .withDetailsScheme(resultSet.getString("details_scheme"))
+                .withLinksMandate(resultSet.getString("links_mandate"))
+                .withLinksNewCustomerBankAccount(resultSet.getString("links_new_customer_bank_account"))
+                .withLinksNewMandate(resultSet.getString("links_new_mandate"))
+                .withLinksOrganisation(resultSet.getString("links_organisation"))
+                .withLinksParentEvent(resultSet.getString("links_parent_event"))
+                .withLinksPayment(resultSet.getString("links_payment"))
+                .withLinksPayout(resultSet.getString("links_payout"))
+                .withLinksPreviousCustomerBankAccount(resultSet.getString("links_previous_customer_bank_account"))
+                .withLinksRefund(resultSet.getString("links_refund"))
+                .withLinksSubscription(resultSet.getString("links_subscription"))
+                .withCreatedAt(ZonedDateTime.ofInstant(
+                        resultSet.getTimestamp("created_at").toInstant(), ZoneOffset.UTC))
+                .build();
     }
 }

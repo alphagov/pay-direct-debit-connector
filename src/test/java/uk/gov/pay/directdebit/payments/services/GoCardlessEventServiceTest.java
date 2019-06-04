@@ -49,10 +49,8 @@ public class GoCardlessEventServiceTest {
 
     @Test
     public void findPaymentForEvent_shouldThrowIfNoPaymentIsFoundForEvent() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().toEntity();
-        String resourceId = "aaa";
-        goCardlessEvent.setResourceId(resourceId);
-        when(mockedGoCardlessPaymentDao.findByEventResourceId(resourceId)).thenReturn(Optional.empty());
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceId("aaa").toEntity();
+        when(mockedGoCardlessPaymentDao.findByEventResourceId("aaa")).thenReturn(Optional.empty());
         thrown.expect(GoCardlessPaymentNotFoundException.class);
         thrown.expectMessage("No gocardless payment found with resource id: aaa");
         thrown.reportMissingExceptionWithMessage("GoCardlessPaymentNotFoundException expected");
@@ -61,10 +59,9 @@ public class GoCardlessEventServiceTest {
 
     @Test
     public void findMandateForEvent_shouldThrowIfNoMandateIsFoundForEvent() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().toEntity();
-        GoCardlessMandateId resourceId = GoCardlessMandateId.valueOf("aaa");
-        goCardlessEvent.setResourceId(resourceId.toString());
-        when(mockedGoCardlessMandateDao.findByEventResourceId(resourceId)).thenReturn(Optional.empty());
+        GoCardlessMandateId mandateId = GoCardlessMandateId.valueOf("aaa");
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceId(mandateId.toString()).toEntity();
+        when(mockedGoCardlessMandateDao.findByEventResourceId(mandateId)).thenReturn(Optional.empty());
         thrown.expect(GoCardlessMandateNotFoundException.class);
         thrown.expectMessage("No gocardless mandate found with resource id: aaa");
         thrown.reportMissingExceptionWithMessage("GoCardlessMandateNotFoundException expected");

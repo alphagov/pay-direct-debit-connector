@@ -16,7 +16,7 @@ public interface GoCardlessPaymentDao {
 
     @SqlQuery("SELECT * FROM gocardless_payments p WHERE p.payment_id = :entityId")
     Optional<GoCardlessPayment> findByEventResourceId(@Bind("entityId") String entityId);
-
+    
     @SqlUpdate("INSERT INTO gocardless_payments(transaction_id, payment_id) VALUES (:transactionId, :paymentId)")
     @GetGeneratedKeys
     Long insert(@BindBean GoCardlessPayment payment);
