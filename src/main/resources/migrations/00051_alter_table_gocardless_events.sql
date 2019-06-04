@@ -1,0 +1,1 @@
+ALTER TABLE gocardless_mandates DROP COLUMN gocardless_creditor_id;
