@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.webhook.gocardless.api;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -12,9 +13,11 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
 
+import javax.json.Json;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -89,7 +92,22 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getCreatedAt(), is(CREATED_AT));
         assertThat(firstEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(firstEvent.getJson(), is(objectMapper.readTree(firstEventPayload).toString()));
-
+        assertThat(firstEvent.getDetailsCause(), is("payment_confirmed"));
+        assertThat(firstEvent.getDetailsDescription(), is("Payment was confirmed as collected"));
+        assertThat(firstEvent.getDetailsOrigin(), is("gocardless"));
+        assertThat(firstEvent.getDetailsReasonCode(), is("a reason code"));
+        assertThat(firstEvent.getDetailsScheme(), is("a details scheme"));
+        assertThat(firstEvent.getLinksNewCustomerBankAccount(), is("a bank account"));
+        assertThat(firstEvent.getLinksNewMandate(), is("a new mandate"));
+        assertThat(firstEvent.getLinksOrganisation(), is(organisationIdentifier.toString()));
+        assertThat(firstEvent.getLinksParentEvent(), is("a parent event"));
+        assertThat(firstEvent.getLinksPreviousCustomerBankAccount(), is("a previous customer bank account"));
+        assertThat(firstEvent.getLinksRefund(), is(""));
+        assertThat(firstEvent.getLinksSubscription(), is("a subscription"));
+        assertThat(firstEvent.getLinksPayment(), is("payment"));
+        assertThat(firstEvent.getLinksMandate(), is(""));
+        assertThat(firstEvent.getLinksPayout(), is(""));
+        
         GoCardlessEvent secondEvent = parsedEvents.get(1);
         assertThat(secondEvent.getEventId(), is(nullValue()));
         assertThat(secondEvent.getId(), is(nullValue()));
@@ -98,6 +116,10 @@ public class GoCardlessWebhookParserTest {
         assertThat(secondEvent.getCreatedAt(), is(eventCreatedAt));
         assertThat(secondEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(secondEvent.getJson(), is(objectMapper.readTree(secondEventPayload).toString()));
+        assertThat(secondEvent.getLinksPayment(), is(""));
+        assertThat(secondEvent.getLinksMandate(), is("mandate"));
+        assertThat(secondEvent.getLinksPayout(), is(""));
+
 
         GoCardlessEvent thirdEvent = parsedEvents.get(2);
         assertThat(thirdEvent.getEventId(), is(nullValue()));
@@ -107,6 +129,9 @@ public class GoCardlessWebhookParserTest {
         assertThat(thirdEvent.getCreatedAt(), is(eventCreatedAt));
         assertThat(thirdEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(thirdEvent.getJson(), is(objectMapper.readTree(thirdEventPayload).toString()));
+        assertThat(thirdEvent.getLinksPayment(), is(""));
+        assertThat(thirdEvent.getLinksMandate(), is(""));
+        assertThat(thirdEvent.getLinksPayout(), is("payout"));
     }
 
     @Test
@@ -123,25 +148,48 @@ public class GoCardlessWebhookParserTest {
         thrown.reportMissingExceptionWithMessage("WebhookParserException expected");
         parser.parse("");
     }
-
-    private String buildValidEvent(String eventId, String action, GoCardlessResourceType resourceType, String linkKey,
+    
+    private String buildValidEvent(String eventId, String action, GoCardlessResourceType resourceType, String resourceId,
                                    ZonedDateTime createdAt, GoCardlessOrganisationId organisationIdentifier) {
-        // language=JSON
-        return String.format("{\n" +
-                "      \"id\": \"%s\",\n" +
-                "      \"created_at\": \"%s\",\n" +
-                "      \"action\": \"%s\",\n" +
-                "      \"resource_type\": \"%s\",\n" +
-                "      \"links\": {\n" +
-                "        \"%s\": \"PM123\",\n" +
-                "        \"organisation\": \"%s\"\n" +
-                "      },\n" +
-                "      \"details\": {\n" +
-                "        \"origin\": \"gocardless\",\n" +
-                "        \"cause\": \"payment_confirmed\",\n" +
-                "        \"description\": \"Payment was confirmed as collected\"\n" +
-                "      }\n" +
-                "    }", eventId, createdAt.toString(), action, resourceType.toString().toLowerCase(), linkKey, organisationIdentifier);
+        return Json.createObjectBuilder()
+                .add("id", eventId)
+                .add("action", action)
+                .add("created_at", createdAt.toString())
+                .add("customer_notifications", 
+                        Json.createObjectBuilder()
+                                .add("deadline", "a deadline")
+                                .add("id", "an id")
+                                .add("mandatory", "true")
+                                .add("type", "a type")
+                                .build())
+                .add("details",
+                        Json.createObjectBuilder()
+                                .add("cause", "payment_confirmed")
+                                .add("description", "Payment was confirmed as collected")
+                                .add("origin", "gocardless")
+                                .add("reason_code", "a reason code")
+                                .add("scheme", "a details scheme")
+                                .build()
+                )
+                .add("metadata",
+                        Json.createObjectBuilder()
+                        .build())
+                .add("resource_type", resourceType.toString().toLowerCase())
+                .add("links",
+                        Json.createObjectBuilder()
+                                .add("mandate", resourceType == MANDATES ? resourceId : "")
+                                .add("new_customer_bank_account", "a bank account")
+                                .add("new_mandate", "a new mandate")
+                                .add("organisation", organisationIdentifier.toString())
+                                .add("parent_event", "a parent event")
+                                .add("payment", resourceType == PAYMENTS ? resourceId : "")
+                                .add("payout", resourceType == PAYOUTS ? resourceId : "")
+                                .add("previous_customer_bank_account", "a previous customer bank account")
+                                .add("refund", "")
+                                .add("subscription", "a subscription")
+                                .build()
+                )
+                .build().toString(); 
     }
 
     private String buildEvents(String... events) throws IOException {

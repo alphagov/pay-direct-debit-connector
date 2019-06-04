@@ -47,6 +47,22 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
     private final static GoCardlessResourceType GOCARDLESS_RESOURCE_TYPE = PAYMENTS;
     private ObjectMapper objectMapper = new ObjectMapper();
     private JsonNode eventJson;
+    private final static String DETAILS_CAUSE  = "a detail cause";
+    private final static String DETAILS_DESCRIPTION = "a detail description";
+    private final static String DETAILS_ORIGIN  = "a detail origin";
+    private final static String DETAILS_REASONCODE = "a detail reason code";
+    private final static String DETAILS_SCHEME  = "a detail scheme";
+    private final static String LINKS_MANDATE = "123456";
+    private final static String LINKS_NEWCUSTOMERBANKACCOUNT  = "a new customer bank account";
+    private final static String LINKS_NEWMANDATE = "a new mandate";
+    private final static String LINKS_ORGANISATION  = "an organisation";
+    private final static String LINKS_PARENTEVENT = "a parent event";
+    private final static String LINKS_PAYMENT  = "a payment";
+    private final static String LINKS_PAYOUT = "a payout";
+    private final static String LINKS_PREVIOUSCUSTOMERBANKACCOUNT  = "a previous customer bank account";
+    private final static String LINKS_REFUND = "a refund";
+    private final static String LINKS_SUBSCRIPTION = "a subscription";
+    
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2017-12-30T12:30:40Z");
 
     private GoCardlessEvent goCardlessEvent;
@@ -68,6 +84,21 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
                 .withGoCardlessEventId(GOCARDLESS_EVENT_ID)
                 .withAction(GOCARDLESS_ACTION)
                 .withResourceType(GOCARDLESS_RESOURCE_TYPE)
+                .withDetailsCause(DETAILS_CAUSE)
+                .withDetailsDescription(DETAILS_DESCRIPTION)
+                .withDetailsOrigin(DETAILS_ORIGIN)
+                .withDetailsReasonCode(DETAILS_REASONCODE)
+                .withDetailsScheme(DETAILS_SCHEME)
+                .withLinksMandate(LINKS_MANDATE)
+                .withLinksNewCustomerBankAccount(LINKS_NEWCUSTOMERBANKACCOUNT)
+                .withLinksNewMandate(LINKS_NEWMANDATE)
+                .withLinksOrganisation(LINKS_ORGANISATION)
+                .withLinksParentEvent(LINKS_PARENTEVENT)
+                .withLinksPayment(LINKS_PAYMENT)
+                .withLinksPayout(LINKS_PAYOUT)
+                .withLinksPreviousCustomerBankAccount(LINKS_PREVIOUSCUSTOMERBANKACCOUNT)
+                .withLinksRefund(LINKS_REFUND)
+                .withLinksSubscription(LINKS_SUBSCRIPTION)
                 .withCreatedAt(CREATED_AT)
                 .withJson(eventJson.toString())
                 .toEntity();
@@ -82,6 +113,22 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
         assertThat(foundGoCardlessEvent.get("event_id"), is(GOCARDLESS_EVENT_ID.toString()));
         assertThat(foundGoCardlessEvent.get("action"), is(GOCARDLESS_ACTION));
         assertThat(foundGoCardlessEvent.get("resource_type"), is(GOCARDLESS_RESOURCE_TYPE.toString()));
+        assertThat(foundGoCardlessEvent.get("details_cause"), is(DETAILS_CAUSE));
+        assertThat(foundGoCardlessEvent.get("details_description"), is(DETAILS_DESCRIPTION));
+        assertThat(foundGoCardlessEvent.get("details_origin"), is(DETAILS_ORIGIN));
+        assertThat(foundGoCardlessEvent.get("details_reason_code"), is(DETAILS_REASONCODE));
+        assertThat(foundGoCardlessEvent.get("details_scheme"), is(DETAILS_SCHEME));
+        assertThat(foundGoCardlessEvent.get("links_mandate"), is(LINKS_MANDATE));
+        assertThat(foundGoCardlessEvent.get("links_new_customer_bank_account"), is(LINKS_NEWCUSTOMERBANKACCOUNT));
+        assertThat(foundGoCardlessEvent.get("links_new_mandate"), is(LINKS_NEWMANDATE));
+        assertThat(foundGoCardlessEvent.get("links_organisation"), is(LINKS_ORGANISATION));
+        assertThat(foundGoCardlessEvent.get("links_parent_event"), is(LINKS_PARENTEVENT));
+        assertThat(foundGoCardlessEvent.get("links_payment"), is(LINKS_PAYMENT));
+        assertThat(foundGoCardlessEvent.get("links_payout"), is(LINKS_PAYOUT));
+        assertThat(foundGoCardlessEvent.get("links_previous_customer_bank_account"),
+                is(LINKS_PREVIOUSCUSTOMERBANKACCOUNT));
+        assertThat(foundGoCardlessEvent.get("links_refund"), is(LINKS_REFUND));
+        assertThat(foundGoCardlessEvent.get("links_subscription"), is(LINKS_SUBSCRIPTION));
         assertThat(objectMapper.readTree(foundGoCardlessEvent.get("json").toString()), is(eventJson));
         assertThat((Timestamp) foundGoCardlessEvent.get("created_at"), isDate(CREATED_AT));
     }

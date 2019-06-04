@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessEvent.GoCardlessEventBuilder;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
@@ -16,13 +17,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.pay.directdebit.payments.model.GoCardlessEvent.GoCardlessEventBuilder.*;
+
 public class GoCardlessWebhookParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessWebhookParser.class);
 
     private ObjectMapper objectMapper;
 
     @Inject
-    public GoCardlessWebhookParser(ObjectMapper objectMapper) {
+    GoCardlessWebhookParser(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
@@ -32,19 +35,73 @@ public class GoCardlessWebhookParser {
             JsonNode webhookJson = objectMapper.readTree(webhookPayload);
             JsonNode eventsPayload = webhookJson.get("events");
             for (JsonNode eventNode : eventsPayload) {
-                String resourceType = eventNode.get("resource_type").asText();
-                GoCardlessResourceType handledGoCardlessResourceType = GoCardlessResourceType.fromString(resourceType);
-                GoCardlessEvent event = new GoCardlessEvent(
-                        GoCardlessEventId.valueOf(eventNode.get("id").asText()),
-                        eventNode.get("action").asText(),
-                        handledGoCardlessResourceType,
-                        eventNode.toString(),
-                        ZonedDateTime.parse(eventNode.get("created_at").asText()),
-                        getOrganisationField(eventNode)
-                );
+                JsonNode detailsNode = eventNode.get("details");
+                JsonNode linksNode = eventNode.get("links");
+                GoCardlessEventBuilder goCardlessEventBuilder = aGoCardlessEvent()
+                        .withGoCardlessEventId(GoCardlessEventId.valueOf(eventNode.get("id").asText()))
+                        .withAction(eventNode.get("action").asText())
+                        .withJson(eventNode.toString())
+                        .withCreatedAt(ZonedDateTime.parse(eventNode.get("created_at").asText()))
+                        .withOrganisationIdentifier(getOrganisationField(eventNode));
+                
+                if (detailsNode.has("cause")) {
+                    goCardlessEventBuilder.withDetailsCause(detailsNode.get("cause").asText());
+                }
+                if (detailsNode.has("description")) {
+                    goCardlessEventBuilder.withDetailsDescription(detailsNode.get("description").asText());
+                }
+                if (detailsNode.has("origin")) {
+                    goCardlessEventBuilder.withDetailsOrigin(detailsNode.get("origin").asText());
+                }
+                if (detailsNode.has("reason_code")) {
+                    goCardlessEventBuilder.withDetailsReasonCode(detailsNode.get("reason_code").asText());
+                }
+                if (detailsNode.has("scheme")) {
+                    goCardlessEventBuilder.withDetailsScheme(detailsNode.get("scheme").asText());
+
+                }
+                if (linksNode.has("mandate")) {
+                    goCardlessEventBuilder.withLinksMandate(linksNode.get("mandate").asText());
+                }
+                if (linksNode.has("new_customer_bank_account")) {
+                    goCardlessEventBuilder
+                            .withLinksNewCustomerBankAccount(linksNode.get("new_customer_bank_account").asText());
+                }
+                if (linksNode.has("new_mandate")) {
+                    goCardlessEventBuilder.withLinksNewMandate(linksNode.get("new_mandate").asText());
+                }
+                if (linksNode.has("organisation")) {
+                    goCardlessEventBuilder.withLinksOrganisation(linksNode.get("organisation").asText());
+                }
+                if (linksNode.has("parent_event")) {
+                    goCardlessEventBuilder.withLinksParentEvent(linksNode.get("parent_event").asText());
+                }
+                if (linksNode.has("payment")) {
+                    goCardlessEventBuilder.withLinksPayment(linksNode.get("payment").asText());
+                }
+                if (linksNode.has("payout")) {
+                    goCardlessEventBuilder.withLinksPayout(linksNode.get("payout").asText());
+                }
+                if (linksNode.has("previous_customer_bank_account")) {
+                    goCardlessEventBuilder
+                            .withLinksPreviousCustomerBankAccount(
+                                    linksNode.get("previous_customer_bank_account").asText());
+                }
+                if (linksNode.has("refund")) {
+                    goCardlessEventBuilder.withLinksRefund(linksNode.get("refund").asText());
+                }
+                if (linksNode.has("subscription")) {
+                    goCardlessEventBuilder.withLinksSubscription(linksNode.get("subscription").asText());
+                }
+                
+                GoCardlessResourceType handledGoCardlessResourceType =
+                        GoCardlessResourceType.fromString(eventNode.get("resource_type").asText());
+                goCardlessEventBuilder.withResourceType(handledGoCardlessResourceType);
                 extractResourceIdFrom(eventNode, handledGoCardlessResourceType)
-                        .ifPresent(event::setResourceId);
+                        .ifPresent(goCardlessEventBuilder::withResourceId);
+                GoCardlessEvent event = goCardlessEventBuilder.build();
                 events.add(event);
+                
                 LOGGER.info("Successfully parsed gocardless webhook, event resource type: {}, action: {}, resource id {}",
                         event.getResourceType(),
                         event.getAction(),
