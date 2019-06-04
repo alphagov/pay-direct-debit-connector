@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.events.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.directdebit.events.api.DirectDebitEventsResponse;
-import uk.gov.pay.directdebit.events.service.DirectDebitEventsSearchService;
+import uk.gov.pay.directdebit.events.services.DirectDebitEventsSearchService;
 import uk.gov.pay.directdebit.payments.params.DirectDebitEventSearchParams;
 
 import javax.inject.Inject;

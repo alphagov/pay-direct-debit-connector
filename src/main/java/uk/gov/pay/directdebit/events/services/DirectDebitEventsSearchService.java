@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.events.service;
+package uk.gov.pay.directdebit.events.services;
 
 import uk.gov.pay.directdebit.events.api.DirectDebitEventsPagination;
 import uk.gov.pay.directdebit.events.api.DirectDebitEventsResponse;
