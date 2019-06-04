@@ -14,8 +14,6 @@ import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 
 import javax.inject.Inject;
 
-import java.util.Optional;
-
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CANCELLED;
@@ -45,8 +43,8 @@ public class MandateStateUpdateService {
         return confirmedDetailsFor(mandate);
     }
     
-    DirectDebitEvent mandateCreatedFor(Mandate mandate) {
-        return directDebitEventService.registerMandateCreatedEventFor(mandate);
+    void mandateCreatedFor(Mandate mandate) {
+        directDebitEventService.registerMandateCreatedEventFor(mandate);
     }
 
     Mandate confirmedOnDemandDirectDebitDetailsFor(Mandate mandate) {
@@ -55,14 +53,14 @@ public class MandateStateUpdateService {
         return updatedMandate;
     }
 
-    DirectDebitEvent changePaymentMethodFor(Mandate mandate) {
+    void changePaymentMethodFor(Mandate mandate) {
         Mandate newMandate = updateStateFor(mandate, SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
-        return directDebitEventService.registerPaymentMethodChangedEventFor(newMandate);
+        directDebitEventService.registerPaymentMethodChangedEventFor(newMandate);
     }
 
-    DirectDebitEvent cancelMandateCreation(Mandate mandate) {
+    void cancelMandateCreation(Mandate mandate) {
         Mandate newMandate = updateStateFor(mandate, SupportedEvent.PAYMENT_CANCELLED_BY_USER);
-        return directDebitEventService.registerMandateCancelledEventFor(newMandate);
+        directDebitEventService.registerMandateCancelledEventFor(newMandate);
     }
 
     public DirectDebitEvent mandateActiveFor(Mandate mandate) {
@@ -70,9 +68,9 @@ public class MandateStateUpdateService {
         return directDebitEventService.registerMandateActiveEventFor(mandate);
     }
 
-    public DirectDebitEvent mandateExpiredFor(Mandate mandate) {
+    public void mandateExpiredFor(Mandate mandate) {
         Mandate updatedMandate = updateStateFor(mandate, SupportedEvent.MANDATE_EXPIRED_BY_SYSTEM);
-        return directDebitEventService.registerMandateExpiredEventFor(updatedMandate);
+        directDebitEventService.registerMandateExpiredEventFor(updatedMandate);
     }
 
     public DirectDebitEvent mandateFailedFor(Mandate mandate) {
@@ -97,13 +95,12 @@ public class MandateStateUpdateService {
         return mandate;
     }
 
-    public Mandate payerCreatedFor(Mandate mandate) {
+    public void payerCreatedFor(Mandate mandate) {
         directDebitEventService.registerPayerCreatedEventFor(mandate);
-        return mandate;
     }
 
-    public DirectDebitEvent payerEditedFor(Mandate mandate) {
-        return directDebitEventService.registerPayerEditedEventFor(mandate);
+    public void payerEditedFor(Mandate mandate) {
+        directDebitEventService.registerPayerEditedEventFor(mandate);
     }
 
     public Mandate tokenExchangedFor(Mandate mandate) {

@@ -25,7 +25,6 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
-import uk.gov.pay.directdebit.mandate.services.OnDemandMandateService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
@@ -35,13 +34,11 @@ public class MandateResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MandateResource.class);
     private final MandateService mandateService;
     private final CreateMandateRequestValidator createMandateRequestValidator = new CreateMandateRequestValidator();
-    private final OnDemandMandateService onDemandMandateService;
     private final MandateQueryService mandateQueryService;
 
     @Inject
-    public MandateResource(MandateService mandateService, OnDemandMandateService onDemandMandateService, MandateQueryService mandateQueryService) {
+    public MandateResource(MandateService mandateService, MandateQueryService mandateQueryService) {
         this.mandateService = mandateService;
-        this.onDemandMandateService = onDemandMandateService;
         this.mandateQueryService = mandateQueryService;
     }
     
@@ -54,7 +51,7 @@ public class MandateResource {
         LOGGER.info("Received create mandate request with gateway account external id - {}", gatewayAccount.getExternalId());
         createMandateRequestValidator.validate(createMandateRequestMap);
         CreateMandateRequest createMandateRequest = CreateMandateRequest.of(createMandateRequestMap);
-        CreateMandateResponse createMandateResponse = onDemandMandateService.create(gatewayAccount, createMandateRequest, uriInfo);
+        CreateMandateResponse createMandateResponse = mandateService.createMandate(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
         return created(createMandateResponse.getLink("self")).entity(createMandateResponse).build();
     }
 
@@ -120,7 +117,7 @@ public class MandateResource {
         LOGGER.info("Confirming direct debit details for mandate with id: {}", mandateExternalId);
         Mandate mandate = mandateQueryService.findByExternalId(mandateExternalId);
         ConfirmMandateRequest confirmMandateRequest = ConfirmMandateRequest.of(mandateConfirmationRequestMap); 
-        onDemandMandateService.confirm(gatewayAccount, mandate, confirmMandateRequest);
+        mandateService.confirm(gatewayAccount, mandate, confirmMandateRequest);
         LOGGER.info("Confirmed direct debit details for mandate with id: {}", mandateExternalId);
 
         return Response.noContent().build();
