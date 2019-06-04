@@ -3,7 +3,6 @@ package uk.gov.pay.directdebit.junit;
 import io.dropwizard.db.DataSourceFactory;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
@@ -30,7 +29,6 @@ public class TestContext {
         jdbi.registerArgument(new MandateExternalIdArgumentFactory());
         jdbi.registerArgument(new GoCardlessMandateIdArgumentFactory());
         jdbi.registerArgument(new MandateBankStatementReferenceArgumentFactory());
-        jdbi.registerArgument(new GoCardlessCreditorIdArgumentFactory());
         jdbi.registerArgument(new GoCardlessEventIdArgumentFactory());
         this.databaseTestHelper = new DatabaseTestHelper(jdbi);
         this.port = port;

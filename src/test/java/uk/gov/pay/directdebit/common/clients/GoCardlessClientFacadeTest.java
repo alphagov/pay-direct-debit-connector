@@ -9,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
@@ -125,44 +124,37 @@ public class GoCardlessClientFacadeTest {
 
     @Test
     public void getSunName_shouldReturnSunNameWhenBacsIsPresent() {
-        String creditorId = "creditor-id-123";
         SunName sunName = SunName.of("testServiceUserNumber");
-        given(mockGoCardlessClientWrapper.getCreditor(creditorId)).willReturn(mockCreditor);
+        given(mockGoCardlessClientWrapper.getCreditor()).willReturn(mockCreditor);
         given(mockCreditor.getSchemeIdentifiers()).willReturn(Collections.singletonList(mockSchemeIdentifier));
         given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.BACS);
         given(mockSchemeIdentifier.getName()).willReturn(sunName.toString());
 
-        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.valueOf(creditorId));
+        Optional<SunName> result = goCardlessClientFacade.getSunName();
 
         assertThat(result, is(Optional.of(sunName)));
     }
 
     @Test
     public void getSunName_shouldReturnEmptyWhenCreditorIdHasNoSunName() {
-        String creditorId = "creditor-id-123";
-        given(mockGoCardlessClientWrapper.getCreditor(creditorId)).willReturn(mockCreditor);
+        given(mockGoCardlessClientWrapper.getCreditor()).willReturn(mockCreditor);
         given(mockCreditor.getSchemeIdentifiers()).willReturn(Collections.singletonList(mockSchemeIdentifier));
         given(mockSchemeIdentifier.getScheme()).willReturn(Creditor.SchemeIdentifier.Scheme.SEPA);
 
-        Optional<SunName> result = goCardlessClientFacade.getSunName(GoCardlessCreditorId.valueOf(creditorId));
+        Optional<SunName> result = goCardlessClientFacade.getSunName();
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
     public void createMandateReturnsGoCardlessMandate() {
-        GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.valueOf("gocardless-test-creditor-id-here");
-        uk.gov.pay.directdebit.mandate.model.Mandate mandate =
-                MandateFixture.aMandateFixture().toEntity();
-        GoCardlessCustomer goCardlessCustomer =
-                GoCardlessCustomerFixture.aGoCardlessCustomerFixture().toEntity();
+        uk.gov.pay.directdebit.mandate.model.Mandate mandate = MandateFixture.aMandateFixture().toEntity();
+        GoCardlessCustomer goCardlessCustomer = GoCardlessCustomerFixture.aGoCardlessCustomerFixture().toEntity();
 
         MandateBankStatementReference goCardlessReference = MandateBankStatementReference.valueOf("test-gocardless-mandate-reference-here");
         GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("test-gocardless-mandate-id-here");
-        given(mockMandate.getId()).willReturn(goCardlessMandateId.toString());
+        given(mockMandate.getId()).willReturn("test-gocardless-mandate-id-here");
         given(mockMandate.getReference()).willReturn(goCardlessReference.toString());
-        given(mockMandate.getLinks()).willReturn(mockMandateLinks);
-        given(mockMandateLinks.getCreditor()).willReturn(goCardlessCreditorId.toString());
 
         given(mockGoCardlessClientWrapper.createMandate(mandate.getExternalId(), goCardlessCustomer)).willReturn(mockMandate);
 
@@ -170,6 +162,5 @@ public class GoCardlessClientFacadeTest {
 
         assertThat(result.getGoCardlessMandateId(), is(goCardlessMandateId));
         assertThat(result.getGoCardlessReference(), is(goCardlessReference));
-        assertThat(result.getGoCardlessCreditorId(), is(goCardlessCreditorId));
     }
 }

@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -22,6 +21,8 @@ import java.util.Optional;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
+import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -34,25 +35,17 @@ public class GoCardlessMandateDaoIT {
     private MandateFixture mandateFixture;
 
     private final static GoCardlessMandateId GOCARDLESS_MANDATE_ID = GoCardlessMandateId.valueOf("NA23434");
-    private final static GoCardlessCreditorId GOCARDLESS_CREDITOR_ID = GoCardlessCreditorId.valueOf("CREDITORID123");
 
     private GoCardlessMandateFixture testGoCardlessMandate;
 
     @Before
     public void setup() {
         mandateDao = testContext.getJdbi().onDemand(GoCardlessMandateDao.class);
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
-                .insert(testContext.getJdbi());
-        mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(
-                gatewayAccountFixture).insert(testContext.getJdbi());
-        TransactionFixture
-                .aTransactionFixture()
-                .withMandateFixture(mandateFixture)
-                .insert(testContext.getJdbi());
-        testGoCardlessMandate = aGoCardlessMandateFixture()
-                .withMandateId(mandateFixture.getId())
-                .withGoCardlessMandateId(GOCARDLESS_MANDATE_ID)
-                .withGoCardlessCreditorId(GOCARDLESS_CREDITOR_ID);
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
+        mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
+        TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).insert(testContext.getJdbi());
+        testGoCardlessMandate = aGoCardlessMandateFixture().withMandateId(mandateFixture.getId())
+                .withGoCardlessMandateId(GOCARDLESS_MANDATE_ID);
     }
 
     @Test
@@ -62,7 +55,6 @@ public class GoCardlessMandateDaoIT {
         assertThat(mandate.get("id"), is(id));
         assertThat(mandate.get("mandate_id"), is(mandateFixture.getId()));
         assertThat(mandate.get("gocardless_mandate_id"), is(GOCARDLESS_MANDATE_ID.toString()));
-        assertThat(mandate.get("gocardless_creditor_id"), is(GOCARDLESS_CREDITOR_ID.toString()));
     }
 
     @Test
@@ -72,18 +64,15 @@ public class GoCardlessMandateDaoIT {
         assertThat(goCardlessMandate.getId(), is(testGoCardlessMandate.getId()));
         assertThat(goCardlessMandate.getMandateId(), is(mandateFixture.getId()));
         assertThat(goCardlessMandate.getGoCardlessMandateId(), is(GOCARDLESS_MANDATE_ID));
-        assertThat(goCardlessMandate.getGoCardlessCreditorId(), is(GOCARDLESS_CREDITOR_ID));
     }
 
     @Test
     public void shouldFindAGoCardlessMandateByEventResourceId() {
         testGoCardlessMandate.insert(testContext.getJdbi());
-        GoCardlessMandate goCardlessMandate = mandateDao
-                .findByEventResourceId(GOCARDLESS_MANDATE_ID).get();
+        GoCardlessMandate goCardlessMandate = mandateDao.findByEventResourceId(GOCARDLESS_MANDATE_ID).get();
         assertThat(goCardlessMandate.getId(), is(testGoCardlessMandate.getId()));
         assertThat(goCardlessMandate.getMandateId(), is(mandateFixture.getId()));
         assertThat(goCardlessMandate.getGoCardlessMandateId(), is(GOCARDLESS_MANDATE_ID));
-        assertThat(goCardlessMandate.getGoCardlessCreditorId(), is(GOCARDLESS_CREDITOR_ID));
     }
 
     @Test

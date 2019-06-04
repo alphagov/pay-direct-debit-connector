@@ -8,7 +8,6 @@ import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Payment;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
@@ -24,7 +23,6 @@ import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import javax.inject.Inject;
-import javax.ws.rs.HEAD;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -57,8 +55,7 @@ public class GoCardlessClientFacade {
         return new GoCardlessMandate(
                 mandate.getId(),
                 GoCardlessMandateId.valueOf(gcMandate.getId()),
-                MandateBankStatementReference.valueOf(gcMandate.getReference()),
-                GoCardlessCreditorId.valueOf(gcMandate.getLinks().getCreditor()));
+                MandateBankStatementReference.valueOf(gcMandate.getReference()));
     }
 
     public GoCardlessPayment createPayment(Transaction transaction, GoCardlessMandate mandate) {
@@ -76,9 +73,9 @@ public class GoCardlessClientFacade {
                 gcBankDetailsLookup.getAvailableDebitSchemes().contains(AvailableDebitScheme.BACS));
     }
 
-    public Optional<SunName> getSunName(GoCardlessCreditorId goCardlessCreditorId) {
+    public Optional<SunName> getSunName() {
         return goCardlessClientWrapper
-                .getCreditor(goCardlessCreditorId.toString())
+                .getCreditor()
                 .getSchemeIdentifiers()
                 .stream()
                 .filter(schemeIdentifier -> Scheme.BACS.equals(schemeIdentifier.getScheme()))

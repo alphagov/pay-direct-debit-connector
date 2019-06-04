@@ -25,7 +25,6 @@ import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProviderCommandService;
 import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
@@ -116,10 +115,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
     public Optional<SunName> getSunName(Mandate mandate) {
         LOGGER.info("Attempting to call GoCardless to retrieve service user name from creditor for mandate with id: {}", mandate.getExternalId());
         try {
-            GoCardlessClientFacade goCardlessClientFacade = goCardlessClientFactory.getClientFor(mandate.getGatewayAccount().getAccessToken());
-            return goCardlessMandateDao.findByMandateId(mandate.getId())
-                    .map(GoCardlessMandate::getGoCardlessCreditorId)
-                    .flatMap(goCardlessClientFacade::getSunName);
+            return goCardlessClientFactory.getClientFor(mandate.getGatewayAccount().getAccessToken()).getSunName();
         } catch (Exception exc) {
             LOGGER.error("Exception while retrieving service user name from GoCardless, message: {}", exc.getMessage());
             return Optional.empty();
