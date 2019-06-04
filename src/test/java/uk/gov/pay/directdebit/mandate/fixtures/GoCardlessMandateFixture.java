@@ -3,7 +3,6 @@ package uk.gov.pay.directdebit.mandate.fixtures;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
-import uk.gov.pay.directdebit.common.model.subtype.gocardless.creditor.GoCardlessCreditorId;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
@@ -13,7 +12,6 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
     private Long id = RandomUtils.nextLong(1, 99999);
     private Long mandateId = RandomUtils.nextLong(1, 99999);
     private GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf(RandomIdGenerator.newId());
-    private GoCardlessCreditorId goCardlessCreditorId = GoCardlessCreditorId.valueOf(RandomIdGenerator.newId());
 
     private GoCardlessMandateFixture() {
     }
@@ -40,21 +38,11 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
         return this;
     }
 
-    public GoCardlessMandateId getGoCardlessMandateId() {
-        return goCardlessMandateId;
-    }
-
     public GoCardlessMandateFixture withGoCardlessMandateId(GoCardlessMandateId goCardlessMandateId) {
         this.goCardlessMandateId = goCardlessMandateId;
         return this;
     }
-
-    //TODO delete
-    public GoCardlessMandateFixture withGoCardlessCreditorId(GoCardlessCreditorId goCardlessCreditorId) {
-        this.goCardlessCreditorId = goCardlessCreditorId;
-        return this;
-    }
-
+    
     @Override
     public GoCardlessMandateFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -63,14 +51,12 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
                                 "    gocardless_mandates(\n" +
                                 "        id,\n" +
                                 "        mandate_id,\n" +
-                                "        gocardless_mandate_id,\n" +
-                                "        gocardless_creditor_id\n" +
+                                "        gocardless_mandate_id\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?)\n",
                         id,
                         mandateId,
-                        goCardlessMandateId.toString(),
-                        goCardlessCreditorId.toString()
+                        goCardlessMandateId.toString()
                 )
         );
         return this;
@@ -78,7 +64,7 @@ public class GoCardlessMandateFixture implements DbFixture<GoCardlessMandateFixt
 
     @Override
     public GoCardlessMandate toEntity() {
-        return new GoCardlessMandate(id, mandateId, goCardlessMandateId, null, goCardlessCreditorId);
+        return new GoCardlessMandate(id, mandateId, goCardlessMandateId, null);
     }
 
 }

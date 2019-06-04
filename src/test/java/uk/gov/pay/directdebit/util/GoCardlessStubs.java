@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.util;
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
+import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -27,9 +28,9 @@ import static uk.gov.pay.directdebit.util.TestRequestResponsesLoader.load;
 
 public class GoCardlessStubs {
 
-    public static void stubGetCreditor(String accessToken, String goCardlessCreditorId, String goCardlessSun) {
+    public static void stubGetCreditor(String accessToken, String goCardlessSun) {
         String getCreditorResponseBody = load(GOCARDLESS_GET_CREDITOR_WITH_BACS_SUCCESS_RESPONSE)
-                .replace("{{gocardless_creditor_id}}", goCardlessCreditorId)
+                .replace("{{gocardless_creditor_id}}", RandomIdGenerator.newId())
                 .replace("{{gocardless_sun}}", goCardlessSun);
 
         stubGetCallsFor("/creditors", accessToken, 200, getCreditorResponseBody);
