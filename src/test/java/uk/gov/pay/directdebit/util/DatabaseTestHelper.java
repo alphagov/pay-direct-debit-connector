@@ -210,6 +210,17 @@ public class DatabaseTestHelper {
         );
     }
 
+    public Map<String, Object> getSandboxEventById(Long id) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from sandbox_events g WHERE g.id = :id")
+                        .bind("id", id)
+                        .mapToMap()
+                        .findFirst()
+                        .get()
+        );
+    }
+
     public Map<String, Object> getGoCardlessPartnerAppTokenById(Long id) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("SELECT * FROM gocardless_partner_app_account_connect_tokens g WHERE g.id= :id")
