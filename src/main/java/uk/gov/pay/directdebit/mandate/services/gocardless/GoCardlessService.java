@@ -1,9 +1,12 @@
 package uk.gov.pay.directdebit.mandate.services.gocardless;
 
+import com.gocardless.GoCardlessException;
+import com.gocardless.errors.ValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
+import uk.gov.pay.directdebit.common.exception.InternalServerErrorException;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
@@ -105,9 +108,11 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
             GoCardlessClientFacade goCardlessClientFacade = goCardlessClientFactory.getClientFor(mandate.getGatewayAccount().getAccessToken());
             GoCardlessBankAccountLookup lookup = goCardlessClientFacade.validate(bankAccountDetails);
             return new BankAccountValidationResponse(lookup.isBacs(), lookup.getBankName());
-        } catch (Exception exc) {
-            LOGGER.error("Exception while validating bank account details in GoCardless, message: {}", exc.getMessage());
+        } catch (ValidationFailedException exc) {
             return new BankAccountValidationResponse(false);
+        } catch (GoCardlessException exc) {
+            LOGGER.error("Exception while validating bank account details in GoCardless, message: {}", exc.getMessage());
+            throw new InternalServerErrorException("Exception while validating bank account details in GoCardless");
         }
     }
 

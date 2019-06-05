@@ -1,11 +1,14 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import com.gocardless.errors.GoCardlessApiException;
+import com.gocardless.errors.ValidationFailedException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
+import uk.gov.pay.directdebit.common.exception.InternalServerErrorException;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
@@ -66,6 +69,10 @@ public abstract class GoCardlessServiceTest {
     protected GoCardlessPaymentDao mockedGoCardlessPaymentDao;
     @Mock
     protected GoCardlessClientFactory mockedGoCardlessClientFactory;
+    @Mock
+    protected GoCardlessApiException mockedGoCardlessException;
+    @Mock
+    protected ValidationFailedException mockedGoCardlessValidationFailedException;
 
     GoCardlessService service;
 
@@ -117,16 +124,28 @@ public abstract class GoCardlessServiceTest {
     }
 
     @Test
-    public void shouldValidateBankAccountDetails_ifExceptionIsThrownFromGC() {
+    public void shouldValidateBankAccountDetails_ifValidationFailedExceptionIsThrownFromGC() {
         AccountNumber accountNumber = AccountNumber.of("12345678");
         SortCode sortCode = SortCode.of("123467");
         BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
 
-        when(mockedGoCardlessClientFacade.validate(bankAccountDetails)).thenThrow(new RuntimeException());
+        when(mockedGoCardlessClientFacade.validate(bankAccountDetails)).thenThrow(mockedGoCardlessValidationFailedException);
 
         BankAccountValidationResponse response = service.validate(mandateFixture.toEntity(), bankAccountDetails);
         assertThat(response.isValid(), is(false));
         assertThat(response.getBankName(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldThrowInternalServerException_ifExceptionIsThrownFromGC() {
+        AccountNumber accountNumber = AccountNumber.of("12345678");
+        SortCode sortCode = SortCode.of("123467");
+        BankAccountDetails bankAccountDetails = new BankAccountDetails(accountNumber, sortCode);
+
+        when(mockedGoCardlessClientFacade.validate(bankAccountDetails)).thenThrow(mockedGoCardlessException);
+
+        thrown.expect(InternalServerErrorException.class);
+        service.validate(mandateFixture.toEntity(), bankAccountDetails);
     }
 
     @Test
