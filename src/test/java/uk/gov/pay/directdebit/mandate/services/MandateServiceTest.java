@@ -53,6 +53,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -200,16 +201,16 @@ public class MandateServiceTest {
     @Test
     public void confirm_shouldNotConfirmOnDemandMandateForInvalidState() {
         GatewayAccount gatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.SANDBOX).toEntity();
-        Mandate mandate = new Mandate(
-                null,
-                gatewayAccount,
-                MandateExternalId.valueOf(RandomIdGenerator.newId()),
-                MandateBankStatementReference.valueOf("mandateReference"),
-                "reference",
-                MandateState.CANCELLED,
-                "http://returnUrl",
-                ZonedDateTime.now(ZoneOffset.UTC),
-                null);
+        Mandate mandate = aMandate()
+                .withGatewayAccount(gatewayAccount)
+                .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
+                .withMandateReference(MandateBankStatementReference.valueOf("mandateReference"))
+                .withServiceReference("reference")
+                .withState(MandateState.CANCELLED)
+                .withReturnUrl("http://returnUrl")
+                .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
+                .build();
+
         Map<String, String> confirmMandateRequest = Map.of("sort_code", "123456", "account_number", "12345678");
         ConfirmMandateRequest mandateConfirmationRequest = ConfirmMandateRequest.of(confirmMandateRequest);
 

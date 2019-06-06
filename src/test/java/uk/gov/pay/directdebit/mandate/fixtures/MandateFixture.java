@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -15,6 +16,8 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+
+import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 
 public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
 
@@ -27,6 +30,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private PayerFixture payerFixture = null;
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+    private PaymentProviderMandateId paymentProviderId;
 
     private MandateFixture() {
     }
@@ -114,6 +118,11 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return createdDate;
     }
 
+    public MandateFixture withPaymentProviderId(PaymentProviderMandateId paymentProviderId) {
+        this.paymentProviderId = paymentProviderId;
+        return this;
+    }
+
     @Override
     public MandateFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -126,9 +135,10 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                                 "  service_reference,\n" +
                                 "  return_url,\n" +
                                 "  state,\n" +
-                                "  created_date\n" +
+                                "  created_date,\n" +
+                                "  payment_provider_id\n" +
                                 ") VALUES (\n" +
-                                "  ?, ?, ?, ?, ?, ?, ?, ?\n" +
+                                "  ?, ?, ?, ?, ?, ?, ?, ?, ?\n" +
                                 ")\n",
                         id,
                         gatewayAccountFixture.getId(),
@@ -137,7 +147,8 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                         serviceReference,
                         returnUrl,
                         state.toString(),
-                        createdDate
+                        createdDate,
+                        paymentProviderId
                 )
         );
         if (payerFixture != null) {
@@ -150,16 +161,17 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     @Override
     public Mandate toEntity() {
         Payer payer = payerFixture != null ? payerFixture.toEntity() : null;
-        return new Mandate(
-                id,
-                gatewayAccountFixture.toEntity(),
-                mandateExternalId,
-                mandateReference,
-                serviceReference,
-                state,
-                returnUrl,
-                createdDate,
-                payer
-        );
+        return aMandate()
+                .withId(id)
+                .withGatewayAccount(gatewayAccountFixture.toEntity())
+                .withExternalId(mandateExternalId)
+                .withMandateReference(mandateReference)
+                .withServiceReference(serviceReference)
+                .withState(state)
+                .withReturnUrl(returnUrl)
+                .withCreatedDate(createdDate)
+                .withPayer(payer)
+                .withPaymentProviderId(paymentProviderId)
+                .build();
     }
 }

@@ -46,6 +46,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
+import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 
 public class MandateService {
@@ -86,16 +87,16 @@ public class MandateService {
                             PaymentProvider.SANDBOX.equals(gatewayAccount.getPaymentProvider()) ?
                                     RandomStringUtils.randomAlphanumeric(18) : "gocardless-default");
 
-                    Mandate mandate = new Mandate(
-                            null,
-                            gatewayAccount,
-                            MandateExternalId.valueOf(RandomIdGenerator.newId()),
-                            mandateReference,
-                            createRequest.getReference(),
-                            MandateState.CREATED,
-                            createRequest.getReturnUrl(),
-                            ZonedDateTime.now(ZoneOffset.UTC),
-                            null);
+                    Mandate mandate = aMandate()
+                            .withGatewayAccount(gatewayAccount)
+                            .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
+                            .withMandateReference(mandateReference)
+                            .withServiceReference(createRequest.getReference())
+                            .withState(MandateState.CREATED)
+                            .withReturnUrl(createRequest.getReturnUrl())
+                            .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
+                            .build();
+
                     LOGGER.info("Creating mandate external id {}", mandate.getExternalId());
                     Long id = mandateDao.insert(mandate);
                     mandate.setId(id);

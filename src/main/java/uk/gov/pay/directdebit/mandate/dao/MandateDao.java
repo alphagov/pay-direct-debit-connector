@@ -33,7 +33,8 @@ public interface MandateDao {
             "  service_reference,\n" +
             "  state,\n" +
             "  return_url,\n" +
-            "  created_date\n" +
+            "  created_date,\n" +
+            "  payment_provider_id\n" +
             ") VALUES (\n" +
             "  :externalId,\n" +
             "  :gatewayAccount.id,\n" +
@@ -41,7 +42,8 @@ public interface MandateDao {
             "  :serviceReference,\n" +
             "  :state,\n" +
             "  :returnUrl,\n" +
-            "  :createdDate" +
+            "  :createdDate," +
+            "  :paymentProviderId" +
             ")")
     @GetGeneratedKeys
     Long insert(@BindBean Mandate mandate);
@@ -55,6 +57,7 @@ public interface MandateDao {
             "  m.return_url AS mandate_return_url," +
             "  m.state AS mandate_state," +
             "  m.created_date AS mandate_created_date," +
+            "  m.payment_provider_id AS mandate_payment_provider_id," +
             "  g.id AS gateway_account_id," +
             "  g.external_id AS gateway_account_external_id," +
             "  g.payment_provider AS gateway_account_payment_provider," +
