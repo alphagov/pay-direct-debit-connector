@@ -13,7 +13,6 @@ import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.OneOffConfirmationDetails;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
@@ -68,26 +67,6 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
         persist(goCardlessCustomer);
         persist(goCardlessMandate);
         return mandate;
-    }
-
-    @Override
-    public OneOffConfirmationDetails confirmOneOffMandate(Mandate mandate, BankAccountDetails bankAccountDetails, Transaction transaction) {
-        LOGGER.info("Confirming direct debit details, one off mandate with id: {}", mandate.getExternalId());
-        GoCardlessCustomer goCardlessCustomer = createCustomer(mandate);
-        GoCardlessCustomer goCardlessCustomerWithBankAccount = createCustomerBankAccount(
-                mandate,
-                goCardlessCustomer,
-                bankAccountDetails
-        );
-        GoCardlessMandate goCardlessMandate = createMandate(mandate, goCardlessCustomerWithBankAccount);
-        mandate.setMandateReference(goCardlessMandate.getGoCardlessReference());
-        transaction.setMandate(mandate);
-        GoCardlessPayment goCardlessPayment = createPayment(transaction, goCardlessMandate);
-
-        persist(goCardlessCustomer);
-        persist(goCardlessMandate);
-        persist(goCardlessPayment);
-        return new OneOffConfirmationDetails(mandate, goCardlessPayment.getChargeDate());
     }
 
     @Override

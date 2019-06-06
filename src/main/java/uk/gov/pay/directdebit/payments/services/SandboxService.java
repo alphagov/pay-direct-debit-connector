@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.OneOffConfirmationDetails;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
@@ -23,12 +22,6 @@ public class SandboxService implements DirectDebitPaymentProvider,
 
     @Inject
     public SandboxService() {
-    }
-
-    @Override
-    public OneOffConfirmationDetails confirmOneOffMandate(Mandate mandate, BankAccountDetails bankAccountDetails, Transaction transaction) {
-        LOGGER.info("Confirming one off mandate for sandbox, mandate with id: {}", mandate.getExternalId());
-        return new OneOffConfirmationDetails(mandate, LocalDate.now().plusDays(DAYS_TO_COLLECTION));
     }
 
     @Override
