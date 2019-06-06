@@ -33,16 +33,25 @@ public class GatewayAccountResponse {
     private String type;
     @JsonProperty("analytics_id")
     private String analyticsId;
+    @JsonProperty("is_connected")
+    private final boolean isConnected;
     @JsonProperty("links")
     private List<Map<String, Object>> links = new ArrayList<>();
 
-    public GatewayAccountResponse(Long gatewayAccountId, String gatewayAccountExternalId, String paymentProvider, String description, String type, String analyticsId) {
+    public GatewayAccountResponse(Long gatewayAccountId, 
+                                  String gatewayAccountExternalId, 
+                                  String paymentProvider, 
+                                  String description, 
+                                  String type, 
+                                  String analyticsId, 
+                                  boolean isConnected) {
         this.gatewayAccountId = gatewayAccountId;
         this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.paymentProvider = paymentProvider;
         this.description = description;
         this.type = type;
         this.analyticsId = analyticsId;
+        this.isConnected = isConnected;
     }
 
     public static GatewayAccountResponse from(GatewayAccount gatewayAccount) {
@@ -52,8 +61,8 @@ public class GatewayAccountResponse {
                 gatewayAccount.getPaymentProvider().toString(),
                 gatewayAccount.getDescription(),
                 gatewayAccount.getType().toString(),
-                gatewayAccount.getAnalyticsId()
-        );
+                gatewayAccount.getAnalyticsId(),
+                gatewayAccount.getAccessToken().isPresent());
     }
 
     public GatewayAccountResponse withSelfLink(UriInfo uriInfo) {

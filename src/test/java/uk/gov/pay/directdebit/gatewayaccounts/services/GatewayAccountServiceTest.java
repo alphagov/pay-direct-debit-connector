@@ -43,7 +43,6 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 @RunWith(MockitoJUnitRunner.class)
 public class GatewayAccountServiceTest {
     private static final PaymentProvider PAYMENT_PROVIDER = PaymentProvider.SANDBOX;
-    private static final String SERVICE_NAME = "alex";
     private static final String DESCRIPTION = "is awesome";
     private static final String ANALYTICS_ID = "DD_234098_BBBLA";
     private static final GatewayAccount.Type TYPE = GatewayAccount.Type.TEST;
@@ -57,13 +56,13 @@ public class GatewayAccountServiceTest {
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture()
             .withGatewayAccountFixture(gatewayAccountFixture);
     @Mock
-    private GatewayAccountDao mockedGatewayAccountDao;
+    private GatewayAccountDao gatewayAccountDao;
 
     @Mock
-    private UriInfo mockedUriInfo;
+    private UriInfo uriInfo;
 
     @Mock
-    private UriBuilder mockedUriBuilder;
+    private UriBuilder uriBuilder;
 
     private GatewayAccountService service;
 
@@ -73,28 +72,29 @@ public class GatewayAccountServiceTest {
 
     @Before
     public void setUp() throws URISyntaxException {
-        service = new GatewayAccountService(mockedGatewayAccountDao);
-        when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
-        when(mockedUriBuilder.path(anyString())).thenReturn(mockedUriBuilder);
-        when(mockedUriBuilder.build(any())).thenReturn(new URI("http://www.example.com/"));
+        service = new GatewayAccountService(gatewayAccountDao);
+        when(uriInfo.getBaseUriBuilder()).thenReturn(uriBuilder);
+        when(uriBuilder.path(anyString())).thenReturn(uriBuilder);
+        when(uriBuilder.build(any())).thenReturn(new URI("http://www.example.com/"));
     }
 
     @Test
     public void shouldReturnGatewayAccountIfItExists() {
         String accountId = "10sadsadsadL";
-        when(mockedGatewayAccountDao.findByExternalId(accountId)).thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
+        when(gatewayAccountDao.findByExternalId(accountId)).thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
         GatewayAccount gatewayAccount = service.getGatewayAccountForId(accountId);
         assertThat(gatewayAccount.getId(), is(gatewayAccountFixture.getId()));
         assertThat(gatewayAccount.getPaymentProvider(), is(PAYMENT_PROVIDER));
         assertThat(gatewayAccount.getAnalyticsId(), is(ANALYTICS_ID));
         assertThat(gatewayAccount.getDescription(), is(DESCRIPTION));
         assertThat(gatewayAccount.getType(), is(TYPE));
+        assertThat(gatewayAccount.getAccessToken().isPresent(), is(true));
     }
 
     @Test
     public void shouldThrowGatewayAccountNotFoundExceptionIfGatewayAccountDoesNotExist() {
         String accountId = "10sadsadsadL";
-        when(mockedGatewayAccountDao.findByExternalId(accountId)).thenReturn(Optional.empty());
+        when(gatewayAccountDao.findByExternalId(accountId)).thenReturn(Optional.empty());
         thrown.expect(GatewayAccountNotFoundException.class);
         thrown.expectMessage("Unknown gateway account: 10");
         thrown.reportMissingExceptionWithMessage("GatewayAccountNotFoundException expected");
@@ -103,7 +103,7 @@ public class GatewayAccountServiceTest {
 
     @Test
     public void shouldReturnGatewayAccountForTransactionIfItExists() {
-        when(mockedGatewayAccountDao.findById(gatewayAccountFixture.getId()))
+        when(gatewayAccountDao.findById(gatewayAccountFixture.getId()))
                 .thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
         GatewayAccount gatewayAccount = service.getGatewayAccountFor(transaction);
         assertThat(gatewayAccount.getId(), is(gatewayAccountFixture.getId()));
@@ -115,7 +115,7 @@ public class GatewayAccountServiceTest {
 
     @Test
     public void shouldThrowIfGatewayAccountForTransactionDoesNotExist() {
-        when(mockedGatewayAccountDao.findById(gatewayAccountFixture.getId()))
+        when(gatewayAccountDao.findById(gatewayAccountFixture.getId()))
                 .thenReturn(Optional.empty());
         thrown.expect(GatewayAccountNotFoundException.class);
         thrown.expectMessage("Unknown gateway account: " + gatewayAccountFixture.getId());
@@ -125,31 +125,31 @@ public class GatewayAccountServiceTest {
 
     @Test
     public void shouldReturnAListOfGatewayAccounts() {
-        when(mockedGatewayAccountDao.findAll())
+        when(gatewayAccountDao.findAll())
                 .thenReturn(Arrays.asList(gatewayAccountFixture.toEntity(),
                         gatewayAccountFixture.toEntity(),
                         gatewayAccountFixture.toEntity()));
 
-        List<GatewayAccountResponse> gatewayAccounts = service.getAllGatewayAccounts("", mockedUriInfo);
+        List<GatewayAccountResponse> gatewayAccounts = service.getAllGatewayAccounts("", uriInfo);
 
         assertThat(gatewayAccounts.size(), is(3));
         assertThat(gatewayAccounts.get(0).getLinks().size(), is(1));
         assertThat(gatewayAccounts.get(0).getSelfLink(), is(notNullValue()));
-        verify(mockedGatewayAccountDao).findAll();
+        verify(gatewayAccountDao).findAll();
     }
 
     @Test
     public void shouldReturnAListOfGatewayAccountsSingle() {
         GatewayAccount fixture = gatewayAccountFixture.toEntity();
-        when(mockedGatewayAccountDao.find(any(List.class)))
+        when(gatewayAccountDao.find(any(List.class)))
                 .thenReturn(Collections.singletonList(fixture));
 
-        List<GatewayAccountResponse> gatewayAccounts = service.getAllGatewayAccounts(fixture.getExternalId(), mockedUriInfo);
+        List<GatewayAccountResponse> gatewayAccounts = service.getAllGatewayAccounts(fixture.getExternalId(), uriInfo);
 
         assertThat(gatewayAccounts.size(), is(1));
         assertThat(gatewayAccounts.get(0).getLinks().size(), is(1));
         assertThat(gatewayAccounts.get(0).getSelfLink(), is(notNullValue()));
-        verify(mockedGatewayAccountDao).find(any(List.class));
+        verify(gatewayAccountDao).find(any(List.class));
     }
 
     @Test
@@ -158,15 +158,15 @@ public class GatewayAccountServiceTest {
         GatewayAccount fixture2 = gatewayAccountFixture.toEntity();
         List<String> ids = Arrays.asList(fixture1.getExternalId(), fixture2.getExternalId());
 
-        when(mockedGatewayAccountDao.find(any(List.class)))
+        when(gatewayAccountDao.find(any(List.class)))
                 .thenReturn(Arrays.asList(fixture1, fixture2));
 
-        List<GatewayAccountResponse> gatewayAccounts = service.getAllGatewayAccounts(String.join(",", ids), mockedUriInfo);
+        List<GatewayAccountResponse> gatewayAccounts = service.getAllGatewayAccounts(String.join(",", ids), uriInfo);
 
         assertThat(gatewayAccounts.size(), is(2));
         assertThat(gatewayAccounts.get(0).getLinks().size(), is(1));
         assertThat(gatewayAccounts.get(0).getSelfLink(), is(notNullValue()));
-        verify(mockedGatewayAccountDao).find(any(List.class));
+        verify(gatewayAccountDao).find(any(List.class));
     }
 
     @Test
@@ -175,7 +175,7 @@ public class GatewayAccountServiceTest {
                         "aDescription", "123", PaymentProviderAccessToken.of("token"), GoCardlessOrganisationId.valueOf("provider"));
         ArgumentCaptor<GatewayAccount> capturedGatewayAccount = ArgumentCaptor.forClass(GatewayAccount.class);
         service.create(request);
-        verify(mockedGatewayAccountDao).insert(capturedGatewayAccount.capture());
+        verify(gatewayAccountDao).insert(capturedGatewayAccount.capture());
         assertThat(capturedGatewayAccount.getValue().getPaymentProvider(), is(PaymentProvider.SANDBOX));
     }
     
@@ -186,7 +186,7 @@ public class GatewayAccountServiceTest {
                 .aGatewayAccountFixture()
                 .withExternalId(externalAccountId)
                 .toEntity();
-        when(mockedGatewayAccountDao.findByExternalId(externalAccountId)).thenReturn(Optional.of(gatewayAccount));
+        when(gatewayAccountDao.findByExternalId(externalAccountId)).thenReturn(Optional.of(gatewayAccount));
 
         ImmutableMap<String, String> accessTokenPayload = ImmutableMap.<String, String>builder()
                 .put("op", "replace")
@@ -201,7 +201,7 @@ public class GatewayAccountServiceTest {
                         .build();
 
         service.patch(externalAccountId, Arrays.asList(accessTokenPayload, organisationPayload));
-        verify(mockedGatewayAccountDao).updateAccessTokenAndOrganisation(externalAccountId,
+        verify(gatewayAccountDao).updateAccessTokenAndOrganisation(externalAccountId,
                 PaymentProviderAccessToken.of("abcde1234"), GoCardlessOrganisationId.valueOf("1234abcde"));
     }
 }
