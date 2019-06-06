@@ -10,10 +10,12 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
@@ -30,6 +32,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
@@ -52,17 +55,16 @@ public class MandateDaoIT {
     @Test
     public void shouldInsertAMandateWithoutServiceReference() {
         ZonedDateTime createdDate = now();
-        Long id = mandateDao.insert(new Mandate(null,
-                        gatewayAccountFixture.toEntity(),
-                        MandateExternalId.valueOf(RandomIdGenerator.newId()),
-                        MandateBankStatementReference.valueOf("test-reference"),
-                        null,
-                        MandateState.PENDING,
-                        "https://www.example.com/return_url",
-                        createdDate,
-                        null
-                )
-        );
+        Long id = mandateDao.insert(aMandate()
+                        .withGatewayAccount(gatewayAccountFixture.toEntity())
+                        .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
+                        .withMandateReference(MandateBankStatementReference.valueOf("test-reference"))
+                        .withState(MandateState.PENDING)
+                        .withReturnUrl("https://www.example.com/return_url")
+                        .withCreatedDate(createdDate)
+                        .withPaymentProviderId(GoCardlessMandateId.valueOf("paymentProvider"))
+                        .build());
+
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(id);
         assertThat(mandate.get("id"), is(id));
         assertThat(mandate.get("external_id"), is(notNullValue()));
@@ -71,22 +73,22 @@ public class MandateDaoIT {
         assertThat(mandate.get("return_url"), is("https://www.example.com/return_url"));
         assertThat(mandate.get("state"), is("PENDING"));
         assertThat((Timestamp) mandate.get("created_date"), isDate(createdDate));
+        assertThat(mandate.get("payment_provider_id"), is("paymentProvider"));
     }
 
     @Test
     public void shouldInsertAMandateWithServiceReference() {
         ZonedDateTime createdDate = now();
-        Long id = mandateDao.insert(new Mandate(null,
-                        gatewayAccountFixture.toEntity(),
-                        MandateExternalId.valueOf(RandomIdGenerator.newId()),
-                        MandateBankStatementReference.valueOf("test-reference"),
-                        "test-service-reference",
-                        MandateState.PENDING,
-                        "https://www.example.com/return_url",
-                        createdDate,
-                        null
-                )
-        );
+        Long id = mandateDao.insert(aMandate()
+                        .withGatewayAccount(gatewayAccountFixture.toEntity())
+                        .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
+                        .withMandateReference(MandateBankStatementReference.valueOf("test-reference"))
+                        .withServiceReference("test-service-reference")
+                        .withState(MandateState.PENDING)
+                        .withReturnUrl("https://www.example.com/return_url")
+                        .withCreatedDate(createdDate)
+                        .build());
+
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(id);
         assertThat(mandate.get("id"), is(id));
         assertThat(mandate.get("external_id"), is(notNullValue()));
@@ -95,22 +97,26 @@ public class MandateDaoIT {
         assertThat(mandate.get("return_url"), is("https://www.example.com/return_url"));
         assertThat(mandate.get("state"), is("PENDING"));
         assertThat((Timestamp) mandate.get("created_date"), isDate(createdDate));
+        assertThat(mandate.get("payment_provider"), is(nullValue()));
     }
 
     @Test
     public void shouldFindAMandateById() {
+        PaymentProviderMandateId paymentProviderMandateId = GoCardlessMandateId.valueOf("aGocardlessMandateId");
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withMandateReference(MandateBankStatementReference.valueOf("test-reference"))
                 .withServiceReference("test-service-reference")
                 .withGatewayAccountFixture(gatewayAccountFixture)
-                .insert(testContext.getJdbi()
-                );
+                .withPaymentProviderId(paymentProviderMandateId)
+                .insert(testContext.getJdbi());
+
         Mandate mandate = mandateDao.findById(mandateFixture.getId()).get();
         assertThat(mandate.getId(), is(mandateFixture.getId()));
         assertThat(mandate.getExternalId(), is(notNullValue()));
         assertThat(mandate.getMandateReference(), is(MandateBankStatementReference.valueOf("test-reference")));
         assertThat(mandate.getServiceReference(), is("test-service-reference"));
         assertThat(mandate.getState(), is(MandateState.CREATED));
+        assertThat(mandate.getPaymentProviderId().get(), is(paymentProviderMandateId));
     }
 
     @Test

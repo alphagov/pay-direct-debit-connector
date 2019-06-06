@@ -6,7 +6,9 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -17,12 +19,14 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
+
 public class MandateMapper implements RowMapper<Mandate> {
 
     private static final String ID_COLUMN = "mandate_id";
     private static final String EXTERNAL_ID_COLUMN = "mandate_external_id";
-    private static final String MANDATE_TYPE_COLUMN = "mandate_type";
     private static final String STATE_COLUMN = "mandate_state";
+    private static final String PAYMENT_PROVIDER_ID = "mandate_payment_provider_id";
     private static final String MANDATE_MANDATE_REFERENCE_COLUMN = "mandate_mandate_reference";
     private static final String MANDATE_SERVICE_REFERENCE_COLUMN = "mandate_service_reference";
     private static final String RETURN_URL_COLUMN = "mandate_return_url";
@@ -46,7 +50,7 @@ public class MandateMapper implements RowMapper<Mandate> {
     private static final String PAYER_BANK_ACCOUNT_SORT_CODE_COLUMN = "payer_bank_account_sort_code";
     private static final String PAYER_BANK_NAME_COLUMN = "payer_bank_name";
     private static final String PAYER_CREATED_DATE_COLUMN = "payer_created_date";
-    
+
     @Override
     public Mandate map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         Payer payer = null;
@@ -82,15 +86,22 @@ public class MandateMapper implements RowMapper<Mandate> {
             gatewayAccount.setOrganisation(GoCardlessOrganisationId.valueOf(organisation));
         }
 
-        return new Mandate(
-                resultSet.getLong(ID_COLUMN),
-                gatewayAccount,
-                MandateExternalId.valueOf(resultSet.getString(EXTERNAL_ID_COLUMN)),
-                MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)),
-                resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN),
-                MandateState.valueOf(resultSet.getString(STATE_COLUMN)),
-                resultSet.getString(RETURN_URL_COLUMN),
-                ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
-                payer);
+        MandateBuilder mandateBuilder = aMandate()
+                .withId(resultSet.getLong(ID_COLUMN))
+                .withGatewayAccount(gatewayAccount)
+                .withExternalId(MandateExternalId.valueOf(resultSet.getString(EXTERNAL_ID_COLUMN)))
+                .withMandateReference(MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)))
+                .withServiceReference(resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN))
+                .withState(MandateState.valueOf(resultSet.getString(STATE_COLUMN)))
+                .withReturnUrl(resultSet.getString(RETURN_URL_COLUMN))
+                .withCreatedDate(ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC))
+                .withPayer(payer);
+
+        String providerId = resultSet.getString(PAYMENT_PROVIDER_ID);
+        if (providerId != null) {
+            mandateBuilder.withPaymentProviderId(GoCardlessMandateId.valueOf(providerId));
+        }
+
+        return mandateBuilder.build();
     }
 }

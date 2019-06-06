@@ -5,6 +5,8 @@ import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
+import java.util.Optional;
 
 public class Mandate {
     private Long id;
@@ -16,26 +18,19 @@ public class Mandate {
     private final String serviceReference;
     private final ZonedDateTime createdDate;
     private Payer payer;
+    private PaymentProviderMandateId paymentProviderId;
 
-    public Mandate(Long id,
-                   GatewayAccount gatewayAccount,
-                   MandateExternalId externalId,
-                   MandateBankStatementReference mandateReference,
-                   String serviceReference,
-                   MandateState state,
-                   String returnUrl,
-                   ZonedDateTime createdDate,
-                   Payer payer
-    ) {
-        this.id = id;
-        this.gatewayAccount = gatewayAccount;
-        this.externalId = externalId;
-        this.mandateReference = mandateReference;
-        this.serviceReference = serviceReference;
-        this.state = state;
-        this.returnUrl = returnUrl;
-        this.createdDate = createdDate;
-        this.payer = payer;
+    private Mandate(MandateBuilder builder) {
+        this.id = builder.id;
+        this.gatewayAccount = builder.gatewayAccount;
+        this.externalId = builder.externalId;
+        this.mandateReference = builder.mandateReference;
+        this.serviceReference = builder.serviceReference;
+        this.state = builder.state;
+        this.returnUrl = builder.returnUrl;
+        this.createdDate = builder.createdDate;
+        this.payer = builder.payer;
+        this.paymentProviderId = builder.paymentProviderId;
     }
 
     public Payer getPayer() {
@@ -86,56 +81,109 @@ public class Mandate {
         this.mandateReference = mandateReference;
     }
 
+    public Optional<PaymentProviderMandateId> getPaymentProviderId() {
+        return Optional.ofNullable(paymentProviderId);
+    }
+
+    public void setPaymentProviderId(PaymentProviderMandateId paymentProviderId) {
+        this.paymentProviderId = paymentProviderId;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Mandate mandate = (Mandate) o;
-
-        if (id != null ? !id.equals(mandate.id) : mandate.id != null) {
-            return false;
-        }
-        if (!externalId.equals(mandate.externalId)) {
-            return false;
-        }
-        if (state != mandate.state) {
-            return false;
-        }
-        if (!gatewayAccount.equals(mandate.gatewayAccount)) {
-            return false;
-        }
-        if (!returnUrl.equals(mandate.returnUrl)) {
-            return false;
-        }
-        if (mandateReference != null ? !mandateReference.equals(mandate.mandateReference) : mandate.mandateReference != null) {
-            return false;
-        }
-        if (serviceReference != null ? !serviceReference.equals(mandate.serviceReference) : mandate.serviceReference != null) {
-            return false;
-        }
-        if (payer != null ? !payer.equals(mandate.payer) : mandate.payer != null) {
-            return false;
-        }
-
-        return createdDate.equals(mandate.createdDate);
+        return Objects.equals(id, mandate.id) &&
+                Objects.equals(externalId, mandate.externalId) &&
+                state == mandate.state &&
+                Objects.equals(gatewayAccount, mandate.gatewayAccount) &&
+                Objects.equals(returnUrl, mandate.returnUrl) &&
+                Objects.equals(mandateReference, mandate.mandateReference) &&
+                Objects.equals(serviceReference, mandate.serviceReference) &&
+                Objects.equals(createdDate, mandate.createdDate) &&
+                Objects.equals(payer, mandate.payer) &&
+                Objects.equals(paymentProviderId, mandate.paymentProviderId);
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + externalId.hashCode();
-        result = 31 * result + state.hashCode();
-        result = 31 * result + (payer != null ? payer.hashCode() : 0);
-        result = 31 * result + gatewayAccount.hashCode();
-        result = 31 * result + returnUrl.hashCode();
-        result = 31 * result + mandateReference.hashCode();
-        result = 31 * result + (serviceReference != null ? serviceReference.hashCode() : 0);
-        result = 31 * result + createdDate.hashCode();
-        return result;
+        return Objects.hash(id, externalId, state, gatewayAccount, returnUrl,
+                mandateReference, serviceReference, createdDate, payer, paymentProviderId);
+    }
+
+
+    public static final class MandateBuilder {
+        private Long id;
+        private MandateExternalId externalId;
+        private MandateState state;
+        private GatewayAccount gatewayAccount;
+        private String returnUrl;
+        private MandateBankStatementReference mandateReference;
+        private String serviceReference;
+        private ZonedDateTime createdDate;
+        private Payer payer;
+        private PaymentProviderMandateId paymentProviderId;
+
+        private MandateBuilder() {
+        }
+
+        public static MandateBuilder aMandate() {
+            return new MandateBuilder();
+        }
+
+        public MandateBuilder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public MandateBuilder withExternalId(MandateExternalId externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
+        public MandateBuilder withState(MandateState state) {
+            this.state = state;
+            return this;
+        }
+
+        public MandateBuilder withGatewayAccount(GatewayAccount gatewayAccount) {
+            this.gatewayAccount = gatewayAccount;
+            return this;
+        }
+
+        public MandateBuilder withReturnUrl(String returnUrl) {
+            this.returnUrl = returnUrl;
+            return this;
+        }
+
+        public MandateBuilder withMandateReference(MandateBankStatementReference mandateReference) {
+            this.mandateReference = mandateReference;
+            return this;
+        }
+
+        public MandateBuilder withServiceReference(String serviceReference) {
+            this.serviceReference = serviceReference;
+            return this;
+        }
+
+        public MandateBuilder withCreatedDate(ZonedDateTime createdDate) {
+            this.createdDate = createdDate;
+            return this;
+        }
+
+        public MandateBuilder withPayer(Payer payer) {
+            this.payer = payer;
+            return this;
+        }
+
+        public MandateBuilder withPaymentProviderId(PaymentProviderMandateId paymentProviderId) {
+            this.paymentProviderId = paymentProviderId;
+            return this;
+        }
+
+        public Mandate build() {
+            return new Mandate(this);
+        }
     }
 }
