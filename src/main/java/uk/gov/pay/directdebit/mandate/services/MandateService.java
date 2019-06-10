@@ -46,7 +46,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
-import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
+import static uk.gov.pay.directdebit.mandate.model.MandateImpl.MandateBuilder.aMandate;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 
 public class MandateService {
@@ -90,7 +90,7 @@ public class MandateService {
                     Mandate mandate = aMandate()
                             .withGatewayAccount(gatewayAccount)
                             .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
-                            .withMandateReference(mandateReference)
+                            .withMandateBankStatementReference(mandateReference)
                             .withServiceReference(createRequest.getReference())
                             .withState(MandateState.CREATED)
                             .withReturnUrl(createRequest.getReturnUrl())
@@ -121,7 +121,7 @@ public class MandateService {
                 mandate.getState().toExternal(),
                 dataLinks,
                 mandate.getServiceReference(),
-                mandate.getMandateReference());
+                mandate.getMandateBankStatementReference());
     }
 
     public TokenExchangeDetails getMandateFor(String token) {
@@ -143,7 +143,7 @@ public class MandateService {
                 accountExternalId,
                 mandate.getState(),
                 mandate.getReturnUrl(),
-                mandate.getMandateReference(),
+                mandate.getMandateBankStatementReference(),
                 mandate.getCreatedDate(),
                 mandate.getPayer(),
                 transaction
@@ -158,7 +158,7 @@ public class MandateService {
                 accountExternalId,
                 mandate.getState(),
                 mandate.getReturnUrl(),
-                mandate.getMandateReference(),
+                mandate.getMandateBankStatementReference(),
                 mandate.getCreatedDate(),
                 mandate.getPayer(),
                 null
@@ -175,7 +175,7 @@ public class MandateService {
                 dataLinks,
                 mandate.getState().toExternal(),
                 mandate.getServiceReference(),
-                mandate.getMandateReference());
+                mandate.getMandateBankStatementReference());
     }
 
     public Mandate findByExternalId(MandateExternalId externalId) {

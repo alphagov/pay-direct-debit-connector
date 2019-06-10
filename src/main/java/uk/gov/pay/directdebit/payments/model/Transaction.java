@@ -1,8 +1,9 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import java.time.ZonedDateTime;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+
+import java.time.ZonedDateTime;
 
 public class Transaction {
 

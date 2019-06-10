@@ -31,7 +31,6 @@ import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
-import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -51,7 +50,7 @@ import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFix
 public abstract class GoCardlessServiceTest {
 
     private static final String CUSTOMER_ID = "CU328471";
-    private static final String BANK_ACCOUNT_ID = "BA34983496";
+    static final String BANK_ACCOUNT_ID = "BA34983496";
     static final MandateExternalId MANDATE_ID = MandateExternalId.valueOf("sdkfhsdkjfhjdks");
     private static final String TRANSACTION_ID = "sdkfhsd2jfhjdks";
     static final SortCode SORT_CODE = SortCode.of("123456");
@@ -91,6 +90,8 @@ public abstract class GoCardlessServiceTest {
             .withMandateFixture(mandateFixture)
             .withExternalId(TRANSACTION_ID)
             .toEntity();
+
+
     GoCardlessMandate goCardlessMandate = aGoCardlessMandateFixture().withMandateId(mandateFixture.getId()).toEntity();
     GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().withTransactionId(transaction.getId()).toEntity();
     BankAccountDetails bankAccountDetails = new BankAccountDetails(ACCOUNT_NUMBER, SORT_CODE);
@@ -163,24 +164,6 @@ public abstract class GoCardlessServiceTest {
         assertThat(service.getSunName(mandateFixture.toEntity()), is(Optional.empty()));
     }
 
-    void verifyMandateFailedException() {
-        when(mockedGoCardlessClientFacade.createMandate(mandateFixture.toEntity(), goCardlessCustomer)).thenThrow(new RuntimeException("gocardless said no"));
-
-        thrown.expect(CreateMandateFailedException.class);
-        thrown.expectMessage(format("Failed to create mandate in gocardless, mandate id: %s", MANDATE_ID));
-        thrown.reportMissingExceptionWithMessage("CreateMandateFailedException expected");
-    }
-
-    void verifyCreatePaymentFailedException() {
-        when(mockedGoCardlessClientFacade.createMandate(mandateFixture.toEntity(), goCardlessCustomer)).thenReturn(goCardlessMandate);
-        when(mockedGoCardlessClientFacade.createPayment(transaction, goCardlessMandate)).thenThrow(new RuntimeException("gocardless said no"));
-
-        thrown.expect(CreatePaymentFailedException.class);
-        thrown.expectMessage(format("Failed to create payment in gocardless, mandate id: %s, transaction id: %s",
-                MANDATE_ID, TRANSACTION_ID));
-        thrown.reportMissingExceptionWithMessage("CreatePaymentFailedException expected");
-    }
-
     void verifyCreateCustomerBankAccountFailedException() {
         when(mockedGoCardlessClientFacade.createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE, ACCOUNT_NUMBER))
                 .thenThrow(new RuntimeException("oops"));
@@ -191,13 +174,4 @@ public abstract class GoCardlessServiceTest {
         thrown.reportMissingExceptionWithMessage("CreateCustomerBankAccountFailedException expected");
     }
 
-    void verifyCreateCustomerFailedException() {
-        when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity()))
-                .thenThrow(new RuntimeException("ooops"));
-
-        thrown.expect(CreateCustomerFailedException.class);
-        thrown.expectMessage(format("Failed to create customer in gocardless, mandate id: %s, payer id: %s",
-                MANDATE_ID, payerFixture.getExternalId()));
-        thrown.reportMissingExceptionWithMessage("CreateCustomerFailedException expected");
-    }
 }

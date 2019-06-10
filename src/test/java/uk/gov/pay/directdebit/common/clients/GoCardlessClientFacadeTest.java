@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
@@ -158,9 +157,9 @@ public class GoCardlessClientFacadeTest {
 
         given(mockGoCardlessClientWrapper.createMandate(mandate.getExternalId(), goCardlessCustomer)).willReturn(mockMandate);
 
-        GoCardlessMandate result = goCardlessClientFacade.createMandate(mandate, goCardlessCustomer);
+        uk.gov.pay.directdebit.mandate.model.Mandate result = goCardlessClientFacade.createMandate(mandate, goCardlessCustomer);
 
-        assertThat(result.getGoCardlessMandateId(), is(goCardlessMandateId));
-        assertThat(result.getGoCardlessReference(), is(goCardlessReference));
+        assertThat(result.getPaymentProviderMandateId().get(), is(goCardlessMandateId));
+        assertThat(result.getMandateBankStatementReference(), is(goCardlessReference));
     }
 }

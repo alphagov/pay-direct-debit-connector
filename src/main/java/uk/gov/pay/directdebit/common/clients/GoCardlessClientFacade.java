@@ -9,6 +9,7 @@ import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Payment;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateAdaptor;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -50,12 +51,9 @@ public class GoCardlessClientFacade {
         return customer;
     }
 
-    public GoCardlessMandate createMandate(Mandate mandate, GoCardlessCustomer customer) {
+    public Mandate createMandate(Mandate mandate, GoCardlessCustomer customer) {
         com.gocardless.resources.Mandate gcMandate = goCardlessClientWrapper.createMandate(mandate.getExternalId(), customer);
-        return new GoCardlessMandate(
-                mandate.getId(),
-                GoCardlessMandateId.valueOf(gcMandate.getId()),
-                MandateBankStatementReference.valueOf(gcMandate.getReference()));
+        return new GoCardlessMandateAdaptor(gcMandate, mandate);
     }
 
     public GoCardlessPayment createPayment(Transaction transaction, GoCardlessMandate mandate) {

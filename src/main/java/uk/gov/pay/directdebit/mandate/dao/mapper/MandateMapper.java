@@ -8,7 +8,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder;
+import uk.gov.pay.directdebit.mandate.model.MandateImpl.MandateBuilder;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -19,7 +19,7 @@ import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
-import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
+import static uk.gov.pay.directdebit.mandate.model.MandateImpl.MandateBuilder.aMandate;
 
 public class MandateMapper implements RowMapper<Mandate> {
 
@@ -90,7 +90,7 @@ public class MandateMapper implements RowMapper<Mandate> {
                 .withId(resultSet.getLong(ID_COLUMN))
                 .withGatewayAccount(gatewayAccount)
                 .withExternalId(MandateExternalId.valueOf(resultSet.getString(EXTERNAL_ID_COLUMN)))
-                .withMandateReference(MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)))
+                .withMandateBankStatementReference(MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)))
                 .withServiceReference(resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN))
                 .withState(MandateState.valueOf(resultSet.getString(STATE_COLUMN)))
                 .withReturnUrl(resultSet.getString(RETURN_URL_COLUMN))
