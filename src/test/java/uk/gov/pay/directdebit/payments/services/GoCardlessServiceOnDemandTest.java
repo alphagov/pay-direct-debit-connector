@@ -9,7 +9,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessService;
+import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
+import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 
 import static java.lang.String.format;
@@ -30,42 +35,55 @@ public class GoCardlessServiceOnDemandTest extends GoCardlessServiceTest {
     }
 
     @Test
-    public void confirm_shouldStoreAGoCardlessCustomerBankAccountMandateAndPaymentWhenReceivingConfirmTransaction() {
+    public void confirm_shouldCreateAGoCardlessCustomerBankAccountMandateAndPaymentWhenReceivingConfirmTransaction() {
         Mandate mandate = mandateFixture.toEntity();
 
-        when(mockedGoCardlessClientFacade.createMandate(mandate, goCardlessCustomer)).thenReturn(goCardlessMandate);
+        when(mockedGoCardlessClientFacade.createMandate(mandate, goCardlessCustomer))
+                .thenReturn(new PaymentProviderMandateIdAndBankReference(
+                        SandboxMandateId.valueOf("aPaymentProviderId"),
+                        MandateBankStatementReference.valueOf(BANK_ACCOUNT_ID)));
 
-        Mandate confirmedMandate = service.confirmOnDemandMandate(mandate, bankAccountDetails);
+        PaymentProviderMandateIdAndBankReference paymentProviderMandateIdAndBankReference = service.confirmMandate(mandate, bankAccountDetails);
         verify(mockedGoCardlessCustomerDao).insert(goCardlessCustomer);
-        verify(mockedGoCardlessMandateDao).insert(goCardlessMandate);
         InOrder orderedCalls = inOrder(mockedGoCardlessClientFacade);
 
         orderedCalls.verify(mockedGoCardlessClientFacade).createCustomer(MANDATE_ID, payerFixture.toEntity());
         orderedCalls.verify(mockedGoCardlessClientFacade).createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE, ACCOUNT_NUMBER);
         orderedCalls.verify(mockedGoCardlessClientFacade).createMandate(mandate, goCardlessCustomer);
 
-        Assert.assertThat(confirmedMandate.getMandateReference(), is(goCardlessMandate.getGoCardlessReference()));
+        Assert.assertThat(paymentProviderMandateIdAndBankReference.getMandateBankStatementReference(), is(MandateBankStatementReference.valueOf(BANK_ACCOUNT_ID)));
     }
 
     @Test
     public void confirm_shouldThrow_ifFailingToCreateCustomerInGoCardless() {
-        verifyCreateCustomerFailedException();
+        when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity()))
+                .thenThrow(new RuntimeException("ooops"));
 
-        service.confirmOnDemandMandate(mandateFixture.toEntity(), bankAccountDetails);
+        thrown.expect(CreateCustomerFailedException.class);
+        thrown.expectMessage(format("Failed to create customer in gocardless, mandate id: %s, payer id: %s",
+                MANDATE_ID, payerFixture.getExternalId()));
+        thrown.reportMissingExceptionWithMessage("CreateCustomerFailedException expected");
+
+        service.confirmMandate(mandateFixture.toEntity(), bankAccountDetails);
     }
 
     @Test
     public void confirm_shouldThrow_ifFailingToCreateCustomerBankAccountInGoCardless() {
         verifyCreateCustomerBankAccountFailedException();
 
-        service.confirmOnDemandMandate(mandateFixture.toEntity(), bankAccountDetails);
+        service.confirmMandate(mandateFixture.toEntity(), bankAccountDetails);
     }
 
     @Test
     public void confirm_shouldThrow_ifFailingToCreateMandateInGoCardless() {
-        verifyMandateFailedException();
+        when(mockedGoCardlessClientFacade.createMandate(mandateFixture.toEntity(), goCardlessCustomer))
+                .thenThrow(new RuntimeException("gocardless said no"));
 
-        service.confirmOnDemandMandate(mandateFixture.toEntity(), bankAccountDetails);
+        thrown.expect(CreateMandateFailedException.class);
+        thrown.expectMessage(format("Failed to create mandate in gocardless, mandate id: %s", MANDATE_ID));
+        thrown.reportMissingExceptionWithMessage("CreateMandateFailedException expected");
+
+        service.confirmMandate(mandateFixture.toEntity(), bankAccountDetails);
     }
 
     @Test
