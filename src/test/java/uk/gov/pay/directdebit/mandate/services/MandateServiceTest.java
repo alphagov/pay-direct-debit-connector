@@ -10,8 +10,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
+import uk.gov.pay.directdebit.common.exception.UnlinkedGCMerchantAccountException;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
+import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
@@ -226,6 +228,29 @@ public class MandateServiceTest {
 
         service.confirm(gatewayAccount, mandate, mandateConfirmationRequest);
     }
+
+    @Test
+    public void shouldThrowUnlinkedGCAccountException_onMandateCreationWithUnlinkedAccount() {
+        thrown.expect(UnlinkedGCMerchantAccountException.class);
+        final String EXTERNAL_ID = "external1d";
+        final String DESCRIPTION = "is awesome";
+        GatewayAccount gatewayAccount = aGatewayAccountFixture()
+                .withExternalId(EXTERNAL_ID)
+                .withDescription(DESCRIPTION)
+                .withPaymentProvider(PaymentProvider.GOCARDLESS)
+                .withType(GatewayAccount.Type.TEST)
+                .withAccessToken(null)
+                .toEntity();
+        when(gatewayAccountDao.findByExternalId(gatewayAccount.getExternalId())).thenReturn(Optional.of(gatewayAccount));
+        service.createMandate(null, gatewayAccount.getExternalId());
+    }
+
+    @Test
+    public void shouldThrowGatewayAccountNotFoundException_onMandateCreationWithInvalidAccount() {
+        thrown.expect(GatewayAccountNotFoundException.class);
+        service.createMandate(null, "test");
+    }
+
 
     private Map<String, String> getMandateRequestPayload() {
         Map<String, String> payload = new HashMap<>();
