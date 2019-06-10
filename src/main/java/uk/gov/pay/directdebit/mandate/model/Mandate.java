@@ -14,23 +14,23 @@ public class Mandate {
     private MandateState state;
     private final GatewayAccount gatewayAccount;
     private final String returnUrl;
-    private MandateBankStatementReference mandateReference;
+    private MandateBankStatementReference mandateBankStatementReference;
     private final String serviceReference;
     private final ZonedDateTime createdDate;
     private Payer payer;
-    private PaymentProviderMandateId paymentProviderId;
+    private PaymentProviderMandateId paymentProviderMandateId;
 
     private Mandate(MandateBuilder builder) {
         this.id = builder.id;
         this.gatewayAccount = builder.gatewayAccount;
         this.externalId = builder.externalId;
-        this.mandateReference = builder.mandateReference;
+        this.mandateBankStatementReference = builder.mandateBankStatementReference;
         this.serviceReference = builder.serviceReference;
         this.state = builder.state;
         this.returnUrl = builder.returnUrl;
         this.createdDate = builder.createdDate;
         this.payer = builder.payer;
-        this.paymentProviderId = builder.paymentProviderId;
+        this.paymentProviderMandateId = builder.paymentProviderId;
     }
 
     public Payer getPayer() {
@@ -69,24 +69,24 @@ public class Mandate {
         this.state = state;
     }
 
-    public MandateBankStatementReference getMandateReference() {
-        return mandateReference;
+    public MandateBankStatementReference getMandateBankStatementReference() {
+        return mandateBankStatementReference;
     }
 
     public String getServiceReference() {
         return serviceReference;
     }
 
-    public void setMandateReference(MandateBankStatementReference mandateReference) {
-        this.mandateReference = mandateReference;
+    public void setMandateBankStatementReference(MandateBankStatementReference mandateBankStatementReference) {
+        this.mandateBankStatementReference = mandateBankStatementReference;
     }
 
-    public Optional<PaymentProviderMandateId> getPaymentProviderId() {
-        return Optional.ofNullable(paymentProviderId);
+    public Optional<PaymentProviderMandateId> getPaymentProviderMandateId() {
+        return Optional.ofNullable(paymentProviderMandateId);
     }
 
-    public void setPaymentProviderId(PaymentProviderMandateId paymentProviderId) {
-        this.paymentProviderId = paymentProviderId;
+    public void setPaymentProviderMandateId(PaymentProviderMandateId paymentProviderMandateId) {
+        this.paymentProviderMandateId = paymentProviderMandateId;
     }
 
     @Override
@@ -99,17 +99,17 @@ public class Mandate {
                 state == mandate.state &&
                 Objects.equals(gatewayAccount, mandate.gatewayAccount) &&
                 Objects.equals(returnUrl, mandate.returnUrl) &&
-                Objects.equals(mandateReference, mandate.mandateReference) &&
+                Objects.equals(mandateBankStatementReference, mandate.mandateBankStatementReference) &&
                 Objects.equals(serviceReference, mandate.serviceReference) &&
                 Objects.equals(createdDate, mandate.createdDate) &&
                 Objects.equals(payer, mandate.payer) &&
-                Objects.equals(paymentProviderId, mandate.paymentProviderId);
+                Objects.equals(paymentProviderMandateId, mandate.paymentProviderMandateId);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, externalId, state, gatewayAccount, returnUrl,
-                mandateReference, serviceReference, createdDate, payer, paymentProviderId);
+                mandateBankStatementReference, serviceReference, createdDate, payer, paymentProviderMandateId);
     }
 
 
@@ -119,7 +119,7 @@ public class Mandate {
         private MandateState state;
         private GatewayAccount gatewayAccount;
         private String returnUrl;
-        private MandateBankStatementReference mandateReference;
+        private MandateBankStatementReference mandateBankStatementReference;
         private String serviceReference;
         private ZonedDateTime createdDate;
         private Payer payer;
@@ -157,8 +157,8 @@ public class Mandate {
             return this;
         }
 
-        public MandateBuilder withMandateReference(MandateBankStatementReference mandateReference) {
-            this.mandateReference = mandateReference;
+        public MandateBuilder withMandateBankStatementReference(MandateBankStatementReference mandateReference) {
+            this.mandateBankStatementReference = mandateReference;
             return this;
         }
 
