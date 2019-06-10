@@ -25,7 +25,6 @@ public class GoCardlessClientFactoryTest {
 
     @Before
     public void setUp() {
-        when(mockedDirectDebitConfig.getGoCardless().getAccessToken()).thenReturn("aaa");
         when(mockedDirectDebitConfig.getGoCardless().getEnvironment()).thenReturn(GoCardlessClient.Environment.SANDBOX);
         goCardlessClientFactory = new GoCardlessClientFactory(mockedDirectDebitConfig);
     }
@@ -37,16 +36,5 @@ public class GoCardlessClientFactoryTest {
         GoCardlessClientFacade secondClient = goCardlessClientFactory
                 .getClientFor(Optional.of(PaymentProviderAccessToken.of("accessToken")));
         assertThat(firstClient, is(secondClient));
-    }
-
-
-    //backward compatibility, please remove once all gateway accounts have an access token
-    @Test
-    public void shouldCreateAClient_ifNoAccessTokenIsDefined() {
-        GoCardlessClientFacade client = goCardlessClientFactory
-                .getClientFor(Optional.empty());
-        GoCardlessClientFacade clientWithConfigAccessToken = goCardlessClientFactory
-                .getClientFor(Optional.of(PaymentProviderAccessToken.of("aaa")));
-        assertThat(client, is(clientWithConfigAccessToken));
     }
 }
