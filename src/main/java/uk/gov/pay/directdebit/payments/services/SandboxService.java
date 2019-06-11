@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
@@ -25,9 +27,11 @@ public class SandboxService implements DirectDebitPaymentProvider,
     }
 
     @Override
-    public Mandate confirmOnDemandMandate(Mandate mandate, BankAccountDetails bankAccountDetails) {
+    public PaymentProviderMandateIdAndBankReference confirmMandate(Mandate mandate, BankAccountDetails bankAccountDetails) {
         LOGGER.info("Confirming on demand mandate for sandbox, mandate with id: {}", mandate.getExternalId());
-        return mandate;
+        return new PaymentProviderMandateIdAndBankReference(
+                SandboxMandateId.valueOf(mandate.getExternalId().toString()),
+                mandate.getMandateBankStatementReference());
     }
 
     @Override

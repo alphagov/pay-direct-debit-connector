@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
@@ -50,12 +51,11 @@ public class GoCardlessClientFacade {
         return customer;
     }
 
-    public GoCardlessMandate createMandate(Mandate mandate, GoCardlessCustomer customer) {
-        com.gocardless.resources.Mandate gcMandate = goCardlessClientWrapper.createMandate(mandate.getExternalId(), customer);
-        return new GoCardlessMandate(
-                mandate.getId(),
-                GoCardlessMandateId.valueOf(gcMandate.getId()),
-                MandateBankStatementReference.valueOf(gcMandate.getReference()));
+    public PaymentProviderMandateIdAndBankReference createMandate(Mandate mandate, GoCardlessCustomer customer) {
+        var createdMandate = goCardlessClientWrapper.createMandate(mandate.getExternalId(), customer);
+        return new PaymentProviderMandateIdAndBankReference(
+                GoCardlessMandateId.valueOf(createdMandate.getId()),
+                MandateBankStatementReference.valueOf(createdMandate.getReference()));
     }
 
     public GoCardlessPayment createPayment(Transaction transaction, GoCardlessMandate mandate) {
