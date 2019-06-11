@@ -9,7 +9,10 @@ import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
 import javax.validation.constraints.NotNull;
 
 public class GoCardlessFactory extends Configuration {
-    
+
+    @JsonProperty
+    private String accessToken;
+
     @JsonProperty
     private String webhookSecret;
 
@@ -24,7 +27,11 @@ public class GoCardlessFactory extends Configuration {
     public Boolean isCallingStubs() {
         return clientUrl != null;
     }
-    
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
     public String getWebhookSecret() {
         return webhookSecret;
     }

@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
-import uk.gov.pay.directdebit.common.exception.UnlinkedGCMerchantAccountException;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
@@ -63,11 +62,11 @@ public class MandateService {
 
     @Inject
     public MandateService(DirectDebitConfig directDebitConfig,
-                          MandateDao mandateDao,
+                          MandateDao mandateDao, 
                           GatewayAccountDao gatewayAccountDao,
                           TokenService tokenService,
                           TransactionService transactionService,
-                          MandateStateUpdateService mandateStateUpdateService,
+                          MandateStateUpdateService mandateStateUpdateService, 
                           PaymentProviderFactory paymentProviderFactory) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
@@ -78,33 +77,36 @@ public class MandateService {
         this.paymentProviderFactory = paymentProviderFactory;
     }
 
-    Mandate createMandate(CreateMandateRequest createRequest, String accountExternalId) {
-        return gatewayAccountDao.findByExternalId(accountExternalId).map(gatewayAccount -> {
-            if (gatewayAccount.getAccessToken().isEmpty()) {
-                LOGGER.error("Gateway account with id {} has no access token", accountExternalId);
-                throw new UnlinkedGCMerchantAccountException(accountExternalId);
-            }
-            MandateBankStatementReference mandateReference = MandateBankStatementReference.valueOf(
-                    PaymentProvider.SANDBOX.equals(gatewayAccount.getPaymentProvider()) ?
-                            RandomStringUtils.randomAlphanumeric(18) : "gocardless-default");
-            Mandate mandate = aMandate()
-                    .withGatewayAccount(gatewayAccount)
-                    .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
-                    .withMandateReference(mandateReference)
-                    .withServiceReference(createRequest.getReference())
-                    .withState(MandateState.CREATED)
-                    .withReturnUrl(createRequest.getReturnUrl())
-                    .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
-                    .build();
-            LOGGER.info("Creating mandate external id {}", mandate.getExternalId());
-            Long id = mandateDao.insert(mandate);
-            mandate.setId(id);
-            mandateStateUpdateService.mandateCreatedFor(mandate);
-            return mandate;
-        }).orElseThrow(() -> {
-            LOGGER.error("Gateway account with id {} not found", accountExternalId);
-            return new GatewayAccountNotFoundException(accountExternalId); 
-        });
+    public Mandate createMandate(CreateMandateRequest createRequest, String accountExternalId) {
+        return gatewayAccountDao.findByExternalId(accountExternalId)
+                .map(gatewayAccount -> {
+                    // TODO:
+                    // when we introduce GoCardless gateway accounts to work with create mandate,
+                    // then modify appropriate mandate reference values
+                    MandateBankStatementReference mandateReference = MandateBankStatementReference.valueOf(
+                            PaymentProvider.SANDBOX.equals(gatewayAccount.getPaymentProvider()) ?
+                                    RandomStringUtils.randomAlphanumeric(18) : "gocardless-default");
+
+                    Mandate mandate = aMandate()
+                            .withGatewayAccount(gatewayAccount)
+                            .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
+                            .withMandateReference(mandateReference)
+                            .withServiceReference(createRequest.getReference())
+                            .withState(MandateState.CREATED)
+                            .withReturnUrl(createRequest.getReturnUrl())
+                            .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
+                            .build();
+
+                    LOGGER.info("Creating mandate external id {}", mandate.getExternalId());
+                    Long id = mandateDao.insert(mandate);
+                    mandate.setId(id);
+                    mandateStateUpdateService.mandateCreatedFor(mandate);
+                    return mandate;
+                })
+                .orElseThrow(() -> {
+                    LOGGER.error("Gateway account with id {} not found", accountExternalId);
+                    return new GatewayAccountNotFoundException(accountExternalId);
+                });
     }
 
     public CreateMandateResponse createMandate(CreateMandateRequest createMandateRequest, String accountExternalId, UriInfo uriInfo) {

@@ -25,10 +25,8 @@ import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.JsonMappingExceptionMapper;
-import uk.gov.pay.directdebit.common.exception.NoAccessTokenExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.PreconditionFailedExceptionMapper;
-import uk.gov.pay.directdebit.common.exception.UnlinkedGCMerchantAccountExceptionMapper;
 import uk.gov.pay.directdebit.common.proxy.CustomInetSocketAddressProxySelector;
 import uk.gov.pay.directdebit.events.resources.DirectDebitEventsResource;
 import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
@@ -124,8 +122,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new InternalServerErrorExceptionMapper());
         environment.jersey().register(new PreconditionFailedExceptionMapper());
         environment.jersey().register(new JsonMappingExceptionMapper());
-        environment.jersey().register(new NoAccessTokenExceptionMapper());
-        environment.jersey().register(new UnlinkedGCMerchantAccountExceptionMapper());
+
         initialiseMetrics(configuration, environment);
     }
 

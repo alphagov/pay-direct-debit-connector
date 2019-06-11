@@ -36,6 +36,7 @@ graphite:
 goCardless:
   # For initial integration we will use sandbox access token.
   # When in live mode: access token should be removed from the config and we should use partner integration instead.
+  accessToken: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN:-}
   clientUrl: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_URL:-}
   webhookSecret: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_WEBHOOK_SECRET:-change-me}
   environment: ${GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ENVIRONMENT:-sandbox}
