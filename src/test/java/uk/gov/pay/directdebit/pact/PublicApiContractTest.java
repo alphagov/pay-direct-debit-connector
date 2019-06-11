@@ -31,7 +31,8 @@ import java.util.Optional;
 @RunWith(PactRunner.class)
 @Provider("direct-debit-connector")
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
-        authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"))
+        authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"), 
+        consumers = {"publicapi"})
 //uncommenting the below is useful for testing pacts locally. grab the pact from the broker and put it in /pacts
 //@PactFolder("pacts")
 public class PublicApiContractTest {
