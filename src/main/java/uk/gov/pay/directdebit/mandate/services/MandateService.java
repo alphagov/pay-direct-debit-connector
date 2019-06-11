@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
+import uk.gov.pay.directdebit.common.exception.UnlinkedGCMerchantAccountException;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
@@ -18,10 +19,10 @@ import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
-import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
@@ -81,6 +82,12 @@ public class MandateService {
     public Mandate createMandate(CreateMandateRequest createRequest, String accountExternalId) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
+                    if (gatewayAccount.getAccessToken().isEmpty() &&
+                            gatewayAccount.getPaymentProvider() == PaymentProvider.GOCARDLESS) {
+                        LOGGER.error("Gateway account with id {} does not have access token", accountExternalId);
+                        throw new UnlinkedGCMerchantAccountException(accountExternalId);
+                    }
+
                     // TODO:
                     // when we introduce GoCardless gateway accounts to work with create mandate,
                     // then modify appropriate mandate reference values
