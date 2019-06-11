@@ -98,14 +98,14 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getDetailsReasonCode(), is("a reason code"));
         assertThat(firstEvent.getDetailsScheme(), is("a details scheme"));
         assertThat(firstEvent.getLinksNewCustomerBankAccount(), is("a bank account"));
-        assertThat(firstEvent.getLinksNewMandate(), is("a new mandate"));
+        assertThat(firstEvent.getLinksNewMandate().get().toString(), is("a new mandate"));
         assertThat(firstEvent.getLinksOrganisation(), is(organisationIdentifier.toString()));
         assertThat(firstEvent.getLinksParentEvent(), is("a parent event"));
         assertThat(firstEvent.getLinksPreviousCustomerBankAccount(), is("a previous customer bank account"));
         assertThat(firstEvent.getLinksRefund(), is(""));
         assertThat(firstEvent.getLinksSubscription(), is("a subscription"));
         assertThat(firstEvent.getLinksPayment(), is("payment"));
-        assertThat(firstEvent.getLinksMandate(), is(""));
+        assertThat(firstEvent.getLinksMandate().get().toString(), is(""));
         assertThat(firstEvent.getLinksPayout(), is(""));
         
         GoCardlessEvent secondEvent = parsedEvents.get(1);
@@ -117,7 +117,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(secondEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(secondEvent.getJson(), is(objectMapper.readTree(secondEventPayload).toString()));
         assertThat(secondEvent.getLinksPayment(), is(""));
-        assertThat(secondEvent.getLinksMandate(), is("mandate"));
+        assertThat(secondEvent.getLinksMandate().get().toString(), is("mandate"));
         assertThat(secondEvent.getLinksPayout(), is(""));
 
 
@@ -130,7 +130,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(thirdEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(thirdEvent.getJson(), is(objectMapper.readTree(thirdEventPayload).toString()));
         assertThat(thirdEvent.getLinksPayment(), is(""));
-        assertThat(thirdEvent.getLinksMandate(), is(""));
+        assertThat(thirdEvent.getLinksMandate().get().toString(), is(""));
         assertThat(thirdEvent.getLinksPayout(), is("payout"));
     }
 

@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
@@ -15,7 +16,7 @@ import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessService;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
-import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
+import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotConfirmed;
 
 import static java.lang.String.format;
 import static org.hamcrest.core.Is.is;
@@ -28,7 +29,7 @@ public class GoCardlessServiceOnDemandTest extends GoCardlessServiceTest {
 
     @Before
     public void setUp() {
-        service = new GoCardlessService(mockedGoCardlessClientFactory, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao);
+        service = new GoCardlessService(mockedGoCardlessClientFactory, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao);
         when(mockedGoCardlessClientFactory.getClientFor(Optional.of(gatewayAccountFixture.getAccessToken()))).thenReturn(mockedGoCardlessClientFacade);
         when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity())).thenReturn(goCardlessCustomer);
         when(mockedGoCardlessClientFacade.createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE, ACCOUNT_NUMBER)).thenReturn(goCardlessCustomer);
@@ -88,11 +89,11 @@ public class GoCardlessServiceOnDemandTest extends GoCardlessServiceTest {
 
     @Test
     public void collect_shouldCreateAndStoreAPaymentForAValidGoCardlessMandate() {
-        Mandate mandate = mandateFixture.toEntity();
+        Mandate mandate = mandateFixture
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("aGoCardlessMandateId"))
+                .toEntity();
 
-        when(mockedGoCardlessMandateDao.findByMandateId(goCardlessMandate.getMandateId()))
-                .thenReturn(Optional.of(goCardlessMandate));
-        when(mockedGoCardlessClientFacade.createPayment(transaction, goCardlessMandate))
+        when(mockedGoCardlessClientFacade.createPayment(transaction, (GoCardlessMandateId) mandate.getPaymentProviderMandateId().get()))
                 .thenReturn(goCardlessPayment);
 
         LocalDate chargeDate = service.collect(mandate, transaction);
@@ -102,16 +103,15 @@ public class GoCardlessServiceOnDemandTest extends GoCardlessServiceTest {
     }
    
     @Test
-    public void collect_shouldThrowIfTryingToCollectFromAnUnknownGoCardlessMandate() {
-        Mandate mandate = mandateFixture.toEntity();
+    public void collect_shouldThrowIfTryingToCollectFromAnUnconfirmedMandate() {
+        Mandate mandate = mandateFixture
+                .withPaymentProviderId(null)
+                .toEntity();
 
-        when(mockedGoCardlessMandateDao.findByMandateId(goCardlessMandate.getMandateId()))
-                .thenReturn(Optional.empty());
+        thrown.expect(GoCardlessMandateNotConfirmed.class);
+        thrown.expectMessage(format("Mandate with mandate id: %s has not been confirmed with GoCardless", MANDATE_ID));
+        thrown.reportMissingExceptionWithMessage("GoCardlessMandateNotConfirmed expected");
 
-        thrown.expect(GoCardlessMandateNotFoundException.class);
-        thrown.expectMessage(format("No gocardless mandate found with mandate id: %s", MANDATE_ID));
-        thrown.reportMissingExceptionWithMessage("GoCardlessMandateNotFoundException expected");
-        
         service.collect(mandate, transaction);
     }
     

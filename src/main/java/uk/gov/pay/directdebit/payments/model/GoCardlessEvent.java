@@ -1,9 +1,11 @@
 package uk.gov.pay.directdebit.payments.model;
 
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public class GoCardlessEvent {
 
@@ -20,9 +22,9 @@ public class GoCardlessEvent {
     private final String detailsOrigin;
     private final String detailsReasonCode;
     private final String detailsScheme;
-    private final String linksMandate;
+    private final GoCardlessMandateId linksMandate;
     private final String linksNewCustomerBankAccount;
-    private final String linksNewMandate;
+    private final GoCardlessMandateId linksNewMandate;
     private final String linksOrganisation;
     private final String linksParentEvent;
     private final String linksPayment;
@@ -113,16 +115,16 @@ public class GoCardlessEvent {
         return detailsScheme;
     }
 
-    public String getLinksMandate() {
-        return linksMandate;
+    public Optional<GoCardlessMandateId> getLinksMandate() {
+        return Optional.ofNullable(linksMandate);
     }
 
     public String getLinksNewCustomerBankAccount() {
         return linksNewCustomerBankAccount;
     }
 
-    public String getLinksNewMandate() {
-        return linksNewMandate;
+    public Optional<GoCardlessMandateId> getLinksNewMandate() {
+        return Optional.ofNullable(linksNewMandate);
     }
 
     public String getLinksOrganisation() {
@@ -215,9 +217,9 @@ public class GoCardlessEvent {
         private String detailsOrigin;
         private String detailsReasonCode;
         private String detailsScheme;
-        private String linksMandate;
+        private GoCardlessMandateId linksMandate;
         private String linksNewCustomerBankAccount;
-        private String linksNewMandate;
+        private GoCardlessMandateId linksNewMandate;
         private String linksOrganisation;
         private String linksParentEvent;
         private String linksPayment;
@@ -295,7 +297,7 @@ public class GoCardlessEvent {
             return this;
         }
 
-        public GoCardlessEventBuilder withLinksMandate(String linksMandate) {
+        public GoCardlessEventBuilder withLinksMandate(GoCardlessMandateId linksMandate) {
             this.linksMandate = linksMandate;
             return this;
         }
@@ -305,7 +307,7 @@ public class GoCardlessEvent {
             return this;
         }
 
-        public GoCardlessEventBuilder withLinksNewMandate(String linksNewMandate) {
+        public GoCardlessEventBuilder withLinksNewMandate(GoCardlessMandateId linksNewMandate) {
             this.linksNewMandate = linksNewMandate;
             return this;
         }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent.GoCardlessEventBuilder;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
@@ -61,14 +62,14 @@ public class GoCardlessWebhookParser {
 
                 }
                 if (linksNode.has("mandate")) {
-                    goCardlessEventBuilder.withLinksMandate(linksNode.get("mandate").asText());
+                    goCardlessEventBuilder.withLinksMandate(GoCardlessMandateId.valueOf(linksNode.get("mandate").asText()));
                 }
                 if (linksNode.has("new_customer_bank_account")) {
                     goCardlessEventBuilder
                             .withLinksNewCustomerBankAccount(linksNode.get("new_customer_bank_account").asText());
                 }
                 if (linksNode.has("new_mandate")) {
-                    goCardlessEventBuilder.withLinksNewMandate(linksNode.get("new_mandate").asText());
+                    goCardlessEventBuilder.withLinksNewMandate(GoCardlessMandateId.valueOf(linksNode.get("new_mandate").asText()));
                 }
                 if (linksNode.has("organisation")) {
                     goCardlessEventBuilder.withLinksOrganisation(linksNode.get("organisation").asText());

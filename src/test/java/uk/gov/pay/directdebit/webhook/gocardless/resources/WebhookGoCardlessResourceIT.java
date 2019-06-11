@@ -33,7 +33,6 @@ import static io.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 
@@ -174,22 +173,25 @@ public class WebhookGoCardlessResourceIT {
 
     @Test
     public void handleWebhook_whenAMandateFailedWebhookArrives_shouldInsertGoCardlessEventsUpdatePaymentToFailedAndReturn200() {
+
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .withState(MandateState.PENDING)
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("MD00008Q30R2BR"))
                 .insert(testContext.getJdbi());
+
         TransactionFixture transactionFixture = aTransactionFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.PENDING)
                 .insert(testContext.getJdbi());
-        PayerFixture payerFixture = PayerFixture.aPayerFixture().withMandateId(mandateFixture.getId()).insert(testContext.getJdbi());
+
+        PayerFixture payerFixture = PayerFixture.aPayerFixture()
+                .withMandateId(mandateFixture.getId())
+                .insert(testContext.getJdbi());
+
         aGoCardlessPaymentFixture()
                 .withPaymentId("PM00008Q30R2BR")
                 .withTransactionId(transactionFixture.getId())
-                .insert(testContext.getJdbi());
-        aGoCardlessMandateFixture()
-                .withGoCardlessMandateId(GoCardlessMandateId.valueOf("MD00008Q30R2BR"))
-                .withMandateId(mandateFixture.getId())
                 .insert(testContext.getJdbi());
 
         // language=JSON
@@ -215,6 +217,7 @@ public class WebhookGoCardlessResourceIT {
                 .accept(APPLICATION_JSON)
                 .post(REQUEST_PATH)
                 .then()
+                .log().body()
                 .statusCode(Response.Status.OK.getStatusCode());
 
         List<Map<String, Object>> events = testContext.getDatabaseTestHelper().getAllGoCardlessEvents();
