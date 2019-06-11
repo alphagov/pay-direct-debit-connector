@@ -7,11 +7,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
-import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 
@@ -29,15 +26,13 @@ public class GoCardlessEventServiceTest {
     @Mock
     private GoCardlessEventDao mockedGoCardlessEventDao;
     @Mock
-    private GoCardlessMandateDao mockedGoCardlessMandateDao;
-    @Mock
     private GoCardlessPaymentDao mockedGoCardlessPaymentDao;
     
     private GoCardlessEventService service;
 
     @Before
     public void setUp() {
-        service = new GoCardlessEventService(mockedGoCardlessPaymentDao, mockedGoCardlessMandateDao, mockedGoCardlessEventDao);
+        service = new GoCardlessEventService(mockedGoCardlessPaymentDao, mockedGoCardlessEventDao);
     }  
     
     @Test
@@ -55,16 +50,5 @@ public class GoCardlessEventServiceTest {
         thrown.expectMessage("No gocardless payment found with resource id: aaa");
         thrown.reportMissingExceptionWithMessage("GoCardlessPaymentNotFoundException expected");
         service.findPaymentForEvent(goCardlessEvent);
-    }
-
-    @Test
-    public void findMandateForEvent_shouldThrowIfNoMandateIsFoundForEvent() {
-        GoCardlessMandateId mandateId = GoCardlessMandateId.valueOf("aaa");
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceId(mandateId.toString()).toEntity();
-        when(mockedGoCardlessMandateDao.findByEventResourceId(mandateId)).thenReturn(Optional.empty());
-        thrown.expect(GoCardlessMandateNotFoundException.class);
-        thrown.expectMessage("No gocardless mandate found with resource id: aaa");
-        thrown.reportMissingExceptionWithMessage("GoCardlessMandateNotFoundException expected");
-        service.findGoCardlessMandateForEvent(goCardlessEvent);
     }
 }

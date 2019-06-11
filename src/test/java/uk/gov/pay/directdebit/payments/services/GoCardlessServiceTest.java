@@ -11,10 +11,8 @@ import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorException;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.mandate.dao.GoCardlessMandateDao;
 import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -41,7 +39,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture.aGoCardlessMandateFixture;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 
@@ -58,8 +55,6 @@ public abstract class GoCardlessServiceTest {
     public ExpectedException thrown = ExpectedException.none();
     @Mock
     protected GoCardlessClientFacade mockedGoCardlessClientFacade;
-    @Mock
-    protected GoCardlessMandateDao mockedGoCardlessMandateDao;
     @Mock
     protected GoCardlessCustomerDao mockedGoCardlessCustomerDao;
     @Mock
@@ -90,7 +85,6 @@ public abstract class GoCardlessServiceTest {
             .toEntity();
 
 
-    GoCardlessMandate goCardlessMandate = aGoCardlessMandateFixture().withMandateId(mandateFixture.getId()).toEntity();
     GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().withTransactionId(transaction.getId()).toEntity();
     BankAccountDetails bankAccountDetails = new BankAccountDetails(ACCOUNT_NUMBER, SORT_CODE);
 

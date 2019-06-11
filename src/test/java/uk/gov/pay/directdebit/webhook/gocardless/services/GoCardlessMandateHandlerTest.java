@@ -2,17 +2,17 @@ package uk.gov.pay.directdebit.webhook.gocardless.services;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.events.exception.EventHasNoMandateIdException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
-import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -56,6 +56,9 @@ public class GoCardlessMandateHandlerTest {
     @Captor
     private ArgumentCaptor<GoCardlessEvent> geCaptor;
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     private DirectDebitEvent directDebitEvent = DirectDebitEventFixture.aDirectDebitEventFixture().toEntity();
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
     private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_organisation");
@@ -65,8 +68,6 @@ public class GoCardlessMandateHandlerTest {
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture()
             .withGatewayAccountFixture(gatewayAccountFixture)
             .withPayerFixture(payerFixture);
-    private GoCardlessMandateFixture goCardlessMandateFixture = GoCardlessMandateFixture.aGoCardlessMandateFixture()
-            .withMandateId(mandateFixture.getId());
     private TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture()
             .withMandateFixture(mandateFixture);
     private GoCardlessMandateHandler goCardlessMandateHandler;
@@ -79,14 +80,13 @@ public class GoCardlessMandateHandlerTest {
                 mandateStateUpdateService, mandateQueryService);
         when(transactionService.findTransactionsForMandate(mandateFixture.getExternalId())).thenReturn(ImmutableList
                 .of(transactionFixture.toEntity()));
-        when(mandateQueryService.findById(mandateFixture.getId())).thenReturn(mandateFixture.toEntity());
     }
 
     @Test
     public void handle_onCreateMandateGoCardlessEvent_shouldRegisterEventAsMandatePending_whenDoesNotPreviouslyExist() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("created").toEntity());
 
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
         when(mandateStateUpdateService.mandatePendingFor(mandateFixture.toEntity())).thenReturn(
                 directDebitEvent);
 
@@ -102,7 +102,7 @@ public class GoCardlessMandateHandlerTest {
     public void handle_onCreateMandateGoCardlessEvent_shouldNotRegisterAnEventAsMandatePending_whenAPreviousMandatePendingEventExists() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("created").toEntity());
 
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
         when(directDebitEventService.findBy(mandateFixture.getId(), MANDATE, SupportedEvent.MANDATE_PENDING)).thenReturn(Optional
                 .of(
                 directDebitEvent));
@@ -120,7 +120,7 @@ public class GoCardlessMandateHandlerTest {
     public void handle_onActiveMandateGoCardlessEvent_shouldSetAPayEventAsMandateActive_whenDoesNotPreviouslyExist() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("active").toEntity());
 
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
         when(mandateStateUpdateService.mandateActiveFor(mandateFixture.toEntity())).thenReturn(
                 directDebitEvent);
         goCardlessMandateHandler.handle(goCardlessEvent);
@@ -136,7 +136,7 @@ public class GoCardlessMandateHandlerTest {
     public void handle_onActiveMandateGoCardlessEvent_shouldNotRegisterAnEventAsMandatePending_whenAPreviousMandatePendingEventExists() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("active").toEntity());
 
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
 
         when(mandateStateUpdateService.mandateActiveFor(mandateFixture.toEntity())).thenReturn(
                 directDebitEvent);
@@ -155,7 +155,7 @@ public class GoCardlessMandateHandlerTest {
     public void handle_onSubmittedMandateGoCardlessEvent_shouldSetAPayEventAsMandatePending_whenDoesNotPreviouslyExist() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("submitted").toEntity());
 
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
         when(mandateStateUpdateService.mandatePendingFor(mandateFixture.toEntity())).thenReturn(
                 directDebitEvent);
 
@@ -172,7 +172,7 @@ public class GoCardlessMandateHandlerTest {
     public void handle_onSubmittedMandateGoCardlessEvent_shouldNotRegisterAnEventAsMandatePending_whenAPreviousMandatePendingEventExists() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("submitted").toEntity());
 
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
         when(directDebitEventService.findBy(mandateFixture.getId(), MANDATE, SupportedEvent.MANDATE_PENDING)).thenReturn(Optional.of(
                 directDebitEvent));
         goCardlessMandateHandler.handle(goCardlessEvent);
@@ -189,7 +189,7 @@ public class GoCardlessMandateHandlerTest {
     public void handle_onAFailedMandateGoCardlessEvent_shouldRegisterAPayEventAsMandateFailed() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("failed").toEntity());
 
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
         when(mandateStateUpdateService.mandateFailedFor(mandateFixture.toEntity())).thenReturn(
                 directDebitEvent);
         when(transactionService.paymentFailedWithoutEmailFor(transactionFixture.toEntity())).thenReturn(
@@ -210,7 +210,7 @@ public class GoCardlessMandateHandlerTest {
     public void handle_onACancelledMandateGoCardlessEvent_shouldRegisterAPayEventAsMandateCancelled_AndFailPaymentIfNotSubmittedToGC() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("cancelled").toEntity());
 
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
         when(transactionService.findPaymentSubmittedEventFor(transactionFixture.toEntity())).thenReturn(Optional.empty());
         when(mandateStateUpdateService.mandateCancelledFor(mandateFixture.toEntity())).thenReturn(
                 directDebitEvent);
@@ -232,7 +232,7 @@ public class GoCardlessMandateHandlerTest {
     public void handle_onACancelledMandateGoCardlessEvent_shouldRegisterAPayEventAsMandateCancelled_withoutFailingPaymentIfSubmittedToGC() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("cancelled").toEntity());
 
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandateFixture.toEntity());
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
         when(transactionService.findPaymentSubmittedEventFor(transactionFixture.toEntity())).thenReturn(Optional.of(
                 directDebitEvent));
         when(mandateStateUpdateService.mandateCancelledFor(mandateFixture.toEntity())).thenReturn(
@@ -255,16 +255,22 @@ public class GoCardlessMandateHandlerTest {
                 .withAction("created")
                 .toEntity());
 
-        GoCardlessMandate goCardlessMandate = goCardlessMandateFixture.toEntity();
-        when(goCardlessService.findGoCardlessMandateForEvent(goCardlessEvent)).thenReturn(goCardlessMandate);
-        Mandate mockedMandate = MandateFixture.aMandateFixture()
-                .withGatewayAccountFixture(GatewayAccountFixture.aGatewayAccountFixture()
-                .withOrganisation(GoCardlessOrganisationId.valueOf("non_existing_organisation")))
-                .toEntity();
-        when(mandateQueryService.findById(goCardlessMandate.getMandateId())).thenReturn(mockedMandate);
+        when(mandateQueryService.findByPaymentProviderMandateId(goCardlessEvent.getLinksMandate().get())).thenReturn(mandateFixture.toEntity());
 
         goCardlessMandateHandler.handle(goCardlessEvent);
         verify(goCardlessEvent, never()).setEventId(anyLong());
         verify(goCardlessService, never()).storeEvent(goCardlessEvent);
+    }
+
+    @Test
+    public void handle_onCreateMandateGoCardlessEvent_shouldThrowExceptionWhenEventHasNoLinkedMandate() {
+        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
+                .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("does_not_exist"))
+                .withAction("created")
+                .withLinksMandate(null)
+                .toEntity());
+        
+        thrown.expect(EventHasNoMandateIdException.class);
+        goCardlessMandateHandler.handle(goCardlessEvent);
     }
 }
