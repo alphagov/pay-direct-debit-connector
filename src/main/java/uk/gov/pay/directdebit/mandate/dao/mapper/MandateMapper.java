@@ -90,7 +90,7 @@ public class MandateMapper implements RowMapper<Mandate> {
                 .withId(resultSet.getLong(ID_COLUMN))
                 .withGatewayAccount(gatewayAccount)
                 .withExternalId(MandateExternalId.valueOf(resultSet.getString(EXTERNAL_ID_COLUMN)))
-                .withMandateBankStatementReference(MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)))
+                .withMandateReference(MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)))
                 .withServiceReference(resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN))
                 .withState(MandateState.valueOf(resultSet.getString(STATE_COLUMN)))
                 .withReturnUrl(resultSet.getString(RETURN_URL_COLUMN))

@@ -5,8 +5,8 @@ import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -77,7 +77,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
         return mandateReference;
     }
 
-    public MandateFixture withMandateBankStatementReference(MandateBankStatementReference mandateReference) {
+    public MandateFixture withMandateReference(MandateBankStatementReference mandateReference) {
         this.mandateReference = mandateReference;
         return this;
     }
@@ -165,7 +165,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                 .withId(id)
                 .withGatewayAccount(gatewayAccountFixture.toEntity())
                 .withExternalId(mandateExternalId)
-                .withMandateBankStatementReference(mandateReference)
+                .withMandateReference(mandateReference)
                 .withServiceReference(serviceReference)
                 .withState(state)
                 .withReturnUrl(returnUrl)

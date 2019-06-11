@@ -130,7 +130,7 @@ public class MandateStateUpdateService {
 
     private Mandate confirmedDetailsFor(Mandate mandate) {
         updateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED);
-        mandateDao.updateReferenceAndPaymentProviderId(mandate);
+        mandateDao.updateMandateReference(mandate.getId(), mandate.getMandateReference());
         return mandate;
     }
 }

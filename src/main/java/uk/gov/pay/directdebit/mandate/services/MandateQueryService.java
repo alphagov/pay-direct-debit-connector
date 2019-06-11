@@ -1,15 +1,14 @@
 package uk.gov.pay.directdebit.mandate.services;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Set;
+import javax.inject.Inject;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-
-import javax.inject.Inject;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Set;
 
 public class MandateQueryService {
     private MandateDao mandateDao;

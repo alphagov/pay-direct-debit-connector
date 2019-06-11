@@ -49,6 +49,15 @@ public class GoCardlessMandateDaoIT {
     }
 
     @Test
+    public void shouldInsertAGoCardlessMandate() {
+        Long id = mandateDao.insert(testGoCardlessMandate.toEntity());
+        Map<String, Object> mandate = testContext.getDatabaseTestHelper().getGoCardlessMandateById(id);
+        assertThat(mandate.get("id"), is(id));
+        assertThat(mandate.get("mandate_id"), is(mandateFixture.getId()));
+        assertThat(mandate.get("gocardless_mandate_id"), is(GOCARDLESS_MANDATE_ID.toString()));
+    }
+
+    @Test
     public void shouldFindAGoCardlessMandateByMandateId() {
         testGoCardlessMandate.insert(testContext.getJdbi());
         GoCardlessMandate goCardlessMandate = mandateDao.findByMandateId(mandateFixture.getId()).get();

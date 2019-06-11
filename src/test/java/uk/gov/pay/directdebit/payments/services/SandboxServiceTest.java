@@ -8,8 +8,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
-import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
@@ -42,17 +40,12 @@ public class SandboxServiceTest {
     }
 
     @Test
-    public void confirmMandate_shouldReturnPaymentProviderIdAndBankStatementReference() {
-        MandateFixture mandateFixture = aMandateFixture()
-                .withExternalId(MandateExternalId.valueOf("anExternalId"))
-                .withMandateBankStatementReference(MandateBankStatementReference.valueOf("aBankReference"))
-                .withGatewayAccountFixture(gatewayAccountFixture);
+    public void confirmOnDemand_shouldNotDoAnything() {
+        MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture);
         BankAccountDetails bankAccountDetails = new BankAccountDetails(AccountNumber.of("12345678"), SortCode.of("123456"));
-
-        var confirmMandateResponse = service.confirmMandate(mandateFixture.toEntity(), bankAccountDetails);
-
-        assertThat(confirmMandateResponse.getPaymentProviderMandateId().toString(), is(mandateFixture.getExternalId().toString()));
-        assertThat(confirmMandateResponse.getMandateBankStatementReference(), is(mandateFixture.getMandateReference()));
+        Mandate mandate = service
+                .confirmOnDemandMandate(mandateFixture.toEntity(), bankAccountDetails);
+        assertThat(mandate, is(mandateFixture.toEntity()));
     }
 
     @Test

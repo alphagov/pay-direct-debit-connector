@@ -22,7 +22,6 @@ import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
@@ -64,11 +63,11 @@ public class MandateService {
 
     @Inject
     public MandateService(DirectDebitConfig directDebitConfig,
-                          MandateDao mandateDao,
+                          MandateDao mandateDao, 
                           GatewayAccountDao gatewayAccountDao,
                           TokenService tokenService,
                           TransactionService transactionService,
-                          MandateStateUpdateService mandateStateUpdateService,
+                          MandateStateUpdateService mandateStateUpdateService, 
                           PaymentProviderFactory paymentProviderFactory) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
@@ -98,7 +97,7 @@ public class MandateService {
                     Mandate mandate = aMandate()
                             .withGatewayAccount(gatewayAccount)
                             .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
-                            .withMandateBankStatementReference(mandateReference)
+                            .withMandateReference(mandateReference)
                             .withServiceReference(createRequest.getReference())
                             .withState(MandateState.CREATED)
                             .withReturnUrl(createRequest.getReturnUrl())
@@ -129,7 +128,7 @@ public class MandateService {
                 mandate.getState().toExternal(),
                 dataLinks,
                 mandate.getServiceReference(),
-                mandate.getMandateBankStatementReference());
+                mandate.getMandateReference());
     }
 
     public TokenExchangeDetails getMandateFor(String token) {
@@ -151,7 +150,7 @@ public class MandateService {
                 accountExternalId,
                 mandate.getState(),
                 mandate.getReturnUrl(),
-                mandate.getMandateBankStatementReference(),
+                mandate.getMandateReference(),
                 mandate.getCreatedDate(),
                 mandate.getPayer(),
                 transaction
@@ -166,7 +165,7 @@ public class MandateService {
                 accountExternalId,
                 mandate.getState(),
                 mandate.getReturnUrl(),
-                mandate.getMandateBankStatementReference(),
+                mandate.getMandateReference(),
                 mandate.getCreatedDate(),
                 mandate.getPayer(),
                 null
@@ -183,7 +182,7 @@ public class MandateService {
                 dataLinks,
                 mandate.getState().toExternal(),
                 mandate.getServiceReference(),
-                mandate.getMandateBankStatementReference());
+                mandate.getMandateReference());
     }
 
     public Mandate findByExternalId(MandateExternalId externalId) {
@@ -211,17 +210,15 @@ public class MandateService {
     public void confirm(GatewayAccount gatewayAccount, Mandate mandate, ConfirmMandateRequest confirmDetailsRequest) {
 
         if (mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)) {
-            PaymentProviderMandateIdAndBankReference paymentProviderMandateIdAndBankReference = paymentProviderFactory
+            Mandate confirmedMandate = paymentProviderFactory
                     .getCommandServiceFor(gatewayAccount.getPaymentProvider())
-                    .confirmMandate(
+                    .confirmOnDemandMandate(
                             mandate,
                             new BankAccountDetails(
                                     confirmDetailsRequest.getAccountNumber(),
                                     confirmDetailsRequest.getSortCode())
                     );
-            mandate.setMandateBankStatementReference(paymentProviderMandateIdAndBankReference.getMandateBankStatementReference());
-            mandate.setPaymentProviderMandateId(paymentProviderMandateIdAndBankReference.getPaymentProviderMandateId());
-            mandateStateUpdateService.confirmedOnDemandDirectDebitDetailsFor(mandate);
+            mandateStateUpdateService.confirmedOnDemandDirectDebitDetailsFor(confirmedMandate);
         } else {
             throw new InvalidStateTransitionException(DIRECT_DEBIT_DETAILS_CONFIRMED.toString(), mandate.getState().toString());
         }
