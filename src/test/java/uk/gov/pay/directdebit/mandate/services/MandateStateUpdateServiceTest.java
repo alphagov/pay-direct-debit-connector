@@ -133,12 +133,24 @@ public class MandateStateUpdateServiceTest {
     }
 
     @Test
-    public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails_andSendEmail_IfOnDemand() {
-        Mandate confirmedMandate = service.confirmedOnDemandDirectDebitDetailsFor(onDemandMandate);
+    public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails_IfOneOff() {
+        Mandate oneOffMandate = MandateFixture
+                .aMandateFixture()
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
+                .toEntity();
+        Mandate newMandate = service.confirmedOneOffDirectDebitDetailsFor(oneOffMandate);
 
-        assertThat(confirmedMandate, is(onDemandMandate));
+        assertThat(newMandate, is(oneOffMandate));
+        verify(mockedMandateDao).updateMandateReference(newMandate.getId(), oneOffMandate.getMandateReference());
+    }
+
+    @Test
+    public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails_andSendEmail_IfOnDemand() {
+        Mandate newMandate = service.confirmedOnDemandDirectDebitDetailsFor(onDemandMandate);
+
+        assertThat(newMandate, is(onDemandMandate));
         verify(mockedUserNotificationService).sendOnDemandMandateCreatedEmailFor(onDemandMandate);
-        verify(mockedMandateDao).updateReferenceAndPaymentProviderId(confirmedMandate);
+        verify(mockedMandateDao).updateMandateReference(newMandate.getId(), onDemandMandate.getMandateReference());
 
     }
 

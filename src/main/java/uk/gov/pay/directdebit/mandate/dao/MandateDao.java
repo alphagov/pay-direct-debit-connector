@@ -8,14 +8,11 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
-import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
 
@@ -26,7 +23,6 @@ import java.util.Set;
 
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
 @RegisterArgumentFactory(MandateBankStatementReferenceArgumentFactory.class)
-@RegisterArgumentFactory(PaymentProviderMandateIdArgumentFactory.class)
 @RegisterRowMapper(MandateMapper.class)
 public interface MandateDao {
 
@@ -42,12 +38,12 @@ public interface MandateDao {
             ") VALUES (\n" +
             "  :externalId,\n" +
             "  :gatewayAccount.id,\n" +
-            "  :mandateBankStatementReference,\n" +
+            "  :mandateReference,\n" +
             "  :serviceReference,\n" +
             "  :state,\n" +
             "  :returnUrl,\n" +
             "  :createdDate," +
-            "  :paymentProviderMandateId" +
+            "  :paymentProviderId" +
             ")")
     @GetGeneratedKeys
     Long insert(@BindBean Mandate mandate);
@@ -101,6 +97,6 @@ public interface MandateDao {
     @SqlUpdate("UPDATE mandates m SET state = :state WHERE m.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
 
-    @SqlUpdate("UPDATE mandates m SET mandate_reference = :mandateBankStatementReference, payment_provider_id = :paymentProviderMandateId WHERE m.id = :id")
-    int updateReferenceAndPaymentProviderId(@BindBean Mandate mandate);
+    @SqlUpdate("UPDATE mandates m SET mandate_reference = :mandateReference WHERE m.id = :id")
+    int updateMandateReference(@Bind("id") Long id, @Bind("mandateReference") MandateBankStatementReference mandateReference);
 }

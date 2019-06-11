@@ -52,7 +52,7 @@ public class TokenResponse {
                 mandate.getExternalId(),
                 mandate.getGatewayAccount().getId(),
                 mandate.getGatewayAccount().getExternalId(),
-                mandate.getMandateBankStatementReference(),
+                mandate.getMandateReference(),
                 mandate.getReturnUrl(),
                 mandate.getState().toString()
         );

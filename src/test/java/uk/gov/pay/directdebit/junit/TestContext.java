@@ -5,7 +5,6 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumentFactory;
-import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
@@ -30,7 +29,6 @@ public class TestContext {
         jdbi.registerArgument(new MandateExternalIdArgumentFactory());
         jdbi.registerArgument(new GoCardlessMandateIdArgumentFactory());
         jdbi.registerArgument(new MandateBankStatementReferenceArgumentFactory());
-        jdbi.registerArgument(new PaymentProviderMandateIdArgumentFactory());
         jdbi.registerArgument(new GoCardlessEventIdArgumentFactory());
         this.databaseTestHelper = new DatabaseTestHelper(jdbi);
         this.port = port;
