@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,6 +25,8 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
@@ -82,7 +85,7 @@ public class MandateServiceTest {
     private UriInfo uriInfo;
     @Mock
     private UriBuilder uriBuilder;
-    @Mock 
+    @Mock
     private PaymentProviderFactory paymentProviderFactory;
     @Mock
     private SandboxService sandboxService;
@@ -134,7 +137,7 @@ public class MandateServiceTest {
                 .toEntity();
         when(mandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId());
-        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
+        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(mandateResponseForFrontend.getTransaction(), is(nullValue()));
     }
@@ -152,12 +155,12 @@ public class MandateServiceTest {
         Mandate mandate = mandateFixture.toEntity();
         when(transactionService.findTransactionForExternalId(mandateFixture.getExternalId().toString())).thenReturn(transactionFixture.toEntity());
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateWithTransactionResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId().toString());
-        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
+        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference()));
         assertThat(mandateResponseForFrontend.getGatewayAccountExternalId(), is(mandate.getGatewayAccount().getExternalId()));
         assertThat(mandateResponseForFrontend.getGatewayAccountId(), is(mandate.getGatewayAccount().getId()));
         assertThat(mandateResponseForFrontend.getCreatedDate(), is(mandate.getCreatedDate()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
-        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateReference()));
+        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference()));
         assertThat(mandateResponseForFrontend.getPayer().getExternalId(), is(payerFixture.getExternalId()));
         assertThat(mandateResponseForFrontend.getPayer().getName(), is(payerFixture.getName()));
         assertThat(mandateResponseForFrontend.getPayer().getEmail(), is(payerFixture.getEmail()));
@@ -173,14 +176,14 @@ public class MandateServiceTest {
     public void shouldCreateAMandateForSandbox_withCustomGeneratedReference() {
         Mandate mandate = getMandateForProvider(PaymentProvider.SANDBOX);
 
-        assertThat(mandate.getMandateReference(), is(not(MandateBankStatementReference.valueOf("gocardless-default"))));
+        assertThat(mandate.getMandateBankStatementReference(), is(not(MandateBankStatementReference.valueOf("gocardless-default"))));
     }
 
     @Test
     public void shouldCreateAMandateForGoCardless_withCustomGeneratedReference() {
         Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
 
-        assertThat(mandate.getMandateReference(), is(MandateBankStatementReference.valueOf("gocardless-default")));
+        assertThat(mandate.getMandateBankStatementReference(), is(MandateBankStatementReference.valueOf("gocardless-default")));
     }
 
     @Test
@@ -190,10 +193,13 @@ public class MandateServiceTest {
         Map<String, String> confirmMandateRequest = Map.of("sort_code", "123456", "account_number", "12345678");
         ConfirmMandateRequest mandateConfirmationRequest = ConfirmMandateRequest.of(confirmMandateRequest);
         BankAccountDetails bankAccountDetails = BankAccountDetails.of(confirmMandateRequest);
+        var confirmMandateResponse = new PaymentProviderMandateIdAndBankReference(
+                SandboxMandateId.valueOf(mandate.getExternalId().toString()),
+                MandateBankStatementReference.valueOf(RandomStringUtils.randomAlphanumeric(5)));
 
         when(mandateStateUpdateService.canUpdateStateFor(mandate, DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED)).thenReturn(true);
         when(paymentProviderFactory.getCommandServiceFor(PaymentProvider.SANDBOX)).thenReturn(sandboxService);
-        when(sandboxService.confirmOnDemandMandate(mandate, bankAccountDetails)).thenReturn(mandate);
+        when(sandboxService.confirmMandate(mandate, bankAccountDetails)).thenReturn(confirmMandateResponse);
         
         service.confirm(gatewayAccount, mandate, mandateConfirmationRequest);
 
@@ -206,7 +212,7 @@ public class MandateServiceTest {
         Mandate mandate = aMandate()
                 .withGatewayAccount(gatewayAccount)
                 .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
-                .withMandateReference(MandateBankStatementReference.valueOf("mandateReference"))
+                .withMandateBankStatementReference(MandateBankStatementReference.valueOf("mandateReference"))
                 .withServiceReference("reference")
                 .withState(MandateState.CANCELLED)
                 .withReturnUrl("http://returnUrl")

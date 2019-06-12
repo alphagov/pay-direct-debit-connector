@@ -17,9 +17,9 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
-import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
@@ -153,14 +153,14 @@ public class TransactionResourceIT {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+        GoCardlessMandateId goCardlessMandate = GoCardlessMandateId.valueOf("aGoCardlessMandateId");
+        Mandate mandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
+                .withPaymentProviderId(goCardlessMandate)
                 .withPayerFixture(payerFixture)
-                .insert(testContext.getJdbi());
-        GoCardlessMandate goCardlessMandate = GoCardlessMandateFixture.aGoCardlessMandateFixture()
-                .withMandateId(mandateFixture.getId())
                 .insert(testContext.getJdbi())
                 .toEntity();
+        
         String accountExternalId = gatewayAccountFixture.getExternalId();
         String expectedReference = "Test reference";
         String expectedDescription = "Test description";
@@ -169,13 +169,13 @@ public class TransactionResourceIT {
                 .put(JSON_REFERENCE_KEY, expectedReference)
                 .put(JSON_DESCRIPTION_KEY, expectedDescription)
                 .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
-                .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId().toString())
+                .put(JSON_AGREEMENT_ID_KEY, mandate.getExternalId().toString())
                 .build());
 
         String sunName = "Test SUN Name";
         String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
                 .replace("{accountId}", accountExternalId);
-        stubCreatePayment(gatewayAccountFixture.getAccessToken().toString(), AMOUNT, goCardlessMandate.getGoCardlessMandateId(), null);
+        stubCreatePayment(gatewayAccountFixture.getAccessToken().toString(), AMOUNT, goCardlessMandate, null);
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
         stubGetCreditor(gatewayAccountFixture.getAccessToken().toString(), sunName);
         // language=JSON
@@ -185,7 +185,7 @@ public class TransactionResourceIT {
                 "  \"template\": \"ON_DEMAND_PAYMENT_CONFIRMED\",\n" +
                 "  \"personalisation\": {\n" +
                 "    \"amount\": \"" + BigDecimal.valueOf(AMOUNT, 2).toString() + "\",\n" +
-                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
+                "    \"mandate reference\": \"" + mandate.getMandateBankStatementReference() + "\",\n" +
                 "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
                 "    \"collection date\": \"21/05/2014\",\n" +
                 "    \"statement name\": \"" + sunName + "\",\n" +

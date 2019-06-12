@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
@@ -89,9 +90,9 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
                 .withDetailsOrigin(DETAILS_ORIGIN)
                 .withDetailsReasonCode(DETAILS_REASONCODE)
                 .withDetailsScheme(DETAILS_SCHEME)
-                .withLinksMandate(LINKS_MANDATE)
+                .withLinksMandate(GoCardlessMandateId.valueOf( LINKS_MANDATE))
                 .withLinksNewCustomerBankAccount(LINKS_NEWCUSTOMERBANKACCOUNT)
-                .withLinksNewMandate(LINKS_NEWMANDATE)
+                .withLinksNewMandate(GoCardlessMandateId.valueOf(LINKS_NEWMANDATE))
                 .withLinksOrganisation(LINKS_ORGANISATION)
                 .withLinksParentEvent(LINKS_PARENTEVENT)
                 .withLinksPayment(LINKS_PAYMENT)

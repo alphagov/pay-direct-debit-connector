@@ -6,8 +6,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -96,7 +96,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
                 .withId(resultSet.getLong(MANDATE_ID_COLUMN))
                 .withGatewayAccount(gatewayAccount)
                 .withExternalId(MandateExternalId.valueOf(resultSet.getString(MANDATE_EXTERNAL_ID_COLUMN)))
-                .withMandateReference(MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)))
+                .withMandateBankStatementReference(MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)))
                 .withServiceReference(resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN))
                 .withState(MandateState.valueOf(resultSet.getString(MANDATE_STATE_COLUMN)))
                 .withReturnUrl(resultSet.getString(MANDATE_RETURN_URL_COLUMN))

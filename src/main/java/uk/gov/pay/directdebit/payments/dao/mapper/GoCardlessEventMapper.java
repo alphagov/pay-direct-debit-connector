@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
@@ -15,7 +16,7 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
 
     @Override
     public GoCardlessEvent map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
-        return GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
+        var builder = GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
                 .withId(resultSet.getLong("id"))
                 .withEventId(resultSet.getLong("event_id"))
                 .withGoCardlessEventId(GoCardlessEventId.valueOf(resultSet.getString("gocardless_event_id")))
@@ -27,9 +28,7 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
                 .withDetailsOrigin(resultSet.getString("details_origin"))
                 .withDetailsReasonCode(resultSet.getString("details_reason_code"))
                 .withDetailsScheme(resultSet.getString("details_scheme"))
-                .withLinksMandate(resultSet.getString("links_mandate"))
                 .withLinksNewCustomerBankAccount(resultSet.getString("links_new_customer_bank_account"))
-                .withLinksNewMandate(resultSet.getString("links_new_mandate"))
                 .withLinksOrganisation(resultSet.getString("links_organisation"))
                 .withLinksParentEvent(resultSet.getString("links_parent_event"))
                 .withLinksPayment(resultSet.getString("links_payment"))
@@ -38,7 +37,18 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
                 .withLinksRefund(resultSet.getString("links_refund"))
                 .withLinksSubscription(resultSet.getString("links_subscription"))
                 .withCreatedAt(ZonedDateTime.ofInstant(
-                        resultSet.getTimestamp("created_at").toInstant(), ZoneOffset.UTC))
-                .build();
+                        resultSet.getTimestamp("created_at").toInstant(), ZoneOffset.UTC));
+
+        String mandateId = resultSet.getString("links_mandate");
+        if (mandateId != null) {
+            builder.withLinksMandate(GoCardlessMandateId.valueOf(mandateId));
+        }
+        
+        String newMandateId = resultSet.getString("links_new_mandate");
+        if (newMandateId != null) {
+            builder.withLinksNewMandate(GoCardlessMandateId.valueOf(newMandateId));
+        }
+
+        return builder.build();
     }
 }

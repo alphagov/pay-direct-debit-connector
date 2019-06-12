@@ -5,6 +5,7 @@ import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
@@ -30,9 +31,9 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     private String detailsOrigin = randomAlphabetic(20);
     private String detailsReasonCode = randomAlphabetic(20);
     private String detailsScheme = randomAlphabetic(20);
-    private String linksMandate = randomAlphabetic(20);
+    private GoCardlessMandateId linksMandate = GoCardlessMandateId.valueOf(randomAlphabetic(20));
     private String linksNewCustomerBankAccount = randomAlphabetic(20);
-    private String linksNewMandate = randomAlphabetic(20);
+    private GoCardlessMandateId linksNewMandate = GoCardlessMandateId.valueOf(randomAlphabetic(20));
     private String linksOrganisation = randomAlphabetic(20);
     private String linksParentEvent = randomAlphabetic(20);
     private String linksPayment = randomAlphabetic(20);
@@ -172,11 +173,11 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public String getLinksMandate() {
+    public GoCardlessMandateId getLinksMandate() {
         return linksMandate;
     }
 
-    public GoCardlessEventFixture withLinksMandate(String linksMandate) {
+    public GoCardlessEventFixture withLinksMandate(GoCardlessMandateId linksMandate) {
         this.linksMandate = linksMandate;
         return this;
     }
@@ -190,11 +191,11 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public String getLinksNewMandate() {
+    public GoCardlessMandateId getLinksNewMandate() {
         return linksNewMandate;
     }
 
-    public GoCardlessEventFixture withLinksNewMandate(String linksNewMandate) {
+    public GoCardlessEventFixture withLinksNewMandate(GoCardlessMandateId linksNewMandate) {
         this.linksNewMandate = linksNewMandate;
         return this;
     }

@@ -17,9 +17,7 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
-import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessMandateFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
@@ -389,10 +387,6 @@ public class MandateResourceIT {
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
-        GoCardlessMandate goCardlessMandate = GoCardlessMandateFixture.aGoCardlessMandateFixture()
-                .withMandateId(mandateFixture.getId())
-                .insert(testContext.getJdbi())
-                .toEntity();
 
         String customerId = "CU000358S3A2FP";
         String customerBankAccountId = "BA0002WR3Z193A";
