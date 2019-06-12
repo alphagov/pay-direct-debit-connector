@@ -11,6 +11,7 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -25,13 +26,12 @@ import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class SandboxEventDaoIT {
 
+    private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2017-12-30T12:30:40Z");
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
     private SandboxEventDao sandboxEventDao;
-
     @DropwizardTestContext
     private TestContext testContext;
-    private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2017-12-30T12:30:40Z");
 
     @Before
     public void setup() {
@@ -40,10 +40,16 @@ public class SandboxEventDaoIT {
 
     @Test
     public void shouldInsertAnEvent() throws IOException {
-        SandboxEvent sandboxEvent = new SandboxEvent("aMandateId", "aPaymentId",
-                "anEventAction", "anEventCause", CREATED_AT);
+        SandboxEvent sandboxEvent = SandboxEvent.SandboxEventBuilder.aSandboxEvent()
+                .withMandateId(SandboxMandateId.valueOf("aMandateId"))
+                .withPaymentId("aPaymentId")
+                .withEventAction("anEventAction")
+                .withEventCause("anEventCause")
+                .withCreatedAt(CREATED_AT)
+                .build();
 
         Long id = sandboxEventDao.insert(sandboxEvent);
+
         Map<String, Object> foundSandboxEvent = testContext.getDatabaseTestHelper().getSandboxEventById(id);
         assertThat(foundSandboxEvent.get("id"), is(id));
         assertThat(foundSandboxEvent.get("mandate_id"), is("aMandateId"));

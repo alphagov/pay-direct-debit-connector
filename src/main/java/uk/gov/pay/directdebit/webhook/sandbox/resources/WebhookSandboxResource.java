@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.webhook.sandbox.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.events.model.SandboxEvent;
 import uk.gov.pay.directdebit.payments.model.Transaction;
@@ -50,11 +51,13 @@ public class WebhookSandboxResource {
     }
 
     private SandboxEvent createSandboxEventFromTransaction(Transaction transaction){
-        return new SandboxEvent(
-                transaction.getMandate().getId().toString(),
-                transaction.getId().toString(),
-                SandboxEventAction.PAID_OUT.toString(),
-                SandboxEventCause.PAID_OUT_CAUSE.toString(),
-                ZonedDateTime.now());
+
+        return SandboxEvent.SandboxEventBuilder.aSandboxEvent()
+                .withPaymentId(transaction.getId().toString())
+                .withEventAction(SandboxEventAction.PAID_OUT.toString())
+                .withEventCause(SandboxEventCause.PAID_OUT_CAUSE.toString())
+                .withCreatedAt(ZonedDateTime.now())
+                .withMandateId(SandboxMandateId.valueOf(transaction.getMandate().getId().toString()))
+                .build();
     }
 }
