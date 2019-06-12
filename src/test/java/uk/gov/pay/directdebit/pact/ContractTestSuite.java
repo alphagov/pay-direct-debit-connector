@@ -6,7 +6,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-        PublicApiContractTest.class
+        PublicApiContractTest.class, SelfServiceApiContractTest.class
 })
 public class ContractTestSuite {
 
