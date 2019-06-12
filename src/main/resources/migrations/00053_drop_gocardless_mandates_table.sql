@@ -1,0 +1,1 @@
+DROP TABLE gocardless_mandates;

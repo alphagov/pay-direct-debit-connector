@@ -1,0 +1,1 @@
+CREATE INDEX payment_provider_id_idx ON mandates(payment_provider_id);
