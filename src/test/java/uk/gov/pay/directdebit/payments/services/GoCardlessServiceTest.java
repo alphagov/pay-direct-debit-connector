@@ -28,8 +28,8 @@ import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import java.util.Optional;
 
@@ -79,13 +79,13 @@ public abstract class GoCardlessServiceTest {
             .withPayerFixture(payerFixture)
             .withGatewayAccountFixture(gatewayAccountFixture)
             .withExternalId(MANDATE_ID);
-    Transaction transaction = TransactionFixture.aTransactionFixture()
+    Payment payment = PaymentFixture.aPaymentFixture()
             .withMandateFixture(mandateFixture)
             .withExternalId(TRANSACTION_ID)
             .toEntity();
 
 
-    GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().withTransactionId(transaction.getId()).toEntity();
+    GoCardlessPayment goCardlessPayment = aGoCardlessPaymentFixture().withTransactionId(payment.getId()).toEntity();
     BankAccountDetails bankAccountDetails = new BankAccountDetails(ACCOUNT_NUMBER, SORT_CODE);
 
     @Test

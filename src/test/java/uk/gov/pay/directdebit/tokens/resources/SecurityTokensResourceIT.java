@@ -12,8 +12,6 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 
 import static io.restassured.RestAssured.given;
@@ -22,7 +20,6 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 

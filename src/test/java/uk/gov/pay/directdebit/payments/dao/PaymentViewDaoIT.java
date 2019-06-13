@@ -27,7 +27,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -59,7 +59,7 @@ public class PaymentViewDaoIT {
                     .withMandateId(mandateFixture.getId())
                     .withName("Joe Bog" + i)
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withReference("important reference " + i)
@@ -85,7 +85,7 @@ public class PaymentViewDaoIT {
                     .withMandateId(mandateFixture.getId())
                     .withName("Joe Bog" + i)
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withReference("important reference " + i)
@@ -118,7 +118,7 @@ public class PaymentViewDaoIT {
                     .withMandateId(mandateFixture.getId())
                     .withName("Joe Bog" + i)
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC).minusDays(i * 2))
@@ -150,7 +150,7 @@ public class PaymentViewDaoIT {
                     .withMandateId(mandateFixture.getId())
                     .withEmail(emailList.get(i))
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .insert(testContext.getJdbi());
@@ -173,7 +173,7 @@ public class PaymentViewDaoIT {
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withReference(referenceList.get(i))
@@ -197,7 +197,7 @@ public class PaymentViewDaoIT {
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withReference("ref" + i)
@@ -221,7 +221,7 @@ public class PaymentViewDaoIT {
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
                     .insert(testContext.getJdbi());
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withReference("important reference " + i)
@@ -245,7 +245,7 @@ public class PaymentViewDaoIT {
                 .withMandateId(mandateFixture.getId())
                 .insert(testContext.getJdbi());
         for (int i = 0; i < 3; i++) {
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withReference("important reference " + i)
@@ -284,12 +284,12 @@ public class PaymentViewDaoIT {
                 .insert(testContext.getJdbi());
         for (int i = 0; i < 6; i++) {
             if (i % 2 == 0) {
-                aTransactionFixture()
+                aPaymentFixture()
                         .withMandateFixture(mandateFixture2)
                         .insert(testContext.getJdbi());
                 continue;
             }
-            aTransactionFixture()
+            aPaymentFixture()
                     .withMandateFixture(mandateFixture1)
                     .insert(testContext.getJdbi());
         }
@@ -319,11 +319,11 @@ public class PaymentViewDaoIT {
                 .withEmail("j.citizen@mail.test")
                 .insert(testContext.getJdbi());
 
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.FAILED)
                 .insert(testContext.getJdbi());
@@ -350,11 +350,11 @@ public class PaymentViewDaoIT {
                 .withEmail("j.citizen@mail.test")
                 .insert(testContext.getJdbi());
 
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.PENDING)
                 .insert(testContext.getJdbi());
@@ -381,11 +381,11 @@ public class PaymentViewDaoIT {
                 .withEmail("j.citizen@mail.test")
                 .insert(testContext.getJdbi());
 
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.USER_CANCEL_NOT_ELIGIBLE)
                 .insert(testContext.getJdbi());
@@ -412,11 +412,11 @@ public class PaymentViewDaoIT {
                 .withEmail("j.citizen@mail.test")
                 .insert(testContext.getJdbi());
 
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.SUCCESS)
                 .insert(testContext.getJdbi());
@@ -443,26 +443,26 @@ public class PaymentViewDaoIT {
                 .withEmail("j.citizen@mail.test")
                 .insert(testContext.getJdbi());
 
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());
         for (int i = 0; i < 6; i++) {
             if (i % 3 == 0) {
-                aTransactionFixture()
+                aPaymentFixture()
                         .withMandateFixture(mandateFixture)
                         .withState(PaymentState.CANCELLED)
                         .insert(testContext.getJdbi());
                 continue;
             }
             if (i % 2 == 0) {
-                aTransactionFixture()
+                aPaymentFixture()
                         .withMandateFixture(mandateFixture)
                         .withState(PaymentState.EXPIRED)
                         .insert(testContext.getJdbi());
                 continue;
             }
-            aTransactionFixture()
+            aPaymentFixture()
                     .withMandateFixture(mandateFixture)
                     .withState(PaymentState.FAILED)
                     .insert(testContext.getJdbi());

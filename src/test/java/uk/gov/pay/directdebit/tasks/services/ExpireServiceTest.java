@@ -13,11 +13,11 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.payments.services.PaymentService;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +39,7 @@ public class ExpireServiceTest {
     private PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
     private MandateStatesGraph mandateStatesGraph = new MandateStatesGraph();
     @Mock
-    private TransactionService transactionService;
+    private PaymentService paymentService;
     @Mock
     private MandateQueryService mandateQueryService;
     @Mock
@@ -48,15 +48,15 @@ public class ExpireServiceTest {
     
     @Before
     public void setup() {
-        expireService = new ExpireService(transactionService, mandateStatesGraph, paymentStatesGraph, mandateQueryService, mandateStateUpdateService);
+        expireService = new ExpireService(paymentService, mandateStatesGraph, paymentStatesGraph, mandateQueryService, mandateStateUpdateService);
     }
     
     @Test
     public void expirePayments_shouldCallTransactionServiceWithPriorStatesToPending() {
-        Transaction transaction = TransactionFixture.aTransactionFixture().withState(PaymentState.NEW).toEntity();
-        when(transactionService
+        Payment payment = PaymentFixture.aPaymentFixture().withState(PaymentState.NEW).toEntity();
+        when(paymentService
                 .findAllPaymentsBySetOfStatesAndCreationTime(eq(paymentStatesGraph.getPriorStates(PaymentState.PENDING)), any()))
-                .thenReturn(Collections.singletonList(transaction));
+                .thenReturn(Collections.singletonList(payment));
         
         int numberOfExpiredPayments = expireService.expirePayments();
         assertEquals(1, numberOfExpiredPayments);

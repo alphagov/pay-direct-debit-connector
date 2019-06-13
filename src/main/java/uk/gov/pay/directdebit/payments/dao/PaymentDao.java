@@ -11,28 +11,28 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
-import uk.gov.pay.directdebit.payments.dao.mapper.TransactionMapper;
+import uk.gov.pay.directdebit.payments.dao.mapper.PaymentMapper;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@RegisterRowMapper(TransactionMapper.class)
+@RegisterRowMapper(PaymentMapper.class)
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
-public interface TransactionDao {
+public interface PaymentDao {
 
     String joinQuery = "SELECT" +
-            "  t.id AS transaction_id," +
-            "  t.mandate_id AS transaction_mandate_id," +
-            "  t.external_id AS transaction_external_id," +
-            "  t.amount AS transaction_amount," +
-            "  t.state AS transaction_state," +
-            "  t.description AS transaction_description," +
-            "  t.reference AS transaction_reference," +
-            "  t.created_date AS transaction_created_date," +
+            "  p.id AS transaction_id," +
+            "  p.mandate_id AS payment_mandate_id," +
+            "  p.external_id AS payment_external_id," +
+            "  p.amount AS transaction_amount," +
+            "  p.state AS transaction_state," +
+            "  p.description AS transaction_description," +
+            "  p.reference AS transaction_reference," +
+            "  p.created_date AS transaction_created_date," +
             "  m.id AS mandate_id," +
             "  m.external_id AS mandate_external_id," +
             "  m.mandate_reference AS mandate_mandate_reference," +
@@ -60,31 +60,31 @@ public interface TransactionDao {
             "  y.bank_account_sort_code AS payer_bank_account_sort_code," +
             "  y.bank_name AS payer_bank_name," +
             "  y.created_date AS payer_created_date" +
-            " FROM transactions t " +
-            "  JOIN mandates m ON t.mandate_id = m.id" +
+            " FROM payments p " +
+            "  JOIN mandates m ON p.mandate_id = m.id" +
             "  JOIN gateway_accounts g ON m.gateway_account_id = g.id" +
-            "  LEFT JOIN payers y ON y.mandate_id = t.mandate_id";
+            "  LEFT JOIN payers y ON y.mandate_id = p.mandate_id";
 
-    @SqlQuery(joinQuery + " WHERE t.id = :id")
-    Optional<Transaction> findById(@Bind("id") Long id);
+    @SqlQuery(joinQuery + " WHERE p.id = :id")
+    Optional<Payment> findById(@Bind("id") Long id);
 
-    @SqlQuery(joinQuery + " WHERE t.external_id = :externalId")
-    Optional<Transaction> findByExternalId(@Bind("externalId") String externalId);
+    @SqlQuery(joinQuery + " WHERE p.external_id = :externalId")
+    Optional<Payment> findByExternalId(@Bind("externalId") String externalId);
 
-    @SqlQuery(joinQuery + " WHERE t.state = :state AND g.payment_provider = :paymentProvider")
-    List<Transaction> findAllByPaymentStateAndProvider(@Bind("state") PaymentState paymentState, @Bind("paymentProvider") PaymentProvider paymentProvider);
+    @SqlQuery(joinQuery + " WHERE p.state = :state AND g.payment_provider = :paymentProvider")
+    List<Payment> findAllByPaymentStateAndProvider(@Bind("state") PaymentState paymentState, @Bind("paymentProvider") PaymentProvider paymentProvider);
 
     @SqlQuery(joinQuery + " WHERE m.external_id = :mandateExternalId")
-    List<Transaction> findAllByMandateExternalId(@Bind("mandateExternalId") MandateExternalId mandateExternalId);
+    List<Payment> findAllByMandateExternalId(@Bind("mandateExternalId") MandateExternalId mandateExternalId);
 
-    @SqlUpdate("UPDATE transactions t SET state = :state WHERE t.id = :id")
+    @SqlUpdate("UPDATE payments p SET state = :state WHERE p.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") PaymentState paymentState);
 
-    @SqlUpdate("INSERT INTO transactions(mandate_id, external_id, amount, state, description, reference, created_date) VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate)")
+    @SqlUpdate("INSERT INTO payments(mandate_id, external_id, amount, state, description, reference, created_date) VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate)")
     @GetGeneratedKeys
-    Long insert(@BindBean Transaction transaction);
+    Long insert(@BindBean Payment payment);
 
-    @SqlQuery(joinQuery + " WHERE t.state IN (<states>) AND t.created_date < :maxDateTime")
-    List<Transaction> findAllPaymentsBySetOfStatesAndCreationTime(@BindList("states") Set<PaymentState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
+    @SqlQuery(joinQuery + " WHERE p.state IN (<states>) AND p.created_date < :maxDateTime")
+    List<Payment> findAllPaymentsBySetOfStatesAndCreationTime(@BindList("states") Set<PaymentState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
 
 }

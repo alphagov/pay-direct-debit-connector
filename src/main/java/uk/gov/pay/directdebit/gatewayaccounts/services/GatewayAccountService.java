@@ -11,7 +11,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundEx
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
@@ -39,10 +39,10 @@ public class GatewayAccountService {
                 .orElseThrow(() -> new GatewayAccountNotFoundException(accountExternalId));
     }
 
-    GatewayAccount getGatewayAccountFor(Transaction transaction) {
+    GatewayAccount getGatewayAccountFor(Payment payment) {
         return gatewayAccountDao
-                .findById(transaction.getMandate().getGatewayAccount().getId())
-                .orElseThrow(() -> new GatewayAccountNotFoundException(transaction.getMandate().getGatewayAccount().getId().toString()));
+                .findById(payment.getMandate().getGatewayAccount().getId())
+                .orElseThrow(() -> new GatewayAccountNotFoundException(payment.getMandate().getGatewayAccount().getId().toString()));
     }
 
     public List<GatewayAccountResponse> getAllGatewayAccounts(String externalAccountIdsArg, UriInfo uriInfo) {

@@ -70,7 +70,7 @@ public class PaymentViewResponse {
 
     @Override
     public String toString() {
-        return format("TransactionResponse{gatewayExternalId='%s', page='%s', total='%s', paymentViewResponses='%s'}"
+        return format("PaymentResponse{gatewayExternalId='%s', page='%s', total='%s', paymentViewResponses='%s'}"
                         + gatewayExternalId, page, total, paymentViewResponses.toString());
     }
 }

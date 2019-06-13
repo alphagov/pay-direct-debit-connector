@@ -12,20 +12,19 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 public class DirectDebitEventDao {
 
-    private static final String QUERY = "SELECT e.id, e.mandate_id, e.transaction_id, e.event_type, e.event, e.event_date, e.version, e.external_id, m.external_id AS mandate_external_id, t.external_id AS transaction_external_id " +
+    private static final String QUERY = "SELECT e.id, e.mandate_id, e.transaction_id, e.event_type, e.event, e.event_date, e.version, e.external_id, m.external_id AS mandate_external_id, p.external_id AS payment_external_id " +
             "FROM events e LEFT OUTER JOIN mandates m ON (e.mandate_id = m.id) " +
-            "LEFT OUTER JOIN transactions t ON (e.transaction_id = t.id) " +
+            "LEFT OUTER JOIN payments p ON (e.transaction_id = p.id) " +
             ":searchFields ORDER BY e.id DESC LIMIT :limit OFFSET :offset";
     private static final String COUNT_QUERY = "SELECT count(*) " +
             "FROM events e LEFT OUTER JOIN mandates m ON (e.mandate_id = m.id) " +
-            "LEFT OUTER JOIN transactions t ON (e.transaction_id = t.id) " +
+            "LEFT OUTER JOIN payments p ON (e.transaction_id = p.id) " +
             ":searchFields";
     
     private final Jdbi jdbi;
@@ -57,7 +56,7 @@ public class DirectDebitEventDao {
             queryMap.put("mandate_id", searchParams.getMandateExternalId());
         }
         if (nonNull(searchParams.getTransactionExternalId())) {
-            searchStrings.add("t.external_id = :transaction_id");
+            searchStrings.add("p.external_id = :transaction_id");
             queryMap.put("transaction_id", searchParams.getTransactionExternalId());
         }
         if (nonNull(searchParams.getToDate())) {
@@ -92,9 +91,9 @@ public class DirectDebitEventDao {
 
     public Optional<DirectDebitEvent> findByMandateIdAndEvent(Long mandateId, DirectDebitEvent.Type eventType, DirectDebitEvent.SupportedEvent event) {
         return jdbi.withHandle(handle -> handle.createQuery("SELECT e.id, e.mandate_id, e.transaction_id, e.event_type, e.event, e.event_date, e.version, e.external_id, " +
-                "m.external_id AS mandate_external_id, t.external_id AS transaction_external_id " +
+                "m.external_id AS mandate_external_id, p.external_id AS payment_external_id " +
                 "FROM events e LEFT OUTER JOIN mandates m ON (e.mandate_id = m.id) " + 
-                "LEFT OUTER JOIN transactions t ON (e.transaction_id = t.id) " + 
+                "LEFT OUTER JOIN payments p ON (e.transaction_id = p.id) " +
                 "WHERE e.mandate_id = :mandateId and e.event_type = :eventType and e.event = :event")
                 .bind("mandateId", mandateId)
                 .bind("eventType", eventType)

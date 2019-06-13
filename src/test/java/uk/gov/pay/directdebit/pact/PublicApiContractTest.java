@@ -21,7 +21,7 @@ import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
 import java.time.ZonedDateTime;
@@ -80,7 +80,7 @@ public class PublicApiContractTest {
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
         testPayer.insert(app.getTestContext().getJdbi());
         for (int x = 0; x < 3; x++) {
-            TransactionFixture.aTransactionFixture().withMandateFixture(testMandate).insert(app.getTestContext().getJdbi());
+            PaymentFixture.aPaymentFixture().withMandateFixture(testMandate).insert(app.getTestContext().getJdbi());
         }
     }
 
@@ -105,7 +105,7 @@ public class PublicApiContractTest {
             mandateFixture.withId(mandateByExternalId.get().getId());
         }
 
-        TransactionFixture transaction = TransactionFixture.aTransactionFixture()
+        PaymentFixture transaction = PaymentFixture.aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withExternalId(transactionExternalId)
                 .insert(app.getTestContext().getJdbi());

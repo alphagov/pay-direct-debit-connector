@@ -13,7 +13,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -31,7 +31,7 @@ public class GoCardlessCustomerDaoIT {
     private GoCardlessCustomerDao goCardlessCustomerDao;
 
     private GoCardlessCustomerFixture goCardlessCustomerFixture;
-    private TransactionFixture transactionFixture;
+    private PaymentFixture paymentFixture;
     private PayerFixture payerFixture;
     private MandateFixture mandateFixture;
     private GatewayAccountFixture gatewayAccountFixture;
@@ -40,7 +40,7 @@ public class GoCardlessCustomerDaoIT {
     public void setup() {
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
         mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
-        transactionFixture = TransactionFixture.aTransactionFixture()
+        paymentFixture = PaymentFixture.aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .insert(testContext.getJdbi());
         payerFixture = PayerFixture.aPayerFixture().withMandateId(mandateFixture.getId()).insert(testContext.getJdbi());

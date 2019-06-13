@@ -32,7 +32,7 @@ import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -53,7 +53,7 @@ public class PaymentViewResourceIT {
         ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC).minusDays(1L);
         for (int i = 0; i < 3; i++) {
             MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withReference("MBK" + i)
@@ -121,7 +121,7 @@ public class PaymentViewResourceIT {
     public void shouldReturnEmptyResults_whenPaginationFindsNoRecords() {
         for (int i = 0; i < 2; i++) {
             MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .insert(testContext.getJdbi());
@@ -150,7 +150,7 @@ public class PaymentViewResourceIT {
         for (int i = 0; i < 15; i++) {
             MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
 
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withAmount(((long) 100 + i))
@@ -192,7 +192,7 @@ public class PaymentViewResourceIT {
         for (int i = 0, day = 15; i < 15; i++, day--) {
             MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
 
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withAmount((long) 100 + i)
@@ -252,7 +252,7 @@ public class PaymentViewResourceIT {
         for (int i = 0; i < 15; i++) {
             MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
 
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .insert(testContext.getJdbi());
@@ -279,7 +279,7 @@ public class PaymentViewResourceIT {
         for (int i = 0; i < 15; i++) {
             MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
 
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withReference(i % 3 == 0 ? referenceList.get(0) : referenceList.get(1))
@@ -306,7 +306,7 @@ public class PaymentViewResourceIT {
         for (int i = 0; i < 20; i++) {
             MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
 
-            aTransactionFixture()
+            aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withAmount(i % 3 == 0 ? amountList.get(0) : i % 2 == 0 ? amountList.get(1) : amountList.get(2))
@@ -354,12 +354,12 @@ public class PaymentViewResourceIT {
                 .insert(testContext.getJdbi());
         for (int i = 0; i < 6; i++) {
             if (i % 2 == 0) {
-                aTransactionFixture()
+                aPaymentFixture()
                         .withMandateFixture(mandateFixture2)
                         .insert(testContext.getJdbi());
                 continue;
             }
-            aTransactionFixture()
+            aPaymentFixture()
                     .withMandateFixture(mandateFixture1)
                     .insert(testContext.getJdbi());
         }
@@ -392,19 +392,19 @@ public class PaymentViewResourceIT {
                 .withEmail("j.citizen@mail.test")
                 .withName("J. Citizen")
                 .insert(testContext.getJdbi());
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());
         for (int i = 0; i < 6; i++) {
             if (i % 2 == 0) {
-                aTransactionFixture()
+                aPaymentFixture()
                         .withMandateFixture(mandateFixture)
                         .withState(PaymentState.CANCELLED)
                         .insert(testContext.getJdbi());
                 continue;
             }
-            aTransactionFixture()
+            aPaymentFixture()
                     .withMandateFixture(mandateFixture)
                     .withState(PaymentState.EXPIRED)
                     .insert(testContext.getJdbi());

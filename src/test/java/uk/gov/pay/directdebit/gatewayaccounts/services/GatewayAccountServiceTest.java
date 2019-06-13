@@ -19,8 +19,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -66,7 +66,7 @@ public class GatewayAccountServiceTest {
 
     private GatewayAccountService service;
 
-    private Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
+    private Payment payment = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture).toEntity();
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -105,7 +105,7 @@ public class GatewayAccountServiceTest {
     public void shouldReturnGatewayAccountForTransactionIfItExists() {
         when(gatewayAccountDao.findById(gatewayAccountFixture.getId()))
                 .thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
-        GatewayAccount gatewayAccount = service.getGatewayAccountFor(transaction);
+        GatewayAccount gatewayAccount = service.getGatewayAccountFor(payment);
         assertThat(gatewayAccount.getId(), is(gatewayAccountFixture.getId()));
         assertThat(gatewayAccount.getPaymentProvider(), is(PAYMENT_PROVIDER));
         assertThat(gatewayAccount.getAnalyticsId(), is(ANALYTICS_ID));
@@ -120,7 +120,7 @@ public class GatewayAccountServiceTest {
         thrown.expect(GatewayAccountNotFoundException.class);
         thrown.expectMessage("Unknown gateway account: " + gatewayAccountFixture.getId());
         thrown.reportMissingExceptionWithMessage("GatewayAccountNotFoundException expected");
-        service.getGatewayAccountFor(transaction);
+        service.getGatewayAccountFor(payment);
     }
 
     @Test

@@ -14,7 +14,7 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
 
@@ -31,7 +31,7 @@ public class TokenDaoIT {
     public ExpectedException expectedException = ExpectedException.none();
     private TokenDao tokenDao;
 
-    private TransactionFixture testTransaction;
+    private PaymentFixture testTransaction;
     private TokenFixture testToken;
     private GatewayAccountFixture gatewayAccountFixture;
     private MandateFixture mandateFixture;
@@ -43,7 +43,7 @@ public class TokenDaoIT {
         tokenDao = testContext.getJdbi().onDemand(TokenDao.class);
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
         mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
-        testTransaction = TransactionFixture.aTransactionFixture()
+        testTransaction = PaymentFixture.aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .insert(testContext.getJdbi());
         testToken = aTokenFixture()

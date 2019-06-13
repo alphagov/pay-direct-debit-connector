@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertFalse;
 
 
-public class TransactionResponseTest {
+public class PaymentResponseTest {
 
     @Test
     public void shouldNotStringifyPIIFields() {
@@ -17,7 +17,7 @@ public class TransactionResponseTest {
         String returnUrl = "http://bla.bla";
         String description = "desc";
         String reference = "ref";
-        TransactionResponse transactionResponse = new TransactionResponse(
+        PaymentResponse paymentResponse = new PaymentResponse(
                 transactionId,
                 ExternalPaymentState.EXTERNAL_STARTED,
                 amount,
@@ -27,6 +27,6 @@ public class TransactionResponseTest {
                 ZonedDateTime.now(),
                 new ArrayList<>()
         );
-        assertFalse(transactionResponse.toString().contains(description));
+        assertFalse(paymentResponse.toString().contains(description));
     }
 }

@@ -17,7 +17,7 @@ public class EventMapper implements RowMapper<DirectDebitEvent> {
     private static final String EVENT_COLUMN = "event";
     private static final String EVENT_DATE_COLUMN = "event_date";
     private static final String MANDATE_EXTERNAL_ID_COLUMN = "mandate_external_id";
-    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "transaction_external_id";
+    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "payment_external_id";
 
     @Override
     public DirectDebitEvent map(ResultSet resultSet, StatementContext statementContext) throws SQLException {

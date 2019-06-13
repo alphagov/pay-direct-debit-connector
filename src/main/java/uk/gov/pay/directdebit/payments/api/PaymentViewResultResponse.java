@@ -136,7 +136,7 @@ public class PaymentViewResultResponse {
 
     @Override
     public String toString() {
-        return format("TransactionResponse{transactionId='%s', amount='%s', reference='%s', createdDate='%s', name='%s', email='%s', state='%s'}",
+        return format("PaymentResponse{transactionId='%s', amount='%s', reference='%s', createdDate='%s', name='%s', email='%s', state='%s'}",
                 transactionId, amount, reference, createdDate, name, email, state.getState());
     }
 }

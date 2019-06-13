@@ -19,7 +19,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -33,7 +33,7 @@ public class WebhookSandboxResourceIT {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
         MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
         PayerFixture.aPayerFixture().withMandateId(mandateFixture.getId()).insert(testContext.getJdbi());
-        Long transactionId = aTransactionFixture().withMandateFixture(mandateFixture)
+        Long transactionId = aPaymentFixture().withMandateFixture(mandateFixture)
                 .withState(PaymentState.PENDING).insert(testContext.getJdbi()).getId();
 
         String requestPath = "/v1/webhooks/sandbox";

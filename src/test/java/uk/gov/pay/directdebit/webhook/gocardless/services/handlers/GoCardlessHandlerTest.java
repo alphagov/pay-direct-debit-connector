@@ -13,9 +13,9 @@ import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
 import static org.mockito.Mockito.verify;
@@ -26,7 +26,7 @@ public class GoCardlessHandlerTest {
     GoCardlessHandler goCardlessHandler;
 
     @Mock
-    TransactionService mockedTransactionService;
+    PaymentService mockedPaymentService;
 
     @Mock
     GoCardlessEventService mockedGoCardlessService;
@@ -38,8 +38,8 @@ public class GoCardlessHandlerTest {
 
     @Test
     public void shouldLinkToDirectDebitEventAndStoreEventIfActionIsHandled() {
-        goCardlessHandler = new GoCardlessHandler(mockedTransactionService, mockedGoCardlessService) {
-            protected Map<GoCardlessAction, Function<Transaction, DirectDebitEvent>> getHandledActions() {
+        goCardlessHandler = new GoCardlessHandler(mockedPaymentService, mockedGoCardlessService) {
+            protected Map<GoCardlessAction, Function<Payment, DirectDebitEvent>> getHandledActions() {
                 return ImmutableMap.of(
                         GoCardlessPaymentHandler.GoCardlessPaymentAction.PAID_OUT,
                         transaction -> directDebitEvent);

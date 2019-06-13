@@ -9,7 +9,7 @@ import uk.gov.pay.directdebit.common.services.SunService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
@@ -75,16 +75,16 @@ public class UserNotificationService {
         );
     }
 
-    public void sendOneOffPaymentConfirmedEmailFor(Transaction transaction, LocalDate earliestChargeDate) {
-        sendPaymentConfirmedEmailFor(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, transaction, earliestChargeDate);
+    public void sendOneOffPaymentConfirmedEmailFor(Payment payment, LocalDate earliestChargeDate) {
+        sendPaymentConfirmedEmailFor(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, payment, earliestChargeDate);
     }
 
-    public void sendOnDemandPaymentConfirmedEmailFor(Transaction transaction, LocalDate earliestChargeDate) {
-        sendPaymentConfirmedEmailFor(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, transaction, earliestChargeDate);
+    public void sendOnDemandPaymentConfirmedEmailFor(Payment payment, LocalDate earliestChargeDate) {
+        sendPaymentConfirmedEmailFor(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, payment, earliestChargeDate);
     }
 
-    private void sendPaymentConfirmedEmailFor(EmailTemplate template, Transaction transaction, LocalDate earliestChargeDate) {
-        Mandate mandate = transaction.getMandate();
+    private void sendPaymentConfirmedEmailFor(EmailTemplate template, Payment payment, LocalDate earliestChargeDate) {
+        Mandate mandate = payment.getMandate();
         Optional<SunName> sunName = sunService.getSunNameFor(mandate);
         if (!sunName.isPresent()) {
             logMissingSunName(template, mandate);
@@ -93,7 +93,7 @@ public class UserNotificationService {
 
         adminUsersClient.sendEmail(template, mandate,
                 ImmutableMap.<String, String>builder()
-                        .put(AMOUNT_KEY, formatToPounds(transaction.getAmount()))
+                        .put(AMOUNT_KEY, formatToPounds(payment.getAmount()))
                         .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate))
                         .put(MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString())
                         .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().getAccountNumberLastTwoDigits())
@@ -102,8 +102,8 @@ public class UserNotificationService {
                         .build());
     }
 
-    public void sendPaymentFailedEmailFor(Transaction transaction) {
-        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_FAILED, transaction.getMandate(),
+    public void sendPaymentFailedEmailFor(Payment payment) {
+        adminUsersClient.sendEmail(EmailTemplate.PAYMENT_FAILED, payment.getMandate(),
                 ImmutableMap.of(
                         DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
                 ));

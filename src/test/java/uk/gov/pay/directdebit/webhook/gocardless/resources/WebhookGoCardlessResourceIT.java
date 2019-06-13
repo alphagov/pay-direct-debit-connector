@@ -17,7 +17,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
@@ -34,7 +34,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -140,13 +140,13 @@ public class WebhookGoCardlessResourceIT {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
-        TransactionFixture transactionFixture = aTransactionFixture()
+        PaymentFixture paymentFixture = aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.PENDING)
                 .insert(testContext.getJdbi());
         aGoCardlessPaymentFixture()
                 .withPaymentId("PM00008Q30R2BR")
-                .withTransactionId(transactionFixture.getId())
+                .withTransactionId(paymentFixture.getId())
                 .insert(testContext.getJdbi());
         given().port(testContext.getPort())
                 .body(WEBHOOK_SUCCESS)
@@ -167,7 +167,7 @@ public class WebhookGoCardlessResourceIT {
         assertThat(secondEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(secondEvent.get("action"), is("paid_out"));
 
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(paymentFixture.getId());
         MatcherAssert.assertThat(transaction.get("state"), is("SUCCESS"));
     }
 
@@ -180,7 +180,7 @@ public class WebhookGoCardlessResourceIT {
                 .withPaymentProviderId(GoCardlessMandateId.valueOf("MD00008Q30R2BR"))
                 .insert(testContext.getJdbi());
 
-        TransactionFixture transactionFixture = aTransactionFixture()
+        PaymentFixture paymentFixture = aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.PENDING)
                 .insert(testContext.getJdbi());
@@ -191,7 +191,7 @@ public class WebhookGoCardlessResourceIT {
 
         aGoCardlessPaymentFixture()
                 .withPaymentId("PM00008Q30R2BR")
-                .withTransactionId(transactionFixture.getId())
+                .withTransactionId(paymentFixture.getId())
                 .insert(testContext.getJdbi());
 
         // language=JSON
@@ -235,7 +235,7 @@ public class WebhookGoCardlessResourceIT {
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         MatcherAssert.assertThat(mandate.get("state"), is("FAILED"));
 
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionFixture.getId());
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(paymentFixture.getId());
         MatcherAssert.assertThat(transaction.get("state"), is("FAILED"));
     }
 }

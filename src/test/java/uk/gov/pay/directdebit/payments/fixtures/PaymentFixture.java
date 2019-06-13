@@ -8,10 +8,10 @@ import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.Transaction;
 
-public class TransactionFixture implements DbFixture<TransactionFixture, Transaction> {
+public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
 
     private Long id = RandomUtils.nextLong(1, 99999);
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture();
@@ -21,18 +21,18 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
-    private TransactionFixture() {
+    private PaymentFixture() {
     }
 
-    public static TransactionFixture aTransactionFixture() {
-        return new TransactionFixture();
+    public static PaymentFixture aPaymentFixture() {
+        return new PaymentFixture();
     }
 
     public Long getId() {
         return id;
     }
     
-    public TransactionFixture withId(Long id) {
+    public PaymentFixture withId(Long id) {
         this.id = id;
         return this;
     }
@@ -41,7 +41,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return mandateFixture;
     }
 
-    public TransactionFixture withMandateFixture(
+    public PaymentFixture withMandateFixture(
             MandateFixture mandateFixture) {
         this.mandateFixture = mandateFixture;
         return this;
@@ -51,7 +51,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return externalId;
     }
 
-    public TransactionFixture withExternalId(String externalId) {
+    public PaymentFixture withExternalId(String externalId) {
         this.externalId = externalId;
         return this;
     }
@@ -60,7 +60,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return amount;
     }
 
-    public TransactionFixture withAmount(Long amount) {
+    public PaymentFixture withAmount(Long amount) {
         this.amount = amount;
         return this;
     }
@@ -69,7 +69,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return state;
     }
 
-    public TransactionFixture withState(PaymentState state) {
+    public PaymentFixture withState(PaymentState state) {
         this.state = state;
         return this;
     }
@@ -78,7 +78,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return reference;
     }
 
-    public TransactionFixture withReference(String reference) {
+    public PaymentFixture withReference(String reference) {
         this.reference = reference;
         return this;
     }
@@ -87,7 +87,7 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return description;
     }
 
-    public TransactionFixture withDescription(String description) {
+    public PaymentFixture withDescription(String description) {
         this.description = description;
         return this;
     }
@@ -96,17 +96,17 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
         return createdDate;
     }
 
-    public TransactionFixture withCreatedDate(ZonedDateTime createdDate) {
+    public PaymentFixture withCreatedDate(ZonedDateTime createdDate) {
         this.createdDate = createdDate;
         return this;
     }
 
     @Override
-    public TransactionFixture insert(Jdbi jdbi) {
+    public PaymentFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
                 h.execute(
                         "INSERT INTO" +
-                                "    transactions(\n" +
+                                "    payments(\n" +
                                 "        id,\n" +
                                 "        mandate_id,\n" +
                                 "        external_id,\n" +
@@ -131,8 +131,8 @@ public class TransactionFixture implements DbFixture<TransactionFixture, Transac
     }
 
     @Override
-    public Transaction toEntity() {
-        return new Transaction(id, externalId, amount, state, description, reference, mandateFixture.toEntity(), createdDate);
+    public Payment toEntity() {
+        return new Payment(id, externalId, amount, state, description, reference, mandateFixture.toEntity(), createdDate);
     }
 
 }

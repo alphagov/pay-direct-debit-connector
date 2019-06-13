@@ -15,7 +15,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -40,7 +40,7 @@ public class PayerDaoIT {
     private PayerDao payerDao;
 
     private GatewayAccountFixture testGatewayAccount;
-    private TransactionFixture testTransaction;
+    private PaymentFixture testTransaction;
     private PayerFixture testPayer;
     private MandateFixture testMandate;
 
@@ -63,7 +63,7 @@ public class PayerDaoIT {
                 .withPayerFixture(testPayer)
                 .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
-        this.testTransaction = TransactionFixture.aTransactionFixture()
+        this.testTransaction = PaymentFixture.aPaymentFixture()
                 .withMandateFixture(testMandate)
                 .insert(testContext.getJdbi());
     }

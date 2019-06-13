@@ -12,7 +12,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentView;
 public class PaymentViewMapper implements RowMapper<PaymentView> {
 
     private static final String GATEWAY_EXTERNAL_ACCOUNT_ID_COLUMN = "gateway_external_id";
-    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "transaction_external_id";
+    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "payment_external_id";
     private static final String AMOUNT_COLUMN = "amount";
     private static final String REFERENCE_COLUMN = "reference";
     private static final String DESCRIPTION_COLUMN = "description";

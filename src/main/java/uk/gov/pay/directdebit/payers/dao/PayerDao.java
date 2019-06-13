@@ -15,7 +15,7 @@ public interface PayerDao {
     @SqlQuery("SELECT * FROM payers p WHERE p.external_id = :externalId")
     Optional<Payer> findByExternalId(@Bind("externalId") String externalId);
 
-    @SqlQuery("SELECT * FROM payers p JOIN mandates m ON p.mandate_id = m.id  JOIN transactions t ON t.mandate_id = m.id WHERE t.id = :transactionId LIMIT 1")
+    @SqlQuery("SELECT * FROM payers p JOIN mandates m ON p.mandate_id = m.id  JOIN payments payments ON payments.mandate_id = m.id WHERE payments.id = :transactionId LIMIT 1")
     Optional<Payer> findByTransactionId(@Bind("transactionId") Long transactionId);
 
     @SqlQuery("SELECT * FROM payers p WHERE p.mandate_id = :mandateId")

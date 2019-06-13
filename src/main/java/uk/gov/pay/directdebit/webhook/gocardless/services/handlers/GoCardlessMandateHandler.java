@@ -13,7 +13,7 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
 import javax.inject.Inject;
@@ -28,12 +28,12 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
     private final MandateQueryService mandateQueryService;
     
     @Inject
-    public GoCardlessMandateHandler(TransactionService transactionService,
+    public GoCardlessMandateHandler(PaymentService paymentService,
                                     GoCardlessEventService goCardlessService,
-                                    DirectDebitEventService directDebitEventService, 
-                                    MandateStateUpdateService mandateStateUpdateService, 
+                                    DirectDebitEventService directDebitEventService,
+                                    MandateStateUpdateService mandateStateUpdateService,
                                     MandateQueryService mandateQueryService) {
-        super(transactionService, goCardlessService);
+        super(paymentService, goCardlessService);
         this.directDebitEventService = directDebitEventService;
         this.mandateStateUpdateService = mandateStateUpdateService;
         this.mandateQueryService = mandateQueryService;
@@ -65,16 +65,16 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 GoCardlessMandateAction.SUBMITTED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
                 GoCardlessMandateAction.ACTIVE, mandateStateUpdateService::mandateActiveFor,
                 GoCardlessMandateAction.CANCELLED, (Mandate mandate) -> {
-                    transactionService.findTransactionsForMandate(mandate.getExternalId()).stream()
-                            .filter(transaction -> !transactionService.findPaymentSubmittedEventFor(transaction).isPresent())
-                            .forEach(transactionService::paymentFailedWithoutEmailFor);
+                    paymentService.findTransactionsForMandate(mandate.getExternalId()).stream()
+                            .filter(transaction -> !paymentService.findPaymentSubmittedEventFor(transaction).isPresent())
+                            .forEach(paymentService::paymentFailedWithoutEmailFor);
 
                     return mandateStateUpdateService.mandateCancelledFor(mandate);
                 },
                 GoCardlessMandateAction.FAILED, (Mandate mandate) -> {
-                    transactionService
+                    paymentService
                             .findTransactionsForMandate(mandate.getExternalId())
-                            .forEach(transactionService::paymentFailedWithoutEmailFor);
+                            .forEach(paymentService::paymentFailedWithoutEmailFor);
 
                     return mandateStateUpdateService.mandateFailedFor(mandate);
                 });

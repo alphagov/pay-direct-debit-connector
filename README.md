@@ -28,7 +28,7 @@ The [GOV.UK Pay](https://www.payments.service.gov.uk/) Direct Debit Connector
 | NAME                                                  | DESCRIPTION                                                                    |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------ |
 | `GOCARDLESS_TEST_OAUTH_BASE_URL`                      | The base URL to use for linking a service's GoCardless account in the GoCardless sandbox environment to GOV.UK Pay's platform account with OAuth. Defaults to the empty string. |
-| `GOCARDLESS_LIVE_OAUTH_BASE_URL`                      | The base URL to use for linking a service's GoCardless account in the GoCardless live environment to GOV.UK Pay's platform account with OAuth for live transactions. Defaults to the empty string. |
+| `GOCARDLESS_LIVE_OAUTH_BASE_URL`                      | The base URL to use for linking a service's GoCardless account in the GoCardless live environment to GOV.UK Pay's platform account with OAuth for live payments. Defaults to the empty string. |
 | `GOCARDLESS_TEST_CLIENT_ID`                           | The client ID to use when obtaining an OAuth access token for GoCardless's sandbox environment in order to link accounts. Defaults to the empty string. |
 | `GOCARDLESS_TEST_CLIENT_SECRET`                       | The client secret to use when obtaining an OAuth access token for GoCardless's sandbox environment in order to link accounts. Defaults to the empty string. |
 | `GOCARDLESS_LIVE_CLIENT_ID`                           | The client ID to use when obtaining an OAuth access token for GoCardless's live environment in order to link accounts. Defaults to the empty string. |

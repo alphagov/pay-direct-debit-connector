@@ -11,18 +11,18 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
 public class GoCardlessPaymentHandler extends GoCardlessHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessPaymentHandler.class);
 
     @Inject
-    public GoCardlessPaymentHandler(TransactionService transactionService,
-            GoCardlessEventService goCardlessService) {
-        super(transactionService, goCardlessService);
+    public GoCardlessPaymentHandler(PaymentService paymentService,
+                                    GoCardlessEventService goCardlessService) {
+        super(paymentService, goCardlessService);
     }
 
     /**
@@ -50,9 +50,9 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 .map((action) -> getHandledActions().get(action))
                 .map((handledAction) -> {
                     GoCardlessPayment goCardlessPayment = goCardlessService.findPaymentForEvent(event);
-                    Transaction transaction = transactionService.findTransaction(goCardlessPayment.getTransactionId());
-                    if (isValidOrganisation(transaction, event)) {
-                        return handledAction.apply(transaction);
+                    Payment payment = paymentService.findTransaction(goCardlessPayment.getTransactionId());
+                    if (isValidOrganisation(payment, event)) {
+                        return handledAction.apply(payment);
                     } else {
                         LOGGER.info("Event from GoCardless with goCardlessEventId: {} has unrecognised organisation: {}",
                                 event.getGoCardlessEventId(), event.getOrganisationIdentifier());
@@ -61,22 +61,22 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 });
     }
 
-    private Map<GoCardlessAction, Function<Transaction, DirectDebitEvent>> getHandledActions() {
-        return ImmutableMap.<GoCardlessAction, Function<Transaction, DirectDebitEvent>>builder()
-                .put(GoCardlessPaymentAction.CREATED, transactionService::paymentAcknowledgedFor)
-                .put(GoCardlessPaymentAction.SUBMITTED, transactionService::paymentSubmittedFor)
-                .put(GoCardlessPaymentAction.CONFIRMED, (Transaction transaction) ->
-                        transactionService.findPaymentSubmittedEventFor(transaction)
-                                .orElseThrow(() -> new InvalidStateException("Could not find payment submitted event for transaction with id: " + transaction.getExternalId())))
-                .put(GoCardlessPaymentAction.FAILED, (Transaction transaction) -> transactionService.paymentFailedWithEmailFor(transaction))
-                .put(GoCardlessPaymentAction.PAID_OUT, transactionService::paymentPaidOutFor)
-                .put(GoCardlessPaymentAction.PAID, transactionService::payoutPaidFor)
+    private Map<GoCardlessAction, Function<Payment, DirectDebitEvent>> getHandledActions() {
+        return ImmutableMap.<GoCardlessAction, Function<Payment, DirectDebitEvent>>builder()
+                .put(GoCardlessPaymentAction.CREATED, paymentService::paymentAcknowledgedFor)
+                .put(GoCardlessPaymentAction.SUBMITTED, paymentService::paymentSubmittedFor)
+                .put(GoCardlessPaymentAction.CONFIRMED, (Payment payment) ->
+                        paymentService.findPaymentSubmittedEventFor(payment)
+                                .orElseThrow(() -> new InvalidStateException("Could not find payment submitted event for payment with id: " + payment.getExternalId())))
+                .put(GoCardlessPaymentAction.FAILED, (Payment payment) -> paymentService.paymentFailedWithEmailFor(payment))
+                .put(GoCardlessPaymentAction.PAID_OUT, paymentService::paymentPaidOutFor)
+                .put(GoCardlessPaymentAction.PAID, paymentService::payoutPaidFor)
                 .build();
     }
 
-    private boolean isValidOrganisation(Transaction transaction, GoCardlessEvent event) {
+    private boolean isValidOrganisation(Payment payment, GoCardlessEvent event) {
         
-        return transaction.getMandate().getGatewayAccount().getOrganisation()
+        return payment.getMandate().getGatewayAccount().getOrganisation()
                 .map(organisationIdentifier -> organisationIdentifier.equals(event.getOrganisationIdentifier()))
                 .orElse(false);
     }
