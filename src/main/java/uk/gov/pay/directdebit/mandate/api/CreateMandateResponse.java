@@ -43,13 +43,17 @@ public class CreateMandateResponse {
     @JsonSerialize(using = ToStringSerializer.class)
     private MandateBankStatementReference mandateReference;
 
+    @JsonProperty("description")
+    private String description;
+
     public CreateMandateResponse(MandateExternalId mandateId,
                                  String returnUrl,
                                  ZonedDateTime createdDate,
                                  ExternalMandateState state,
                                  List<Map<String, Object>> dataLinks,
                                  String serviceReference,
-                                 MandateBankStatementReference mandateReference) {
+                                 MandateBankStatementReference mandateReference,
+                                 String description) {
         this.dataLinks = dataLinks;
         this.mandateId = mandateId;
         this.returnUrl = returnUrl;
@@ -57,6 +61,7 @@ public class CreateMandateResponse {
         this.state = state;
         this.serviceReference = serviceReference;
         this.mandateReference = mandateReference;
+        this.description = description;
     }
 
     public MandateExternalId getMandateId() {

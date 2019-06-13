@@ -6,7 +6,11 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import junitparams.Parameters;
+import junitparams.converters.Nullable;
+import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -93,61 +97,28 @@ public class MandateResourceIT {
         wireMockAdminUsers.start();
         gatewayAccountFixture.insert(testContext.getJdbi());
     }
-
+    
+    //TODO
     @Test
-    public void shouldCreateAMandateWithoutPayment_IfMandateIsOnDemand() throws Exception {
-        String accountExternalId = gatewayAccountFixture.getExternalId();
-        String returnUrl = "http://example.com/success-page/";
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
-                .put("return_url", returnUrl)
-                .build());
-
-        String requestPath = "/v1/api/accounts/{accountId}/mandates"
-                .replace("{accountId}", accountExternalId);
-
-        ValidatableResponse response = givenSetup()
-                .body(postBody)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.CREATED.getStatusCode())
-                .body(JSON_MANDATE_ID_KEY, is(notNullValue()))
-                .body("return_url", is(returnUrl))
-                .body("created_date", is(notNullValue()))
-                .contentType(JSON);
-        MandateExternalId externalMandateId = MandateExternalId.valueOf(response.extract().path(JSON_MANDATE_ID_KEY).toString());
-
-        String documentLocation = expectedMandateLocationFor(accountExternalId, externalMandateId);
-        String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(externalMandateId).get("secure_redirect_token").toString();
-
-        String hrefNextUrl = "http://Frontend/secure/" + token;
-        String hrefNextUrlPost = "http://Frontend/secure";
-
-        response
-                .body("links", hasSize(3))
-                .body("links", containsLink("self", "GET", documentLocation))
-                .body("links", containsLink("next_url", "GET", hrefNextUrl))
-                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
-                    put("chargeTokenId", token);
-                }}));
-
-        Map<String, Object> createdMandate = testContext.getDatabaseTestHelper().getMandateByExternalId(externalMandateId);
-
-        assertThat(createdMandate.get("external_id"), is(notNullValue()));
-        assertThat(createdMandate.get("return_url"), is(returnUrl));
-        assertThat(createdMandate.get("gateway_account_id"), is(gatewayAccountFixture.getId()));
+    public void createMandateValidationFailures() {
+        
     }
 
     @Test
-    public void shouldCreateAMandate_withAllFields() throws Exception {
+    @Parameters({"null", "raindrops on roses and whiskers on kittens"})
+    public void shouldCreateAMandateSuccessfully(@Nullable String description) throws Exception {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         String returnUrl = "http://example.com/success-page/";
-        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+        
+        ImmutableMap.Builder createMandateBuilder = ImmutableMap.builder()
                 .put("return_url", returnUrl)
-                .put("service_reference", "test-service-reference")
-                .build());
+                .put("service_reference", "test-service-reference");
+        
+        if (description != null) createMandateBuilder.put("description", description);
+        
+        String postBody = new ObjectMapper().writeValueAsString(createMandateBuilder.build());
 
-        String requestPath = "/v1/api/accounts/{accountId}/mandates"
-                .replace("{accountId}", accountExternalId);
+        String requestPath = "/v1/api/accounts/{accountId}/mandates".replace("{accountId}", accountExternalId);
 
         ValidatableResponse response = givenSetup()
                 .body(postBody)
@@ -161,6 +132,7 @@ public class MandateResourceIT {
                 .body("state.finished", is(false))
                 .body("service_reference", is("test-service-reference"))
                 .body("mandate_reference", is(notNullValue()))
+                .body("description", optionalDescriptionMatcher(description))
                 .contentType(JSON);
         MandateExternalId externalMandateId = MandateExternalId.valueOf(response.extract().path(JSON_MANDATE_ID_KEY).toString());
 
@@ -170,13 +142,16 @@ public class MandateResourceIT {
         String hrefNextUrl = "http://Frontend/secure/" + token;
         String hrefNextUrlPost = "http://Frontend/secure";
 
-        response
-                .body("links", hasSize(3))
+        response.body("links", hasSize(3))
                 .body("links", containsLink("self", "GET", documentLocation))
                 .body("links", containsLink("next_url", "GET", hrefNextUrl))
                 .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
                     put("chargeTokenId", token);
                 }}));
+    }
+
+    private Matcher<Object> optionalDescriptionMatcher(String description) {
+        return description == null ? is(nullValue()) : is(notNullValue());
     }
 
     @Test

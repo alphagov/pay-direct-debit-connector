@@ -38,6 +38,7 @@ public interface MandateDao {
             "  gateway_account_id,\n" +
             "  mandate_reference,\n" +
             "  service_reference,\n" +
+            "  description,\n" +
             "  state,\n" +
             "  return_url,\n" +
             "  created_date,\n" +
@@ -47,6 +48,7 @@ public interface MandateDao {
             "  :gatewayAccount.id,\n" +
             "  :mandateBankStatementReference,\n" +
             "  :serviceReference,\n" +
+            "  :description,\n" +
             "  :state,\n" +
             "  :returnUrl,\n" +
             "  :createdDate," +

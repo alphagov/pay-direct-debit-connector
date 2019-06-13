@@ -8,13 +8,11 @@ import uk.gov.pay.directdebit.common.validation.FieldSize;
 
 public class CreateMandateRequestValidator extends ApiValidation {
 
-    private final static String AGREEMENT_TYPE_KEY = "agreement_type";
     private final static String RETURN_URL_KEY = "return_url";
     private final static String REFERENCE_KEY = "service_reference";
 
     private final static Map<String, Function<String, Boolean>> validators =
             ImmutableMap.<String, Function<String, Boolean>>builder()
-                    .put(AGREEMENT_TYPE_KEY, ApiValidation::isNotNullOrEmpty)
                     .put(RETURN_URL_KEY, ApiValidation::isNotNullOrEmpty)
                     .put(REFERENCE_KEY, ApiValidation::isNotNullOrEmpty)
                     .build();

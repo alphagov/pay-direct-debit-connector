@@ -2,8 +2,8 @@ package uk.gov.pay.directdebit.junit;
 
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
+import junitparams.JUnitParamsRunner;
 import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkField;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
@@ -46,7 +46,7 @@ import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getOrCreate;
  * After this test and if more tests are being executed, the application will be kept alive so other tests that needs
  * similar configuration will benefit from the existing running application.
  */
-public final class DropwizardJUnitRunner extends BlockJUnit4ClassRunner {
+public final class DropwizardJUnitRunner extends JUnitParamsRunner {
 
     public DropwizardJUnitRunner(Class<?> testClass) throws InitializationError {
         super(testClass);

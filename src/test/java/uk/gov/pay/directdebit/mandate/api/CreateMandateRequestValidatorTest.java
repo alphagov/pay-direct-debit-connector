@@ -12,45 +12,32 @@ import uk.gov.pay.directdebit.common.exception.validation.MissingMandatoryFields
 
 public class CreateMandateRequestValidatorTest {
 
-        private CreateMandateRequestValidator createMandateRequestValidator = new CreateMandateRequestValidator();
+    private CreateMandateRequestValidator createMandateRequestValidator = new CreateMandateRequestValidator();
 
-        @Rule
-        public ExpectedException thrown = ExpectedException.none();
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
-        @Test
-        public void shouldNotThrowExceptionIfRequestIsValid() {
-            Map<String, String> request = ImmutableMap.of(
-                    "agreement_type", "ON_DEMAND",
-                    "return_url", "https://blabla.test",
-                    "service_reference", "blablabla"
-            );
-            createMandateRequestValidator.validate(request);
-        }
-        
-        @Test
-        public void shouldThrowIfMissingRequiredFields() {
-            Map<String, String> request = ImmutableMap.of(
-                    "agreement_type", "ON_DEMAND",
-                    "service_reference", "blablabla"
-            );
-            thrown.expect(MissingMandatoryFieldsException.class);
-            thrown.expectMessage("Field(s) missing: [return_url]");
-            thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
-            createMandateRequestValidator.validate(request);
-        }
-        
-        @Test
-        public void shouldThrowIfFieldsAreInvalid() {
-            Map<String, String> request = ImmutableMap.of(
-                    "agreement_type", "",
-                    "return_url", "blabla.test",
-                    "service_reference", "blablabla"
-            );
-            thrown.expect(InvalidFieldsException.class);
-            thrown.expectMessage("Field(s) are invalid: [agreement_type]");
-            thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
-            createMandateRequestValidator.validate(request);
-        }
+    @Test
+    public void shouldNotThrowExceptionIfRequestIsValid() {
+        Map<String, String> request = ImmutableMap.of(
+                "agreement_type", "ON_DEMAND",
+                "return_url", "https://blabla.test",
+                "service_reference", "blablabla"
+        );
+        createMandateRequestValidator.validate(request);
+    }
+
+    @Test
+    public void shouldThrowIfMissingRequiredFields() {
+        Map<String, String> request = ImmutableMap.of(
+                "agreement_type", "ON_DEMAND",
+                "service_reference", "blablabla"
+        );
+        thrown.expect(MissingMandatoryFieldsException.class);
+        thrown.expectMessage("Field(s) missing: [return_url]");
+        thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
+        createMandateRequestValidator.validate(request);
+    }
 
     @Test
     public void shouldThrowIfFieldsHaveTheWrongSize() {
