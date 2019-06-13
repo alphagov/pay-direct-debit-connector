@@ -11,8 +11,8 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.Transaction;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,12 +21,12 @@ import java.time.ZonedDateTime;
 
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 
-public class TransactionMapper implements RowMapper<Transaction> {
+public class PaymentMapper implements RowMapper<Payment> {
 
     private static final String TRANSACTION_ID_COLUMN = "transaction_id";
     private static final String TRANSACTION_AMOUNT_COLUMN = "transaction_amount";
     private static final String TRANSACTION_STATE_COLUMN = "transaction_state";
-    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "transaction_external_id";
+    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "payment_external_id";
     private static final String TRANSACTION_REFERENCE_COLUMN = "transaction_reference";
     private static final String TRANSACTION_DESCRIPTION_COLUMN = "transaction_description";
     private static final String TRANSACTION_CREATED_DATE_COLUMN = "transaction_created_date";
@@ -59,7 +59,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
     private static final String MANDATE_CREATED_DATE_COLUMN = "mandate_created_date";
 
     @Override
-    public Transaction map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
+    public Payment map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         Payer payer = null;
         if (resultSet.getTimestamp(PAYER_CREATED_DATE_COLUMN) != null) {
             payer = new Payer(
@@ -104,7 +104,7 @@ public class TransactionMapper implements RowMapper<Transaction> {
                 .withPayer(payer)
                 .build();
 
-        return new Transaction(
+        return new Payment(
                 resultSet.getLong(TRANSACTION_ID_COLUMN),
                 resultSet.getString(TRANSACTION_EXTERNAL_ID_COLUMN),
                 resultSet.getLong(TRANSACTION_AMOUNT_COLUMN),

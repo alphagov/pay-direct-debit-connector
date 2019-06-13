@@ -5,7 +5,6 @@ import com.gocardless.resources.Creditor;
 import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import com.gocardless.resources.Mandate;
-import com.gocardless.resources.Payment;
 import com.gocardless.services.PaymentService;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -14,7 +13,7 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.model.SortCode;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 //thin abstraction over the client provided in the SDK
 public class GoCardlessClientWrapper {
@@ -56,13 +55,13 @@ public class GoCardlessClientWrapper {
                 .execute();
     }
 
-    public Payment createPayment(Transaction transaction, GoCardlessMandateId goCardlessMandateId) {
+    public com.gocardless.resources.Payment createPayment(Payment payment, GoCardlessMandateId goCardlessMandateId) {
         return goCardlessClient.payments()
                 .create()
-                .withAmount(Math.toIntExact(transaction.getAmount()))
+                .withAmount(Math.toIntExact(payment.getAmount()))
                 .withCurrency(PaymentService.PaymentCreateRequest.Currency.GBP)
                 .withLinksMandate(goCardlessMandateId.toString())
-                .withIdempotencyKey(transaction.getExternalId())
+                .withIdempotencyKey(payment.getExternalId())
                 .execute();
     }
 

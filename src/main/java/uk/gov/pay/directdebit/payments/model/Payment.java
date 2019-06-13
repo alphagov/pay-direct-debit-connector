@@ -4,7 +4,7 @@ import java.time.ZonedDateTime;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 
-public class Transaction {
+public class Payment {
 
     private Long id;
     private String externalId;
@@ -15,7 +15,7 @@ public class Transaction {
     private ZonedDateTime createdDate;
     private Mandate mandate;
 
-    public Transaction(Long id, String externalId, Long amount, PaymentState state, String description, String reference, Mandate mandate, ZonedDateTime createdDate) {
+    public Payment(Long id, String externalId, Long amount, PaymentState state, String description, String reference, Mandate mandate, ZonedDateTime createdDate) {
         this.id = id;
         this.externalId = externalId;
         this.amount = amount;
@@ -26,7 +26,7 @@ public class Transaction {
         this.mandate = mandate;
     }
 
-    public Transaction(Long amount, PaymentState state, String description, String reference, Mandate mandate, ZonedDateTime createdDate) {
+    public Payment(Long amount, PaymentState state, String description, String reference, Mandate mandate, ZonedDateTime createdDate) {
         this(null, RandomIdGenerator.newId(), amount, state, description, reference, mandate, createdDate);
     }
 
@@ -103,7 +103,7 @@ public class Transaction {
             return false;
         }
 
-        Transaction that = (Transaction) o;
+        Payment that = (Payment) o;
 
         if (id != null ? !id.equals(that.id) : that.id != null) {
             return false;

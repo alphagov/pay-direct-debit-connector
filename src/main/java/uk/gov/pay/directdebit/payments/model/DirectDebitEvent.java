@@ -41,7 +41,7 @@ public class DirectDebitEvent {
     private Long mandateId;
     private String mandateExternalId;
     private Long transactionId;
-    private String transactionExternalId;
+    private String paymentExternalId;
     private Type eventType;
     private SupportedEvent event;
     private ZonedDateTime eventDate;
@@ -58,12 +58,12 @@ public class DirectDebitEvent {
         this.eventDate = eventDate;
     }
 
-    public DirectDebitEvent(Long id, String externalId, Long mandateId, String mandateExternalId, Long transactionId, String transactionExternalId, Type eventType, SupportedEvent event, ZonedDateTime eventDate) {
+    public DirectDebitEvent(Long id, String externalId, Long mandateId, String mandateExternalId, Long transactionId, String paymentExternalId, Type eventType, SupportedEvent event, ZonedDateTime eventDate) {
         this.id = id;
         this.externalId = externalId;
         this.mandateId = mandateId;
         this.mandateExternalId = mandateExternalId;
-        this.transactionExternalId = transactionExternalId;
+        this.paymentExternalId = paymentExternalId;
         this.eventType = eventType;
         this.transactionId = transactionId;
         this.event = event;
@@ -183,8 +183,8 @@ public class DirectDebitEvent {
         return transactionId;
     }
 
-    public String getTransactionExternalId() {
-        return transactionExternalId;
+    public String getPaymentExternalId() {
+        return paymentExternalId;
     }
 
     public Type getEventType() {
@@ -219,8 +219,8 @@ public class DirectDebitEvent {
         this.transactionId = transactionId;
     }
 
-    public void setTransactionExternalId(String transactionExternalId) {
-        this.transactionExternalId = transactionExternalId;
+    public void setPaymentExternalId(String paymentExternalId) {
+        this.paymentExternalId = paymentExternalId;
     }
 
     public void setEventType(Type eventType) {

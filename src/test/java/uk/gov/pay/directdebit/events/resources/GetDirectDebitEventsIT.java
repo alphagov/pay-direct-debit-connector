@@ -15,7 +15,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
@@ -39,7 +39,7 @@ public class GetDirectDebitEventsIT {
     public static DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
     
     private MandateFixture testMandate;
-    private TransactionFixture testTransaction;
+    private PaymentFixture testTransaction;
     private TestContext testContext;
 
     @Before
@@ -47,7 +47,7 @@ public class GetDirectDebitEventsIT {
         testContext = app.getTestContext();
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
-        this.testTransaction = TransactionFixture.aTransactionFixture().withMandateFixture(testMandate).insert(testContext.getJdbi());
+        this.testTransaction = PaymentFixture.aPaymentFixture().withMandateFixture(testMandate).insert(testContext.getJdbi());
     }
     
     @After

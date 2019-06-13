@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
@@ -16,7 +16,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public class TransactionResponse {
+public class PaymentResponse {
     @JsonProperty("links")
     private List<Map<String, Object>> dataLinks;
 
@@ -43,7 +43,7 @@ public class TransactionResponse {
     @JsonProperty
     private ExternalPaymentState state;
 
-    public TransactionResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, ZonedDateTime createdDate, List<Map<String, Object>> dataLinks) {
+    public PaymentResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, ZonedDateTime createdDate, List<Map<String, Object>> dataLinks) {
         this.transactionExternalId = transactionExternalId;
         this.state = state;
         this.dataLinks = dataLinks;
@@ -87,15 +87,15 @@ public class TransactionResponse {
     }
 
 
-    public static TransactionResponse from(Transaction transaction, List<Map<String, Object>> dataLinks) {
-        return new TransactionResponse(
-                transaction.getExternalId(),
-                transaction.getState().toExternal(),
-                transaction.getAmount(),
-                transaction.getMandate().getReturnUrl(),
-                transaction.getDescription(),
-                transaction.getReference(),
-                transaction.getCreatedDate(),
+    public static PaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
+        return new PaymentResponse(
+                payment.getExternalId(),
+                payment.getState().toExternal(),
+                payment.getAmount(),
+                payment.getMandate().getReturnUrl(),
+                payment.getDescription(),
+                payment.getReference(),
+                payment.getCreatedDate(),
                 dataLinks);
     }
 
@@ -104,7 +104,7 @@ public class TransactionResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TransactionResponse that = (TransactionResponse) o;
+        PaymentResponse that = (PaymentResponse) o;
 
         if (dataLinks != null ? !dataLinks.equals(that.dataLinks) : that.dataLinks != null) return false;
         if (!transactionExternalId.equals(that.transactionExternalId)) return false;
@@ -131,7 +131,7 @@ public class TransactionResponse {
 
     @Override
     public String toString() {
-        return "TransactionResponse{" +
+        return "PaymentResponse{" +
                 "dataLinks=" + dataLinks +
                 ", transactionExternalId='" + transactionExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +

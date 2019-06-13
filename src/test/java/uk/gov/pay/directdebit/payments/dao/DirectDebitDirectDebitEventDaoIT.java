@@ -13,7 +13,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 
 import java.sql.Timestamp;
@@ -38,7 +38,7 @@ public class DirectDebitDirectDebitEventDaoIT {
     private DirectDebitEventDao directDebitEventDao;
 
     private MandateFixture testMandate;
-    private TransactionFixture testTransaction;
+    private PaymentFixture testTransaction;
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -50,7 +50,7 @@ public class DirectDebitDirectDebitEventDaoIT {
                 .insert(testContext.getJdbi());
         this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(
                 gatewayAccountFixture).insert(testContext.getJdbi());
-        this.testTransaction = TransactionFixture.aTransactionFixture()
+        this.testTransaction = PaymentFixture.aPaymentFixture()
                 .withMandateFixture(testMandate)
                 .insert(testContext.getJdbi());
     }
@@ -89,7 +89,7 @@ public class DirectDebitDirectDebitEventDaoIT {
         assertThat(foundDirectDebitEvent.getEventType(), is(MANDATE));
         assertThat(foundDirectDebitEvent.getExternalId(), is(directDebitEventFixture.getExternalId()));
         assertThat(foundDirectDebitEvent.getMandateExternalId(), is(testMandate.getExternalId().toString()));
-        assertThat(foundDirectDebitEvent.getTransactionExternalId(), is(testTransaction.getExternalId()));
+        assertThat(foundDirectDebitEvent.getPaymentExternalId(), is(testTransaction.getExternalId()));
     }
 
     @Test

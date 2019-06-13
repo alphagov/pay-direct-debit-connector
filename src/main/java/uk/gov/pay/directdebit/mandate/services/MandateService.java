@@ -28,8 +28,8 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
-import uk.gov.pay.directdebit.payments.model.Transaction;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -58,7 +58,7 @@ public class MandateService {
     private final LinksConfig linksConfig;
     private final GatewayAccountDao gatewayAccountDao;
     private final TokenService tokenService;
-    private final TransactionService transactionService;
+    private final PaymentService paymentService;
     private final MandateStateUpdateService mandateStateUpdateService;
     private final PaymentProviderFactory paymentProviderFactory;
 
@@ -67,12 +67,12 @@ public class MandateService {
                           MandateDao mandateDao,
                           GatewayAccountDao gatewayAccountDao,
                           TokenService tokenService,
-                          TransactionService transactionService,
+                          PaymentService paymentService,
                           MandateStateUpdateService mandateStateUpdateService,
                           PaymentProviderFactory paymentProviderFactory) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
-        this.transactionService = transactionService;
+        this.paymentService = paymentService;
         this.mandateDao = mandateDao;
         this.mandateStateUpdateService = mandateStateUpdateService;
         this.linksConfig = directDebitConfig.getLinks();
@@ -143,8 +143,8 @@ public class MandateService {
     }
 
     public DirectDebitInfoFrontendResponse populateGetMandateWithTransactionResponseForFrontend(String accountExternalId, String transactionExternalId) {
-        Transaction transaction = transactionService.findTransactionForExternalId(transactionExternalId);
-        Mandate mandate = transaction.getMandate();
+        Payment payment = paymentService.findTransactionForExternalId(transactionExternalId);
+        Mandate mandate = payment.getMandate();
         return new DirectDebitInfoFrontendResponse(
                 mandate.getExternalId(),
                 mandate.getGatewayAccount().getId(),
@@ -154,7 +154,7 @@ public class MandateService {
                 mandate.getMandateBankStatementReference(),
                 mandate.getCreatedDate(),
                 mandate.getPayer(),
-                transaction
+                payment
         );
     }
 

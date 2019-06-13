@@ -23,7 +23,7 @@ import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
@@ -38,6 +38,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
+import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.empty;
@@ -52,7 +53,7 @@ import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateMandate;
@@ -134,8 +135,6 @@ public class MandateResourceIT {
         assertThat(createdMandate.get("external_id"), is(notNullValue()));
         assertThat(createdMandate.get("return_url"), is(returnUrl));
         assertThat(createdMandate.get("gateway_account_id"), is(gatewayAccountFixture.getId()));
-        assertThat(createdMandate.get("payer"), is(nullValue()));
-        assertThat(createdMandate.get("transaction"), is(nullValue()));
     }
 
     @Test
@@ -189,13 +188,12 @@ public class MandateResourceIT {
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
 
-        TransactionFixture transactionFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
+        PaymentFixture paymentFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
 
-        String frontendMandateWithTransactionPath = "/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}";
-        String requestPath = frontendMandateWithTransactionPath
-                .replace("{accountId}", accountExternalId)
-                .replace("{mandateExternalId}", mandateFixture.getExternalId().toString())
-                .replace("{transactionExternalId}", transactionFixture.getExternalId());
+        String requestPath = format("/v1/accounts/%s/mandates/%s/payments/%s",
+                accountExternalId, 
+                mandateFixture.getExternalId().toString(),
+                paymentFixture.getExternalId());
 
         givenSetup()
                 .get(requestPath)
@@ -209,10 +207,10 @@ public class MandateResourceIT {
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
-                .body("transaction." + JSON_AMOUNT_KEY, isNumber(transactionFixture.getAmount()))
-                .body("transaction." + JSON_REFERENCE_KEY, is(transactionFixture.getReference()))
-                .body("transaction." + JSON_DESCRIPTION_KEY, is(transactionFixture.getDescription()))
-                .body("transaction." + JSON_STATE_KEY, is(transactionFixture.getState().toExternal().getState()))
+                .body("transaction." + JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
+                .body("transaction." + JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
+                .body("transaction." + JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
+                .body("transaction." + JSON_STATE_KEY, is(paymentFixture.getState().toExternal().getState()))
                 .body("payer.payer_external_id", is(payerFixture.getExternalId()))
                 .body("payer.account_holder_name", is(payerFixture.getName()))
                 .body("payer.email", is(payerFixture.getEmail()))
@@ -366,7 +364,7 @@ public class MandateResourceIT {
                 "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\"\n" +
                 "}\n";
 
-        String requestPath = String.format("/v1/api/accounts/%s/mandates/%s/confirm", gatewayAccountFixture.getExternalId(), mandateFixture.getExternalId());
+        String requestPath = format("/v1/api/accounts/%s/mandates/%s/confirm", gatewayAccountFixture.getExternalId(), mandateFixture.getExternalId());
         given().port(testContext.getPort())
                 .body(confirmDetails)
                 .contentType(APPLICATION_JSON)
@@ -421,7 +419,7 @@ public class MandateResourceIT {
                 "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\"\n" +
                 "}\n";
 
-        String requestPath = String.format("/v1/api/accounts/%s/mandates/%s/confirm",
+        String requestPath = format("/v1/api/accounts/%s/mandates/%s/confirm",
                 gatewayAccountFixture.getExternalId(), mandateFixture.getExternalId());
         given().port(testContext.getPort())
                 .contentType(APPLICATION_JSON)
@@ -434,8 +432,8 @@ public class MandateResourceIT {
         MatcherAssert.assertThat(transactionsForMandate, is(empty()));
     }
 
-    private TransactionFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
-        return aTransactionFixture()
+    private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
+        return aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(paymentState)
                 .insert(testContext.getJdbi());

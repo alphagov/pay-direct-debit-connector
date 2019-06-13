@@ -10,7 +10,7 @@ import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProvider;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProviderCommandService;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
@@ -35,8 +35,8 @@ public class SandboxService implements DirectDebitPaymentProvider,
     }
 
     @Override
-    public LocalDate collect(Mandate mandate, Transaction transaction) {
-        LOGGER.info("Collecting payment for sandbox, mandate with id: {}, transaction with id: {}", mandate.getExternalId(), transaction.getExternalId());
+    public LocalDate collect(Mandate mandate, Payment payment) {
+        LOGGER.info("Collecting payment for sandbox, mandate with id: {}, payment with id: {}", mandate.getExternalId(), payment.getExternalId());
         return LocalDate.now().plusDays(DAYS_TO_COLLECTION);
     }
 

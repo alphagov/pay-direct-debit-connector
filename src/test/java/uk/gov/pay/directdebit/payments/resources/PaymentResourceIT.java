@@ -22,7 +22,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
@@ -44,8 +44,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
-import static uk.gov.pay.directdebit.payments.resources.TransactionResource.CHARGE_API_PATH;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
+import static uk.gov.pay.directdebit.payments.resources.PaymentResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubGetCreditor;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
@@ -53,7 +53,7 @@ import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLi
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class TransactionResourceIT {
+public class PaymentResourceIT {
 
     private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
     private static final String JSON_AMOUNT_KEY = "amount";
@@ -227,27 +227,27 @@ public class TransactionResourceIT {
                 .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
 
-        TransactionFixture transactionFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
+        PaymentFixture paymentFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
 
         String requestPath = CHARGE_API_PATH
                 .replace("{accountId}", accountExternalId)
-                .replace("{transactionExternalId}", transactionFixture.getExternalId());
+                .replace("{transactionExternalId}", paymentFixture.getExternalId());
 
         ValidatableResponse getChargeResponse = givenSetup()
                 .get(requestPath)
                 .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
-                .body(JSON_CHARGE_KEY, is(transactionFixture.getExternalId()))
-                .body(JSON_AMOUNT_KEY, isNumber(transactionFixture.getAmount()))
-                .body(JSON_REFERENCE_KEY, is(transactionFixture.getReference()))
-                .body(JSON_DESCRIPTION_KEY, is(transactionFixture.getDescription()))
-                .body(JSON_STATE_KEY, is(transactionFixture.getState().toExternal().getState()))
+                .body(JSON_CHARGE_KEY, is(paymentFixture.getExternalId()))
+                .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
+                .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
+                .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
+                .body(JSON_STATE_KEY, is(paymentFixture.getState().toExternal().getState()))
                 .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
 
 
-        String documentLocation = expectedTransactionLocationFor(accountExternalId, transactionFixture.getExternalId());
-        String token = testContext.getDatabaseTestHelper().getTokenByTransactionExternalId(transactionFixture.getExternalId());
+        String documentLocation = expectedTransactionLocationFor(accountExternalId, paymentFixture.getExternalId());
+        String token = testContext.getDatabaseTestHelper().getTokenByTransactionExternalId(paymentFixture.getExternalId());
 
         String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + token;
         String hrefNextUrlPost = "http://Frontend" + FRONTEND_CARD_DETAILS_URL;
@@ -263,21 +263,21 @@ public class TransactionResourceIT {
 
         String requestPath2 = CHARGE_API_PATH
                 .replace("{accountId}", accountExternalId)
-                .replace("{transactionExternalId}", transactionFixture.getExternalId());
+                .replace("{transactionExternalId}", paymentFixture.getExternalId());
 
         ValidatableResponse getChargeFromTokenResponse = givenSetup()
                 .get(requestPath2)
                 .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
-                .body(JSON_CHARGE_KEY, is(transactionFixture.getExternalId()))
-                .body(JSON_AMOUNT_KEY, isNumber(transactionFixture.getAmount()))
-                .body(JSON_REFERENCE_KEY, is(transactionFixture.getReference()))
-                .body(JSON_DESCRIPTION_KEY, is(transactionFixture.getDescription()))
-                .body(JSON_STATE_KEY, is(transactionFixture.getState().toExternal().getState()))
+                .body(JSON_CHARGE_KEY, is(paymentFixture.getExternalId()))
+                .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
+                .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
+                .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
+                .body(JSON_STATE_KEY, is(paymentFixture.getState().toExternal().getState()))
                 .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
 
-        String newChargeToken = testContext.getDatabaseTestHelper().getTokenByTransactionExternalId(transactionFixture.getExternalId());
+        String newChargeToken = testContext.getDatabaseTestHelper().getTokenByTransactionExternalId(paymentFixture.getExternalId());
 
         String newHrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + newChargeToken;
 
@@ -290,8 +290,8 @@ public class TransactionResourceIT {
                 }}));
     }
     
-    private TransactionFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
-        return aTransactionFixture()
+    private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
+        return aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(paymentState)
                 .insert(testContext.getJdbi());

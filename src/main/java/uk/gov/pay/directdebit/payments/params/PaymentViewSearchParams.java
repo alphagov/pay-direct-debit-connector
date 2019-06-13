@@ -155,23 +155,23 @@ public class PaymentViewSearchParams {
         }
         if (searchDateParams != null) {
             if (searchDateParams.getFromDate() != null) {
-                sb.append(" AND t.created_date > :" + FROM_DATE_FIELD);
+                sb.append(" AND p.created_date > :" + FROM_DATE_FIELD);
             }
             if (searchDateParams.getToDate() != null) {
-                sb.append(" AND t.created_date < :" + TO_DATE_FIELD);
+                sb.append(" AND p.created_date < :" + TO_DATE_FIELD);
             }
         }
         if (isNotBlank(email)) {
             sb.append(" AND pa.email ILIKE :" + EMAIL_FIELD);
         }
         if (isNotBlank(reference)) {
-            sb.append(" AND t.reference ILIKE :" + REFERENCE_FIELD);
+            sb.append(" AND p.reference ILIKE :" + REFERENCE_FIELD);
         }
         if (amount != null) {
-            sb.append(" AND t.amount = :" + AMOUNT_FIELD);
+            sb.append(" AND p.amount = :" + AMOUNT_FIELD);
         }
         if (isNotBlank(state) && externalPaymentToInternalStateQueryMap.containsKey(state)) {
-            sb.append(format(" AND t.state IN(%s)", externalPaymentToInternalStateQueryMap.get(state)));
+            sb.append(format(" AND p.state IN(%s)", externalPaymentToInternalStateQueryMap.get(state)));
         }
         return sb.toString();
     }

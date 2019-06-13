@@ -93,10 +93,10 @@ public class GoCardlessServiceOnDemandTest extends GoCardlessServiceTest {
                 .withPaymentProviderId(GoCardlessMandateId.valueOf("aGoCardlessMandateId"))
                 .toEntity();
 
-        when(mockedGoCardlessClientFacade.createPayment(transaction, (GoCardlessMandateId) mandate.getPaymentProviderMandateId().get()))
+        when(mockedGoCardlessClientFacade.createPayment(payment, (GoCardlessMandateId) mandate.getPaymentProviderMandateId().get()))
                 .thenReturn(goCardlessPayment);
 
-        LocalDate chargeDate = service.collect(mandate, transaction);
+        LocalDate chargeDate = service.collect(mandate, payment);
         verify(mockedGoCardlessPaymentDao).insert(goCardlessPayment);
 
         Assert.assertThat(chargeDate, is(goCardlessPayment.getChargeDate()));
@@ -112,7 +112,7 @@ public class GoCardlessServiceOnDemandTest extends GoCardlessServiceTest {
         thrown.expectMessage(format("Mandate with mandate id: %s has not been confirmed with GoCardless", MANDATE_ID));
         thrown.reportMissingExceptionWithMessage("GoCardlessMandateNotConfirmed expected");
 
-        service.collect(mandate, transaction);
+        service.collect(mandate, payment);
     }
     
 }

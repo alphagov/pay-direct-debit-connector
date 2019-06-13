@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
@@ -86,15 +86,15 @@ public class CollectPaymentResponse {
     }
 
 
-    public static CollectPaymentResponse from(Transaction transaction, List<Map<String, Object>> dataLinks) {
+    public static CollectPaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
         return new CollectPaymentResponse(
-                transaction.getExternalId(),
-                transaction.getState().toExternal(),
-                transaction.getAmount(),
-                transaction.getDescription(),
-                transaction.getReference(),
-                transaction.getCreatedDate(),
-                transaction.getMandate().getGatewayAccount().getPaymentProvider().toString(),
+                payment.getExternalId(),
+                payment.getState().toExternal(),
+                payment.getAmount(),
+                payment.getDescription(),
+                payment.getReference(),
+                payment.getCreatedDate(),
+                payment.getMandate().getGatewayAccount().getPaymentProvider().toString(),
                 dataLinks);
     }
 

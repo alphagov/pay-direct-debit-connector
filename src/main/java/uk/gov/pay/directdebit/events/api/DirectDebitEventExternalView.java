@@ -31,7 +31,7 @@ public class DirectDebitEventExternalView {
     public DirectDebitEventExternalView(DirectDebitEvent directDebitEvent) {
         this.externalId = directDebitEvent.getExternalId();
         this.mandateExternalId = directDebitEvent.getMandateExternalId();
-        this.transactionExternalId = directDebitEvent.getTransactionExternalId();
+        this.transactionExternalId = directDebitEvent.getPaymentExternalId();
         this.event = directDebitEvent.getEvent();
         this.eventType = directDebitEvent.getEventType();
         this.eventDate = directDebitEvent.getEventDate();

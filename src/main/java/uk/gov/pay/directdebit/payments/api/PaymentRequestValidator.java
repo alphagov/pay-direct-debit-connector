@@ -7,7 +7,8 @@ import uk.gov.pay.directdebit.common.validation.FieldSize;
 import java.util.Map;
 import java.util.function.Function;
 
-public class TransactionRequestValidator extends ApiValidation {
+//TODO Remove this in favour of bean validation annotations.
+public class PaymentRequestValidator extends ApiValidation {
 
     private final static String AMOUNT_KEY = "amount";
     private final static String DESCRIPTION_KEY = "description";
@@ -36,7 +37,7 @@ public class TransactionRequestValidator extends ApiValidation {
                     .put(REFERENCE_KEY, new FieldSize(0, 255))
                     .build();
 
-    public TransactionRequestValidator() {
+    public PaymentRequestValidator() {
         super(requiredFields, fieldSizes, validators);
     }
 

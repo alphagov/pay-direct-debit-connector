@@ -33,7 +33,7 @@ import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCAR
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -152,7 +152,7 @@ public class PayerResourceIT {
                 .withPaymentProvider(paymentProvider)
                 .insert(testContext.getJdbi());
         testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-        aTransactionFixture()
+        aPaymentFixture()
                 .withMandateFixture(testMandate)
                 .withState(PaymentState.NEW)
                 .insert(testContext.getJdbi());

@@ -15,8 +15,8 @@ import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -58,9 +58,9 @@ public class SandboxServiceTest {
     @Test
     public void collect_shouldReturnCollectionDate() {
         Mandate mandate = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).toEntity();
-        Transaction transaction = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).toEntity();
+        Payment payment = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture).toEntity();
 
-        LocalDate chargeDate = service.collect(mandate, transaction);
+        LocalDate chargeDate = service.collect(mandate, payment);
 
         assertThat(chargeDate, is(LocalDateMatchers
                 .within(1, ChronoUnit.DAYS, LocalDate.now().plusDays(4))));

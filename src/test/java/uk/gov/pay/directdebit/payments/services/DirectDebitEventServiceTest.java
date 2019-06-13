@@ -13,7 +13,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 
@@ -49,7 +49,7 @@ public class DirectDebitEventServiceTest {
     private DirectDebitEventService service;
 
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture();
-    private TransactionFixture transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture);
+    private PaymentFixture paymentFixture = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture);
 
     @Before
     public void setUp() {
@@ -71,12 +71,12 @@ public class DirectDebitEventServiceTest {
 
     @Test
     public void registerTransactionCreatedEventFor_shouldInsertAnEventWhenTransactionIsCreated() {
-        service.registerTransactionCreatedEventFor(transactionFixture.toEntity());
+        service.registerTransactionCreatedEventFor(paymentFixture.toEntity());
 
         verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
         DirectDebitEvent directDebitEvent = prCaptor.getValue();
         assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
-        assertThat(directDebitEvent.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(paymentFixture.getId()));
         assertThat(directDebitEvent.getEvent(), is(SupportedEvent.CHARGE_CREATED));
         assertThat(directDebitEvent.getEventType(), is(CHARGE));
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
@@ -123,12 +123,12 @@ public class DirectDebitEventServiceTest {
 
     @Test
     public void registerPaymentCreatedEventFor_shouldCreateExpectedEvent() {
-        service.registerPaymentSubmittedToProviderEventFor(transactionFixture.toEntity());
+        service.registerPaymentSubmittedToProviderEventFor(paymentFixture.toEntity());
 
         verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
         DirectDebitEvent directDebitEvent = prCaptor.getValue();
         assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
-        assertThat(directDebitEvent.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(paymentFixture.getId()));
         assertThat(directDebitEvent.getEvent(), is(DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER));
         assertThat(directDebitEvent.getEventType(), is(CHARGE));
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
@@ -136,12 +136,12 @@ public class DirectDebitEventServiceTest {
 
     @Test
     public void registerPaymentPendingEventFor_shouldCreateExpectedEvent() {
-        service.registerPaymentAcknowledgedEventFor(transactionFixture.toEntity());
+        service.registerPaymentAcknowledgedEventFor(paymentFixture.toEntity());
 
         verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
         DirectDebitEvent directDebitEvent = prCaptor.getValue();
         assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
-        assertThat(directDebitEvent.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(paymentFixture.getId()));
         assertThat(directDebitEvent.getEvent(), is(PAYMENT_ACKNOWLEDGED_BY_PROVIDER));
         assertThat(directDebitEvent.getEventType(), is(CHARGE));
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
@@ -149,12 +149,12 @@ public class DirectDebitEventServiceTest {
 
     @Test
     public void registerPaymentSubmittedEventFor_shouldCreateExpectedEvent() {
-        service.registerPaymentSubmittedEventFor(transactionFixture.toEntity());
+        service.registerPaymentSubmittedEventFor(paymentFixture.toEntity());
 
         verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
         DirectDebitEvent directDebitEvent = prCaptor.getValue();
         assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
-        assertThat(directDebitEvent.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(paymentFixture.getId()));
         assertThat(directDebitEvent.getEvent(), is(PAYMENT_SUBMITTED_TO_BANK));
         assertThat(directDebitEvent.getEventType(), is(CHARGE));
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
@@ -162,12 +162,12 @@ public class DirectDebitEventServiceTest {
 
     @Test
     public void registerPaymentPaidOutEventFor_shouldCreateExpectedEvent() {
-        service.registerPaymentPaidOutEventFor(transactionFixture.toEntity());
+        service.registerPaymentPaidOutEventFor(paymentFixture.toEntity());
 
         verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
         DirectDebitEvent directDebitEvent = prCaptor.getValue();
         assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
-        assertThat(directDebitEvent.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(paymentFixture.getId()));
         assertThat(directDebitEvent.getEvent(), is(PAID_OUT));
         assertThat(directDebitEvent.getEventType(), is(CHARGE));
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
@@ -175,12 +175,12 @@ public class DirectDebitEventServiceTest {
 
     @Test
     public void registerPaymentCancelledEventFor_shouldCreateExpectedEvent() {
-        service.registerPaymentCancelledEventFor(mandateFixture.toEntity(), transactionFixture.toEntity());
+        service.registerPaymentCancelledEventFor(mandateFixture.toEntity(), paymentFixture.toEntity());
 
         verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
         DirectDebitEvent directDebitEvent = prCaptor.getValue();
         assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
-        assertThat(directDebitEvent.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(paymentFixture.getId()));
         assertThat(directDebitEvent.getEvent(), is(PAYMENT_CANCELLED_BY_USER));
         assertThat(directDebitEvent.getEventType(), is(CHARGE));
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
@@ -188,12 +188,12 @@ public class DirectDebitEventServiceTest {
 
     @Test
     public void registerPaymentFailedEventFor_shouldCreateExpectedEvent() {
-        service.registerPaymentFailedEventFor(transactionFixture.toEntity());
+        service.registerPaymentFailedEventFor(paymentFixture.toEntity());
 
         verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
         DirectDebitEvent directDebitEvent = prCaptor.getValue();
         assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
-        assertThat(directDebitEvent.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(paymentFixture.getId()));
         assertThat(directDebitEvent.getEvent(), is(PAYMENT_FAILED));
         assertThat(directDebitEvent.getEventType(), is(CHARGE));
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));
@@ -201,12 +201,12 @@ public class DirectDebitEventServiceTest {
 
     @Test
     public void registerPayoutPaidEventFor_shouldCreateExpectedEvent() {
-        service.registerPayoutPaidEventFor(transactionFixture.toEntity());
+        service.registerPayoutPaidEventFor(paymentFixture.toEntity());
 
         verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
         DirectDebitEvent directDebitEvent = prCaptor.getValue();
         assertThat(directDebitEvent.getMandateId(), is(mandateFixture.getId()));
-        assertThat(directDebitEvent.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(directDebitEvent.getTransactionId(), is(paymentFixture.getId()));
         assertThat(directDebitEvent.getEvent(), is(PAID));
         assertThat(directDebitEvent.getEventType(), is(CHARGE));
         assertThat(directDebitEvent.getEventDate(), is(ZonedDateTimeMatchers.within(10, ChronoUnit.SECONDS, ZonedDateTime.now())));

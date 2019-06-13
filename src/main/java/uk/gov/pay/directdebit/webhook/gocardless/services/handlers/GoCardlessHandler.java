@@ -6,19 +6,19 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.payments.services.PaymentService;
 
 public abstract class GoCardlessHandler implements GoCardlessActionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessHandler.class);
 
-    protected TransactionService transactionService;
+    protected PaymentService paymentService;
     GoCardlessEventService goCardlessService;
 
     protected abstract Optional<DirectDebitEvent> process(GoCardlessEvent event);
 
-    GoCardlessHandler(TransactionService transactionService,
+    GoCardlessHandler(PaymentService paymentService,
                       GoCardlessEventService goCardlessService) {
-        this.transactionService = transactionService;
+        this.paymentService = paymentService;
         this.goCardlessService = goCardlessService;
     }
 

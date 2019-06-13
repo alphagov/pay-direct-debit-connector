@@ -11,7 +11,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import java.time.ZonedDateTime;
 
@@ -71,7 +71,7 @@ public class DirectDebitInfoFrontendResponse {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-    public class TransactionDetails {
+    public class PaymentDetails {
         @JsonProperty("external_id")
         private String externalId;
         private Long amount;
@@ -79,8 +79,8 @@ public class DirectDebitInfoFrontendResponse {
         private String description;
         private String reference;
 
-        public TransactionDetails(String externalId, Long amount,
-                                  ExternalPaymentState state, String description, String reference) {
+        public PaymentDetails(String externalId, Long amount,
+                              ExternalPaymentState state, String description, String reference) {
             this.externalId = externalId;
             this.amount = amount;
             this.state = state;
@@ -110,7 +110,7 @@ public class DirectDebitInfoFrontendResponse {
     }
 
     @JsonProperty("transaction")
-    private TransactionDetails transaction;
+    private PaymentDetails transaction;
 
     @JsonProperty("external_id")
     private String mandateExternalId;
@@ -146,7 +146,7 @@ public class DirectDebitInfoFrontendResponse {
                                            MandateBankStatementReference mandateReference,
                                            ZonedDateTime createdDate,
                                            Payer payer,
-                                           Transaction transaction) {
+                                           Payment payment) {
         this.mandateExternalId = paymentExternalId.toString();
         this.internalState = internalState;
         this.state = internalState.toExternal();
@@ -155,18 +155,18 @@ public class DirectDebitInfoFrontendResponse {
         this.returnUrl = returnUrl;
         this.mandateReference = mandateReference;
         this.createdDate = createdDate;
-        this.transaction = initTransaction(transaction);
+        this.transaction = initTransaction(payment);
         this.payer = initPayer(payer);
     }
 
-    private TransactionDetails initTransaction(Transaction transaction) {
-        if (transaction != null) {
-            return new TransactionDetails(
-                    transaction.getExternalId(),
-                    transaction.getAmount(),
-                    transaction.getState().toExternal(),
-                    transaction.getDescription(),
-                    transaction.getReference()
+    private PaymentDetails initTransaction(Payment payment) {
+        if (payment != null) {
+            return new PaymentDetails(
+                    payment.getExternalId(),
+                    payment.getAmount(),
+                    payment.getState().toExternal(),
+                    payment.getDescription(),
+                    payment.getReference()
             );
         }
         return null;
@@ -191,7 +191,7 @@ public class DirectDebitInfoFrontendResponse {
         return mandateReference;
     }
 
-    public TransactionDetails getTransaction() {
+    public PaymentDetails getTransaction() {
         return transaction;
     }
 

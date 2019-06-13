@@ -26,7 +26,7 @@ import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotConfirmed;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProviderCommandService;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
@@ -64,13 +64,13 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
     }
 
     @Override
-    public LocalDate collect(Mandate mandate, Transaction transaction) {
-        LOGGER.info("Collecting payment for GoCardless, mandate with id: {}, transaction with id: {}", mandate.getExternalId(), transaction.getExternalId());
+    public LocalDate collect(Mandate mandate, Payment payment) {
+        LOGGER.info("Collecting payment for GoCardless, mandate with id: {}, payment with id: {}", mandate.getExternalId(), payment.getExternalId());
         var goCardlessMandateId = mandate.getPaymentProviderMandateId()
                 .map(a -> (GoCardlessMandateId) a)
                 .orElseThrow( () -> new GoCardlessMandateNotConfirmed("mandate id", mandate.getExternalId().toString()));
         
-        GoCardlessPayment goCardlessPayment = createPayment(transaction, goCardlessMandateId);
+        GoCardlessPayment goCardlessPayment = createPayment(payment, goCardlessMandateId);
 
         persist(goCardlessPayment);
         return goCardlessPayment.getChargeDate();
@@ -162,24 +162,24 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
         }
     }
 
-    private GoCardlessPayment createPayment(Transaction transaction, GoCardlessMandateId goCardlessMandateId) {
+    private GoCardlessPayment createPayment(Payment payment, GoCardlessMandateId goCardlessMandateId) {
         try {
-            LOGGER.info("Attempting to call GoCardless to create a payment, mandate id: {}, transaction id: {}",
-                    transaction.getMandate().getExternalId(),
-                    transaction.getExternalId());
-            GoCardlessClientFacade goCardlessClientFacade = goCardlessClientFactory.getClientFor(transaction.getMandate().getGatewayAccount().getAccessToken());
+            LOGGER.info("Attempting to call GoCardless to create a payment, mandate id: {}, payment id: {}",
+                    payment.getMandate().getExternalId(),
+                    payment.getExternalId());
+            GoCardlessClientFacade goCardlessClientFacade = goCardlessClientFactory.getClientFor(payment.getMandate().getGatewayAccount().getAccessToken());
 
-            GoCardlessPayment goCardlessPayment = goCardlessClientFacade.createPayment(transaction, goCardlessMandateId);
+            GoCardlessPayment goCardlessPayment = goCardlessClientFacade.createPayment(payment, goCardlessMandateId);
 
-            LOGGER.info("Created payment in GoCardless, mandate id: {}, transaction id: {}, GoCardless payment id: {}",
-                    transaction.getMandate().getExternalId(),
-                    transaction.getExternalId(),
+            LOGGER.info("Created payment in GoCardless, mandate id: {}, payment id: {}, GoCardless payment id: {}",
+                    payment.getMandate().getExternalId(),
+                    payment.getExternalId(),
                     goCardlessPayment.getPaymentId());
 
             return goCardlessPayment;
         } catch (Exception exc) {
-            logException(exc, "payment", transaction.getExternalId());
-            throw new CreatePaymentFailedException(transaction.getMandate().getExternalId().toString(), transaction.getExternalId());
+            logException(exc, "payment", payment.getExternalId());
+            throw new CreatePaymentFailedException(payment.getMandate().getExternalId().toString(), payment.getExternalId());
         }
     }
 

@@ -14,7 +14,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.TransactionFixture;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -29,7 +29,7 @@ public class GoCardlessPaymentDaoIT {
 
     private GoCardlessPaymentDao goCardlessPaymentDao;
 
-    private TransactionFixture transactionFixture;
+    private PaymentFixture paymentFixture;
 
     private final static String GOCARDLESS_PAYMENT_ID = "NA23434";
 
@@ -41,10 +41,10 @@ public class GoCardlessPaymentDaoIT {
     public void setup()  {
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
         mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
-        transactionFixture = TransactionFixture.aTransactionFixture().withMandateFixture(mandateFixture).insert(testContext.getJdbi());
+        paymentFixture = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture).insert(testContext.getJdbi());
         goCardlessPaymentDao = testContext.getJdbi().onDemand(GoCardlessPaymentDao.class);
         goCardlessPaymentFixture = aGoCardlessPaymentFixture()
-                .withTransactionId(transactionFixture.getId())
+                .withTransactionId(paymentFixture.getId())
                 .withPaymentId(GOCARDLESS_PAYMENT_ID);
     }
 
@@ -53,7 +53,7 @@ public class GoCardlessPaymentDaoIT {
         Long id = goCardlessPaymentDao.insert(goCardlessPaymentFixture.toEntity());
         Map<String, Object> goCardlessPayment = testContext.getDatabaseTestHelper().getGoCardlessPaymentById(id);
         assertThat(goCardlessPayment.get("id"), is(id));
-        assertThat(goCardlessPayment.get("transaction_id"), is(transactionFixture.getId()));
+        assertThat(goCardlessPayment.get("transaction_id"), is(paymentFixture.getId()));
         assertThat(goCardlessPayment.get("payment_id"), is(GOCARDLESS_PAYMENT_ID));
     }
 
@@ -63,7 +63,7 @@ public class GoCardlessPaymentDaoIT {
         GoCardlessPayment goCardlessPayment = goCardlessPaymentDao
                 .findByEventResourceId(GOCARDLESS_PAYMENT_ID).get();
         assertThat(goCardlessPayment.getId(), is(goCardlessPaymentFixture.getId()));
-        assertThat(goCardlessPayment.getTransactionId(), is(transactionFixture.getId()));
+        assertThat(goCardlessPayment.getTransactionId(), is(paymentFixture.getId()));
         assertThat(goCardlessPayment.getPaymentId(), is(GOCARDLESS_PAYMENT_ID));
     }
 

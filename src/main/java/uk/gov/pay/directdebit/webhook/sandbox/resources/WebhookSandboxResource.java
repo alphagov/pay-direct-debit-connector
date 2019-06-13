@@ -3,11 +3,11 @@ package uk.gov.pay.directdebit.webhook.sandbox.resources;
 import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.events.model.SandboxEvent;
-import uk.gov.pay.directdebit.payments.model.Transaction;
 import uk.gov.pay.directdebit.events.services.SandboxEventService;
-import uk.gov.pay.directdebit.payments.services.TransactionService;
+import uk.gov.pay.directdebit.payments.services.PaymentService;
 
 import javax.inject.Inject;
 import javax.ws.rs.POST;
@@ -20,12 +20,12 @@ import static javax.ws.rs.core.Response.Status.OK;
 @Path("/v1/webhooks/sandbox")
 public class WebhookSandboxResource {
 
-    private final TransactionService transactionService;
+    private final PaymentService paymentService;
     private final SandboxEventService sandboxEventService;
 
     @Inject
-    public WebhookSandboxResource(TransactionService transactionService, SandboxEventService sandboxEventService) {
-        this.transactionService = transactionService;
+    public WebhookSandboxResource(PaymentService paymentService, SandboxEventService sandboxEventService) {
+        this.paymentService = paymentService;
         this.sandboxEventService = sandboxEventService;
     }
 
@@ -40,24 +40,24 @@ public class WebhookSandboxResource {
     @POST
     @Timed
     public Response handleWebhook() {
-        transactionService.findAllByPaymentStateAndProvider(PaymentState.PENDING, PaymentProvider.SANDBOX)
+        paymentService.findAllByPaymentStateAndProvider(PaymentState.PENDING, PaymentProvider.SANDBOX)
                 .forEach(this::processTransaction);
         return Response.status(OK).build();
     }
 
-    private void processTransaction(Transaction transaction) {
-        sandboxEventService.insertEvent(createSandboxEventFromTransaction(transaction));
-        transactionService.paymentPaidOutFor(transaction);
+    private void processTransaction(Payment payment) {
+        sandboxEventService.insertEvent(createSandboxEventFromTransaction(payment));
+        paymentService.paymentPaidOutFor(payment);
     }
 
-    private SandboxEvent createSandboxEventFromTransaction(Transaction transaction){
+    private SandboxEvent createSandboxEventFromTransaction(Payment payment){
 
         return SandboxEvent.SandboxEventBuilder.aSandboxEvent()
-                .withPaymentId(transaction.getId().toString())
+                .withPaymentId(payment.getId().toString())
                 .withEventAction(SandboxEventAction.PAID_OUT.toString())
                 .withEventCause(SandboxEventCause.PAID_OUT_CAUSE.toString())
                 .withCreatedAt(ZonedDateTime.now())
-                .withMandateId(SandboxMandateId.valueOf(transaction.getMandate().getId().toString()))
+                .withMandateId(SandboxMandateId.valueOf(payment.getMandate().getId().toString()))
                 .build();
     }
 }

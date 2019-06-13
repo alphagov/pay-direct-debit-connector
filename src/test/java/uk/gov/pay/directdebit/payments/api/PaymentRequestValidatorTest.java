@@ -11,9 +11,9 @@ import uk.gov.pay.directdebit.common.exception.validation.MissingMandatoryFields
 
 import java.util.Map;
 
-public class TransactionRequestValidatorTest {
+public class PaymentRequestValidatorTest {
 
-    private TransactionRequestValidator transactionRequestValidator = new TransactionRequestValidator();
+    private PaymentRequestValidator paymentRequestValidator = new PaymentRequestValidator();
     
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -26,7 +26,7 @@ public class TransactionRequestValidatorTest {
                 "return_url", "https://blabla.test",
                 "reference", "blablabla"
         );
-        transactionRequestValidator.validate(request);
+        paymentRequestValidator.validate(request);
     }
 
 
@@ -40,7 +40,7 @@ public class TransactionRequestValidatorTest {
         thrown.expect(MissingMandatoryFieldsException.class);
         thrown.expectMessage("Field(s) missing: [reference]");
         thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
-        transactionRequestValidator.validate(request);
+        paymentRequestValidator.validate(request);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class TransactionRequestValidatorTest {
         thrown.expect(InvalidSizeFieldsException.class);
         thrown.expectMessage("The size of a field(s) is invalid: [description, reference]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
-        transactionRequestValidator.validate(request);
+        paymentRequestValidator.validate(request);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class TransactionRequestValidatorTest {
         thrown.expect(InvalidFieldsException.class);
         thrown.expectMessage("Field(s) are invalid: [amount]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
-        transactionRequestValidator.validate(request);
+        paymentRequestValidator.validate(request);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class TransactionRequestValidatorTest {
         thrown.expect(InvalidFieldsException.class);
         thrown.expectMessage("Field(s) are invalid: [amount]");
         thrown.reportMissingExceptionWithMessage("InvalidFieldsException expected");
-        transactionRequestValidator.validate(request);
+        paymentRequestValidator.validate(request);
     }
     
 }

@@ -20,7 +20,7 @@ import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
-import uk.gov.pay.directdebit.payments.model.Transaction;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
 import javax.ws.rs.core.UriBuilder;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.fixtures.TransactionFixture.aTransactionFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentViewServiceTest {
@@ -140,7 +140,7 @@ public class PaymentViewServiceTest {
                 .toEntity();
         List<PaymentView> paymentViewList = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
-            Transaction transaction = aTransactionFixture()
+            Payment payment = aPaymentFixture()
                     .withId((long) i)
                     .withMandateFixture(mandateFixture)
                     .withAmount(((long) 100 + i))
@@ -149,14 +149,14 @@ public class PaymentViewServiceTest {
                     .withCreatedDate(createdDate)
                     .toEntity();
             paymentViewList.add(new PaymentView(gatewayAccountExternalId,
-                    transaction.getExternalId(),
-                    transaction.getAmount(),
-                    transaction.getReference(),
-                    transaction.getDescription(),
-                    transaction.getCreatedDate(),
+                    payment.getExternalId(),
+                    payment.getAmount(),
+                    payment.getReference(),
+                    payment.getDescription(),
+                    payment.getCreatedDate(),
                     payer.getName(),
                     payer.getEmail(),
-                    transaction.getState(),
+                    payment.getState(),
                     RandomIdGenerator.newId()));
         }
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
