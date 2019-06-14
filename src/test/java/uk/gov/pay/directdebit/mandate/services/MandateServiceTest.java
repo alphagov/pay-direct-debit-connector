@@ -35,8 +35,8 @@ import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
-import uk.gov.pay.directdebit.payments.services.SandboxService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
+import uk.gov.pay.directdebit.payments.services.SandboxService;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
@@ -46,7 +46,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -251,20 +250,11 @@ public class MandateServiceTest {
         service.createMandate(null, "test");
     }
 
-
-    private Map<String, String> getMandateRequestPayload() {
-        Map<String, String> payload = new HashMap<>();
-        payload.put("agreement_type", "ON_DEMAND");
-        payload.put("return_url", "https://example.com/return");
-        payload.put("service_reference", "some-service-reference");
-        return payload;
-    }
-
     private Mandate getMandateForProvider(GatewayAccount gatewayAccount) {
         when(gatewayAccountDao.findByExternalId(anyString())).thenReturn(Optional.of(gatewayAccount));
         when(mandateDao.insert(any(Mandate.class))).thenReturn(1L);
 
-        CreateMandateRequest createMandateRequest = null;
+        var createMandateRequest = new CreateMandateRequest("https://example.com/return", "some-service-reference");
         Mandate mandate = service.createMandate(createMandateRequest, gatewayAccount.getExternalId());
 
         verify(mandateStateUpdateService).mandateCreatedFor(mandate);

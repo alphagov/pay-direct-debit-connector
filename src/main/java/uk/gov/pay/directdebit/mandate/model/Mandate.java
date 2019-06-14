@@ -197,6 +197,5 @@ public class Mandate {
         public Mandate build() {
             return new Mandate(this);
         }
-
     }
 }

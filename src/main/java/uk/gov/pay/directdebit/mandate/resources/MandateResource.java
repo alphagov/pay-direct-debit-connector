@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
-import uk.gov.pay.directdebit.mandate.api.CreateMandateRequestValidator;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
@@ -34,7 +33,6 @@ import static javax.ws.rs.core.Response.created;
 public class MandateResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MandateResource.class);
     private final MandateService mandateService;
-    private final CreateMandateRequestValidator createMandateRequestValidator = new CreateMandateRequestValidator();
     private final MandateQueryService mandateQueryService;
 
     @Inject
@@ -52,8 +50,6 @@ public class MandateResource {
                                   @Valid CreateMandateRequest createMandateRequest, 
                                   @Context UriInfo uriInfo) {
         LOGGER.info("Received create mandate request with gateway account external id - {}", gatewayAccount.getExternalId());
-//        createMandateRequestValidator.validate(createMandateRequestMap);
-//        CreateMandateRequest createMandateRequest = CreateMandateRequest.of(createMandateRequestMap);
         CreateMandateResponse createMandateResponse = mandateService.createMandate(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
         return created(createMandateResponse.getLink("self")).entity(createMandateResponse).build();
     }

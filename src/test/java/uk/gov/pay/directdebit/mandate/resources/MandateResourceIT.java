@@ -11,7 +11,6 @@ import junitparams.converters.Nullable;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -48,7 +47,6 @@ import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
@@ -106,12 +104,14 @@ public class MandateResourceIT {
     
     @Test
     @Parameters({
-            "null, test-service-ref",
-//            " , test-service-ref",
-//            "http://example, null",
-//            "http://example, "
+            "null, test-service-ref, Field [return_url] cannot be null",
+            " , test-service-ref, Field [return_url] must have a size between 1 and 255",
+            "http://example, null, Field [service_reference] cannot be null",
+            "http://example, , Field [service_reference] must have a size between 1 and 255"
     })
-    public void createMandateValidationFailures(@Nullable String returnUrl, @Nullable String serviceReference) throws Exception {
+    public void createMandateValidationFailures(@Nullable String returnUrl, 
+                                                @Nullable String serviceReference, 
+                                                String expectedErrorMessage) throws Exception {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         
         Map<String, String> createMandateRequest = new HashMap<>();
@@ -121,9 +121,9 @@ public class MandateResourceIT {
         givenSetup()
                 .body(objectMapper.writeValueAsString(createMandateRequest))
                 .post("/v1/api/accounts/{accountId}/mandates".replace("{accountId}", accountExternalId))
-                .then().log().body()
+                .then()
                 .statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY)
-                .body("errors", contains("Field [return_url] cannot be null"))
+                .body("message", contains(expectedErrorMessage))
                 .body("error_identifier", is("GENERIC"));
     }
 

@@ -20,9 +20,15 @@ public class CreateMandateRequest {
     private String reference;
 
     @JsonProperty
+    @Length(min = 1, max = 255, message = "Field [description] must have a size between 1 and 255")
     private String description;
 
     public CreateMandateRequest() {}
+
+    public CreateMandateRequest(String returnUrl, String reference) {
+        this.returnUrl = returnUrl;
+        this.reference = reference;
+    }
 
     public String getReturnUrl() {
         return returnUrl;
