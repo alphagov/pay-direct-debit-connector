@@ -1,21 +1,28 @@
 package uk.gov.pay.directdebit.mandate.api;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.NotNull;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateMandateRequest {
 
-    private final String returnUrl, reference, description;
+    @NotNull(message = "Field [return_url] cannot be null")
+    @Length(min = 1, max = 255, message = "Field [return_url] must have a size between 1 and 255")
+    @JsonProperty("return_url")
+    private String returnUrl;
 
-    private CreateMandateRequest(String returnUrl, String reference, String description) {
-        this.returnUrl = returnUrl;
-        this.reference = reference;
-        this.description = description;
-    }
+    @NotNull(message = "Field [service_reference] cannot be null")
+    @Length(min = 1, max = 255, message = "Field [service_reference] must have a size between 1 and 255")
+    @JsonProperty("service_reference")
+    private String reference;
 
-    public static CreateMandateRequest of(Map<String, String> createMandateRequest) {
-        return new CreateMandateRequest(createMandateRequest.get("return_url"), 
-                createMandateRequest.get("service_reference"), createMandateRequest.get("description"));
-    }
+    @JsonProperty
+    private String description;
+
+    public CreateMandateRequest() {}
 
     public String getReturnUrl() {
         return returnUrl;

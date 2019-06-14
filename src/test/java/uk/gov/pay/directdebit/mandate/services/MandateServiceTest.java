@@ -264,7 +264,7 @@ public class MandateServiceTest {
         when(gatewayAccountDao.findByExternalId(anyString())).thenReturn(Optional.of(gatewayAccount));
         when(mandateDao.insert(any(Mandate.class))).thenReturn(1L);
 
-        CreateMandateRequest createMandateRequest = CreateMandateRequest.of(getMandateRequestPayload());
+        CreateMandateRequest createMandateRequest = null;
         Mandate mandate = service.createMandate(createMandateRequest, gatewayAccount.getExternalId());
 
         verify(mandateStateUpdateService).mandateCreatedFor(mandate);

@@ -8,6 +8,7 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import junitparams.Parameters;
 import junitparams.converters.Nullable;
+import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,7 @@ import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
@@ -45,6 +47,8 @@ import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
@@ -91,6 +95,8 @@ public class MandateResourceIT {
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
 
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
+    
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
     public void setUp() {
@@ -98,10 +104,27 @@ public class MandateResourceIT {
         gatewayAccountFixture.insert(testContext.getJdbi());
     }
     
-    //TODO
     @Test
-    public void createMandateValidationFailures() {
+    @Parameters({
+            "null, test-service-ref",
+//            " , test-service-ref",
+//            "http://example, null",
+//            "http://example, "
+    })
+    public void createMandateValidationFailures(@Nullable String returnUrl, @Nullable String serviceReference) throws Exception {
+        String accountExternalId = gatewayAccountFixture.getExternalId();
         
+        Map<String, String> createMandateRequest = new HashMap<>();
+        Optional.ofNullable(returnUrl).ifPresent(x -> createMandateRequest.put("return_url", x));
+        Optional.ofNullable(serviceReference).ifPresent(x -> createMandateRequest.put("service_reference", x));
+
+        givenSetup()
+                .body(objectMapper.writeValueAsString(createMandateRequest))
+                .post("/v1/api/accounts/{accountId}/mandates".replace("{accountId}", accountExternalId))
+                .then().log().body()
+                .statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY)
+                .body("errors", contains("Field [return_url] cannot be null"))
+                .body("error_identifier", is("GENERIC"));
     }
 
     @Test
@@ -116,12 +139,10 @@ public class MandateResourceIT {
         
         if (description != null) createMandateBuilder.put("description", description);
         
-        String postBody = new ObjectMapper().writeValueAsString(createMandateBuilder.build());
-
         String requestPath = "/v1/api/accounts/{accountId}/mandates".replace("{accountId}", accountExternalId);
 
         ValidatableResponse response = givenSetup()
-                .body(postBody)
+                .body(objectMapper.writeValueAsString(createMandateBuilder.build()))
                 .post(requestPath)
                 .then()
                 .statusCode(Response.Status.CREATED.getStatusCode())

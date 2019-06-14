@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.mandate.resources;
 import com.codahale.metrics.annotation.Timed;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -47,12 +48,12 @@ public class MandateResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response createMandate(@PathParam("accountId") GatewayAccount gatewayAccount,
-                                  Map<String, String> createMandateRequestMap,
+    public Response createMandate(@PathParam("accountId") GatewayAccount gatewayAccount, 
+                                  @Valid CreateMandateRequest createMandateRequest, 
                                   @Context UriInfo uriInfo) {
         LOGGER.info("Received create mandate request with gateway account external id - {}", gatewayAccount.getExternalId());
-        createMandateRequestValidator.validate(createMandateRequestMap);
-        CreateMandateRequest createMandateRequest = CreateMandateRequest.of(createMandateRequestMap);
+//        createMandateRequestValidator.validate(createMandateRequestMap);
+//        CreateMandateRequest createMandateRequest = CreateMandateRequest.of(createMandateRequestMap);
         CreateMandateResponse createMandateResponse = mandateService.createMandate(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
         return created(createMandateResponse.getLink("self")).entity(createMandateResponse).build();
     }
