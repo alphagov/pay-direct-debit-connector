@@ -17,10 +17,7 @@ import static org.junit.Assert.assertThat;
 public class CreateGatewayAccountRequestTest {
 
     private Validator validator;
-    private final String tooLong = "This String is over 255 characters long. This String is over 255 characters long. This String is over 255 characters long. This String is over 255 characters long." +
-            " This String is over 255 characters long. This String is over 255 characters long. This String is over 255 characters long. This String is over 255 characters long." +
-            " This String is over 255 characters long. This String is over 255 characters long. This String is over 255 characters long. This String is over 255 characters long."  +
-            " This String is over 255 characters long. This String is over 255 characters long. This String is over 255 characters long. This String is over 255 characters long.";
+    private final String tooLong = "This String is over 255 characters long".repeat(255);
 
     @Before
     public void setUp() {
@@ -46,14 +43,14 @@ public class CreateGatewayAccountRequestTest {
     public void shouldGiveConstraintViolationForTooLongDescription() {
         Set<ConstraintViolation<CreateGatewayAccountRequest>> violations = validator.validateValue(CreateGatewayAccountRequest.class, "description", tooLong);
         assertThat(violations.size(), is(1));
-        assertThat(violations.iterator().next().getMessage(), is("size must be between 0 and 255"));
+        assertThat(violations.iterator().next().getMessage(), is("Field [description] must have a maximum length of 255"));
     }
 
     @Test
     public void shouldGiveConstraintViolationForTooLongAnalysticsId() {
         Set<ConstraintViolation<CreateGatewayAccountRequest>> violations = validator.validateValue(CreateGatewayAccountRequest.class, "analyticsId", tooLong);
         assertThat(violations.size(), is(1));
-        assertThat(violations.iterator().next().getMessage(), is("size must be between 0 and 255"));
+        assertThat(violations.iterator().next().getMessage(), is("Field [analytics_id] must have a maximum length of 255"));
     }
 
     @Test
