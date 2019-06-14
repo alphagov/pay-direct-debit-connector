@@ -30,7 +30,7 @@ import static javax.ws.rs.core.Response.created;
 @Path("/")
 public class PaymentResource {
     //has to be /charges unless we change public api
-    public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{transactionExternalId}";
+    public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{paymentExternalId}";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentResource.class);
     
@@ -48,7 +48,7 @@ public class PaymentResource {
     @Path(CHARGE_API_PATH)
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getCharge(@PathParam("accountId") String accountExternalId, @PathParam("transactionExternalId") String transactionExternalId, @Context UriInfo uriInfo) {
+    public Response getCharge(@PathParam("accountId") String accountExternalId, @PathParam("paymentExternalId") String transactionExternalId, @Context UriInfo uriInfo) {
         PaymentResponse response = paymentService.getPaymentWithExternalId(accountExternalId, transactionExternalId, uriInfo);
         return Response.ok(response).build();
     }
@@ -62,7 +62,7 @@ public class PaymentResource {
         collectPaymentRequestValidator.validate(collectPaymentRequestMap);
         CollectPaymentRequest collectPaymentRequest = CollectPaymentRequest.of(collectPaymentRequestMap);
         Mandate mandate = mandateQueryService.findByExternalId(collectPaymentRequest.getMandateExternalId());
-        Payment paymentToCollect = paymentService.createOnDemandTransaction(gatewayAccount, mandate, collectPaymentRequest);
+        Payment paymentToCollect = paymentService.createPayment(gatewayAccount, mandate, collectPaymentRequest);
         CollectPaymentResponse response = paymentService.collectPaymentResponseWithSelfLink(paymentToCollect, gatewayAccount.getExternalId(), uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }

@@ -53,7 +53,7 @@ public class GoCardlessPaymentHandlerTest {
     @Before
     public void setUp() {
         goCardlessPaymentHandler = new GoCardlessPaymentHandler(mockedPaymentService, mockedGoCardlessEventService);
-        when(mockedPaymentService.findTransaction(goCardlessPaymentFixture.getTransactionId())).thenReturn(payment);
+        when(mockedPaymentService.findPayment(goCardlessPaymentFixture.getTransactionId())).thenReturn(payment);
     }
 
     @Test

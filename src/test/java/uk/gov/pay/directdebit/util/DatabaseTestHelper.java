@@ -81,7 +81,7 @@ public class DatabaseTestHelper {
     }
 
 
-    public List<Map<String, Object>> getTransactionsForMandate(MandateExternalId mandateExternalId) {
+    public List<Map<String, Object>> getPaymentsForMandate(MandateExternalId mandateExternalId) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT p.* from payments p JOIN mandates m ON p.mandate_id = m.id WHERE m.external_id = :mandateExternalId")

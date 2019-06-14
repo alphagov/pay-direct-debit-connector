@@ -27,7 +27,7 @@ public class PaymentViewResource {
     }
 
     @GET
-    @Path("/v1/api/accounts/{accountId}/transactions/view")
+    @Path("/v1/api/accounts/{accountId}/payments/view")
     @Produces(APPLICATION_JSON)
     @Timed
     public Response getPaymentView(

@@ -78,7 +78,7 @@ public class GoCardlessMandateHandlerTest {
     public void setUp() {
         goCardlessMandateHandler = new GoCardlessMandateHandler(paymentService, goCardlessService, directDebitEventService, 
                 mandateStateUpdateService, mandateQueryService);
-        when(paymentService.findTransactionsForMandate(mandateFixture.getExternalId())).thenReturn(ImmutableList
+        when(paymentService.findPaymentsForMandate(mandateFixture.getExternalId())).thenReturn(ImmutableList
                 .of(paymentFixture.toEntity()));
     }
 

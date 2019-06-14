@@ -18,8 +18,8 @@ import static java.lang.String.format;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class PaymentViewResultResponse {
 
-    @JsonProperty("transaction_id")
-    private String transactionId;
+    @JsonProperty("payment_id")
+    private String paymentId;
 
     @JsonProperty
     private Long amount;
@@ -50,7 +50,7 @@ public class PaymentViewResultResponse {
     private List<Link> links = new ArrayList<>();
 
 
-    public PaymentViewResultResponse(String transactionId,
+    public PaymentViewResultResponse(String paymentId,
                                      Long amount,
                                      String reference,
                                      String description,
@@ -59,7 +59,7 @@ public class PaymentViewResultResponse {
                                      String email,
                                      ExternalPaymentState state,
                                      String mandateExternalId) {
-        this.transactionId = transactionId;
+        this.paymentId = paymentId;
         this.amount = amount;
         this.reference = reference;
         this.description = description;
@@ -70,8 +70,8 @@ public class PaymentViewResultResponse {
         this.mandateExternalId = mandateExternalId;
     }
 
-    public String getTransactionId() {
-        return transactionId;
+    public String getPaymentId() {
+        return paymentId;
     }
 
     public Long getAmount() {
@@ -118,7 +118,7 @@ public class PaymentViewResultResponse {
 
         PaymentViewResultResponse that = (PaymentViewResultResponse) o;
 
-        return Objects.equals(transactionId, that.transactionId)
+        return Objects.equals(paymentId, that.paymentId)
                 && Objects.equals(amount, that.amount)
                 && Objects.equals(description, that.description)
                 && Objects.equals(reference, that.reference)
@@ -131,12 +131,12 @@ public class PaymentViewResultResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(transactionId, amount, description, reference, createdDate, name, email, state, mandateExternalId);
+        return Objects.hash(paymentId, amount, description, reference, createdDate, name, email, state, mandateExternalId);
     }
 
     @Override
     public String toString() {
-        return format("PaymentResponse{transactionId='%s', amount='%s', reference='%s', createdDate='%s', name='%s', email='%s', state='%s'}",
-                transactionId, amount, reference, createdDate, name, email, state.getState());
+        return format("PaymentResponse{paymentId='%s', amount='%s', reference='%s', createdDate='%s', name='%s', email='%s', state='%s'}",
+                paymentId, amount, reference, createdDate, name, email, state.getState());
     }
 }

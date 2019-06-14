@@ -65,15 +65,15 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 GoCardlessMandateAction.SUBMITTED, this::findMandatePendingEventOrInsertOneIfItDoesNotExist,
                 GoCardlessMandateAction.ACTIVE, mandateStateUpdateService::mandateActiveFor,
                 GoCardlessMandateAction.CANCELLED, (Mandate mandate) -> {
-                    paymentService.findTransactionsForMandate(mandate.getExternalId()).stream()
-                            .filter(transaction -> !paymentService.findPaymentSubmittedEventFor(transaction).isPresent())
+                    paymentService.findPaymentsForMandate(mandate.getExternalId()).stream()
+                            .filter(payment -> !paymentService.findPaymentSubmittedEventFor(payment).isPresent())
                             .forEach(paymentService::paymentFailedWithoutEmailFor);
 
                     return mandateStateUpdateService.mandateCancelledFor(mandate);
                 },
                 GoCardlessMandateAction.FAILED, (Mandate mandate) -> {
                     paymentService
-                            .findTransactionsForMandate(mandate.getExternalId())
+                            .findPaymentsForMandate(mandate.getExternalId())
                             .forEach(paymentService::paymentFailedWithoutEmailFor);
 
                     return mandateStateUpdateService.mandateFailedFor(mandate);

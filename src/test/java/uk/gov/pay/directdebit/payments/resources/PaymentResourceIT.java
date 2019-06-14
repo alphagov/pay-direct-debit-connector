@@ -231,7 +231,7 @@ public class PaymentResourceIT {
 
         String requestPath = CHARGE_API_PATH
                 .replace("{accountId}", accountExternalId)
-                .replace("{transactionExternalId}", paymentFixture.getExternalId());
+                .replace("{paymentExternalId}", paymentFixture.getExternalId());
 
         ValidatableResponse getChargeResponse = givenSetup()
                 .get(requestPath)
@@ -263,7 +263,7 @@ public class PaymentResourceIT {
 
         String requestPath2 = CHARGE_API_PATH
                 .replace("{accountId}", accountExternalId)
-                .replace("{transactionExternalId}", paymentFixture.getExternalId());
+                .replace("{paymentExternalId}", paymentFixture.getExternalId());
 
         ValidatableResponse getChargeFromTokenResponse = givenSetup()
                 .get(requestPath2)
@@ -300,7 +300,7 @@ public class PaymentResourceIT {
     private String expectedTransactionLocationFor(String accountId, String chargeId) {
         return "http://localhost:" + testContext.getPort() + CHARGE_API_PATH
                 .replace("{accountId}", accountId)
-                .replace("{transactionExternalId}", chargeId);
+                .replace("{paymentExternalId}", chargeId);
     }
 
     private RequestSpecification givenSetup() {

@@ -12,6 +12,7 @@ public class EventMapper implements RowMapper<DirectDebitEvent> {
     private static final String ID_COLUMN = "id";
     private static final String EXTERNAL_ID_COLUMN = "external_id";
     private static final String MANDATE_ID_COLUMN = "mandate_id";
+    //TODO this will stay as transaction_id for the time being as the events table is likely to be replaced all-together.
     private static final String TRANSACTION_ID_COLUMN = "transaction_id";
     private static final String EVENT_TYPE_COLUMN = "event_type";
     private static final String EVENT_COLUMN = "event";

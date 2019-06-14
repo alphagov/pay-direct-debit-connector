@@ -50,7 +50,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 .map((action) -> getHandledActions().get(action))
                 .map((handledAction) -> {
                     GoCardlessPayment goCardlessPayment = goCardlessService.findPaymentForEvent(event);
-                    Payment payment = paymentService.findTransaction(goCardlessPayment.getTransactionId());
+                    Payment payment = paymentService.findPayment(goCardlessPayment.getTransactionId());
                     if (isValidOrganisation(payment, event)) {
                         return handledAction.apply(payment);
                     } else {

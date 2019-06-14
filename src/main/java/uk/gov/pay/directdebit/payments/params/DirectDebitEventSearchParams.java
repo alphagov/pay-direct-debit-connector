@@ -12,19 +12,25 @@ public class DirectDebitEventSearchParams {
     private final ZonedDateTime toDate;
     private final ZonedDateTime fromDate;
     private final String mandateExternalId;
-    private final String transactionExternalId;
+    private final String paymentExternalId;
     private final Integer displaySize;
     private final Integer page;
 
     public DirectDebitEventSearchParamsBuilder copy() {
-        return new DirectDebitEventSearchParamsBuilder().page(getPage()).pageSize(getDisplaySize()).transactionExternalId(getTransactionExternalId()).mandateExternalId(getMandateExternalId()).fromDate(getFromDate()).toDate(getToDate());
+        return new DirectDebitEventSearchParamsBuilder()
+                .page(getPage())
+                .pageSize(getDisplaySize())
+                .paymentExternalId(getPaymentExternalId())
+                .mandateExternalId(getMandateExternalId())
+                .fromDate(getFromDate())
+                .toDate(getToDate());
     }
     
     private DirectDebitEventSearchParams(DirectDebitEventSearchParamsBuilder builder) {
         this.toDate = builder.toDate;
         this.fromDate = builder.fromDate;
         this.mandateExternalId = builder.mandateExternalId;
-        this.transactionExternalId = builder.transactionExternalId;
+        this.paymentExternalId = builder.paymentExternalId;
         this.displaySize = builder.displaySize;
         this.page = builder.page;
     }
@@ -41,8 +47,8 @@ public class DirectDebitEventSearchParams {
         if (mandateExternalId != null)
             params.put("mandate_external_id", mandateExternalId);
         
-        if (transactionExternalId != null)
-            params.put("transaction_external_id", transactionExternalId);
+        if (paymentExternalId != null)
+            params.put("payment_external_id", paymentExternalId);
 
         params.put("page", page.toString());
         params.put("display_size", displaySize.toString());
@@ -62,8 +68,8 @@ public class DirectDebitEventSearchParams {
         return mandateExternalId;
     }
 
-    public String getTransactionExternalId() {
-        return transactionExternalId;
+    public String getPaymentExternalId() {
+        return paymentExternalId;
     }
 
     public Integer getDisplaySize() {
@@ -81,7 +87,7 @@ public class DirectDebitEventSearchParams {
         private ZonedDateTime toDate;
         private ZonedDateTime fromDate;
         private String mandateExternalId;
-        private String transactionExternalId;
+        private String paymentExternalId;
 
         public DirectDebitEventSearchParams build() {
             return new DirectDebitEventSearchParams(this);
@@ -92,8 +98,8 @@ public class DirectDebitEventSearchParams {
             return this;
         }
 
-        public DirectDebitEventSearchParamsBuilder transactionExternalId(String transactionExternalId) {
-            this.transactionExternalId = transactionExternalId;
+        public DirectDebitEventSearchParamsBuilder paymentExternalId(String paymentExternalId) {
+            this.paymentExternalId = paymentExternalId;
             return this;
         }
 

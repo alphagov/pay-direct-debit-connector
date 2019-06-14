@@ -133,7 +133,7 @@ public class PaymentResponse {
     public String toString() {
         return "PaymentResponse{" +
                 "dataLinks=" + dataLinks +
-                ", transactionExternalId='" + transactionExternalId + '\'' +
+                ", paymentExternalId='" + transactionExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +
                 ", amount=" + amount +
                 ", returnUrl='" + returnUrl + '\'' +

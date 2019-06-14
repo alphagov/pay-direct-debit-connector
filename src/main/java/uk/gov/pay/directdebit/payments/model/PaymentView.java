@@ -4,7 +4,7 @@ import java.time.ZonedDateTime;
 
 public class PaymentView {
     private String gatewayExternalId;
-    private String transactionExternalId;
+    private String paymentExternalId;
     private Long amount;
     private String reference;
     private String description;
@@ -15,7 +15,7 @@ public class PaymentView {
     private String mandateExternalId;
 
     public PaymentView(String gatewayExternalId,
-                       String transactionExternalId,
+                       String paymentExternalId,
                        Long amount,
                        String reference,
                        String description,
@@ -25,7 +25,7 @@ public class PaymentView {
                        PaymentState state,
                        String mandateExternalId) {
         this.gatewayExternalId = gatewayExternalId;
-        this.transactionExternalId = transactionExternalId;
+        this.paymentExternalId = paymentExternalId;
         this.amount = amount;
         this.reference = reference;
         this.description = description;
@@ -40,8 +40,8 @@ public class PaymentView {
         return gatewayExternalId;
     }
 
-    public String getTransactionExternalId() {
-        return transactionExternalId;
+    public String getPaymentExternalId() {
+        return paymentExternalId;
     }
 
     public Long getAmount() {
@@ -82,7 +82,7 @@ public class PaymentView {
         PaymentView that = (PaymentView) o;
 
         if (!gatewayExternalId.equals(that.gatewayExternalId)) return false;
-        if (!transactionExternalId.equals(that.transactionExternalId)) return false;
+        if (!paymentExternalId.equals(that.paymentExternalId)) return false;
         if (!amount.equals(that.amount)) return false;
         if (description != null ? !description.equals(that.description) : that.description != null) return false;
         if (reference != null ? !reference.equals(that.reference) : that.reference != null) return false;
@@ -96,7 +96,7 @@ public class PaymentView {
     @Override
     public int hashCode() {
         int result = gatewayExternalId.hashCode();
-        result = 31 * result + transactionExternalId.hashCode();
+        result = 31 * result + paymentExternalId.hashCode();
         result = 31 * result + amount.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (reference != null ? reference.hashCode() : 0);

@@ -39,7 +39,7 @@ public class GetDirectDebitEventsIT {
     public static DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
     
     private MandateFixture testMandate;
-    private PaymentFixture testTransaction;
+    private PaymentFixture testPayment;
     private TestContext testContext;
 
     @Before
@@ -47,7 +47,7 @@ public class GetDirectDebitEventsIT {
         testContext = app.getTestContext();
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
         this.testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
-        this.testTransaction = PaymentFixture.aPaymentFixture().withMandateFixture(testMandate).insert(testContext.getJdbi());
+        this.testPayment = PaymentFixture.aPaymentFixture().withMandateFixture(testMandate).insert(testContext.getJdbi());
     }
     
     @After
@@ -59,7 +59,7 @@ public class GetDirectDebitEventsIT {
     public void shouldReturnAllEventsForNoSearchParameters() {
         aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
-                .withTransactionId(testTransaction.getId())
+                .withTransactionId(testPayment.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .withEventDate(ZonedDateTime.now())
@@ -81,7 +81,7 @@ public class GetDirectDebitEventsIT {
     public void shouldReturnBadRequestIfDatesAreNotValid() {
         aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
-                .withTransactionId(testTransaction.getId())
+                .withTransactionId(testPayment.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .withEventDate(ZonedDateTime.now())
@@ -101,17 +101,17 @@ public class GetDirectDebitEventsIT {
         DirectDebitEventFixture directDebitEventFixture = aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
                 .withExternalId("externalId")
-                .withTransactionId(testTransaction.getId())
+                .withTransactionId(testPayment.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?to_date=%s&from_date=%s&display_size=100&page=1&mandate_external_id=%s&transaction_external_id=%s",
+        String requestPath = format("/v1/events?to_date=%s&from_date=%s&display_size=100&page=1&mandate_external_id=%s&payment_external_id=%s",
                 ZonedDateTime.now().plusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
                 ZonedDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
                 testMandate.getExternalId(),
-                testTransaction.getExternalId());
+                testPayment.getExternalId());
         
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -126,7 +126,7 @@ public class GetDirectDebitEventsIT {
                 .body("results[0].event_date", is(directDebitEventFixture.getEventDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
                 .body("results[0].external_id", is("externalId"))
                 .body("results[0].mandate_external_id", is(testMandate.getExternalId().toString()))
-                .body("results[0].transaction_external_id", is(testTransaction.getExternalId()))
+                .body("results[0].payment_external_id", is(testPayment.getExternalId()))
         ;
     }
 
@@ -134,17 +134,17 @@ public class GetDirectDebitEventsIT {
     public void shouldReturnNoEventsForNonExistentDates() {
         aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
-                .withTransactionId(testTransaction.getId())
+                .withTransactionId(testPayment.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?to_date=%s&from_date=%s&display_size=100&page=1&mandate_external_id=%s&transaction_external_id=%s",
+        String requestPath = format("/v1/events?to_date=%s&from_date=%s&display_size=100&page=1&mandate_external_id=%s&payment_external_id=%s",
                 ZonedDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
                 ZonedDateTime.now().minusMinutes(5).format(DateTimeFormatter.ISO_INSTANT),
                 testMandate.getId().toString(),
-                testTransaction.getId().toString());
+                testPayment.getId().toString());
 
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -160,7 +160,7 @@ public class GetDirectDebitEventsIT {
     public void shouldReturnAnEventForBeforeParameter() {
         aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
-                .withTransactionId(testTransaction.getId())
+                .withTransactionId(testPayment.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .withEventDate(ZonedDateTime.now())
@@ -183,7 +183,7 @@ public class GetDirectDebitEventsIT {
     public void shouldReturnAnEventForAfterParameter() {
         aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
-                .withTransactionId(testTransaction.getId())
+                .withTransactionId(testPayment.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .withEventDate(ZonedDateTime.now())
@@ -206,7 +206,7 @@ public class GetDirectDebitEventsIT {
     public void shouldReturnAnEventForMandateIdParameter() {
         aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
-                .withTransactionId(testTransaction.getId())
+                .withTransactionId(testPayment.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .withEventDate(ZonedDateTime.now())
@@ -228,13 +228,13 @@ public class GetDirectDebitEventsIT {
     public void shouldReturnAnEventForTransactionIdParameter() {
         aDirectDebitEventFixture()
                 .withMandateId(testMandate.getId())
-                .withTransactionId(testTransaction.getId())
+                .withTransactionId(testPayment.getId())
                 .withEventType(MANDATE)
                 .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                 .withEventDate(ZonedDateTime.now())
                 .insert(testContext.getJdbi());
 
-        String requestPath = format("/v1/events?transaction_external_id=%s", testTransaction.getExternalId());
+        String requestPath = format("/v1/events?payment_external_id=%s", testPayment.getExternalId());
 
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -251,14 +251,14 @@ public class GetDirectDebitEventsIT {
         for (int i = 0; i < 4; i++) {
             aDirectDebitEventFixture()
                     .withMandateId(testMandate.getId())
-                    .withTransactionId(testTransaction.getId())
+                    .withTransactionId(testPayment.getId())
                     .withEventType(MANDATE)
                     .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                     .withEventDate(ZonedDateTime.now())
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = format("/v1/events?transaction_external_id=%s&display_size=2", testTransaction.getExternalId());
+        String requestPath = format("/v1/events?payment_external_id=%s&display_size=2", testPayment.getExternalId());
 
         given().port(testContext.getPort())
                 .contentType(JSON)
@@ -280,7 +280,7 @@ public class GetDirectDebitEventsIT {
                     .withId((long) i)
                     .withExternalId("testId" + i)
                     .withMandateId(testMandate.getId())
-                    .withTransactionId(testTransaction.getId())
+                    .withTransactionId(testPayment.getId())
                     .withEventType(MANDATE)
                     .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                     .withEventDate(ZonedDateTime.now())
@@ -310,7 +310,7 @@ public class GetDirectDebitEventsIT {
             aDirectDebitEventFixture()
                     .withId((long) i)
                     .withMandateId(testMandate.getId())
-                    .withTransactionId(testTransaction.getId())
+                    .withTransactionId(testPayment.getId())
                     .withEventType(MANDATE)
                     .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                     .withEventDate(ZonedDateTime.now())
@@ -349,7 +349,7 @@ public class GetDirectDebitEventsIT {
             aDirectDebitEventFixture()
                     .withId((long) i)
                     .withMandateId(testMandate.getId())
-                    .withTransactionId(testTransaction.getId())
+                    .withTransactionId(testPayment.getId())
                     .withEventType(MANDATE)
                     .withEvent(PAYMENT_ACKNOWLEDGED_BY_PROVIDER)
                     .withEventDate(ZonedDateTime.now())

@@ -50,7 +50,7 @@ public class DirectDebitEventService {
         return insertEventFor(payment, directDebitEvent);
     }
 
-    public DirectDebitEvent registerTransactionCreatedEventFor(Payment payment) {
+    public DirectDebitEvent registerPaymentCreatedEventFor(Payment payment) {
         DirectDebitEvent directDebitEvent = transactionCreated(payment.getMandate().getId(), payment.getId());
         return insertEventFor(payment.getMandate(), directDebitEvent);
     }

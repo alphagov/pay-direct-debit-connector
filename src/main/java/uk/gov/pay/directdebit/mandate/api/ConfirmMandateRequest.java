@@ -6,22 +6,18 @@ import uk.gov.pay.directdebit.payers.model.SortCode;
 
 public class ConfirmMandateRequest {
     private final SortCode sortCode;
-    
+
     private final AccountNumber accountNumber;
 
-    private String transactionExternalId;
-
-    public ConfirmMandateRequest(SortCode sortCode, AccountNumber accountNumber, String transactionExternalId) {
+    public ConfirmMandateRequest(SortCode sortCode, AccountNumber accountNumber) {
         this.sortCode = sortCode;
         this.accountNumber = accountNumber;
-        this.transactionExternalId = transactionExternalId;
     }
-    
+
     public static ConfirmMandateRequest of(Map<String, String> mandateConfirmation) {
         return new ConfirmMandateRequest(
                 SortCode.of(mandateConfirmation.get("sort_code")),
-                AccountNumber.of(mandateConfirmation.get("account_number")),
-                mandateConfirmation.get("transaction_external_id")
+                AccountNumber.of(mandateConfirmation.get("account_number"))
         );
     }
 
@@ -31,9 +27,5 @@ public class ConfirmMandateRequest {
 
     public AccountNumber getAccountNumber() {
         return accountNumber;
-    }
-
-    public String getTransactionExternalId() {
-        return transactionExternalId;
     }
 }

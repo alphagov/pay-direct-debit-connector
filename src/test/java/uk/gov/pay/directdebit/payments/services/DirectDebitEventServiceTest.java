@@ -71,7 +71,7 @@ public class DirectDebitEventServiceTest {
 
     @Test
     public void registerTransactionCreatedEventFor_shouldInsertAnEventWhenTransactionIsCreated() {
-        service.registerTransactionCreatedEventFor(paymentFixture.toEntity());
+        service.registerPaymentCreatedEventFor(paymentFixture.toEntity());
 
         verify(mockedDirectDebitEventDao).insert(prCaptor.capture());
         DirectDebitEvent directDebitEvent = prCaptor.getValue();

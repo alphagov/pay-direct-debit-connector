@@ -15,8 +15,8 @@ public class DirectDebitEventExternalView {
     @JsonProperty("mandate_external_id")
     private final String mandateExternalId;
 
-    @JsonProperty("transaction_external_id")
-    private final String transactionExternalId;
+    @JsonProperty("payment_external_id")
+    private final String paymentExternalId;
 
     @JsonProperty("event_type")
     private final DirectDebitEvent.Type eventType;
@@ -31,7 +31,7 @@ public class DirectDebitEventExternalView {
     public DirectDebitEventExternalView(DirectDebitEvent directDebitEvent) {
         this.externalId = directDebitEvent.getExternalId();
         this.mandateExternalId = directDebitEvent.getMandateExternalId();
-        this.transactionExternalId = directDebitEvent.getPaymentExternalId();
+        this.paymentExternalId = directDebitEvent.getPaymentExternalId();
         this.event = directDebitEvent.getEvent();
         this.eventType = directDebitEvent.getEventType();
         this.eventDate = directDebitEvent.getEventDate();
@@ -45,8 +45,8 @@ public class DirectDebitEventExternalView {
         return mandateExternalId;
     }
 
-    public String getTransactionExternalId() {
-        return transactionExternalId;
+    public String getPaymentExternalId() {
+        return paymentExternalId;
     }
 
     public DirectDebitEvent.Type getEventType() {
