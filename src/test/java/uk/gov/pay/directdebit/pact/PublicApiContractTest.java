@@ -11,6 +11,7 @@ import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
@@ -35,6 +36,7 @@ import java.util.Optional;
         consumers = {"publicapi"})
 //uncommenting the below is useful for testing pacts locally. grab the pact from the broker and put it in /pacts
 //@PactFolder("pacts")
+@Ignore
 public class PublicApiContractTest {
 
     @ClassRule

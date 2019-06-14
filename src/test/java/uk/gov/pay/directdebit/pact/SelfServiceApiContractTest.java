@@ -11,6 +11,7 @@ import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -20,6 +21,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
         consumers = {"selfservice"})
+@Ignore
 public class SelfServiceApiContractTest {
 
     @ClassRule
