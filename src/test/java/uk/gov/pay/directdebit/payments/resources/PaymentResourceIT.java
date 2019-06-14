@@ -40,7 +40,9 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -63,6 +65,8 @@ public class PaymentResourceIT {
     private static final String JSON_RETURN_URL_KEY = "return_url";
     private static final String JSON_AGREEMENT_ID_KEY = "agreement_id";
     private static final String JSON_CHARGE_KEY = "charge_id";
+    private static final String JSON_PROVIDER_ID_KEY = "provider_id";
+    private static final String JSON_MANDATE_ID_KEY = "mandate_id";
     private static final String JSON_STATE_KEY = "state.status";
     private static final long AMOUNT = 6234L;
     private GatewayAccountFixture testGatewayAccount;
@@ -137,6 +141,8 @@ public class PaymentResourceIT {
                 .body(JSON_AMOUNT_KEY, isNumber(AMOUNT))
                 .body(JSON_REFERENCE_KEY, is(expectedReference))
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
+                .body(JSON_MANDATE_ID_KEY, is(mandateFixture.getExternalId().toString()))
+                .body("$", not(hasKey(JSON_PROVIDER_ID_KEY)))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
@@ -207,6 +213,7 @@ public class PaymentResourceIT {
                 .body(JSON_AMOUNT_KEY, isNumber(AMOUNT))
                 .body(JSON_REFERENCE_KEY, is(expectedReference))
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
+                .body(JSON_MANDATE_ID_KEY, is(mandate.getExternalId().toString()))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
