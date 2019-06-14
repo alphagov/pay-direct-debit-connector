@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class Mandate {
+    private final String description;
     private Long id;
     private final MandateExternalId externalId;
     private MandateState state;
@@ -31,6 +32,11 @@ public class Mandate {
         this.createdDate = builder.createdDate;
         this.payer = builder.payer;
         this.paymentProviderMandateId = builder.paymentProviderId;
+        this.description = builder.description;
+    }
+
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
     }
 
     public Payer getPayer() {
@@ -124,6 +130,7 @@ public class Mandate {
         private ZonedDateTime createdDate;
         private Payer payer;
         private PaymentProviderMandateId paymentProviderId;
+        private String description;
 
         private MandateBuilder() {
         }
@@ -179,6 +186,11 @@ public class Mandate {
 
         public MandateBuilder withPaymentProviderId(PaymentProviderMandateId paymentProviderId) {
             this.paymentProviderId = paymentProviderId;
+            return this;
+        }
+        
+        public MandateBuilder withDescription(String description) {
+            this.description = description;
             return this;
         }
 

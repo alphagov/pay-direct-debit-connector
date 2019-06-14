@@ -2,13 +2,13 @@ package uk.gov.pay.directdebit.gatewayaccounts.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.validator.constraints.Length;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount.Type;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateGatewayAccountRequest {
@@ -19,10 +19,10 @@ public class CreateGatewayAccountRequest {
     @NotNull
     private final Type type;
 
-    @Size(max = 255)
+    @Length(max = 255, message = "Field [description] must have a maximum length of {max}")
     private final String description;
 
-    @Size(max = 255)
+    @Length(max = 255, message = "Field [analytics_id] must have a maximum length of {max}")
     private final String analyticsId;
 
     private final PaymentProviderAccessToken accessToken;
