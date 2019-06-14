@@ -19,10 +19,10 @@ public class CreateGatewayAccountRequest {
     @NotNull
     private final Type type;
 
-    @Length(max = 255, message = "Field [description] must have a maximum length of 255")
+    @Length(max = 255, message = "Field [description] must have a maximum length of {max}")
     private final String description;
 
-    @Length(max = 255, message = "Field [analytics_id] must have a maximum length of 255")
+    @Length(max = 255, message = "Field [analytics_id] must have a maximum length of {max}")
     private final String analyticsId;
 
     private final PaymentProviderAccessToken accessToken;

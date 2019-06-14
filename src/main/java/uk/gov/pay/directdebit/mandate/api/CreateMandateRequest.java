@@ -5,22 +5,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateMandateRequest {
 
     @NotNull(message = "Field [return_url] cannot be null")
-    @Length(min = 1, max = 255, message = "Field [return_url] must have a size between 1 and 255")
+    @Length(min = 1, max = 255, message = "Field [return_url] must have a size between {min} and {max}")
     @JsonProperty("return_url")
     private String returnUrl;
 
     @NotNull(message = "Field [service_reference] cannot be null")
-    @Length(min = 1, max = 255, message = "Field [service_reference] must have a size between 1 and 255")
+    @Length(min = 1, max = 255, message = "Field [service_reference] must have a size between {min} and {max}")
     @JsonProperty("service_reference")
     private String reference;
 
     @JsonProperty
-    @Length(min = 1, max = 255, message = "Field [description] must have a size between 1 and 255")
+    @Length(min = 1, max = 255, message = "Field [description] must have a size between {min} and {max}")
     private String description;
 
     public CreateMandateRequest() {}
@@ -38,7 +39,7 @@ public class CreateMandateRequest {
         return reference;
     }
 
-    public String getDescription() {
-        return description;
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
     }
 }

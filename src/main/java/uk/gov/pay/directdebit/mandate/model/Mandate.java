@@ -35,8 +35,8 @@ public class Mandate {
         this.description = builder.description;
     }
 
-    public String getDescription() {
-        return description;
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
     }
 
     public Payer getPayer() {

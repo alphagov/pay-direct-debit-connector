@@ -137,7 +137,9 @@ public class MandateResourceIT {
                 .put("return_url", returnUrl)
                 .put("service_reference", "test-service-reference");
         
-        if (description != null) createMandateBuilder.put("description", description);
+        if (description != null) {
+            createMandateBuilder.put("description", description);
+        }
         
         String requestPath = "/v1/api/accounts/{accountId}/mandates".replace("{accountId}", accountExternalId);
 

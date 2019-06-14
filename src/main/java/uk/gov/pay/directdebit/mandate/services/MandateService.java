@@ -103,7 +103,7 @@ public class MandateService {
                             .withState(MandateState.CREATED)
                             .withReturnUrl(createRequest.getReturnUrl())
                             .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
-                            .withDescription(createRequest.getDescription())
+                            .withDescription(createRequest.getDescription().orElse(null))
                             .build();
 
                     LOGGER.info("Creating mandate external id {}", mandate.getExternalId());
@@ -131,7 +131,7 @@ public class MandateService {
                 dataLinks,
                 mandate.getServiceReference(),
                 mandate.getMandateBankStatementReference(),
-                mandate.getDescription());
+                mandate.getDescription().orElse(null));
     }
 
     public TokenExchangeDetails getMandateFor(String token) {
