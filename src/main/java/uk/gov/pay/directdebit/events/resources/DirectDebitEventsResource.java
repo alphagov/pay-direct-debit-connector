@@ -35,7 +35,10 @@ public class DirectDebitEventsResource {
                                @QueryParam("page") Integer page,
                                @QueryParam("mandate_external_id") String mandateId,
                                @QueryParam("payment_external_id") String paymentId,
+                               @QueryParam("transaction_external_id") String transactionId,
                                @Context UriInfo uriInfo) {
+
+        paymentId = paymentId == null ? transactionId : paymentId;
 
         DirectDebitEventSearchParams searchParams = new DirectDebitEventSearchParams.DirectDebitEventSearchParamsBuilder()
                 .toDate(toDate)
