@@ -47,7 +47,9 @@ public class MandateResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response createMandate(@PathParam("accountId") GatewayAccount gatewayAccount, Map<String, String> createMandateRequestMap, @Context UriInfo uriInfo) {
+    public Response createMandate(@PathParam("accountId") GatewayAccount gatewayAccount,
+                                  Map<String, String> createMandateRequestMap,
+                                  @Context UriInfo uriInfo) {
         LOGGER.info("Received create mandate request with gateway account external id - {}", gatewayAccount.getExternalId());
         createMandateRequestValidator.validate(createMandateRequestMap);
         CreateMandateRequest createMandateRequest = CreateMandateRequest.of(createMandateRequestMap);
@@ -59,7 +61,9 @@ public class MandateResource {
     @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getMandate(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") MandateExternalId mandateExternalId, @Context UriInfo uriInfo) {
+    public Response getMandate(@PathParam("accountId") String accountExternalId,
+                               @PathParam("mandateExternalId") MandateExternalId mandateExternalId,
+                               @Context UriInfo uriInfo) {
         LOGGER.info("Retrieving mandate {} for frontend", mandateExternalId);
         GetMandateResponse response = mandateService.populateGetMandateResponse(accountExternalId, mandateExternalId, uriInfo);
         return Response.ok(response).build();
@@ -69,19 +73,22 @@ public class MandateResource {
     @Path("/v1/accounts/{accountId}/mandates/{mandateExternalId}")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getMandateFrontend(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") MandateExternalId mandateExternalId) {
+    public Response getMandateFrontend(@PathParam("accountId") String accountExternalId,
+                                       @PathParam("mandateExternalId") MandateExternalId mandateExternalId) {
         LOGGER.info("Retrieving mandate {} for frontend", mandateExternalId);
         DirectDebitInfoFrontendResponse response = mandateService.populateGetMandateResponseForFrontend(accountExternalId, mandateExternalId);
         return Response.ok(response).build();
     }
 
     @GET
-    @Path("/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{transactionExternalId}")
+    @Path("/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{paymentExternalId}")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getMandateWithTransactionFrontend(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") String mandateExternalId, @PathParam("transactionExternalId") String transactionExternalId) {
-        LOGGER.info("Retrieving mandate {} and charge {} for frontend", mandateExternalId, transactionExternalId);
-        DirectDebitInfoFrontendResponse response = mandateService.populateGetMandateWithTransactionResponseForFrontend(accountExternalId, transactionExternalId);
+    public Response getMandateWithTransactionFrontend(@PathParam("accountId") String accountExternalId,
+                                                      @PathParam("mandateExternalId") String mandateExternalId,
+                                                      @PathParam("paymentExternalId") String paymentExternalId) {
+        LOGGER.info("Retrieving mandate {} and charge {} for frontend", mandateExternalId, paymentExternalId);
+        DirectDebitInfoFrontendResponse response = mandateService.populateGetMandateWithTransactionResponseForFrontend(accountExternalId, paymentExternalId);
         return Response.ok(response).build();
     }
     
@@ -89,7 +96,8 @@ public class MandateResource {
     @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/cancel")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response userCancelSetup(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") MandateExternalId mandateExternalId) {
+    public Response userCancelSetup(@PathParam("accountId") String accountExternalId,
+                                    @PathParam("mandateExternalId") MandateExternalId mandateExternalId) {
         LOGGER.info("User wants to cancel setup of mandate with external id - {}", mandateExternalId);
         mandateService.cancelMandateCreation(mandateExternalId);
         return Response.noContent().build();
@@ -99,7 +107,8 @@ public class MandateResource {
     @Path("/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/change-payment-method")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response userChangePaymentMethod(@PathParam("accountId") String accountExternalId, @PathParam("mandateExternalId") MandateExternalId mandateExternalId) {
+    public Response userChangePaymentMethod(@PathParam("accountId") String accountExternalId,
+                                            @PathParam("mandateExternalId") MandateExternalId mandateExternalId) {
         LOGGER.info("User wants to change payment method for mandate with external id - {}", mandateExternalId);
         mandateService.changePaymentMethodFor(mandateExternalId);
         return Response.noContent().build();
@@ -111,12 +120,12 @@ public class MandateResource {
     @Produces(APPLICATION_JSON)
     @Timed
     public Response confirm(@PathParam("accountId") GatewayAccount gatewayAccount,
-            @PathParam("mandateExternalId") MandateExternalId mandateExternalId,
-            Map<String, String> mandateConfirmationRequestMap) {
+                            @PathParam("mandateExternalId") MandateExternalId mandateExternalId,
+                            Map<String, String> mandateConfirmationRequestMap) {
 
         LOGGER.info("Confirming direct debit details for mandate with id: {}", mandateExternalId);
         Mandate mandate = mandateQueryService.findByExternalId(mandateExternalId);
-        ConfirmMandateRequest confirmMandateRequest = ConfirmMandateRequest.of(mandateConfirmationRequestMap); 
+        ConfirmMandateRequest confirmMandateRequest = ConfirmMandateRequest.of(mandateConfirmationRequestMap);
         mandateService.confirm(gatewayAccount, mandate, confirmMandateRequest);
         LOGGER.info("Confirmed direct debit details for mandate with id: {}", mandateExternalId);
 

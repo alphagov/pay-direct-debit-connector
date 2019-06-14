@@ -139,7 +139,7 @@ public class MandateServiceTest {
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId());
         assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
-        assertThat(mandateResponseForFrontend.getTransaction(), is(nullValue()));
+        assertThat(mandateResponseForFrontend.getPayment(), is(nullValue()));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class MandateServiceTest {
                 .aPaymentFixture()
                 .withMandateFixture(mandateFixture);
         Mandate mandate = mandateFixture.toEntity();
-        when(paymentService.findTransactionForExternalId(mandateFixture.getExternalId().toString())).thenReturn(paymentFixture.toEntity());
+        when(paymentService.findPaymentForExternalId(mandateFixture.getExternalId().toString())).thenReturn(paymentFixture.toEntity());
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateWithTransactionResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId().toString());
         assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference()));
         assertThat(mandateResponseForFrontend.getGatewayAccountExternalId(), is(mandate.getGatewayAccount().getExternalId()));
@@ -165,11 +165,11 @@ public class MandateServiceTest {
         assertThat(mandateResponseForFrontend.getPayer().getName(), is(payerFixture.getName()));
         assertThat(mandateResponseForFrontend.getPayer().getEmail(), is(payerFixture.getEmail()));
         assertThat(mandateResponseForFrontend.getPayer().getAccountRequiresAuthorisation(), is(payerFixture.getAccountRequiresAuthorisation()));
-        assertThat(mandateResponseForFrontend.getTransaction().getAmount(), is(paymentFixture.getAmount()));
-        assertThat(mandateResponseForFrontend.getTransaction().getDescription(), is(paymentFixture.getDescription()));
-        assertThat(mandateResponseForFrontend.getTransaction().getExternalId(), is(paymentFixture.getExternalId()));
-        assertThat(mandateResponseForFrontend.getTransaction().getState(), is(paymentFixture.getState().toExternal()));
-        assertThat(mandateResponseForFrontend.getTransaction().getReference(), is(paymentFixture.getReference()));
+        assertThat(mandateResponseForFrontend.getPayment().getAmount(), is(paymentFixture.getAmount()));
+        assertThat(mandateResponseForFrontend.getPayment().getDescription(), is(paymentFixture.getDescription()));
+        assertThat(mandateResponseForFrontend.getPayment().getExternalId(), is(paymentFixture.getExternalId()));
+        assertThat(mandateResponseForFrontend.getPayment().getState(), is(paymentFixture.getState().toExternal()));
+        assertThat(mandateResponseForFrontend.getPayment().getReference(), is(paymentFixture.getReference()));
     }
 
     @Test

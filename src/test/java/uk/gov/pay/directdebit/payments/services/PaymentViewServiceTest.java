@@ -98,7 +98,7 @@ public class PaymentViewServiceTest {
                 .withToDateString(createdDate.toString());
         List<PaymentViewResultResponse> listResponses = new ArrayList<>();
         for (PaymentView paymentView : paymentViewList) {
-            listResponses.add(new PaymentViewResultResponse(paymentView.getTransactionExternalId(),
+            listResponses.add(new PaymentViewResultResponse(paymentView.getPaymentExternalId(),
                     paymentView.getAmount(), paymentView.getReference(), paymentView.getDescription(),
                     paymentView.getCreatedDate(), paymentView.getName(),
                     paymentView.getEmail(), paymentView.getState().toExternal(),

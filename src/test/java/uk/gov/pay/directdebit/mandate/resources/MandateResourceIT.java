@@ -95,7 +95,7 @@ public class MandateResourceIT {
     }
 
     @Test
-    public void shouldCreateAMandateWithoutTransaction_IfMandateIsOnDemand() throws Exception {
+    public void shouldCreateAMandateWithoutPayment_IfMandateIsOnDemand() throws Exception {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         String returnUrl = "http://example.com/success-page/";
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
@@ -180,7 +180,7 @@ public class MandateResourceIT {
     }
 
     @Test
-    public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenATransactionHasBeenCreated() {
+    public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenAPaymentHasBeenCreated() {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
@@ -188,7 +188,7 @@ public class MandateResourceIT {
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
 
-        PaymentFixture paymentFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
+        PaymentFixture paymentFixture = createPaymentFixtureWith(mandateFixture, PaymentState.NEW);
 
         String requestPath = format("/v1/accounts/%s/mandates/%s/payments/%s",
                 accountExternalId, 
@@ -200,6 +200,7 @@ public class MandateResourceIT {
                 .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
+                .log().body()
                 .body("external_id", is(mandateFixture.getExternalId().toString()))
                 .body("gateway_account_id", isNumber(gatewayAccountFixture.getId()))
                 .body("gateway_account_external_id", is(gatewayAccountFixture.getExternalId()))
@@ -207,10 +208,10 @@ public class MandateResourceIT {
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
-                .body("transaction." + JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
-                .body("transaction." + JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
-                .body("transaction." + JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
-                .body("transaction." + JSON_STATE_KEY, is(paymentFixture.getState().toExternal().getState()))
+                .body("payment." + JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
+                .body("payment." + JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
+                .body("payment." + JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
+                .body("payment." + JSON_STATE_KEY, is(paymentFixture.getState().toExternal().getState()))
                 .body("payer.payer_external_id", is(payerFixture.getExternalId()))
                 .body("payer.account_holder_name", is(payerFixture.getName()))
                 .body("payer.email", is(payerFixture.getEmail()))
@@ -218,7 +219,7 @@ public class MandateResourceIT {
     }
 
     @Test
-    public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenNoTransactionHasBeenCreated() {
+    public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenNoPaymentHasBeenCreated() {
 
         String accountExternalId = gatewayAccountFixture.getExternalId();
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
@@ -244,7 +245,7 @@ public class MandateResourceIT {
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
-                .body("$", not(hasKey("transaction")))
+                .body("$", not(hasKey("payment")))
                 .body("payer.payer_external_id", is(payerFixture.getExternalId()))
                 .body("payer.account_holder_name", is(payerFixture.getName()))
                 .body("payer.email", is(payerFixture.getEmail()))
@@ -308,8 +309,8 @@ public class MandateResourceIT {
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(transaction.get("state"), is("CANCELLED"));
+        Map<String, Object> payment = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
+        assertThat(payment.get("state"), is("CANCELLED"));
     }
 
     @Test
@@ -328,12 +329,12 @@ public class MandateResourceIT {
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
-        assertThat(transaction.get("state"), is("USER_CANCEL_NOT_ELIGIBLE"));
+        Map<String, Object> payment = testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
+        assertThat(payment.get("state"), is("USER_CANCEL_NOT_ELIGIBLE"));
     }
 
     @Test
-    public void confirm_shouldCreateAMandateWithoutTransaction_ifMandateIsOnDemand() {
+    public void confirm_shouldCreateAMandateWithoutPayment_ifMandateIsOnDemand() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
@@ -372,12 +373,12 @@ public class MandateResourceIT {
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
-        MatcherAssert.assertThat(transactionsForMandate, is(empty()));
+        List<Map<String, Object>> paymentsForMandate = testContext.getDatabaseTestHelper().getPaymentsForMandate(mandateFixture.getExternalId());
+        MatcherAssert.assertThat(paymentsForMandate, is(empty()));
     }
 
     @Test
-    public void confirm_shouldCreateACustomerBankAccountMandateWithNoTransaction_ForGoCardless_ifMandateIsOnDemand() {
+    public void confirm_shouldCreateACustomerBankAccountMandateWithNoPayment_ForGoCardless_ifMandateIsOnDemand() {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
@@ -428,11 +429,11 @@ public class MandateResourceIT {
                 .then()
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
-        List<Map<String, Object>> transactionsForMandate = testContext.getDatabaseTestHelper().getTransactionsForMandate(mandateFixture.getExternalId());
-        MatcherAssert.assertThat(transactionsForMandate, is(empty()));
+        List<Map<String, Object>> paymentsForMandate = testContext.getDatabaseTestHelper().getPaymentsForMandate(mandateFixture.getExternalId());
+        MatcherAssert.assertThat(paymentsForMandate, is(empty()));
     }
 
-    private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
+    private PaymentFixture createPaymentFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
         return aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(paymentState)

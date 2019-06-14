@@ -21,7 +21,7 @@ public class CollectPaymentResponse {
     private List<Map<String, Object>> dataLinks;
 
     @JsonProperty("charge_id")
-    private String transactionExternalId;
+    private String paymentExternalId;
 
     @JsonProperty
     private Long amount;
@@ -42,8 +42,8 @@ public class CollectPaymentResponse {
     @JsonProperty
     private ExternalPaymentState state;
 
-    public CollectPaymentResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String description, String reference, ZonedDateTime createdDate, String paymentProvider, List<Map<String, Object>> dataLinks) {
-        this.transactionExternalId = transactionExternalId;
+    public CollectPaymentResponse(String paymentExternalId, ExternalPaymentState state, Long amount, String description, String reference, ZonedDateTime createdDate, String paymentProvider, List<Map<String, Object>> dataLinks) {
+        this.paymentExternalId = paymentExternalId;
         this.state = state;
         this.dataLinks = dataLinks;
         this.amount = amount;
@@ -61,8 +61,8 @@ public class CollectPaymentResponse {
         return dataLinks;
     }
 
-    public String getTransactionExternalId() {
-        return transactionExternalId;
+    public String getPaymentExternalId() {
+        return paymentExternalId;
     }
 
     public Long getAmount() {
@@ -112,7 +112,7 @@ public class CollectPaymentResponse {
         if (!dataLinks.equals(that.dataLinks)) {
             return false;
         }
-        if (!transactionExternalId.equals(that.transactionExternalId)) {
+        if (!paymentExternalId.equals(that.paymentExternalId)) {
             return false;
         }
         if (!amount.equals(that.amount)) {
@@ -136,7 +136,7 @@ public class CollectPaymentResponse {
     @Override
     public int hashCode() {
         int result = dataLinks.hashCode();
-        result = 31 * result + transactionExternalId.hashCode();
+        result = 31 * result + paymentExternalId.hashCode();
         result = 31 * result + amount.hashCode();
         result = 31 * result + paymentProvider.hashCode();
         result = 31 * result + description.hashCode();
@@ -150,7 +150,7 @@ public class CollectPaymentResponse {
     public String toString() {
         return "CollectPaymentResponse{" +
                 "dataLinks=" + dataLinks +
-                ", transactionExternalId='" + transactionExternalId + '\'' +
+                ", paymentExternalId='" + paymentExternalId + '\'' +
                 ", state='" + state.getState() + '\'' +
                 ", amount=" + amount +
                 ", paymentProvider=" + paymentProvider +

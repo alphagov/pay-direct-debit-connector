@@ -79,17 +79,17 @@ public class PaymentService {
         this.paymentProviderFactory = paymentProviderFactory;
     }
 
-    public Payment findTransactionForExternalId(String externalId) {
+    public Payment findPaymentForExternalId(String externalId) {
         Payment payment = paymentDao.findByExternalId(externalId)
                 .orElseThrow(() -> new ChargeNotFoundException("No charges found for payment id: " + externalId));
         LOGGER.info("Found charge for payment with id: {}", externalId);
         return payment;
     }
 
-    public Payment createOnDemandTransaction(GatewayAccount gatewayAccount, Mandate mandate,
-                                             CollectPaymentRequest collectPaymentRequest) {
+    public Payment createPayment(GatewayAccount gatewayAccount, Mandate mandate,
+                                 CollectPaymentRequest collectPaymentRequest) {
 
-        Payment payment = createTransaction(collectPaymentRequest, mandate, gatewayAccount.getExternalId());
+        Payment payment = createPayment(collectPaymentRequest, mandate, gatewayAccount.getExternalId());
 
         LocalDate chargeDate = paymentProviderFactory
                 .getCommandServiceFor(gatewayAccount.getPaymentProvider())
@@ -100,7 +100,7 @@ public class PaymentService {
         return payment;
     }
     
-    public Payment createTransaction(CollectRequest collectRequest, Mandate mandate, String accountExternalId) {
+    public Payment createPayment(CollectRequest collectRequest, Mandate mandate, String accountExternalId) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     LOGGER.info("Creating payment for mandate {}", mandate.getExternalId());
@@ -114,7 +114,7 @@ public class PaymentService {
                     );
                     Long id = paymentDao.insert(payment);
                     payment.setId(id);
-                    transactionCreatedFor(payment);
+                    paymentCreatedFor(payment);
                     LOGGER.info("Created payment with external id {}", payment.getExternalId());
                     return payment;
                 })
@@ -145,14 +145,14 @@ public class PaymentService {
 
     public CollectPaymentResponse collectPaymentResponseWithSelfLink(Payment payment, String accountExternalId, UriInfo uriInfo) {
         List<Map<String, Object>> dataLinks = ImmutableList.of(
-                createLink("self", GET, selfUriFor(uriInfo, "/v1/api/accounts/{accountId}/charges/{transactionExternalId}",
+                createLink("self", GET, selfUriFor(uriInfo, "/v1/api/accounts/{accountId}/charges/{paymentExternalId}",
                         accountExternalId, payment.getExternalId()))
         );
         return CollectPaymentResponse.from(payment, dataLinks);
     }
 
     public PaymentResponse getPaymentWithExternalId(String accountExternalId, String paymentExternalId, UriInfo uriInfo) {
-        Payment payment = findTransactionForExternalId(paymentExternalId);
+        Payment payment = findPaymentForExternalId(paymentExternalId);
         return createPaymentResponseWithAllLinks(payment, accountExternalId, uriInfo);
     }
 
@@ -165,19 +165,19 @@ public class PaymentService {
         return paymentDao.findAllPaymentsBySetOfStatesAndCreationTime(states, creationTime);
     }
 
-    public Payment findTransaction(Long transactionId) {
+    public Payment findPayment(Long paymentId) {
         return paymentDao
-                .findById(transactionId)
-                .orElseThrow(() -> new ChargeNotFoundException("transaction id" + transactionId.toString()));
+                .findById(paymentId)
+                .orElseThrow(() -> new ChargeNotFoundException("payment id" + paymentId.toString()));
     }
 
     // todo we might want to split this service in query / state update like mandate
-    public List<Payment> findTransactionsForMandate(MandateExternalId mandateExternalId) {
+    public List<Payment> findPaymentsForMandate(MandateExternalId mandateExternalId) {
         return paymentDao.findAllByMandateExternalId(mandateExternalId);
     }
 
-    public DirectDebitEvent transactionCreatedFor(Payment payment) {
-        return directDebitEventService.registerTransactionCreatedEventFor(payment);
+    public DirectDebitEvent paymentCreatedFor(Payment payment) {
+        return directDebitEventService.registerPaymentCreatedEventFor(payment);
     }
     
     public DirectDebitEvent paymentExpired(Payment payment) {

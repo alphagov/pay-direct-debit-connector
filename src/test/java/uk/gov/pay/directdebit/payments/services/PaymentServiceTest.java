@@ -104,7 +104,7 @@ public class PaymentServiceTest {
     public void findByTransactionExternalIdAndAccountId_shouldFindATransaction() {
         when(mockedPaymentDao.findByExternalId(paymentFixture.getExternalId()))
                 .thenReturn(Optional.of(paymentFixture.toEntity()));
-        Payment foundPayment = service.findTransactionForExternalId(paymentFixture.getExternalId());
+        Payment foundPayment = service.findPaymentForExternalId(paymentFixture.getExternalId());
         assertThat(foundPayment.getId(), is(notNullValue()));
         assertThat(foundPayment.getExternalId(), is(paymentFixture.getExternalId()));
         assertThat(foundPayment.getMandate(), is(mandateFixture.toEntity()));
@@ -120,7 +120,7 @@ public class PaymentServiceTest {
         thrown.expect(ChargeNotFoundException.class);
         thrown.expectMessage("No charges found for payment id: not-existing");
         thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
-        service.findTransactionForExternalId("not-existing");
+        service.findPaymentForExternalId("not-existing");
     }
 
     @Test
@@ -130,7 +130,7 @@ public class PaymentServiceTest {
                         gatewayAccountFixture.getExternalId(), mockedUriInfo);
 
         assertThat(collectPaymentResponse.getAmount(), is(paymentFixture.getAmount()));
-        assertThat(collectPaymentResponse.getTransactionExternalId(), is(paymentFixture.getExternalId()));
+        assertThat(collectPaymentResponse.getPaymentExternalId(), is(paymentFixture.getExternalId()));
         assertThat(collectPaymentResponse.getDescription(), is(paymentFixture.getDescription()));
         assertThat(collectPaymentResponse.getReference(), is(paymentFixture.getReference()));
         assertThat(collectPaymentResponse.getPaymentProvider(), is(gatewayAccountFixture.getPaymentProvider().toString()));
@@ -335,7 +335,7 @@ public class PaymentServiceTest {
         when(mockedPaymentProviderFactory.getCommandServiceFor(mandateFixture.toEntity().getGatewayAccount().getPaymentProvider())).thenReturn(mockedSandboxService);
         when(mockedGatewayAccountDao.findByExternalId(gatewayAccountFixture.getExternalId())).thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
 
-        Payment returnedPayment = service.createOnDemandTransaction(gatewayAccountFixture.toEntity(), mandateFixture.toEntity(), collectPaymentRequest);
+        Payment returnedPayment = service.createPayment(gatewayAccountFixture.toEntity(), mandateFixture.toEntity(), collectPaymentRequest);
 
         verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(returnedPayment);
         assertThat(returnedPayment.getState(), is(PENDING));

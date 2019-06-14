@@ -6,7 +6,7 @@ import static java.lang.String.format;
 
 public class CreatePaymentFailedException extends InternalServerErrorException {
 
-    public CreatePaymentFailedException(String mandateExternalId, String transactionExternalId) {
-        super(format("Failed to create payment in gocardless, mandate id: %s, transaction id: %s", mandateExternalId, transactionExternalId));
+    public CreatePaymentFailedException(String mandateExternalId, String paymentExternalId) {
+        super(format("Failed to create payment in gocardless, mandate id: %s, payment id: %s", mandateExternalId, paymentExternalId));
     }
 }

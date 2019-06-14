@@ -21,6 +21,183 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class DirectDebitInfoFrontendResponse {
 
+    @JsonProperty("payer")
+    private PayerDetails payer;
+
+    @JsonProperty("payment")
+    private PaymentDetails payment;
+
+    @JsonProperty("external_id")
+    private String mandateExternalId;
+
+    @JsonProperty("return_url")
+    private String returnUrl;
+
+    @JsonProperty("gateway_account_id")
+    private Long gatewayAccountId;
+
+    @JsonProperty("gateway_account_external_id")
+    private String gatewayAccountExternalId;
+
+    @JsonProperty("mandate_reference")
+    @JsonSerialize(using = ToStringSerializer.class)
+    private MandateBankStatementReference mandateReference;
+
+    @JsonProperty("created_date")
+    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
+    private ZonedDateTime createdDate;
+
+    @JsonProperty
+    private ExternalMandateState state;
+
+    @JsonProperty("internal_state")
+    private MandateState internalState;
+
+    public DirectDebitInfoFrontendResponse(MandateExternalId paymentExternalId,
+                                           Long gatewayAccountId,
+                                           String gatewayAccountExternalId,
+                                           MandateState internalState,
+                                           String returnUrl,
+                                           MandateBankStatementReference mandateReference,
+                                           ZonedDateTime createdDate,
+                                           Payer payer,
+                                           Payment payment) {
+        this.mandateExternalId = paymentExternalId.toString();
+        this.internalState = internalState;
+        this.state = internalState.toExternal();
+        this.gatewayAccountId = gatewayAccountId;
+        this.gatewayAccountExternalId = gatewayAccountExternalId;
+        this.returnUrl = returnUrl;
+        this.mandateReference = mandateReference;
+        this.createdDate = createdDate;
+        this.payment = initPayment(payment);
+        this.payer = initPayer(payer);
+    }
+
+    private PaymentDetails initPayment(Payment payment) {
+        if (payment != null) {
+            return new PaymentDetails(
+                    payment.getExternalId(),
+                    payment.getAmount(),
+                    payment.getState().toExternal(),
+                    payment.getDescription(),
+                    payment.getReference()
+            );
+        }
+        return null;
+    }
+
+    private PayerDetails initPayer(Payer payer) {
+        if (payer != null) {
+            return new PayerDetails(
+                    payer.getExternalId(),
+                    payer.getName(),
+                    payer.getEmail(),
+                    payer.getAccountRequiresAuthorisation());
+        }
+        return null;
+    }
+
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public MandateBankStatementReference getMandateReference() {
+        return mandateReference;
+    }
+
+    public PaymentDetails getPayment() {
+        return payment;
+    }
+
+    public PayerDetails getPayer() {
+        return payer;
+    }
+
+    public String getMandateExternalId() {
+        return mandateExternalId;
+    }
+
+    public Long getGatewayAccountId() {
+        return gatewayAccountId;
+    }
+
+    public String getGatewayAccountExternalId() {
+        return gatewayAccountExternalId;
+    }
+
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public ExternalMandateState getState() {
+        return state;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        DirectDebitInfoFrontendResponse that = (DirectDebitInfoFrontendResponse) o;
+
+        if (payer != null ? !payer.equals(that.payer) : that.payer != null) {
+            return false;
+        }
+        if (payment != null ? !payment.equals(that.payment) : that.payment != null) {
+            return false;
+        }
+        if (!mandateExternalId.equals(that.mandateExternalId)) {
+            return false;
+        }
+        if (!returnUrl.equals(that.returnUrl)) {
+            return false;
+        }
+        if (!mandateReference.equals(that.mandateReference)) {
+            return false;
+        }
+        if (!createdDate.equals(that.createdDate)) {
+            return false;
+        }
+        if (!internalState.equals(that.internalState)) {
+            return false;
+        }
+        return state == that.state;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = payer != null ? payer.hashCode() : 0;
+        result = 31 * result + (payment != null ? payment.hashCode() : 0);
+        result = 31 * result + mandateExternalId.hashCode();
+        result = 31 * result + returnUrl.hashCode();
+        result = 31 * result + gatewayAccountId.hashCode();
+        result = 31 * result + gatewayAccountExternalId.hashCode();
+        result = 31 * result + mandateReference.hashCode();
+        result = 31 * result + createdDate.hashCode();
+        result = 31 * result + internalState.hashCode();
+        result = 31 * result + state.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "DirectDebitInfoFrontendResponse{" +
+                "payerId='" + payer.externalId + "'" +
+                ", paymentId='" + payment.externalId + "'" +
+                ", mandateId='" + mandateExternalId + "'" +
+                ", state='" + state.getState() + "'" +
+                ", internalState='" + internalState + "'" +
+                ", returnUrl='" + returnUrl + "'" +
+                ", mandateReference='" + mandateReference + "'" +
+                ", createdDate='" + createdDate + "'" +
+                "}";
+    }
+
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public static class PayerDetails {
         @JsonProperty("payer_external_id")
@@ -66,9 +243,6 @@ public class DirectDebitInfoFrontendResponse {
         }
     }
 
-    @JsonProperty("payer")
-    private PayerDetails payer;
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public class PaymentDetails {
@@ -108,179 +282,4 @@ public class DirectDebitInfoFrontendResponse {
             return reference;
         }
     }
-
-    @JsonProperty("transaction")
-    private PaymentDetails transaction;
-
-    @JsonProperty("external_id")
-    private String mandateExternalId;
-
-    @JsonProperty("return_url")
-    private String returnUrl;
-
-    @JsonProperty("gateway_account_id")
-    private Long gatewayAccountId;
-
-    @JsonProperty("gateway_account_external_id")
-    private String gatewayAccountExternalId;
-
-    @JsonProperty("mandate_reference")
-    @JsonSerialize(using = ToStringSerializer.class)
-    private MandateBankStatementReference mandateReference;
-
-    @JsonProperty("created_date")
-    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
-    private ZonedDateTime createdDate;
-
-    @JsonProperty
-    private ExternalMandateState state;
-
-    @JsonProperty("internal_state")
-    private MandateState internalState;
-
-    public DirectDebitInfoFrontendResponse(MandateExternalId paymentExternalId,
-                                           Long gatewayAccountId,
-                                           String gatewayAccountExternalId,
-                                           MandateState internalState,
-                                           String returnUrl,
-                                           MandateBankStatementReference mandateReference,
-                                           ZonedDateTime createdDate,
-                                           Payer payer,
-                                           Payment payment) {
-        this.mandateExternalId = paymentExternalId.toString();
-        this.internalState = internalState;
-        this.state = internalState.toExternal();
-        this.gatewayAccountId = gatewayAccountId;
-        this.gatewayAccountExternalId = gatewayAccountExternalId;
-        this.returnUrl = returnUrl;
-        this.mandateReference = mandateReference;
-        this.createdDate = createdDate;
-        this.transaction = initTransaction(payment);
-        this.payer = initPayer(payer);
-    }
-
-    private PaymentDetails initTransaction(Payment payment) {
-        if (payment != null) {
-            return new PaymentDetails(
-                    payment.getExternalId(),
-                    payment.getAmount(),
-                    payment.getState().toExternal(),
-                    payment.getDescription(),
-                    payment.getReference()
-            );
-        }
-        return null;
-    }
-
-    private PayerDetails initPayer(Payer payer) {
-        if (payer != null) {
-            return new PayerDetails(
-                    payer.getExternalId(),
-                    payer.getName(),
-                    payer.getEmail(),
-                    payer.getAccountRequiresAuthorisation());
-        }
-        return null;
-    }
-
-    public String getReturnUrl() {
-        return returnUrl;
-    }
-
-    public MandateBankStatementReference getMandateReference() {
-        return mandateReference;
-    }
-
-    public PaymentDetails getTransaction() {
-        return transaction;
-    }
-
-    public PayerDetails getPayer() {
-        return payer;
-    }
-
-    public String getMandateExternalId() {
-        return mandateExternalId;
-    }
-
-    public Long getGatewayAccountId() {
-        return gatewayAccountId;
-    }
-
-    public String getGatewayAccountExternalId() {
-        return gatewayAccountExternalId;
-    }
-
-    public ZonedDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public ExternalMandateState getState() {
-        return state;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        DirectDebitInfoFrontendResponse that = (DirectDebitInfoFrontendResponse) o;
-
-        if (payer != null ? !payer.equals(that.payer) : that.payer != null) {
-            return false;
-        }
-        if (transaction != null ? !transaction.equals(that.transaction) : that.transaction != null) {
-            return false;
-        }
-        if (!mandateExternalId.equals(that.mandateExternalId)) {
-            return false;
-        }
-        if (!returnUrl.equals(that.returnUrl)) {
-            return false;
-        }
-        if (!mandateReference.equals(that.mandateReference)) {
-            return false;
-        }
-        if (!createdDate.equals(that.createdDate)) {
-            return false;
-        }
-        if (!internalState.equals(that.internalState)) {
-            return false;
-        }
-        return state == that.state;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = payer != null ? payer.hashCode() : 0;
-        result = 31 * result + (transaction != null ? transaction.hashCode() : 0);
-        result = 31 * result + mandateExternalId.hashCode();
-        result = 31 * result + returnUrl.hashCode();
-        result = 31 * result + gatewayAccountId.hashCode();
-        result = 31 * result + gatewayAccountExternalId.hashCode();
-        result = 31 * result + mandateReference.hashCode();
-        result = 31 * result + createdDate.hashCode();
-        result = 31 * result + internalState.hashCode();
-        result = 31 * result + state.hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "DirectDebitInfoFrontendResponse{" +
-                "payerId='" + payer.externalId + "'" +
-                ", transactionId='" + transaction.externalId + "'" +
-                ", mandateId='" + mandateExternalId + "'" +
-                ", state='" + state.getState() + "'" +
-                ", internalState='" + internalState + "'" +
-                ", returnUrl='" + returnUrl + "'" +
-                ", mandateReference='" + mandateReference + "'" +
-                ", createdDate='" + createdDate + "'" +
-                "}";
-    }
-
 }

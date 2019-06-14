@@ -55,9 +55,9 @@ public class DirectDebitEventDao {
             searchStrings.add("m.external_id = :mandate_id");
             queryMap.put("mandate_id", searchParams.getMandateExternalId());
         }
-        if (nonNull(searchParams.getTransactionExternalId())) {
+        if (nonNull(searchParams.getPaymentExternalId())) {
             searchStrings.add("p.external_id = :transaction_id");
-            queryMap.put("transaction_id", searchParams.getTransactionExternalId());
+            queryMap.put("transaction_id", searchParams.getPaymentExternalId());
         }
         if (nonNull(searchParams.getToDate())) {
             searchStrings.add("e.event_date < :before_date");
