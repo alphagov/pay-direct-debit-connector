@@ -17,9 +17,10 @@ public class PaymentResponseTest {
         String returnUrl = "http://bla.bla";
         String description = "desc";
         String reference = "ref";
+        var state = new ExternalPaymentStateWithDetails(ExternalPaymentState.EXTERNAL_STARTED, "test_details");
         PaymentResponse paymentResponse = new PaymentResponse(
                 transactionId,
-                ExternalPaymentState.EXTERNAL_STARTED,
+                state,
                 amount,
                 returnUrl,
                 description,

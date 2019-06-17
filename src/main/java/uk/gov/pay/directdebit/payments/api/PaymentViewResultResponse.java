@@ -44,7 +44,7 @@ public class PaymentViewResultResponse {
     private String email;
 
     @JsonProperty
-    private ExternalPaymentState state;
+    private ExternalPaymentStateWithDetails state;
 
     @JsonProperty
     private List<Link> links = new ArrayList<>();
@@ -57,7 +57,7 @@ public class PaymentViewResultResponse {
                                      ZonedDateTime createdDate,
                                      String name,
                                      String email,
-                                     ExternalPaymentState state,
+                                     ExternalPaymentStateWithDetails state,
                                      String mandateExternalId) {
         this.paymentId = paymentId;
         this.amount = amount;
@@ -98,7 +98,7 @@ public class PaymentViewResultResponse {
         return email;
     }
 
-    public ExternalPaymentState getState() {
+    public ExternalPaymentStateWithDetails getState() {
         return state;
     }
 
@@ -137,6 +137,6 @@ public class PaymentViewResultResponse {
     @Override
     public String toString() {
         return format("PaymentResponse{paymentId='%s', amount='%s', reference='%s', createdDate='%s', name='%s', email='%s', state='%s'}",
-                paymentId, amount, reference, createdDate, name, email, state.getState());
+                paymentId, amount, reference, createdDate, name, email, state);
     }
 }
