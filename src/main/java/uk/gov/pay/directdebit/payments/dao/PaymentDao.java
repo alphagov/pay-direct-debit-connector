@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.dao.mapper.PaymentMapper;
 import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import java.time.ZonedDateTime;
@@ -22,6 +23,7 @@ import java.util.Set;
 
 @RegisterRowMapper(PaymentMapper.class)
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
+@RegisterArgumentFactory(PaymentProviderPaymentIdArgumentFactory.class)
 public interface PaymentDao {
 
     String joinQuery = "SELECT" +
@@ -33,6 +35,7 @@ public interface PaymentDao {
             "  p.description AS transaction_description," +
             "  p.reference AS transaction_reference," +
             "  p.created_date AS transaction_created_date," +
+            "  p.payment_provider_id AS payment_provider_id," +
             "  m.id AS mandate_id," +
             "  m.external_id AS mandate_external_id," +
             "  m.mandate_reference AS mandate_mandate_reference," +
@@ -80,7 +83,8 @@ public interface PaymentDao {
     @SqlUpdate("UPDATE payments p SET state = :state WHERE p.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") PaymentState paymentState);
 
-    @SqlUpdate("INSERT INTO payments(mandate_id, external_id, amount, state, description, reference, created_date) VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate)")
+    @SqlUpdate("INSERT INTO payments(mandate_id, external_id, amount, state, description, reference, created_date, payment_provider_id)" +
+            "VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate, :providerId)")
     @GetGeneratedKeys
     Long insert(@BindBean Payment payment);
 

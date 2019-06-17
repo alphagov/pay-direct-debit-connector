@@ -44,7 +44,7 @@ public class WebhookSandboxResourceIT {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode());
 
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(transactionId);
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getPaymentById(transactionId);
         assertThat(transaction.get("state"), is("SUCCESS"));
     }
 

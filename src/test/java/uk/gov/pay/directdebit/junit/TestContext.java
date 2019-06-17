@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumen
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdArgumentFactory;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 public class TestContext {
@@ -31,6 +32,7 @@ public class TestContext {
         jdbi.registerArgument(new GoCardlessMandateIdArgumentFactory());
         jdbi.registerArgument(new MandateBankStatementReferenceArgumentFactory());
         jdbi.registerArgument(new PaymentProviderMandateIdArgumentFactory());
+        jdbi.registerArgument(new PaymentProviderPaymentIdArgumentFactory());
         jdbi.registerArgument(new GoCardlessEventIdArgumentFactory());
         this.databaseTestHelper = new DatabaseTestHelper(jdbi);
         this.port = port;

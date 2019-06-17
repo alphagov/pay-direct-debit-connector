@@ -167,7 +167,7 @@ public class WebhookGoCardlessResourceIT {
         assertThat(secondEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(secondEvent.get("action"), is("paid_out"));
 
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(paymentFixture.getId());
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         MatcherAssert.assertThat(transaction.get("state"), is("SUCCESS"));
     }
 
@@ -235,7 +235,7 @@ public class WebhookGoCardlessResourceIT {
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         MatcherAssert.assertThat(mandate.get("state"), is("FAILED"));
 
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getTransactionById(paymentFixture.getId());
+        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         MatcherAssert.assertThat(transaction.get("state"), is("FAILED"));
     }
 }

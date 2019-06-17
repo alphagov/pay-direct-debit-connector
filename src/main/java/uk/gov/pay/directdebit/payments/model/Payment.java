@@ -18,7 +18,8 @@ public class Payment {
     private ZonedDateTime createdDate;
     private Mandate mandate;
 
-    public Payment(Long id, String externalId, Long amount, PaymentState state, String description, String reference, Mandate mandate, ZonedDateTime createdDate) {
+    public Payment(Long id, String externalId, Long amount, PaymentState state, String description, String reference,
+                   Mandate mandate, ZonedDateTime createdDate, PaymentProviderPaymentId paymentProviderPaymentId) {
         this.id = id;
         this.externalId = externalId;
         this.amount = amount;
@@ -27,10 +28,11 @@ public class Payment {
         this.reference = reference;
         this.createdDate = createdDate;
         this.mandate = mandate;
+        this.providerId = paymentProviderPaymentId;
     }
 
     public Payment(Long amount, PaymentState state, String description, String reference, Mandate mandate, ZonedDateTime createdDate) {
-        this(null, RandomIdGenerator.newId(), amount, state, description, reference, mandate, createdDate);
+        this(null, RandomIdGenerator.newId(), amount, state, description, reference, mandate, createdDate, null);
     }
 
     public Long getId() {
