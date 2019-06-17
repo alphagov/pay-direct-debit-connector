@@ -21,6 +21,9 @@ public class PaymentViewResultResponse {
     @JsonProperty("payment_id")
     private String paymentId;
 
+    @JsonProperty("transaction_id")
+    private String transactionId; // TODO: temporary
+
     @JsonProperty
     private Long amount;
 
@@ -60,6 +63,7 @@ public class PaymentViewResultResponse {
                                      ExternalPaymentState state,
                                      String mandateExternalId) {
         this.paymentId = paymentId;
+        this.transactionId = paymentId;
         this.amount = amount;
         this.reference = reference;
         this.description = description;
