@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -24,6 +25,8 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
     private PaymentProviderPaymentId paymentProviderId = SandboxPaymentId.valueOf(RandomStringUtils.randomAlphanumeric(20));
+    private LocalDate chargeDate = LocalDate.now();
+
     private PaymentFixture() {
     }
 
@@ -109,6 +112,11 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
         return this;
     }
 
+    public PaymentFixture withChargeDate(LocalDate chargeDate) {
+        this.chargeDate = chargeDate;
+        return this;
+    }
+
     @Override
     public PaymentFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -123,9 +131,10 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
                                 "        reference,\n" +
                                 "        description,\n" +
                                 "        created_date,\n" +
-                                "        payment_provider_id\n" +
+                                "        payment_provider_id,\n" +
+                                "        charge_date\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         mandateFixture.getId(),
                         externalId,
@@ -134,7 +143,8 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
                         reference,
                         description,
                         createdDate,
-                        paymentProviderId
+                        paymentProviderId,
+                        chargeDate
                 )
         );
         return this;
@@ -142,7 +152,8 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
 
     @Override
     public Payment toEntity() {
-        return new Payment(id, externalId, amount, state, description, reference, mandateFixture.toEntity(), createdDate, paymentProviderId);
+        return new Payment(id, externalId, amount, state, description, reference, mandateFixture.toEntity(),
+                createdDate, paymentProviderId, chargeDate);
     }
 
 }

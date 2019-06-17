@@ -27,15 +27,17 @@ import java.util.Set;
 public interface PaymentDao {
 
     String joinQuery = "SELECT" +
-            "  p.id AS transaction_id," +
+            "  p.id AS payment_id," +
             "  p.mandate_id AS payment_mandate_id," +
             "  p.external_id AS payment_external_id," +
-            "  p.amount AS transaction_amount," +
-            "  p.state AS transaction_state," +
-            "  p.description AS transaction_description," +
-            "  p.reference AS transaction_reference," +
-            "  p.created_date AS transaction_created_date," +
+            "  p.amount AS payment_amount," +
+            "  p.state AS payment_state," +
+            "  p.state AS payment_state," +
+            "  p.description AS payment_description," +
+            "  p.reference AS payment_reference," +
+            "  p.created_date AS payment_created_date," +
             "  p.payment_provider_id AS payment_provider_id," +
+            "  p.charge_date AS payment_charge_date," +
             "  m.id AS mandate_id," +
             "  m.external_id AS mandate_external_id," +
             "  m.mandate_reference AS mandate_mandate_reference," +
@@ -83,8 +85,8 @@ public interface PaymentDao {
     @SqlUpdate("UPDATE payments p SET state = :state WHERE p.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") PaymentState paymentState);
 
-    @SqlUpdate("INSERT INTO payments(mandate_id, external_id, amount, state, description, reference, created_date, payment_provider_id)" +
-            "VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate, :providerId)")
+    @SqlUpdate("INSERT INTO payments(mandate_id, external_id, amount, state, description, reference, created_date, payment_provider_id, charge_date)" +
+            "VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate, :providerId, :chargeDate)")
     @GetGeneratedKeys
     Long insert(@BindBean Payment payment);
 

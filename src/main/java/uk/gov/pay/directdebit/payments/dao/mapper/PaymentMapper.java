@@ -17,8 +17,10 @@ import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -27,14 +29,15 @@ import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aManda
 
 public class PaymentMapper implements RowMapper<Payment> {
 
-    private static final String TRANSACTION_ID_COLUMN = "transaction_id";
-    private static final String TRANSACTION_AMOUNT_COLUMN = "transaction_amount";
-    private static final String TRANSACTION_STATE_COLUMN = "transaction_state";
-    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "payment_external_id";
-    private static final String TRANSACTION_REFERENCE_COLUMN = "transaction_reference";
-    private static final String TRANSACTION_DESCRIPTION_COLUMN = "transaction_description";
-    private static final String TRANSACTION_CREATED_DATE_COLUMN = "transaction_created_date";
-    private static final String TRANSACTION_PAYMENT_PROVIDER_ID_COLUMN = "payment_provider_id";
+    private static final String PAYMENT_ID_COLUMN = "payment_id";
+    private static final String PAYMENT_AMOUNT_COLUMN = "payment_amount";
+    private static final String PAYMENT_STATE_COLUMN = "payment_state";
+    private static final String PAYMENT_EXTERNAL_ID_COLUMN = "payment_external_id";
+    private static final String PAYMENT_REFERENCE_COLUMN = "payment_reference";
+    private static final String PAYMENT_DESCRIPTION_COLUMN = "payment_description";
+    private static final String PAYMENT_CREATED_DATE_COLUMN = "payment_created_date";
+    private static final String PAYMENT_CHARGE_DATE_COLUMN = "payment_charge_date";
+    private static final String PAYMENT_PAYMENT_PROVIDER_ID_COLUMN = "payment_provider_id";
     private static final String GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
     private static final String GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN = "gateway_account_external_id";
     private static final String GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN = "gateway_account_payment_provider";
@@ -109,15 +112,16 @@ public class PaymentMapper implements RowMapper<Payment> {
                 .build();
 
         return new Payment(
-                resultSet.getLong(TRANSACTION_ID_COLUMN),
-                resultSet.getString(TRANSACTION_EXTERNAL_ID_COLUMN),
-                resultSet.getLong(TRANSACTION_AMOUNT_COLUMN),
-                PaymentState.valueOf(resultSet.getString(TRANSACTION_STATE_COLUMN)),
-                resultSet.getString(TRANSACTION_DESCRIPTION_COLUMN),
-                resultSet.getString(TRANSACTION_REFERENCE_COLUMN),
+                resultSet.getLong(PAYMENT_ID_COLUMN),
+                resultSet.getString(PAYMENT_EXTERNAL_ID_COLUMN),
+                resultSet.getLong(PAYMENT_AMOUNT_COLUMN),
+                PaymentState.valueOf(resultSet.getString(PAYMENT_STATE_COLUMN)),
+                resultSet.getString(PAYMENT_DESCRIPTION_COLUMN),
+                resultSet.getString(PAYMENT_REFERENCE_COLUMN),
                 mandate,
-                ZonedDateTime.ofInstant(resultSet.getTimestamp(TRANSACTION_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
-                resolvePaymentProviderPaymentId(gatewayAccount.getPaymentProvider(), resultSet.getString(TRANSACTION_PAYMENT_PROVIDER_ID_COLUMN)).orElse(null));
+                ZonedDateTime.ofInstant(resultSet.getTimestamp(PAYMENT_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
+                resolvePaymentProviderPaymentId(gatewayAccount.getPaymentProvider(), resultSet.getString(PAYMENT_PAYMENT_PROVIDER_ID_COLUMN)).orElse(null),
+                resolveChargeDate(resultSet.getDate(PAYMENT_CHARGE_DATE_COLUMN)).orElse(null));
     }
 
     private Optional<PaymentProviderPaymentId> resolvePaymentProviderPaymentId(PaymentProvider paymentProvider, String paymentProviderPaymentId) {
@@ -133,5 +137,9 @@ public class PaymentMapper implements RowMapper<Payment> {
             default:
                 throw new IllegalArgumentException("Unrecognised payment provider " + paymentProvider + " for payment " + paymentProviderPaymentId);
         }
+    }
+
+    private Optional<LocalDate> resolveChargeDate(Date chargeDate) {
+        return Optional.ofNullable(chargeDate).map(Date::toLocalDate);
     }
 }
