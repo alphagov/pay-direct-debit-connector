@@ -1,12 +1,12 @@
 package uk.gov.pay.directdebit.payments.model;
 
+import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
-
-import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
 
 public class Payment {
 
@@ -104,8 +104,8 @@ public class Payment {
         this.mandate = mandate;
     }
 
-    public PaymentProviderPaymentId getProviderId() {
-        return providerId;
+    public Optional<PaymentProviderPaymentId> getProviderId() {
+        return Optional.ofNullable(providerId);
     }
 
     public Optional<LocalDate> getChargeDate() {

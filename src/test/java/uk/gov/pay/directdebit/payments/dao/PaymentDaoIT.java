@@ -1,13 +1,5 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +16,14 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -110,7 +110,7 @@ public class PaymentDaoIT {
         assertThat(payment.getAmount(), is(AMOUNT));
         assertThat(payment.getState(), is(STATE));
         assertThat(payment.getCreatedDate(), is(testPayment.getCreatedDate()));
-        assertThat(payment.getProviderId(), is(providerId));
+        assertThat(payment.getProviderId().get(), is(providerId));
         assertThat(payment.getChargeDate().get(), is(chargeDate));
     }
 
