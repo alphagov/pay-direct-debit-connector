@@ -1,8 +1,5 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import java.time.LocalDate;
-import java.util.Optional;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,9 +14,16 @@ import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessService;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotConfirmed;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.time.Month.JULY;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,7 +33,7 @@ public class GoCardlessServiceOnDemandTest extends GoCardlessServiceTest {
 
     @Before
     public void setUp() {
-        service = new GoCardlessService(mockedGoCardlessClientFactory, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao);
+        service = new GoCardlessService(mockedGoCardlessClientFactory, mockedGoCardlessCustomerDao, mockedGoCardlessPaymentDao, mockedPaymentDao);
         when(mockedGoCardlessClientFactory.getClientFor(Optional.of(gatewayAccountFixture.getAccessToken()))).thenReturn(mockedGoCardlessClientFacade);
         when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity())).thenReturn(goCardlessCustomer);
         when(mockedGoCardlessClientFacade.createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE, ACCOUNT_NUMBER)).thenReturn(goCardlessCustomer);
@@ -52,7 +56,7 @@ public class GoCardlessServiceOnDemandTest extends GoCardlessServiceTest {
         orderedCalls.verify(mockedGoCardlessClientFacade).createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE, ACCOUNT_NUMBER);
         orderedCalls.verify(mockedGoCardlessClientFacade).createMandate(mandate, goCardlessCustomer);
 
-        Assert.assertThat(paymentProviderMandateIdAndBankReference.getMandateBankStatementReference(), is(MandateBankStatementReference.valueOf(BANK_ACCOUNT_ID)));
+        assertThat(paymentProviderMandateIdAndBankReference.getMandateBankStatementReference(), is(MandateBankStatementReference.valueOf(BANK_ACCOUNT_ID)));
     }
 
     @Test
@@ -89,17 +93,21 @@ public class GoCardlessServiceOnDemandTest extends GoCardlessServiceTest {
 
     @Test
     public void collect_shouldCreateAndStoreAPaymentForAValidGoCardlessMandate() {
+        GoCardlessPaymentId goCardlessPaymentId = GoCardlessPaymentId.valueOf("expectedGoCardlessPaymentId");
+        GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("aGoCardlessMandateId");
+        LocalDate chargeDateFromGoCardless = LocalDate.of(1969, JULY, 16);
+        
         Mandate mandate = mandateFixture
-                .withPaymentProviderId(GoCardlessMandateId.valueOf("aGoCardlessMandateId"))
+                .withPaymentProviderId(goCardlessMandateId)
                 .toEntity();
 
-        when(mockedGoCardlessClientFacade.createPayment(payment, (GoCardlessMandateId) mandate.getPaymentProviderMandateId().get()))
-                .thenReturn(goCardlessPayment);
+        when(mockedGoCardlessClientFacade.createPayment(payment, goCardlessMandateId))
+                .thenReturn(new PaymentProviderPaymentIdAndChargeDate(goCardlessPaymentId, chargeDateFromGoCardless));
 
-        LocalDate chargeDate = service.collect(mandate, payment);
-        verify(mockedGoCardlessPaymentDao).insert(goCardlessPayment);
+        LocalDate actualChargeDate = service.collect(mandate, payment);
+        verify(mockedPaymentDao).updateProviderIdAndChargeDate(payment);
 
-        Assert.assertThat(chargeDate, is(goCardlessPayment.getChargeDate()));
+        assertThat(actualChargeDate, is(chargeDateFromGoCardless));
     }
    
     @Test

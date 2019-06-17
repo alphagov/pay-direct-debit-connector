@@ -20,11 +20,13 @@ import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.time.Month.*;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -180,6 +182,35 @@ public class PaymentDaoIT {
         assertThat(transactionAfterUpdate.get("amount"), is(AMOUNT));
         assertThat(transactionAfterUpdate.get("state"), is(newState.toString()));
         assertThat((Timestamp) transactionAfterUpdate.get("created_date"), isDate(testPayment.getCreatedDate()));
+    }
+
+    @Test
+    public void shouldUpdateProviderIdAndChargeDateAndReturnNumberOfAffectedRows() {
+        LocalDate chargeDate = LocalDate.of(1969, JULY, 16);
+        SandboxPaymentId providerPaymentId = SandboxPaymentId.valueOf("expectedProviderId");
+        Payment thisTestPayment = testPayment
+                .withPaymentProviderId(null)
+                .withChargeDate(null)
+                .insert(testContext.getJdbi())
+                .toEntity();
+
+        thisTestPayment.setChargeDate(chargeDate);
+        thisTestPayment.setProviderId(providerPaymentId);
+
+        int numOfUpdatedPayments = paymentDao.updateProviderIdAndChargeDate(thisTestPayment);
+        
+        Map<String, Object> paymentAfterUpdate = testContext.getDatabaseTestHelper().getPaymentById(thisTestPayment.getId());
+        assertThat(numOfUpdatedPayments, is(1));
+        assertThat(paymentAfterUpdate.get("id"), is(thisTestPayment.getId()));
+        assertThat(paymentAfterUpdate.get("external_id"), is(thisTestPayment.getExternalId()));
+        assertThat(paymentAfterUpdate.get("mandate_id"), is(thisTestPayment.getMandate().getId()));
+        assertThat(paymentAfterUpdate.get("description"), is(thisTestPayment.getDescription()));
+        assertThat(paymentAfterUpdate.get("reference"), is(thisTestPayment.getReference()));
+        assertThat(paymentAfterUpdate.get("amount"), is(thisTestPayment.getAmount()));
+        assertThat(paymentAfterUpdate.get("state"), is(thisTestPayment.getState().toString()));
+        assertThat((Timestamp) paymentAfterUpdate.get("created_date"), isDate(thisTestPayment.getCreatedDate()));
+        assertThat(((Date) paymentAfterUpdate.get("charge_date")).toLocalDate(), is(chargeDate));
+        assertThat(paymentAfterUpdate.get("payment_provider_id"), is(providerPaymentId.toString()));
     }
 
     @Test

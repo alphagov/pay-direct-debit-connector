@@ -85,6 +85,9 @@ public interface PaymentDao {
     @SqlUpdate("UPDATE payments p SET state = :state WHERE p.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") PaymentState paymentState);
 
+    @SqlUpdate("UPDATE payments SET payment_provider_id = :providerId, charge_date = :chargeDate WHERE id = :id")
+    int updateProviderIdAndChargeDate(@BindBean Payment payment);
+
     @SqlUpdate("INSERT INTO payments(mandate_id, external_id, amount, state, description, reference, created_date, payment_provider_id, charge_date)" +
             "VALUES (:mandate.id, :externalId, :amount, :state, :description, :reference, :createdDate, :providerId, :chargeDate)")
     @GetGeneratedKeys

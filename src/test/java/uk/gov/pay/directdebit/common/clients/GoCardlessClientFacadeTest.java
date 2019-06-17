@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.common.clients;
 
-import com.gocardless.resources.BankDetailsLookup;
 import com.gocardless.resources.Creditor;
-import com.gocardless.resources.Mandate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +17,11 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.SortCode;
+import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
@@ -28,6 +30,7 @@ import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.AU
 import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.BACS;
 import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.BECS;
 import static com.gocardless.resources.BankDetailsLookup.AvailableDebitScheme.SEPA_CORE;
+import static java.time.Month.JULY;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -37,32 +40,35 @@ import static org.mockito.BDDMockito.given;
 public class GoCardlessClientFacadeTest {
 
     private static final String BANK_NAME = "Awesome Bank";
-
-    private final BankAccountDetails bankAccountDetails = new BankAccountDetails(AccountNumber.of("12345678"), SortCode.of("123456"));
+    private static final MandateBankStatementReference BANK_STATEMENT_REFERENCE = MandateBankStatementReference.valueOf("BANK STATEMENT REF");
+    private static final GoCardlessMandateId GO_CARDLESS_MANDATE_ID = GoCardlessMandateId.valueOf("MD123");
+    private static final GoCardlessPaymentId GO_CARDLESS_PAYMENT_ID = GoCardlessPaymentId.valueOf("PM123");
+    private static final BankAccountDetails BANK_ACCOUNT_DETAILS = new BankAccountDetails(AccountNumber.of("12345678"), SortCode.of("123456"));
+    private static final LocalDate CHARGE_DATE = LocalDate.of(1969, JULY, 16);
 
     @Mock
     private GoCardlessClientWrapper mockGoCardlessClientWrapper;
 
     @Mock
-    private BankDetailsLookup mockBankDetailsLookup;
+    private com.gocardless.resources.BankDetailsLookup mockBankDetailsLookup;
 
     @Mock
-    private Mandate mockMandate;
+    private com.gocardless.resources.Mandate mockMandate;
 
     @Mock
-    private Mandate.Links mockMandateLinks;
+    private com.gocardless.resources.Payment mockPayment;
 
     @Mock
-    private Creditor mockCreditor;
+    private com.gocardless.resources.Creditor mockCreditor;
 
     @Mock
-    private Creditor.SchemeIdentifier mockSchemeIdentifier;
+    private com.gocardless.resources.Creditor.SchemeIdentifier mockSchemeIdentifier;
 
     private GoCardlessClientFacade goCardlessClientFacade;
 
     @Before
     public void setUp() {
-        given(mockGoCardlessClientWrapper.validate(bankAccountDetails)).willReturn(mockBankDetailsLookup);
+        given(mockGoCardlessClientWrapper.validate(BANK_ACCOUNT_DETAILS)).willReturn(mockBankDetailsLookup);
 
         goCardlessClientFacade = new GoCardlessClientFacade(mockGoCardlessClientWrapper);
     }
@@ -72,7 +78,7 @@ public class GoCardlessClientFacadeTest {
         given(mockBankDetailsLookup.getBankName()).willReturn(BANK_NAME);
         given(mockBankDetailsLookup.getAvailableDebitSchemes()).willReturn(Arrays.asList(AUTOGIRO, BACS, SEPA_CORE));
 
-        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(bankAccountDetails);
+        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(BANK_ACCOUNT_DETAILS);
 
         assertThat(result.getBankName(), is(BANK_NAME));
         assertThat(result.isBacs(), is(true));
@@ -83,7 +89,7 @@ public class GoCardlessClientFacadeTest {
         given(mockBankDetailsLookup.getBankName()).willReturn(BANK_NAME);
         given(mockBankDetailsLookup.getAvailableDebitSchemes()).willReturn(Arrays.asList(AUTOGIRO, BECS, SEPA_CORE));
 
-        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(bankAccountDetails);
+        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(BANK_ACCOUNT_DETAILS);
 
         assertThat(result.getBankName(), is(BANK_NAME));
         assertThat(result.isBacs(), is(false));
@@ -94,7 +100,7 @@ public class GoCardlessClientFacadeTest {
         given(mockBankDetailsLookup.getBankName()).willReturn(BANK_NAME);
         given(mockBankDetailsLookup.getAvailableDebitSchemes()).willReturn(Arrays.asList(AUTOGIRO, BACS, SEPA_CORE));
 
-        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(bankAccountDetails);
+        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(BANK_ACCOUNT_DETAILS);
 
         assertThat(result.getBankName(), is(BANK_NAME));
         assertThat(result.isBacs(), is(true));
@@ -105,7 +111,7 @@ public class GoCardlessClientFacadeTest {
         given(mockBankDetailsLookup.getBankName()).willReturn(null);
         given(mockBankDetailsLookup.getAvailableDebitSchemes()).willReturn(Arrays.asList(AUTOGIRO, BACS, SEPA_CORE));
 
-        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(bankAccountDetails);
+        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(BANK_ACCOUNT_DETAILS);
 
         assertThat(result.getBankName(), is(nullValue()));
         assertThat(result.isBacs(), is(true));
@@ -116,7 +122,7 @@ public class GoCardlessClientFacadeTest {
         given(mockBankDetailsLookup.getBankName()).willReturn(null);
         given(mockBankDetailsLookup.getAvailableDebitSchemes()).willReturn(Collections.emptyList());
 
-        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(bankAccountDetails);
+        GoCardlessBankAccountLookup result = goCardlessClientFacade.validate(BANK_ACCOUNT_DETAILS);
 
         assertThat(result.getBankName(), is(nullValue()));
         assertThat(result.isBacs(), is(false));
@@ -147,20 +153,34 @@ public class GoCardlessClientFacadeTest {
     }
 
     @Test
-    public void createMandateReturnsGoCardlessMandate() {
-        uk.gov.pay.directdebit.mandate.model.Mandate mandate = MandateFixture.aMandateFixture().toEntity();
+    public void createMandateReturnsGoCardlessMandateIdAndBankStatementReference() {
+        var mandate = MandateFixture.aMandateFixture().toEntity();
         GoCardlessCustomer goCardlessCustomer = GoCardlessCustomerFixture.aGoCardlessCustomerFixture().toEntity();
 
-        MandateBankStatementReference goCardlessReference = MandateBankStatementReference.valueOf("test-gocardless-mandate-reference-here");
-        GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("test-gocardless-mandate-id-here");
-        given(mockMandate.getId()).willReturn("test-gocardless-mandate-id-here");
-        given(mockMandate.getReference()).willReturn(goCardlessReference.toString());
+        given(mockMandate.getId()).willReturn(GO_CARDLESS_MANDATE_ID.toString());
+        given(mockMandate.getReference()).willReturn(BANK_STATEMENT_REFERENCE.toString());
 
         given(mockGoCardlessClientWrapper.createMandate(mandate.getExternalId(), goCardlessCustomer)).willReturn(mockMandate);
 
-        PaymentProviderMandateIdAndBankReference confirmMandateResponse = goCardlessClientFacade.createMandate(mandate, goCardlessCustomer);
+        PaymentProviderMandateIdAndBankReference result = goCardlessClientFacade.createMandate(mandate, goCardlessCustomer);
 
-        assertThat(confirmMandateResponse.getPaymentProviderMandateId(), is(goCardlessMandateId));
-        assertThat(confirmMandateResponse.getMandateBankStatementReference(), is(goCardlessReference));
+        assertThat(result.getPaymentProviderMandateId(), is(GO_CARDLESS_MANDATE_ID));
+        assertThat(result.getMandateBankStatementReference(), is(BANK_STATEMENT_REFERENCE));
     }
+
+    @Test
+    public void createPaymentReturnsGoCardlessPaymentIdAndChargeDate() {
+        var payment = PaymentFixture.aPaymentFixture().toEntity();
+
+        given(mockPayment.getId()).willReturn(GO_CARDLESS_PAYMENT_ID.toString());
+        given(mockPayment.getChargeDate()).willReturn(CHARGE_DATE.toString());
+
+        given(mockGoCardlessClientWrapper.createPayment(payment, GO_CARDLESS_MANDATE_ID)).willReturn(mockPayment);
+
+        PaymentProviderPaymentIdAndChargeDate result = goCardlessClientFacade.createPayment(payment, GO_CARDLESS_MANDATE_ID);
+
+        assertThat(result.getPaymentProviderPaymentId(), is(GO_CARDLESS_PAYMENT_ID));
+        assertThat(result.getChargeDate(), is(CHARGE_DATE));
+    }
+
 }
