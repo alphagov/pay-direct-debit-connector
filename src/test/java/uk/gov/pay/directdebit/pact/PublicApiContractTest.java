@@ -87,7 +87,7 @@ public class PublicApiContractTest {
     @State("a direct debit event exists")
     public void aDirectDebitEventExists(Map<String, String> params) {
 
-        String transactionExternalId = params.getOrDefault("transaction_external_id", RandomIdGenerator.newId());
+        String paymentExternalId = params.getOrDefault("payment_external_id", RandomIdGenerator.newId());
         MandateExternalId mandateExternalId = MandateExternalId.valueOf(params.getOrDefault("mandate_external_id", RandomIdGenerator.newId()));
 
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
@@ -105,16 +105,16 @@ public class PublicApiContractTest {
             mandateFixture.withId(mandateByExternalId.get().getId());
         }
 
-        PaymentFixture transaction = PaymentFixture.aPaymentFixture()
+        PaymentFixture payment = PaymentFixture.aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withExternalId(transactionExternalId)
+                .withExternalId(paymentExternalId)
                 .insert(app.getTestContext().getJdbi());
 
         Long eventId = Long.valueOf(params.get("event_id"));
         DirectDebitEventFixture.aDirectDebitEventFixture()
                 .withId(eventId)
                 .withMandateId(mandateFixture.getId())
-                .withTransactionId(transaction.getId())
+                .withTransactionId(payment.getId())
                 .withEvent(DirectDebitEvent.SupportedEvent.valueOf(params.get("event")))
                 .withEventType(DirectDebitEvent.Type.valueOf(params.get("event_type")))
                 .withEventDate(ZonedDateTime.parse(params.getOrDefault("event_date", ZonedDateTime.now().toString())))
