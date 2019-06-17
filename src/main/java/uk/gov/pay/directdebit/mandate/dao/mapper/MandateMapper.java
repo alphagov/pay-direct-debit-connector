@@ -11,6 +11,8 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
@@ -18,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 
@@ -97,11 +100,25 @@ public class MandateMapper implements RowMapper<Mandate> {
                 .withCreatedDate(ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC))
                 .withPayer(payer);
 
-        String providerId = resultSet.getString(PAYMENT_PROVIDER_ID);
-        if (providerId != null) {
-            mandateBuilder.withPaymentProviderId(GoCardlessMandateId.valueOf(providerId));
-        }
+        resolvePaymentProviderMandateId(gatewayAccount.getPaymentProvider(), resultSet.getString(PAYMENT_PROVIDER_ID))
+                .ifPresent(mandateBuilder::withPaymentProviderId);
 
         return mandateBuilder.build();
     }
+
+    private Optional<PaymentProviderMandateId> resolvePaymentProviderMandateId(PaymentProvider paymentProvider, String paymentProviderMandateId) {
+        if (paymentProviderMandateId == null) {
+            return Optional.empty();
+        }
+
+        switch (paymentProvider) {
+            case SANDBOX:
+                return Optional.of(SandboxMandateId.valueOf(paymentProviderMandateId));
+            case GOCARDLESS:
+                return Optional.of(GoCardlessMandateId.valueOf(paymentProviderMandateId));
+            default:
+                throw new IllegalArgumentException("Unrecognised payment provider " + paymentProvider + " for mandate " + paymentProviderMandateId);
+        }
+    }
+ 
 }
