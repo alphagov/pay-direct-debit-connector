@@ -41,9 +41,9 @@ public class PaymentResponse {
     private ZonedDateTime createdDate;
 
     @JsonProperty
-    private ExternalPaymentState state;
+    private ExternalPaymentStateWithDetails state;
 
-    public PaymentResponse(String transactionExternalId, ExternalPaymentState state, Long amount, String returnUrl, String description, String reference, ZonedDateTime createdDate, List<Map<String, Object>> dataLinks) {
+    public PaymentResponse(String transactionExternalId, ExternalPaymentStateWithDetails state, Long amount, String returnUrl, String description, String reference, ZonedDateTime createdDate, List<Map<String, Object>> dataLinks) {
         this.transactionExternalId = transactionExternalId;
         this.state = state;
         this.dataLinks = dataLinks;
@@ -90,7 +90,8 @@ public class PaymentResponse {
     public static PaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
         return new PaymentResponse(
                 payment.getExternalId(),
-                payment.getState().toExternal(),
+                // TODO: should extract state details (go cardless cause details) from events table somehow
+                new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"),
                 payment.getAmount(),
                 payment.getMandate().getReturnUrl(),
                 payment.getDescription(),
@@ -134,7 +135,7 @@ public class PaymentResponse {
         return "PaymentResponse{" +
                 "dataLinks=" + dataLinks +
                 ", paymentExternalId='" + transactionExternalId + '\'' +
-                ", state='" + state.getState() + '\'' +
+                ", state='" + state + '\'' +
                 ", amount=" + amount +
                 ", returnUrl='" + returnUrl + '\'' +
                 ", reference='" + reference + '\'' +

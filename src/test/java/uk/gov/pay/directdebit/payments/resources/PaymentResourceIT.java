@@ -67,7 +67,9 @@ public class PaymentResourceIT {
     private static final String JSON_CHARGE_KEY = "charge_id";
     private static final String JSON_PROVIDER_ID_KEY = "provider_id";
     private static final String JSON_MANDATE_ID_KEY = "mandate_id";
-    private static final String JSON_STATE_KEY = "state.status";
+    private static final String JSON_STATE_STATUS_KEY = "state.status";
+    private static final String JSON_STATE_FINISHED_KEY = "state.finished";
+    private static final String JSON_STATE_DETAILS_KEY = "state.details";
     private static final long AMOUNT = 6234L;
     private GatewayAccountFixture testGatewayAccount;
 
@@ -249,7 +251,9 @@ public class PaymentResourceIT {
                 .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
                 .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
                 .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
-                .body(JSON_STATE_KEY, is(paymentFixture.getState().toExternal().getState()))
+                .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getState()))
+                .body(JSON_STATE_FINISHED_KEY, is(false))
+                .body(JSON_STATE_DETAILS_KEY, is("example_details"))
                 .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
 
 
@@ -281,7 +285,8 @@ public class PaymentResourceIT {
                 .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
                 .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
                 .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
-                .body(JSON_STATE_KEY, is(paymentFixture.getState().toExternal().getState()))
+                .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getState()))
+                .body(JSON_STATE_DETAILS_KEY, is("example_details"))
                 .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
 
         String newChargeToken = testContext.getDatabaseTestHelper().getTokenByTransactionExternalId(paymentFixture.getExternalId());

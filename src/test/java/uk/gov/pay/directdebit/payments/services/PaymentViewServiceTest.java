@@ -14,13 +14,13 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
-import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
-import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
 import javax.ws.rs.core.UriBuilder;
@@ -96,21 +96,15 @@ public class PaymentViewServiceTest {
                 .withDisplaySize(100L)
                 .withFromDateString(createdDate.toString())
                 .withToDateString(createdDate.toString());
-        List<PaymentViewResultResponse> listResponses = new ArrayList<>();
-        for (PaymentView paymentView : paymentViewList) {
-            listResponses.add(new PaymentViewResultResponse(paymentView.getPaymentExternalId(),
-                    paymentView.getAmount(), paymentView.getReference(), paymentView.getDescription(),
-                    paymentView.getCreatedDate(), paymentView.getName(),
-                    paymentView.getEmail(), paymentView.getState().toExternal(),
-                    paymentView.getMandateExternalId()));
-        }
+        
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(4L);
         PaymentViewResponse response = paymentViewService.getPaymentViewResponse(searchParams);
         assertThat(response.getPaymentViewResponses().get(3).getAmount(), is(1003L));
         assertThat(response.getPaymentViewResponses().get(1).getName(), is("John Doe1"));
-        assertThat(response.getPaymentViewResponses().get(0).getState(), is((PaymentState.NEW.toExternal())));
+        assertThat(response.getPaymentViewResponses().get(0).getState(),
+                is(new ExternalPaymentStateWithDetails(PaymentState.NEW.toExternal(), "example_details")));
         assertThat(response.getPaymentViewResponses().get(2).getCreatedDate(), is(createdDate));
     }
 

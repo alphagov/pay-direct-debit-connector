@@ -15,7 +15,9 @@ public enum ExternalPaymentState {
     EXTERNAL_EXPIRED("expired", true),
     EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE("cancelled", true, "P0060", "User not eligible for Direct Debit");
 
+    @JsonProperty("status")
     private final String value;
+    
     private final boolean finished;
     private final String code;
     private final String message;
@@ -33,22 +35,31 @@ public enum ExternalPaymentState {
         this.code = code;
         this.message = message;
     }
-
-    @JsonProperty("status")
+    
     public String getState() {
         return value;
     }
-
     public boolean isFinished() {
         return finished;
     }
 
+    
     public String getCode() {
         return code;
     }
 
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String toString() {
+        return "ExternalPaymentState{" +
+                "value='" + value + '\'' +
+                ", finished=" + finished +
+                ", code='" + code + '\'' +
+                ", message='" + message + '\'' +
+                '}';
     }
 }
 

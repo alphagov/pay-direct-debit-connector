@@ -420,7 +420,8 @@ public class PaymentViewResourceIT {
                 .body("count", is(6))
                 .body("results", hasSize(6))
                 .body("results[0].state.finished", is(true))
-                .body("results[0].state.status", is("failed"));
+                .body("results[0].state.status", is("failed"))
+                .body("results[0].state.details", is("example_details"));
     }
 
     private RequestSpecification givenSetup() {

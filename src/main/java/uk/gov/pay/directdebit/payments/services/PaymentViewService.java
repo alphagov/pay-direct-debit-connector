@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.payments.services;
 
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewValidator;
@@ -80,7 +81,8 @@ public class PaymentViewService {
                 paymentView.getCreatedDate(),
                 paymentView.getName(),
                 paymentView.getEmail(),
-                paymentView.getState().toExternal(),
+                // TODO: should extract state details (go cardless cause details) from events table somehow
+                new ExternalPaymentStateWithDetails(paymentView.getState().toExternal(), "example_details"),
                 paymentView.getMandateExternalId());
     }
 

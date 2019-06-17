@@ -30,6 +30,7 @@ import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
@@ -167,7 +168,7 @@ public class MandateServiceTest {
         assertThat(mandateResponseForFrontend.getPayment().getAmount(), is(paymentFixture.getAmount()));
         assertThat(mandateResponseForFrontend.getPayment().getDescription(), is(paymentFixture.getDescription()));
         assertThat(mandateResponseForFrontend.getPayment().getExternalId(), is(paymentFixture.getExternalId()));
-        assertThat(mandateResponseForFrontend.getPayment().getState(), is(paymentFixture.getState().toExternal()));
+        assertThat(mandateResponseForFrontend.getPayment().getState(), is(new ExternalPaymentStateWithDetails(paymentFixture.getState().toExternal(), "example_details")));
         assertThat(mandateResponseForFrontend.getPayment().getReference(), is(paymentFixture.getReference()));
     }
 

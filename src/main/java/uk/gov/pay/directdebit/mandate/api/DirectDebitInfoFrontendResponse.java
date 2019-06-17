@@ -10,7 +10,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
 import uk.gov.pay.directdebit.payments.model.Payment;
 
 import java.time.ZonedDateTime;
@@ -79,7 +79,8 @@ public class DirectDebitInfoFrontendResponse {
             return new PaymentDetails(
                     payment.getExternalId(),
                     payment.getAmount(),
-                    payment.getState().toExternal(),
+                    // TODO: should extract state details (go cardless cause details) from events table somehow
+                    new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"),
                     payment.getDescription(),
                     payment.getReference()
             );
@@ -249,12 +250,12 @@ public class DirectDebitInfoFrontendResponse {
         @JsonProperty("external_id")
         private String externalId;
         private Long amount;
-        private ExternalPaymentState state;
+        private ExternalPaymentStateWithDetails state;
         private String description;
         private String reference;
 
         public PaymentDetails(String externalId, Long amount,
-                              ExternalPaymentState state, String description, String reference) {
+                              ExternalPaymentStateWithDetails state, String description, String reference) {
             this.externalId = externalId;
             this.amount = amount;
             this.state = state;
@@ -270,7 +271,7 @@ public class DirectDebitInfoFrontendResponse {
             return amount;
         }
 
-        public ExternalPaymentState getState() {
+        public ExternalPaymentStateWithDetails getState() {
             return state;
         }
 

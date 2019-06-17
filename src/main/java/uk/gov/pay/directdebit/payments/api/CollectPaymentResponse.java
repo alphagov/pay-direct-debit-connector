@@ -53,7 +53,7 @@ public class CollectPaymentResponse {
     private ZonedDateTime createdDate;
 
     @JsonProperty
-    private ExternalPaymentState state;
+    private ExternalPaymentStateWithDetails state;
 
     public CollectPaymentResponse(CollectPaymentResponseBuilder builder) {
         this.paymentExternalId = builder.paymentExternalId;
@@ -103,7 +103,8 @@ public class CollectPaymentResponse {
     public static CollectPaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
         return aCollectPaymentResponse()
                 .withPaymentExternalId(payment.getExternalId())
-                .withState(payment.getState().toExternal())
+                // TODO: should extract state details (go cardless cause details) from events table somehow
+                .withState(new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"))
                 .withAmount(payment.getAmount())
                 .withMandateId(payment.getMandate().getExternalId())
                 .withDescription(payment.getDescription())
@@ -163,7 +164,7 @@ public class CollectPaymentResponse {
         private String reference;
         private PaymentProviderPaymentId providerId;
         private ZonedDateTime createdDate;
-        private ExternalPaymentState state;
+        private ExternalPaymentStateWithDetails state;
 
         private CollectPaymentResponseBuilder() {
         }
@@ -212,7 +213,7 @@ public class CollectPaymentResponse {
             return this;
         }
 
-        public CollectPaymentResponseBuilder withState(ExternalPaymentState state) {
+        public CollectPaymentResponseBuilder withState(ExternalPaymentStateWithDetails state) {
             this.state = state;
             return this;
         }
