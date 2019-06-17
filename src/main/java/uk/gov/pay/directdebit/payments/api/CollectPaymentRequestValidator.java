@@ -28,7 +28,8 @@ public class CollectPaymentRequestValidator extends ApiValidation {
                     })
                     .put(DESCRIPTION_KEY, ApiValidation::isNotNullOrEmpty)
                     .put(REFERENCE_KEY, ApiValidation::isNotNullOrEmpty)
-                    .put(AGREEMENT_ID_KEY, ApiValidation::isNotNullOrEmpty)
+                    // TODO: re-add validation when field rename to mandate_id completed. Disabled for backwards compatibility in the meantime
+//                    .put(AGREEMENT_ID_KEY, ApiValidation::isNotNullOrEmpty)
                     .build();
 
     private final static String[] requiredFields = {AMOUNT_KEY, DESCRIPTION_KEY, REFERENCE_KEY, AGREEMENT_ID_KEY};
