@@ -1,6 +1,8 @@
 package uk.gov.pay.directdebit.payments.model;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
+
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 
@@ -12,6 +14,7 @@ public class Payment {
     private PaymentState state;
     private String description;
     private String reference;
+    private PaymentProviderPaymentId providerId;
     private ZonedDateTime createdDate;
     private Mandate mandate;
 
@@ -94,6 +97,10 @@ public class Payment {
         this.mandate = mandate;
     }
 
+    public PaymentProviderPaymentId getProviderId() {
+        return providerId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -105,7 +112,7 @@ public class Payment {
 
         Payment that = (Payment) o;
 
-        if (id != null ? !id.equals(that.id) : that.id != null) {
+        if (!Objects.equals(id, that.id)) {
             return false;
         }
         if (!externalId.equals(that.externalId)) {
@@ -117,11 +124,10 @@ public class Payment {
         if (state != that.state) {
             return false;
         }
-        if (description != null ? !description.equals(that.description)
-                : that.description != null) {
+        if (!Objects.equals(description, that.description)) {
             return false;
         }
-        if (reference != null ? !reference.equals(that.reference) : that.reference != null) {
+        if (!Objects.equals(reference, that.reference)) {
             return false;
         }
         if (!createdDate.equals(that.createdDate)) {

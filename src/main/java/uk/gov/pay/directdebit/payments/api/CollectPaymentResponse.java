@@ -4,15 +4,20 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static uk.gov.pay.directdebit.payments.api.CollectPaymentResponse.CollectPaymentResponseBuilder.aCollectPaymentResponse;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -25,6 +30,14 @@ public class CollectPaymentResponse {
 
     @JsonProperty
     private Long amount;
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonProperty("mandate_id")
+    private MandateExternalId mandateId;
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonProperty("provider_id")
+    private PaymentProviderPaymentId providerId;
 
     @JsonProperty("payment_provider")
     private String paymentProvider;
@@ -42,15 +55,17 @@ public class CollectPaymentResponse {
     @JsonProperty
     private ExternalPaymentState state;
 
-    public CollectPaymentResponse(String paymentExternalId, ExternalPaymentState state, Long amount, String description, String reference, ZonedDateTime createdDate, String paymentProvider, List<Map<String, Object>> dataLinks) {
-        this.paymentExternalId = paymentExternalId;
-        this.state = state;
-        this.dataLinks = dataLinks;
-        this.amount = amount;
-        this.description = description;
-        this.reference = reference;
-        this.createdDate = createdDate;
-        this.paymentProvider = paymentProvider;
+    public CollectPaymentResponse(CollectPaymentResponseBuilder builder) {
+        this.paymentExternalId = builder.paymentExternalId;
+        this.state = builder.state;
+        this.dataLinks = builder.dataLinks;
+        this.amount = builder.amount;
+        this.mandateId = builder.mandateId;
+        this.description = builder.description;
+        this.providerId = builder.providerId;
+        this.reference = builder.reference;
+        this.createdDate = builder.createdDate;
+        this.paymentProvider = builder.paymentProvider;
     }
 
     public String getPaymentProvider() {
@@ -85,65 +100,19 @@ public class CollectPaymentResponse {
                 .get();
     }
 
-
     public static CollectPaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
-        return new CollectPaymentResponse(
-                payment.getExternalId(),
-                payment.getState().toExternal(),
-                payment.getAmount(),
-                payment.getDescription(),
-                payment.getReference(),
-                payment.getCreatedDate(),
-                payment.getMandate().getGatewayAccount().getPaymentProvider().toString(),
-                dataLinks);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        CollectPaymentResponse that = (CollectPaymentResponse) o;
-
-        if (!dataLinks.equals(that.dataLinks)) {
-            return false;
-        }
-        if (!paymentExternalId.equals(that.paymentExternalId)) {
-            return false;
-        }
-        if (!amount.equals(that.amount)) {
-            return false;
-        }
-        if (!paymentProvider.equals(that.paymentProvider)) {
-            return false;
-        }
-        if (!description.equals(that.description)) {
-            return false;
-        }
-        if (!reference.equals(that.reference)) {
-            return false;
-        }
-        if (!createdDate.equals(that.createdDate)) {
-            return false;
-        }
-        return state == that.state;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = dataLinks.hashCode();
-        result = 31 * result + paymentExternalId.hashCode();
-        result = 31 * result + amount.hashCode();
-        result = 31 * result + paymentProvider.hashCode();
-        result = 31 * result + description.hashCode();
-        result = 31 * result + reference.hashCode();
-        result = 31 * result + createdDate.hashCode();
-        result = 31 * result + state.hashCode();
-        return result;
+        return aCollectPaymentResponse()
+                .withPaymentExternalId(payment.getExternalId())
+                .withState(payment.getState().toExternal())
+                .withAmount(payment.getAmount())
+                .withMandateId(payment.getMandate().getExternalId())
+                .withDescription(payment.getDescription())
+                .withReference(payment.getReference())
+                .withProviderId(payment.getProviderId())
+                .withCreatedDate(payment.getCreatedDate())
+                .withPaymentProvider(payment.getMandate().getGatewayAccount().getPaymentProvider().toString())
+                .withDataLinks(dataLinks)
+                .build();
     }
 
     @Override
@@ -151,14 +120,112 @@ public class CollectPaymentResponse {
         return "CollectPaymentResponse{" +
                 "dataLinks=" + dataLinks +
                 ", paymentExternalId='" + paymentExternalId + '\'' +
-                ", state='" + state.getState() + '\'' +
                 ", amount=" + amount +
-                ", paymentProvider=" + paymentProvider +
+                ", mandateId='" + mandateId + '\'' +
+                ", providerId='" + providerId + '\'' +
+                ", paymentProvider='" + paymentProvider + '\'' +
+                ", description='" + description + '\'' +
                 ", reference='" + reference + '\'' +
                 ", createdDate=" + createdDate +
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CollectPaymentResponse that = (CollectPaymentResponse) o;
+        return Objects.equals(dataLinks, that.dataLinks) &&
+                Objects.equals(paymentExternalId, that.paymentExternalId) &&
+                Objects.equals(amount, that.amount) &&
+                Objects.equals(mandateId, that.mandateId) &&
+                Objects.equals(providerId, that.providerId) &&
+                Objects.equals(paymentProvider, that.paymentProvider) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(reference, that.reference) &&
+                Objects.equals(createdDate, that.createdDate) &&
+                state == that.state;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dataLinks, paymentExternalId, amount, mandateId, providerId, paymentProvider, description, reference, createdDate, state);
+    }
+
+    public static final class CollectPaymentResponseBuilder {
+
+        private List<Map<String, Object>> dataLinks;
+        private String paymentExternalId;
+        private Long amount;
+        private MandateExternalId mandateId;
+        private String paymentProvider;
+        private String description;
+        private String reference;
+        private PaymentProviderPaymentId providerId;
+        private ZonedDateTime createdDate;
+        private ExternalPaymentState state;
+
+        private CollectPaymentResponseBuilder() {
+        }
+
+        public static CollectPaymentResponseBuilder aCollectPaymentResponse() {
+            return new CollectPaymentResponseBuilder();
+        }
+
+        public CollectPaymentResponseBuilder withDataLinks(List<Map<String, Object>> dataLinks) {
+            this.dataLinks = dataLinks;
+            return this;
+        }
+
+        public CollectPaymentResponseBuilder withPaymentExternalId(String paymentExternalId) {
+            this.paymentExternalId = paymentExternalId;
+            return this;
+        }
+
+        public CollectPaymentResponseBuilder withAmount(Long amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public CollectPaymentResponseBuilder withMandateId(MandateExternalId mandateId) {
+            this.mandateId = mandateId;
+            return this;
+        }
+
+        public CollectPaymentResponseBuilder withPaymentProvider(String paymentProvider) {
+            this.paymentProvider = paymentProvider;
+            return this;
+        }
+
+        public CollectPaymentResponseBuilder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public CollectPaymentResponseBuilder withReference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public CollectPaymentResponseBuilder withCreatedDate(ZonedDateTime createdDate) {
+            this.createdDate = createdDate;
+            return this;
+        }
+
+        public CollectPaymentResponseBuilder withState(ExternalPaymentState state) {
+            this.state = state;
+            return this;
+        }
+        
+        public CollectPaymentResponseBuilder withProviderId(PaymentProviderPaymentId providerId) {
+            this.providerId = providerId;
+            return this;
+        }
+
+        public CollectPaymentResponse build() {
+            return new CollectPaymentResponse(this);
+        }
+    }
 }
 
 
