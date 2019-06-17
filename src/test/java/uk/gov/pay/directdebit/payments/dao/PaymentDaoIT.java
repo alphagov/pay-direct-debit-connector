@@ -1,6 +1,8 @@
 package uk.gov.pay.directdebit.payments.dao;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +58,11 @@ public class PaymentDaoIT {
 
     @Test
     public void shouldInsertAPayment() {
+        LocalDate chargeDate = LocalDate.of(1969, 7, 16);
+
         Payment payment = testPayment
                 .withPaymentProviderId(SandboxPaymentId.valueOf("expectedPaymentProviderId"))
+                .withChargeDate(chargeDate)
                 .toEntity();
         Long id = paymentDao.insert(payment);
 
@@ -67,6 +72,7 @@ public class PaymentDaoIT {
         assertThat((Long) foundPayment.get("amount"), isNumber(AMOUNT));
         assertThat(PaymentState.valueOf((String) foundPayment.get("state")), is(STATE));
         assertThat(foundPayment.get("payment_provider_id"), is("expectedPaymentProviderId"));
+        assertThat(((Date) foundPayment.get("charge_date")).toLocalDate(), is(chargeDate));
     }
 
     @Test
@@ -87,8 +93,11 @@ public class PaymentDaoIT {
     @Test
     public void shouldGetAPaymentById() {
         SandboxPaymentId providerId = SandboxPaymentId.valueOf("expectedPaymentProviderId");
+        LocalDate chargeDate = LocalDate.of(1969, 7, 16);
+
         testPayment
                 .withPaymentProviderId(providerId)
+                .withChargeDate(chargeDate)
                 .insert(testContext.getJdbi());
 
         Payment payment = paymentDao.findById(testPayment.getId()).get();
@@ -102,6 +111,7 @@ public class PaymentDaoIT {
         assertThat(payment.getState(), is(STATE));
         assertThat(payment.getCreatedDate(), is(testPayment.getCreatedDate()));
         assertThat(payment.getProviderId(), is(providerId));
+        assertThat(payment.getChargeDate().get(), is(chargeDate));
     }
 
     @Test
