@@ -25,7 +25,11 @@ public class CollectPaymentResponse {
     @JsonProperty("links")
     private List<Map<String, Object>> dataLinks;
 
+    // TODO - added for backwards compatibility while field is renamed
     @JsonProperty("charge_id")
+    private String chargeId;
+    
+    @JsonProperty("payment_id")
     private String paymentExternalId;
 
     @JsonProperty
@@ -57,6 +61,8 @@ public class CollectPaymentResponse {
 
     public CollectPaymentResponse(CollectPaymentResponseBuilder builder) {
         this.paymentExternalId = builder.paymentExternalId;
+        // TODO - added for backwards compatibility while field is renamed
+        this.chargeId = builder.paymentExternalId;
         this.state = builder.state;
         this.dataLinks = builder.dataLinks;
         this.amount = builder.amount;
