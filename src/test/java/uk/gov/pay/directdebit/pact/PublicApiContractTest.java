@@ -86,8 +86,10 @@ public class PublicApiContractTest {
 
     @State("a direct debit event exists")
     public void aDirectDebitEventExists(Map<String, String> params) {
+        String paymentExternalId = params.get("payment_external_id") != null
+                ? params.get("payment_external_id")
+                : params.getOrDefault("transaction_external_id", RandomIdGenerator.newId());
 
-        String paymentExternalId = params.getOrDefault("payment_external_id", RandomIdGenerator.newId());
         MandateExternalId mandateExternalId = MandateExternalId.valueOf(params.getOrDefault("mandate_external_id", RandomIdGenerator.newId()));
 
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
