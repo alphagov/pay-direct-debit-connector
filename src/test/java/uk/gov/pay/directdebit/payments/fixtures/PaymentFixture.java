@@ -9,7 +9,9 @@ import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
 public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
 
@@ -21,6 +23,7 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+    private PaymentProviderPaymentId paymentProviderId = SandboxPaymentId.valueOf(RandomStringUtils.randomAlphanumeric(20));
     private PaymentFixture() {
     }
 
@@ -101,6 +104,11 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
         return this;
     }
 
+    public PaymentFixture withPaymentProviderId(PaymentProviderPaymentId paymentProviderId) {
+        this.paymentProviderId = paymentProviderId;
+        return this;
+    }
+
     @Override
     public PaymentFixture insert(Jdbi jdbi) {
         jdbi.withHandle(h ->
@@ -114,9 +122,10 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
                                 "        state,\n" +
                                 "        reference,\n" +
                                 "        description,\n" +
-                                "        created_date\n" +
+                                "        created_date,\n" +
+                                "        payment_provider_id\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         mandateFixture.getId(),
                         externalId,
@@ -124,7 +133,8 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
                         state,
                         reference,
                         description,
-                        createdDate
+                        createdDate,
+                        paymentProviderId
                 )
         );
         return this;
@@ -132,7 +142,7 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
 
     @Override
     public Payment toEntity() {
-        return new Payment(id, externalId, amount, state, description, reference, mandateFixture.toEntity(), createdDate);
+        return new Payment(id, externalId, amount, state, description, reference, mandateFixture.toEntity(), createdDate, paymentProviderId);
     }
 
 }

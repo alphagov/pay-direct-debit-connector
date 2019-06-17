@@ -58,7 +58,7 @@ public class DatabaseTestHelper {
         );
     }
 
-    public Map<String, Object> getTransactionById(Long id) {
+    public Map<String, Object> getPaymentById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT * from payments p WHERE p.id = :id")

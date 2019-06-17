@@ -21,7 +21,9 @@ import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
+import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -41,7 +43,7 @@ public class PaymentDaoIT {
     private PaymentDao paymentDao;
 
     private GatewayAccountFixture testGatewayAccount;
-    private PaymentFixture testTransaction;
+    private PaymentFixture testPayment;
     private MandateFixture testMandate;
 
     @Before
@@ -49,106 +51,131 @@ public class PaymentDaoIT {
         paymentDao = testContext.getJdbi().onDemand(PaymentDao.class);
         testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
         testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-        testTransaction = generateNewTransactionFixture(testMandate, STATE, AMOUNT);
+        testPayment = generateNewPaymentFixture(testMandate, STATE, AMOUNT);
     }
 
     @Test
-    public void shouldInsertATransaction() {
-        Payment payment = testTransaction.toEntity();
+    public void shouldInsertAPayment() {
+        Payment payment = testPayment
+                .withPaymentProviderId(SandboxPaymentId.valueOf("expectedPaymentProviderId"))
+                .toEntity();
         Long id = paymentDao.insert(payment);
-        Map<String, Object> foundTransaction = testContext.getDatabaseTestHelper().getTransactionById(id);
-        assertThat(foundTransaction.get("id"), is(id));
-        assertThat(foundTransaction.get("mandate_id"), is(testMandate.getId()));
-        assertThat((Long) foundTransaction.get("amount"), isNumber(AMOUNT));
-        assertThat(PaymentState.valueOf((String) foundTransaction.get("state")), is(STATE));
+
+        Map<String, Object> foundPayment = testContext.getDatabaseTestHelper().getPaymentById(id);
+        assertThat(foundPayment.get("id"), is(id));
+        assertThat(foundPayment.get("mandate_id"), is(testMandate.getId()));
+        assertThat((Long) foundPayment.get("amount"), isNumber(AMOUNT));
+        assertThat(PaymentState.valueOf((String) foundPayment.get("state")), is(STATE));
+        assertThat(foundPayment.get("payment_provider_id"), is("expectedPaymentProviderId"));
     }
 
     @Test
-    public void shouldGetATransactionById() {
-        testTransaction.insert(testContext.getJdbi());
-        Payment payment = paymentDao.findById(testTransaction.getId()).get();
-        assertThat(payment.getId(), is(testTransaction.getId()));
+    public void shouldInsertAPaymentWithoutProviderId() {
+        Payment payment = testPayment
+                .withPaymentProviderId(null)
+                .toEntity();
+        Long id = paymentDao.insert(payment);
+
+        Map<String, Object> foundPayment = testContext.getDatabaseTestHelper().getPaymentById(id);
+        assertThat(foundPayment.get("id"), is(id));
+        assertThat(foundPayment.get("mandate_id"), is(testMandate.getId()));
+        assertThat((Long) foundPayment.get("amount"), isNumber(AMOUNT));
+        assertThat(PaymentState.valueOf((String) foundPayment.get("state")), is(STATE));
+        assertThat(foundPayment.get("payment_provider_id"), is(nullValue()));
+    }
+
+    @Test
+    public void shouldGetAPaymentById() {
+        SandboxPaymentId providerId = SandboxPaymentId.valueOf("expectedPaymentProviderId");
+        testPayment
+                .withPaymentProviderId(providerId)
+                .insert(testContext.getJdbi());
+
+        Payment payment = paymentDao.findById(testPayment.getId()).get();
+
+        assertThat(payment.getId(), is(testPayment.getId()));
         assertThat(payment.getMandate(), is(testMandate.toEntity()));
-        assertThat(payment.getExternalId(), is(testTransaction.getExternalId()));
-        assertThat(payment.getDescription(), is(testTransaction.getDescription()));
-        assertThat(payment.getReference(), is(testTransaction.getReference()));
+        assertThat(payment.getExternalId(), is(testPayment.getExternalId()));
+        assertThat(payment.getDescription(), is(testPayment.getDescription()));
+        assertThat(payment.getReference(), is(testPayment.getReference()));
         assertThat(payment.getAmount(), is(AMOUNT));
         assertThat(payment.getState(), is(STATE));
-        assertThat(payment.getCreatedDate(), is(testTransaction.getCreatedDate()));
+        assertThat(payment.getCreatedDate(), is(testPayment.getCreatedDate()));
+        assertThat(payment.getProviderId(), is(providerId));
     }
 
     @Test
-    public void shouldGetATransactionByExternalId() {
-        testTransaction.insert(testContext.getJdbi());
-        Payment payment = paymentDao.findByExternalId(testTransaction.getExternalId()).get();
-        assertThat(payment.getId(), is(testTransaction.getId()));
+    public void shouldGetAPaymentByExternalId() {
+        testPayment.insert(testContext.getJdbi());
+        Payment payment = paymentDao.findByExternalId(testPayment.getExternalId()).get();
+        assertThat(payment.getId(), is(testPayment.getId()));
         assertThat(payment.getMandate(), is(testMandate.toEntity()));
-        assertThat(payment.getExternalId(), is(testTransaction.getExternalId()));
-        assertThat(payment.getDescription(), is(testTransaction.getDescription()));
-        assertThat(payment.getReference(), is(testTransaction.getReference()));
+        assertThat(payment.getExternalId(), is(testPayment.getExternalId()));
+        assertThat(payment.getDescription(), is(testPayment.getDescription()));
+        assertThat(payment.getReference(), is(testPayment.getReference()));
         assertThat(payment.getAmount(), is(AMOUNT));
         assertThat(payment.getState(), is(STATE));
-        assertThat(payment.getCreatedDate(), is(testTransaction.getCreatedDate()));
+        assertThat(payment.getCreatedDate(), is(testPayment.getCreatedDate()));
     }
 
     @Test
-    public void shouldFindAllTransactionsByPaymentStateAndProvider() {
+    public void shouldFindAllPaymentsByPaymentStateAndProvider() {
         GatewayAccountFixture goCardlessGatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
         GatewayAccountFixture sandboxGatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.SANDBOX).insert(testContext.getJdbi());
 
         MandateFixture sandboxMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(sandboxGatewayAccount).insert(testContext.getJdbi());
         MandateFixture goCardlessMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(goCardlessGatewayAccount).insert(testContext.getJdbi());
         PaymentFixture sandboxCharge =
-                generateNewTransactionFixture(sandboxMandate, PaymentState.NEW, AMOUNT);
+                generateNewPaymentFixture(sandboxMandate, PaymentState.NEW, AMOUNT);
         
-        generateNewTransactionFixture(goCardlessMandate, PaymentState.NEW, AMOUNT);
+        generateNewPaymentFixture(goCardlessMandate, PaymentState.NEW, AMOUNT);
         sandboxCharge.insert(testContext.getJdbi());
 
         PaymentFixture successSandboxCharge =
-                generateNewTransactionFixture(sandboxMandate, PaymentState.SUCCESS, AMOUNT);
+                generateNewPaymentFixture(sandboxMandate, PaymentState.SUCCESS, AMOUNT);
         successSandboxCharge.insert(testContext.getJdbi());
 
         PaymentFixture goCardlessSuccessCharge =
-                generateNewTransactionFixture(goCardlessMandate, PaymentState.SUCCESS, AMOUNT);
+                generateNewPaymentFixture(goCardlessMandate, PaymentState.SUCCESS, AMOUNT);
         goCardlessSuccessCharge.insert(testContext.getJdbi());
 
-        List<Payment> successTransactionsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
-        assertThat(successTransactionsList.size(), is(1));
-        assertThat(successTransactionsList.get(0).getState(), is(PaymentState.SUCCESS));
-        assertThat(successTransactionsList.get(0).getMandate().getGatewayAccount().getPaymentProvider(), is(PaymentProvider.SANDBOX));
+        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
+        assertThat(successPaymentsList.size(), is(1));
+        assertThat(successPaymentsList.get(0).getState(), is(PaymentState.SUCCESS));
+        assertThat(successPaymentsList.get(0).getMandate().getGatewayAccount().getPaymentProvider(), is(PaymentProvider.SANDBOX));
     }
 
     @Test
-    public void shouldNotFindAnyTransactionByPaymentState_ifPaymentStateIsNotUsed() {
+    public void shouldNotFindAnyPaymentByPaymentState_ifPaymentStateIsNotUsed() {
         PaymentFixture processingDirectDebitPaymentStatePaymentFixture =
-                generateNewTransactionFixture(testMandate, PaymentState.NEW, AMOUNT);
+                generateNewPaymentFixture(testMandate, PaymentState.NEW, AMOUNT);
         processingDirectDebitPaymentStatePaymentFixture.insert(testContext.getJdbi());
 
-        List<Payment> successTransactionsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
-        assertThat(successTransactionsList.size(), is(0));
+        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
+        assertThat(successPaymentsList.size(), is(0));
     }
 
     @Test
     public void shouldUpdateStateAndReturnNumberOfAffectedRows() {
         PaymentState newState = PaymentState.NEW;
-        testTransaction.insert(testContext.getJdbi());
-        int numOfUpdatedTransactions = paymentDao.updateState(testTransaction.getId(), newState);
-        Map<String, Object> transactionAfterUpdate = testContext.getDatabaseTestHelper().getTransactionById(testTransaction.getId());
-        assertThat(numOfUpdatedTransactions, is(1));
-        assertThat(transactionAfterUpdate.get("id"), is(testTransaction.getId()));
-        assertThat(transactionAfterUpdate.get("external_id"), is(testTransaction.getExternalId()));
+        testPayment.insert(testContext.getJdbi());
+        int numOfUpdatedPayments = paymentDao.updateState(testPayment.getId(), newState);
+        Map<String, Object> transactionAfterUpdate = testContext.getDatabaseTestHelper().getPaymentById(testPayment.getId());
+        assertThat(numOfUpdatedPayments, is(1));
+        assertThat(transactionAfterUpdate.get("id"), is(testPayment.getId()));
+        assertThat(transactionAfterUpdate.get("external_id"), is(testPayment.getExternalId()));
         assertThat(transactionAfterUpdate.get("mandate_id"), is(testMandate.getId()));
-        assertThat(transactionAfterUpdate.get("description"), is(testTransaction.getDescription()));
-        assertThat(transactionAfterUpdate.get("reference"), is(testTransaction.getReference()));
+        assertThat(transactionAfterUpdate.get("description"), is(testPayment.getDescription()));
+        assertThat(transactionAfterUpdate.get("reference"), is(testPayment.getReference()));
         assertThat(transactionAfterUpdate.get("amount"), is(AMOUNT));
         assertThat(transactionAfterUpdate.get("state"), is(newState.toString()));
-        assertThat((Timestamp) transactionAfterUpdate.get("created_date"), isDate(testTransaction.getCreatedDate()));
+        assertThat((Timestamp) transactionAfterUpdate.get("created_date"), isDate(testPayment.getCreatedDate()));
     }
 
     @Test
-    public void shouldNotUpdateAnythingIfTransactionDoesNotExist() {
-        int numOfUpdatedTransactions = paymentDao.updateState(34L, PaymentState.NEW);
-        assertThat(numOfUpdatedTransactions, is(0));
+    public void shouldNotUpdateAnythingIfPaymentDoesNotExist() {
+        int numOfUpdatedPayments = paymentDao.updateState(34L, PaymentState.NEW);
+        assertThat(numOfUpdatedPayments, is(0));
     }
     
     @Test
@@ -191,9 +218,9 @@ public class PaymentDaoIT {
     }
     
 
-    private PaymentFixture generateNewTransactionFixture(MandateFixture mandateFixture,
-                                                         PaymentState paymentState,
-                                                         long amount) {
+    private PaymentFixture generateNewPaymentFixture(MandateFixture mandateFixture,
+                                                     PaymentState paymentState,
+                                                     long amount) {
         return aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withAmount(amount)

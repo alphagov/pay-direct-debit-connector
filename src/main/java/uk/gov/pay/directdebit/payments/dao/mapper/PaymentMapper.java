@@ -11,13 +11,17 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 
@@ -30,6 +34,7 @@ public class PaymentMapper implements RowMapper<Payment> {
     private static final String TRANSACTION_REFERENCE_COLUMN = "transaction_reference";
     private static final String TRANSACTION_DESCRIPTION_COLUMN = "transaction_description";
     private static final String TRANSACTION_CREATED_DATE_COLUMN = "transaction_created_date";
+    private static final String TRANSACTION_PAYMENT_PROVIDER_ID_COLUMN = "payment_provider_id";
     private static final String GATEWAY_ACCOUNT_ID_COLUMN = "gateway_account_id";
     private static final String GATEWAY_ACCOUNT_EXTERNAL_ID_COLUMN = "gateway_account_external_id";
     private static final String GATEWAY_ACCOUNT_PAYMENT_PROVIDER_COLUMN = "gateway_account_payment_provider";
@@ -53,7 +58,6 @@ public class PaymentMapper implements RowMapper<Payment> {
     private static final String MANDATE_EXTERNAL_ID_COLUMN = "mandate_external_id";
     private static final String MANDATE_RETURN_URL_COLUMN = "mandate_return_url";
     private static final String MANDATE_STATE_COLUMN = "mandate_state";
-    private static final String MANDATE_TYPE_COLUMN = "mandate_type";
     private static final String MANDATE_MANDATE_REFERENCE_COLUMN = "mandate_mandate_reference";
     private static final String MANDATE_SERVICE_REFERENCE_COLUMN = "mandate_service_reference";
     private static final String MANDATE_CREATED_DATE_COLUMN = "mandate_created_date";
@@ -112,6 +116,22 @@ public class PaymentMapper implements RowMapper<Payment> {
                 resultSet.getString(TRANSACTION_DESCRIPTION_COLUMN),
                 resultSet.getString(TRANSACTION_REFERENCE_COLUMN),
                 mandate,
-                ZonedDateTime.ofInstant(resultSet.getTimestamp(TRANSACTION_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC));
+                ZonedDateTime.ofInstant(resultSet.getTimestamp(TRANSACTION_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
+                resolvePaymentProviderPaymentId(gatewayAccount.getPaymentProvider(), resultSet.getString(TRANSACTION_PAYMENT_PROVIDER_ID_COLUMN)).orElse(null));
+    }
+
+    private Optional<PaymentProviderPaymentId> resolvePaymentProviderPaymentId(PaymentProvider paymentProvider, String paymentProviderPaymentId) {
+        if (paymentProviderPaymentId == null) {
+            return Optional.empty();
+        }
+
+        switch (paymentProvider) {
+            case SANDBOX:
+                return Optional.of(SandboxPaymentId.valueOf(paymentProviderPaymentId));
+            case GOCARDLESS:
+                return Optional.of(GoCardlessPaymentId.valueOf(paymentProviderPaymentId));
+            default:
+                throw new IllegalArgumentException("Unrecognised payment provider " + paymentProvider + " for payment " + paymentProviderPaymentId);
+        }
     }
 }
