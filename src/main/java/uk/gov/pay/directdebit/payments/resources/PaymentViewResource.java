@@ -57,37 +57,4 @@ public class PaymentViewResource {
                 .withUriInfo(uriInfo)
                 .getPaymentViewResponse(searchParams)).build();
     }
-
-    // TODO: temporary
-    @GET
-    @Path("/v1/api/accounts/{accountId}/transactions/view")
-    @Produces(APPLICATION_JSON)
-    @Timed
-    public Response getTransactionView(
-            @PathParam("accountId") String accountExternalId,
-            @QueryParam("page") Long pageNumber,
-            @QueryParam("display_size") Long displaySize,
-            @QueryParam("from_date") String fromDate,
-            @QueryParam("to_date") String toDate,
-            @QueryParam("email") String email,
-            @QueryParam("reference") String reference,
-            @QueryParam("amount") Long amount,
-            @QueryParam("agreement_id") String mandateId,
-            @QueryParam("state") String state,
-            @Context UriInfo uriInfo) {
-
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(accountExternalId)
-                .withPage(pageNumber)
-                .withDisplaySize(displaySize)
-                .withFromDateString(fromDate)
-                .withToDateString(toDate)
-                .withEmail(email)
-                .withReference(reference)
-                .withAmount(amount)
-                .withMandateId(mandateId)
-                .withState(state);
-        return Response.ok().entity(paymentViewService
-                .withUriInfo(uriInfo)
-                .getPaymentViewResponse(searchParams)).build();
-    }
 }

@@ -105,8 +105,7 @@ public class MandateResourceIT {
     @Parameters({
             "null, test-service-ref, Field [return_url] cannot be null",
             " , test-service-ref, Field [return_url] must have a size between 1 and 255",
-            //TODO Re-enable once pact tests are passing and validation is re-enabled.
-            //"http://example, null, Field [service_reference] cannot be null",
+            "http://example, null, Field [service_reference] cannot be null",
             "http://example, , Field [service_reference] must have a size between 1 and 255"
     })
     public void createMandateValidationFailures(@Nullable String returnUrl, 
