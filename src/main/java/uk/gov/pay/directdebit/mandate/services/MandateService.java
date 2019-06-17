@@ -131,7 +131,8 @@ public class MandateService {
                 dataLinks,
                 mandate.getServiceReference(),
                 mandate.getMandateBankStatementReference(),
-                mandate.getDescription().orElse(null));
+                mandate.getDescription().orElse(null), 
+                mandate.getGatewayAccount().getPaymentProvider());
     }
 
     public TokenExchangeDetails getMandateFor(String token) {

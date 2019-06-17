@@ -153,6 +153,7 @@ public class MandateResourceIT {
                 .body("state.status", is("created"))
                 .body("state.finished", is(false))
                 .body("service_reference", is("test-service-reference"))
+                .body("payment_provider", is(gatewayAccountFixture.getPaymentProvider().toString().toLowerCase()))
                 .body("mandate_reference", is(notNullValue()))
                 .body("description", optionalMatcher(description))
                 .contentType(JSON);
