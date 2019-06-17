@@ -1,0 +1,1 @@
+ALTER TABLE payments ALTER COLUMN charge_date TYPE DATE;
