@@ -9,7 +9,6 @@ import io.restassured.specification.RequestSpecification;
 import junitparams.Parameters;
 import junitparams.converters.Nullable;
 import org.apache.http.HttpStatus;
-import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Before;
@@ -52,10 +51,10 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
+import static uk.gov.pay.commons.testing.matchers.HamcrestMatchers.optionalMatcher;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
@@ -156,7 +155,7 @@ public class MandateResourceIT {
                 .body("state.finished", is(false))
                 .body("service_reference", is("test-service-reference"))
                 .body("mandate_reference", is(notNullValue()))
-                .body("description", optionalDescriptionMatcher(description))
+                .body("description", optionalMatcher(description))
                 .contentType(JSON);
         MandateExternalId externalMandateId = MandateExternalId.valueOf(response.extract().path(JSON_MANDATE_ID_KEY).toString());
 
@@ -169,13 +168,9 @@ public class MandateResourceIT {
         response.body("links", hasSize(3))
                 .body("links", containsLink("self", "GET", documentLocation))
                 .body("links", containsLink("next_url", "GET", hrefNextUrl))
-                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
+                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<>() {{
                     put("chargeTokenId", token);
                 }}));
-    }
-
-    private Matcher<Object> optionalDescriptionMatcher(String description) {
-        return description == null ? is(nullValue()) : is(notNullValue());
     }
 
     @Test
