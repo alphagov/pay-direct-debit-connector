@@ -70,22 +70,8 @@ public class PublicApiContractTest {
                 .insert(app.getTestContext().getJdbi());
     }
 
-    @State("three transaction records exist") // TODO: make go bye-bye
-    public void threeTransactionRecordsExist(Map<String, String> params) {
-        testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
-        MandateFixture testMandate = MandateFixture.aMandateFixture()
-                .withGatewayAccountFixture(testGatewayAccount)
-                .withExternalId(MandateExternalId.valueOf(params.get("agreement_id")));
-        testMandate.insert(app.getTestContext().getJdbi());
-        PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
-        testPayer.insert(app.getTestContext().getJdbi());
-        for (int x = 0; x < 3; x++) {
-            PaymentFixture.aPaymentFixture().withMandateFixture(testMandate).insert(app.getTestContext().getJdbi());
-        }
-    }
-
     @State("three payment records exist")
-    public void threePaymentRecordsExist(Map<String, String> params) {
+    public void threeTransactionRecordsExist(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
@@ -100,10 +86,8 @@ public class PublicApiContractTest {
 
     @State("a direct debit event exists")
     public void aDirectDebitEventExists(Map<String, String> params) {
-        String paymentExternalId = params.get("payment_external_id") != null
-                ? params.get("payment_external_id")
-                : params.getOrDefault("transaction_external_id", RandomIdGenerator.newId());
 
+        String paymentExternalId = params.getOrDefault("payment_external_id", RandomIdGenerator.newId());
         MandateExternalId mandateExternalId = MandateExternalId.valueOf(params.getOrDefault("mandate_external_id", RandomIdGenerator.newId()));
 
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
