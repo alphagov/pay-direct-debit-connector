@@ -206,11 +206,11 @@ public class GoCardlessPaymentHandlerTest {
 
     @Test
     public void handle_onCreatePaymentGoCardlessEvent_shouldThrowExceptionWhenEventHasNoLinkedPayment() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
+        GoCardlessEvent goCardlessEvent = goCardlessEventFixture
                 .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("does_not_exist"))
                 .withAction("created")
                 .withLinksPayment(null)
-                .toEntity());
+                .toEntity();
 
         thrown.expect(EventHasNoPaymentIdException.class);
         goCardlessPaymentHandler.handle(goCardlessEvent);
@@ -219,11 +219,11 @@ public class GoCardlessPaymentHandlerTest {
     @Test
     public void handle_onCreatePaymentGoCardlessEvent_shouldThrowPaymentNotFoundException() {
         GoCardlessPaymentId expectedPaymentProvider = GoCardlessPaymentId.valueOf("expected");
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
+        GoCardlessEvent goCardlessEvent = goCardlessEventFixture
                 .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("does_not_exist"))
                 .withAction("created")
                 .withLinksPayment(expectedPaymentProvider)
-                .toEntity());
+                .toEntity();
         
         when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, expectedPaymentProvider)).thenReturn(Optional.empty());
 

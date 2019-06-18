@@ -43,7 +43,8 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
     @Inject
     public GoCardlessService(
             GoCardlessClientFactory goCardlessClientFactory,
-            GoCardlessCustomerDao goCardlessCustomerDao, PaymentDao paymentDao) {
+            GoCardlessCustomerDao goCardlessCustomerDao,
+            PaymentDao paymentDao) {
         this.goCardlessClientFactory = goCardlessClientFactory;
         this.goCardlessCustomerDao = goCardlessCustomerDao;
         this.paymentDao = paymentDao;

@@ -20,14 +20,13 @@ import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.time.Month.*;
+import static java.time.Month.JULY;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;

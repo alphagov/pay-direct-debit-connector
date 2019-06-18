@@ -199,7 +199,7 @@ public class GoCardlessServiceTest {
                         SandboxMandateId.valueOf("aPaymentProviderId"),
                         MandateBankStatementReference.valueOf(BANK_ACCOUNT_ID)));
 
-        PaymentProviderMandateIdAndBankReference paymentProviderMandateIdAndBankReference = service.confirmMandate(mandate, bankAccountDetails);
+        var paymentProviderMandateIdAndBankReference = service.confirmMandate(mandate, bankAccountDetails);
         verify(mockedGoCardlessCustomerDao).insert(goCardlessCustomer);
         InOrder orderedCalls = inOrder(mockedGoCardlessClientFacade);
 

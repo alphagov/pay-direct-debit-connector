@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
 
@@ -39,20 +40,17 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
                 .withCreatedAt(ZonedDateTime.ofInstant(
                         resultSet.getTimestamp("created_at").toInstant(), ZoneOffset.UTC));
 
-        String paymentId = resultSet.getString("links_payment");
-        if (paymentId != null) {
-            builder.withLinksPayment(GoCardlessPaymentId.valueOf(paymentId));
-        }
+        Optional.ofNullable(resultSet.getString("links_payment"))
+                .map(GoCardlessPaymentId::valueOf)
+                .ifPresent(builder::withLinksPayment);
 
-        String mandateId = resultSet.getString("links_mandate");
-        if (mandateId != null) {
-            builder.withLinksMandate(GoCardlessMandateId.valueOf(mandateId));
-        }
-        
-        String newMandateId = resultSet.getString("links_new_mandate");
-        if (newMandateId != null) {
-            builder.withLinksNewMandate(GoCardlessMandateId.valueOf(newMandateId));
-        }
+        Optional.ofNullable(resultSet.getString("links_mandate"))
+                .map(GoCardlessMandateId::valueOf)
+                .ifPresent(builder::withLinksMandate);
+
+        Optional.ofNullable(resultSet.getString("links_new_mandate"))
+                .map(GoCardlessMandateId::valueOf)
+                .ifPresent(builder::withLinksNewMandate);
 
         return builder.build();
     }
