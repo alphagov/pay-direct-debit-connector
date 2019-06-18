@@ -32,13 +32,18 @@ public class CollectPaymentRequestValidator extends ApiValidation {
 //                    .put(AGREEMENT_ID_KEY, ApiValidation::isNotNullOrEmpty)
                     .build();
 
-    private final static String[] requiredFields = {AMOUNT_KEY, DESCRIPTION_KEY, REFERENCE_KEY, AGREEMENT_ID_KEY};
+    private final static String[] requiredFields = {
+            AMOUNT_KEY,
+            DESCRIPTION_KEY,
+            REFERENCE_KEY
+//            AGREEMENT_ID_KEY
+    };
 
     private final static Map<String, FieldSize> fieldSizes =
             ImmutableMap.<String, FieldSize>builder()
                     .put(DESCRIPTION_KEY, new FieldSize(0, 255))
                     .put(REFERENCE_KEY, new FieldSize(0, 255))
-                    .put(AGREEMENT_ID_KEY, new FieldSize(0, 26))
+//                    .put(AGREEMENT_ID_KEY, new FieldSize(0, 26))
                     .build();
 
     public CollectPaymentRequestValidator() {
