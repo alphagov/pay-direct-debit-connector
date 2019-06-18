@@ -5,6 +5,7 @@ import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import java.sql.ResultSet;
@@ -31,13 +32,17 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
                 .withLinksNewCustomerBankAccount(resultSet.getString("links_new_customer_bank_account"))
                 .withLinksOrganisation(resultSet.getString("links_organisation"))
                 .withLinksParentEvent(resultSet.getString("links_parent_event"))
-                .withLinksPayment(resultSet.getString("links_payment"))
                 .withLinksPayout(resultSet.getString("links_payout"))
                 .withLinksPreviousCustomerBankAccount(resultSet.getString("links_previous_customer_bank_account"))
                 .withLinksRefund(resultSet.getString("links_refund"))
                 .withLinksSubscription(resultSet.getString("links_subscription"))
                 .withCreatedAt(ZonedDateTime.ofInstant(
                         resultSet.getTimestamp("created_at").toInstant(), ZoneOffset.UTC));
+
+        String paymentId = resultSet.getString("links_payment");
+        if (paymentId != null) {
+            builder.withLinksPayment(GoCardlessPaymentId.valueOf(paymentId));
+        }
 
         String mandateId = resultSet.getString("links_mandate");
         if (mandateId != null) {

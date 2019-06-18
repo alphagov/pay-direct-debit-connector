@@ -27,7 +27,7 @@ public class GoCardlessEvent {
     private final GoCardlessMandateId linksNewMandate;
     private final String linksOrganisation;
     private final String linksParentEvent;
-    private final String linksPayment;
+    private final GoCardlessPaymentId linksPayment;
     private final String linksPayout;
     private final String linksPreviousCustomerBankAccount;
     private final String linksRefund;
@@ -135,8 +135,8 @@ public class GoCardlessEvent {
         return linksParentEvent;
     }
 
-    public String getLinksPayment() {
-        return linksPayment;
+    public Optional<GoCardlessPaymentId> getLinksPayment() {
+        return Optional.ofNullable(linksPayment);
     }
 
     public String getLinksPayout() {
@@ -222,7 +222,7 @@ public class GoCardlessEvent {
         private GoCardlessMandateId linksNewMandate;
         private String linksOrganisation;
         private String linksParentEvent;
-        private String linksPayment;
+        private GoCardlessPaymentId linksPayment;
         private String linksPayout;
         private String linksPreviousCustomerBankAccount;
         private String linksRefund;
@@ -322,7 +322,7 @@ public class GoCardlessEvent {
             return this;
         }
 
-        public GoCardlessEventBuilder withLinksPayment(String linksPayment) {
+        public GoCardlessEventBuilder withLinksPayment(GoCardlessPaymentId linksPayment) {
             this.linksPayment = linksPayment;
             return this;
         }

@@ -18,6 +18,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import java.io.IOException;
@@ -95,7 +96,7 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
                 .withLinksNewMandate(GoCardlessMandateId.valueOf(LINKS_NEWMANDATE))
                 .withLinksOrganisation(LINKS_ORGANISATION)
                 .withLinksParentEvent(LINKS_PARENTEVENT)
-                .withLinksPayment(LINKS_PAYMENT)
+                .withLinksPayment(GoCardlessPaymentId.valueOf(LINKS_PAYMENT))
                 .withLinksPayout(LINKS_PAYOUT)
                 .withLinksPreviousCustomerBankAccount(LINKS_PREVIOUSCUSTOMERBANKACCOUNT)
                 .withLinksRefund(LINKS_REFUND)
