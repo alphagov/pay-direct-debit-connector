@@ -8,7 +8,6 @@ import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
-import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.clients.ClientFactory;
@@ -117,12 +116,6 @@ public class DirectDebitModule extends AbstractModule {
     @Singleton
     public GoCardlessCustomerDao provideGoCardlessCustomerDao() {
         return jdbi.onDemand(GoCardlessCustomerDao.class);
-    }
-
-    @Provides
-    @Singleton
-    public GoCardlessPaymentDao provideGoCardlessPaymentDao() {
-        return jdbi.onDemand(GoCardlessPaymentDao.class);
     }
 
     @Provides

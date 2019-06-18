@@ -1,20 +1,25 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
+import uk.gov.pay.directdebit.events.exception.EventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
+import uk.gov.pay.directdebit.payments.exception.PaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
+
+import javax.inject.Inject;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 
 public class GoCardlessPaymentHandler extends GoCardlessHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessPaymentHandler.class);
@@ -33,32 +38,35 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     public enum GoCardlessPaymentAction implements GoCardlessAction {
         CREATED, SUBMITTED, CONFIRMED, FAILED, PAID_OUT, PAID;
 
-        public static GoCardlessPaymentAction fromString(String type) {
+        public static Optional<GoCardlessPaymentAction> fromString(String type) {
             for (GoCardlessPaymentAction typeEnum : values()) {
                 if (typeEnum.toString().equalsIgnoreCase(type)) {
-                    return typeEnum;
+                    return Optional.of(typeEnum);
                 }
             }
             LOGGER.error("Webhook from GoCardless with unrecognised payment action: {}", type);
-            return null;
+            return Optional.empty();
         }
     }
 
     @Override
     protected Optional<DirectDebitEvent> process(GoCardlessEvent event) {
-        return Optional.ofNullable(GoCardlessPaymentAction.fromString(event.getAction()))
-                .map((action) -> getHandledActions().get(action))
-                .map((handledAction) -> {
-                    GoCardlessPayment goCardlessPayment = goCardlessService.findPaymentForEvent(event);
-                    Payment payment = paymentService.findPayment(goCardlessPayment.getTransactionId());
-                    if (isValidOrganisation(payment, event)) {
-                        return handledAction.apply(payment);
-                    } else {
-                        LOGGER.info("Event from GoCardless with goCardlessEventId: {} has unrecognised organisation: {}",
-                                event.getGoCardlessEventId(), event.getOrganisationIdentifier());
-                        return null;
-                    }
-                });
+        GoCardlessPaymentId goCardlessPaymentId = event.getLinksPayment()
+                .orElseThrow(() -> new EventHasNoPaymentIdException(event.getEventId()));
+
+        Payment payment = paymentService.findPaymentByProviderId(GOCARDLESS, goCardlessPaymentId)
+                .orElseThrow(() -> new PaymentNotFoundException(GOCARDLESS, goCardlessPaymentId));
+
+        if (!isValidOrganisation(payment, event)) {
+            LOGGER.info("Ignoring GoCardless event {} because its organisation {} does not match organisation of " +
+                            "stored payment {}",
+                    event.getGoCardlessEventId(), event.getOrganisationIdentifier(), payment.getExternalId());
+            return Optional.empty();
+        }
+
+        return GoCardlessPaymentAction.fromString(event.getAction())
+                .map(action -> getHandledActions().get(action))
+                .map(handledAction -> handledAction.apply(payment));
     }
 
     private Map<GoCardlessAction, Function<Payment, DirectDebitEvent>> getHandledActions() {
@@ -75,7 +83,6 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     }
 
     private boolean isValidOrganisation(Payment payment, GoCardlessEvent event) {
-        
         return payment.getMandate().getGatewayAccount().getOrganisation()
                 .map(organisationIdentifier -> organisationIdentifier.equals(event.getOrganisationIdentifier()))
                 .orElse(false);

@@ -8,7 +8,6 @@ import com.gocardless.resources.Customer;
 import com.gocardless.resources.CustomerBankAccount;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
@@ -19,7 +18,9 @@ import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payers.model.SortCode;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
@@ -56,12 +57,11 @@ public class GoCardlessClientFacade {
                 MandateBankStatementReference.valueOf(createdMandate.getReference()));
     }
 
-    public GoCardlessPayment createPayment(Payment payment, GoCardlessMandateId goCardlessMandateId) {
-        com.gocardless.resources.Payment gcPayment = goCardlessClientWrapper.createPayment(payment, goCardlessMandateId);
-        return new GoCardlessPayment(
-                payment.getId(),
-                gcPayment.getId(),
-                LocalDate.parse(gcPayment.getChargeDate()));
+    public PaymentProviderPaymentIdAndChargeDate createPayment(Payment payment, GoCardlessMandateId goCardlessMandateId) {
+        var createdPayment = goCardlessClientWrapper.createPayment(payment, goCardlessMandateId);
+        return new PaymentProviderPaymentIdAndChargeDate(
+                GoCardlessPaymentId.valueOf(createdPayment.getId()),
+                LocalDate.parse(createdPayment.getChargeDate()));
     }
 
     public GoCardlessBankAccountLookup validate(BankAccountDetails bankAccountDetails) {

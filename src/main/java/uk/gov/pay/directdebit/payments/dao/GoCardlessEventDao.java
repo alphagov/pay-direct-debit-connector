@@ -11,9 +11,11 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.dao.mapper.GoCardlessEventMapper;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdArgumentFactory;
 
 @RegisterArgumentFactory(GoCardlessEventIdArgumentFactory.class)
 @RegisterArgumentFactory(GoCardlessMandateIdArgumentFactory.class)
+@RegisterArgumentFactory(GoCardlessPaymentIdArgumentFactory.class)
 @RegisterRowMapper(GoCardlessEventMapper.class)
 public interface GoCardlessEventDao {
 

@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import java.sql.Timestamp;
@@ -36,7 +37,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     private GoCardlessMandateId linksNewMandate = GoCardlessMandateId.valueOf(randomAlphabetic(20));
     private String linksOrganisation = randomAlphabetic(20);
     private String linksParentEvent = randomAlphabetic(20);
-    private String linksPayment = randomAlphabetic(20);
+    private GoCardlessPaymentId linksPayment = GoCardlessPaymentId.valueOf(randomAlphabetic(20));
     private String linksPayout = randomAlphabetic(20);
     private String linksPreviousCustomerBankAccount = randomAlphabetic(20);
     private String linksRefund = randomAlphabetic(20);
@@ -218,11 +219,11 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public String getLinksPayment() {
+    public GoCardlessPaymentId getLinksPayment() {
         return linksPayment;
     }
 
-    public GoCardlessEventFixture withLinksPayment(String linksPayment) {
+    public GoCardlessEventFixture withLinksPayment(GoCardlessPaymentId linksPayment) {
         this.linksPayment = linksPayment;
         return this;
     }
@@ -304,12 +305,12 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                         detailsOrigin,
                         detailsReasonCode,
                         detailsScheme,
-                        linksMandate,
+                        linksMandate.toString(),
                         linksNewCustomerBankAccount,
                         linksNewMandate,
                         linksOrganisation,
                         linksParentEvent,
-                        linksPayment,
+                        linksPayment.toString(),
                         linksPayout,
                         linksPreviousCustomerBankAccount,
                         linksRefund,

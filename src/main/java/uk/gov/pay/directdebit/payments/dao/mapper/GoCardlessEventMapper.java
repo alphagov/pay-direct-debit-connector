@@ -5,12 +5,14 @@ import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
 
@@ -31,7 +33,6 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
                 .withLinksNewCustomerBankAccount(resultSet.getString("links_new_customer_bank_account"))
                 .withLinksOrganisation(resultSet.getString("links_organisation"))
                 .withLinksParentEvent(resultSet.getString("links_parent_event"))
-                .withLinksPayment(resultSet.getString("links_payment"))
                 .withLinksPayout(resultSet.getString("links_payout"))
                 .withLinksPreviousCustomerBankAccount(resultSet.getString("links_previous_customer_bank_account"))
                 .withLinksRefund(resultSet.getString("links_refund"))
@@ -39,15 +40,17 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
                 .withCreatedAt(ZonedDateTime.ofInstant(
                         resultSet.getTimestamp("created_at").toInstant(), ZoneOffset.UTC));
 
-        String mandateId = resultSet.getString("links_mandate");
-        if (mandateId != null) {
-            builder.withLinksMandate(GoCardlessMandateId.valueOf(mandateId));
-        }
-        
-        String newMandateId = resultSet.getString("links_new_mandate");
-        if (newMandateId != null) {
-            builder.withLinksNewMandate(GoCardlessMandateId.valueOf(newMandateId));
-        }
+        Optional.ofNullable(resultSet.getString("links_payment"))
+                .map(GoCardlessPaymentId::valueOf)
+                .ifPresent(builder::withLinksPayment);
+
+        Optional.ofNullable(resultSet.getString("links_mandate"))
+                .map(GoCardlessMandateId::valueOf)
+                .ifPresent(builder::withLinksMandate);
+
+        Optional.ofNullable(resultSet.getString("links_new_mandate"))
+                .map(GoCardlessMandateId::valueOf)
+                .ifPresent(builder::withLinksNewMandate);
 
         return builder.build();
     }

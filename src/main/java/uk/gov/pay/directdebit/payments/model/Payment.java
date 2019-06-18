@@ -112,6 +112,15 @@ public class Payment {
         return Optional.ofNullable(chargeDate);
     }
 
+    public void setChargeDate(LocalDate chargeDate) {
+        this.chargeDate = chargeDate;
+    }
+
+    public void setProviderId(PaymentProviderPaymentId providerId) {
+        this.providerId = providerId;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
