@@ -1,8 +1,5 @@
 package uk.gov.pay.directdebit.payments.fixtures;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
@@ -13,6 +10,12 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
+
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+
+import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.aPayment;
 
 public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
 
@@ -152,8 +155,18 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
 
     @Override
     public Payment toEntity() {
-        return new Payment(id, externalId, amount, state, description, reference, mandateFixture.toEntity(),
-                createdDate, paymentProviderId, chargeDate);
+        return aPayment()
+                .withId(id)
+                .withExternalId(externalId)
+                .withAmount(amount)
+                .withState(state)
+                .withDescription(description)
+                .withReference(reference)
+                .withMandate(mandateFixture.toEntity())
+                .withCreatedDate(createdDate)
+                .withProviderId(paymentProviderId)
+                .withChargeDate(chargeDate)
+                .build();
     }
 
 }

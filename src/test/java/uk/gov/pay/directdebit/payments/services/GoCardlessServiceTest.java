@@ -57,6 +57,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
+import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoCardlessServiceTest {
@@ -247,7 +248,7 @@ public class GoCardlessServiceTest {
         GoCardlessPaymentId goCardlessPaymentId = GoCardlessPaymentId.valueOf("expectedGoCardlessPaymentId");
         GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("aGoCardlessMandateId");
         LocalDate chargeDateFromGoCardless = LocalDate.of(1969, JULY, 16);
-        
+
         Mandate mandate = mandateFixture
                 .withPaymentProviderId(goCardlessMandateId)
                 .toEntity();
@@ -256,9 +257,11 @@ public class GoCardlessServiceTest {
                 .thenReturn(new PaymentProviderPaymentIdAndChargeDate(goCardlessPaymentId, chargeDateFromGoCardless));
 
         LocalDate actualChargeDate = service.collect(mandate, payment);
-        verify(mockedPaymentDao).updateProviderIdAndChargeDate(payment);
 
-        assertThat(actualChargeDate, Is.is(chargeDateFromGoCardless));
+        Payment paymentWithProviderIdAndChargeDate = fromPayment(payment).withProviderId(goCardlessPaymentId).withChargeDate(chargeDateFromGoCardless).build();
+        verify(mockedPaymentDao).updateProviderIdAndChargeDate(paymentWithProviderIdAndChargeDate);
+
+        assertThat(actualChargeDate, is(chargeDateFromGoCardless));
     }
 
     @Test

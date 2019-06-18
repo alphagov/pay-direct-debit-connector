@@ -71,9 +71,12 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
                 .orElseThrow( () -> new GoCardlessMandateNotConfirmed("mandate id", mandate.getExternalId().toString()));
 
         PaymentProviderPaymentIdAndChargeDate providerIdAndChargeDate = createPayment(payment, goCardlessMandateId);
-        payment.setProviderId(providerIdAndChargeDate.getPaymentProviderPaymentId());
-        payment.setChargeDate(providerIdAndChargeDate.getChargeDate());
-        paymentDao.updateProviderIdAndChargeDate(payment);
+        Payment updatePayment = Payment.PaymentBuilder.fromPayment(payment)
+                .withProviderId(providerIdAndChargeDate.getPaymentProviderPaymentId())
+                .withChargeDate(providerIdAndChargeDate.getChargeDate())
+                .build();
+
+        paymentDao.updateProviderIdAndChargeDate(updatePayment);
         return providerIdAndChargeDate.getChargeDate();
     }
 
