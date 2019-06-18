@@ -107,7 +107,7 @@ public class CollectPaymentResponse {
     }
 
     public static CollectPaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
-        return aCollectPaymentResponse()
+        CollectPaymentResponseBuilder collectPaymentResponseBuilder = aCollectPaymentResponse()
                 .withPaymentExternalId(payment.getExternalId())
                 // TODO: should extract state details (go cardless cause details) from events table somehow
                 .withState(new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"))
@@ -115,11 +115,13 @@ public class CollectPaymentResponse {
                 .withMandateId(payment.getMandate().getExternalId())
                 .withDescription(payment.getDescription())
                 .withReference(payment.getReference())
-                .withProviderId(payment.getProviderId())
                 .withCreatedDate(payment.getCreatedDate())
                 .withPaymentProvider(payment.getMandate().getGatewayAccount().getPaymentProvider().toString())
-                .withDataLinks(dataLinks)
-                .build();
+                .withDataLinks(dataLinks);
+
+        payment.getProviderId().ifPresent(collectPaymentResponseBuilder::withProviderId);
+
+        return collectPaymentResponseBuilder.build();
     }
 
     @Override
