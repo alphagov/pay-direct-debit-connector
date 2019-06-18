@@ -8,9 +8,7 @@ import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorException;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
-import uk.gov.pay.directdebit.mandate.dao.GoCardlessPaymentDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessPayment;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -40,17 +38,14 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
     private final GoCardlessClientFactory goCardlessClientFactory;
     private final GoCardlessCustomerDao goCardlessCustomerDao;
-    private final GoCardlessPaymentDao goCardlessPaymentDao;
     private final PaymentDao paymentDao;
 
     @Inject
     public GoCardlessService(
             GoCardlessClientFactory goCardlessClientFactory,
-            GoCardlessCustomerDao goCardlessCustomerDao,
-            GoCardlessPaymentDao goCardlessPaymentDao, PaymentDao paymentDao) {
+            GoCardlessCustomerDao goCardlessCustomerDao, PaymentDao paymentDao) {
         this.goCardlessClientFactory = goCardlessClientFactory;
         this.goCardlessCustomerDao = goCardlessCustomerDao;
-        this.goCardlessPaymentDao = goCardlessPaymentDao;
         this.paymentDao = paymentDao;
     }
 
@@ -190,10 +185,6 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
     private void persist(GoCardlessCustomer customer) {
         goCardlessCustomerDao.insert(customer);
-    }
-
-    private void persist(GoCardlessPayment payment) {
-        goCardlessPaymentDao.insert(payment);
     }
 
     private void logException(Exception exc, String resource, String id) {
