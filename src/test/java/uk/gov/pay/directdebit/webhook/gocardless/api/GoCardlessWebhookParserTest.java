@@ -13,6 +13,8 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
 
 import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -104,8 +106,8 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getLinksRefund(), is(""));
         assertThat(firstEvent.getLinksSubscription(), is("a subscription"));
         assertThat(firstEvent.getLinksPayment().get().toString(), is("payment"));
-        assertThat(firstEvent.getLinksMandate().get().toString(), is(""));
-        assertThat(firstEvent.getLinksPayout(), is(""));
+        assertThat(firstEvent.getLinksMandate(), is(Optional.empty()));
+        assertThat(firstEvent.getLinksPayout(), is(nullValue()));
         
         GoCardlessEvent secondEvent = parsedEvents.get(1);
         assertThat(secondEvent.getEventId(), is(nullValue()));
@@ -117,7 +119,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(secondEvent.getJson(), is(objectMapper.readTree(secondEventPayload).toString()));
         assertThat(secondEvent.getLinksPayment(), is(Optional.empty()));
         assertThat(secondEvent.getLinksMandate().get().toString(), is("mandate"));
-        assertThat(secondEvent.getLinksPayout(), is(""));
+        assertThat(secondEvent.getLinksPayout(), is(nullValue()));
 
 
         GoCardlessEvent thirdEvent = parsedEvents.get(2);
@@ -129,7 +131,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(thirdEvent.getOrganisationIdentifier(), is(organisationIdentifier));
         assertThat(thirdEvent.getJson(), is(objectMapper.readTree(thirdEventPayload).toString()));
         assertThat(thirdEvent.getLinksPayment(), is(Optional.empty()));
-        assertThat(thirdEvent.getLinksMandate().get().toString(), is(""));
+        assertThat(thirdEvent.getLinksMandate(), is(Optional.empty()));
         assertThat(thirdEvent.getLinksPayout(), is("payout"));
     }
 
@@ -174,21 +176,34 @@ public class GoCardlessWebhookParserTest {
                         Json.createObjectBuilder()
                         .build())
                 .add("resource_type", resourceType.toString().toLowerCase())
-                .add("links",
-                        Json.createObjectBuilder()
-                                .add("mandate", resourceType == MANDATES ? resourceId : "")
-                                .add("new_customer_bank_account", "a bank account")
-                                .add("new_mandate", "a new mandate")
-                                .add("organisation", organisationIdentifier.toString())
-                                .add("parent_event", "a parent event")
-                                .add("payment", resourceType == PAYMENTS ? resourceId : "")
-                                .add("payout", resourceType == PAYOUTS ? resourceId : "")
-                                .add("previous_customer_bank_account", "a previous customer bank account")
-                                .add("refund", "")
-                                .add("subscription", "a subscription")
-                                .build()
-                )
+                .add("links", buildLinks(organisationIdentifier, resourceType, resourceId))
                 .build().toString(); 
+    }
+
+    private JsonObject buildLinks(GoCardlessOrganisationId organisationId,
+                                  GoCardlessResourceType goCardlessResourceType, String resourceId) {
+        JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder()
+                .add("new_customer_bank_account", "a bank account")
+                .add("new_mandate", "a new mandate")
+                .add("organisation", organisationId.toString())
+                .add("parent_event", "a parent event")
+                .add("previous_customer_bank_account", "a previous customer bank account")
+                .add("refund", "")
+                .add("subscription", "a subscription");
+
+        switch (goCardlessResourceType) {
+            case PAYMENTS:
+                jsonObjectBuilder.add("payment", resourceId);
+                break;
+            case MANDATES:
+                jsonObjectBuilder.add("mandate", resourceId);
+                break;
+            case PAYOUTS:
+                jsonObjectBuilder.add("payout", resourceId);
+                break;
+        }
+
+        return jsonObjectBuilder.build();
     }
 
     private String buildEvents(String... events) throws IOException {

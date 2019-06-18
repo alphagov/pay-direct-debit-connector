@@ -7,8 +7,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorException;
@@ -59,6 +61,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 
+@RunWith(MockitoJUnitRunner.class)
 public class GoCardlessServiceTest {
 
     private static final String CUSTOMER_ID = "CU328471";

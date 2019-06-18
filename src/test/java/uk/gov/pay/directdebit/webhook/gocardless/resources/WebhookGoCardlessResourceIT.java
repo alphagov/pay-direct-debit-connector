@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -18,6 +19,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.ws.rs.core.Response;
@@ -33,7 +35,6 @@ import static io.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.mandate.fixtures.GoCardlessPaymentFixture.aGoCardlessPaymentFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
 @RunWith(DropwizardJUnitRunner.class)
@@ -128,7 +129,9 @@ public class WebhookGoCardlessResourceIT {
 
     private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_organisation_id");
 
-    private GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().withOrganisation(organisationIdentifier);
+    private GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture()
+            .withPaymentProvider(PaymentProvider.GOCARDLESS)
+            .withOrganisation(organisationIdentifier);
 
     @Before
     public void setUp() {
@@ -142,12 +145,10 @@ public class WebhookGoCardlessResourceIT {
                 .insert(testContext.getJdbi());
         PaymentFixture paymentFixture = aPaymentFixture()
                 .withMandateFixture(mandateFixture)
+                .withPaymentProviderId(GoCardlessPaymentId.valueOf("PM00008Q30R2BR"))
                 .withState(PaymentState.PENDING)
                 .insert(testContext.getJdbi());
-        aGoCardlessPaymentFixture()
-                .withPaymentId("PM00008Q30R2BR")
-                .withTransactionId(paymentFixture.getId())
-                .insert(testContext.getJdbi());
+
         given().port(testContext.getPort())
                 .body(WEBHOOK_SUCCESS)
                 .header("Webhook-Signature", WEBHOOK_SUCCESS_SIGNATURE)
@@ -182,16 +183,12 @@ public class WebhookGoCardlessResourceIT {
 
         PaymentFixture paymentFixture = aPaymentFixture()
                 .withMandateFixture(mandateFixture)
+                .withPaymentProviderId(GoCardlessPaymentId.valueOf("PM00008Q30R2BR"))
                 .withState(PaymentState.PENDING)
                 .insert(testContext.getJdbi());
 
         PayerFixture payerFixture = PayerFixture.aPayerFixture()
                 .withMandateId(mandateFixture.getId())
-                .insert(testContext.getJdbi());
-
-        aGoCardlessPaymentFixture()
-                .withPaymentId("PM00008Q30R2BR")
-                .withTransactionId(paymentFixture.getId())
                 .insert(testContext.getJdbi());
 
         // language=JSON

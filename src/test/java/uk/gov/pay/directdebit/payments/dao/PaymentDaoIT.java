@@ -24,12 +24,15 @@ import java.time.Month;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.time.Month.*;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
@@ -131,9 +134,40 @@ public class PaymentDaoIT {
     }
 
     @Test
+    public void shouldGetAPaymentByProviderId() {
+        SandboxPaymentId expectedProviderId = SandboxPaymentId.valueOf("aProviderId");
+        testPayment
+                .withPaymentProviderId(expectedProviderId)
+                .insert(testContext.getJdbi());
+
+        Payment payment = paymentDao.findPaymentByProviderId(SANDBOX, expectedProviderId).get();
+
+        assertThat(payment.getId(), is(testPayment.getId()));
+        assertThat(payment.getMandate(), is(testMandate.toEntity()));
+        assertThat(payment.getExternalId(), is(testPayment.getExternalId()));
+        assertThat(payment.getDescription(), is(testPayment.getDescription()));
+        assertThat(payment.getReference(), is(testPayment.getReference()));
+        assertThat(payment.getAmount(), is(AMOUNT));
+        assertThat(payment.getState(), is(STATE));
+        assertThat(payment.getCreatedDate(), is(testPayment.getCreatedDate()));
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenProviderIdMatchesButProviderDoesNotMatch() {
+        SandboxPaymentId expectedProviderId = SandboxPaymentId.valueOf("aProviderId");
+        testPayment
+                .withPaymentProviderId(expectedProviderId)
+                .insert(testContext.getJdbi());
+
+        Optional<Payment> payment = paymentDao.findPaymentByProviderId(GOCARDLESS, expectedProviderId);
+
+        assertThat(payment, is(Optional.empty()));
+    }
+
+    @Test
     public void shouldFindAllPaymentsByPaymentStateAndProvider() {
         GatewayAccountFixture goCardlessGatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
-        GatewayAccountFixture sandboxGatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.SANDBOX).insert(testContext.getJdbi());
+        GatewayAccountFixture sandboxGatewayAccount = aGatewayAccountFixture().withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
 
         MandateFixture sandboxMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(sandboxGatewayAccount).insert(testContext.getJdbi());
         MandateFixture goCardlessMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(goCardlessGatewayAccount).insert(testContext.getJdbi());
@@ -151,10 +185,10 @@ public class PaymentDaoIT {
                 generateNewPaymentFixture(goCardlessMandate, PaymentState.SUCCESS, AMOUNT);
         goCardlessSuccessCharge.insert(testContext.getJdbi());
 
-        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
+        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, SANDBOX);
         assertThat(successPaymentsList.size(), is(1));
         assertThat(successPaymentsList.get(0).getState(), is(PaymentState.SUCCESS));
-        assertThat(successPaymentsList.get(0).getMandate().getGatewayAccount().getPaymentProvider(), is(PaymentProvider.SANDBOX));
+        assertThat(successPaymentsList.get(0).getMandate().getGatewayAccount().getPaymentProvider(), is(SANDBOX));
     }
 
     @Test
@@ -163,7 +197,7 @@ public class PaymentDaoIT {
                 generateNewPaymentFixture(testMandate, PaymentState.NEW, AMOUNT);
         processingDirectDebitPaymentStatePaymentFixture.insert(testContext.getJdbi());
 
-        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, PaymentProvider.SANDBOX);
+        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, SANDBOX);
         assertThat(successPaymentsList.size(), is(0));
     }
 

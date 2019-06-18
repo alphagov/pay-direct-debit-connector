@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.dao.mapper.PaymentMapper;
 import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
@@ -96,4 +97,7 @@ public interface PaymentDao {
     @SqlQuery(joinQuery + " WHERE p.state IN (<states>) AND p.created_date < :maxDateTime")
     List<Payment> findAllPaymentsBySetOfStatesAndCreationTime(@BindList("states") Set<PaymentState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
 
+    @SqlQuery(joinQuery + " WHERE g.payment_provider = :provider AND p.payment_provider_id = :providerId")
+    Optional<Payment> findPaymentByProviderId(@Bind("provider") PaymentProvider paymentProvider,
+                                              @Bind("providerId") PaymentProviderPaymentId providerId);
 }

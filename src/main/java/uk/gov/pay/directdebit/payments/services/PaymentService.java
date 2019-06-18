@@ -24,6 +24,7 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -169,6 +170,10 @@ public class PaymentService {
         return paymentDao
                 .findById(paymentId)
                 .orElseThrow(() -> new ChargeNotFoundException("payment id" + paymentId.toString()));
+    }
+    
+    public Optional<Payment> findPaymentByProviderId(PaymentProvider paymentProvider, PaymentProviderPaymentId providerId) {
+        return paymentDao.findPaymentByProviderId(paymentProvider, providerId);
     }
 
     // todo we might want to split this service in query / state update like mandate
