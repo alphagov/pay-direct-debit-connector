@@ -27,12 +27,8 @@ public class CollectPaymentRequest implements CollectRequest {
     }
 
     public static CollectPaymentRequest of(Map<String, String> collectPaymentRequest) {
-        var mandateExternalId = collectPaymentRequest.containsKey("mandate_id") ?
-                MandateExternalId.valueOf(collectPaymentRequest.get("mandate_id")) :
-                MandateExternalId.valueOf(collectPaymentRequest.get("agreement_id"));
-        
         return new CollectPaymentRequest(
-                mandateExternalId,
+                MandateExternalId.valueOf(collectPaymentRequest.get("mandate_id")),
                 Long.valueOf(collectPaymentRequest.get("amount")),
                 collectPaymentRequest.get("description"),
                 collectPaymentRequest.get("reference")
