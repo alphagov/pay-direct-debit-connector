@@ -25,13 +25,11 @@ public class CollectPaymentRequestValidator extends ApiValidation {
                         Integer amountValue = Integer.valueOf(amount);
                         return MIN_AMOUNT_IN_PENCE <= amountValue && MAX_AMOUNT_IN_PENCE >= amountValue;
                     },
-                    DESCRIPTION_KEY, ApiValidation::isNotNullOrEmpty,
                     REFERENCE_KEY, ApiValidation::isNotNullOrEmpty,
                     MANDATE_ID_KEY, ApiValidation::isNotNullOrEmpty);
 
     private final static String[] requiredFields = {
             AMOUNT_KEY,
-            DESCRIPTION_KEY,
             REFERENCE_KEY,
             MANDATE_ID_KEY
     };

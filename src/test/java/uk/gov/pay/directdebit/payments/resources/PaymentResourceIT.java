@@ -159,6 +159,34 @@ public class PaymentResourceIT {
     }
 
     @Test
+    public void shouldCollectAPayment_withNoDescription() throws Exception {
+        PayerFixture payerFixture = PayerFixture.aPayerFixture();
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .withPayerFixture(payerFixture)
+                .insert(testContext.getJdbi());
+        String accountExternalId = testGatewayAccount.getExternalId();
+        String expectedReference = "Test reference";
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put(JSON_AMOUNT_KEY, AMOUNT)
+                .put(JSON_REFERENCE_KEY, expectedReference)
+                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
+                .put(JSON_MANDATE_ID_KEY, mandateFixture.getExternalId().toString())
+                .build());
+
+        String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
+                .replace("{accountId}", accountExternalId);
+
+        givenSetup()
+                .body(postBody)
+                .post(requestPath)
+                .then()
+                .statusCode(Response.Status.CREATED.getStatusCode())
+                .body("$", not(hasKey(JSON_DESCRIPTION_KEY)))
+                .contentType(JSON);
+    }
+    
+    @Test
     public void shouldCollectAPayment_forGoCardless() throws Exception {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
