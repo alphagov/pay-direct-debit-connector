@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 
 import javax.inject.Inject;
 
+import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CANCELLED;
@@ -50,6 +51,7 @@ public class MandateStateUpdateService {
     Mandate confirmedOnDemandDirectDebitDetailsFor(Mandate mandate) {
         Mandate updatedMandate = confirmedDetailsFor(mandate);
         userNotificationService.sendOnDemandMandateCreatedEmailFor(updatedMandate);
+        directDebitEventService.registerDirectDebitConfirmedEventFor(updatedMandate);
         return updatedMandate;
     }
 
@@ -64,8 +66,8 @@ public class MandateStateUpdateService {
     }
 
     public DirectDebitEvent mandateActiveFor(Mandate mandate) {
-        updateStateFor(mandate, MANDATE_ACTIVE);
-        return directDebitEventService.registerMandateActiveEventFor(mandate);
+        Mandate updatedMandate = updateStateFor(mandate, MANDATE_ACTIVE);
+        return directDebitEventService.registerMandateActiveEventFor(updatedMandate);
     }
 
     public void mandateExpiredFor(Mandate mandate) {
@@ -120,8 +122,10 @@ public class MandateStateUpdateService {
                 mandate.getExternalId(),
                 mandate.getState(),
                 newState);
-        mandate.setState(newState);
-        return mandate;
+
+        return fromMandate(mandate)
+                .withState(newState)
+                .build();
     }
 
     boolean canUpdateStateFor(Mandate mandate, DirectDebitEvent.SupportedEvent event) {

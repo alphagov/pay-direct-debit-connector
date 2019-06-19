@@ -10,27 +10,27 @@ import java.util.Optional;
 
 public class Mandate {
     private final String description;
-    private Long id;
+    private final Long id;
     private final MandateExternalId externalId;
-    private MandateState state;
+    private final MandateState state;
     private final GatewayAccount gatewayAccount;
     private final String returnUrl;
-    private MandateBankStatementReference mandateBankStatementReference;
+    private final MandateBankStatementReference mandateBankStatementReference;
     private final String serviceReference;
     private final ZonedDateTime createdDate;
-    private Payer payer;
-    private PaymentProviderMandateId paymentProviderMandateId;
+    private final Payer payer;
+    private final PaymentProviderMandateId paymentProviderMandateId;
 
     private Mandate(MandateBuilder builder) {
         this.id = builder.id;
-        this.gatewayAccount = builder.gatewayAccount;
-        this.externalId = builder.externalId;
-        this.mandateBankStatementReference = builder.mandateBankStatementReference;
-        this.serviceReference = builder.serviceReference;
-        this.state = builder.state;
-        this.returnUrl = builder.returnUrl;
-        this.createdDate = builder.createdDate;
+        this.gatewayAccount = Objects.requireNonNull(builder.gatewayAccount);
+        this.externalId = Objects.requireNonNull(builder.externalId);
+        this.serviceReference = Objects.requireNonNull(builder.serviceReference);
+        this.state = Objects.requireNonNull(builder.state);
+        this.returnUrl = Objects.requireNonNull(builder.returnUrl);
+        this.createdDate = Objects.requireNonNull(builder.createdDate);
         this.payer = builder.payer;
+        this.mandateBankStatementReference = builder.mandateBankStatementReference;
         this.paymentProviderMandateId = builder.paymentProviderId;
         this.description = builder.description;
     }
@@ -59,20 +59,12 @@ public class Mandate {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public MandateExternalId getExternalId() {
         return externalId;
     }
 
     public MandateState getState() {
         return state;
-    }
-
-    public void setState(MandateState state) {
-        this.state = state;
     }
 
     public MandateBankStatementReference getMandateBankStatementReference() {
@@ -83,18 +75,9 @@ public class Mandate {
         return serviceReference;
     }
 
-    public void setMandateBankStatementReference(MandateBankStatementReference mandateBankStatementReference) {
-        this.mandateBankStatementReference = mandateBankStatementReference;
-    }
-
     public Optional<PaymentProviderMandateId> getPaymentProviderMandateId() {
         return Optional.ofNullable(paymentProviderMandateId);
     }
-
-    public void setPaymentProviderMandateId(PaymentProviderMandateId paymentProviderMandateId) {
-        this.paymentProviderMandateId = paymentProviderMandateId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -137,6 +120,21 @@ public class Mandate {
 
         public static MandateBuilder aMandate() {
             return new MandateBuilder();
+        }
+
+        public static MandateBuilder fromMandate(Mandate mandate) {
+            return aMandate()
+            .withId(mandate.id)
+            .withGatewayAccount(mandate.gatewayAccount)
+            .withExternalId(mandate.externalId)
+            .withMandateBankStatementReference(mandate.mandateBankStatementReference)
+            .withServiceReference(mandate.serviceReference)
+            .withState(mandate.state)
+            .withReturnUrl(mandate.returnUrl)
+            .withCreatedDate(mandate.createdDate)
+            .withPayer(mandate.payer)
+            .withPaymentProviderId(mandate.paymentProviderMandateId)
+            .withDescription(mandate.description);
         }
 
         public MandateBuilder withId(Long id) {

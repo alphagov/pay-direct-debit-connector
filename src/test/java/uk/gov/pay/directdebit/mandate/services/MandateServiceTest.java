@@ -59,9 +59,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
+import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MandateServiceTest {
@@ -187,7 +189,7 @@ public class MandateServiceTest {
     }
 
     @Test
-    public void confirm_shouldConfirmOnDemandMandate() {
+    public void confirm_shouldConfirmMandate() {
         GatewayAccount gatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.SANDBOX).toEntity();
         Mandate mandate = getMandateForProvider(gatewayAccount);
         Map<String, String> confirmMandateRequest = Map.of("sort_code", "123456", "account_number", "12345678");
@@ -197,13 +199,19 @@ public class MandateServiceTest {
                 SandboxMandateId.valueOf(mandate.getExternalId().toString()),
                 MandateBankStatementReference.valueOf(RandomStringUtils.randomAlphanumeric(5)));
 
-        when(mandateStateUpdateService.canUpdateStateFor(mandate, DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED)).thenReturn(true);
+        when(mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)).thenReturn(true);
         when(paymentProviderFactory.getCommandServiceFor(PaymentProvider.SANDBOX)).thenReturn(sandboxService);
         when(sandboxService.confirmMandate(mandate, bankAccountDetails)).thenReturn(confirmMandateResponse);
-        
+
         service.confirm(gatewayAccount, mandate, mandateConfirmationRequest);
 
-        verify(mandateStateUpdateService).confirmedOnDemandDirectDebitDetailsFor(mandate);
+        var expectedMandateWithStateDetailsConfirmed = fromMandate(mandate)
+                .withState(CREATED)
+                .withPaymentProviderId(confirmMandateResponse.getPaymentProviderMandateId())
+                .withMandateBankStatementReference(confirmMandateResponse.getMandateBankStatementReference())
+                .build();
+
+        verify(mandateStateUpdateService).confirmedOnDemandDirectDebitDetailsFor(expectedMandateWithStateDetailsConfirmed);
     }
 
     @Test
@@ -222,7 +230,7 @@ public class MandateServiceTest {
         Map<String, String> confirmMandateRequest = Map.of("sort_code", "123456", "account_number", "12345678");
         ConfirmMandateRequest mandateConfirmationRequest = ConfirmMandateRequest.of(confirmMandateRequest);
 
-        when(mandateStateUpdateService.canUpdateStateFor(mandate, DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED)).thenReturn(false);
+        when(mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)).thenReturn(false);
         thrown.expect(InvalidStateTransitionException.class);
         thrown.expectMessage("Transition DIRECT_DEBIT_DETAILS_CONFIRMED from state CANCELLED is not valid");
 

@@ -49,6 +49,7 @@ import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
+import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
 
 public class MandateService {
@@ -108,9 +109,11 @@ public class MandateService {
 
                     LOGGER.info("Creating mandate external id {}", mandate.getExternalId());
                     Long id = mandateDao.insert(mandate);
-                    mandate.setId(id);
-                    mandateStateUpdateService.mandateCreatedFor(mandate);
-                    return mandate;
+
+                    Mandate insertedMandate = fromMandate(mandate).withId(id).build();
+
+                    mandateStateUpdateService.mandateCreatedFor(insertedMandate);
+                    return insertedMandate;
                 })
                 .orElseThrow(() -> {
                     LOGGER.error("Gateway account with id {} not found", accountExternalId);
@@ -222,9 +225,13 @@ public class MandateService {
                                     confirmDetailsRequest.getAccountNumber(),
                                     confirmDetailsRequest.getSortCode())
                     );
-            mandate.setMandateBankStatementReference(paymentProviderMandateIdAndBankReference.getMandateBankStatementReference());
-            mandate.setPaymentProviderMandateId(paymentProviderMandateIdAndBankReference.getPaymentProviderMandateId());
-            mandateStateUpdateService.confirmedOnDemandDirectDebitDetailsFor(mandate);
+
+            Mandate updatedMandate = fromMandate(mandate)
+                    .withMandateBankStatementReference(paymentProviderMandateIdAndBankReference.getMandateBankStatementReference())
+                    .withPaymentProviderId(paymentProviderMandateIdAndBankReference.getPaymentProviderMandateId())
+                    .build();
+
+            mandateStateUpdateService.confirmedOnDemandDirectDebitDetailsFor(updatedMandate);
         } else {
             throw new InvalidStateTransitionException(DIRECT_DEBIT_DETAILS_CONFIRMED.toString(), mandate.getState().toString());
         }
