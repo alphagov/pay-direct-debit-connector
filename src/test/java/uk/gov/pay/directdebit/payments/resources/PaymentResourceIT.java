@@ -64,8 +64,8 @@ public class PaymentResourceIT {
     private static final String JSON_DESCRIPTION_KEY = "description";
     private static final String JSON_GATEWAY_ACC_KEY = "gateway_account_id";
     private static final String JSON_RETURN_URL_KEY = "return_url";
-    private static final String JSON_AGREEMENT_ID_KEY = "agreement_id";
     private static final String JSON_CHARGE_KEY = "charge_id";
+    private static final String JSON_PAYMENT_ID_KEY = "payment_id";
     private static final String JSON_PROVIDER_ID_KEY = "provider_id";
     private static final String JSON_MANDATE_ID_KEY = "mandate_id";
     private static final String JSON_STATE_STATUS_KEY = "state.status";
@@ -108,7 +108,7 @@ public class PaymentResourceIT {
                 .put(JSON_REFERENCE_KEY, expectedReference)
                 .put(JSON_DESCRIPTION_KEY, expectedDescription)
                 .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
-                .put(JSON_AGREEMENT_ID_KEY, mandateFixture.getExternalId().toString())
+                .put(JSON_MANDATE_ID_KEY, mandateFixture.getExternalId().toString())
                 .build());
 
         String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
@@ -140,7 +140,7 @@ public class PaymentResourceIT {
                 .post(requestPath)
                 .then()
                 .statusCode(Response.Status.CREATED.getStatusCode())
-                .body(JSON_CHARGE_KEY, is(notNullValue()))
+                .body(JSON_PAYMENT_ID_KEY, is(notNullValue()))
                 .body(JSON_AMOUNT_KEY, isNumber(AMOUNT))
                 .body(JSON_REFERENCE_KEY, is(expectedReference))
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
@@ -149,7 +149,7 @@ public class PaymentResourceIT {
                 .body(JSON_STATE_FINISHED_KEY, is(false))
                 .contentType(JSON);
 
-        String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
+        String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
 
         Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getTransactionByExternalId(externalTransactionId);
         assertThat(createdTransaction.get("external_id"), is(notNullValue()));
@@ -179,7 +179,7 @@ public class PaymentResourceIT {
                 .put(JSON_REFERENCE_KEY, expectedReference)
                 .put(JSON_DESCRIPTION_KEY, expectedDescription)
                 .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
-                .put(JSON_AGREEMENT_ID_KEY, mandate.getExternalId().toString())
+                .put(JSON_MANDATE_ID_KEY, mandate.getExternalId().toString())
                 .build());
 
         String sunName = "Test SUN Name";
@@ -213,7 +213,7 @@ public class PaymentResourceIT {
                 .post(requestPath)
                 .then()
                 .statusCode(Response.Status.CREATED.getStatusCode())
-                .body(JSON_CHARGE_KEY, is(notNullValue()))
+                .body(JSON_PAYMENT_ID_KEY, is(notNullValue()))
                 .body(JSON_AMOUNT_KEY, isNumber(AMOUNT))
                 .body(JSON_REFERENCE_KEY, is(expectedReference))
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
@@ -222,7 +222,7 @@ public class PaymentResourceIT {
                 .body(JSON_STATE_FINISHED_KEY, is(false))
                 .contentType(JSON);
 
-        String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
+        String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
 
         Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getTransactionByExternalId(externalTransactionId);
         assertThat(createdTransaction.get("external_id"), is(notNullValue()));

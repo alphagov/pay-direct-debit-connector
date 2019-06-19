@@ -26,11 +26,10 @@ public class CollectPaymentRequestValidatorTest {
     }
 
     @Test
-    @Ignore
     public void shouldThrowMissingMandatoryFieldsExceptionIfMissingRequiredFields() {
         Map<String, String> request = new HashMap<>();
         thrown.expect(MissingMandatoryFieldsException.class);
-        thrown.expectMessage("Field(s) missing: [amount, description, reference, agreement_id]");
+        thrown.expectMessage("Field(s) missing: [amount, description, reference, mandate_id]");
         thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
         collectPaymentRequestValidator.validate(request);
     }
@@ -96,12 +95,11 @@ public class CollectPaymentRequestValidatorTest {
     }
 
     @Test
-    @Ignore
     public void shouldThrowInvalidSizeFieldsExceptionIfAgreementIdFieldHasInvalidSize() {
         Map<String, String> request = generateValidRequest();
-        request.put("agreement_id", RandomStringUtils.randomAlphanumeric(27));
+        request.put("mandate_id", RandomStringUtils.randomAlphanumeric(27));
         thrown.expect(InvalidSizeFieldsException.class);
-        thrown.expectMessage("The size of a field(s) is invalid: [agreement_id]");
+        thrown.expectMessage("The size of a field(s) is invalid: [mandate_id]");
         thrown.reportMissingExceptionWithMessage("InvalidSizeFieldsException expected");
         collectPaymentRequestValidator.validate(request);
     }
@@ -111,7 +109,7 @@ public class CollectPaymentRequestValidatorTest {
         request.put("amount", "10000");
         request.put("description", "A description");
         request.put("reference", "ref123");
-        request.put("agreement_id", "d’accordo");
+        request.put("mandate_id", "d’accordo");
         return request;
     }
 
