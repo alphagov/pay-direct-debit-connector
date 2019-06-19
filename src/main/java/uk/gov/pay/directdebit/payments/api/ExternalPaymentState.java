@@ -16,28 +16,28 @@ public enum ExternalPaymentState {
     EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE("cancelled", true, "P0060", "User not eligible for Direct Debit");
 
     @JsonProperty("status")
-    private final String value;
+    private final String status;
     
     private final boolean finished;
     private final String code;
     private final String message;
 
-    ExternalPaymentState(String value, boolean finished) {
-        this.value = value;
+    ExternalPaymentState(String status, boolean finished) {
+        this.status = status;
         this.finished = finished;
         this.code = null;
         this.message = null;
     }
 
-    ExternalPaymentState(String value, boolean finished, String code, String message) {
-        this.value = value;
+    ExternalPaymentState(String status, boolean finished, String code, String message) {
+        this.status = status;
         this.finished = finished;
         this.code = code;
         this.message = message;
     }
     
-    public String getState() {
-        return value;
+    public String getStatus() {
+        return status;
     }
     public boolean isFinished() {
         return finished;
@@ -55,7 +55,7 @@ public enum ExternalPaymentState {
     @Override
     public String toString() {
         return "ExternalPaymentState{" +
-                "value='" + value + '\'' +
+                "status='" + status + '\'' +
                 ", finished=" + finished +
                 ", code='" + code + '\'' +
                 ", message='" + message + '\'' +

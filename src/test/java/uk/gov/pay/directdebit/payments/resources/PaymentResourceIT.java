@@ -144,7 +144,8 @@ public class PaymentResourceIT {
                 .body(JSON_REFERENCE_KEY, is(expectedReference))
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
                 .body(JSON_MANDATE_ID_KEY, is(mandateFixture.getExternalId().toString()))
-                .body("$", not(hasKey(JSON_PROVIDER_ID_KEY)))
+                .body(JSON_STATE_STATUS_KEY, is("pending"))
+                .body(JSON_STATE_FINISHED_KEY, is(false))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
@@ -216,6 +217,8 @@ public class PaymentResourceIT {
                 .body(JSON_REFERENCE_KEY, is(expectedReference))
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
                 .body(JSON_MANDATE_ID_KEY, is(mandate.getExternalId().toString()))
+                .body(JSON_STATE_STATUS_KEY, is("pending"))
+                .body(JSON_STATE_FINISHED_KEY, is(false))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_CHARGE_KEY).toString();
@@ -228,7 +231,7 @@ public class PaymentResourceIT {
     }
 
     @Test
-    public void shouldRetrieveATransaction_fromPublicApiEndpoint() {
+    public void shouldRetrieveAPayment_fromPublicApiEndpoint() {
 
         String accountExternalId = testGatewayAccount.getExternalId();
 
@@ -251,7 +254,7 @@ public class PaymentResourceIT {
                 .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
                 .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
                 .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
-                .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getState()))
+                .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getStatus()))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
                 .body(JSON_STATE_DETAILS_KEY, is("example_details"))
                 .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
@@ -285,7 +288,7 @@ public class PaymentResourceIT {
                 .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
                 .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
                 .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
-                .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getState()))
+                .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getStatus()))
                 .body(JSON_STATE_DETAILS_KEY, is("example_details"))
                 .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
 
