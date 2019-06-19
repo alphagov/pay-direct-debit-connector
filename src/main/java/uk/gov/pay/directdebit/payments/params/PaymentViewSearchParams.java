@@ -49,15 +49,15 @@ public class PaymentViewSearchParams {
     static {
         // see uk.gov.pay.directdebit.payments.model.PaymentState for mappings
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_STARTED.getState(), NEW.toSingleQuoteString());
+                .put(ExternalPaymentState.EXTERNAL_STARTED.getStatus(), NEW.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_PENDING.getState(), PENDING.toSingleQuoteString());
+                .put(ExternalPaymentState.EXTERNAL_PENDING.getStatus(), PENDING.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE.getState(), USER_CANCEL_NOT_ELIGIBLE.toSingleQuoteString());
+                .put(ExternalPaymentState.EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE.getStatus(), USER_CANCEL_NOT_ELIGIBLE.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_SUCCESS.getState(), SUCCESS.toSingleQuoteString());
+                .put(ExternalPaymentState.EXTERNAL_SUCCESS.getStatus(), SUCCESS.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_FAILED.getState(), FAILED.toSingleQuoteString() + ", " + CANCELLED.toSingleQuoteString() + ", " + EXPIRED.toSingleQuoteString());
+                .put(ExternalPaymentState.EXTERNAL_FAILED.getStatus(), FAILED.toSingleQuoteString() + ", " + CANCELLED.toSingleQuoteString() + ", " + EXPIRED.toSingleQuoteString());
     }
 
     public PaymentViewSearchParams(String gatewayExternalId) {

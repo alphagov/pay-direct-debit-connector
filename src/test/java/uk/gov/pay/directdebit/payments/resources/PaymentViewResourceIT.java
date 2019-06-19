@@ -411,7 +411,7 @@ public class PaymentViewResourceIT {
         }
         String requestPath = "/v1/api/accounts/{accountId}/payments/view?state=:state"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
-                .replace(":state", ExternalPaymentState.EXTERNAL_FAILED.getState());
+                .replace(":state", ExternalPaymentState.EXTERNAL_FAILED.getStatus());
         givenSetup()
                 .get(requestPath)
                 .then()

@@ -205,7 +205,7 @@ public class MandateResourceIT {
                 .body("payment." + JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
                 .body("payment." + JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
                 .body("payment." + JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
-                .body("payment." + JSON_STATE_KEY, is(paymentFixture.getState().toExternal().getState()))
+                .body("payment." + JSON_STATE_KEY, is(paymentFixture.getState().toExternal().getStatus()))
                 .body("payer.payer_external_id", is(payerFixture.getExternalId()))
                 .body("payer.account_holder_name", is(payerFixture.getName()))
                 .body("payer.email", is(payerFixture.getEmail()))
