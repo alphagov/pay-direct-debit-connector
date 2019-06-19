@@ -62,7 +62,7 @@ public class PaymentResource {
         collectPaymentRequestValidator.validate(collectPaymentRequestMap);
         CollectPaymentRequest collectPaymentRequest = CollectPaymentRequest.of(collectPaymentRequestMap);
         Mandate mandate = mandateQueryService.findByExternalId(collectPaymentRequest.getMandateExternalId());
-        Payment paymentToCollect = paymentService.createPayment(gatewayAccount, mandate, collectPaymentRequest);
+        Payment paymentToCollect = paymentService.createAndCollectPayment(gatewayAccount, mandate, collectPaymentRequest);
         CollectPaymentResponse response = paymentService.collectPaymentResponseWithSelfLink(paymentToCollect, gatewayAccount.getExternalId(), uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }

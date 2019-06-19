@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 
 import java.time.LocalDate;
@@ -10,98 +9,60 @@ import java.util.Optional;
 
 public class Payment {
 
-    private Long id;
-    private String externalId;
-    private Long amount;
-    private PaymentState state;
-    private String description;
-    private String reference;
-    private PaymentProviderPaymentId providerId;
-    private ZonedDateTime createdDate;
-    private Mandate mandate;
-    private LocalDate chargeDate;
+    private final Long id;
+    private final String externalId;
+    private final Long amount;
+    private final PaymentState state;
+    private final String description;
+    private final String reference;
+    private final PaymentProviderPaymentId providerId;
+    private final ZonedDateTime createdDate;
+    private final Mandate mandate;
+    private final LocalDate chargeDate;
 
-    public Payment(Long id, String externalId, Long amount, PaymentState state, String description, String reference,
-                   Mandate mandate, ZonedDateTime createdDate, PaymentProviderPaymentId paymentProviderPaymentId,
-                   LocalDate chargeDate) {
-        this.id = id;
-        this.externalId = externalId;
-        this.amount = amount;
-        this.state = state;
-        this.description = description;
-        this.reference = reference;
-        this.createdDate = createdDate;
-        this.mandate = mandate;
-        this.providerId = paymentProviderPaymentId;
-        this.chargeDate = chargeDate;
-    }
-
-    public Payment(Long amount, PaymentState state, String description, String reference, Mandate mandate, ZonedDateTime createdDate) {
-        this(null, RandomIdGenerator.newId(), amount, state, description, reference, mandate, createdDate, null, null);
+    private Payment(PaymentBuilder builder) {
+        this.id = builder.id;
+        this.externalId = Objects.requireNonNull(builder.externalId);
+        this.amount = Objects.requireNonNull(builder.amount);
+        this.state = Objects.requireNonNull(builder.state);
+        this.description = builder.description;
+        this.reference = Objects.requireNonNull(builder.reference);
+        this.createdDate = Objects.requireNonNull(builder.createdDate);
+        this.mandate = Objects.requireNonNull(builder.mandate);
+        this.providerId = builder.providerId;
+        this.chargeDate = builder.chargeDate;
     }
 
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getExternalId() {
         return externalId;
-    }
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
     }
 
     public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(Long amount) {
-        this.amount = amount;
-    }
-
     public PaymentState getState() {
         return state;
-    }
-
-    public void setState(PaymentState state) {
-        this.state = state;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getReference() {
         return reference;
-    }
-
-    public void setReference(String reference) {
-        this.reference = reference;
     }
 
     public ZonedDateTime getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(ZonedDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
     public Mandate getMandate() {
         return mandate;
-    }
-
-    public void setMandate(Mandate mandate) {
-        this.mandate = mandate;
     }
 
     public Optional<PaymentProviderPaymentId> getProviderId() {
@@ -111,15 +72,6 @@ public class Payment {
     public Optional<LocalDate> getChargeDate() {
         return Optional.ofNullable(chargeDate);
     }
-
-    public void setChargeDate(LocalDate chargeDate) {
-        this.chargeDate = chargeDate;
-    }
-
-    public void setProviderId(PaymentProviderPaymentId providerId) {
-        this.providerId = providerId;
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -141,5 +93,97 @@ public class Payment {
     @Override
     public int hashCode() {
         return Objects.hash(id, externalId, amount, state, description, reference, providerId, createdDate, mandate, chargeDate);
+    }
+
+
+    public static final class PaymentBuilder {
+        private Long id;
+        private String externalId;
+        private Long amount;
+        private PaymentState state;
+        private String description;
+        private String reference;
+        private PaymentProviderPaymentId providerId;
+        private ZonedDateTime createdDate;
+        private Mandate mandate;
+        private LocalDate chargeDate;
+
+        private PaymentBuilder() {
+        }
+
+        public static PaymentBuilder aPayment() {
+            return new PaymentBuilder();
+        }
+
+        public static PaymentBuilder fromPayment(Payment payment) {
+            var builder = aPayment()
+                    .withAmount(payment.getAmount())
+                    .withCreatedDate(payment.getCreatedDate())
+                    .withDescription(payment.getDescription())
+                    .withExternalId(payment.getExternalId())
+                    .withId(payment.getId())
+                    .withMandate(payment.getMandate())
+                    .withReference(payment.getReference())
+                    .withState(payment.getState());
+
+            payment.getChargeDate().ifPresent(builder::withChargeDate);
+            payment.getProviderId().ifPresent(builder::withProviderId);
+
+            return builder;
+        }
+
+        public PaymentBuilder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public PaymentBuilder withExternalId(String externalId) {
+            this.externalId = externalId;
+            return this;
+        }
+
+        public PaymentBuilder withAmount(Long amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public PaymentBuilder withState(PaymentState state) {
+            this.state = state;
+            return this;
+        }
+
+        public PaymentBuilder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public PaymentBuilder withReference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public PaymentBuilder withProviderId(PaymentProviderPaymentId providerId) {
+            this.providerId = providerId;
+            return this;
+        }
+
+        public PaymentBuilder withCreatedDate(ZonedDateTime createdDate) {
+            this.createdDate = createdDate;
+            return this;
+        }
+
+        public PaymentBuilder withMandate(Mandate mandate) {
+            this.mandate = mandate;
+            return this;
+        }
+
+        public PaymentBuilder withChargeDate(LocalDate chargeDate) {
+            this.chargeDate = chargeDate;
+            return this;
+        }
+
+        public Payment build() {
+            return new Payment(this);
+        }
     }
 }

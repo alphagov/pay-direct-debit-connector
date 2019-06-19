@@ -6,8 +6,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
@@ -26,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
+import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.aPayment;
 
 public class PaymentMapper implements RowMapper<Payment> {
 
@@ -111,17 +112,23 @@ public class PaymentMapper implements RowMapper<Payment> {
                 .withPayer(payer)
                 .build();
 
-        return new Payment(
-                resultSet.getLong(PAYMENT_ID_COLUMN),
-                resultSet.getString(PAYMENT_EXTERNAL_ID_COLUMN),
-                resultSet.getLong(PAYMENT_AMOUNT_COLUMN),
-                PaymentState.valueOf(resultSet.getString(PAYMENT_STATE_COLUMN)),
-                resultSet.getString(PAYMENT_DESCRIPTION_COLUMN),
-                resultSet.getString(PAYMENT_REFERENCE_COLUMN),
-                mandate,
-                ZonedDateTime.ofInstant(resultSet.getTimestamp(PAYMENT_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC),
-                resolvePaymentProviderPaymentId(gatewayAccount.getPaymentProvider(), resultSet.getString(PAYMENT_PAYMENT_PROVIDER_ID_COLUMN)).orElse(null),
-                resolveChargeDate(resultSet.getDate(PAYMENT_CHARGE_DATE_COLUMN)).orElse(null));
+        var paymentBuilder = aPayment()
+                .withId(resultSet.getLong(PAYMENT_ID_COLUMN))
+                .withExternalId(resultSet.getString(PAYMENT_EXTERNAL_ID_COLUMN))
+                .withAmount(resultSet.getLong(PAYMENT_AMOUNT_COLUMN))
+                .withState(PaymentState.valueOf(resultSet.getString(PAYMENT_STATE_COLUMN)))
+                .withDescription(resultSet.getString(PAYMENT_DESCRIPTION_COLUMN))
+                .withReference(resultSet.getString(PAYMENT_REFERENCE_COLUMN))
+                .withMandate(mandate)
+                .withCreatedDate(ZonedDateTime.ofInstant(resultSet.getTimestamp(PAYMENT_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC));
+
+        resolvePaymentProviderPaymentId(gatewayAccount.getPaymentProvider(), resultSet.getString(PAYMENT_PAYMENT_PROVIDER_ID_COLUMN))
+                .ifPresent(paymentBuilder::withProviderId);
+
+        resolveChargeDate(resultSet.getDate(PAYMENT_CHARGE_DATE_COLUMN))
+                .ifPresent(paymentBuilder::withChargeDate);
+
+        return paymentBuilder.build();
     }
 
     private Optional<PaymentProviderPaymentId> resolvePaymentProviderPaymentId(PaymentProvider paymentProvider, String paymentProviderPaymentId) {

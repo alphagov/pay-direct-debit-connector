@@ -2,10 +2,10 @@ package uk.gov.pay.directdebit.payments.services;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.time.ZoneOffset;
 import org.slf4j.Logger;
-import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
+import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -33,6 +33,7 @@ import uk.gov.pay.directdebit.tokens.services.TokenService;
 import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,8 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
+import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.aPayment;
+import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
 import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
 import static uk.gov.pay.directdebit.payments.resources.PaymentResource.CHARGE_API_PATH;
 
@@ -87,8 +90,8 @@ public class PaymentService {
         return payment;
     }
 
-    public Payment createPayment(GatewayAccount gatewayAccount, Mandate mandate,
-                                 CollectPaymentRequest collectPaymentRequest) {
+    public Payment createAndCollectPayment(GatewayAccount gatewayAccount, Mandate mandate,
+                                           CollectPaymentRequest collectPaymentRequest) {
 
         Payment payment = createPayment(collectPaymentRequest, mandate, gatewayAccount.getExternalId());
 
@@ -96,28 +99,28 @@ public class PaymentService {
                 .getCommandServiceFor(gatewayAccount.getPaymentProvider())
                 .collect(mandate, payment);
 
-        onDemandPaymentSubmittedToProviderFor(payment, chargeDate);
-
-        return payment;
+        return onDemandPaymentSubmittedToProviderFor(payment, chargeDate);
     }
     
-    public Payment createPayment(CollectRequest collectRequest, Mandate mandate, String accountExternalId) {
+    private Payment createPayment(CollectRequest collectRequest, Mandate mandate, String accountExternalId) {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     LOGGER.info("Creating payment for mandate {}", mandate.getExternalId());
-                    Payment payment = new Payment(
-                            collectRequest.getAmount(),
-                            PaymentStatesGraph.initialState(),
-                            collectRequest.getDescription(),
-                            collectRequest.getReference(),
-                            mandate,
-                            ZonedDateTime.now(ZoneOffset.UTC)
-                    );
+                    Payment payment = aPayment()
+                            .withExternalId(RandomIdGenerator.newId())
+                            .withAmount(collectRequest.getAmount())
+                            .withState(PaymentStatesGraph.initialState())
+                            .withDescription(collectRequest.getDescription())
+                            .withReference(collectRequest.getReference())
+                            .withMandate(mandate)
+                            .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
+                            .build();
                     Long id = paymentDao.insert(payment);
-                    payment.setId(id);
-                    paymentCreatedFor(payment);
-                    LOGGER.info("Created payment with external id {}", payment.getExternalId());
-                    return payment;
+
+                    Payment insertedPayment = fromPayment(payment).withId(id).build();
+                    paymentCreatedFor(insertedPayment);
+                    LOGGER.info("Created payment with external id {}", insertedPayment.getExternalId());
+                    return insertedPayment;
                 })
                 .orElseThrow(() -> {
                     LOGGER.error("Gateway account with id {} not found", accountExternalId);
@@ -190,16 +193,11 @@ public class PaymentService {
         return directDebitEventService.registerPaymentExpiredEventFor(updatePayment);
     }
 
-    public DirectDebitEvent oneOffPaymentSubmittedToProviderFor(Payment payment, LocalDate earliestChargeDate) {
-        updateStateFor(payment, PAYMENT_SUBMITTED_TO_PROVIDER);
-        userNotificationService.sendOneOffPaymentConfirmedEmailFor(payment, earliestChargeDate);
-        return directDebitEventService.registerPaymentSubmittedToProviderEventFor(payment);
-    }
-
-    public DirectDebitEvent onDemandPaymentSubmittedToProviderFor(Payment payment, LocalDate earliestChargeDate) {
-        updateStateFor(payment, PAYMENT_SUBMITTED_TO_PROVIDER);
+    public Payment onDemandPaymentSubmittedToProviderFor(Payment payment, LocalDate earliestChargeDate) {
+        Payment updatedPayment = updateStateFor(payment, PAYMENT_SUBMITTED_TO_PROVIDER);
         userNotificationService.sendOnDemandPaymentConfirmedEmailFor(payment, earliestChargeDate);
-        return directDebitEventService.registerPaymentSubmittedToProviderEventFor(payment);
+        directDebitEventService.registerPaymentSubmittedToProviderEventFor(updatedPayment);
+        return updatedPayment;
     }
 
     public DirectDebitEvent paymentFailedWithEmailFor(Payment payment) {
@@ -254,8 +252,7 @@ public class PaymentService {
                 payment.getExternalId(),
                 payment.getState(),
                 newState);
-        payment.setState(newState);
-        return payment;
+        return fromPayment(payment).withState(newState).build();
     }
 
     public Optional<DirectDebitEvent> findPaymentSubmittedEventFor(Payment payment) {
