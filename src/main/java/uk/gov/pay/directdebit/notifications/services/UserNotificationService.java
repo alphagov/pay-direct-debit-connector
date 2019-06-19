@@ -75,15 +75,11 @@ public class UserNotificationService {
         );
     }
 
-    public void sendOneOffPaymentConfirmedEmailFor(Payment payment, LocalDate earliestChargeDate) {
-        sendPaymentConfirmedEmailFor(EmailTemplate.ONE_OFF_PAYMENT_CONFIRMED, payment, earliestChargeDate);
+    public void sendOnDemandPaymentConfirmedEmailFor(Payment payment) {
+        sendPaymentConfirmedEmailFor(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, payment);
     }
 
-    public void sendOnDemandPaymentConfirmedEmailFor(Payment payment, LocalDate earliestChargeDate) {
-        sendPaymentConfirmedEmailFor(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, payment, earliestChargeDate);
-    }
-
-    private void sendPaymentConfirmedEmailFor(EmailTemplate template, Payment payment, LocalDate earliestChargeDate) {
+    private void sendPaymentConfirmedEmailFor(EmailTemplate template, Payment payment) {
         Mandate mandate = payment.getMandate();
         Optional<SunName> sunName = sunService.getSunNameFor(mandate);
         if (!sunName.isPresent()) {
@@ -91,10 +87,13 @@ public class UserNotificationService {
             return;
         }
 
+        LocalDate chargeDate = payment.getChargeDate()
+                .orElseThrow(() -> new IllegalArgumentException("No charge date on payment " + payment.getExternalId()));
+
         adminUsersClient.sendEmail(template, mandate,
                 ImmutableMap.<String, String>builder()
                         .put(AMOUNT_KEY, formatToPounds(payment.getAmount()))
-                        .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(earliestChargeDate))
+                        .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(chargeDate))
                         .put(MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString())
                         .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().getAccountNumberLastTwoDigits())
                         .put(STATEMENT_NAME_KEY, sunName.get().toString())

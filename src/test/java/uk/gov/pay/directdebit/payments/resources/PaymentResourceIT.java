@@ -40,11 +40,8 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
@@ -147,6 +144,7 @@ public class PaymentResourceIT {
                 .body(JSON_MANDATE_ID_KEY, is(mandateFixture.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
+                .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
@@ -248,6 +246,7 @@ public class PaymentResourceIT {
                 .body(JSON_MANDATE_ID_KEY, is(mandate.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
+                .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();

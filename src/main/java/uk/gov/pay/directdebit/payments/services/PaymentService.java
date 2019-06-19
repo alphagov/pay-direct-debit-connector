@@ -25,6 +25,7 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -93,13 +94,18 @@ public class PaymentService {
     public Payment createAndCollectPayment(GatewayAccount gatewayAccount, Mandate mandate,
                                            CollectPaymentRequest collectPaymentRequest) {
 
-        Payment payment = createPayment(collectPaymentRequest, mandate, gatewayAccount.getExternalId());
+        Payment createdPayment = createPayment(collectPaymentRequest, mandate, gatewayAccount.getExternalId());
 
-        LocalDate chargeDate = paymentProviderFactory
+        var providerPaymentIdAndChargeDate = paymentProviderFactory
                 .getCommandServiceFor(gatewayAccount.getPaymentProvider())
-                .collect(mandate, payment);
+                .collect(mandate, createdPayment);
 
-        return onDemandPaymentSubmittedToProviderFor(payment, chargeDate);
+        Payment collectedPayment = fromPayment(createdPayment)
+                .withProviderId(providerPaymentIdAndChargeDate.getPaymentProviderPaymentId())
+                .withChargeDate(providerPaymentIdAndChargeDate.getChargeDate())
+                .build();
+
+        return onDemandPaymentSubmittedToProviderFor(collectedPayment);
     }
     
     private Payment createPayment(CollectRequest collectRequest, Mandate mandate, String accountExternalId) {
@@ -193,9 +199,9 @@ public class PaymentService {
         return directDebitEventService.registerPaymentExpiredEventFor(updatePayment);
     }
 
-    public Payment onDemandPaymentSubmittedToProviderFor(Payment payment, LocalDate earliestChargeDate) {
+    public Payment onDemandPaymentSubmittedToProviderFor(Payment payment) {
         Payment updatedPayment = updateStateFor(payment, PAYMENT_SUBMITTED_TO_PROVIDER);
-        userNotificationService.sendOnDemandPaymentConfirmedEmailFor(payment, earliestChargeDate);
+        userNotificationService.sendOnDemandPaymentConfirmedEmailFor(updatedPayment);
         directDebitEventService.registerPaymentSubmittedToProviderEventFor(updatedPayment);
         return updatedPayment;
     }

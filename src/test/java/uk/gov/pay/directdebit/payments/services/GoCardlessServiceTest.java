@@ -256,12 +256,13 @@ public class GoCardlessServiceTest {
         when(mockedGoCardlessClientFacade.createPayment(payment, goCardlessMandateId))
                 .thenReturn(new PaymentProviderPaymentIdAndChargeDate(goCardlessPaymentId, chargeDateFromGoCardless));
 
-        LocalDate actualChargeDate = service.collect(mandate, payment);
+        PaymentProviderPaymentIdAndChargeDate collectResponse = service.collect(mandate, payment);
 
         Payment paymentWithProviderIdAndChargeDate = fromPayment(payment).withProviderId(goCardlessPaymentId).withChargeDate(chargeDateFromGoCardless).build();
         verify(mockedPaymentDao).updateProviderIdAndChargeDate(paymentWithProviderIdAndChargeDate);
 
-        assertThat(actualChargeDate, is(chargeDateFromGoCardless));
+        assertThat(collectResponse.getChargeDate(), is(chargeDateFromGoCardless));
+        assertThat(collectResponse.getPaymentProviderPaymentId(), is(goCardlessPaymentId));
     }
 
     @Test

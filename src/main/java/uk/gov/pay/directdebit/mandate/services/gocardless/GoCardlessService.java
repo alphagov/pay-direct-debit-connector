@@ -29,7 +29,6 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 
 import javax.inject.Inject;
-import java.time.LocalDate;
 import java.util.Optional;
 
 public class GoCardlessService implements DirectDebitPaymentProviderCommandService {
@@ -64,7 +63,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
     }
 
     @Override
-    public LocalDate collect(Mandate mandate, Payment payment) {
+    public PaymentProviderPaymentIdAndChargeDate collect(Mandate mandate, Payment payment) {
         LOGGER.info("Collecting payment for GoCardless, mandate with id: {}, payment with id: {}", mandate.getExternalId(), payment.getExternalId());
         var goCardlessMandateId = mandate.getPaymentProviderMandateId()
                 .map(a -> (GoCardlessMandateId) a)
@@ -77,7 +76,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
                 .build();
 
         paymentDao.updateProviderIdAndChargeDate(updatePayment);
-        return providerIdAndChargeDate.getChargeDate();
+        return providerIdAndChargeDate;
     }
 
     @Override
