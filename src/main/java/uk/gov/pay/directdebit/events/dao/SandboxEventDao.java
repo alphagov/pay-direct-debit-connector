@@ -7,9 +7,11 @@ import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.events.model.SandboxEvent;
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateIdArgumentFactory;
+import uk.gov.pay.directdebit.payments.model.SandboxPaymentIdArgumentFactory;
 
 @RegisterRowMapper(SandboxEventMapper.class)
 @RegisterArgumentFactory(SandboxMandateIdArgumentFactory.class)
+@RegisterArgumentFactory(SandboxPaymentIdArgumentFactory.class)
 public interface SandboxEventDao {
     
     @SqlUpdate("INSERT INTO sandbox_events(created_at, mandate_id, payment_id, event_action, event_cause) " +

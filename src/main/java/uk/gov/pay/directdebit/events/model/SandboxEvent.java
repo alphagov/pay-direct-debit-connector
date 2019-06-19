@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.events.model;
 
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
+import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -8,7 +9,7 @@ import java.util.Optional;
 public class SandboxEvent {
     
     private final SandboxMandateId mandateId;
-    private final String paymentId;
+    private final SandboxPaymentId paymentId;
     private final String eventAction;
     private final String eventCause;
     private final ZonedDateTime createdAt;
@@ -25,7 +26,7 @@ public class SandboxEvent {
         return Optional.ofNullable(mandateId);
     }
 
-    public Optional<String> getPaymentId() {
+    public Optional<SandboxPaymentId> getPaymentId() {
         return Optional.ofNullable(paymentId);
     }
 
@@ -44,7 +45,7 @@ public class SandboxEvent {
 
     public static final class SandboxEventBuilder {
         private SandboxMandateId mandateId;
-        private String paymentId;
+        private SandboxPaymentId paymentId;
         private String eventAction;
         private String eventCause;
         private ZonedDateTime createdAt;
@@ -61,7 +62,7 @@ public class SandboxEvent {
             return this;
         }
 
-        public SandboxEventBuilder withPaymentId(String paymentId) {
+        public SandboxEventBuilder withPaymentId(SandboxPaymentId paymentId) {
             this.paymentId = paymentId;
             return this;
         }

@@ -12,6 +12,7 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
+import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -42,7 +43,7 @@ public class SandboxEventDaoIT {
     public void shouldInsertAnEvent() throws IOException {
         SandboxEvent sandboxEvent = SandboxEvent.SandboxEventBuilder.aSandboxEvent()
                 .withMandateId(SandboxMandateId.valueOf("aMandateId"))
-                .withPaymentId("aPaymentId")
+                .withPaymentId(SandboxPaymentId.valueOf("aPaymentId"))
                 .withEventAction("anEventAction")
                 .withEventCause("anEventCause")
                 .withCreatedAt(CREATED_AT)

@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.events.model.SandboxEvent;
 import uk.gov.pay.directdebit.events.services.SandboxEventService;
+import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 
 import javax.inject.Inject;
@@ -46,14 +47,14 @@ public class WebhookSandboxResource {
     }
 
     private void processTransaction(Payment payment) {
-        sandboxEventService.insertEvent(createSandboxEventFromTransaction(payment));
+        sandboxEventService.insertEvent(createSandboxEventFromPayment(payment));
         paymentService.paymentPaidOutFor(payment);
     }
 
-    private SandboxEvent createSandboxEventFromTransaction(Payment payment){
+    private SandboxEvent createSandboxEventFromPayment(Payment payment){
 
         return SandboxEvent.SandboxEventBuilder.aSandboxEvent()
-                .withPaymentId(payment.getId().toString())
+                .withPaymentId(SandboxPaymentId.valueOf(payment.getExternalId()))
                 .withEventAction(SandboxEventAction.PAID_OUT.toString())
                 .withEventCause(SandboxEventCause.PAID_OUT_CAUSE.toString())
                 .withCreatedAt(ZonedDateTime.now())
