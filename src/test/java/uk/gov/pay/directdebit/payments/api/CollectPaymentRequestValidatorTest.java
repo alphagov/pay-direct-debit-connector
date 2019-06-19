@@ -29,7 +29,7 @@ public class CollectPaymentRequestValidatorTest {
     public void shouldThrowMissingMandatoryFieldsExceptionIfMissingRequiredFields() {
         Map<String, String> request = new HashMap<>();
         thrown.expect(MissingMandatoryFieldsException.class);
-        thrown.expectMessage("Field(s) missing: [amount, description, reference, mandate_id]");
+        thrown.expectMessage("Field(s) missing: [amount, reference, mandate_id]");
         thrown.reportMissingExceptionWithMessage("MissingMandatoryFieldsException expected");
         collectPaymentRequestValidator.validate(request);
     }
