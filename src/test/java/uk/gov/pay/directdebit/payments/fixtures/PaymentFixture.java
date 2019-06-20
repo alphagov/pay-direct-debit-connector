@@ -28,7 +28,7 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
     private PaymentProviderPaymentId paymentProviderId = SandboxPaymentId.valueOf(RandomStringUtils.randomAlphanumeric(20));
-    private LocalDate chargeDate = LocalDate.now();
+    private LocalDate chargeDate = LocalDate.now().plusDays(4);
 
     private PaymentFixture() {
     }

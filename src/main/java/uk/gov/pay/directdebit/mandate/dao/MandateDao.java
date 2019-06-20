@@ -8,12 +8,9 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
@@ -99,6 +96,10 @@ public interface MandateDao {
 
     @SqlQuery(query + "WHERE m.external_id = :mandateExternalId")
     Optional<Mandate> findByExternalId(@Bind("mandateExternalId") MandateExternalId mandateExternalId);
+
+    @SqlQuery(query + "WHERE m.external_id = :mandateExternalId AND g.external_id = :gatewayAccountExternalId")
+    Optional<Mandate> findByExternalIdAndGatewayAccountExternalId(@Bind("mandateExternalId") MandateExternalId mandateExternalId,
+                                                                  @Bind("gatewayAccountExternalId") String gatewayAccountExternalId);
 
     @SqlQuery(query + "WHERE m.payment_provider_id = :paymentProviderMandateId")
     Optional<Mandate> findByPaymentProviderMandateId(@Bind("paymentProviderMandateId") PaymentProviderMandateId paymentProviderMandateId);

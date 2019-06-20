@@ -44,7 +44,6 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
@@ -147,6 +146,7 @@ public class PaymentResourceIT {
                 .body(JSON_MANDATE_ID_KEY, is(mandateFixture.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
+                .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
@@ -185,7 +185,7 @@ public class PaymentResourceIT {
                 .body("$", not(hasKey(JSON_DESCRIPTION_KEY)))
                 .contentType(JSON);
     }
-    
+
     @Test
     public void shouldCollectAPayment_forGoCardless() throws Exception {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
@@ -248,6 +248,7 @@ public class PaymentResourceIT {
                 .body(JSON_MANDATE_ID_KEY, is(mandate.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
+                .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();

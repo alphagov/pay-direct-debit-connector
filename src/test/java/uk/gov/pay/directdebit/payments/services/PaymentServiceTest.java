@@ -11,9 +11,9 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
@@ -25,7 +25,9 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
@@ -92,7 +94,7 @@ public class PaymentServiceTest {
     private PaymentFixture paymentFixture = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture);
     @Before
     public void setUp() throws URISyntaxException {
-        service = new PaymentService(mockedTokenService, mockedGatewayAccountDao, mockedDirectDebitConfig, mockedPaymentDao,
+        service = new PaymentService(mockedTokenService, mockedDirectDebitConfig, mockedPaymentDao,
                 mockedDirectDebitEventService, mockedUserNotificationService, mockedPaymentProviderFactory);
         when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
         when(mockedLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
@@ -150,14 +152,14 @@ public class PaymentServiceTest {
     }
 
     @Test
-    public void onDemandPaymentSubmittedToProvider_shouldUpdateTransactionAsPending_andRegisterAPaymentSubmittedEvent() {
+    public void onDemandPaymentSubmittedToProvider_shouldUpdatePaymentAsPending_andRegisterAPaymentSubmittedEvent() {
         Payment payment = PaymentFixture
                 .aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(NEW)
                 .toEntity();
 
-        service.onDemandPaymentSubmittedToProviderFor(payment, LocalDate.now());
+        service.onDemandPaymentSubmittedToProviderFor(payment);
 
         Payment updatedPayment = fromPayment(payment).withState(PENDING).build();
         verify(mockedPaymentDao).updateState(updatedPayment.getId(), PaymentState.PENDING);
@@ -307,7 +309,26 @@ public class PaymentServiceTest {
     }
 
     @Test
-    public void collect_shouldCreateAPaymentAndRegisterPaymentSubmittedEvent() {
+    public void createShouldCreatePaymentAndRegisterPaymentCreatedEvent() {
+        Mandate mandate = mandateFixture.toEntity();
+
+        Payment returnedPayment = service.createPayment(123456L,"a description", "a reference", mandate);
+
+        assertThat(returnedPayment.getAmount(), is(123456L));
+        assertThat(returnedPayment.getMandate(), is(mandate));
+        assertThat(returnedPayment.getState(), is(NEW));
+        assertThat(returnedPayment.getDescription(), is("a description"));
+        assertThat(returnedPayment.getReference(), is("a reference"));
+        assertThat(returnedPayment.getProviderId(), is(Optional.empty()));
+        assertThat(returnedPayment.getChargeDate(), is(Optional.empty()));
+        
+        verify(mockedDirectDebitEventService).registerPaymentCreatedEventFor(returnedPayment);
+    }
+
+    @Test
+    public void submitPaymentToProvider_shouldSubmitAndRegisterPaymentSubmittedEvent() {
+        Mandate mandate = mandateFixture.toEntity();
+
         Payment payment = PaymentFixture
                 .aPaymentFixture()
                 .withAmount(123456L)
@@ -317,24 +338,24 @@ public class PaymentServiceTest {
                 .withState(NEW)
                 .toEntity();
 
-        CollectPaymentRequest collectPaymentRequest = new CollectPaymentRequest(
-                mandateFixture.getExternalId(),
-                payment.getAmount(),
-                payment.getDescription(),
-                payment.getReference());
+        SandboxPaymentId sandboxPaymentId = SandboxPaymentId.valueOf("123");
+        LocalDate chargeDate = LocalDate.now().plusDays(2);
 
-        when(mockedPaymentProviderFactory.getCommandServiceFor(mandateFixture.toEntity().getGatewayAccount().getPaymentProvider())).thenReturn(mockedSandboxService);
-        when(mockedGatewayAccountDao.findByExternalId(gatewayAccountFixture.getExternalId())).thenReturn(Optional.of(gatewayAccountFixture.toEntity()));
+        when(mockedPaymentProviderFactory.getCommandServiceFor(mandate.getGatewayAccount().getPaymentProvider())).thenReturn(mockedSandboxService);
+        when(mockedSandboxService.collect(mandate, payment)).thenReturn(new PaymentProviderPaymentIdAndChargeDate(sandboxPaymentId, chargeDate));
 
-        Payment returnedPayment = service.createAndCollectPayment(gatewayAccountFixture.toEntity(), mandateFixture.toEntity(), collectPaymentRequest);
+        Payment returnedPayment = service.submitPaymentToProvider(payment);
 
         assertThat(returnedPayment.getAmount(), is(payment.getAmount()));
         assertThat(returnedPayment.getMandate(), is(payment.getMandate()));
         assertThat(returnedPayment.getState(), is(PENDING));
         assertThat(returnedPayment.getDescription(), is("a description"));
         assertThat(returnedPayment.getReference(), is("a reference"));
+        assertThat(returnedPayment.getProviderId(), is(Optional.of(sandboxPaymentId)));
+        assertThat(returnedPayment.getChargeDate(), is(Optional.of(chargeDate)));
 
         Payment expectedPaymentWithStatePending = fromPayment(returnedPayment).withState(PENDING).build();
         verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(expectedPaymentWithStatePending);
     }
+
 }

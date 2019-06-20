@@ -13,7 +13,7 @@ public interface DirectDebitPaymentProviderCommandService {
 
     PaymentProviderMandateIdAndBankReference confirmMandate(Mandate mandate, BankAccountDetails bankAccountDetails);
 
-    LocalDate collect(Mandate mandate, Payment payment);
+    PaymentProviderPaymentIdAndChargeDate collect(Mandate mandate, Payment payment);
 
     BankAccountValidationResponse validate(Mandate mandate, BankAccountDetails bankAccountDetails);
 
