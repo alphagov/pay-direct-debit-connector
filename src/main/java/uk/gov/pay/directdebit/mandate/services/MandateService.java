@@ -19,16 +19,16 @@ import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
-import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
-import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
@@ -231,7 +231,7 @@ public class MandateService {
                     .withPaymentProviderId(paymentProviderMandateIdAndBankReference.getPaymentProviderMandateId())
                     .build();
 
-            mandateStateUpdateService.confirmedOnDemandDirectDebitDetailsFor(updatedMandate);
+            mandateStateUpdateService.confirmedDirectDebitDetailsFor(updatedMandate);
         } else {
             throw new InvalidStateTransitionException(DIRECT_DEBIT_DETAILS_CONFIRMED.toString(), mandate.getState().toString());
         }

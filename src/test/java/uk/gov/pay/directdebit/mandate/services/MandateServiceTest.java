@@ -33,7 +33,6 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
-import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
@@ -211,7 +210,7 @@ public class MandateServiceTest {
                 .withMandateBankStatementReference(confirmMandateResponse.getMandateBankStatementReference())
                 .build();
 
-        verify(mandateStateUpdateService).confirmedOnDemandDirectDebitDetailsFor(expectedMandateWithStateDetailsConfirmed);
+        verify(mandateStateUpdateService).confirmedDirectDebitDetailsFor(expectedMandateWithStateDetailsConfirmed);
     }
 
     @Test

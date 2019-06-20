@@ -48,7 +48,7 @@ public class UserNotificationService {
         );
     }
 
-    public void sendOnDemandMandateCreatedEmailFor(Mandate mandate) {
+    public void sendMandateCreatedEmailFor(Mandate mandate) {
         EmailTemplate template = EmailTemplate.ON_DEMAND_MANDATE_CREATED;
         Optional<SunName> sunName = sunService.getSunNameFor(mandate);
         if (!sunName.isPresent()) {
@@ -75,7 +75,7 @@ public class UserNotificationService {
         );
     }
 
-    public void sendOnDemandPaymentConfirmedEmailFor(Payment payment) {
+    public void sendPaymentConfirmedEmailFor(Payment payment) {
         sendPaymentConfirmedEmailFor(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, payment);
     }
 

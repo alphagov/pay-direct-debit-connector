@@ -372,7 +372,7 @@ public class MandateResourceIT {
     }
 
     @Test
-    public void confirm_shouldCreateACustomerBankAccountMandateWithNoPayment_ForGoCardless_ifMandateIsOnDemand() {
+    public void confirm_shouldCreateACustomerBankAccountMandate() {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()

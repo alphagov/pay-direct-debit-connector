@@ -12,7 +12,6 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
-import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotConfirmed;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 
@@ -20,8 +19,6 @@ import java.time.ZonedDateTime;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
@@ -158,10 +155,10 @@ public class MandateStateUpdateServiceTest {
 
     @Test
     public void shouldUpdateMandateStateAndRegisterEventWhenConfirmingDirectDebitDetails_andSendEmail() {
-        Mandate confirmedMandate = service.confirmedOnDemandDirectDebitDetailsFor(mandate);
+        Mandate confirmedMandate = service.confirmedDirectDebitDetailsFor(mandate);
 
         assertThat(confirmedMandate, is(mandate));
-        verify(mockedUserNotificationService).sendOnDemandMandateCreatedEmailFor(mandate);
+        verify(mockedUserNotificationService).sendMandateCreatedEmailFor(mandate);
         verify(mockedMandateDao).updateReferenceAndPaymentProviderId(confirmedMandate);
 
         verify(mockedDirectDebitEventService).registerDirectDebitConfirmedEventFor(confirmedMandate);
