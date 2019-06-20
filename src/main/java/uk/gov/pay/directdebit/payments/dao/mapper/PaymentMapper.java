@@ -20,7 +20,6 @@ import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -122,31 +121,26 @@ public class PaymentMapper implements RowMapper<Payment> {
                 .withMandate(mandate)
                 .withCreatedDate(ZonedDateTime.ofInstant(resultSet.getTimestamp(PAYMENT_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC));
 
-        resolvePaymentProviderPaymentId(gatewayAccount.getPaymentProvider(), resultSet.getString(PAYMENT_PAYMENT_PROVIDER_ID_COLUMN))
+        Optional.ofNullable(resultSet.getString(PAYMENT_PAYMENT_PROVIDER_ID_COLUMN))
+                .map(paymentProviderId -> resolvePaymentProviderPaymentId(gatewayAccount.getPaymentProvider(), paymentProviderId))
                 .ifPresent(paymentBuilder::withProviderId);
 
-        resolveChargeDate(resultSet.getDate(PAYMENT_CHARGE_DATE_COLUMN))
+        Optional.ofNullable(resultSet.getDate(PAYMENT_CHARGE_DATE_COLUMN))
+                .map(Date::toLocalDate)
                 .ifPresent(paymentBuilder::withChargeDate);
 
         return paymentBuilder.build();
     }
 
-    private Optional<PaymentProviderPaymentId> resolvePaymentProviderPaymentId(PaymentProvider paymentProvider, String paymentProviderPaymentId) {
-        if (paymentProviderPaymentId == null) {
-            return Optional.empty();
-        }
-
+    private PaymentProviderPaymentId resolvePaymentProviderPaymentId(PaymentProvider paymentProvider, String paymentProviderPaymentId) {
         switch (paymentProvider) {
             case SANDBOX:
-                return Optional.of(SandboxPaymentId.valueOf(paymentProviderPaymentId));
+                return SandboxPaymentId.valueOf(paymentProviderPaymentId);
             case GOCARDLESS:
-                return Optional.of(GoCardlessPaymentId.valueOf(paymentProviderPaymentId));
+                return GoCardlessPaymentId.valueOf(paymentProviderPaymentId);
             default:
                 throw new IllegalArgumentException("Unrecognised payment provider " + paymentProvider + " for payment " + paymentProviderPaymentId);
         }
     }
 
-    private Optional<LocalDate> resolveChargeDate(Date chargeDate) {
-        return Optional.ofNullable(chargeDate).map(Date::toLocalDate);
-    }
 }

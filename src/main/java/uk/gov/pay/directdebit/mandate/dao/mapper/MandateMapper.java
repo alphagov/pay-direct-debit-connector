@@ -100,22 +100,19 @@ public class MandateMapper implements RowMapper<Mandate> {
                 .withCreatedDate(ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC))
                 .withPayer(payer);
 
-        resolvePaymentProviderMandateId(gatewayAccount.getPaymentProvider(), resultSet.getString(PAYMENT_PROVIDER_ID))
+        Optional.ofNullable(resultSet.getString(PAYMENT_PROVIDER_ID))
+                .map(paymentProviderId -> resolvePaymentProviderMandateId(gatewayAccount.getPaymentProvider(), paymentProviderId))
                 .ifPresent(mandateBuilder::withPaymentProviderId);
 
         return mandateBuilder.build();
     }
 
-    private Optional<PaymentProviderMandateId> resolvePaymentProviderMandateId(PaymentProvider paymentProvider, String paymentProviderMandateId) {
-        if (paymentProviderMandateId == null) {
-            return Optional.empty();
-        }
-
+    private PaymentProviderMandateId resolvePaymentProviderMandateId(PaymentProvider paymentProvider, String paymentProviderMandateId) {
         switch (paymentProvider) {
             case SANDBOX:
-                return Optional.of(SandboxMandateId.valueOf(paymentProviderMandateId));
+                return SandboxMandateId.valueOf(paymentProviderMandateId);
             case GOCARDLESS:
-                return Optional.of(GoCardlessMandateId.valueOf(paymentProviderMandateId));
+                return GoCardlessMandateId.valueOf(paymentProviderMandateId);
             default:
                 throw new IllegalArgumentException("Unrecognised payment provider " + paymentProvider + " for mandate " + paymentProviderMandateId);
         }
