@@ -16,7 +16,6 @@ import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Locale;
@@ -72,7 +71,7 @@ public class UserNotificationServiceTest {
     }
 
     @Test
-    public void shouldSendOnDemandMandateCreatedEmail() {
+    public void shouldSendMandateCreatedEmail() {
         Mandate mandate = MandateFixture.aMandateFixture().withPayerFixture(payerFixture).toEntity();
         SunName sunName = SunName.of("test sun Name");
         when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
@@ -82,15 +81,15 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("statement name", sunName.toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
-        userNotificationService.sendOnDemandMandateCreatedEmailFor(mandate);
+        userNotificationService.sendMandateCreatedEmailFor(mandate);
 
         verify(mockAdminUsersClient).sendEmail(EmailTemplate.ON_DEMAND_MANDATE_CREATED, mandate, emailPersonalisation);
     }
 
-    public void shouldNotSendOnDemandMandateCreatedEmail_whenSunNameUnavailable() {
+    public void shouldNotSendMandateCreatedEmail_whenSunNameUnavailable() {
         Mandate mandate = MandateFixture.aMandateFixture().withPayerFixture(payerFixture).toEntity();
         when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.empty());
-        userNotificationService.sendOnDemandMandateCreatedEmailFor(mandate);
+        userNotificationService.sendMandateCreatedEmailFor(mandate);
         verifyZeroInteractions(mockAdminUsersClient);
     }
 
@@ -106,7 +105,7 @@ public class UserNotificationServiceTest {
     }
 
     @Test
-    public void shouldSendOnDemandPaymentConfirmedEmail() {
+    public void shouldSendPaymentConfirmedEmail() {
         Mandate mandate = mandateFixture.withPayerFixture(payerFixture).toEntity();
 
         Payment paymentWithMandate = fromPayment(payment).withMandate(mandate).build();
@@ -122,7 +121,7 @@ public class UserNotificationServiceTest {
         emailPersonalisation.put("statement name", sunName.toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
-        userNotificationService.sendOnDemandPaymentConfirmedEmailFor(paymentWithMandate);
+        userNotificationService.sendPaymentConfirmedEmailFor(paymentWithMandate);
 
         verify(mockAdminUsersClient).sendEmail(EmailTemplate.ON_DEMAND_PAYMENT_CONFIRMED, mandate, emailPersonalisation);
     }

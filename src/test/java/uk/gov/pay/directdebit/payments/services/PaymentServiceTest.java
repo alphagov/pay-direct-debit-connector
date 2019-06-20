@@ -152,14 +152,14 @@ public class PaymentServiceTest {
     }
 
     @Test
-    public void onDemandPaymentSubmittedToProvider_shouldUpdatePaymentAsPending_andRegisterAPaymentSubmittedEvent() {
+    public void paymentSubmittedToProvider_shouldUpdatePaymentAsPending_andRegisterAPaymentSubmittedEvent() {
         Payment payment = PaymentFixture
                 .aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(NEW)
                 .toEntity();
 
-        service.onDemandPaymentSubmittedToProviderFor(payment);
+        service.paymentSubmittedToProviderFor(payment);
 
         Payment updatedPayment = fromPayment(payment).withState(PENDING).build();
         verify(mockedPaymentDao).updateState(updatedPayment.getId(), PaymentState.PENDING);

@@ -110,7 +110,7 @@ public class PaymentService {
                 .withChargeDate(providerPaymentIdAndChargeDate.getChargeDate())
                 .build();
 
-        return onDemandPaymentSubmittedToProviderFor(submittedPayment);
+        return paymentSubmittedToProviderFor(submittedPayment);
     }
 
     public PaymentResponse createPaymentResponseWithAllLinks(Payment payment, String accountExternalId, UriInfo uriInfo) {
@@ -178,9 +178,9 @@ public class PaymentService {
         return directDebitEventService.registerPaymentExpiredEventFor(updatePayment);
     }
 
-    public Payment onDemandPaymentSubmittedToProviderFor(Payment payment) {
+    public Payment paymentSubmittedToProviderFor(Payment payment) {
         Payment updatedPayment = updateStateFor(payment, PAYMENT_SUBMITTED_TO_PROVIDER);
-        userNotificationService.sendOnDemandPaymentConfirmedEmailFor(updatedPayment);
+        userNotificationService.sendPaymentConfirmedEmailFor(updatedPayment);
         directDebitEventService.registerPaymentSubmittedToProviderEventFor(updatedPayment);
         return updatedPayment;
     }

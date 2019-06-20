@@ -39,7 +39,7 @@ public class SecurityTokensResourceIT {
     }
 
     @Test
-    public void shouldReturn200WithMandateForValidToken_ifMandateIsOnDemand() {
+    public void shouldReturn200WithMandateForValidToken() {
         MandateFixture testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
         TokenFixture testToken = aTokenFixture().withMandateId(testMandate.getId()).insert(testContext.getJdbi());

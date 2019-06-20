@@ -231,7 +231,7 @@ public class MandateService {
                     .withPaymentProviderId(paymentProviderMandateIdAndBankReference.getPaymentProviderMandateId())
                     .build();
 
-            mandateStateUpdateService.confirmedOnDemandDirectDebitDetailsFor(updatedMandate);
+            mandateStateUpdateService.confirmedDirectDebitDetailsFor(updatedMandate);
         } else {
             throw new InvalidStateTransitionException(DIRECT_DEBIT_DETAILS_CONFIRMED.toString(), mandate.getState().toString());
         }
