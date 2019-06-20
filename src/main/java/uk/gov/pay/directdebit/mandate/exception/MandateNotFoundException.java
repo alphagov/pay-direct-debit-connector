@@ -15,4 +15,8 @@ public class MandateNotFoundException extends NotFoundException {
     public MandateNotFoundException(MandateExternalId mandateExternalId) {
         super(format("Couldn't find mandate with id: %s", mandateExternalId));
     }
+
+    public MandateNotFoundException(MandateExternalId mandateExternalId, String gatewayAccountExternalId) {
+        super(format("Couldn't find mandate for gateway account %s with id: %s", gatewayAccountExternalId, mandateExternalId));
+    }
 }

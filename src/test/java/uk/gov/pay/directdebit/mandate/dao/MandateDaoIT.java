@@ -144,6 +144,41 @@ public class MandateDaoIT {
     }
 
     @Test
+    public void shouldNotFindAMandateByExternalId_ifExternalIdDoesNotExist() {
+        MandateExternalId invalidMandateId = MandateExternalId.valueOf("invalid1d");
+        assertThat(mandateDao.findByExternalId(invalidMandateId), is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldFindAMandateByExternalIdAndGatewayAccount() {
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withMandateBankStatementReference(MandateBankStatementReference.valueOf("test-reference"))
+                .withServiceReference("test-service-reference")
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .insert(testContext.getJdbi());
+
+        Mandate mandate = mandateDao.findByExternalIdAndGatewayAccountExternalId(mandateFixture.getExternalId(), gatewayAccountFixture.getExternalId()).get();
+
+        assertThat(mandate.getId(), is(mandateFixture.getId()));
+        assertThat(mandate.getExternalId(), is(notNullValue()));
+        assertThat(mandate.getMandateBankStatementReference(), is(MandateBankStatementReference.valueOf("test-reference")));
+        assertThat(mandate.getServiceReference(), is("test-service-reference"));
+        assertThat(mandate.getState(), is(MandateState.CREATED));
+    }
+
+    @Test
+    public void shouldNotFindAMandateByExternalIdAndGatewayAccountId_ifGatewayAccountIdIsNotCorrect() {
+        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+                .withMandateBankStatementReference(MandateBankStatementReference.valueOf("test-reference"))
+                .withServiceReference("test-service-reference")
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .insert(testContext.getJdbi());
+
+        assertThat(mandateDao.findByExternalIdAndGatewayAccountExternalId(mandateFixture.getExternalId(), "xxxx"), is(Optional.empty()));
+    }
+    
+    
+    @Test
     public void shouldFindAMandateByPaymentProviderId() {
         GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("expectedGoCardlessMandateId");
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
@@ -157,12 +192,6 @@ public class MandateDaoIT {
         assertThat(mandate.getExternalId().toString(), is("expectedExternalId"));
         assertThat(mandate.getPaymentProviderMandateId().get().toString(), is("expectedGoCardlessMandateId"));
         assertThat(mandate.getState(), is(MandateState.CREATED));
-    }
-
-    @Test
-    public void shouldNotFindAMandateByExternalId_ifExternalIdIsInvalid() {
-        MandateExternalId invalidMandateId = MandateExternalId.valueOf("invalid1d");
-        assertThat(mandateDao.findByExternalId(invalidMandateId), is(Optional.empty()));
     }
 
     @Test

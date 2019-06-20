@@ -6,16 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
-import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
-import uk.gov.pay.directdebit.payments.api.CollectRequest;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
@@ -25,7 +20,6 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
-import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -33,7 +27,6 @@ import uk.gov.pay.directdebit.tokens.services.TokenService;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
-import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -61,7 +54,6 @@ public class PaymentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentService.class);
     private final TokenService tokenService;
-    private final GatewayAccountDao gatewayAccountDao;
     private final DirectDebitConfig directDebitConfig;
     private final PaymentDao paymentDao;
     private final DirectDebitEventService directDebitEventService;
@@ -70,13 +62,11 @@ public class PaymentService {
 
     @Inject
     public PaymentService(TokenService tokenService,
-                          GatewayAccountDao gatewayAccountDao,
                           DirectDebitConfig directDebitConfig,
                           PaymentDao paymentDao,
                           DirectDebitEventService directDebitEventService,
                           UserNotificationService userNotificationService, PaymentProviderFactory paymentProviderFactory) {
         this.tokenService = tokenService;
-        this.gatewayAccountDao = gatewayAccountDao;
         this.directDebitConfig = directDebitConfig;
         this.directDebitEventService = directDebitEventService;
         this.paymentDao = paymentDao;
@@ -91,47 +81,36 @@ public class PaymentService {
         return payment;
     }
 
-    public Payment createAndCollectPayment(GatewayAccount gatewayAccount, Mandate mandate,
-                                           CollectPaymentRequest collectPaymentRequest) {
+    Payment createPayment(long amount, String description, String reference, Mandate mandate) {
+        LOGGER.info("Creating payment for mandate {}", mandate.getExternalId());
+        Payment payment = aPayment()
+                .withExternalId(RandomIdGenerator.newId())
+                .withAmount(amount)
+                .withState(PaymentStatesGraph.initialState())
+                .withDescription(description)
+                .withReference(reference)
+                .withMandate(mandate)
+                .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
+                .build();
+        Long id = paymentDao.insert(payment);
+    
+        Payment insertedPayment = fromPayment(payment).withId(id).build();
+        paymentCreatedFor(insertedPayment);
+        LOGGER.info("Created payment with external id {}", insertedPayment.getExternalId());
+        return insertedPayment;
+    }
 
-        Payment createdPayment = createPayment(collectPaymentRequest, mandate, gatewayAccount.getExternalId());
-
+    Payment submitPaymentToProvider(Payment payment) {
         var providerPaymentIdAndChargeDate = paymentProviderFactory
-                .getCommandServiceFor(gatewayAccount.getPaymentProvider())
-                .collect(mandate, createdPayment);
+                .getCommandServiceFor(payment.getMandate().getGatewayAccount().getPaymentProvider())
+                .collect(payment.getMandate(), payment);
 
-        Payment collectedPayment = fromPayment(createdPayment)
+        Payment submittedPayment = fromPayment(payment)
                 .withProviderId(providerPaymentIdAndChargeDate.getPaymentProviderPaymentId())
                 .withChargeDate(providerPaymentIdAndChargeDate.getChargeDate())
                 .build();
 
-        return onDemandPaymentSubmittedToProviderFor(collectedPayment);
-    }
-    
-    private Payment createPayment(CollectRequest collectRequest, Mandate mandate, String accountExternalId) {
-        return gatewayAccountDao.findByExternalId(accountExternalId)
-                .map(gatewayAccount -> {
-                    LOGGER.info("Creating payment for mandate {}", mandate.getExternalId());
-                    Payment payment = aPayment()
-                            .withExternalId(RandomIdGenerator.newId())
-                            .withAmount(collectRequest.getAmount())
-                            .withState(PaymentStatesGraph.initialState())
-                            .withDescription(collectRequest.getDescription())
-                            .withReference(collectRequest.getReference())
-                            .withMandate(mandate)
-                            .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
-                            .build();
-                    Long id = paymentDao.insert(payment);
-
-                    Payment insertedPayment = fromPayment(payment).withId(id).build();
-                    paymentCreatedFor(insertedPayment);
-                    LOGGER.info("Created payment with external id {}", insertedPayment.getExternalId());
-                    return insertedPayment;
-                })
-                .orElseThrow(() -> {
-                    LOGGER.error("Gateway account with id {} not found", accountExternalId);
-                    return new GatewayAccountNotFoundException(accountExternalId);
-                });
+        return onDemandPaymentSubmittedToProviderFor(submittedPayment);
     }
 
     public PaymentResponse createPaymentResponseWithAllLinks(Payment payment, String accountExternalId, UriInfo uriInfo) {

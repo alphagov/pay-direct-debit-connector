@@ -4,13 +4,12 @@ import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequestValidator;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.payments.services.CollectService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 
 import javax.inject.Inject;
@@ -35,13 +34,13 @@ public class PaymentResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentResource.class);
     
     private final PaymentService paymentService;
-    private final MandateQueryService mandateQueryService;
+    private final CollectService collectService;
     private final CollectPaymentRequestValidator collectPaymentRequestValidator = new CollectPaymentRequestValidator();
 
     @Inject
-    public PaymentResource(PaymentService paymentService, MandateQueryService mandateQueryService) {
+    public PaymentResource(PaymentService paymentService, CollectService collectService) {
         this.paymentService = paymentService;
-        this.mandateQueryService = mandateQueryService;
+        this.collectService = collectService;
     }
 
     @GET
@@ -52,7 +51,7 @@ public class PaymentResource {
         PaymentResponse response = paymentService.getPaymentWithExternalId(accountExternalId, transactionExternalId, uriInfo);
         return Response.ok(response).build();
     }
-    
+
     @POST
     @Path("/v1/api/accounts/{accountId}/charges/collect")
     @Produces(APPLICATION_JSON)
@@ -60,9 +59,7 @@ public class PaymentResource {
     public Response collectPaymentFromMandate(@PathParam("accountId") GatewayAccount gatewayAccount, Map<String, String> collectPaymentRequestMap, @Context UriInfo uriInfo) {
         LOGGER.info("Received collect payment from mandate request");
         collectPaymentRequestValidator.validate(collectPaymentRequestMap);
-        CollectPaymentRequest collectPaymentRequest = CollectPaymentRequest.of(collectPaymentRequestMap);
-        Mandate mandate = mandateQueryService.findByExternalId(collectPaymentRequest.getMandateExternalId());
-        Payment paymentToCollect = paymentService.createAndCollectPayment(gatewayAccount, mandate, collectPaymentRequest);
+        Payment paymentToCollect = collectService.collect(gatewayAccount, CollectPaymentRequest.of(collectPaymentRequestMap));
         CollectPaymentResponse response = paymentService.collectPaymentResponseWithSelfLink(paymentToCollect, gatewayAccount.getExternalId(), uriInfo);
         return created(response.getLink("self")).entity(response).build();
     }

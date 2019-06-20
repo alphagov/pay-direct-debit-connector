@@ -26,6 +26,12 @@ public class MandateQueryService {
                 .orElseThrow(() -> new MandateNotFoundException(externalId));
     }
 
+    public Mandate findByExternalIdAndGatewayAccountExternalId(MandateExternalId mandateExternalId, String gatewayAccountExternalId) {
+        return mandateDao
+                .findByExternalIdAndGatewayAccountExternalId(mandateExternalId, gatewayAccountExternalId)
+                .orElseThrow(() -> new MandateNotFoundException(mandateExternalId, gatewayAccountExternalId));
+    }
+    
     public Mandate findByPaymentProviderMandateId(PaymentProviderMandateId paymentProviderMandateId) {
         return mandateDao
                 .findByPaymentProviderMandateId(paymentProviderMandateId)

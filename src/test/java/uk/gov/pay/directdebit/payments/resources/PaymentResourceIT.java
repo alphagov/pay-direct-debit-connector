@@ -40,7 +40,9 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -183,7 +185,7 @@ public class PaymentResourceIT {
                 .body("$", not(hasKey(JSON_DESCRIPTION_KEY)))
                 .contentType(JSON);
     }
-    
+
     @Test
     public void shouldCollectAPayment_forGoCardless() throws Exception {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
