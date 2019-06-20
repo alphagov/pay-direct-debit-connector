@@ -39,10 +39,6 @@ public class MandateStateUpdateService {
         this.mandateDao = mandateDao;
         this.userNotificationService = userNotificationService;
     }
-
-    Mandate confirmedOneOffDirectDebitDetailsFor(Mandate mandate) {
-        return confirmedDetailsFor(mandate);
-    }
     
     void mandateCreatedFor(Mandate mandate) {
         directDebitEventService.registerMandateCreatedEventFor(mandate);
