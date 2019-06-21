@@ -16,7 +16,9 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
@@ -28,9 +30,11 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
+
 @RunWith(PactRunner.class)
 @Provider("direct-debit-connector")
-@PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
+@PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"PR-549"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"), 
         consumers = {"publicapi"})
 //uncommenting the below is useful for testing pacts locally. grab the pact from the broker and put it in /pacts
@@ -67,6 +71,17 @@ public class PublicApiContractTest {
         testMandate.withGatewayAccountFixture(testGatewayAccount)
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
                 .withPayerFixture(PayerFixture.aPayerFixture())
+                .insert(app.getTestContext().getJdbi());
+    }
+    
+    @State("a gateway account with external id and a confirmed mandate exists")
+    public void aGatewayAccountWithExternalIdAndAConfirmedMandateExists(Map<String, String> params) {
+        testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
+        testMandate.withGatewayAccountFixture(testGatewayAccount)
+                .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
+                .withPayerFixture(PayerFixture.aPayerFixture())
+                .withMandateBankStatementReference(MandateBankStatementReference.valueOf(params.get("bank_mandate_reference")))
+                .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
                 .insert(app.getTestContext().getJdbi());
     }
 
