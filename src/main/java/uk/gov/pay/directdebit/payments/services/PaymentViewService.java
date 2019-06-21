@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.payments.services;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
+import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResultResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewValidator;
@@ -15,6 +16,7 @@ import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 import javax.inject.Inject;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,7 +39,7 @@ public class PaymentViewService {
         return gatewayAccountDao.findByExternalId(searchParams.getGatewayExternalId())
                 .map(gatewayAccount -> {
                     PaymentViewSearchParams validatedSearchParams = paymentViewValidator.validateParams(searchParams);
-                    List<PaymentViewResultResponse> viewListResponse = Collections.emptyList();
+                    List<PaymentResponse> viewListResponse = Collections.emptyList();
                     Long total = getTotal(validatedSearchParams);
                     if (total > 0) {
                         viewListResponse =
@@ -65,11 +67,8 @@ public class PaymentViewService {
         return paymentViewDao.getPaymentViewCount(searchParams);
     }
 
-    private List<PaymentViewResultResponse> getPaymentViewResultResponse(PaymentViewSearchParams searchParams, String gatewayAccountId) {
-        return paymentViewDao.searchPaymentView(searchParams)
-                .stream()
-                .map(paymentView -> decorateWithSelfLink(populateResponseWith(paymentView), gatewayAccountId))
-                .collect(Collectors.toList());
+    private List<PaymentResponse> getPaymentViewResultResponse(PaymentViewSearchParams searchParams, String gatewayAccountId) {
+        return new ArrayList<PaymentResponse>(paymentViewDao.searchPaymentView(searchParams));
     }
 
     private PaymentViewResultResponse populateResponseWith(PaymentView paymentView) {

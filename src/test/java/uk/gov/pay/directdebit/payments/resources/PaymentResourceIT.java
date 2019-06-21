@@ -285,59 +285,13 @@ public class PaymentResourceIT {
                 .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
-                .body(JSON_CHARGE_KEY, is(paymentFixture.getExternalId()))
                 .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
                 .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
                 .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
                 .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getStatus()))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
-                .body(JSON_STATE_DETAILS_KEY, is("example_details"))
-                .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
-
-
-        String documentLocation = expectedTransactionLocationFor(accountExternalId, paymentFixture.getExternalId());
-        String token = testContext.getDatabaseTestHelper().getTokenByPaymentExternalId(paymentFixture.getExternalId());
-
-        String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + token;
-        String hrefNextUrlPost = "http://Frontend" + FRONTEND_CARD_DETAILS_URL;
-
-
-        getChargeResponse
-                .body("links", hasSize(3))
-                .body("links", containsLink("self", "GET", documentLocation))
-                .body("links", containsLink("next_url", "GET", hrefNextUrl))
-                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
-                    put("chargeTokenId", token);
-                }}));
-
-        String requestPath2 = CHARGE_API_PATH
-                .replace("{accountId}", accountExternalId)
-                .replace("{paymentExternalId}", paymentFixture.getExternalId());
-
-        ValidatableResponse getChargeFromTokenResponse = givenSetup()
-                .get(requestPath2)
-                .then()
-                .statusCode(OK.getStatusCode())
-                .contentType(JSON)
-                .body(JSON_CHARGE_KEY, is(paymentFixture.getExternalId()))
-                .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
-                .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
-                .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
-                .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getStatus()))
-                .body(JSON_STATE_DETAILS_KEY, is("example_details"))
-                .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
-
-        String newChargeToken = testContext.getDatabaseTestHelper().getTokenByPaymentExternalId(paymentFixture.getExternalId());
-
-        String newHrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + newChargeToken;
-
-        getChargeFromTokenResponse
-                .body("links", hasSize(3))
-                .body("links", containsLink("self", "GET", documentLocation))
-                .body("links", containsLink("next_url", "GET", newHrefNextUrl))
-                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
-                    put("chargeTokenId", newChargeToken);
-                }}));
+                .body(JSON_STATE_DETAILS_KEY, is("example_details"));
+        
     }
     
     private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {

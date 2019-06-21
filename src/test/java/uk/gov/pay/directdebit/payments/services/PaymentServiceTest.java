@@ -93,14 +93,9 @@ public class PaymentServiceTest {
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withPayerFixture(payerFixture);
     private PaymentFixture paymentFixture = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture);
     @Before
-    public void setUp() throws URISyntaxException {
+    public void setUp() {
         service = new PaymentService(mockedTokenService, mockedDirectDebitConfig, mockedPaymentDao,
                 mockedDirectDebitEventService, mockedUserNotificationService, mockedPaymentProviderFactory);
-        when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
-        when(mockedLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
-        when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
-        when(mockedUriBuilder.path(anyString())).thenReturn(mockedUriBuilder);
-        when(mockedUriBuilder.build(any())).thenReturn(new URI("aaa"));
     }
 
     @Test
@@ -140,15 +135,10 @@ public class PaymentServiceTest {
     }
     @Test
     public void shouldCreateATransactionResponseWithLinksFromAValidTransaction() {
-        when(mockedTokenService.generateNewTokenFor(mandateFixture.toEntity())).thenReturn(new Token("token", mandateFixture.getId()));
-        PaymentResponse paymentResponse = service
-                .createPaymentResponseWithAllLinks(paymentFixture.toEntity(),
-                        gatewayAccountFixture.getExternalId(), mockedUriInfo);
-
+        CollectPaymentResponse paymentResponse = CollectPaymentResponse.from(paymentFixture.toEntity());
         assertThat(paymentResponse.getAmount(), is(paymentFixture.getAmount()));
         assertThat(paymentResponse.getDescription(), is(paymentFixture.getDescription()));
         assertThat(paymentResponse.getReference(), is(paymentFixture.getReference()));
-        assertThat(paymentResponse.getReturnUrl(), is(paymentFixture.getMandateFixture().getReturnUrl()));
     }
 
     @Test

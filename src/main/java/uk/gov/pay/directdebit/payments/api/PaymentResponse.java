@@ -143,6 +143,68 @@ public class PaymentResponse {
                 '}';
     }
 
+    public static final class PaymentResponseBuilder {
+        private List<Map<String, Object>> dataLinks;
+        //compatibility with public api
+        private String transactionExternalId;
+        private Long amount;
+        private String returnUrl;
+        private String description;
+        private String reference;
+        private ZonedDateTime createdDate;
+        private ExternalPaymentStateWithDetails state;
+
+        private PaymentResponseBuilder() {
+        }
+
+        public static PaymentResponseBuilder aPaymentResponse() {
+            return new PaymentResponseBuilder();
+        }
+
+        public PaymentResponseBuilder withDataLinks(List<Map<String, Object>> dataLinks) {
+            this.dataLinks = dataLinks;
+            return this;
+        }
+
+        public PaymentResponseBuilder withTransactionExternalId(String transactionExternalId) {
+            this.transactionExternalId = transactionExternalId;
+            return this;
+        }
+
+        public PaymentResponseBuilder withAmount(Long amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public PaymentResponseBuilder withReturnUrl(String returnUrl) {
+            this.returnUrl = returnUrl;
+            return this;
+        }
+
+        public PaymentResponseBuilder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public PaymentResponseBuilder withReference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public PaymentResponseBuilder withCreatedDate(ZonedDateTime createdDate) {
+            this.createdDate = createdDate;
+            return this;
+        }
+
+        public PaymentResponseBuilder withState(ExternalPaymentStateWithDetails state) {
+            this.state = state;
+            return this;
+        }
+
+        public PaymentResponse build() {
+            return new PaymentResponse(transactionExternalId, state, amount, returnUrl, description, reference, createdDate, dataLinks);
+        }
+    }
 }
 
 

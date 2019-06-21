@@ -17,6 +17,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 import static uk.gov.pay.directdebit.payments.api.CollectPaymentResponse.CollectPaymentResponseBuilder.aCollectPaymentResponse;
@@ -95,12 +96,21 @@ public class CollectPaymentResponse {
         return reference;
     }
 
-    public URI getLink(String rel) {
-        return dataLinks.stream()
-                .filter(map -> rel.equals(map.get("rel")))
-                .findFirst()
-                .map(link -> (URI) link.get("href"))
-                .get();
+    public static CollectPaymentResponse from(Payment payment) {
+        CollectPaymentResponseBuilder collectPaymentResponseBuilder = aCollectPaymentResponse()
+                .withPaymentExternalId(payment.getExternalId())
+                // TODO: should extract state details (go cardless cause details) from events table somehow
+                .withState(new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"))
+                .withAmount(payment.getAmount())
+                .withMandateId(payment.getMandate().getExternalId())
+                .withDescription(payment.getDescription())
+                .withReference(payment.getReference())
+                .withCreatedDate(payment.getCreatedDate())
+                .withPaymentProvider(payment.getMandate().getGatewayAccount().getPaymentProvider());
+
+        payment.getProviderId().ifPresent(collectPaymentResponseBuilder::withProviderId);
+
+        return collectPaymentResponseBuilder.build();
     }
 
     public static CollectPaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
