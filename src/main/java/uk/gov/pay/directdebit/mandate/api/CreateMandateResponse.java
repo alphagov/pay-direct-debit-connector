@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.directdebit.common.json.ToLowerCaseStringSerializer;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -48,7 +49,8 @@ public class CreateMandateResponse {
     private String description;
     
     @JsonProperty("payment_provider")
-    private String paymentProvider;
+    @JsonSerialize(using = ToLowerCaseStringSerializer.class)
+    private PaymentProvider paymentProvider;
 
     public CreateMandateResponse(MandateExternalId mandateId,
                                  String returnUrl,
@@ -67,7 +69,7 @@ public class CreateMandateResponse {
         this.serviceReference = serviceReference;
         this.mandateReference = mandateReference;
         this.description = description;
-        this.paymentProvider = paymentProvider.toString().toLowerCase();
+        this.paymentProvider = paymentProvider;
     }
 
     public MandateExternalId getMandateId() {

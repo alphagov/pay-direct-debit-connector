@@ -136,7 +136,7 @@ public class PaymentServiceTest {
         assertThat(collectPaymentResponse.getPaymentExternalId(), is(paymentFixture.getExternalId()));
         assertThat(collectPaymentResponse.getDescription(), is(paymentFixture.getDescription()));
         assertThat(collectPaymentResponse.getReference(), is(paymentFixture.getReference()));
-        assertThat(collectPaymentResponse.getPaymentProvider(), is(gatewayAccountFixture.getPaymentProvider().toString()));
+        assertThat(collectPaymentResponse.getPaymentProvider(), is(gatewayAccountFixture.getPaymentProvider()));
     }
     @Test
     public void shouldCreateATransactionResponseWithLinksFromAValidTransaction() {

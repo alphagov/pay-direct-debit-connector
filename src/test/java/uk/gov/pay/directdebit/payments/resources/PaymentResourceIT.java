@@ -46,6 +46,8 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 import static uk.gov.pay.directdebit.payments.resources.PaymentResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
@@ -67,6 +69,7 @@ public class PaymentResourceIT {
     private static final String JSON_PAYMENT_ID_KEY = "payment_id";
     private static final String JSON_PROVIDER_ID_KEY = "provider_id";
     private static final String JSON_MANDATE_ID_KEY = "mandate_id";
+    private static final String JSON_PAYMENT_PROVIDER_KEY = "payment_provider";
     private static final String JSON_STATE_STATUS_KEY = "state.status";
     private static final String JSON_STATE_FINISHED_KEY = "state.finished";
     private static final String JSON_STATE_DETAILS_KEY = "state.details";
@@ -147,6 +150,7 @@ public class PaymentResourceIT {
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
                 .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
+                .body(JSON_PAYMENT_PROVIDER_KEY, is(SANDBOX.toString().toLowerCase()))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
@@ -249,6 +253,7 @@ public class PaymentResourceIT {
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
                 .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
+                .body(JSON_PAYMENT_PROVIDER_KEY, is(GOCARDLESS.toString().toLowerCase()))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
