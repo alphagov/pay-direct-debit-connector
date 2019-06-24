@@ -151,7 +151,7 @@ public class PaymentResourceIT {
 
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
 
-        Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getTransactionByExternalId(externalTransactionId);
+        Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getPaymentByExternalId(externalTransactionId);
         assertThat(createdTransaction.get("external_id"), is(notNullValue()));
         assertThat(createdTransaction.get("reference"), is(expectedReference));
         assertThat(createdTransaction.get("description"), is(expectedDescription));
@@ -253,7 +253,7 @@ public class PaymentResourceIT {
 
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
 
-        Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getTransactionByExternalId(externalTransactionId);
+        Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getPaymentByExternalId(externalTransactionId);
         assertThat(createdTransaction.get("external_id"), is(notNullValue()));
         assertThat(createdTransaction.get("reference"), is(expectedReference));
         assertThat(createdTransaction.get("description"), is(expectedDescription));
@@ -291,7 +291,7 @@ public class PaymentResourceIT {
 
 
         String documentLocation = expectedTransactionLocationFor(accountExternalId, paymentFixture.getExternalId());
-        String token = testContext.getDatabaseTestHelper().getTokenByTransactionExternalId(paymentFixture.getExternalId());
+        String token = testContext.getDatabaseTestHelper().getTokenByPaymentExternalId(paymentFixture.getExternalId());
 
         String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + token;
         String hrefNextUrlPost = "http://Frontend" + FRONTEND_CARD_DETAILS_URL;
@@ -322,7 +322,7 @@ public class PaymentResourceIT {
                 .body(JSON_STATE_DETAILS_KEY, is("example_details"))
                 .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
 
-        String newChargeToken = testContext.getDatabaseTestHelper().getTokenByTransactionExternalId(paymentFixture.getExternalId());
+        String newChargeToken = testContext.getDatabaseTestHelper().getTokenByPaymentExternalId(paymentFixture.getExternalId());
 
         String newHrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + newChargeToken;
 

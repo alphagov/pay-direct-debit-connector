@@ -78,7 +78,7 @@ public class DirectDebitModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public PaymentDao provideTransactionDao() {
+    public PaymentDao providePaymentDao() {
         return jdbi.onDemand(PaymentDao.class);
     }
 

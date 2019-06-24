@@ -42,11 +42,11 @@ public class WebhookSandboxResource {
     @Timed
     public Response handleWebhook() {
         paymentService.findAllByPaymentStateAndProvider(PaymentState.PENDING, PaymentProvider.SANDBOX)
-                .forEach(this::processTransaction);
+                .forEach(this::processPayment);
         return Response.status(OK).build();
     }
 
-    private void processTransaction(Payment payment) {
+    private void processPayment(Payment payment) {
         sandboxEventService.insertEvent(createSandboxEventFromPayment(payment));
         paymentService.paymentPaidOutFor(payment);
     }

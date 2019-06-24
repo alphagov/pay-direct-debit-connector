@@ -30,8 +30,6 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
-
 @RunWith(PactRunner.class)
 @Provider("direct-debit-connector")
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
@@ -86,7 +84,7 @@ public class PublicApiContractTest {
     }
 
     @State("three payment records exist")
-    public void threeTransactionRecordsExist(Map<String, String> params) {
+    public void threePaymentRecordsExist(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)

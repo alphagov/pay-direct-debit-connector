@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.payers.dao;
 
-import java.util.Optional;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -10,13 +9,15 @@ import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.payers.dao.mapper.PayerMapper;
 import uk.gov.pay.directdebit.payers.model.Payer;
 
+import java.util.Optional;
+
 @RegisterRowMapper(PayerMapper.class)
 public interface PayerDao {
     @SqlQuery("SELECT * FROM payers p WHERE p.external_id = :externalId")
     Optional<Payer> findByExternalId(@Bind("externalId") String externalId);
 
     @SqlQuery("SELECT * FROM payers p JOIN mandates m ON p.mandate_id = m.id  JOIN payments payments ON payments.mandate_id = m.id WHERE payments.id = :paymentId LIMIT 1")
-    Optional<Payer> findByTransactionId(@Bind("paymentId") Long paymentId);
+    Optional<Payer> findByPaymentId(@Bind("paymentId") Long paymentId);
 
     @SqlQuery("SELECT * FROM payers p WHERE p.mandate_id = :mandateId")
     Optional<Payer> findByMandateId(@Bind("mandateId") Long mandateId);

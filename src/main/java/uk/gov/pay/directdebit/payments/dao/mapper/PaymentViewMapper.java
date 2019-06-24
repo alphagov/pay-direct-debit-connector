@@ -1,18 +1,19 @@
 package uk.gov.pay.directdebit.payments.dao.mapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+
 public class PaymentViewMapper implements RowMapper<PaymentView> {
 
     private static final String GATEWAY_EXTERNAL_ACCOUNT_ID_COLUMN = "gateway_external_id";
-    private static final String TRANSACTION_EXTERNAL_ID_COLUMN = "payment_external_id";
+    private static final String PAYMENT_EXTERNAL_ID_COLUMN = "payment_external_id";
     private static final String AMOUNT_COLUMN = "amount";
     private static final String REFERENCE_COLUMN = "reference";
     private static final String DESCRIPTION_COLUMN = "description";
@@ -26,7 +27,7 @@ public class PaymentViewMapper implements RowMapper<PaymentView> {
     public PaymentView map(ResultSet rs, StatementContext ctx) throws SQLException {
         return new PaymentView(
                 rs.getString(GATEWAY_EXTERNAL_ACCOUNT_ID_COLUMN),
-                rs.getString(TRANSACTION_EXTERNAL_ID_COLUMN),
+                rs.getString(PAYMENT_EXTERNAL_ID_COLUMN),
                 rs.getLong(AMOUNT_COLUMN),
                 rs.getString(REFERENCE_COLUMN),
                 rs.getString(DESCRIPTION_COLUMN),
