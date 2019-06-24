@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.mandate.services;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
@@ -11,7 +10,6 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
@@ -20,7 +18,6 @@ import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -48,6 +45,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
@@ -84,22 +82,14 @@ public class MandateService {
         return gatewayAccountDao.findByExternalId(accountExternalId)
                 .map(gatewayAccount -> {
                     if (gatewayAccount.getAccessToken().isEmpty() &&
-                            gatewayAccount.getPaymentProvider() == PaymentProvider.GOCARDLESS) {
+                            gatewayAccount.getPaymentProvider() == GOCARDLESS) {
                         LOGGER.error("Gateway account with id {} does not have access token", accountExternalId);
                         throw new UnlinkedGCMerchantAccountException(accountExternalId);
                     }
 
-                    // TODO:
-                    // when we introduce GoCardless gateway accounts to work with create mandate,
-                    // then modify appropriate mandate reference values
-                    MandateBankStatementReference mandateReference = MandateBankStatementReference.valueOf(
-                            PaymentProvider.SANDBOX.equals(gatewayAccount.getPaymentProvider()) ?
-                                    RandomStringUtils.randomAlphanumeric(18) : "gocardless-default");
-
                     Mandate mandate = aMandate()
                             .withGatewayAccount(gatewayAccount)
                             .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
-                            .withMandateBankStatementReference(mandateReference)
                             .withServiceReference(createRequest.getReference())
                             .withState(MandateState.CREATED)
                             .withReturnUrl(createRequest.getReturnUrl())
