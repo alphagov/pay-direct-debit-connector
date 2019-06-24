@@ -19,7 +19,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
-import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
+import uk.gov.pay.directdebit.mandate.api.MandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -127,7 +127,7 @@ public class MandateServiceTest {
                 .toEntity();
         when(mandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
         when(tokenService.generateNewTokenFor(mandate)).thenReturn(new Token("token", mandate.getId()));
-        GetMandateResponse getMandateResponse = service.populateGetMandateResponse(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId(), uriInfo);
+        MandateResponse getMandateResponse = service.populateGetMandateResponse(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId(), uriInfo);
         assertThat(getMandateResponse.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(getMandateResponse.getMandateId(), is(mandate.getExternalId()));
         assertThat(getMandateResponse.getState(), is(mandate.getState().toExternal()));

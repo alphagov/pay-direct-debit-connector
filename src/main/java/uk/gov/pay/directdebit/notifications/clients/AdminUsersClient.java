@@ -15,8 +15,7 @@ import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 public class AdminUsersClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminUsersClient.class);
-
-
+    
     private final Client client;
     private final AdminUsersConfig config;
 

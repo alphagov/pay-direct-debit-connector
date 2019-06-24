@@ -12,9 +12,8 @@ import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundEx
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
-import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
-import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
+import uk.gov.pay.directdebit.mandate.api.MandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -111,21 +110,10 @@ public class MandateService {
                 });
     }
 
-    public CreateMandateResponse createMandate(CreateMandateRequest createMandateRequest, String accountExternalId, UriInfo uriInfo) {
+    public MandateResponse createMandate(CreateMandateRequest createMandateRequest, String accountExternalId, UriInfo uriInfo) {
         Mandate mandate = createMandate(createMandateRequest, accountExternalId);
-        MandateExternalId mandateExternalId = mandate.getExternalId();
         List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
-
-        return new CreateMandateResponse(
-                mandateExternalId,
-                mandate.getReturnUrl(),
-                mandate.getCreatedDate(),
-                mandate.getState().toExternal(),
-                dataLinks,
-                mandate.getServiceReference(),
-                mandate.getMandateBankStatementReference(),
-                mandate.getDescription().orElse(null), 
-                mandate.getGatewayAccount().getPaymentProvider());
+        return new MandateResponse(mandate, dataLinks);
     }
 
     public TokenExchangeDetails getMandateFor(String token) {
@@ -169,10 +157,10 @@ public class MandateService {
         );
     }
 
-    public GetMandateResponse populateGetMandateResponse(String accountExternalId, MandateExternalId mandateExternalId, UriInfo uriInfo) {
+    public MandateResponse populateGetMandateResponse(String accountExternalId, MandateExternalId mandateExternalId, UriInfo uriInfo) {
         Mandate mandate = findByExternalId(mandateExternalId);
         List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
-        return new GetMandateResponse(mandate, dataLinks);
+        return new MandateResponse(mandate, dataLinks);
     }
 
     public Mandate findByExternalId(MandateExternalId externalId) {
