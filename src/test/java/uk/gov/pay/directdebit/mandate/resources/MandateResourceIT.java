@@ -54,6 +54,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.commons.testing.matchers.HamcrestMatchers.optionalMatcher;
@@ -230,6 +231,7 @@ public class MandateResourceIT {
                 .body("provider_id", is(nullValue()))
                 .body("mandate_reference", is(nullValue()))
                 .body("description", optionalMatcher(description))
+                .body("created_date", matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(.\\d{1,3})?Z"))
                 .contentType(JSON);
         MandateExternalId externalMandateId = MandateExternalId.valueOf(response.extract().path(JSON_MANDATE_ID_KEY).toString());
 
@@ -338,7 +340,7 @@ public class MandateResourceIT {
 
         ValidatableResponse getMandateResponse = givenSetup()
                 .get(requestPath)
-                .then()
+                .then().log().body()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
                 .body("mandate_id", is(mandateFixture.getExternalId().toString()))
@@ -347,7 +349,8 @@ public class MandateResourceIT {
                 .body("state.finished", is(mandateFixture.getState().toExternal().isFinished()))
                 .body("state.details", is("example details"))
                 .body("service_reference", is(mandateFixture.getServiceReference()))
-                .body("mandate_reference", is(notNullValue()));
+                .body("mandate_reference", is(notNullValue()))
+                .body("created_date", matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(.\\d{1,3})?Z"));
 
         String token = testContext.getDatabaseTestHelper().getTokenByMandateExternalId(mandateFixture.getExternalId()).get("secure_redirect_token").toString();
         String documentLocation = expectedMandateLocationFor(accountExternalId, mandateFixture.getExternalId());

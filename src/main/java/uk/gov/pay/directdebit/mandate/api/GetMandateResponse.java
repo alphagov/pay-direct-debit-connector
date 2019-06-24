@@ -17,39 +17,15 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public class GetMandateResponse {
+public class GetMandateResponse extends MandateResponse {
 
     @JsonProperty("provider_id")
     @JsonSerialize(using = ToStringSerializer.class)
     private final PaymentProviderMandateId paymentProviderId;
     
-    @JsonProperty("mandate_id")
-    @JsonSerialize(using = ToStringSerializer.class)
-    private final MandateExternalId mandateId;
-
-    @JsonProperty("return_url")
-    private final String returnUrl;
-
-    @JsonProperty("links")
-    private final List<Map<String, Object>> dataLinks;
-
-    @JsonProperty
-    private final ExternalMandateState state;
-
-    @JsonProperty("service_reference")
-    private final String serviceReference;
-
-    @JsonProperty("mandate_reference")
-    @JsonSerialize(using = ToStringSerializer.class)
-    private final MandateBankStatementReference mandateReference;
-
     public GetMandateResponse(Mandate mandate, List<Map<String, Object>> dataLinks) {
-        this.mandateId = mandate.getExternalId();
-        this.returnUrl = mandate.getReturnUrl();
-        this.dataLinks = dataLinks;
-        this.state = mandate.getState().toExternal();
-        this.serviceReference = mandate.getServiceReference();
-        this.mandateReference = mandate.getMandateBankStatementReference();
+        super(mandate.getExternalId(), mandate.getReturnUrl(), dataLinks, mandate.getState().toExternal(),
+                mandate.getServiceReference(), mandate.getMandateBankStatementReference(), mandate.getCreatedDate());
         this.paymentProviderId = mandate.getPaymentProviderMandateId().orElse(null);
     }
 

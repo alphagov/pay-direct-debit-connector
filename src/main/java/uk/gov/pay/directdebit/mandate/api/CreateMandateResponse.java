@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.directdebit.common.json.ToLowerCaseStringSerializer;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
@@ -20,30 +18,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public class CreateMandateResponse {
-    @JsonProperty("links")
-    private List<Map<String, Object>> dataLinks;
-
-    @JsonProperty("mandate_id")
-    @JsonSerialize(using = ToStringSerializer.class)
-    private MandateExternalId mandateId;
-
-    @JsonProperty("return_url")
-    private String returnUrl;
-
-    @JsonProperty("created_date")
-    @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
-    private ZonedDateTime createdDate;
-
-    @JsonProperty
-    private ExternalMandateState state;
-
-    @JsonProperty("service_reference")
-    private String serviceReference;
-
-    @JsonProperty("mandate_reference")
-    @JsonSerialize(using = ToStringSerializer.class)
-    private MandateBankStatementReference mandateReference;
+public class CreateMandateResponse extends MandateResponse {
 
     @JsonProperty("description")
     private String description;
@@ -61,13 +36,7 @@ public class CreateMandateResponse {
                                  MandateBankStatementReference mandateReference,
                                  String description,
                                  PaymentProvider paymentProvider) {
-        this.dataLinks = dataLinks;
-        this.mandateId = mandateId;
-        this.returnUrl = returnUrl;
-        this.createdDate = createdDate;
-        this.state = state;
-        this.serviceReference = serviceReference;
-        this.mandateReference = mandateReference;
+        super(mandateId, returnUrl, dataLinks, state, serviceReference, mandateReference, createdDate);
         this.description = description;
         this.paymentProvider = paymentProvider;
     }
