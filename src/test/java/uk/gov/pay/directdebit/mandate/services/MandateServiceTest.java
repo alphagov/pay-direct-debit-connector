@@ -46,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -57,6 +58,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
@@ -175,21 +178,22 @@ public class MandateServiceTest {
 
     @Test
     public void shouldCreateAMandateForSandbox_withCustomGeneratedReference() {
-        Mandate mandate = getMandateForProvider(PaymentProvider.SANDBOX);
+        Mandate mandate = getMandateForProvider(SANDBOX);
 
         assertThat(mandate.getMandateBankStatementReference(), is(not(MandateBankStatementReference.valueOf("gocardless-default"))));
     }
 
     @Test
-    public void shouldCreateAMandateForGoCardless_withCustomGeneratedReference() {
-        Mandate mandate = getMandateForProvider(PaymentProvider.GOCARDLESS);
-
-        assertThat(mandate.getMandateBankStatementReference(), is(MandateBankStatementReference.valueOf("gocardless-default")));
+    public void assertNullMandateBankStatementReferenceWhenCreatingMandate() {
+        List.of(GOCARDLESS, SANDBOX).forEach(p -> {
+            Mandate mandate = getMandateForProvider(p);
+            assertThat(mandate.getMandateBankStatementReference(), is(nullValue()));
+        });
     }
 
     @Test
     public void confirm_shouldConfirmMandate() {
-        GatewayAccount gatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.SANDBOX).toEntity();
+        GatewayAccount gatewayAccount = aGatewayAccountFixture().withPaymentProvider(SANDBOX).toEntity();
         Mandate mandate = getMandateForProvider(gatewayAccount);
         Map<String, String> confirmMandateRequest = Map.of("sort_code", "123456", "account_number", "12345678");
         ConfirmMandateRequest mandateConfirmationRequest = ConfirmMandateRequest.of(confirmMandateRequest);
@@ -199,7 +203,7 @@ public class MandateServiceTest {
                 MandateBankStatementReference.valueOf(RandomStringUtils.randomAlphanumeric(5)));
 
         when(mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)).thenReturn(true);
-        when(paymentProviderFactory.getCommandServiceFor(PaymentProvider.SANDBOX)).thenReturn(sandboxService);
+        when(paymentProviderFactory.getCommandServiceFor(SANDBOX)).thenReturn(sandboxService);
         when(sandboxService.confirmMandate(mandate, bankAccountDetails)).thenReturn(confirmMandateResponse);
 
         service.confirm(gatewayAccount, mandate, mandateConfirmationRequest);
@@ -215,7 +219,7 @@ public class MandateServiceTest {
 
     @Test
     public void confirm_shouldNotConfirmOnDemandMandateForInvalidState() {
-        GatewayAccount gatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.SANDBOX).toEntity();
+        GatewayAccount gatewayAccount = aGatewayAccountFixture().withPaymentProvider(SANDBOX).toEntity();
         Mandate mandate = aMandate()
                 .withGatewayAccount(gatewayAccount)
                 .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
@@ -244,7 +248,7 @@ public class MandateServiceTest {
         GatewayAccount gatewayAccount = aGatewayAccountFixture()
                 .withExternalId(EXTERNAL_ID)
                 .withDescription(DESCRIPTION)
-                .withPaymentProvider(PaymentProvider.GOCARDLESS)
+                .withPaymentProvider(GOCARDLESS)
                 .withType(GatewayAccount.Type.TEST)
                 .withAccessToken(null)
                 .toEntity();

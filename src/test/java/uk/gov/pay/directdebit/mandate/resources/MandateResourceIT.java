@@ -16,6 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -51,6 +52,7 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
@@ -58,6 +60,7 @@ import static uk.gov.pay.commons.testing.matchers.HamcrestMatchers.optionalMatch
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
@@ -89,7 +92,7 @@ public class MandateResourceIT {
         wireMockAdminUsers.shutdown();
     }
 
-    private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
+    private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withPaymentProvider(GOCARDLESS);
 
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
     
@@ -154,7 +157,8 @@ public class MandateResourceIT {
                 .body("state.finished", is(false))
                 .body("service_reference", is("test-service-reference"))
                 .body("payment_provider", is(gatewayAccountFixture.getPaymentProvider().toString().toLowerCase()))
-                .body("mandate_reference", is(notNullValue()))
+                .body("provider_id", is(nullValue()))
+                .body("mandate_reference", is(nullValue()))
                 .body("description", optionalMatcher(description))
                 .contentType(JSON);
         MandateExternalId externalMandateId = MandateExternalId.valueOf(response.extract().path(JSON_MANDATE_ID_KEY).toString());
@@ -328,52 +332,8 @@ public class MandateResourceIT {
     }
 
     @Test
-    public void confirm_shouldCreateAMandateWithoutPayment_ifMandateIsOnDemand() {
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withGatewayAccountFixture(gatewayAccountFixture)
-                .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
-                .withPayerFixture(payerFixture)
-                .insert(testContext.getJdbi());
-
-        String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
-
-        // language=JSON
-        String emailPayloadBody = "{\n" +
-                "  \"address\": \"" + payerFixture.getEmail() + "\",\n" +
-                "  \"gateway_account_external_id\": \"" + gatewayAccountFixture.getExternalId() + "\",\n" +
-                "  \"template\": \"ON_DEMAND_MANDATE_CREATED\",\n" +
-                "  \"personalisation\": {\n" +
-                "    \"mandate reference\": \"" + mandateFixture.getMandateReference() + "\",\n" +
-                "    \"bank account last 2 digits\": \"" + lastTwoDigitsBankAccount + "\",\n" +
-                "    \"statement name\": \"Sandbox SUN Name\",\n" +
-                "    \"dd guarantee link\": \"http://Frontend/direct-debit-guarantee\"\n" +
-                "  }\n" +
-                "}\n";
-        wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send"))
-                .withRequestBody(equalToJson(emailPayloadBody))
-                .willReturn(aResponse().withStatus(200)));
-
-        // language=JSON
-        String confirmDetails = "{\n" +
-                "  \"sort_code\": \"" + payerFixture.getSortCode() + "\",\n" +
-                "  \"account_number\": \"" + payerFixture.getAccountNumber() + "\"\n" +
-                "}\n";
-
-        String requestPath = format("/v1/api/accounts/%s/mandates/%s/confirm", gatewayAccountFixture.getExternalId(), mandateFixture.getExternalId());
-        given().port(testContext.getPort())
-                .body(confirmDetails)
-                .contentType(APPLICATION_JSON)
-                .post(requestPath)
-                .then()
-                .statusCode(Response.Status.NO_CONTENT.getStatusCode());
-
-        List<Map<String, Object>> paymentsForMandate = testContext.getDatabaseTestHelper().getPaymentsForMandate(mandateFixture.getExternalId());
-        MatcherAssert.assertThat(paymentsForMandate, is(empty()));
-    }
-
-    @Test
     public void confirm_shouldCreateACustomerBankAccountMandate() {
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
@@ -441,8 +401,7 @@ public class MandateResourceIT {
     }
 
     private RequestSpecification givenSetup() {
-        return given().port(testContext.getPort())
-                .contentType(JSON);
+        return given().port(testContext.getPort()).contentType(JSON);
     }
 
 }
