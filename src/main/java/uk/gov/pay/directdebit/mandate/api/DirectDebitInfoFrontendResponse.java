@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.model.Payer;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
 import uk.gov.pay.directdebit.payments.model.Payment;
@@ -22,58 +22,52 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class DirectDebitInfoFrontendResponse {
 
     @JsonProperty("payer")
-    private PayerDetails payer;
+    private final PayerDetails payer;
 
     @JsonProperty("payment")
-    private PaymentDetails payment;
+    private final PaymentDetails payment;
 
     @JsonProperty("external_id")
-    private String mandateExternalId;
+    private final String mandateExternalId;
 
     @JsonProperty("return_url")
-    private String returnUrl;
+    private final String returnUrl;
 
     @JsonProperty("gateway_account_id")
-    private Long gatewayAccountId;
+    private final Long gatewayAccountId;
 
     @JsonProperty("gateway_account_external_id")
-    private String gatewayAccountExternalId;
+    private final String gatewayAccountExternalId;
 
     @JsonProperty("mandate_reference")
     @JsonSerialize(using = ToStringSerializer.class)
-    private MandateBankStatementReference mandateReference;
+    private final MandateBankStatementReference mandateReference;
 
     @JsonProperty("created_date")
     @JsonSerialize(using = ApiResponseDateTimeSerializer.class)
-    private ZonedDateTime createdDate;
+    private final ZonedDateTime createdDate;
 
     @JsonProperty
-    private ExternalMandateState state;
+    private final ExternalMandateState state;
 
     @JsonProperty("internal_state")
-    private MandateState internalState;
+    private final MandateState internalState;
 
-    public DirectDebitInfoFrontendResponse(MandateExternalId paymentExternalId,
-                                           Long gatewayAccountId,
+    public DirectDebitInfoFrontendResponse(Mandate mandate,
                                            String gatewayAccountExternalId,
-                                           MandateState internalState,
-                                           String returnUrl,
-                                           MandateBankStatementReference mandateReference,
-                                           ZonedDateTime createdDate,
-                                           Payer payer,
                                            Payment payment) {
-        this.mandateExternalId = paymentExternalId.toString();
-        this.internalState = internalState;
+        this.mandateExternalId = mandate.getExternalId().toString();
+        this.internalState = mandate.getState();
         this.state = internalState.toExternal();
-        this.gatewayAccountId = gatewayAccountId;
+        this.gatewayAccountId = mandate.getGatewayAccount().getId();
         this.gatewayAccountExternalId = gatewayAccountExternalId;
-        this.returnUrl = returnUrl;
-        this.mandateReference = mandateReference;
-        this.createdDate = createdDate;
+        this.returnUrl = mandate.getReturnUrl();
+        this.mandateReference = mandate.getMandateBankStatementReference().orElse(null);
+        this.createdDate = mandate.getCreatedDate();
         this.payment = initPayment(payment);
-        this.payer = initPayer(payer);
+        this.payer = initPayer(mandate.getPayer());
     }
-
+    
     private PaymentDetails initPayment(Payment payment) {
         if (payment != null) {
             return new PaymentDetails(

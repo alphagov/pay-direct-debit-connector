@@ -67,8 +67,8 @@ public class Mandate {
         return state;
     }
 
-    public MandateBankStatementReference getMandateBankStatementReference() { //TODO make optional
-        return mandateBankStatementReference;
+    public Optional<MandateBankStatementReference> getMandateBankStatementReference() {
+        return Optional.ofNullable(mandateBankStatementReference);
     }
 
     public String getServiceReference() {

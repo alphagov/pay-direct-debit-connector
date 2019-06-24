@@ -141,7 +141,7 @@ public class MandateServiceTest {
                 .toEntity();
         when(mandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId());
-        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference()));
+        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference().get()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(mandateResponseForFrontend.getPayment(), is(nullValue()));
     }
@@ -159,12 +159,11 @@ public class MandateServiceTest {
         Mandate mandate = mandateFixture.toEntity();
         when(paymentService.findPaymentForExternalId(mandateFixture.getExternalId().toString())).thenReturn(paymentFixture.toEntity());
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateWithPaymentResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId().toString());
-        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference()));
+        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference().get()));
         assertThat(mandateResponseForFrontend.getGatewayAccountExternalId(), is(mandate.getGatewayAccount().getExternalId()));
         assertThat(mandateResponseForFrontend.getGatewayAccountId(), is(mandate.getGatewayAccount().getId()));
         assertThat(mandateResponseForFrontend.getCreatedDate(), is(mandate.getCreatedDate()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
-        assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference()));
         assertThat(mandateResponseForFrontend.getPayer().getExternalId(), is(payerFixture.getExternalId()));
         assertThat(mandateResponseForFrontend.getPayer().getName(), is(payerFixture.getName()));
         assertThat(mandateResponseForFrontend.getPayer().getEmail(), is(payerFixture.getEmail()));
@@ -187,7 +186,7 @@ public class MandateServiceTest {
     public void assertNullMandateBankStatementReferenceWhenCreatingMandate() {
         List.of(GOCARDLESS, SANDBOX).forEach(p -> {
             Mandate mandate = getMandateForProvider(p);
-            assertThat(mandate.getMandateBankStatementReference(), is(nullValue()));
+            assertThat(mandate.getMandateBankStatementReference().isEmpty(), is(true));
         });
     }
 

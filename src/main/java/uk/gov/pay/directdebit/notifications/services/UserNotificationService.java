@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Optional;
 
 public class UserNotificationService {
@@ -40,12 +41,14 @@ public class UserNotificationService {
     }
 
     public void sendMandateFailedEmailFor(Mandate mandate) {
+        // it is safe to call mandate.getMandateBankStatementReference().get() here because when we create a mandate 
+        // with GoCardless, their library returns one of their `Mandate` objects. We call `getReference()` on that, 
+        // which the Javadoc implies will not be null. Then we call `MandateBankStatementReference.valueOf(…)` on that, 
+        // which will throw an exception if it’s null.
+        String mandateReference = mandate.getMandateBankStatementReference().get().toString();
+        String directDebitGuaranteeUrl = directDebitConfig.getLinks().getDirectDebitGuaranteeUrl();
         adminUsersClient.sendEmail(EmailTemplate.MANDATE_FAILED, mandate,
-                ImmutableMap.of(
-                        MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString(),
-                        DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
-                )
-        );
+                Map.of(MANDATE_REFERENCE_KEY, mandateReference, DD_GUARANTEE_KEY, directDebitGuaranteeUrl));
     }
 
     public void sendMandateCreatedEmailFor(Mandate mandate) {
@@ -69,7 +72,7 @@ public class UserNotificationService {
     public void sendMandateCancelledEmailFor(Mandate mandate) {
         adminUsersClient.sendEmail(EmailTemplate.MANDATE_CANCELLED, mandate,
                 ImmutableMap.of(
-                        MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString(),
+                        MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().get().toString(),
                         DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl()
                 )
         );
