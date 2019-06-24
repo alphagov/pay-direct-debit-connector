@@ -27,7 +27,6 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.TOKEN_EXCHANGED;
 
 public class MandateStatesGraph extends DirectDebitStatesGraph<MandateState> {
-    
 
     public static MandateState initialState() {
         return PENDING;

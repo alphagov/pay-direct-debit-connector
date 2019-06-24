@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.mandate.resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -16,7 +17,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -95,7 +95,7 @@ public class MandateResourceIT {
     private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withPaymentProvider(GOCARDLESS);
 
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
-    
+
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Before
@@ -103,7 +103,77 @@ public class MandateResourceIT {
         wireMockAdminUsers.start();
         gatewayAccountFixture.insert(testContext.getJdbi());
     }
-    
+
+    @Test
+    public void providerIdAndBankStatementReferenceShouldBePopulatedOnConfirmingAMandate() throws Exception {
+        
+        String mandateExternalId = createMandate();
+
+        simulateFollowingNextUrlFromMandateCreation(mandateExternalId);
+
+        simulateInputOfUserDetailsFromFrontend(mandateExternalId);
+
+        String providerId = "MD123";
+        String reference = "REF-123";
+        
+        simulateConfirmFromFrontend(mandateExternalId, providerId, reference);
+
+        givenSetup()
+                .get(format("/v1/api/accounts/%s/mandates/%s", gatewayAccountFixture.getExternalId(), mandateExternalId))
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("provider_id", is(providerId))
+                .body("mandate_reference", is(reference));
+    }
+
+    private void simulateConfirmFromFrontend(String mandateExternalId, String providerId, String reference) throws JsonProcessingException {
+        String customerId = "CU000358S3A2FP";
+        String customerBankAccountId = "BA0002WR3Z193A";
+        String sunName = "Test SUN Name";
+        var goCardlessCustomerFixture = aGoCardlessCustomerFixture()
+                .withCustomerId(customerId)
+                .withCustomerBankAccountId(customerBankAccountId)
+                .withPayerId(payerFixture.getId());
+        stubCreateCustomer(gatewayAccountFixture.getAccessToken().toString(), mandateExternalId, payerFixture, customerId);
+        stubCreateCustomerBankAccount(gatewayAccountFixture.getAccessToken().toString(), mandateExternalId, payerFixture, customerId, customerBankAccountId);
+        stubCreateMandate(gatewayAccountFixture.getAccessToken().toString(), mandateExternalId, goCardlessCustomerFixture, providerId, reference);
+        stubGetCreditor(gatewayAccountFixture.getAccessToken().toString(), sunName);
+        wireMockAdminUsers.stubFor(post(urlPathEqualTo("/v1/emails/send")).willReturn(aResponse().withStatus(200)));
+
+        givenSetup()
+                .body(objectMapper.writeValueAsString(Map.of("sort_code", payerFixture.getSortCode(), "account_number", payerFixture.getAccountNumber())))
+                .post(format("/v1/api/accounts/%s/mandates/%s/confirm", gatewayAccountFixture.getExternalId(), mandateExternalId));
+    }
+
+    private void simulateInputOfUserDetailsFromFrontend(String mandateExternalId) {
+        givenSetup()
+                .body(Map.of("account_number", payerFixture.getAccountNumber(),
+                        "sort_code", payerFixture.getSortCode(),
+                        "account_holder_name", payerFixture.getName(),
+                        "email", payerFixture.getEmail()))
+                .put(format("/v1/api/accounts/%s/mandates/%s/payers", gatewayAccountFixture.getExternalId(), mandateExternalId));
+    }
+
+    private void simulateFollowingNextUrlFromMandateCreation(String mandateExternalId) {
+        String token = testContext.getDatabaseTestHelper()
+                .getTokenByMandateExternalId(MandateExternalId.valueOf(mandateExternalId))
+                .get("secure_redirect_token")
+                .toString();
+        givenSetup().get(format("/v1/tokens/%s/mandate", token));
+    }
+
+    private String createMandate() throws JsonProcessingException {
+        ValidatableResponse response = givenSetup()
+                .body(objectMapper.writeValueAsString(Map.of("return_url", "http://example.com", "service_reference", "ref")))
+                .post(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()))
+                .then()
+                .statusCode(HttpStatus.SC_CREATED)
+                .body("provider_id", is(nullValue()))
+                .body("mandate_reference", is(nullValue()));
+
+        return response.extract().path(JSON_MANDATE_ID_KEY).toString();
+    }
+
     @Test
     @Parameters({
             "null, test-service-ref, Field [return_url] cannot be null",
@@ -111,11 +181,11 @@ public class MandateResourceIT {
             "http://example, null, Field [service_reference] cannot be null",
             "http://example, , Field [service_reference] must have a size between 1 and 255"
     })
-    public void createMandateValidationFailures(@Nullable String returnUrl, 
-                                                @Nullable String serviceReference, 
+    public void createMandateValidationFailures(@Nullable String returnUrl,
+                                                @Nullable String serviceReference,
                                                 String expectedErrorMessage) throws Exception {
         String accountExternalId = gatewayAccountFixture.getExternalId();
-        
+
         Map<String, String> createMandateRequest = new HashMap<>();
         Optional.ofNullable(returnUrl).ifPresent(x -> createMandateRequest.put("return_url", x));
         Optional.ofNullable(serviceReference).ifPresent(x -> createMandateRequest.put("service_reference", x));
@@ -134,15 +204,15 @@ public class MandateResourceIT {
     public void shouldCreateAMandateSuccessfully(@Nullable String description) throws Exception {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         String returnUrl = "http://example.com/success-page/";
-        
+
         ImmutableMap.Builder createMandateBuilder = ImmutableMap.builder()
                 .put("return_url", returnUrl)
                 .put("service_reference", "test-service-reference");
-        
+
         if (description != null) {
             createMandateBuilder.put("description", description);
         }
-        
+
         String requestPath = "/v1/api/accounts/{accountId}/mandates".replace("{accountId}", accountExternalId);
 
         ValidatableResponse response = givenSetup()
@@ -172,9 +242,9 @@ public class MandateResourceIT {
         response.body("links", hasSize(3))
                 .body("links", containsLink("self", "GET", documentLocation))
                 .body("links", containsLink("next_url", "GET", hrefNextUrl))
-                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<>() {{
-                    put("chargeTokenId", token);
-                }}));
+                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", 
+                    Map.of("chargeTokenId", token)
+                ));
     }
 
     @Test
@@ -189,7 +259,7 @@ public class MandateResourceIT {
         PaymentFixture paymentFixture = createPaymentFixtureWith(mandateFixture, PaymentState.NEW);
 
         String requestPath = format("/v1/accounts/%s/mandates/%s/payments/%s",
-                accountExternalId, 
+                accountExternalId,
                 mandateFixture.getExternalId().toString(),
                 paymentFixture.getExternalId());
 
@@ -350,7 +420,7 @@ public class MandateResourceIT {
                 .withPayerId(payerFixture.getId());
         stubCreateCustomer(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId);
         stubCreateCustomerBankAccount(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), payerFixture, customerId, customerBankAccountId);
-        stubCreateMandate(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), goCardlessCustomerFixture);
+        stubCreateMandate(gatewayAccountFixture.getAccessToken().toString(), mandateFixture.getExternalId().toString(), goCardlessCustomerFixture, "MD123", "REF-123");
         String lastTwoDigitsBankAccount = payerFixture.getAccountNumber().substring(payerFixture.getAccountNumber().length() - 2);
         stubGetCreditor(gatewayAccountFixture.getAccessToken().toString(), sunName);
 

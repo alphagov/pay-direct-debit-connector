@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 
 import java.util.List;
@@ -16,38 +18,39 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class GetMandateResponse {
+
+    @JsonProperty("provider_id")
+    @JsonSerialize(using = ToStringSerializer.class)
+    private final PaymentProviderMandateId paymentProviderId;
+    
     @JsonProperty("mandate_id")
     @JsonSerialize(using = ToStringSerializer.class)
-    private MandateExternalId mandateId;
+    private final MandateExternalId mandateId;
 
     @JsonProperty("return_url")
-    private String returnUrl;
+    private final String returnUrl;
 
     @JsonProperty("links")
-    private List<Map<String, Object>> dataLinks;
+    private final List<Map<String, Object>> dataLinks;
 
     @JsonProperty
-    private ExternalMandateState state;
+    private final ExternalMandateState state;
 
     @JsonProperty("service_reference")
-    private String serviceReference;
+    private final String serviceReference;
 
     @JsonProperty("mandate_reference")
     @JsonSerialize(using = ToStringSerializer.class)
-    private MandateBankStatementReference mandateReference;
+    private final MandateBankStatementReference mandateReference;
 
-    public GetMandateResponse(MandateExternalId mandateId,
-                              String returnUrl,
-                              List<Map<String, Object>> dataLinks,
-                              ExternalMandateState state,
-                              String serviceReference,
-                              MandateBankStatementReference mandateReference) {
-        this.mandateId = mandateId;
-        this.returnUrl = returnUrl;
+    public GetMandateResponse(Mandate mandate, List<Map<String, Object>> dataLinks) {
+        this.mandateId = mandate.getExternalId();
+        this.returnUrl = mandate.getReturnUrl();
         this.dataLinks = dataLinks;
-        this.state = state;
-        this.serviceReference = serviceReference;
-        this.mandateReference = mandateReference;
+        this.state = mandate.getState().toExternal();
+        this.serviceReference = mandate.getServiceReference();
+        this.mandateReference = mandate.getMandateBankStatementReference();
+        this.paymentProviderId = mandate.getPaymentProviderMandateId().orElse(null);
     }
 
     public String getReturnUrl() {

@@ -64,11 +64,17 @@ public class GoCardlessStubs {
         stubPostCallsFor("/customer_bank_accounts", accessToken, 200, idempotencyKey, customerBankAccountRequestExpectedBody, customerBankAccountResponseBody);
     }
 
-    public static void stubCreateMandate(String accessToken, String idempotencyKey, GoCardlessCustomerFixture goCardlessCustomerFixture) {
+    public static void stubCreateMandate(String accessToken, 
+                                         String idempotencyKey, 
+                                         GoCardlessCustomerFixture goCardlessCustomerFixture, 
+                                         String providerId, 
+                                         String reference) {
         String mandateRequestExpectedBody = load(GOCARDLESS_CREATE_MANDATE_REQUEST)
                 .replace("{{customer_bank_account_id}}", goCardlessCustomerFixture.getCustomerBankAccountId());
 
         String mandateResponseBody = load(GOCARDLESS_CREATE_MANDATE_SUCCESS_RESPONSE)
+                .replace("{{providerId}}", providerId)
+                .replace("{{reference}}", reference)
                 .replace("{{customer_bank_account_id}}", goCardlessCustomerFixture.getCustomerBankAccountId())
                 .replace("{{customer_id}}", goCardlessCustomerFixture.getCustomerId())
                 .replace("{{gocardless_customer_bank_account_id}}", goCardlessCustomerFixture.getCustomerBankAccountId());

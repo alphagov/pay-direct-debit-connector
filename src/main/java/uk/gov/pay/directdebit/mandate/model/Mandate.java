@@ -67,7 +67,7 @@ public class Mandate {
         return state;
     }
 
-    public MandateBankStatementReference getMandateBankStatementReference() {
+    public MandateBankStatementReference getMandateBankStatementReference() { //TODO make optional
         return mandateBankStatementReference;
     }
 
