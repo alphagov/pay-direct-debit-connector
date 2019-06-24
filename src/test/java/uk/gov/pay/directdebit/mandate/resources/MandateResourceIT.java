@@ -273,6 +273,7 @@ public class MandateResourceIT {
                 .body("gateway_account_id", isNumber(gatewayAccountFixture.getId()))
                 .body("gateway_account_external_id", is(gatewayAccountFixture.getExternalId()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
+                .body("state.details", is("example details"))
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
@@ -310,6 +311,7 @@ public class MandateResourceIT {
                 .body("gateway_account_id", isNumber(gatewayAccountFixture.getId()))
                 .body("gateway_account_external_id", is(gatewayAccountFixture.getExternalId()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
+                .body("state.details", is("example details"))
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
@@ -343,6 +345,7 @@ public class MandateResourceIT {
                 .body("return_url", is(mandateFixture.getReturnUrl()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
                 .body("state.finished", is(mandateFixture.getState().toExternal().isFinished()))
+                .body("state.details", is("example details"))
                 .body("service_reference", is(mandateFixture.getServiceReference()))
                 .body("mandate_reference", is(notNullValue()));
 
