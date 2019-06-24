@@ -172,14 +172,7 @@ public class MandateService {
     public GetMandateResponse populateGetMandateResponse(String accountExternalId, MandateExternalId mandateExternalId, UriInfo uriInfo) {
         Mandate mandate = findByExternalId(mandateExternalId);
         List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
-
-        return new GetMandateResponse(
-                mandateExternalId,
-                mandate.getReturnUrl(),
-                dataLinks,
-                mandate.getState().toExternal(),
-                mandate.getServiceReference(),
-                mandate.getMandateBankStatementReference());
+        return new GetMandateResponse(mandate, dataLinks);
     }
 
     public Mandate findByExternalId(MandateExternalId externalId) {
