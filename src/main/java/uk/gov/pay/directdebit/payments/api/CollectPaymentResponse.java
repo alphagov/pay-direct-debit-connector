@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.directdebit.common.json.ToLowerCaseStringSerializer;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
@@ -39,8 +41,9 @@ public class CollectPaymentResponse {
     @JsonProperty("provider_id")
     private PaymentProviderPaymentId providerId;
 
+    @JsonSerialize(using = ToLowerCaseStringSerializer.class)
     @JsonProperty("payment_provider")
-    private String paymentProvider;
+    private PaymentProvider paymentProvider;
 
     @JsonProperty
     private String description;
@@ -68,7 +71,7 @@ public class CollectPaymentResponse {
         this.paymentProvider = builder.paymentProvider;
     }
 
-    public String getPaymentProvider() {
+    public PaymentProvider getPaymentProvider() {
         return paymentProvider;
     }
 
@@ -110,7 +113,7 @@ public class CollectPaymentResponse {
                 .withDescription(payment.getDescription())
                 .withReference(payment.getReference())
                 .withCreatedDate(payment.getCreatedDate())
-                .withPaymentProvider(payment.getMandate().getGatewayAccount().getPaymentProvider().toString())
+                .withPaymentProvider(payment.getMandate().getGatewayAccount().getPaymentProvider())
                 .withDataLinks(dataLinks);
 
         payment.getProviderId().ifPresent(collectPaymentResponseBuilder::withProviderId);
@@ -161,7 +164,7 @@ public class CollectPaymentResponse {
         private String paymentExternalId;
         private Long amount;
         private MandateExternalId mandateId;
-        private String paymentProvider;
+        private PaymentProvider paymentProvider;
         private String description;
         private String reference;
         private PaymentProviderPaymentId providerId;
@@ -195,7 +198,7 @@ public class CollectPaymentResponse {
             return this;
         }
 
-        public CollectPaymentResponseBuilder withPaymentProvider(String paymentProvider) {
+        public CollectPaymentResponseBuilder withPaymentProvider(PaymentProvider paymentProvider) {
             this.paymentProvider = paymentProvider;
             return this;
         }
