@@ -108,7 +108,7 @@ public class PayerDaoIT {
 
     @Test
     public void shouldGetAPayerByTransactionId() {
-        Payer payer = payerDao.findByTransactionId(testTransaction.getId()).get();
+        Payer payer = payerDao.findByPaymentId(testTransaction.getId()).get();
         assertThat(payer.getId(), is(testPayer.getId()));
         assertThat(payer.getMandateId(), is(testMandate.getId()));
         assertThat(payer.getExternalId(), is(EXTERNAL_ID));
@@ -124,7 +124,7 @@ public class PayerDaoIT {
 
     @Test
     public void shouldNotFindAPayerByTransactionId_ifIdIsInvalid() {
-        assertThat(payerDao.findByTransactionId(154L).isPresent(), is(false));
+        assertThat(payerDao.findByPaymentId(154L).isPresent(), is(false));
     }
 
     @Test

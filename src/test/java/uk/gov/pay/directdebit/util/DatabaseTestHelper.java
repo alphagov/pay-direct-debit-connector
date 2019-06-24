@@ -36,7 +36,7 @@ public class DatabaseTestHelper {
         );
     }
 
-    public String getTokenByTransactionExternalId(String externalId) {
+    public String getTokenByPaymentExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT secure_redirect_token from tokens t JOIN payments p ON p.mandate_id = t.mandate_id WHERE p.external_id = :external_id ORDER BY t.id DESC")
@@ -69,7 +69,7 @@ public class DatabaseTestHelper {
         );
     }
 
-    public Map<String, Object> getTransactionByExternalId(String externalId) {
+    public Map<String, Object> getPaymentByExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT * from payments p WHERE p.external_id = :externalId")
@@ -135,7 +135,7 @@ public class DatabaseTestHelper {
         );
     }
 
-    public Map<String, Object> getMandateByTransactionExternalId(String externalId) {
+    public Map<String, Object> getMandateByPaymentExternalId(String externalId) {
         return jdbi.withHandle(handle ->
                 handle
                         .createQuery("SELECT m.* from mandates m JOIN payments p ON p.mandate_id = m.id WHERE p.external_id = :externalId")

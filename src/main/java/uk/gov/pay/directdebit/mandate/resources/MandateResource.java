@@ -1,18 +1,6 @@
 package uk.gov.pay.directdebit.mandate.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import java.util.Map;
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -25,6 +13,19 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
@@ -81,11 +82,11 @@ public class MandateResource {
     @Path("/v1/accounts/{accountId}/mandates/{mandateExternalId}/payments/{paymentExternalId}")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getMandateWithTransactionFrontend(@PathParam("accountId") String accountExternalId,
-                                                      @PathParam("mandateExternalId") String mandateExternalId,
-                                                      @PathParam("paymentExternalId") String paymentExternalId) {
+    public Response getMandateWithPaymentFrontend(@PathParam("accountId") String accountExternalId,
+                                                  @PathParam("mandateExternalId") String mandateExternalId,
+                                                  @PathParam("paymentExternalId") String paymentExternalId) {
         LOGGER.info("Retrieving mandate {} and charge {} for frontend", mandateExternalId, paymentExternalId);
-        DirectDebitInfoFrontendResponse response = mandateService.populateGetMandateWithTransactionResponseForFrontend(accountExternalId, paymentExternalId);
+        DirectDebitInfoFrontendResponse response = mandateService.populateGetMandateWithPaymentResponseForFrontend(accountExternalId, paymentExternalId);
         return Response.ok(response).build();
     }
     

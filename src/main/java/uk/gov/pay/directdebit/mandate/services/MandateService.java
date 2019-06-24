@@ -148,7 +148,7 @@ public class MandateService {
 
     }
 
-    public DirectDebitInfoFrontendResponse populateGetMandateWithTransactionResponseForFrontend(String accountExternalId, String paymentExternalId) {
+    public DirectDebitInfoFrontendResponse populateGetMandateWithPaymentResponseForFrontend(String accountExternalId, String paymentExternalId) {
         Payment payment = paymentService.findPaymentForExternalId(paymentExternalId);
         Mandate mandate = payment.getMandate();
         return new DirectDebitInfoFrontendResponse(
