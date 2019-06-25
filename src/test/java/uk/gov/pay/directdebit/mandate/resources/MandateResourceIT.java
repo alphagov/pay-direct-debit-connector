@@ -106,13 +106,35 @@ public class MandateResourceIT {
     }
 
     @Test
+    public void payerEmailAndNameShouldBePopulatedOnInputOfUserDetails() throws Exception {
+
+        String mandateExternalId = createMandate();
+
+        givenSetup()
+                .get(format("/v1/api/accounts/%s/mandates/%s", gatewayAccountFixture.getExternalId(), mandateExternalId))
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("payer.email", is(nullValue()))
+                .body("payer.name", is(nullValue()));
+
+        simulateInputOfUserDetailsFromFrontend(mandateExternalId, payerFixture);
+
+        givenSetup()
+                .get(format("/v1/api/accounts/%s/mandates/%s", gatewayAccountFixture.getExternalId(), mandateExternalId))
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("payer.email", is(payerFixture.getEmail()))
+                .body("payer.name", is(payerFixture.getName()));
+    }
+    
+    @Test
     public void providerIdAndBankStatementReferenceShouldBePopulatedOnConfirmingAMandate() throws Exception {
         
         String mandateExternalId = createMandate();
 
         simulateFollowingNextUrlFromMandateCreation(mandateExternalId);
 
-        simulateInputOfUserDetailsFromFrontend(mandateExternalId);
+        simulateInputOfUserDetailsFromFrontend(mandateExternalId, payerFixture);
 
         String providerId = "MD123";
         String reference = "REF-123";
@@ -146,7 +168,7 @@ public class MandateResourceIT {
                 .post(format("/v1/api/accounts/%s/mandates/%s/confirm", gatewayAccountFixture.getExternalId(), mandateExternalId));
     }
 
-    private void simulateInputOfUserDetailsFromFrontend(String mandateExternalId) {
+    private void simulateInputOfUserDetailsFromFrontend(String mandateExternalId, PayerFixture payerFixture) {
         givenSetup()
                 .body(Map.of("account_number", payerFixture.getAccountNumber(),
                         "sort_code", payerFixture.getSortCode(),

@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.mandate.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -16,6 +17,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MandateResponse {
 
     @JsonProperty("mandate_id")
@@ -52,6 +54,9 @@ public class MandateResponse {
 
     @JsonProperty("description")
     private final String description;
+    
+    @JsonProperty
+    private final Payer payer;
 
     public MandateResponse(Mandate mandate, List<Map<String, Object>> dataLinks) {
         mandateId = mandate.getExternalId();
@@ -64,6 +69,7 @@ public class MandateResponse {
         createdDate = mandate.getCreatedDate();
         paymentProvider = mandate.getGatewayAccount().getPaymentProvider();
         description = mandate.getDescription().orElse(null);
+        payer = mandate.getPayer().map(p -> Payer.from(p)).orElse(null);
     }
 
     public URI getLink(String rel) {

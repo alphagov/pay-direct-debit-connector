@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.AdminUsersConfig;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.api.EmailPayloadRequest;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
@@ -25,11 +26,13 @@ public class AdminUsersClient {
     }
 
     public void sendEmail(EmailTemplate template, Mandate mandate, Map<String, String> personalisation) {
+        String gatewayAccountExternalId = mandate.getGatewayAccount().getExternalId();
         LOGGER.info("Calling adminusers to send {} email for mandate id {} for gateway account id {}",
                 template.toString(),
                 mandate.getExternalId(),
-                mandate.getGatewayAccount().getExternalId());
-        EmailPayloadRequest emailPayloadRequest = new EmailPayloadRequest(mandate.getPayer().getEmail(), mandate.getGatewayAccount().getExternalId(), template, personalisation);
+                gatewayAccountExternalId);
+        String email = mandate.getPayer().orElseThrow(() -> new PayerNotFoundException(mandate.getExternalId())).getEmail();
+        var emailPayloadRequest = new EmailPayloadRequest(email, gatewayAccountExternalId, template, personalisation);
         try {
              Response response = client.target(config.getAdminUsersUrl())
                     .path("/v1/emails/send")

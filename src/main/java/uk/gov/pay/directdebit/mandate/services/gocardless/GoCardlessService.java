@@ -27,6 +27,7 @@ import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotConfirmed;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProviderCommandService;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
+import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -107,7 +108,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
     private GoCardlessCustomer createCustomer(Mandate mandate) {
         MandateExternalId mandateExternalId = mandate.getExternalId();
-        Payer payer = mandate.getPayer();
+        Payer payer = mandate.getPayer().orElseThrow(() -> new PayerNotFoundException(mandateExternalId));
         try {
             LOGGER.info("Attempting to call GoCardless to create a customer, mandate id: {}", mandateExternalId);
             GoCardlessClientFacade goCardlessClientFacade = goCardlessClientFactory.getClientFor(mandate.getGatewayAccount().getAccessToken());
@@ -123,7 +124,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
     private GoCardlessCustomer createCustomerBankAccount(Mandate mandate, GoCardlessCustomer goCardlessCustomer, BankAccountDetails bankAccountDetails) {
         MandateExternalId mandateExternalId = mandate.getExternalId();
-        Payer payer = mandate.getPayer();
+        Payer payer = mandate.getPayer().orElseThrow(() -> new PayerNotFoundException(mandateExternalId));
 
         try {
             LOGGER.info("Attempting to call GoCardless to create a customer bank account, mandate id: {}", mandateExternalId);
