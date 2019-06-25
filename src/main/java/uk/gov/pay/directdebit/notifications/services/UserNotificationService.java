@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.common.services.SunService;
+import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
@@ -54,19 +55,17 @@ public class UserNotificationService {
     public void sendMandateCreatedEmailFor(Mandate mandate) {
         EmailTemplate template = EmailTemplate.ON_DEMAND_MANDATE_CREATED;
         Optional<SunName> sunName = sunService.getSunNameFor(mandate);
-        if (!sunName.isPresent()) {
+        if (sunName.isEmpty()) {
             logMissingSunName(template, mandate);
             return;
         }
 
-        adminUsersClient.sendEmail(template, mandate,
-                ImmutableMap.<String, String>builder()
-                        .put(MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString())
-                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().get().getAccountNumberLastTwoDigits())
-                        .put(STATEMENT_NAME_KEY, sunName.get().toString())
-                        .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
-                        .build()
-        );
+        var personalisation = Map.of(MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString(),
+                BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().orElseThrow(
+                        () -> new PayerNotFoundException(mandate.getExternalId())).getAccountNumberLastTwoDigits(),
+                STATEMENT_NAME_KEY, sunName.get().toString(),
+                DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
+        adminUsersClient.sendEmail(template, mandate, personalisation);
     }
 
     public void sendMandateCancelledEmailFor(Mandate mandate) {
@@ -93,15 +92,14 @@ public class UserNotificationService {
         LocalDate chargeDate = payment.getChargeDate()
                 .orElseThrow(() -> new IllegalArgumentException("No charge date on payment " + payment.getExternalId()));
 
-        adminUsersClient.sendEmail(template, mandate,
-                ImmutableMap.<String, String>builder()
-                        .put(AMOUNT_KEY, formatToPounds(payment.getAmount()))
-                        .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(chargeDate))
-                        .put(MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString())
-                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().get() .getAccountNumberLastTwoDigits())
-                        .put(STATEMENT_NAME_KEY, sunName.get().toString())
-                        .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
-                        .build());
+        var personalisation = Map.of(AMOUNT_KEY, formatToPounds(payment.getAmount()),
+                COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(chargeDate),
+                MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString(),
+                BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().orElseThrow(
+                        () -> new PayerNotFoundException(mandate.getExternalId())).getAccountNumberLastTwoDigits(),
+                STATEMENT_NAME_KEY, sunName.get().toString(),
+                DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl());
+        adminUsersClient.sendEmail(template, mandate, personalisation);
     }
 
     public void sendPaymentFailedEmailFor(Payment payment) {
