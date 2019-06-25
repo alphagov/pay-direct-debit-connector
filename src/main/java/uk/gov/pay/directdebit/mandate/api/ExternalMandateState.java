@@ -17,11 +17,16 @@ public enum ExternalMandateState {
 
     private final String value;
     private final boolean finished;
+    private final String details = "example details";
+    
     ExternalMandateState(String value, boolean finished) {
         this.value = value;
         this.finished = finished;
     }
 
+    public String getDetails() {
+        return details;
+    }
 
     @JsonProperty("status")
     public String getState() {

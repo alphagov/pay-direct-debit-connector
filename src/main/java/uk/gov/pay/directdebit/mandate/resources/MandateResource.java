@@ -6,9 +6,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
-import uk.gov.pay.directdebit.mandate.api.CreateMandateResponse;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
-import uk.gov.pay.directdebit.mandate.api.GetMandateResponse;
+import uk.gov.pay.directdebit.mandate.api.MandateResponse;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
@@ -51,7 +50,7 @@ public class MandateResource {
                                   @Valid CreateMandateRequest createMandateRequest, 
                                   @Context UriInfo uriInfo) {
         LOGGER.info("Received create mandate request with gateway account external id - {}", gatewayAccount.getExternalId());
-        CreateMandateResponse createMandateResponse = mandateService.createMandate(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
+        MandateResponse createMandateResponse = mandateService.createMandate(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
         return created(createMandateResponse.getLink("self")).entity(createMandateResponse).build();
     }
 
@@ -63,7 +62,7 @@ public class MandateResource {
                                @PathParam("mandateExternalId") MandateExternalId mandateExternalId,
                                @Context UriInfo uriInfo) {
         LOGGER.info("Retrieving mandate {} for frontend", mandateExternalId);
-        GetMandateResponse response = mandateService.populateGetMandateResponse(accountExternalId, mandateExternalId, uriInfo);
+        MandateResponse response = mandateService.populateGetMandateResponse(accountExternalId, mandateExternalId, uriInfo);
         return Response.ok(response).build();
     }
     
