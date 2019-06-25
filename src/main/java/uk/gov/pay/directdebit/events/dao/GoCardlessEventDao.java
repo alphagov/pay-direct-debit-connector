@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.dao;
+package uk.gov.pay.directdebit.events.dao;
 
 import org.jdbi.v3.sqlobject.config.RegisterArgumentFactory;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
@@ -6,7 +6,6 @@ import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.dao.mapper.GoCardlessEventMapper;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
