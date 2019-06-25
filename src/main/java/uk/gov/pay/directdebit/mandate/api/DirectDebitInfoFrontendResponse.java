@@ -65,9 +65,9 @@ public class DirectDebitInfoFrontendResponse {
         this.mandateReference = mandate.getMandateBankStatementReference().orElse(null);
         this.createdDate = mandate.getCreatedDate();
         this.payment = initPayment(payment);
-        this.payer = initPayer(mandate.getPayer());
+        this.payer = mandate.getPayer().map(p -> initPayer(p)).orElse(null);
     }
-    
+
     private PaymentDetails initPayment(Payment payment) {
         if (payment != null) {
             return new PaymentDetails(
@@ -83,14 +83,11 @@ public class DirectDebitInfoFrontendResponse {
     }
 
     private PayerDetails initPayer(Payer payer) {
-        if (payer != null) {
-            return new PayerDetails(
-                    payer.getExternalId(),
-                    payer.getName(),
-                    payer.getEmail(),
-                    payer.getAccountRequiresAuthorisation());
-        }
-        return null;
+        return new PayerDetails(
+                payer.getExternalId(),
+                payer.getName(),
+                payer.getEmail(),
+                payer.getAccountRequiresAuthorisation());
     }
 
     public String getReturnUrl() {

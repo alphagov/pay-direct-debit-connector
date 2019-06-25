@@ -107,7 +107,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
     private GoCardlessCustomer createCustomer(Mandate mandate) {
         MandateExternalId mandateExternalId = mandate.getExternalId();
-        Payer payer = mandate.getPayer();
+        Payer payer = mandate.getPayer().get();
         try {
             LOGGER.info("Attempting to call GoCardless to create a customer, mandate id: {}", mandateExternalId);
             GoCardlessClientFacade goCardlessClientFacade = goCardlessClientFactory.getClientFor(mandate.getGatewayAccount().getAccessToken());
@@ -123,7 +123,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
     private GoCardlessCustomer createCustomerBankAccount(Mandate mandate, GoCardlessCustomer goCardlessCustomer, BankAccountDetails bankAccountDetails) {
         MandateExternalId mandateExternalId = mandate.getExternalId();
-        Payer payer = mandate.getPayer();
+        Payer payer = mandate.getPayer().get();
 
         try {
             LOGGER.info("Attempting to call GoCardless to create a customer bank account, mandate id: {}", mandateExternalId);

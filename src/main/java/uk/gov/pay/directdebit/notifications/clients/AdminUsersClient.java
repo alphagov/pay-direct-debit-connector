@@ -29,7 +29,7 @@ public class AdminUsersClient {
                 template.toString(),
                 mandate.getExternalId(),
                 mandate.getGatewayAccount().getExternalId());
-        EmailPayloadRequest emailPayloadRequest = new EmailPayloadRequest(mandate.getPayer().getEmail(), mandate.getGatewayAccount().getExternalId(), template, personalisation);
+        EmailPayloadRequest emailPayloadRequest = new EmailPayloadRequest(mandate.getPayer().get().getEmail(), mandate.getGatewayAccount().getExternalId(), template, personalisation);
         try {
              Response response = client.target(config.getAdminUsersUrl())
                     .path("/v1/emails/send")

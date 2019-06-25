@@ -39,8 +39,8 @@ public class Mandate {
         return Optional.ofNullable(description);
     }
 
-    public Payer getPayer() {
-        return payer;
+    public Optional<Payer> getPayer() {
+        return Optional.ofNullable(payer);
     }
 
     public GatewayAccount getGatewayAccount() {

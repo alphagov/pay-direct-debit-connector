@@ -62,7 +62,7 @@ public class UserNotificationService {
         adminUsersClient.sendEmail(template, mandate,
                 ImmutableMap.<String, String>builder()
                         .put(MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString())
-                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().getAccountNumberLastTwoDigits())
+                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().get().getAccountNumberLastTwoDigits())
                         .put(STATEMENT_NAME_KEY, sunName.get().toString())
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
                         .build()
@@ -98,7 +98,7 @@ public class UserNotificationService {
                         .put(AMOUNT_KEY, formatToPounds(payment.getAmount()))
                         .put(COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(chargeDate))
                         .put(MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString())
-                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().getAccountNumberLastTwoDigits())
+                        .put(BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().get() .getAccountNumberLastTwoDigits())
                         .put(STATEMENT_NAME_KEY, sunName.get().toString())
                         .put(DD_GUARANTEE_KEY, directDebitConfig.getLinks().getDirectDebitGuaranteeUrl())
                         .build());

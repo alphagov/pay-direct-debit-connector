@@ -77,7 +77,7 @@ public class UserNotificationServiceTest {
         when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("mandate reference", mandate.getMandateBankStatementReference().toString());
-        emailPersonalisation.put("bank account last 2 digits", mandate.getPayer().getAccountNumberLastTwoDigits());
+        emailPersonalisation.put("bank account last 2 digits", mandate.getPayer().get().getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", sunName.toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
 
