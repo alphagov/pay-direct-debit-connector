@@ -7,6 +7,8 @@ import com.google.inject.Singleton;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
+import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
+import uk.gov.pay.directdebit.events.dao.SandboxEventDao;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.notifications.clients.AdminUsersClient;
@@ -16,10 +18,8 @@ import uk.gov.pay.directdebit.partnerapp.dao.GoCardlessAppConnectAccountTokenDao
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
-import uk.gov.pay.directdebit.payments.dao.GoCardlessEventDao;
-import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
-import uk.gov.pay.directdebit.events.dao.SandboxEventDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
+import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
 import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
 
