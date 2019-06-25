@@ -129,32 +129,12 @@ public class MandateService {
     public DirectDebitInfoFrontendResponse populateGetMandateWithPaymentResponseForFrontend(String accountExternalId, String paymentExternalId) {
         Payment payment = paymentService.findPaymentForExternalId(paymentExternalId);
         Mandate mandate = payment.getMandate();
-        return new DirectDebitInfoFrontendResponse(
-                mandate.getExternalId(),
-                mandate.getGatewayAccount().getId(),
-                accountExternalId,
-                mandate.getState(),
-                mandate.getReturnUrl(),
-                mandate.getMandateBankStatementReference(),
-                mandate.getCreatedDate(),
-                mandate.getPayer(),
-                payment
-        );
+        return new DirectDebitInfoFrontendResponse(mandate, accountExternalId, payment);
     }
 
     public DirectDebitInfoFrontendResponse populateGetMandateResponseForFrontend(String accountExternalId, MandateExternalId mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        return new DirectDebitInfoFrontendResponse(
-                mandate.getExternalId(),
-                mandate.getGatewayAccount().getId(),
-                accountExternalId,
-                mandate.getState(),
-                mandate.getReturnUrl(),
-                mandate.getMandateBankStatementReference(),
-                mandate.getCreatedDate(),
-                mandate.getPayer(),
-                null
-        );
+        return new DirectDebitInfoFrontendResponse(mandate, accountExternalId, null);
     }
 
     public MandateResponse populateGetMandateResponse(String accountExternalId, MandateExternalId mandateExternalId, UriInfo uriInfo) {

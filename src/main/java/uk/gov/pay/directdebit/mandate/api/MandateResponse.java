@@ -59,7 +59,7 @@ public class MandateResponse {
         this.dataLinks = dataLinks;
         state = mandate.getState().toExternal();
         serviceReference = mandate.getServiceReference();
-        mandateReference = mandate.getMandateBankStatementReference();
+        mandateReference = mandate.getMandateBankStatementReference().orElse(null);
         paymentProviderId = mandate.getPaymentProviderMandateId().orElse(null);
         createdDate = mandate.getCreatedDate();
         paymentProvider = mandate.getGatewayAccount().getPaymentProvider();
