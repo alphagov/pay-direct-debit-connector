@@ -11,6 +11,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
+import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentView;
@@ -71,7 +72,7 @@ public class PaymentViewDaoIT {
                 .withPage(0L)
                 .withDisplaySize(100L)
                 .withSearchDateParams(searchDateParams);
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(3));
     }
 
@@ -97,14 +98,14 @@ public class PaymentViewDaoIT {
                 .withPage(2L)
                 .withDisplaySize(1L)
                 .withSearchDateParams(searchDateParams);
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
     }
 
     @Test
     public void shouldReturnAnEmptyList_whenNoMatchingGatewayAccounts() {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams("invalid-external-id");
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.isEmpty(), is(true));
     }
 
@@ -132,7 +133,7 @@ public class PaymentViewDaoIT {
                 .withDisplaySize(100L)
                 .withFromDateString(zonedDateTime7DaysAgo.toString())
                 .withSearchDateParams(new SearchDateParams(zonedDateTime7DaysAgo, zonedDateTimeNow));
-        List<PaymentView> paymentViewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> paymentViewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(paymentViewList.size(), is(2));
         assertThat(paymentViewList.get(0).getCreatedDate().isAfter(zonedDateTime7DaysAgo), is(true));
         assertThat(paymentViewList.get(0).getCreatedDate().isBefore(zonedDateTimeNow), is(true));
@@ -157,10 +158,8 @@ public class PaymentViewDaoIT {
         }
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withEmail("bog");
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(2));
-        assertThat(viewList.get(0).getEmail().contains("bog"), is(true));
-        assertThat(viewList.get(1).getEmail().contains("bog"), is(true));
     }
 
     @Test
@@ -182,7 +181,7 @@ public class PaymentViewDaoIT {
         }
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withReference("bkh");
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(2));
         assertThat(viewList.get(0).getReference(), is(referenceList.get(2)));
         assertThat(viewList.get(1).getReference(), is(referenceList.get(0)));
@@ -207,7 +206,7 @@ public class PaymentViewDaoIT {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withAmount(202L)
                 .withSearchDateParams(searchDateParams);
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
         assertThat(viewList.get(0).getReference(), is("ref2"));
     }
@@ -233,7 +232,7 @@ public class PaymentViewDaoIT {
                 .withPage(2L)
                 .withDisplaySize(100L)
                 .withSearchDateParams(searchDateParams);
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
     }
 
@@ -297,11 +296,8 @@ public class PaymentViewDaoIT {
                 .withMandateId(mandateFixture1.getExternalId().toString());
         Long count = paymentViewDao.getPaymentViewCount(searchParams);
         assertThat(count, is(3L));
-        List<PaymentView> paymentViews = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> paymentViews = paymentViewDao.searchPaymentView(searchParams);
         assertThat(paymentViews.size(), is(3));
-        assertThat(paymentViews.get(0).getEmail().equals(payerFixture1.getEmail()), is(true));
-        assertThat(paymentViews.get(1).getEmail().equals(payerFixture1.getEmail()), is(true));
-        assertThat(paymentViews.get(2).getEmail().equals(payerFixture1.getEmail()), is(true));
     }
 
     @Test
@@ -331,7 +327,7 @@ public class PaymentViewDaoIT {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withState("started");
 
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
     }
 
@@ -362,7 +358,7 @@ public class PaymentViewDaoIT {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withState("pending");
 
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
     }
 
@@ -393,7 +389,7 @@ public class PaymentViewDaoIT {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withState("cancelled");
 
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
     }
 
@@ -424,7 +420,7 @@ public class PaymentViewDaoIT {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withState("success");
 
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
     }
 
@@ -471,7 +467,7 @@ public class PaymentViewDaoIT {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withState("failed");
 
-        List<PaymentView> viewList = paymentViewDao.searchPaymentView(searchParams);
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(6));
     }
 }

@@ -80,7 +80,6 @@ public class PaymentViewResourceIT {
                 .body("count", is(3))
                 .body("results", hasSize(3))
                 .body("results[0].reference", is("MBK2"))
-                .body("results[0].name", is("J. Doe2"))
                 .body("results[2].description", is("Description0"))
                 .body("results[1].created_date", is(createdDate.format(ISO_INSTANT_MILLISECOND_PRECISION)));
     }
@@ -181,7 +180,6 @@ public class PaymentViewResourceIT {
                 .body("page", is(2))
                 .body("results[0].reference", is("MBK4"))
                 .body("results[4].description", is("Description0"))
-                .body("results[1].name", is("J. Doe3"))
                 .body("results[2].created_date", is(createdDate.format(ISO_INSTANT_MILLISECOND_PRECISION)));
     }
 
@@ -223,8 +221,7 @@ public class PaymentViewResourceIT {
                 .body("total", is(3))
                 .body("count", is(3))
                 .body("results[0].reference", is("MBK2"))
-                .body("results[2].description", is("Description11"))
-                .body("results[1].name", is("J. Doe3"));
+                .body("results[2].description", is("Description11"));
     }
 
     @Test
@@ -372,9 +369,7 @@ public class PaymentViewResourceIT {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
                 .body("count", is(3))
-                .body("results", hasSize(3))
-                .body("results[0].email", is(payerFixture1.getEmail()))
-                .body("results[1].name", is("J. Citizen"));
+                .body("results", hasSize(3));
     }
 
     @Test
@@ -420,8 +415,7 @@ public class PaymentViewResourceIT {
                 .body("count", is(6))
                 .body("results", hasSize(6))
                 .body("results[0].state.finished", is(true))
-                .body("results[0].state.status", is("failed"))
-                .body("results[0].state.details", is("example_details"));
+                .body("results[0].state.status", is("failed"));
     }
 
     private RequestSpecification givenSetup() {
