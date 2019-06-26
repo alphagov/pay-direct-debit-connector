@@ -69,6 +69,7 @@ import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateMandate;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubGetCreditor;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
+import static uk.gov.pay.directdebit.util.ResponseDoesNotContainLinkMatcher.doesNotContainLink;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -105,6 +106,39 @@ public class MandateResourceIT {
         gatewayAccountFixture.insert(testContext.getJdbi());
     }
 
+    @Test
+    public void nextUrlAndNextUrlPostShouldOnlyBePresentWhenMandateStateIsCreated() throws Exception {
+
+        var request = Map.of("return_url", "http://example.com", "service_reference", "test-service-reference");
+        ValidatableResponse response = givenSetup()
+                .body(objectMapper.writeValueAsString(request))
+                .post(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()))
+                .then();
+
+        String externalMandateId = response.extract().path(JSON_MANDATE_ID_KEY);
+
+        String token = testContext
+                .getDatabaseTestHelper()
+                .getTokenByMandateExternalId(MandateExternalId.valueOf(externalMandateId))
+                .get("secure_redirect_token")
+                .toString();
+        String hrefNextUrl = "http://Frontend/secure/" + token;
+        String hrefNextUrlPost = "http://Frontend/secure";
+
+        response.body("links", containsLink("next_url", "GET", hrefNextUrl))
+                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, 
+                        "application/x-www-form-urlencoded", Map.of("chargeTokenId", token)));
+
+        simulateFollowingNextUrlFromMandateCreation(externalMandateId);
+
+        givenSetup()
+                .get(format("/v1/api/accounts/%s/mandates/%s", gatewayAccountFixture.getExternalId(), externalMandateId))
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("links", doesNotContainLink("next_url"))
+                .body("links", doesNotContainLink("next_url_post"));
+    }
+    
     @Test
     public void payerEmailAndNameShouldBePopulatedOnInputOfUserDetails() throws Exception {
 
@@ -228,7 +262,7 @@ public class MandateResourceIT {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         String returnUrl = "http://example.com/success-page/";
 
-        ImmutableMap.Builder createMandateBuilder = ImmutableMap.builder()
+        ImmutableMap.Builder<String, String> createMandateBuilder = ImmutableMap.<String, String>builder()
                 .put("return_url", returnUrl)
                 .put("service_reference", "test-service-reference");
 
