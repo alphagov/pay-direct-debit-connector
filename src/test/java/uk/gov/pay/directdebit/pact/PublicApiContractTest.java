@@ -19,6 +19,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
@@ -80,6 +81,7 @@ public class PublicApiContractTest {
                 .withPayerFixture(PayerFixture.aPayerFixture())
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(params.get("bank_mandate_reference")))
                 .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
+                .withState(MandateState.PENDING)
                 .insert(app.getTestContext().getJdbi());
     }
 
