@@ -11,6 +11,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -32,7 +33,7 @@ public class PaymentResponse {
 
     @JsonProperty
     private String description;
-
+    
     @JsonProperty
     private String reference;
 
@@ -54,8 +55,8 @@ public class PaymentResponse {
         this.createdDate = createdDate;
     }
 
-    public List<Map<String, Object>> getDataLinks() {
-        return dataLinks;
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
     }
 
     public String getTransactionExternalId() {
@@ -78,12 +79,8 @@ public class PaymentResponse {
         return reference;
     }
 
-    public URI getLink(String rel) {
-        return dataLinks.stream()
-                .filter(map -> rel.equals(map.get("rel")))
-                .findFirst()
-                .map(link -> (URI) link.get("href"))
-                .get();
+    public ExternalPaymentStateWithDetails getState() {
+        return state;
     }
 
 
@@ -107,12 +104,12 @@ public class PaymentResponse {
 
         PaymentResponse that = (PaymentResponse) o;
 
-        if (dataLinks != null ? !dataLinks.equals(that.dataLinks) : that.dataLinks != null) return false;
+        if (!Objects.equals(dataLinks, that.dataLinks)) return false;
         if (!transactionExternalId.equals(that.transactionExternalId)) return false;
         if (!amount.equals(that.amount)) return false;
         if (!returnUrl.equals(that.returnUrl)) return false;
-        if (description != null ? !description.equals(that.description) : that.description != null) return false;
-        if (reference != null ? !reference.equals(that.reference) : that.reference != null) return false;
+        if (!Objects.equals(description, that.description)) return false;
+        if (!Objects.equals(reference, that.reference)) return false;
         if (!createdDate.equals(that.createdDate)) return false;
         return state == that.state;
     }
@@ -143,6 +140,58 @@ public class PaymentResponse {
                 '}';
     }
 
+    public static final class PaymentResponseBuilder {
+        private List<Map<String, Object>> dataLinks;
+        //compatibility with public api
+        private String transactionExternalId;
+        private Long amount;
+        private String returnUrl;
+        private String description;
+        private String reference;
+        private ZonedDateTime createdDate;
+        private ExternalPaymentStateWithDetails state;
+
+        private PaymentResponseBuilder() {
+        }
+
+        public static PaymentResponseBuilder aPaymentResponse() {
+            return new PaymentResponseBuilder();
+        }
+
+        public PaymentResponseBuilder withTransactionExternalId(String transactionExternalId) {
+            this.transactionExternalId = transactionExternalId;
+            return this;
+        }
+
+        public PaymentResponseBuilder withAmount(Long amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public PaymentResponseBuilder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public PaymentResponseBuilder withReference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public PaymentResponseBuilder withCreatedDate(ZonedDateTime createdDate) {
+            this.createdDate = createdDate;
+            return this;
+        }
+
+        public PaymentResponseBuilder withState(ExternalPaymentStateWithDetails state) {
+            this.state = state;
+            return this;
+        }
+
+        public PaymentResponse build() {
+            return new PaymentResponse(transactionExternalId, state, amount, returnUrl, description, reference, createdDate, dataLinks);
+        }
+    }
 }
 
 

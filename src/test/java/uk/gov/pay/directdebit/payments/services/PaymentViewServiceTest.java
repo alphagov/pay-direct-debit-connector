@@ -14,13 +14,13 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
+import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
-import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.PaymentView;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
 import javax.ws.rs.core.UriBuilder;
@@ -40,6 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
+import static uk.gov.pay.directdebit.payments.api.PaymentResponse.PaymentResponseBuilder.aPaymentResponse;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
@@ -49,7 +50,7 @@ public class PaymentViewServiceTest {
     public ExpectedException thrown = ExpectedException.none();
     private String gatewayAccountExternalId = RandomIdGenerator.newId();
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
-    private List<PaymentView> paymentViewList = new ArrayList<>();
+    private List<PaymentResponse> paymentViewList = new ArrayList<>();
     @Mock
     private PaymentViewDao paymentViewDao;
     @Mock
@@ -62,18 +63,15 @@ public class PaymentViewServiceTest {
     @Before
     public void setUp() {
         for (int i = 0; i < 4; i++) {
-            PaymentView paymentView = new PaymentView(
-                    gatewayAccountExternalId,
-                    RandomIdGenerator.newId(),
-                    1000L + i,
-                    "Pay reference" + i,
-                    "This is a description" + i,
-                    createdDate,
-                    "John Doe" + i,
-                    "doe@mail.mail",
-                    PaymentState.NEW,
-                    RandomIdGenerator.newId());
-            paymentViewList.add(paymentView);
+            PaymentResponse paymentResponse = aPaymentResponse()
+                    .withCreatedDate(createdDate)
+                    .withState(new ExternalPaymentStateWithDetails(ExternalPaymentState.EXTERNAL_PENDING, "example_details"))
+                    .withReference("Pay reference " + i)
+                    .withAmount(1000L + i)
+                    .withDescription("This is a description " + i)
+                    .withTransactionExternalId(RandomIdGenerator.newId())
+                    .build();
+            paymentViewList.add(paymentResponse);
         }
         gatewayAccount = new GatewayAccount(1L, gatewayAccountExternalId, null, null, null, null);
         when(mockUriInfo.getBaseUriBuilder()).thenReturn(UriBuilder.fromUri("http://app.com"),
@@ -81,7 +79,6 @@ public class PaymentViewServiceTest {
         when(mockUriInfo.getPath()).thenReturn("/v1/api/accounts/" + gatewayAccount.getExternalId() + "/transactions/view");
         try {
             URI uri = new URI("http://app.com");
-            when(mockUriInfo.getBaseUri()).thenReturn(uri);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -102,9 +99,8 @@ public class PaymentViewServiceTest {
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(4L);
         PaymentViewResponse response = paymentViewService.getPaymentViewResponse(searchParams);
         assertThat(response.getPaymentViewResponses().get(3).getAmount(), is(1003L));
-        assertThat(response.getPaymentViewResponses().get(1).getName(), is("John Doe1"));
         assertThat(response.getPaymentViewResponses().get(0).getState(),
-                is(new ExternalPaymentStateWithDetails(PaymentState.NEW.toExternal(), "example_details")));
+                is(new ExternalPaymentStateWithDetails(ExternalPaymentState.EXTERNAL_PENDING, "example_details")));
         assertThat(response.getPaymentViewResponses().get(2).getCreatedDate(), is(createdDate));
     }
 
@@ -132,7 +128,7 @@ public class PaymentViewServiceTest {
                 .withName("J. Doe")
                 .withEmail("j.doe@mail.fake")
                 .toEntity();
-        List<PaymentView> paymentViewList = new ArrayList<>();
+        List<PaymentResponse> paymentViewList = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             Payment payment = aPaymentFixture()
                     .withId((long) i)
@@ -142,16 +138,13 @@ public class PaymentViewServiceTest {
                     .withDescription("Description" + i)
                     .withCreatedDate(createdDate)
                     .toEntity();
-            paymentViewList.add(new PaymentView(gatewayAccountExternalId,
-                    payment.getExternalId(),
-                    payment.getAmount(),
-                    payment.getReference(),
-                    payment.getDescription(),
-                    payment.getCreatedDate(),
-                    payer.getName(),
-                    payer.getEmail(),
-                    payment.getState(),
-                    RandomIdGenerator.newId()));
+            paymentViewList.add(aPaymentResponse()
+                    .withTransactionExternalId(payment.getExternalId())
+                    .withAmount(payment.getAmount())
+                    .withReference(payment.getReference())
+                    .withDescription(payment.getDescription())
+                    .withCreatedDate(payment.getCreatedDate())
+                    .build());
         }
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(50L);
@@ -163,7 +156,6 @@ public class PaymentViewServiceTest {
         assertThat(paymentViewResponse.getCount(), is(20L));
         assertThat(paymentViewResponse.getPage(), is(2L));
         assertThat(paymentViewResponse.getTotal(), is(50L));
-        assertThat(paymentViewResponse.getPaymentViewResponses().get(0).getLinks().get(0).getRel(), is("self"));
         assertThat(paymentViewResponse.getPaginationBuilder().getFirstLink().getHref().contains("?page=1"), is(true));
         assertThat(paymentViewResponse.getPaginationBuilder().getLastLink().getHref().contains("?page=3"), is(true));
         assertThat(paymentViewResponse.getPaginationBuilder().getPrevLink().getHref().contains("?page=1"), is(true));
@@ -175,7 +167,7 @@ public class PaymentViewServiceTest {
     public void shouldReturnNoRecords_whenPaginationSetToPage2AndNoDisplaySize() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withExternalId(gatewayAccountExternalId);
         GatewayAccount testGatewayAccount = gatewayAccountFixture.toEntity();
-        List<PaymentView> paymentViewList = new ArrayList<>();
+        List<PaymentResponse> paymentViewList = new ArrayList<>();
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(18L);
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
