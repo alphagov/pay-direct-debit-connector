@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.payers.model;
 
-import java.util.Objects;
+import uk.gov.pay.commons.model.WrappedStringValue;
+
 import java.util.regex.Pattern;
 
 /**
@@ -9,44 +10,23 @@ import java.util.regex.Pattern;
  * inclusive) but not necessarily valid (in the sense of representing
  * a real bank account)
  */
-public class AccountNumber {
+public class AccountNumber extends WrappedStringValue {
 
     private static final Pattern SIX_TO_EIGHT_ARABIC_NUMERALS = Pattern.compile("[0-9]{6,8}");
 
-    private final String accountNumber;
-
     private AccountNumber(String accountNumber) throws IllegalArgumentException {
-        Objects.requireNonNull(accountNumber);
+        super(accountNumber);
         if (!SIX_TO_EIGHT_ARABIC_NUMERALS.matcher(accountNumber).matches()) {
             throw new IllegalArgumentException("Account number must consist of six to eight Arabic numerals inclusive e.g. \"12345678\"");
         }
-        this.accountNumber = accountNumber;
     }
 
     public static AccountNumber of(String accountNumber) throws IllegalArgumentException {
         return new AccountNumber(accountNumber);
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (other != null && other.getClass() == AccountNumber.class) {
-            AccountNumber that = (AccountNumber) other;
-            return this.accountNumber.equals(that.accountNumber);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return accountNumber.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return accountNumber;
-    }
-
     public String getLastTwoDigits() {
+        String accountNumber = toString();
         return accountNumber.substring(accountNumber.length() - 2);
     }
 

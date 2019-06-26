@@ -1,31 +1,11 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import java.util.Objects;
+import uk.gov.pay.commons.model.WrappedStringValue;
 
-public abstract class PaymentProviderPaymentId {
-
-    private final String paymentProviderId;
+public abstract class PaymentProviderPaymentId extends WrappedStringValue {
 
     PaymentProviderPaymentId(String paymentProviderId) {
-        this.paymentProviderId = Objects.requireNonNull(paymentProviderId);
+        super(paymentProviderId);
     }
 
-    @Override
-    public String toString() {
-        return paymentProviderId;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other != null) {
-            PaymentProviderPaymentId that = (PaymentProviderPaymentId) other;
-            return this.paymentProviderId.equals(that.paymentProviderId);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return paymentProviderId.hashCode();
-    }
 }
