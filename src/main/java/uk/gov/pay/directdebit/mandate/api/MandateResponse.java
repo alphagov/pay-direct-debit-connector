@@ -16,6 +16,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MandateResponse {
@@ -72,12 +73,11 @@ public class MandateResponse {
         payer = mandate.getPayer().map(p -> Payer.from(p)).orElse(null);
     }
 
-    public URI getLink(String rel) {
+    public Optional<URI> getLink(String rel) {
         return dataLinks.stream()
                 .filter(map -> rel.equals(map.get("rel")))
                 .findFirst()
-                .map(link -> (URI) link.get("href"))
-                .get();
+                .map(link -> (URI) link.get("href"));
     }
 
     public MandateExternalId getMandateId() {

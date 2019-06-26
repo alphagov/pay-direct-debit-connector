@@ -46,6 +46,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -109,6 +110,26 @@ public class MandateServiceTest {
     }
 
     @Test
+    public void nextUrlAndNextUrlPostShouldOnlyBePresentWhenMandateStateIsCreated() {
+        Arrays.stream(MandateState.values()).forEach(state -> {
+            Mandate mandate = MandateFixture.aMandateFixture().withState(state).toEntity();
+            when(mandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
+            when(tokenService.generateNewTokenFor(mandate)).thenReturn(new Token("token", mandate.getId()));
+            MandateResponse mandateResponse = service.populateGetMandateResponse(
+                    mandate.getGatewayAccount().getExternalId(), mandate.getExternalId(), uriInfo);
+
+            if (state == CREATED) {
+                assertThat(mandateResponse.getLink("next_url").isPresent(), is(true));
+                assertThat(mandateResponse.getLink("next_url_post").isPresent(), is(true));
+            } else {
+                assertThat(mandateResponse.getLink("next_url").isEmpty(), is(true));
+                assertThat(mandateResponse.getLink("next_url_post").isEmpty(), is(true));
+            }
+        });
+
+    }
+
+    @Test
     public void findMandateForToken_shouldUpdateTransactionStateAndRegisterEventWhenExchangingTokens() {
         String token = "token";
         Mandate mandate = MandateFixture.aMandateFixture().withState(CREATED).toEntity();
@@ -126,7 +147,6 @@ public class MandateServiceTest {
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .toEntity();
         when(mandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
-        when(tokenService.generateNewTokenFor(mandate)).thenReturn(new Token("token", mandate.getId()));
         MandateResponse getMandateResponse = service.populateGetMandateResponse(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId(), uriInfo);
         assertThat(getMandateResponse.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(getMandateResponse.getMandateId(), is(mandate.getExternalId()));

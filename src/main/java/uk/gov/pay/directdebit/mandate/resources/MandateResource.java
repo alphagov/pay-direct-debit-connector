@@ -51,7 +51,7 @@ public class MandateResource {
                                   @Context UriInfo uriInfo) {
         LOGGER.info("Received create mandate request with gateway account external id - {}", gatewayAccount.getExternalId());
         MandateResponse createMandateResponse = mandateService.createMandate(createMandateRequest, gatewayAccount.getExternalId(), uriInfo);
-        return created(createMandateResponse.getLink("self")).entity(createMandateResponse).build();
+        return created(createMandateResponse.getLink("self").get()).entity(createMandateResponse).build();
     }
 
     @GET
