@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.tokens.fixtures.TokenFixture;
@@ -78,7 +79,7 @@ public class MandateDaoIT {
 
     @Test
     public void shouldFindAMandateById() {
-        PaymentProviderMandateId paymentProviderMandateId = GoCardlessMandateId.valueOf("aGocardlessMandateId");
+        PaymentProviderMandateId paymentProviderMandateId = SandboxMandateId.valueOf("aSandboxMandateId");
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf("test-reference"))
                 .withServiceReference("test-service-reference")

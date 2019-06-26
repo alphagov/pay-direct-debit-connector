@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.mandate.model;
 
-import java.util.Objects;
+import uk.gov.pay.commons.model.WrappedStringValue;
 
 /**
  * Reference for a mandate, which may be shown on the paying user’s bank
@@ -16,35 +16,14 @@ import java.util.Objects;
  * @see <a href="https://developer.gocardless.com/api-reference/#appendix-character-sets">GoCardless character sets</a>
  * @see <a href="https://support.gocardless.com/hc/en-gb/articles/360000962309">GoCardless customer bank statement references</a>
  */
-public class MandateBankStatementReference {
-
-    private final String mandateBankStatementReference;
+public class MandateBankStatementReference extends WrappedStringValue {
 
     private MandateBankStatementReference(String mandateBankStatementReference) {
-        this.mandateBankStatementReference = Objects.requireNonNull(mandateBankStatementReference);
+        super(mandateBankStatementReference);
     }
 
     public static MandateBankStatementReference valueOf(String mandateBankStatementReference) {
         return new MandateBankStatementReference(mandateBankStatementReference);
-    }
-
-    @Override
-    public String toString() {
-        return mandateBankStatementReference;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other != null && other.getClass() == MandateBankStatementReference.class) {
-            MandateBankStatementReference that = (MandateBankStatementReference) other;
-            return this.mandateBankStatementReference.equals(that.mandateBankStatementReference);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return mandateBankStatementReference.hashCode();
     }
 
 }

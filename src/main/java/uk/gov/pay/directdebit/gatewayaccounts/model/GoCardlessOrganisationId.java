@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.gatewayaccounts.model;
 
-import java.util.Objects;
+import uk.gov.pay.commons.model.WrappedStringValue;
 
 /**
  * An ID that GoCardless assign to a GoCardless account belonging to a
@@ -9,37 +9,16 @@ import java.util.Objects;
  * GoCardless send this to us in webhooks to indicate which account each
  * event relates to
  * <br>
- * "organisation_id" in GoCardless JSON
+ * "organisation" or "organisation_id" in GoCardless JSON
  */
-public class GoCardlessOrganisationId {
-
-    private final String goCardlessOrganisationId;
+public class GoCardlessOrganisationId extends WrappedStringValue {
 
     private GoCardlessOrganisationId(String goCardlessOrganisationId) {
-        this.goCardlessOrganisationId = Objects.requireNonNull(goCardlessOrganisationId);
+        super(goCardlessOrganisationId);
     }
 
-    public static GoCardlessOrganisationId valueOf(String paymentProviderAccessToken) {
-        return new GoCardlessOrganisationId(paymentProviderAccessToken);
+    public static GoCardlessOrganisationId valueOf(String goCardlessOrganisationId) {
+        return new GoCardlessOrganisationId(goCardlessOrganisationId);
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (other != null && other.getClass() == GoCardlessOrganisationId.class) {
-            GoCardlessOrganisationId that = (GoCardlessOrganisationId) other;
-            return this.goCardlessOrganisationId.equals(that.goCardlessOrganisationId);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return goCardlessOrganisationId.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return goCardlessOrganisationId;
-    }
-    
 }
