@@ -7,13 +7,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
 import uk.gov.pay.directdebit.payments.model.Payment;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static uk.gov.pay.directdebit.payments.api.PaymentResponse.PaymentResponseBuilder.aPaymentResponse;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -33,7 +33,7 @@ public class PaymentResponse {
 
     @JsonProperty
     private String description;
-    
+
     @JsonProperty
     private String reference;
 
@@ -44,15 +44,14 @@ public class PaymentResponse {
     @JsonProperty
     private ExternalPaymentStateWithDetails state;
 
-    public PaymentResponse(String transactionExternalId, ExternalPaymentStateWithDetails state, Long amount, String returnUrl, String description, String reference, ZonedDateTime createdDate, List<Map<String, Object>> dataLinks) {
-        this.transactionExternalId = transactionExternalId;
-        this.state = state;
-        this.dataLinks = dataLinks;
-        this.amount = amount;
-        this.returnUrl = returnUrl;
-        this.description = description;
-        this.reference = reference;
-        this.createdDate = createdDate;
+    private PaymentResponse(PaymentResponseBuilder builder) {
+        this.transactionExternalId = builder.transactionExternalId;
+        this.state = builder.state;
+        this.dataLinks = builder.dataLinks;
+        this.amount = builder.amount;
+        this.description = builder.description;
+        this.reference = builder.reference;
+        this.createdDate = builder.createdDate;
     }
 
     public ZonedDateTime getCreatedDate() {
@@ -63,12 +62,12 @@ public class PaymentResponse {
         return transactionExternalId;
     }
 
-    public Long getAmount() {
-        return amount;
-    }
-
     public String getReturnUrl() {
         return returnUrl;
+    }
+
+    public Long getAmount() {
+        return amount;
     }
 
     public String getDescription() {
@@ -85,59 +84,51 @@ public class PaymentResponse {
 
 
     public static PaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
-        return new PaymentResponse(
-                payment.getExternalId(),
-                // TODO: should extract state details (go cardless cause details) from events table somehow
-                new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"),
-                payment.getAmount(),
-                payment.getMandate().getReturnUrl(),
-                payment.getDescription(),
-                payment.getReference(),
-                payment.getCreatedDate(),
-                dataLinks);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PaymentResponse that = (PaymentResponse) o;
-
-        if (!Objects.equals(dataLinks, that.dataLinks)) return false;
-        if (!transactionExternalId.equals(that.transactionExternalId)) return false;
-        if (!amount.equals(that.amount)) return false;
-        if (!returnUrl.equals(that.returnUrl)) return false;
-        if (!Objects.equals(description, that.description)) return false;
-        if (!Objects.equals(reference, that.reference)) return false;
-        if (!createdDate.equals(that.createdDate)) return false;
-        return state == that.state;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = dataLinks != null ? dataLinks.hashCode() : 0;
-        result = 31 * result + transactionExternalId.hashCode();
-        result = 31 * result + amount.hashCode();
-        result = 31 * result + returnUrl.hashCode();
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (reference != null ? reference.hashCode() : 0);
-        result = 31 * result + createdDate.hashCode();
-        result = 31 * result + state.hashCode();
-        return result;
+        // TODO: should extract state details (go cardless cause details) from events table somehow
+        return aPaymentResponse()
+                .withTransactionExternalId(payment.getExternalId())
+                .withState(
+                        new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"))
+                .withAmount(payment.getAmount())
+                .withReference(payment.getReference())
+                .withDescription(payment.getDescription())
+                .withCreatedDate(payment.getCreatedDate())
+                .withDataLinks(dataLinks)
+                .build();
     }
 
     @Override
     public String toString() {
         return "PaymentResponse{" +
                 "dataLinks=" + dataLinks +
-                ", paymentExternalId='" + transactionExternalId + '\'' +
-                ", state='" + state + '\'' +
+                ", transactionExternalId='" + transactionExternalId + '\'' +
                 ", amount=" + amount +
                 ", returnUrl='" + returnUrl + '\'' +
+                ", description='" + description + '\'' +
                 ", reference='" + reference + '\'' +
                 ", createdDate=" + createdDate +
+                ", state=" + state +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PaymentResponse that = (PaymentResponse) o;
+        return Objects.equals(dataLinks, that.dataLinks) &&
+                Objects.equals(transactionExternalId, that.transactionExternalId) &&
+                Objects.equals(amount, that.amount) &&
+                Objects.equals(returnUrl, that.returnUrl) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(reference, that.reference) &&
+                Objects.equals(createdDate, that.createdDate) &&
+                Objects.equals(state, that.state);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dataLinks, transactionExternalId, amount, returnUrl, description, reference, createdDate, state);
     }
 
     public static final class PaymentResponseBuilder {
@@ -145,7 +136,6 @@ public class PaymentResponse {
         //compatibility with public api
         private String transactionExternalId;
         private Long amount;
-        private String returnUrl;
         private String description;
         private String reference;
         private ZonedDateTime createdDate;
@@ -187,9 +177,14 @@ public class PaymentResponse {
             this.state = state;
             return this;
         }
+        
+        public PaymentResponseBuilder withDataLinks(List<Map<String, Object>> dataLinks) {
+            this.dataLinks = dataLinks;
+            return this;
+        }
 
         public PaymentResponse build() {
-            return new PaymentResponse(transactionExternalId, state, amount, returnUrl, description, reference, createdDate, dataLinks);
+            return new PaymentResponse(this);
         }
     }
 }
