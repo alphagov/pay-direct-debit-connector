@@ -5,22 +5,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import uk.gov.pay.commons.api.json.ApiResponseDateTimeSerializer;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static uk.gov.pay.directdebit.payments.api.PaymentResponse.PaymentResponseBuilder.aPaymentResponse;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class PaymentResponse {
-    @JsonProperty("links")
-    private List<Map<String, Object>> dataLinks;
-
+    
     //compatibility with public api
     @JsonProperty("charge_id")
     private String transactionExternalId;
@@ -34,6 +31,9 @@ public class PaymentResponse {
     @JsonProperty
     private String description;
     
+    @JsonProperty("mandate_id")
+    private MandateExternalId mandateId;
+    
     @JsonProperty
     private String reference;
 
@@ -44,15 +44,14 @@ public class PaymentResponse {
     @JsonProperty
     private ExternalPaymentStateWithDetails state;
 
-    public PaymentResponse(String transactionExternalId, ExternalPaymentStateWithDetails state, Long amount, String returnUrl, String description, String reference, ZonedDateTime createdDate, List<Map<String, Object>> dataLinks) {
-        this.transactionExternalId = transactionExternalId;
-        this.state = state;
-        this.dataLinks = dataLinks;
-        this.amount = amount;
-        this.returnUrl = returnUrl;
-        this.description = description;
-        this.reference = reference;
-        this.createdDate = createdDate;
+    PaymentResponse(PaymentResponseBuilder builder) {
+        this.transactionExternalId = builder.transactionExternalId;
+        this.state = builder.state;
+        this.amount = builder.amount;
+        this.description = builder.description;
+        this.reference = builder.reference;
+        this.createdDate = builder.createdDate;
+        this.mandateId = builder.mandateId;
     }
 
     public ZonedDateTime getCreatedDate() {
@@ -84,17 +83,17 @@ public class PaymentResponse {
     }
 
 
-    public static PaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
-        return new PaymentResponse(
-                payment.getExternalId(),
-                // TODO: should extract state details (go cardless cause details) from events table somehow
-                new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"),
-                payment.getAmount(),
-                payment.getMandate().getReturnUrl(),
-                payment.getDescription(),
-                payment.getReference(),
-                payment.getCreatedDate(),
-                dataLinks);
+    public static PaymentResponse from(Payment payment) {
+        return aPaymentResponse()
+                .withCreatedDate(payment.getCreatedDate())
+                .withReference(payment.getReference())
+                .withState(new ExternalPaymentStateWithDetails(payment.getState().toExternal(),
+                        "example_details"))
+                .withAmount(payment.getAmount())
+                .withTransactionExternalId(payment.getExternalId())
+                .withDescription(payment.getDescription())
+                .withMandateId(payment.getMandate().getExternalId())
+                .build();
     }
 
     @Override
@@ -104,7 +103,6 @@ public class PaymentResponse {
 
         PaymentResponse that = (PaymentResponse) o;
 
-        if (!Objects.equals(dataLinks, that.dataLinks)) return false;
         if (!transactionExternalId.equals(that.transactionExternalId)) return false;
         if (!amount.equals(that.amount)) return false;
         if (!returnUrl.equals(that.returnUrl)) return false;
@@ -116,8 +114,7 @@ public class PaymentResponse {
 
     @Override
     public int hashCode() {
-        int result = dataLinks != null ? dataLinks.hashCode() : 0;
-        result = 31 * result + transactionExternalId.hashCode();
+        int result = 31 * transactionExternalId.hashCode();
         result = 31 * result + amount.hashCode();
         result = 31 * result + returnUrl.hashCode();
         result = 31 * result + (description != null ? description.hashCode() : 0);
@@ -130,8 +127,7 @@ public class PaymentResponse {
     @Override
     public String toString() {
         return "PaymentResponse{" +
-                "dataLinks=" + dataLinks +
-                ", paymentExternalId='" + transactionExternalId + '\'' +
+                " paymentExternalId='" + transactionExternalId + '\'' +
                 ", state='" + state + '\'' +
                 ", amount=" + amount +
                 ", returnUrl='" + returnUrl + '\'' +
@@ -141,15 +137,14 @@ public class PaymentResponse {
     }
 
     public static final class PaymentResponseBuilder {
-        private List<Map<String, Object>> dataLinks;
         //compatibility with public api
         private String transactionExternalId;
         private Long amount;
-        private String returnUrl;
         private String description;
         private String reference;
         private ZonedDateTime createdDate;
         private ExternalPaymentStateWithDetails state;
+        private MandateExternalId mandateId;
 
         private PaymentResponseBuilder() {
         }
@@ -188,8 +183,13 @@ public class PaymentResponse {
             return this;
         }
 
+        public PaymentResponseBuilder withMandateId(MandateExternalId mandateId) {
+            this.mandateId = mandateId;
+            return this;
+        }
+        
         public PaymentResponse build() {
-            return new PaymentResponse(transactionExternalId, state, amount, returnUrl, description, reference, createdDate, dataLinks);
+            return new PaymentResponse(this);
         }
     }
 }
