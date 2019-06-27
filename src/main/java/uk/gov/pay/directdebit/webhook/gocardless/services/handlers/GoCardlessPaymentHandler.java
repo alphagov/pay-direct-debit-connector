@@ -60,7 +60,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
         if (!isValidOrganisation(payment, event)) {
             LOGGER.info("Ignoring GoCardless event {} because its organisation {} does not match organisation of " +
                             "stored payment {}",
-                    event.getGoCardlessEventId(), event.getOrganisationIdentifier(), payment.getExternalId());
+                    event.getGoCardlessEventId(), event.getLinksOrganisation(), payment.getExternalId());
             return Optional.empty();
         }
 
@@ -84,7 +84,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
 
     private boolean isValidOrganisation(Payment payment, GoCardlessEvent event) {
         return payment.getMandate().getGatewayAccount().getOrganisation()
-                .map(organisationIdentifier -> organisationIdentifier.equals(event.getOrganisationIdentifier()))
+                .map(organisationIdentifier -> organisationIdentifier.equals(event.getLinksOrganisation()))
                 .orElse(false);
     }
 }

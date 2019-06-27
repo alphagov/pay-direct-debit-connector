@@ -60,7 +60,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
         assertThat(firstEvent.getCreatedAt(), is(CREATED_AT));
-        assertThat(firstEvent.getOrganisationIdentifier(), is(organisationIdentifier));
+        assertThat(firstEvent.getLinksOrganisation(), is(organisationIdentifier));
         assertThat(firstEvent.getJson(), is(objectMapper.readTree(validEvent).toString()));
     }
 
@@ -91,7 +91,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
         assertThat(firstEvent.getCreatedAt(), is(CREATED_AT));
-        assertThat(firstEvent.getOrganisationIdentifier(), is(organisationIdentifier));
+        assertThat(firstEvent.getLinksOrganisation(), is(organisationIdentifier));
         assertThat(firstEvent.getJson(), is(objectMapper.readTree(firstEventPayload).toString()));
         assertThat(firstEvent.getDetailsCause(), is("payment_confirmed"));
         assertThat(firstEvent.getDetailsDescription(), is("Payment was confirmed as collected"));
@@ -100,7 +100,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getDetailsScheme(), is("a details scheme"));
         assertThat(firstEvent.getLinksNewCustomerBankAccount(), is("a bank account"));
         assertThat(firstEvent.getLinksNewMandate().get().toString(), is("a new mandate"));
-        assertThat(firstEvent.getLinksOrganisation(), is(organisationIdentifier.toString()));
+        assertThat(firstEvent.getLinksOrganisation(), is(organisationIdentifier));
         assertThat(firstEvent.getLinksParentEvent(), is("a parent event"));
         assertThat(firstEvent.getLinksPreviousCustomerBankAccount(), is("a previous customer bank account"));
         assertThat(firstEvent.getLinksRefund(), is(""));
@@ -115,7 +115,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(secondEvent.getAction(), is(secondEventAction));
         assertThat(secondEvent.getResourceType(), is(secondEventResourceType));
         assertThat(secondEvent.getCreatedAt(), is(eventCreatedAt));
-        assertThat(secondEvent.getOrganisationIdentifier(), is(organisationIdentifier));
+        assertThat(secondEvent.getLinksOrganisation(), is(organisationIdentifier));
         assertThat(secondEvent.getJson(), is(objectMapper.readTree(secondEventPayload).toString()));
         assertThat(secondEvent.getLinksPayment(), is(Optional.empty()));
         assertThat(secondEvent.getLinksMandate().get().toString(), is("mandate"));
@@ -128,7 +128,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(thirdEvent.getAction(), is(thirdEventAction));
         assertThat(thirdEvent.getResourceType(), is(thirdEventResourceType));
         assertThat(thirdEvent.getCreatedAt(), is(eventCreatedAt));
-        assertThat(thirdEvent.getOrganisationIdentifier(), is(organisationIdentifier));
+        assertThat(thirdEvent.getLinksOrganisation(), is(organisationIdentifier));
         assertThat(thirdEvent.getJson(), is(objectMapper.readTree(thirdEventPayload).toString()));
         assertThat(thirdEvent.getLinksPayment(), is(Optional.empty()));
         assertThat(thirdEvent.getLinksMandate(), is(Optional.empty()));

@@ -35,7 +35,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     private GoCardlessMandateId linksMandate = GoCardlessMandateId.valueOf(randomAlphabetic(20));
     private String linksNewCustomerBankAccount = randomAlphabetic(20);
     private GoCardlessMandateId linksNewMandate = GoCardlessMandateId.valueOf(randomAlphabetic(20));
-    private String linksOrganisation = randomAlphabetic(20);
+    private GoCardlessOrganisationId linksOrganisation = GoCardlessOrganisationId.valueOf(randomAlphanumeric(20));
     private String linksParentEvent = randomAlphabetic(20);
     private GoCardlessPaymentId linksPayment = GoCardlessPaymentId.valueOf(randomAlphabetic(20));
     private String linksPayout = randomAlphabetic(20);
@@ -43,7 +43,6 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     private String linksRefund = randomAlphabetic(20);
     private String linksSubscription = randomAlphabetic(20);
     private ZonedDateTime createdAt = ZonedDateTime.now(ZoneOffset.UTC);
-    private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf(randomAlphanumeric(25));
 
     private GoCardlessEventFixture() {
     }
@@ -124,11 +123,6 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public GoCardlessEventFixture withOrganisationIdentifier(GoCardlessOrganisationId organisationIdentifier) {
-        this.organisationIdentifier = organisationIdentifier;
-        return this;
-    }
-
     public String getDetailsCause() {
         return detailsCause;
     }
@@ -201,11 +195,11 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public String getLinksOrganisation() {
+    public GoCardlessOrganisationId getLinksOrganisation() {
         return linksOrganisation;
     }
 
-    public GoCardlessEventFixture withLinksOrganisation(String linksOrganisation) {
+    public GoCardlessEventFixture withLinksOrganisation(GoCardlessOrganisationId linksOrganisation) {
         this.linksOrganisation = linksOrganisation;
         return this;
     }
@@ -308,7 +302,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                         linksMandate.toString(),
                         linksNewCustomerBankAccount,
                         linksNewMandate,
-                        linksOrganisation,
+                        linksOrganisation.toString(),
                         linksParentEvent,
                         linksPayment.toString(),
                         linksPayout,
@@ -346,7 +340,6 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                 .withLinksPreviousCustomerBankAccount(linksPreviousCustomerBankAccount)
                 .withLinksRefund(linksRefund).withLinksSubscription(linksSubscription)
                 .withCreatedAt(createdAt)
-                .withOrganisationIdentifier(organisationIdentifier)
                 .build();
     }
 }

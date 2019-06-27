@@ -72,7 +72,7 @@ public class GoCardlessMandateHandlerTest {
             .withMandateFixture(mandateFixture);
     private GoCardlessMandateHandler goCardlessMandateHandler;
     private GoCardlessEventFixture goCardlessEventFixture = GoCardlessEventFixture.aGoCardlessEventFixture()
-            .withOrganisationIdentifier(organisationIdentifier);
+            .withLinksOrganisation(organisationIdentifier);
 
     @Before
     public void setUp() {
@@ -251,7 +251,7 @@ public class GoCardlessMandateHandlerTest {
     @Test
     public void handle_onCreateMandateGoCardlessEvent_shouldNotRegisterEventAsMandatePending_whenOrganisationDoesNotExist() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("does_not_exist"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("does_not_exist"))
                 .withAction("created")
                 .toEntity());
 
@@ -265,7 +265,7 @@ public class GoCardlessMandateHandlerTest {
     @Test
     public void handle_onCreateMandateGoCardlessEvent_shouldThrowExceptionWhenEventHasNoLinkedMandate() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("does_not_exist"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("does_not_exist"))
                 .withAction("created")
                 .withLinksMandate(null)
                 .toEntity());

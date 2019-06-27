@@ -25,7 +25,7 @@ public class GoCardlessEvent {
     private final GoCardlessMandateId linksMandate;
     private final String linksNewCustomerBankAccount;
     private final GoCardlessMandateId linksNewMandate;
-    private final String linksOrganisation;
+    private final GoCardlessOrganisationId linksOrganisation;
     private final String linksParentEvent;
     private final GoCardlessPaymentId linksPayment;
     private final String linksPayout;
@@ -33,7 +33,6 @@ public class GoCardlessEvent {
     private final String linksRefund;
     private final String linksSubscription;
     private final ZonedDateTime createdAt;
-    private final GoCardlessOrganisationId organisationIdentifier;
 
     private GoCardlessEvent(GoCardlessEventBuilder goCardlessEventBuilder) {
         this.id = goCardlessEventBuilder.id;
@@ -59,7 +58,6 @@ public class GoCardlessEvent {
         this.linksRefund = goCardlessEventBuilder.linksRefund;
         this.linksSubscription = goCardlessEventBuilder.linksSubscription;
         this.createdAt = goCardlessEventBuilder.createdAt;
-        this.organisationIdentifier = goCardlessEventBuilder.organisationIdentifier;
     }
     
     //TODO: This method will be removed once we stop creating generic events
@@ -127,7 +125,7 @@ public class GoCardlessEvent {
         return Optional.ofNullable(linksNewMandate);
     }
 
-    public String getLinksOrganisation() {
+    public GoCardlessOrganisationId getLinksOrganisation() {
         return linksOrganisation;
     }
 
@@ -186,8 +184,7 @@ public class GoCardlessEvent {
                 linksPreviousCustomerBankAccount.equals(that.linksPreviousCustomerBankAccount) &&
                 linksRefund.equals(that.linksRefund) &&
                 linksSubscription.equals(that.linksSubscription) &&
-                createdAt.equals(that.createdAt) &&
-                organisationIdentifier.equals(that.organisationIdentifier);
+                createdAt.equals(that.createdAt);
     }
 
     @Override
@@ -196,11 +193,7 @@ public class GoCardlessEvent {
                 detailsDescription, detailsOrigin, detailsReasonCode, detailsScheme, linksMandate,
                 linksNewCustomerBankAccount, linksNewMandate, linksOrganisation, linksParentEvent,
                 linksPayment, linksPayout, linksPreviousCustomerBankAccount, linksRefund, linksSubscription,
-                createdAt, organisationIdentifier);
-    }
-
-    public GoCardlessOrganisationId getOrganisationIdentifier() {
-        return organisationIdentifier;
+                createdAt);
     }
 
     public static final class GoCardlessEventBuilder {
@@ -220,7 +213,7 @@ public class GoCardlessEvent {
         private GoCardlessMandateId linksMandate;
         private String linksNewCustomerBankAccount;
         private GoCardlessMandateId linksNewMandate;
-        private String linksOrganisation;
+        private GoCardlessOrganisationId linksOrganisation;
         private String linksParentEvent;
         private GoCardlessPaymentId linksPayment;
         private String linksPayout;
@@ -312,7 +305,7 @@ public class GoCardlessEvent {
             return this;
         }
 
-        public GoCardlessEventBuilder withLinksOrganisation(String linksOrganisation) {
+        public GoCardlessEventBuilder withLinksOrganisation(GoCardlessOrganisationId linksOrganisation) {
             this.linksOrganisation = linksOrganisation;
             return this;
         }
@@ -349,11 +342,6 @@ public class GoCardlessEvent {
 
         public GoCardlessEventBuilder withCreatedAt(ZonedDateTime createdAt) {
             this.createdAt = createdAt;
-            return this;
-        }
-
-        public GoCardlessEventBuilder withOrganisationIdentifier(GoCardlessOrganisationId organisationIdentifier) {
-            this.organisationIdentifier = organisationIdentifier;
             return this;
         }
 

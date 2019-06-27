@@ -93,7 +93,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                         return handledAction.apply(mandate);
                     } else {
                         LOGGER.info("Event from GoCardless with goCardlessEventId: {} has unrecognised organisation: {}",
-                                event.getGoCardlessEventId(), event.getOrganisationIdentifier());
+                                event.getGoCardlessEventId(), event.getLinksOrganisation());
                         return null;
                     }
                 }));
@@ -106,7 +106,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
 
     private boolean isValidOrganisation(Mandate mandate, GoCardlessEvent event) {
         return mandate.getGatewayAccount().getOrganisation()
-                .map(organisationIdentifier -> organisationIdentifier.equals(event.getOrganisationIdentifier()))
+                .map(organisationIdentifier -> organisationIdentifier.equals(event.getLinksOrganisation()))
                 // TODO: replace true with false after going live. kept now for backwards compatibility with GetDirectDebitEventsIT
                 .orElse(true);
     }

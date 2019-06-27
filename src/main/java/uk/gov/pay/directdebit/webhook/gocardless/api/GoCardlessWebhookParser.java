@@ -44,8 +44,8 @@ public class GoCardlessWebhookParser {
                         .withAction(eventNode.get("action").asText())
                         .withJson(eventNode.toString())
                         .withCreatedAt(ZonedDateTime.parse(eventNode.get("created_at").asText()))
-                        .withOrganisationIdentifier(getOrganisationField(eventNode));
-                
+                        .withLinksOrganisation(GoCardlessOrganisationId.valueOf(linksNode.get("organisation").asText()));
+
                 if (detailsNode.has("cause")) {
                     goCardlessEventBuilder.withDetailsCause(detailsNode.get("cause").asText());
                 }
@@ -71,9 +71,6 @@ public class GoCardlessWebhookParser {
                 }
                 if (linksNode.has("new_mandate")) {
                     goCardlessEventBuilder.withLinksNewMandate(GoCardlessMandateId.valueOf(linksNode.get("new_mandate").asText()));
-                }
-                if (linksNode.has("organisation")) {
-                    goCardlessEventBuilder.withLinksOrganisation(linksNode.get("organisation").asText());
                 }
                 if (linksNode.has("parent_event")) {
                     goCardlessEventBuilder.withLinksParentEvent(linksNode.get("parent_event").asText());
@@ -112,17 +109,6 @@ public class GoCardlessWebhookParser {
             return events;
         } catch (Exception exc) {
             throw new WebhookParserException("Failed to parse webhooks, body: " + webhookPayload);
-        }
-    }
-
-    private GoCardlessOrganisationId getOrganisationField(JsonNode eventNode) {
-        /* todo: remove the check for missing node after going live
-        Now is used for backward compatibility as when live we will get the organisation in the payload
-        */
-        if (eventNode.get("links").has("organisation")) {
-            return GoCardlessOrganisationId.valueOf(eventNode.get("links").get("organisation").asText());
-        } else {
-            return null;
         }
     }
 
