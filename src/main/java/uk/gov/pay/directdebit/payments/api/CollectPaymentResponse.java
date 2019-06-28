@@ -12,10 +12,7 @@ import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 
-import java.net.URI;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -80,6 +77,14 @@ public class CollectPaymentResponse {
         return amount;
     }
 
+    public ZonedDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public ExternalPaymentStateWithDetails getState() {
+        return state;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -140,7 +145,7 @@ public class CollectPaymentResponse {
     public int hashCode() {
         return Objects.hash(paymentExternalId, amount, mandateId, providerId, paymentProvider, description, reference, createdDate, state);
     }
-
+    
     public static final class CollectPaymentResponseBuilder {
 
         private String paymentExternalId;

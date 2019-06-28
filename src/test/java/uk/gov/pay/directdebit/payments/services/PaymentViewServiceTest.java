@@ -14,9 +14,9 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.model.Payer;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
-import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
-import static uk.gov.pay.directdebit.payments.api.PaymentResponse.PaymentResponseBuilder.aPaymentResponse;
+import static uk.gov.pay.directdebit.payments.api.CollectPaymentResponse.CollectPaymentResponseBuilder.aCollectPaymentResponse;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
@@ -50,7 +50,7 @@ public class PaymentViewServiceTest {
     public ExpectedException thrown = ExpectedException.none();
     private String gatewayAccountExternalId = RandomIdGenerator.newId();
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
-    private List<PaymentResponse> paymentViewList = new ArrayList<>();
+    private List<CollectPaymentResponse> paymentViewList = new ArrayList<>();
     @Mock
     private PaymentViewDao paymentViewDao;
     @Mock
@@ -63,13 +63,13 @@ public class PaymentViewServiceTest {
     @Before
     public void setUp() {
         for (int i = 0; i < 4; i++) {
-            PaymentResponse paymentResponse = aPaymentResponse()
+            CollectPaymentResponse paymentResponse = aCollectPaymentResponse()
                     .withCreatedDate(createdDate)
                     .withState(new ExternalPaymentStateWithDetails(ExternalPaymentState.EXTERNAL_PENDING, "example_details"))
                     .withReference("Pay reference " + i)
                     .withAmount(1000L + i)
                     .withDescription("This is a description " + i)
-                    .withTransactionExternalId(RandomIdGenerator.newId())
+                    .withPaymentExternalId(RandomIdGenerator.newId())
                     .build();
             paymentViewList.add(paymentResponse);
         }
@@ -128,7 +128,7 @@ public class PaymentViewServiceTest {
                 .withName("J. Doe")
                 .withEmail("j.doe@mail.fake")
                 .toEntity();
-        List<PaymentResponse> paymentViewList = new ArrayList<>();
+        List<CollectPaymentResponse> paymentViewList = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             Payment payment = aPaymentFixture()
                     .withId((long) i)
@@ -138,8 +138,8 @@ public class PaymentViewServiceTest {
                     .withDescription("Description" + i)
                     .withCreatedDate(createdDate)
                     .toEntity();
-            paymentViewList.add(aPaymentResponse()
-                    .withTransactionExternalId(payment.getExternalId())
+            paymentViewList.add(aCollectPaymentResponse()
+                    .withPaymentExternalId(payment.getExternalId())
                     .withAmount(payment.getAmount())
                     .withReference(payment.getReference())
                     .withDescription(payment.getDescription())
@@ -167,7 +167,7 @@ public class PaymentViewServiceTest {
     public void shouldReturnNoRecords_whenPaginationSetToPage2AndNoDisplaySize() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withExternalId(gatewayAccountExternalId);
         GatewayAccount testGatewayAccount = gatewayAccountFixture.toEntity();
-        List<PaymentResponse> paymentViewList = new ArrayList<>();
+        List<CollectPaymentResponse> paymentViewList = new ArrayList<>();
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(18L);
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
