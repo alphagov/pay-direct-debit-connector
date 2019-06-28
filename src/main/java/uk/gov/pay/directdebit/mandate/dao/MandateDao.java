@@ -9,6 +9,7 @@ import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.PaymentProviderServiceIdArgumentFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -102,8 +103,9 @@ public interface MandateDao {
     Optional<Mandate> findByExternalIdAndGatewayAccountExternalId(@Bind("mandateExternalId") MandateExternalId mandateExternalId,
                                                                   @Bind("gatewayAccountExternalId") String gatewayAccountExternalId);
 
-    @SqlQuery(query + "WHERE m.payment_provider_id = :paymentProviderMandateId AND g.organisation = :paymentProviderServiceId")
-    Optional<Mandate> findByPaymentProviderMandateId(@Bind("paymentProviderMandateId") PaymentProviderMandateId paymentProviderMandateId,
+    @SqlQuery(query + "WHERE m.payment_provider_id = :paymentProviderMandateId AND g.organisation = :paymentProviderServiceId AND g.payment_provider = :provider")
+    Optional<Mandate> findByPaymentProviderMandateId(@Bind("provider") PaymentProvider paymentProvider,
+                                                     @Bind("paymentProviderMandateId") PaymentProviderMandateId paymentProviderMandateId,
                                                      @Bind("paymentProviderServiceId") PaymentProviderServiceId paymentProviderServiceId);
 
     @SqlQuery(query + "WHERE m.state IN (<states>) AND m.created_date < :maxDateTime")
