@@ -8,11 +8,13 @@ import au.com.dius.pact.provider.junit.loader.PactBrokerAuth;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
@@ -38,7 +40,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFi
 
 @RunWith(PactRunner.class)
 @Provider("direct-debit-connector")
-@PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
+@PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"PR-570"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
         consumers = {"publicapi"})
 //uncommenting the below is useful for testing pacts locally. grab the pact from the broker and put it in /pacts
@@ -85,17 +87,19 @@ public class PublicApiContractTest {
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
                 .withPayerFixture(PayerFixture.aPayerFixture())
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(params.get("bank_mandate_reference")))
-                .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("MD1"))
                 .withState(MandateState.PENDING)
                 .insert(app.getTestContext().getJdbi());
     }
 
     @State("three payment records exist")
     public void threePaymentRecordsExist(Map<String, String> params) {
-        testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
+        testGatewayAccount.withPaymentProvider(PaymentProvider.GOCARDLESS)
+                .withExternalId(params.get("gateway_account_id"))
+                .insert(app.getTestContext().getJdbi());
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
-                .withExternalId(MandateExternalId.valueOf(params.get("agreement_id")));
+                .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")));
         testMandate.insert(app.getTestContext().getJdbi());
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
         testPayer.insert(app.getTestContext().getJdbi());

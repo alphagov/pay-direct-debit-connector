@@ -27,7 +27,7 @@ public class PaymentViewResource {
     }
 
     @GET
-    @Path("/v1/api/accounts/{accountId}/payments/view")
+    @Path("/v1/api/accounts/{accountId}/payments")
     @Produces(APPLICATION_JSON)
     @Timed
     public Response getPaymentView(
@@ -38,7 +38,7 @@ public class PaymentViewResource {
             @QueryParam("to_date") String toDate,
             @QueryParam("reference") String reference,
             @QueryParam("amount") Long amount,
-            @QueryParam("agreement_id") String mandateId,
+            @QueryParam("mandate_id") String mandateId,
             @QueryParam("state") String state,
             @Context UriInfo uriInfo) {
 
@@ -51,8 +51,6 @@ public class PaymentViewResource {
                 .withAmount(amount)
                 .withMandateId(mandateId)
                 .withState(state);
-        return Response.ok().entity(paymentViewService
-                .withUriInfo(uriInfo)
-                .getPaymentViewResponse(searchParams)).build();
+        return Response.ok().entity(paymentViewService.withUriInfo(uriInfo).getPaymentViewResponse(searchParams)).build();
     }
 }

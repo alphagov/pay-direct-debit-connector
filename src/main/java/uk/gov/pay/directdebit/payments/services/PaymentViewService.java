@@ -34,8 +34,7 @@ public class PaymentViewService {
                     List<CollectPaymentResponse> viewListResponse = Collections.emptyList();
                     Long total = getTotal(validatedSearchParams);
                     if (total > 0) {
-                        viewListResponse =
-                                getPaymentViewResultResponse(validatedSearchParams);
+                        viewListResponse = getPaymentViewResultResponse(validatedSearchParams);
                     }
                     ViewPaginationBuilder paginationBuilder = new ViewPaginationBuilder(validatedSearchParams, uriInfo);
                     return new PaymentViewResponse(validatedSearchParams.getGatewayExternalId(),
