@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -180,19 +181,48 @@ public class MandateDaoIT {
     
     
     @Test
-    public void shouldFindAMandateByPaymentProviderId() {
+    public void shouldFindAMandateByPaymentProviderIdAndOrganisationId() {
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("expectedExternalId");
         GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("expectedGoCardlessMandateId");
+        GoCardlessOrganisationId goCardlessOrganisationId = GoCardlessOrganisationId.valueOf("expectedGoCardlessOrganisationId");
+
+        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+                .withOrganisation(goCardlessOrganisationId)
+                .insert(testContext.getJdbi());
+
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
-                .withExternalId(MandateExternalId.valueOf("expectedExternalId"))
+                .withExternalId(mandateExternalId)
                 .withPaymentProviderId(goCardlessMandateId)
                 .insert(testContext.getJdbi());
 
-        Mandate mandate = mandateDao.findByPaymentProviderMandateId(goCardlessMandateId).get();
+        Mandate mandate = mandateDao.findByPaymentProviderMandateId(goCardlessMandateId, goCardlessOrganisationId).get();
+
         assertThat(mandate.getId(), is(mandateFixture.getId()));
         assertThat(mandate.getExternalId().toString(), is("expectedExternalId"));
         assertThat(mandate.getPaymentProviderMandateId().get().toString(), is("expectedGoCardlessMandateId"));
         assertThat(mandate.getState(), is(MandateState.CREATED));
+    }
+
+    @Test
+    public void shouldNotFindAMandateByPaymentProviderIdIfOrganisationIdDoesNotMatch() {
+        MandateExternalId mandateExternalId = MandateExternalId.valueOf("expectedExternalId");
+        GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("expectedGoCardlessMandateId");
+        GoCardlessOrganisationId goCardlessOrganisationId = GoCardlessOrganisationId.valueOf("expectedGoCardlessOrganisationId");
+
+        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+                .withOrganisation(goCardlessOrganisationId)
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withExternalId(mandateExternalId)
+                .withPaymentProviderId(goCardlessMandateId)
+                .insert(testContext.getJdbi());
+
+        Optional<Mandate> mandate = mandateDao.findByPaymentProviderMandateId(goCardlessMandateId, GoCardlessOrganisationId.valueOf("differentOrganisationId"));
+
+        assertThat(mandate, is(Optional.empty()));
     }
 
     @Test

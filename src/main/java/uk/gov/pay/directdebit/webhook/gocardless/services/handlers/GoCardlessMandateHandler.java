@@ -86,8 +86,9 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 .map((action) -> getHandledActions().get(action))
                 .map((handledAction -> {
                     Mandate mandate = mandateQueryService.findByPaymentProviderMandateId(
-                            event.getLinksMandate()
-                                    .orElseThrow(() -> new EventHasNoMandateIdException(event.getEventId())));
+                            event.getLinksMandate().orElseThrow(() -> new EventHasNoMandateIdException(event.getEventId())),
+                            event.getLinksOrganisation()
+                    );
 
                     if (isValidOrganisation(mandate, event)) {
                         return handledAction.apply(mandate);
