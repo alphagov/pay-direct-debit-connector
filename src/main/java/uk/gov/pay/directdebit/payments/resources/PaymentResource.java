@@ -26,7 +26,7 @@ import static org.apache.http.HttpStatus.SC_CREATED;
 @Path("/")
 public class PaymentResource {
     //has to be /charges unless we change public api
-    public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{paymentExternalId}";
+    public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{paymentExternalId}"; // TODO rename to /payments instead of /charges
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentResource.class);
     

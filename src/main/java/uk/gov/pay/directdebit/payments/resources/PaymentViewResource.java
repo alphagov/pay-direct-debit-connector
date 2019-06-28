@@ -36,7 +36,6 @@ public class PaymentViewResource {
             @QueryParam("display_size") Long displaySize,
             @QueryParam("from_date") String fromDate,
             @QueryParam("to_date") String toDate,
-            @QueryParam("email") String email,
             @QueryParam("reference") String reference,
             @QueryParam("amount") Long amount,
             @QueryParam("agreement_id") String mandateId,
@@ -48,7 +47,6 @@ public class PaymentViewResource {
                 .withDisplaySize(displaySize)
                 .withFromDateString(fromDate)
                 .withToDateString(toDate)
-                .withEmail(email)
                 .withReference(reference)
                 .withAmount(amount)
                 .withMandateId(mandateId)

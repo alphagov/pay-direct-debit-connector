@@ -27,7 +27,6 @@ public class PaymentViewValidator {
                 .withDisplaySize(searchParams.getDisplaySize() == null ? MAX_PAGE_NUMBER : searchParams.getDisplaySize())
                 .withFromDateString(searchParams.getFromDateString())
                 .withToDateString(searchParams.getToDateString())
-                .withEmail(searchParams.getEmail())
                 .withReference(searchParams.getReference())
                 .withAmount(searchParams.getAmount())
                 .withMandateId(searchParams.getMandateId())

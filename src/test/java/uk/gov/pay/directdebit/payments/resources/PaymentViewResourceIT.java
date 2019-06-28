@@ -36,7 +36,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFi
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class PaymentViewResourceIT {
+public class PaymentViewResourceIT { //TODO merge with PaymentResource
 
     private GatewayAccountFixture testGatewayAccount;
 
@@ -241,33 +241,6 @@ public class PaymentViewResourceIT {
                 .contentType(JSON)
                 .body("message", contains("Input toDate (2018-14-08T15:00Z) is wrong format"))
                 .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
-    }
-
-    @Test
-    public void shouldReturn7Records_whenEmailSet() {
-        List<String> emailList = Arrays.asList("john.doe@example.com", "jane.doe@example.com");
-        for (int i = 0; i < 15; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-
-            aPaymentFixture()
-                    .withId((long) i)
-                    .withMandateFixture(mandateFixture)
-                    .insert(testContext.getJdbi());
-            aPayerFixture()
-                    .withMandateId(mandateFixture.getId())
-                    .withEmail(i % 2 == 0 ? emailList.get(0) : emailList.get(1))
-                    .insert(testContext.getJdbi());
-        }
-
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?email=:email"
-                .replace("{accountId}", testGatewayAccount.getExternalId())
-                .replace(":email", "Jane");
-        givenSetup()
-                .get(requestPath)
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body("results", hasSize(7));
     }
 
     @Test

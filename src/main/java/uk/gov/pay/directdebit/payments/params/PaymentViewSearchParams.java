@@ -22,7 +22,6 @@ public class PaymentViewSearchParams {
     private static final String PAGE_SIZE_FIELD = "limit";
     private static final String FROM_DATE_FIELD = "fromDate";
     private static final String TO_DATE_FIELD = "toDate";
-    private static final String EMAIL_FIELD = "email";
     private static final String REFERENCE_FIELD = "reference";
     private static final String AMOUNT_FIELD = "amount";
     private static final String MANDATE_ID_INTERNAL_KEY = "mandate_id";
@@ -30,12 +29,12 @@ public class PaymentViewSearchParams {
     private static final String FROM_DATE_KEY = "from_date";
     private static final String TO_DATE_KEY = "to_date";
     private static final String STATE_FIELD = "state";
+    
     private final String gatewayExternalId;
     private Long page;
     private Long displaySize;
     private String fromDateString;
     private String toDateString;
-    private String email;
     private String reference;
     private Long amount;
     private String mandateId;
@@ -84,11 +83,6 @@ public class PaymentViewSearchParams {
         return this;
     }
 
-    public PaymentViewSearchParams withEmail(String email) {
-        this.email = email;
-        return this;
-    }
-
     public PaymentViewSearchParams withReference(String reference) {
         this.reference = reference;
         return this;
@@ -123,8 +117,6 @@ public class PaymentViewSearchParams {
     public String getFromDateString() { return fromDateString; }
 
     public String getToDateString() { return toDateString; }
-
-    public String getEmail() { return email; }
 
     public String getReference() { return reference; }
 
@@ -161,9 +153,6 @@ public class PaymentViewSearchParams {
                 sb.append(" AND p.created_date < :" + TO_DATE_FIELD);
             }
         }
-        if (isNotBlank(email)) {
-            sb.append(" AND pa.email ILIKE :" + EMAIL_FIELD);
-        }
         if (isNotBlank(reference)) {
             sb.append(" AND p.reference ILIKE :" + REFERENCE_FIELD);
         }
@@ -193,9 +182,6 @@ public class PaymentViewSearchParams {
                     queryMap.put(TO_DATE_FIELD, searchDateParams.getToDate());
                 }
             }
-            if (isNotBlank(email)) {
-                queryMap.put(EMAIL_FIELD, likeClause(email));
-            }
             if (isNotBlank(reference)) {
                 queryMap.put(REFERENCE_FIELD, likeClause(reference));
             }
@@ -218,9 +204,6 @@ public class PaymentViewSearchParams {
             if (searchDateParams.getToDate() != null) {
                 query += "&" + TO_DATE_KEY + "=" + searchDateParams.getToDate().toString();
             }
-        }
-        if (isNotBlank(email)) {
-            query += "&" + EMAIL_FIELD + "=" + email;
         }
         if (isNotBlank(reference)) {
             query += "&" + REFERENCE_FIELD + "=" + reference;
