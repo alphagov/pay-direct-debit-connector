@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -40,6 +41,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
@@ -51,21 +53,26 @@ import static uk.gov.pay.directdebit.payments.resources.PaymentResource.CHARGE_A
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubGetCreditor;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
+import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class PaymentResourceIT {
 
+    private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
     private static final String JSON_AMOUNT_KEY = "amount";
     private static final String JSON_REFERENCE_KEY = "reference";
     private static final String JSON_DESCRIPTION_KEY = "description";
     private static final String JSON_GATEWAY_ACC_KEY = "gateway_account_id";
+    private static final String JSON_RETURN_URL_KEY = "return_url";
+    private static final String JSON_CHARGE_KEY = "charge_id";
     private static final String JSON_PAYMENT_ID_KEY = "payment_id";
     private static final String JSON_PROVIDER_ID_KEY = "provider_id";
     private static final String JSON_MANDATE_ID_KEY = "mandate_id";
     private static final String JSON_PAYMENT_PROVIDER_KEY = "payment_provider";
     private static final String JSON_STATE_STATUS_KEY = "state.status";
     private static final String JSON_STATE_FINISHED_KEY = "state.finished";
+    private static final String JSON_STATE_DETAILS_KEY = "state.details";
     private static final long AMOUNT = 6234L;
     private GatewayAccountFixture testGatewayAccount;
 
@@ -273,16 +280,64 @@ public class PaymentResourceIT {
                 .replace("{accountId}", accountExternalId)
                 .replace("{paymentExternalId}", paymentFixture.getExternalId());
 
-        givenSetup()
+        ValidatableResponse getChargeResponse = givenSetup()
                 .get(requestPath)
                 .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
+                .body(JSON_CHARGE_KEY, is(paymentFixture.getExternalId()))
                 .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
                 .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
                 .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
                 .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getStatus()))
-                .body(JSON_STATE_FINISHED_KEY, is(false));
+                .body(JSON_STATE_FINISHED_KEY, is(false))
+                .body(JSON_STATE_DETAILS_KEY, is("example_details"))
+                .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
+
+
+        String documentLocation = expectedTransactionLocationFor(accountExternalId, paymentFixture.getExternalId());
+        String token = testContext.getDatabaseTestHelper().getTokenByPaymentExternalId(paymentFixture.getExternalId());
+
+        String hrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + token;
+        String hrefNextUrlPost = "http://Frontend" + FRONTEND_CARD_DETAILS_URL;
+
+
+        getChargeResponse
+                .body("links", hasSize(3))
+                .body("links", containsLink("self", "GET", documentLocation))
+                .body("links", containsLink("next_url", "GET", hrefNextUrl))
+                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
+                    put("chargeTokenId", token);
+                }}));
+
+        String requestPath2 = CHARGE_API_PATH
+                .replace("{accountId}", accountExternalId)
+                .replace("{paymentExternalId}", paymentFixture.getExternalId());
+
+        ValidatableResponse getChargeFromTokenResponse = givenSetup()
+                .get(requestPath2)
+                .then()
+                .statusCode(OK.getStatusCode())
+                .contentType(JSON)
+                .body(JSON_CHARGE_KEY, is(paymentFixture.getExternalId()))
+                .body(JSON_AMOUNT_KEY, isNumber(paymentFixture.getAmount()))
+                .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
+                .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
+                .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getStatus()))
+                .body(JSON_STATE_DETAILS_KEY, is("example_details"))
+                .body(JSON_RETURN_URL_KEY, is(mandateFixture.getReturnUrl()));
+
+        String newChargeToken = testContext.getDatabaseTestHelper().getTokenByPaymentExternalId(paymentFixture.getExternalId());
+
+        String newHrefNextUrl = "http://Frontend" + FRONTEND_CARD_DETAILS_URL + "/" + newChargeToken;
+
+        getChargeFromTokenResponse
+                .body("links", hasSize(3))
+                .body("links", containsLink("self", "GET", documentLocation))
+                .body("links", containsLink("next_url", "GET", newHrefNextUrl))
+                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", new HashMap<String, Object>() {{
+                    put("chargeTokenId", newChargeToken);
+                }}));
     }
     
     private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
@@ -290,6 +345,12 @@ public class PaymentResourceIT {
                 .withMandateFixture(mandateFixture)
                 .withState(paymentState)
                 .insert(testContext.getJdbi());
+    }
+
+    private String expectedTransactionLocationFor(String accountId, String chargeId) {
+        return "http://localhost:" + testContext.getPort() + CHARGE_API_PATH
+                .replace("{accountId}", accountId)
+                .replace("{paymentExternalId}", chargeId);
     }
 
     private RequestSpecification givenSetup() {
