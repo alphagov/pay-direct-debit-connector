@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
@@ -12,6 +13,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
@@ -135,12 +137,24 @@ public class PaymentDaoIT {
 
     @Test
     public void shouldGetAPaymentByProviderId() {
-        SandboxPaymentId expectedProviderId = SandboxPaymentId.valueOf("aProviderId");
+        var goCardlessOrganisationId = GoCardlessOrganisationId.valueOf("orgId");
+        var expectedProviderId = GoCardlessPaymentId.valueOf("aProviderId");
+
+        testGatewayAccount = aGatewayAccountFixture()
+                .withPaymentProvider(GOCARDLESS)
+                .withOrganisation(goCardlessOrganisationId)
+                .insert(testContext.getJdbi());
+
+        testMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
         testPayment
+                .withMandateFixture(testMandate)
                 .withPaymentProviderId(expectedProviderId)
                 .insert(testContext.getJdbi());
 
-        Payment payment = paymentDao.findPaymentByProviderId(SANDBOX, expectedProviderId).get();
+        Payment payment = paymentDao.findPaymentByProviderId(GOCARDLESS, expectedProviderId, goCardlessOrganisationId).get();
 
         assertThat(payment.getId(), is(testPayment.getId()));
         assertThat(payment.getMandate(), is(testMandate.toEntity()));
@@ -153,13 +167,49 @@ public class PaymentDaoIT {
     }
 
     @Test
-    public void shouldReturnEmptyWhenProviderIdMatchesButProviderDoesNotMatch() {
-        SandboxPaymentId expectedProviderId = SandboxPaymentId.valueOf("aProviderId");
+    public void shouldReturnEmptyWhenProviderIdMatchesButPaymentProviderServiceIdDoesNotMatch() {
+        var goCardlessOrganisationId = GoCardlessOrganisationId.valueOf("orgId");
+        var expectedProviderId = GoCardlessPaymentId.valueOf("aProviderId");
+
+        testGatewayAccount = aGatewayAccountFixture()
+                .withPaymentProvider(GOCARDLESS)
+                .withOrganisation(goCardlessOrganisationId)
+                .insert(testContext.getJdbi());
+
+        testMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
         testPayment
+                .withMandateFixture(testMandate)
                 .withPaymentProviderId(expectedProviderId)
                 .insert(testContext.getJdbi());
 
-        Optional<Payment> payment = paymentDao.findPaymentByProviderId(GOCARDLESS, expectedProviderId);
+        Optional<Payment> payment = paymentDao.findPaymentByProviderId(GOCARDLESS, expectedProviderId, GoCardlessOrganisationId.valueOf("differentOrg"));
+
+        assertThat(payment, is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenProviderIdMatchesButProviderDoesNotMatch() {
+        var goCardlessOrganisationId = GoCardlessOrganisationId.valueOf("orgId");
+        var expectedProviderId = GoCardlessPaymentId.valueOf("aProviderId");
+
+        testGatewayAccount = aGatewayAccountFixture()
+                .withPaymentProvider(GOCARDLESS)
+                .withOrganisation(goCardlessOrganisationId)
+                .insert(testContext.getJdbi());
+
+        testMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
+        testPayment
+                .withMandateFixture(testMandate)
+                .withPaymentProviderId(expectedProviderId)
+                .insert(testContext.getJdbi());
+
+        Optional<Payment> payment = paymentDao.findPaymentByProviderId(SANDBOX, expectedProviderId, goCardlessOrganisationId);
 
         assertThat(payment, is(Optional.empty()));
     }
