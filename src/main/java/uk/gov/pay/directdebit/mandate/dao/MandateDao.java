@@ -8,8 +8,8 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.PaymentProviderServiceIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
@@ -26,7 +26,7 @@ import java.util.Set;
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
 @RegisterArgumentFactory(MandateBankStatementReferenceArgumentFactory.class)
 @RegisterArgumentFactory(PaymentProviderMandateIdArgumentFactory.class)
-@RegisterArgumentFactory(GoCardlessMandateIdArgumentFactory.class)
+@RegisterArgumentFactory(PaymentProviderServiceIdArgumentFactory.class)
 @RegisterRowMapper(MandateMapper.class)
 public interface MandateDao {
 
