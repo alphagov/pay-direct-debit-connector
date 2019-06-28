@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.events.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
@@ -31,7 +32,7 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
                 .withDetailsReasonCode(resultSet.getString("details_reason_code"))
                 .withDetailsScheme(resultSet.getString("details_scheme"))
                 .withLinksNewCustomerBankAccount(resultSet.getString("links_new_customer_bank_account"))
-                .withLinksOrganisation(resultSet.getString("links_organisation"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf(resultSet.getString("links_organisation")))
                 .withLinksParentEvent(resultSet.getString("links_parent_event"))
                 .withLinksPayout(resultSet.getString("links_payout"))
                 .withLinksPreviousCustomerBankAccount(resultSet.getString("links_previous_customer_bank_account"))

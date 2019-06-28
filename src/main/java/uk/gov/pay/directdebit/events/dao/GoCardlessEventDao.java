@@ -7,6 +7,7 @@ import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.events.dao.mapper.GoCardlessEventMapper;
+import uk.gov.pay.directdebit.events.model.GoCardlessOrganisationIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
@@ -15,6 +16,7 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdArgumentFactory;
 @RegisterArgumentFactory(GoCardlessEventIdArgumentFactory.class)
 @RegisterArgumentFactory(GoCardlessMandateIdArgumentFactory.class)
 @RegisterArgumentFactory(GoCardlessPaymentIdArgumentFactory.class)
+@RegisterArgumentFactory(GoCardlessOrganisationIdArgumentFactory.class)
 @RegisterRowMapper(GoCardlessEventMapper.class)
 public interface GoCardlessEventDao {
 

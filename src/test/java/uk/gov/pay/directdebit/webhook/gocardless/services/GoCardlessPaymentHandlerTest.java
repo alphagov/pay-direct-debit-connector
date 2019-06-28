@@ -52,7 +52,7 @@ public class GoCardlessPaymentHandlerTest {
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().withOrganisation(organisationIdentifier);
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture);
     private Payment payment = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture).toEntity();
-    private GoCardlessEventFixture goCardlessEventFixture = GoCardlessEventFixture.aGoCardlessEventFixture().withOrganisationIdentifier(organisationIdentifier);
+    private GoCardlessEventFixture goCardlessEventFixture = GoCardlessEventFixture.aGoCardlessEventFixture().withLinksOrganisation(organisationIdentifier);
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -191,9 +191,9 @@ public class GoCardlessPaymentHandlerTest {
     }
 
     @Test
-    public void handle_doNotProcess_noOrgansiationOnGatewayAccount() {
+    public void handle_doNotProcess_organisationOnEventDoesNotMatchGatewayAccount() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
-                .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("i_do_not_exist_id"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("i_do_not_exist_id"))
                 .withAction("paid")
                 .toEntity());
 
@@ -207,7 +207,7 @@ public class GoCardlessPaymentHandlerTest {
     @Test
     public void handle_onCreatePaymentGoCardlessEvent_shouldThrowExceptionWhenEventHasNoLinkedPayment() {
         GoCardlessEvent goCardlessEvent = goCardlessEventFixture
-                .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("does_not_exist"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("does_not_exist"))
                 .withAction("created")
                 .withLinksPayment(null)
                 .toEntity();
@@ -220,7 +220,7 @@ public class GoCardlessPaymentHandlerTest {
     public void handle_onCreatePaymentGoCardlessEvent_shouldThrowPaymentNotFoundException() {
         GoCardlessPaymentId expectedPaymentProvider = GoCardlessPaymentId.valueOf("expected");
         GoCardlessEvent goCardlessEvent = goCardlessEventFixture
-                .withOrganisationIdentifier(GoCardlessOrganisationId.valueOf("does_not_exist"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("does_not_exist"))
                 .withAction("created")
                 .withLinksPayment(expectedPaymentProvider)
                 .toEntity();

@@ -9,6 +9,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -95,7 +96,7 @@ public class GoCardlessDirectDebitDirectDebitEventDaoIT {
                 .withLinksMandate(GoCardlessMandateId.valueOf( LINKS_MANDATE))
                 .withLinksNewCustomerBankAccount(LINKS_NEWCUSTOMERBANKACCOUNT)
                 .withLinksNewMandate(GoCardlessMandateId.valueOf(LINKS_NEWMANDATE))
-                .withLinksOrganisation(LINKS_ORGANISATION)
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf(LINKS_ORGANISATION))
                 .withLinksParentEvent(LINKS_PARENTEVENT)
                 .withLinksPayment(GoCardlessPaymentId.valueOf(LINKS_PAYMENT))
                 .withLinksPayout(LINKS_PAYOUT)
