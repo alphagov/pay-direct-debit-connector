@@ -59,6 +59,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.commons.testing.matchers.HamcrestMatchers.optionalMatcher;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -309,7 +310,7 @@ public class MandateResourceIT {
     public void shouldRetrieveAMandate_FromFrontendEndpoint_WhenAPaymentHasBeenCreated() {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+        MandateFixture mandateFixture = aMandateFixture()
                 .withPayerFixture(payerFixture)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
@@ -350,7 +351,7 @@ public class MandateResourceIT {
 
         String accountExternalId = gatewayAccountFixture.getExternalId();
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+        MandateFixture mandateFixture = aMandateFixture()
                 .withPayerFixture(payerFixture)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
@@ -384,7 +385,7 @@ public class MandateResourceIT {
     public void shouldRetrieveAMandate_FromPublicApiEndpoint() {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+        MandateFixture mandateFixture = aMandateFixture()
                 .withPayerFixture(payerFixture)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
@@ -425,7 +426,7 @@ public class MandateResourceIT {
 
     @Test
     public void shouldCancelAMandate() {
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+        MandateFixture mandateFixture = aMandateFixture()
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
@@ -445,7 +446,7 @@ public class MandateResourceIT {
 
     @Test
     public void shouldChangePaymentType() {
-        MandateFixture testMandate = MandateFixture.aMandateFixture()
+        MandateFixture testMandate = aMandateFixture()
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
@@ -467,7 +468,7 @@ public class MandateResourceIT {
     public void confirm_shouldCreateACustomerBankAccountMandate() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+        MandateFixture mandateFixture = aMandateFixture()
                 .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPayerFixture(payerFixture)
