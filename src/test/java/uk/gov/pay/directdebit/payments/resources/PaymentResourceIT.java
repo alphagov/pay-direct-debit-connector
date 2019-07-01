@@ -248,7 +248,7 @@ public class PaymentResourceIT {
                 .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
                 .body(JSON_PAYMENT_PROVIDER_KEY, is(GOCARDLESS.toString().toLowerCase()))
                 .contentType(JSON);
-
+        
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
 
         Map<String, Object> createdTransaction = testContext.getDatabaseTestHelper().getPaymentByExternalId(externalTransactionId);
@@ -256,6 +256,24 @@ public class PaymentResourceIT {
         assertThat(createdTransaction.get("reference"), is(expectedReference));
         assertThat(createdTransaction.get("description"), is(expectedDescription));
         assertThat(createdTransaction.get("amount"), is(AMOUNT));
+
+        String getRequestPath = "/v1/api/accounts/{accountId}/charges/{paymentExternalId}"
+                .replace("{accountId}", accountExternalId)
+                .replace("{paymentExternalId}", externalTransactionId);
+        response = givenSetup()
+                .get(getRequestPath)
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body(JSON_PAYMENT_ID_KEY, is(notNullValue()))
+                .body(JSON_AMOUNT_KEY, isNumber(AMOUNT))
+                .body(JSON_REFERENCE_KEY, is(expectedReference))
+                .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
+                .body(JSON_MANDATE_ID_KEY, is(mandate.getExternalId().toString()))
+                .body(JSON_STATE_STATUS_KEY, is("pending"))
+                .body(JSON_STATE_FINISHED_KEY, is(false))
+                .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
+                .body(JSON_PAYMENT_PROVIDER_KEY, is(GOCARDLESS.toString().toLowerCase()))
+                .contentType(JSON);
     }
 
     @Test

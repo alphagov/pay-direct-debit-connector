@@ -26,15 +26,20 @@ import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
+
 @RunWith(PactRunner.class)
 @Provider("direct-debit-connector")
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
-        authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"), 
+        authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
         consumers = {"publicapi"})
 //uncommenting the below is useful for testing pacts locally. grab the pact from the broker and put it in /pacts
 //@PactFolder("pacts")
@@ -72,7 +77,7 @@ public class PublicApiContractTest {
                 .withPayerFixture(PayerFixture.aPayerFixture())
                 .insert(app.getTestContext().getJdbi());
     }
-    
+
     @State("a gateway account with external id and a confirmed mandate exists")
     public void aGatewayAccountWithExternalIdAndAConfirmedMandateExists(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
@@ -95,7 +100,7 @@ public class PublicApiContractTest {
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
         testPayer.insert(app.getTestContext().getJdbi());
         for (int x = 0; x < 3; x++) {
-            PaymentFixture.aPaymentFixture().withMandateFixture(testMandate).insert(app.getTestContext().getJdbi());
+            aPaymentFixture().withMandateFixture(testMandate).insert(app.getTestContext().getJdbi());
         }
     }
 
@@ -120,7 +125,7 @@ public class PublicApiContractTest {
             mandateFixture.withId(mandateByExternalId.get().getId());
         }
 
-        PaymentFixture payment = PaymentFixture.aPaymentFixture()
+        PaymentFixture payment = aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withExternalId(paymentExternalId)
                 .insert(app.getTestContext().getJdbi());
@@ -135,5 +140,26 @@ public class PublicApiContractTest {
                 .withEventDate(ZonedDateTime.parse(params.getOrDefault("event_date", ZonedDateTime.now().toString())))
                 .withExternalId(params.getOrDefault("external_id", RandomIdGenerator.newId()))
                 .insert(app.getTestContext().getJdbi());
+    }
+
+    @State("a gateway account with external id and a confirmed mandate with a payment on it exists")
+    public void aValidPaymentExists(Map<String, String> params) {
+        testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
+        testMandate.withGatewayAccountFixture(testGatewayAccount)
+                .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
+                .withPayerFixture(PayerFixture.aPayerFixture())
+                .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
+                .withState(MandateState.PENDING)
+                .insert(app.getTestContext().getJdbi());
+        aPaymentFixture()
+                .withMandateFixture(testMandate)
+                .withExternalId(params.get("charge_id"))
+                .withAmount(1000L)
+                .withReference("ABCDE")
+                .withState(PaymentState.PENDING)
+                .withCreatedDate(ZonedDateTime.parse("1995-10-27T10:21:01.499Z"))
+                .withPaymentProviderId(GoCardlessPaymentId.valueOf("AAAA1111"))
+                .insert(app.getTestContext().getJdbi());
+        
     }
 }

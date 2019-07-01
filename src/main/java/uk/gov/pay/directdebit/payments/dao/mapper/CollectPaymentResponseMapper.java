@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.payments.dao.mapper;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
@@ -31,6 +32,7 @@ public class CollectPaymentResponseMapper implements RowMapper<CollectPaymentRes
                 .withPaymentExternalId(rs.getString("payment_external_id"))
                 .withDescription(rs.getString("description"))
                 .withReference(rs.getString("reference"))
+                .withMandateId(MandateExternalId.valueOf(rs.getString("mandate_external_id")))
                 .withCreatedDate(
                         ZonedDateTime.ofInstant(rs.getTimestamp("created_date").toInstant(), ZoneOffset.UTC))
                 .withPaymentProvider(PaymentProvider.valueOf(rs.getString("payment_provider")));
