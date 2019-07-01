@@ -15,7 +15,6 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
-import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
@@ -28,21 +27,16 @@ import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
-import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -84,7 +78,7 @@ public class PaymentServiceTest {
     private PaymentProviderFactory mockedPaymentProviderFactory;
     @Mock
     private SandboxService mockedSandboxService;
-    
+
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
     private PaymentService service;
 
@@ -93,14 +87,9 @@ public class PaymentServiceTest {
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withPayerFixture(payerFixture);
     private PaymentFixture paymentFixture = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture);
     @Before
-    public void setUp() throws URISyntaxException {
+    public void setUp() {
         service = new PaymentService(mockedTokenService, mockedDirectDebitConfig, mockedPaymentDao,
                 mockedDirectDebitEventService, mockedUserNotificationService, mockedPaymentProviderFactory);
-        when(mockedDirectDebitConfig.getLinks()).thenReturn(mockedLinksConfig);
-        when(mockedLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
-        when(mockedUriInfo.getBaseUriBuilder()).thenReturn(mockedUriBuilder);
-        when(mockedUriBuilder.path(anyString())).thenReturn(mockedUriBuilder);
-        when(mockedUriBuilder.build(any())).thenReturn(new URI("aaa"));
     }
 
     @Test
@@ -128,10 +117,7 @@ public class PaymentServiceTest {
 
     @Test
     public void shouldCreateACollectPaymentResponseFromAValidTransaction() {
-        CollectPaymentResponse collectPaymentResponse = service
-                .collectPaymentResponseWithSelfLink(paymentFixture.toEntity(),
-                        gatewayAccountFixture.getExternalId(), mockedUriInfo);
-
+        var collectPaymentResponse = CollectPaymentResponse.from(paymentFixture.toEntity());
         assertThat(collectPaymentResponse.getAmount(), is(paymentFixture.getAmount()));
         assertThat(collectPaymentResponse.getPaymentExternalId(), is(paymentFixture.getExternalId()));
         assertThat(collectPaymentResponse.getDescription(), is(paymentFixture.getDescription()));
@@ -140,15 +126,11 @@ public class PaymentServiceTest {
     }
     @Test
     public void shouldCreateATransactionResponseWithLinksFromAValidTransaction() {
-        when(mockedTokenService.generateNewTokenFor(mandateFixture.toEntity())).thenReturn(new Token("token", mandateFixture.getId()));
-        PaymentResponse paymentResponse = service
-                .createPaymentResponseWithAllLinks(paymentFixture.toEntity(),
-                        gatewayAccountFixture.getExternalId(), mockedUriInfo);
+        var paymentResponse = CollectPaymentResponse.from(paymentFixture.toEntity());
 
         assertThat(paymentResponse.getAmount(), is(paymentFixture.getAmount()));
         assertThat(paymentResponse.getDescription(), is(paymentFixture.getDescription()));
         assertThat(paymentResponse.getReference(), is(paymentFixture.getReference()));
-        assertThat(paymentResponse.getReturnUrl(), is(paymentFixture.getMandateFixture().getReturnUrl()));
     }
 
     @Test
@@ -277,7 +259,7 @@ public class PaymentServiceTest {
         verify(mockedDirectDebitEventService).registerPaymentCancelledEventFor(mandateFixture.toEntity(), updatedPayment);
         verify(mockedPaymentDao).updateState(updatedPayment.getId(), CANCELLED);
     }
-    
+
     @Test
     public void userNotEligibleFor_shouldUpdateTransactionAsCancelled_shouldRegisterAUserNotEligibledEvent_ifMandateIsOneOff() {
         Payment payment = PaymentFixture
@@ -292,7 +274,7 @@ public class PaymentServiceTest {
         verify(mockedDirectDebitEventService).registerPaymentMethodChangedEventFor(mandateFixture.toEntity());
         verify(mockedPaymentDao).updateState(updatedPayment.getId(), USER_CANCEL_NOT_ELIGIBLE);
     }
-    
+
     @Test
     public void paymentExpired_shouldSetStatusToExpired() {
         Payment payment = PaymentFixture
@@ -321,7 +303,7 @@ public class PaymentServiceTest {
         assertThat(returnedPayment.getReference(), is("a reference"));
         assertThat(returnedPayment.getProviderId(), is(Optional.empty()));
         assertThat(returnedPayment.getChargeDate(), is(Optional.empty()));
-        
+
         verify(mockedDirectDebitEventService).registerPaymentCreatedEventFor(returnedPayment);
     }
 

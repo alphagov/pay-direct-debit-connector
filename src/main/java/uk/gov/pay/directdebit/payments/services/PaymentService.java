@@ -12,7 +12,6 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
-import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
@@ -113,37 +112,10 @@ public class PaymentService {
 
         return paymentSubmittedToProviderFor(submittedPayment);
     }
-
-    public PaymentResponse createPaymentResponseWithAllLinks(Payment payment, String accountExternalId, UriInfo uriInfo) {
-        List<Map<String, Object>> dataLinks = new ArrayList<>();
-
-        dataLinks.add(createLink("self", GET, selfUriFor(uriInfo, CHARGE_API_PATH, accountExternalId, payment.getExternalId())));
-
-        if (!payment.getState().toExternal().isFinished()) {
-            Token token = tokenService.generateNewTokenFor(payment.getMandate());
-            dataLinks.add(createLink("next_url",
-                    GET,
-                    nextUrl(directDebitConfig.getLinks().getFrontendUrl(), "secure", token.getToken())));
-            dataLinks.add(createLink("next_url_post",
-                    POST,
-                    nextUrl(directDebitConfig.getLinks().getFrontendUrl(), "secure"),
-                    APPLICATION_FORM_URLENCODED,
-                    ImmutableMap.of("chargeTokenId", token.getToken())));
-        }
-        return PaymentResponse.from(payment, dataLinks);
-    }
-
-    public CollectPaymentResponse collectPaymentResponseWithSelfLink(Payment payment, String accountExternalId, UriInfo uriInfo) {
-        List<Map<String, Object>> dataLinks = ImmutableList.of(
-                createLink("self", GET, selfUriFor(uriInfo, "/v1/api/accounts/{accountId}/charges/{paymentExternalId}",
-                        accountExternalId, payment.getExternalId()))
-        );
-        return CollectPaymentResponse.from(payment, dataLinks);
-    }
-
-    public PaymentResponse getPaymentWithExternalId(String accountExternalId, String paymentExternalId, UriInfo uriInfo) {
+    
+    public CollectPaymentResponse getPaymentWithExternalId(String paymentExternalId) {
         Payment payment = findPaymentForExternalId(paymentExternalId);
-        return createPaymentResponseWithAllLinks(payment, accountExternalId, uriInfo);
+        return CollectPaymentResponse.from(payment);
     }
 
 

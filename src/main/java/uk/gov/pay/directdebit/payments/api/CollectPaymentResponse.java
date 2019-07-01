@@ -21,8 +21,6 @@ import static uk.gov.pay.directdebit.payments.api.CollectPaymentResponse.Collect
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public class CollectPaymentResponse {
-    @JsonProperty("links")
-    private List<Map<String, Object>> dataLinks;
     
     @JsonProperty("payment_id")
     private String paymentExternalId;
@@ -58,7 +56,6 @@ public class CollectPaymentResponse {
     public CollectPaymentResponse(CollectPaymentResponseBuilder builder) {
         this.paymentExternalId = builder.paymentExternalId;
         this.state = builder.state;
-        this.dataLinks = builder.dataLinks;
         this.amount = builder.amount;
         this.mandateId = builder.mandateId;
         this.description = builder.description;
@@ -72,9 +69,6 @@ public class CollectPaymentResponse {
         return paymentProvider;
     }
 
-    public List<Map<String, Object>> getDataLinks() {
-        return dataLinks;
-    }
 
     public String getPaymentExternalId() {
         return paymentExternalId;
@@ -100,15 +94,7 @@ public class CollectPaymentResponse {
         return reference;
     }
 
-    public URI getLink(String rel) {
-        return dataLinks.stream()
-                .filter(map -> rel.equals(map.get("rel")))
-                .findFirst()
-                .map(link -> (URI) link.get("href"))
-                .get();
-    }
-
-    public static CollectPaymentResponse from(Payment payment, List<Map<String, Object>> dataLinks) {
+    public static CollectPaymentResponse from(Payment payment) {
         CollectPaymentResponseBuilder collectPaymentResponseBuilder = aCollectPaymentResponse()
                 .withPaymentExternalId(payment.getExternalId())
                 // TODO: should extract state details (go cardless cause details) from events table somehow
@@ -118,8 +104,7 @@ public class CollectPaymentResponse {
                 .withDescription(payment.getDescription())
                 .withReference(payment.getReference())
                 .withCreatedDate(payment.getCreatedDate())
-                .withPaymentProvider(payment.getMandate().getGatewayAccount().getPaymentProvider())
-                .withDataLinks(dataLinks);
+                .withPaymentProvider(payment.getMandate().getGatewayAccount().getPaymentProvider());
 
         payment.getProviderId().ifPresent(collectPaymentResponseBuilder::withProviderId);
 
@@ -129,8 +114,7 @@ public class CollectPaymentResponse {
     @Override
     public String toString() {
         return "CollectPaymentResponse{" +
-                "dataLinks=" + dataLinks +
-                ", paymentExternalId='" + paymentExternalId + '\'' +
+                " paymentExternalId='" + paymentExternalId + '\'' +
                 ", amount=" + amount +
                 ", mandateId='" + mandateId + '\'' +
                 ", providerId='" + providerId + '\'' +
@@ -146,8 +130,7 @@ public class CollectPaymentResponse {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CollectPaymentResponse that = (CollectPaymentResponse) o;
-        return Objects.equals(dataLinks, that.dataLinks) &&
-                Objects.equals(paymentExternalId, that.paymentExternalId) &&
+        return Objects.equals(paymentExternalId, that.paymentExternalId) &&
                 Objects.equals(amount, that.amount) &&
                 Objects.equals(mandateId, that.mandateId) &&
                 Objects.equals(providerId, that.providerId) &&
@@ -160,12 +143,11 @@ public class CollectPaymentResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(dataLinks, paymentExternalId, amount, mandateId, providerId, paymentProvider, description, reference, createdDate, state);
+        return Objects.hash(paymentExternalId, amount, mandateId, providerId, paymentProvider, description, reference, createdDate, state);
     }
     
     public static final class CollectPaymentResponseBuilder {
 
-        private List<Map<String, Object>> dataLinks;
         private String paymentExternalId;
         private Long amount;
         private MandateExternalId mandateId;
@@ -182,12 +164,7 @@ public class CollectPaymentResponse {
         public static CollectPaymentResponseBuilder aCollectPaymentResponse() {
             return new CollectPaymentResponseBuilder();
         }
-
-        public CollectPaymentResponseBuilder withDataLinks(List<Map<String, Object>> dataLinks) {
-            this.dataLinks = dataLinks;
-            return this;
-        }
-
+        
         public CollectPaymentResponseBuilder withPaymentExternalId(String paymentExternalId) {
             this.paymentExternalId = paymentExternalId;
             return this;
