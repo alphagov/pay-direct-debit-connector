@@ -8,7 +8,6 @@ import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
 import uk.gov.pay.directdebit.payments.exception.PaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
@@ -51,18 +50,13 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
 
     @Override
     protected Optional<DirectDebitEvent> process(GoCardlessEvent event) {
-        GoCardlessPaymentId goCardlessPaymentId = event.getLinksPayment()
+        var goCardlessPaymentId = event.getLinksPayment()
                 .orElseThrow(() -> new EventHasNoPaymentIdException(event.getEventId()));
 
-        Payment payment = paymentService.findPaymentByProviderId(GOCARDLESS, goCardlessPaymentId)
-                .orElseThrow(() -> new PaymentNotFoundException(GOCARDLESS, goCardlessPaymentId));
+        var goCardlessOrganisationId = event.getLinksOrganisation();
 
-        if (!isValidOrganisation(payment, event)) {
-            LOGGER.info("Ignoring GoCardless event {} because its organisation {} does not match organisation of " +
-                            "stored payment {}",
-                    event.getGoCardlessEventId(), event.getLinksOrganisation(), payment.getExternalId());
-            return Optional.empty();
-        }
+        Payment payment = paymentService.findPaymentByProviderId(GOCARDLESS, goCardlessPaymentId, goCardlessOrganisationId)
+                .orElseThrow(() -> new PaymentNotFoundException(GOCARDLESS, goCardlessPaymentId, goCardlessOrganisationId));
 
         return GoCardlessPaymentAction.fromString(event.getAction())
                 .map(action -> getHandledActions().get(action))

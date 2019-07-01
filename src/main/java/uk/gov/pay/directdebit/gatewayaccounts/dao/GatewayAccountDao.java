@@ -10,15 +10,15 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.mapper.GatewayAccountMapper;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 
 import java.util.List;
 import java.util.Optional;
 
 @RegisterRowMapper(GatewayAccountMapper.class)
 @RegisterArgumentFactory(PaymentProviderAccessTokenArgumentFactory.class)
-@RegisterArgumentFactory(PaymentProviderOrganisationIdentifierArgumentFactory.class)
+@RegisterArgumentFactory(PaymentProviderServiceIdArgumentFactory.class)
 public interface GatewayAccountDao {
     @SqlQuery("SELECT * FROM gateway_accounts p WHERE p.id = :id")
     Optional<GatewayAccount> findById(@Bind("id") Long id);
@@ -42,5 +42,5 @@ public interface GatewayAccountDao {
     @SqlUpdate("UPDATE gateway_accounts g SET access_token = :accessToken, organisation = :organisation WHERE g.external_id = :externalId")
     int updateAccessTokenAndOrganisation(@Bind("externalId") String externalId,
                                          @Bind("accessToken") PaymentProviderAccessToken accessToken,
-                                         @Bind("organisation") GoCardlessOrganisationId organisation);
+                                         @Bind("organisation") PaymentProviderServiceId organisation);
 }

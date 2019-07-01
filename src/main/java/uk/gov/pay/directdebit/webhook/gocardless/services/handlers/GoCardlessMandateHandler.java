@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+
 public class GoCardlessMandateHandler extends GoCardlessHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessMandateHandler.class);
     private final DirectDebitEventService directDebitEventService;
@@ -86,8 +88,10 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 .map((action) -> getHandledActions().get(action))
                 .map((handledAction -> {
                     Mandate mandate = mandateQueryService.findByPaymentProviderMandateId(
-                            event.getLinksMandate()
-                                    .orElseThrow(() -> new EventHasNoMandateIdException(event.getEventId())));
+                            GOCARDLESS,
+                            event.getLinksMandate().orElseThrow(() -> new EventHasNoMandateIdException(event.getEventId())),
+                            event.getLinksOrganisation()
+                    );
 
                     if (isValidOrganisation(mandate, event)) {
                         return handledAction.apply(mandate);

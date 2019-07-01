@@ -8,7 +8,9 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import uk.gov.pay.directdebit.gatewayaccounts.dao.PaymentProviderServiceIdArgumentFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.dao.mapper.PaymentMapper;
@@ -25,6 +27,7 @@ import java.util.Set;
 @RegisterRowMapper(PaymentMapper.class)
 @RegisterArgumentFactory(MandateExternalIdArgumentFactory.class)
 @RegisterArgumentFactory(PaymentProviderPaymentIdArgumentFactory.class)
+@RegisterArgumentFactory(PaymentProviderServiceIdArgumentFactory.class)
 public interface PaymentDao {
 
     String joinQuery = "SELECT" +
@@ -97,7 +100,8 @@ public interface PaymentDao {
     @SqlQuery(joinQuery + " WHERE p.state IN (<states>) AND p.created_date < :maxDateTime")
     List<Payment> findAllPaymentsBySetOfStatesAndCreationTime(@BindList("states") Set<PaymentState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
 
-    @SqlQuery(joinQuery + " WHERE g.payment_provider = :provider AND p.payment_provider_id = :providerId")
+    @SqlQuery(joinQuery + " WHERE p.payment_provider_id = :providerId AND g.organisation = :paymentProviderServiceId AND g.payment_provider = :provider")
     Optional<Payment> findPaymentByProviderId(@Bind("provider") PaymentProvider paymentProvider,
-                                              @Bind("providerId") PaymentProviderPaymentId providerId);
+                                              @Bind("providerId") PaymentProviderPaymentId providerId,
+                                              @Bind("paymentProviderServiceId") PaymentProviderServiceId paymentProviderServiceId);
 }

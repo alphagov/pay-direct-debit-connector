@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.mandate.services;
 
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -32,9 +34,10 @@ public class MandateQueryService {
                 .orElseThrow(() -> new MandateNotFoundException(mandateExternalId, gatewayAccountExternalId));
     }
     
-    public Mandate findByPaymentProviderMandateId(PaymentProviderMandateId paymentProviderMandateId) {
+    public Mandate findByPaymentProviderMandateId(PaymentProvider paymentProvider, PaymentProviderMandateId paymentProviderMandateId,
+                                                  PaymentProviderServiceId paymentProviderServiceId) {
         return mandateDao
-                .findByPaymentProviderMandateId(paymentProviderMandateId)
+                .findByPaymentProviderMandateId(paymentProvider, paymentProviderMandateId, paymentProviderServiceId)
                 .orElseThrow(() -> new MandateNotFoundException(paymentProviderMandateId.toString()));
     }
 
