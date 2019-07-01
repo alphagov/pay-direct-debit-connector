@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.payments.services;
 
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
-import uk.gov.pay.directdebit.payments.api.PaymentResponse;
+import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
 import uk.gov.pay.directdebit.payments.api.PaymentViewValidator;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
@@ -11,7 +11,6 @@ import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class PaymentViewService {
         return gatewayAccountDao.findByExternalId(searchParams.getGatewayExternalId())
                 .map(gatewayAccount -> {
                     PaymentViewSearchParams validatedSearchParams = paymentViewValidator.validateParams(searchParams);
-                    List<PaymentResponse> viewListResponse = Collections.emptyList();
+                    List<CollectPaymentResponse> viewListResponse = Collections.emptyList();
                     Long total = getTotal(validatedSearchParams);
                     if (total > 0) {
                         viewListResponse =
@@ -60,7 +59,7 @@ public class PaymentViewService {
         return paymentViewDao.getPaymentViewCount(searchParams);
     }
 
-    private List<PaymentResponse> getPaymentViewResultResponse(PaymentViewSearchParams searchParams) {
+    private List<CollectPaymentResponse> getPaymentViewResultResponse(PaymentViewSearchParams searchParams) {
         return paymentViewDao.searchPaymentView(searchParams);
     }
 
