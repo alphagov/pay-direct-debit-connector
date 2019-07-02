@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequestValidator;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
+import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.CollectService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
@@ -45,7 +45,7 @@ public class PaymentResource {
     @Produces(APPLICATION_JSON)
     @Timed
     public Response getCharge(@PathParam("paymentExternalId") String transactionExternalId) {
-        CollectPaymentResponse response = paymentService.getPaymentWithExternalId(transactionExternalId);
+        PaymentResponse response = paymentService.getPaymentWithExternalId(transactionExternalId);
         return Response.ok(response).build();
     }
 
@@ -57,7 +57,7 @@ public class PaymentResource {
         LOGGER.info("Received collect payment from mandate request");
         collectPaymentRequestValidator.validate(collectPaymentRequestMap);
         Payment paymentToCollect = collectService.collect(gatewayAccount, CollectPaymentRequest.of(collectPaymentRequestMap));
-        CollectPaymentResponse response = CollectPaymentResponse.from(paymentToCollect);
+        PaymentResponse response = PaymentResponse.from(paymentToCollect);
         return Response.status(SC_CREATED).entity(response).build();
     }
 }

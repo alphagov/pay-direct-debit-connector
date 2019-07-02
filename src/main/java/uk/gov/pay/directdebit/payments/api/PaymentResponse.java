@@ -16,11 +16,11 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
-import static uk.gov.pay.directdebit.payments.api.CollectPaymentResponse.CollectPaymentResponseBuilder.aCollectPaymentResponse;
+import static uk.gov.pay.directdebit.payments.api.PaymentResponse.PaymentResponseBuilder.aPaymentResponse;
 
 @JsonInclude(Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-public class CollectPaymentResponse {
+public class PaymentResponse {
     
     @JsonProperty("payment_id")
     private String paymentExternalId;
@@ -53,7 +53,7 @@ public class CollectPaymentResponse {
     @JsonProperty
     private ExternalPaymentStateWithDetails state;
 
-    public CollectPaymentResponse(CollectPaymentResponseBuilder builder) {
+    public PaymentResponse(PaymentResponseBuilder builder) {
         this.paymentExternalId = builder.paymentExternalId;
         this.state = builder.state;
         this.amount = builder.amount;
@@ -94,8 +94,8 @@ public class CollectPaymentResponse {
         return reference;
     }
 
-    public static CollectPaymentResponse from(Payment payment) {
-        CollectPaymentResponseBuilder collectPaymentResponseBuilder = aCollectPaymentResponse()
+    public static PaymentResponse from(Payment payment) {
+        PaymentResponseBuilder paymentResponseBuilder = aPaymentResponse()
                 .withPaymentExternalId(payment.getExternalId())
                 // TODO: should extract state details (go cardless cause details) from events table somehow
                 .withState(new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"))
@@ -106,14 +106,14 @@ public class CollectPaymentResponse {
                 .withCreatedDate(payment.getCreatedDate())
                 .withPaymentProvider(payment.getMandate().getGatewayAccount().getPaymentProvider());
 
-        payment.getProviderId().ifPresent(collectPaymentResponseBuilder::withProviderId);
+        payment.getProviderId().ifPresent(paymentResponseBuilder::withProviderId);
 
-        return collectPaymentResponseBuilder.build();
+        return paymentResponseBuilder.build();
     }
 
     @Override
     public String toString() {
-        return "CollectPaymentResponse{" +
+        return "PaymentResponse{" +
                 " paymentExternalId='" + paymentExternalId + '\'' +
                 ", amount=" + amount +
                 ", mandateId='" + mandateId + '\'' +
@@ -129,7 +129,7 @@ public class CollectPaymentResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CollectPaymentResponse that = (CollectPaymentResponse) o;
+        PaymentResponse that = (PaymentResponse) o;
         return Objects.equals(paymentExternalId, that.paymentExternalId) &&
                 Objects.equals(amount, that.amount) &&
                 Objects.equals(mandateId, that.mandateId) &&
@@ -146,7 +146,7 @@ public class CollectPaymentResponse {
         return Objects.hash(paymentExternalId, amount, mandateId, providerId, paymentProvider, description, reference, createdDate, state);
     }
     
-    public static final class CollectPaymentResponseBuilder {
+    public static final class PaymentResponseBuilder {
 
         private String paymentExternalId;
         private Long amount;
@@ -158,60 +158,60 @@ public class CollectPaymentResponse {
         private ZonedDateTime createdDate;
         private ExternalPaymentStateWithDetails state;
 
-        private CollectPaymentResponseBuilder() {
+        private PaymentResponseBuilder() {
         }
 
-        public static CollectPaymentResponseBuilder aCollectPaymentResponse() {
-            return new CollectPaymentResponseBuilder();
+        public static PaymentResponseBuilder aPaymentResponse() {
+            return new PaymentResponseBuilder();
         }
         
-        public CollectPaymentResponseBuilder withPaymentExternalId(String paymentExternalId) {
+        public PaymentResponseBuilder withPaymentExternalId(String paymentExternalId) {
             this.paymentExternalId = paymentExternalId;
             return this;
         }
 
-        public CollectPaymentResponseBuilder withAmount(Long amount) {
+        public PaymentResponseBuilder withAmount(Long amount) {
             this.amount = amount;
             return this;
         }
 
-        public CollectPaymentResponseBuilder withMandateId(MandateExternalId mandateId) {
+        public PaymentResponseBuilder withMandateId(MandateExternalId mandateId) {
             this.mandateId = mandateId;
             return this;
         }
 
-        public CollectPaymentResponseBuilder withPaymentProvider(PaymentProvider paymentProvider) {
+        public PaymentResponseBuilder withPaymentProvider(PaymentProvider paymentProvider) {
             this.paymentProvider = paymentProvider;
             return this;
         }
 
-        public CollectPaymentResponseBuilder withDescription(String description) {
+        public PaymentResponseBuilder withDescription(String description) {
             this.description = description;
             return this;
         }
 
-        public CollectPaymentResponseBuilder withReference(String reference) {
+        public PaymentResponseBuilder withReference(String reference) {
             this.reference = reference;
             return this;
         }
 
-        public CollectPaymentResponseBuilder withCreatedDate(ZonedDateTime createdDate) {
+        public PaymentResponseBuilder withCreatedDate(ZonedDateTime createdDate) {
             this.createdDate = createdDate;
             return this;
         }
 
-        public CollectPaymentResponseBuilder withState(ExternalPaymentStateWithDetails state) {
+        public PaymentResponseBuilder withState(ExternalPaymentStateWithDetails state) {
             this.state = state;
             return this;
         }
         
-        public CollectPaymentResponseBuilder withProviderId(PaymentProviderPaymentId providerId) {
+        public PaymentResponseBuilder withProviderId(PaymentProviderPaymentId providerId) {
             this.providerId = providerId;
             return this;
         }
 
-        public CollectPaymentResponse build() {
-            return new CollectPaymentResponse(this);
+        public PaymentResponse build() {
+            return new PaymentResponse(this);
         }
     }
 }
