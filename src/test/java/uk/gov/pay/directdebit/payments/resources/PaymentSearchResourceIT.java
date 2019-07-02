@@ -36,7 +36,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFi
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class PaymentViewResourceIT { //TODO merge with PaymentResource
+public class PaymentSearchResourceIT { //TODO merge with PaymentResource
 
     private GatewayAccountFixture testGatewayAccount;
 

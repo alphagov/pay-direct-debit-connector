@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.payments.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
-import uk.gov.pay.directdebit.payments.services.PaymentViewService;
+import uk.gov.pay.directdebit.payments.services.PaymentSearchService;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -17,20 +17,20 @@ import javax.ws.rs.core.UriInfo;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/")
-public class PaymentViewResource {
+public class PaymentSearchResource {
 
-    private final PaymentViewService paymentViewService;
+    private final PaymentSearchService paymentSearchService;
 
     @Inject
-    public PaymentViewResource(PaymentViewService paymentViewService) {
-        this.paymentViewService = paymentViewService;
+    public PaymentSearchResource(PaymentSearchService paymentSearchService) {
+        this.paymentSearchService = paymentSearchService;
     }
 
     @GET
     @Path("/v1/api/accounts/{accountId}/payments")
     @Produces(APPLICATION_JSON)
     @Timed
-    public Response getPaymentView(
+    public Response searchPayments(
             @PathParam("accountId") String accountExternalId,
             @QueryParam("page") Long pageNumber,
             @QueryParam("display_size") Long displaySize,
@@ -51,6 +51,6 @@ public class PaymentViewResource {
                 .withAmount(amount)
                 .withMandateId(mandateId)
                 .withState(state);
-        return Response.ok().entity(paymentViewService.withUriInfo(uriInfo).getPaymentViewResponse(searchParams)).build();
+        return Response.ok().entity(paymentSearchService.withUriInfo(uriInfo).getPaymentSearchResponse(searchParams)).build();
     }
 }

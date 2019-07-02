@@ -14,7 +14,7 @@ import javax.ws.rs.core.UriInfo;
 import java.util.Collections;
 import java.util.List;
 
-public class PaymentViewService {
+public class PaymentSearchService {
 
     private final PaymentViewDao paymentViewDao;
     private final GatewayAccountDao gatewayAccountDao;
@@ -22,12 +22,12 @@ public class PaymentViewService {
     private UriInfo uriInfo;
 
     @Inject
-    public PaymentViewService(PaymentViewDao paymentViewDao, GatewayAccountDao gatewayAccountDao) {
+    public PaymentSearchService(PaymentViewDao paymentViewDao, GatewayAccountDao gatewayAccountDao) {
         this.paymentViewDao = paymentViewDao;
         this.gatewayAccountDao = gatewayAccountDao;
     }
 
-    public PaymentViewResponse getPaymentViewResponse(PaymentViewSearchParams searchParams) {
+    public PaymentViewResponse getPaymentSearchResponse(PaymentViewSearchParams searchParams) {
         return gatewayAccountDao.findByExternalId(searchParams.getGatewayExternalId())
                 .map(gatewayAccount -> {
                     PaymentViewSearchParams validatedSearchParams = paymentViewValidator.validateParams(searchParams);
@@ -49,7 +49,7 @@ public class PaymentViewService {
                 .orElseThrow(() -> new GatewayAccountNotFoundException(searchParams.getGatewayExternalId()));
     }
 
-    public PaymentViewService withUriInfo(UriInfo uriInfo) {
+    public PaymentSearchService withUriInfo(UriInfo uriInfo) {
         this.uriInfo = uriInfo;
         return this;
     }

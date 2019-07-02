@@ -87,7 +87,7 @@ public class PublicApiContractTest {
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
                 .withPayerFixture(PayerFixture.aPayerFixture())
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(params.get("bank_mandate_reference")))
-                .withPaymentProviderId(GoCardlessMandateId.valueOf("MD1"))
+                .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
                 .withState(MandateState.PENDING)
                 .insert(app.getTestContext().getJdbi());
     }
@@ -99,6 +99,7 @@ public class PublicApiContractTest {
                 .insert(app.getTestContext().getJdbi());
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("MD1"))
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")));
         testMandate.insert(app.getTestContext().getJdbi());
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
