@@ -14,7 +14,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
+import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
@@ -116,17 +116,17 @@ public class PaymentServiceTest {
     }
 
     @Test
-    public void shouldCreateACollectPaymentResponseFromAValidTransaction() {
-        var collectPaymentResponse = CollectPaymentResponse.from(paymentFixture.toEntity());
-        assertThat(collectPaymentResponse.getAmount(), is(paymentFixture.getAmount()));
-        assertThat(collectPaymentResponse.getPaymentExternalId(), is(paymentFixture.getExternalId()));
-        assertThat(collectPaymentResponse.getDescription(), is(paymentFixture.getDescription()));
-        assertThat(collectPaymentResponse.getReference(), is(paymentFixture.getReference()));
-        assertThat(collectPaymentResponse.getPaymentProvider(), is(gatewayAccountFixture.getPaymentProvider()));
+    public void shouldCreateAPaymentResponseFromAValidTransaction() {
+        var paymentResponse = PaymentResponse.from(paymentFixture.toEntity());
+        assertThat(paymentResponse.getAmount(), is(paymentFixture.getAmount()));
+        assertThat(paymentResponse.getPaymentExternalId(), is(paymentFixture.getExternalId()));
+        assertThat(paymentResponse.getDescription(), is(paymentFixture.getDescription()));
+        assertThat(paymentResponse.getReference(), is(paymentFixture.getReference()));
+        assertThat(paymentResponse.getPaymentProvider(), is(gatewayAccountFixture.getPaymentProvider()));
     }
     @Test
     public void shouldCreateATransactionResponseWithLinksFromAValidTransaction() {
-        var paymentResponse = CollectPaymentResponse.from(paymentFixture.toEntity());
+        var paymentResponse = PaymentResponse.from(paymentFixture.toEntity());
 
         assertThat(paymentResponse.getAmount(), is(paymentFixture.getAmount()));
         assertThat(paymentResponse.getDescription(), is(paymentFixture.getDescription()));
