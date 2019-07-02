@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
@@ -204,5 +205,11 @@ public class PaymentService {
 
     public Optional<DirectDebitEvent> findPaymentSubmittedEventFor(Payment payment) {
         return directDebitEventService.findBy(payment.getId(), CHARGE, PAYMENT_SUBMITTED_TO_BANK);
+    }
+    
+    public boolean isPaymentMandateStateValid(Payment payment) {
+        return payment.getMandate().getState().equals(MandateState.SUBMITTED) || 
+                payment.getMandate().getState().equals(MandateState.PENDING)  ||
+                payment.getMandate().getState().equals(MandateState.ACTIVE);
     }
 }

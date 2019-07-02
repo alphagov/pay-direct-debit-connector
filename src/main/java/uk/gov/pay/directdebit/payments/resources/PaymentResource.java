@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.exception.MandateStateInvalidException;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequestValidator;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
@@ -57,6 +58,10 @@ public class PaymentResource {
         LOGGER.info("Received collect payment from mandate request");
         collectPaymentRequestValidator.validate(collectPaymentRequestMap);
         Payment paymentToCollect = collectService.collect(gatewayAccount, CollectPaymentRequest.of(collectPaymentRequestMap));
+        if(!paymentService.isPaymentMandateStateValid(paymentToCollect)) {
+            throw new MandateStateInvalidException("Mandate state invalid for mandateId: " +
+                    paymentToCollect.getMandate().getExternalId());
+        }
         PaymentResponse response = PaymentResponse.from(paymentToCollect);
         return Response.status(SC_CREATED).entity(response).build();
     }

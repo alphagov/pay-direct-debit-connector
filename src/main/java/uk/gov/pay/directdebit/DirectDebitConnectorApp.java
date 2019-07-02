@@ -27,6 +27,7 @@ import uk.gov.pay.directdebit.common.exception.GoCardlessAccountAlreadyConnected
 import uk.gov.pay.directdebit.common.exception.JerseyViolationExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.JsonMappingExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.MandateStateInvalidExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NoAccessTokenExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.PreconditionFailedExceptionMapper;
@@ -128,6 +129,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new JsonMappingExceptionMapper());
         environment.jersey().register(new NoAccessTokenExceptionMapper());
         environment.jersey().register(new UnlinkedGCMerchantAccountExceptionMapper());
+        environment.jersey().register(new MandateStateInvalidExceptionMapper());
         environment.jersey().register(new GoCardlessAccountAlreadyConnectedExceptionMapper());
         initialiseMetrics(configuration, environment);
     }
