@@ -89,7 +89,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 .map((handledAction -> {
                     Mandate mandate = mandateQueryService.findByPaymentProviderMandateId(
                             GOCARDLESS,
-                            event.getLinksMandate().orElseThrow(() -> new EventHasNoMandateIdException(event.getEventId())),
+                            event.getLinksMandate().orElseThrow(() -> new EventHasNoMandateIdException(event.getInternalEventId())),
                             event.getLinksOrganisation()
                     );
 

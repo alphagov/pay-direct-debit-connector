@@ -51,7 +51,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     @Override
     protected Optional<DirectDebitEvent> process(GoCardlessEvent event) {
         var goCardlessPaymentId = event.getLinksPayment()
-                .orElseThrow(() -> new EventHasNoPaymentIdException(event.getEventId()));
+                .orElseThrow(() -> new EventHasNoPaymentIdException(event.getInternalEventId()));
 
         var goCardlessOrganisationId = event.getLinksOrganisation();
 

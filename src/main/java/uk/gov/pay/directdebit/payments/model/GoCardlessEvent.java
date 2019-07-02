@@ -11,7 +11,7 @@ public class GoCardlessEvent {
 
     private final Long id;
     private final String resourceId;
-    private Long eventId;
+    private Long internalEventId;
     private final GoCardlessEventId goCardlessEventId;
     //todo action should be typed (see https://developer.gocardless.com/api-reference/#events-payment-actions and the equivalent for other resource_types
     private final String action;
@@ -37,7 +37,7 @@ public class GoCardlessEvent {
     private GoCardlessEvent(GoCardlessEventBuilder goCardlessEventBuilder) {
         this.id = goCardlessEventBuilder.id;
         this.resourceId = goCardlessEventBuilder.resourceId;
-        this.eventId = goCardlessEventBuilder.eventId;
+        this.internalEventId = goCardlessEventBuilder.internalEventId;
         this.goCardlessEventId = goCardlessEventBuilder.goCardlessEventId;
         this.action = goCardlessEventBuilder.action;
         this.resourceType = goCardlessEventBuilder.resourceType;
@@ -61,16 +61,16 @@ public class GoCardlessEvent {
     }
     
     //TODO: This method will be removed once we stop creating generic events
-    public void setEventId(Long eventId) {
-        this.eventId = eventId;
+    public void setInternalEventId(Long internalEventId) {
+        this.internalEventId = internalEventId;
     }
     
     public Long getId() {
         return id;
     }
 
-    public Long getEventId() {
-        return eventId;
+    public Long getInternalEventId() {
+        return internalEventId;
     }
 
     public GoCardlessEventId getGoCardlessEventId() {
@@ -163,7 +163,7 @@ public class GoCardlessEvent {
         if (o == null || getClass() != o.getClass()) return false;
         GoCardlessEvent that = (GoCardlessEvent) o;
         return id.equals(that.id) &&
-                eventId.equals(that.eventId) &&
+                internalEventId.equals(that.internalEventId) &&
                 goCardlessEventId.equals(that.goCardlessEventId) &&
                 action.equals(that.action) &&
                 resourceType == that.resourceType &&
@@ -189,7 +189,7 @@ public class GoCardlessEvent {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, eventId, goCardlessEventId, action, resourceType, resourceId, json, detailsCause,
+        return Objects.hash(id, internalEventId, goCardlessEventId, action, resourceType, resourceId, json, detailsCause,
                 detailsDescription, detailsOrigin, detailsReasonCode, detailsScheme, linksMandate,
                 linksNewCustomerBankAccount, linksNewMandate, linksOrganisation, linksParentEvent,
                 linksPayment, linksPayout, linksPreviousCustomerBankAccount, linksRefund, linksSubscription,
@@ -198,7 +198,7 @@ public class GoCardlessEvent {
 
     public static final class GoCardlessEventBuilder {
         private Long id;
-        private Long eventId;
+        private Long internalEventId;
         private GoCardlessEventId goCardlessEventId;
         //todo action should be typed (see https://developer.gocardless.com/api-reference/#events-payment-actions and the equivalent for other resource_types
         private String action;
@@ -235,8 +235,8 @@ public class GoCardlessEvent {
             return this;
         }
 
-        public GoCardlessEventBuilder withEventId(Long eventId) {
-            this.eventId = eventId;
+        public GoCardlessEventBuilder withInternalEventId(Long internalEventId) {
+            this.internalEventId = internalEventId;
             return this;
         }
 
