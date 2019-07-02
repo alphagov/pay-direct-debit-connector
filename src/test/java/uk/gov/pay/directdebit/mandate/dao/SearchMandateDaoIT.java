@@ -119,6 +119,11 @@ public class SearchMandateDaoIT {
     }
     
     @Test
+    public void searchByInvalidDisplaySize() {
+        
+    }
+    
+    @Test
     public void searchByMultipleParams() {
         
     }
