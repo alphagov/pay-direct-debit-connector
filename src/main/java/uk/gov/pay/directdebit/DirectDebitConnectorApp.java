@@ -23,6 +23,7 @@ import uk.gov.pay.directdebit.app.healthcheck.Database;
 import uk.gov.pay.directdebit.app.healthcheck.Ping;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
+import uk.gov.pay.directdebit.common.exception.GoCardlessAccountAlreadyConnectedExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.JerseyViolationExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.JsonMappingExceptionMapper;
@@ -127,6 +128,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.jersey().register(new JsonMappingExceptionMapper());
         environment.jersey().register(new NoAccessTokenExceptionMapper());
         environment.jersey().register(new UnlinkedGCMerchantAccountExceptionMapper());
+        environment.jersey().register(new GoCardlessAccountAlreadyConnectedExceptionMapper());
         initialiseMetrics(configuration, environment);
     }
 

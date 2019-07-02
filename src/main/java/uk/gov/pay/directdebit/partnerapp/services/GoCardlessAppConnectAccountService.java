@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.partnerapp.services;
 
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.pay.directdebit.common.exception.BadRequestException;
+import uk.gov.pay.directdebit.common.exception.GoCardlessAccountAlreadyConnectedException;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorException;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
@@ -57,6 +58,10 @@ public class GoCardlessAppConnectAccountService {
 
     private Response processGoCardlessResponse(GoCardlessAppConnectAccessTokenResponse response, GatewayAccount gatewayAccount) {
         if (GoCardlessAppConnectClient.isValidResponse(response)) {
+            if (gatewayAccountDao.existsWithOrganisation(response.getOrganisationId())) {
+                throw new GoCardlessAccountAlreadyConnectedException("There is already a gateway account linked to the GoCardless account with organisation id " +
+                        response.getOrganisationId());
+            }
             gatewayAccountDao.updateAccessTokenAndOrganisation(gatewayAccount.getExternalId(), response.getAccessToken(), response.getOrganisationId());
             return Response.ok().build();
         } else if (StringUtils.isNotBlank(response.getError())) {

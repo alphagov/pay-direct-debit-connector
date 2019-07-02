@@ -10,6 +10,7 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.mapper.GatewayAccountMapper;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 
@@ -43,4 +44,7 @@ public interface GatewayAccountDao {
     int updateAccessTokenAndOrganisation(@Bind("externalId") String externalId,
                                          @Bind("accessToken") PaymentProviderAccessToken accessToken,
                                          @Bind("organisation") PaymentProviderServiceId organisation);
+    
+    @SqlQuery("SELECT EXISTS (SELECT * FROM gateway_accounts where organisation = :organisation)")
+    boolean existsWithOrganisation(@Bind("organisation") GoCardlessOrganisationId organisation);
 }
