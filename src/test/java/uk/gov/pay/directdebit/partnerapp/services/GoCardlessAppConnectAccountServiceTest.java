@@ -10,6 +10,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.exception.BadRequestException;
+import uk.gov.pay.directdebit.common.exception.GoCardlessAccountAlreadyConnectedException;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.partnerapp.api.GoCardlessAppConnectStateResponse;
@@ -111,6 +112,7 @@ public class GoCardlessAppConnectAccountServiceTest {
         GoCardlessAppConnectAccessTokenResponse response = GoCardlessAppConnectClientResponseBuilder
                 .aGoCardlessConnectClientResponse()
                 .build();
+        when(mockedGatewayAccountDao.existsWithOrganisation(response.getOrganisationId())).thenReturn(false);
         when(mockedConnectClient.postAccessCode(accessCode, gatewayAccount, REDIRECT_URI)).thenReturn(Optional.of(response));
         tokenService.exchangeCodeForToken(accessCode, partnerToken);
         verify(mockedGatewayAccountDao).updateAccessTokenAndOrganisation(
@@ -118,5 +120,26 @@ public class GoCardlessAppConnectAccountServiceTest {
                 response.getAccessToken(),
                 response.getOrganisationId()
         );
+    }
+    
+    @Test
+    public void shouldThrowException_whenGatewayAccountAlreadyExistsWithOrganisationId() {
+        String accessCode = "some-test-access-code";
+        String partnerToken = "some-test-partner-token";
+        GoCardlessAppConnectAccountEntity accountEntity = GoCardlessAppConnectAccountEntityFixture.aPartnerAppAccountFixture()
+                .withGatewayAccountId(gatewayAccount.getId())
+                .withToken(partnerToken)
+                .toEntity();
+        when(mockedTokenDao.findActiveTokenByToken(partnerToken)).thenReturn(Optional.of(accountEntity));
+        when(mockedGatewayAccountDao.findById(gatewayAccount.getId())).thenReturn(Optional.of(gatewayAccount));
+        GoCardlessAppConnectAccessTokenResponse response = GoCardlessAppConnectClientResponseBuilder
+                .aGoCardlessConnectClientResponse()
+                .build();
+        when(mockedGatewayAccountDao.existsWithOrganisation(response.getOrganisationId())).thenReturn(true);
+        when(mockedConnectClient.postAccessCode(accessCode, gatewayAccount, REDIRECT_URI)).thenReturn(Optional.of(response));
+        
+        thrown.expect(GoCardlessAccountAlreadyConnectedException.class);
+        
+        tokenService.exchangeCodeForToken(accessCode, partnerToken);
     }
 }

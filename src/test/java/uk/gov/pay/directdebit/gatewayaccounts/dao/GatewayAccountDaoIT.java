@@ -254,4 +254,21 @@ public class GatewayAccountDaoIT {
         assertThat(foundGatewayAccount.get("access_token"), is("an-access-token"));
         assertThat(foundGatewayAccount.get("organisation"), is("an-organisation"));
     }
+
+    @Test
+    public void shouldReturnTrueWhenGatewayAccountWithOrganisationExists() {
+        var organisationId = GoCardlessOrganisationId.valueOf("ABC123");
+        gatewayAccountDao.insert(testGatewayAccount
+                .withOrganisation(organisationId)
+                .toEntity());
+        assertThat(gatewayAccountDao.existsWithOrganisation(organisationId), is(true));
+    }
+
+    @Test
+    public void shouldReturnFalseWhenGatewayAccountWithOrganisationDoesNotExist() {
+        gatewayAccountDao.insert(testGatewayAccount
+                .withOrganisation(GoCardlessOrganisationId.valueOf("ABC123"))
+                .toEntity());
+        assertThat(gatewayAccountDao.existsWithOrganisation(GoCardlessOrganisationId.valueOf("XYZ789")), is(false));
+    }
 }
