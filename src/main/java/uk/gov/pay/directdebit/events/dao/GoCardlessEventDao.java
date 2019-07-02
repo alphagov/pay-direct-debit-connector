@@ -21,8 +21,8 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdArgumentFactory;
 public interface GoCardlessEventDao {
 
     @SqlUpdate("INSERT INTO gocardless_events(" +
-            " internal_event_id," +
-            " event_id, action," +
+            " event_id," +
+            " action," +
             " resource_type," +
             " json," +
             " details_cause," +
@@ -42,7 +42,6 @@ public interface GoCardlessEventDao {
             " links_subscription," +
             " created_at)" +
             " VALUES (" +
-            " :eventId," +
             " :goCardlessEventId," +
             " :action," +
             " :resourceType," +

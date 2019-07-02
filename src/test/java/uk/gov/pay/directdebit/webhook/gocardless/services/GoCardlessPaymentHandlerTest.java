@@ -10,7 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.events.exception.EventHasNoPaymentIdException;
+import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.exception.PaymentNotFoundException;
@@ -73,10 +73,10 @@ public class GoCardlessPaymentHandlerTest {
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
         verify(mockedPaymentService).paymentPaidOutFor(payment);
-        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
+        verify(goCardlessEvent).setInternalEventId(directDebitEvent.getId());
         verify(mockedGoCardlessEventService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
+        Assert.assertThat(storedGoCardlessEvent.getInternalEventId(), is(directDebitEvent.getId()));
         Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -92,10 +92,10 @@ public class GoCardlessPaymentHandlerTest {
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
         verify(mockedPaymentService).paymentAcknowledgedFor(payment);
-        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
+        verify(goCardlessEvent).setInternalEventId(directDebitEvent.getId());
         verify(mockedGoCardlessEventService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
+        Assert.assertThat(storedGoCardlessEvent.getInternalEventId(), is(directDebitEvent.getId()));
         Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -111,10 +111,10 @@ public class GoCardlessPaymentHandlerTest {
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
         verify(mockedPaymentService).payoutPaidFor(payment);
-        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
+        verify(goCardlessEvent).setInternalEventId(directDebitEvent.getId());
         verify(mockedGoCardlessEventService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
+        Assert.assertThat(storedGoCardlessEvent.getInternalEventId(), is(directDebitEvent.getId()));
         Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -129,10 +129,10 @@ public class GoCardlessPaymentHandlerTest {
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
         verify(mockedPaymentService).paymentSubmittedFor(payment);
-        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
+        verify(goCardlessEvent).setInternalEventId(directDebitEvent.getId());
         verify(mockedGoCardlessEventService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
+        Assert.assertThat(storedGoCardlessEvent.getInternalEventId(), is(directDebitEvent.getId()));
         Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -147,10 +147,10 @@ public class GoCardlessPaymentHandlerTest {
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
-        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
+        verify(goCardlessEvent).setInternalEventId(directDebitEvent.getId());
         verify(mockedGoCardlessEventService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
+        Assert.assertThat(storedGoCardlessEvent.getInternalEventId(), is(directDebitEvent.getId()));
         Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -166,10 +166,10 @@ public class GoCardlessPaymentHandlerTest {
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
         verify(mockedPaymentService).paymentFailedWithEmailFor(payment);
-        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
+        verify(goCardlessEvent).setInternalEventId(directDebitEvent.getId());
         verify(mockedGoCardlessEventService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
+        Assert.assertThat(storedGoCardlessEvent.getInternalEventId(), is(directDebitEvent.getId()));
         Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -183,10 +183,10 @@ public class GoCardlessPaymentHandlerTest {
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
-        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
+        verify(goCardlessEvent).setInternalEventId(directDebitEvent.getId());
         verify(mockedGoCardlessEventService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();
-        Assert.assertThat(storedGoCardlessEvent.getEventId(), is(directDebitEvent.getId()));
+        Assert.assertThat(storedGoCardlessEvent.getInternalEventId(), is(directDebitEvent.getId()));
         Assert.assertThat(storedGoCardlessEvent.getGoCardlessEventId(), is(goCardlessEvent.getGoCardlessEventId()));
     }
 
@@ -212,7 +212,7 @@ public class GoCardlessPaymentHandlerTest {
                 .withLinksPayment(null)
                 .toEntity();
 
-        thrown.expect(EventHasNoPaymentIdException.class);
+        thrown.expect(GoCardlessEventHasNoPaymentIdException.class);
         goCardlessPaymentHandler.handle(goCardlessEvent);
     }
 

@@ -1,12 +1,13 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
+
+import java.util.Optional;
 
 public abstract class GoCardlessHandler implements GoCardlessActionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessHandler.class);
@@ -24,9 +25,9 @@ public abstract class GoCardlessHandler implements GoCardlessActionHandler {
 
     public void handle(GoCardlessEvent event) {
         process(event).ifPresent((directDebitEvent) -> {
-            event.setEventId(directDebitEvent.getId());
+            event.setInternalEventId(directDebitEvent.getId());
             goCardlessService.updateInternalEventId(event);
-            LOGGER.info("handled gocardless event with id: {}, resource type: {}", event.getEventId(), event.getResourceType().toString());
+            LOGGER.info("handled gocardless event with id: {}, resource type: {}", event.getInternalEventId(), event.getResourceType().toString());
         });
     }
 }

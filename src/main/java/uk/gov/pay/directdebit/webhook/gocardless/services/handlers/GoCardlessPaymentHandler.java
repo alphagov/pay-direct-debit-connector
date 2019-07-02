@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.directdebit.events.exception.EventHasNoPaymentIdException;
+import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
 import uk.gov.pay.directdebit.payments.exception.PaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
@@ -51,7 +51,7 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
     @Override
     protected Optional<DirectDebitEvent> process(GoCardlessEvent event) {
         var goCardlessPaymentId = event.getLinksPayment()
-                .orElseThrow(() -> new EventHasNoPaymentIdException(event.getEventId()));
+                .orElseThrow(() -> new GoCardlessEventHasNoPaymentIdException(event.getGoCardlessEventId()));
 
         var goCardlessOrganisationId = event.getLinksOrganisation();
 

@@ -1,9 +1,6 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -17,6 +14,10 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 import static org.mockito.Mockito.verify;
 
@@ -51,7 +52,7 @@ public class GoCardlessHandlerTest {
             }
         };
         goCardlessHandler.handle(goCardlessEvent);
-        verify(goCardlessEvent).setEventId(directDebitEvent.getId());
+        verify(goCardlessEvent).setInternalEventId(directDebitEvent.getId());
         verify(mockedGoCardlessService).updateInternalEventId(goCardlessEvent);
     }
 }

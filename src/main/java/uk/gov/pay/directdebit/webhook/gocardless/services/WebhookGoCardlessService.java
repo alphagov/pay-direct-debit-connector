@@ -42,7 +42,7 @@ public class WebhookGoCardlessService {
     }
 
     private void logUnknownResourceTypeForEvent(GoCardlessEvent event) {
-        LOGGER.info("unhandled resource type for event with id {} ", event.getEventId());
+        LOGGER.info("unhandled resource type for event with id {} ", event.getInternalEventId());
     }
 
     private GoCardlessActionHandler getHandlerFor(GoCardlessResourceType goCardlessResourceType) {

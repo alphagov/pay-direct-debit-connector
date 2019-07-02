@@ -55,7 +55,7 @@ public class GoCardlessWebhookParserTest {
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
 
         GoCardlessEvent firstEvent = parsedEvents.get(0);
-        assertThat(firstEvent.getEventId(), is(nullValue()));
+        assertThat(firstEvent.getInternalEventId(), is(nullValue()));
         assertThat(firstEvent.getId(), is(nullValue()));
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
@@ -86,7 +86,7 @@ public class GoCardlessWebhookParserTest {
         List<GoCardlessEvent> parsedEvents = parser.parse(payload);
 
         GoCardlessEvent firstEvent = parsedEvents.get(0);
-        assertThat(firstEvent.getEventId(), is(nullValue()));
+        assertThat(firstEvent.getInternalEventId(), is(nullValue()));
         assertThat(firstEvent.getId(), is(nullValue()));
         assertThat(firstEvent.getAction(), is(ACTION));
         assertThat(firstEvent.getResourceType(), is(RESOURCE_TYPE));
@@ -110,7 +110,7 @@ public class GoCardlessWebhookParserTest {
         assertThat(firstEvent.getLinksPayout(), is(nullValue()));
         
         GoCardlessEvent secondEvent = parsedEvents.get(1);
-        assertThat(secondEvent.getEventId(), is(nullValue()));
+        assertThat(secondEvent.getInternalEventId(), is(nullValue()));
         assertThat(secondEvent.getId(), is(nullValue()));
         assertThat(secondEvent.getAction(), is(secondEventAction));
         assertThat(secondEvent.getResourceType(), is(secondEventResourceType));
@@ -123,7 +123,7 @@ public class GoCardlessWebhookParserTest {
 
 
         GoCardlessEvent thirdEvent = parsedEvents.get(2);
-        assertThat(thirdEvent.getEventId(), is(nullValue()));
+        assertThat(thirdEvent.getInternalEventId(), is(nullValue()));
         assertThat(thirdEvent.getId(), is(nullValue()));
         assertThat(thirdEvent.getAction(), is(thirdEventAction));
         assertThat(thirdEvent.getResourceType(), is(thirdEventResourceType));

@@ -319,7 +319,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     public GoCardlessEvent toEntity() {
         return aGoCardlessEvent()
                 .withId(id)
-                .withEventId(eventId)
+                .withInternalEventId(eventId)
                 .withGoCardlessEventId(goCardlessEventId)
                 .withAction(action)
                 .withResourceId(resourceId)
