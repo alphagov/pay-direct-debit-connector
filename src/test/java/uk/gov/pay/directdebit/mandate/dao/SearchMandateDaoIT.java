@@ -130,7 +130,13 @@ public class SearchMandateDaoIT {
     
     @Test
     public void searchByDateRange() {
-        
+        var searchParams = aMandateSearchParams()
+                .withToDate(now().minusHours(1))
+                .withFromDate(now().minusHours(7))
+                .withGatewayAccountId("gateway-account-id");
+        List<Mandate> results = mandateSearchDao.search(searchParams);
+        assertThat(results.size()).isEqualTo(1);
+        assertThat(results.get(0).getId()).isEqualTo(mandate2.getId());
     }
     
     @Test

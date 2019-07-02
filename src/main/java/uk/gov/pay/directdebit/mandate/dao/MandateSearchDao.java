@@ -89,8 +89,8 @@ public class MandateSearchDao {
         params.getCaseInsensitivePartialSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
         params.getCaseInsensitivePartialSearchTermsOnPayer().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
         params.getExactSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), e.getValue()));
-        params.getGreaterThanSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), e.getValue()));
-        params.getLessThanSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), e.getValue()));
+        params.getGreaterThanSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey() + "_from", e.getValue()));
+        params.getLessThanSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey() + "_to", e.getValue()));
         return queryMap;
     }
 
@@ -99,8 +99,8 @@ public class MandateSearchDao {
         params.getCaseInsensitivePartialSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s ILIKE :%s", e.getKey(), e.getKey())));
         params.getCaseInsensitivePartialSearchTermsOnPayer().forEach(e -> sb.append(format(" AND p.%s ILIKE :%s", e.getKey(), e.getKey())));
         params.getExactSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s = :%s", e.getKey(), e.getKey())));
-        params.getGreaterThanSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s > :%s", e.getKey(), e.getKey())));
-        params.getLessThanSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s < :%s", e.getKey(), e.getKey())));
+        params.getGreaterThanSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s > :%s", e.getKey(), e.getKey() + "_from")));
+        params.getLessThanSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s < :%s", e.getKey(), e.getKey() + "_to")));
         return sb.toString();
     }
 
