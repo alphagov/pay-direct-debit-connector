@@ -90,6 +90,7 @@ public class MandateSearchDao {
         params.getCaseInsensitivePartialSearchTermsOnPayer().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
         params.getExactSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), e.getValue()));
         params.getGreaterThanSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), e.getValue()));
+        params.getLessThanSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), e.getValue()));
         return queryMap;
     }
 
@@ -99,6 +100,7 @@ public class MandateSearchDao {
         params.getCaseInsensitivePartialSearchTermsOnPayer().forEach(e -> sb.append(format(" AND p.%s ILIKE :%s", e.getKey(), e.getKey())));
         params.getExactSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s = :%s", e.getKey(), e.getKey())));
         params.getGreaterThanSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s > :%s", e.getKey(), e.getKey())));
+        params.getLessThanSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s < :%s", e.getKey(), e.getKey())));
         return sb.toString();
     }
 
@@ -111,7 +113,7 @@ public class MandateSearchDao {
         final SimpleEntry<String, String> name;
         final SimpleEntry<String, String> email;
         final SimpleEntry<String, ZonedDateTime> fromDate;
-//        final AbstractMap.SimpleEntry<String, ZonedDateTime> toDate;
+        final SimpleEntry<String, ZonedDateTime> toDate;
 //        final AbstractMap.SimpleEntry<String, Integer> page;
 //        final AbstractMap.SimpleEntry<String, Integer> displaySize;
 
@@ -129,9 +131,13 @@ public class MandateSearchDao {
             this.name = new SimpleEntry<>(PAYER_NAME_COLUMN_NAME, mandateSearchParams.getName());
             this.email = new SimpleEntry<>(PAYER_EMAIL_COLUMN_NAME, mandateSearchParams.getEmail());
             this.fromDate = new SimpleEntry<>(MANDATE_CREATED_DATE_COLUMN_NAME, mandateSearchParams.getFromDate());
-//            this.toDate = new AbstractMap.SimpleEntry<>("created_date", mandateSearchParams.getToDate());
+            this.toDate = new SimpleEntry<>(MANDATE_CREATED_DATE_COLUMN_NAME, mandateSearchParams.getToDate());
 //            this.page = new AbstractMap.SimpleEntry<>("page;
 //            this.displaySize = new AbstractMap.SimpleEntry<>("displaySize;
+        }
+
+        List<SimpleEntry<String, ?>> getLessThanSearchTermsOnMandate() {
+            return List.of(toDate).stream().filter(e -> e.getValue() != null).collect(Collectors.toList());
         }
 
         List<SimpleEntry<String, ?>> getGreaterThanSearchTermsOnMandate() {

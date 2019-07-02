@@ -16,9 +16,9 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.time.ZonedDateTime.now;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
@@ -112,12 +112,20 @@ public class SearchMandateDaoIT {
         searchParams = aMandateSearchParams().withFromDate(now().minusHours(7)).withGatewayAccountId("gateway-account-id");
         results = mandateSearchDao.search(searchParams);
         assertThat(results.size()).isEqualTo(2);
-        assertThat(results.stream().map(m -> m.getId()).collect(Collectors.toList())).contains(mandate1.getId(), mandate2.getId());
+        assertThat(results.stream().map(m -> m.getId()).collect(toList())).contains(mandate1.getId(), mandate2.getId());
     }
     
     @Test
     public void searchByToDate() {
-        
+        var searchParams = aMandateSearchParams().withToDate(now().minusHours(1)).withGatewayAccountId("gateway-account-id");
+        List<Mandate> results = mandateSearchDao.search(searchParams);
+        assertThat(results.size()).isEqualTo(1);
+        assertThat(results.get(0).getId()).isEqualTo(mandate2.getId());
+
+        searchParams = aMandateSearchParams().withToDate(now()).withGatewayAccountId("gateway-account-id");
+        results = mandateSearchDao.search(searchParams);
+        assertThat(results.size()).isEqualTo(2);
+        assertThat(results.stream().map(m -> m.getId()).collect(toList())).contains(mandate1.getId(), mandate2.getId());
     }
     
     @Test
