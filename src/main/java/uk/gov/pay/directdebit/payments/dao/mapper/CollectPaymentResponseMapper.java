@@ -19,7 +19,6 @@ import java.util.Optional;
 import static uk.gov.pay.directdebit.payments.api.CollectPaymentResponse.CollectPaymentResponseBuilder.aCollectPaymentResponse;
 
 public class CollectPaymentResponseMapper implements RowMapper<CollectPaymentResponse> {
-    
 
     @Override
     public CollectPaymentResponse map(ResultSet rs, StatementContext ctx) throws SQLException {

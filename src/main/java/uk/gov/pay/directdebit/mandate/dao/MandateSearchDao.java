@@ -84,13 +84,15 @@ public class MandateSearchDao {
     private Map<String, Object> getQueryMap(Params params) {
         Map<String, Object> queryMap = new HashMap<>();
         queryMap.put("gatewayAccountExternalId", params.gatewayAccountExternalId.getValue());
-        params.getCaseInsensitivePartialSearchTerms().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
+        params.getCaseInsensitivePartialSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
+        params.getCaseInsensitivePartialSearchTermsOnPayer().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
         return queryMap;
     }
 
     private String generateQuery(Params params) {
         StringBuilder sb = new StringBuilder();
-        params.getCaseInsensitivePartialSearchTerms().forEach(e -> sb.append(format(" AND m.%s ILIKE :%s", e.getKey(), e.getKey())));
+        params.getCaseInsensitivePartialSearchTermsOnMandate().forEach(e -> sb.append(format(" AND m.%s ILIKE :%s", e.getKey(), e.getKey())));
+        params.getCaseInsensitivePartialSearchTermsOnPayer().forEach(e -> sb.append(format(" AND p.%s ILIKE :%s", e.getKey(), e.getKey())));
         return sb.toString();
     }
 
@@ -126,8 +128,15 @@ public class MandateSearchDao {
 //            this.displaySize = new AbstractMap.SimpleEntry<>("displaySize;
         }
         
-        List<SimpleEntry<String, ?>> getCaseInsensitivePartialSearchTerms() {
-            return List.of(reference, mandateBankStatementReference, name, email)
+        List<SimpleEntry<String, ?>> getCaseInsensitivePartialSearchTermsOnMandate() {
+            return List.of(reference, mandateBankStatementReference)
+                    .stream()
+                    .filter(e -> isNotBlank(e.getValue()))
+                    .collect(Collectors.toList());
+        }
+
+        List<SimpleEntry<String, ?>> getCaseInsensitivePartialSearchTermsOnPayer() {
+            return List.of(name, email)
                     .stream()
                     .filter(e -> isNotBlank(e.getValue()))
                     .collect(Collectors.toList());
