@@ -59,16 +59,16 @@ public class SearchMandateDaoIT {
     @Test
     @Parameters({"REF1234", "ref1234", "f12"})
     public void searchByReference(String searchString) {
-        var mandateSearchParams = aMandateSearchParams().withReference(searchString).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(mandateSearchParams);
+        var searchParams = aMandateSearchParams().withReference(searchString).withGatewayAccountId("gateway-account-id");
+        List<Mandate> results = mandateSearchDao.search(searchParams);
         assertThat(results.size()).isEqualTo(1);
         assertThat(results.get(0).getId()).isEqualTo(mandate1.getId());
     }
     
     @Test
     public void searchByState() {
-        var mandateSearchParams = aMandateSearchParams().withMandateState(FAILED).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(mandateSearchParams);
+        var searchParams = aMandateSearchParams().withMandateState(FAILED).withGatewayAccountId("gateway-account-id");
+        List<Mandate> results = mandateSearchDao.search(searchParams);
         assertThat(results.size()).isEqualTo(1);
         assertThat(results.get(0).getId()).isEqualTo(mandate2.getId());
     }
@@ -76,10 +76,10 @@ public class SearchMandateDaoIT {
     @Test
     @Parameters({"STATEMENT123", "statement123", "ment"})
     public void searchByBankStatementReference(String searchString) {
-        var mandateSearchParams = aMandateSearchParams()
+        var searchParams = aMandateSearchParams()
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(searchString))
                 .withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(mandateSearchParams);
+        List<Mandate> results = mandateSearchDao.search(searchParams);
         assertThat(results.size()).isEqualTo(1);
         assertThat(results.get(0).getId()).isEqualTo(mandate2.getId());
     }
@@ -87,8 +87,8 @@ public class SearchMandateDaoIT {
     @Test
     @Parameters({"joe.bloggs@example.com", "joe.bloggs@EXAMPLE.com", "joe.bloggs"})
     public void searchByEmail(String searchString) {
-        var mandateSearchParams = aMandateSearchParams().withEmail(searchString).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(mandateSearchParams);
+        var searchParams = aMandateSearchParams().withEmail(searchString).withGatewayAccountId("gateway-account-id");
+        List<Mandate> results = mandateSearchDao.search(searchParams);
         assertThat(results.size()).isEqualTo(1);
         assertThat(results.get(0).getId()).isEqualTo(mandate1.getId());
     }
@@ -96,8 +96,8 @@ public class SearchMandateDaoIT {
     @Test
     @Parameters({"JOe Bloggs", "joe bloggs", "bloggs"})
     public void searchByName(String searchString) {
-        var mandateSearchParams = aMandateSearchParams().withName(searchString).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(mandateSearchParams);
+        var searchParams = aMandateSearchParams().withName(searchString).withGatewayAccountId("gateway-account-id");
+        List<Mandate> results = mandateSearchDao.search(searchParams);
         assertThat(results.size()).isEqualTo(1);
         assertThat(results.get(0).getId()).isEqualTo(mandate1.getId());
     }
