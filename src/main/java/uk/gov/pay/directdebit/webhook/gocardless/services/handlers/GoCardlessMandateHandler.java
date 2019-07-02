@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.directdebit.events.exception.EventHasNoMandateIdException;
+import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoMandateIdException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
@@ -89,7 +89,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 .map((handledAction -> {
                     Mandate mandate = mandateQueryService.findByPaymentProviderMandateId(
                             GOCARDLESS,
-                            event.getLinksMandate().orElseThrow(() -> new EventHasNoMandateIdException(event.getInternalEventId())),
+                            event.getLinksMandate().orElseThrow(() -> new GoCardlessEventHasNoMandateIdException(event.getGoCardlessEventId())),
                             event.getLinksOrganisation()
                     );
 

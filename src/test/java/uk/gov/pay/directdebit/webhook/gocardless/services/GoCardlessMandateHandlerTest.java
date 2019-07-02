@@ -10,7 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.events.exception.EventHasNoMandateIdException;
+import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoMandateIdException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
@@ -281,7 +281,7 @@ public class GoCardlessMandateHandlerTest {
                 .withLinksMandate(null)
                 .toEntity());
         
-        thrown.expect(EventHasNoMandateIdException.class);
+        thrown.expect(GoCardlessEventHasNoMandateIdException.class);
         goCardlessMandateHandler.handle(goCardlessEvent);
     }
 }

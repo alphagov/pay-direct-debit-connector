@@ -10,7 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.events.exception.EventHasNoPaymentIdException;
+import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payments.exception.PaymentNotFoundException;
@@ -212,7 +212,7 @@ public class GoCardlessPaymentHandlerTest {
                 .withLinksPayment(null)
                 .toEntity();
 
-        thrown.expect(EventHasNoPaymentIdException.class);
+        thrown.expect(GoCardlessEventHasNoPaymentIdException.class);
         goCardlessPaymentHandler.handle(goCardlessEvent);
     }
 
