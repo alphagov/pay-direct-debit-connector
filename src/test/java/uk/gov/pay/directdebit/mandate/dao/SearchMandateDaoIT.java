@@ -151,11 +151,19 @@ public class SearchMandateDaoIT {
     
     @Test
     public void searchByInvalidDisplaySize() {
-        
+        //this should be tested at ResourceIT level
     }
     
     @Test
     public void searchByMultipleParams() {
-        
+        var searchParams = aMandateSearchParams()
+                .withReference("REF1234")
+                .withEmail("joe.bloggs@example.com")
+                .withName("bloggs")
+                .withFromDate(now().minusHours(1))
+                .withGatewayAccountId("gateway-account-id");
+        List<Mandate> results = mandateSearchDao.search(searchParams);
+        assertThat(results.size()).isEqualTo(1);
+        assertThat(results.get(0).getId()).isEqualTo(mandate1.getId());
     }
 }
