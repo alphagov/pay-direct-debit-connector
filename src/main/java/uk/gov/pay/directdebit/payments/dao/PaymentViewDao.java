@@ -5,8 +5,8 @@ import javax.inject.Inject;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
-import uk.gov.pay.directdebit.payments.api.CollectPaymentResponse;
-import uk.gov.pay.directdebit.payments.dao.mapper.CollectPaymentResponseMapper;
+import uk.gov.pay.directdebit.payments.api.PaymentResponse;
+import uk.gov.pay.directdebit.payments.dao.mapper.PaymentResponseMapper;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
 public class PaymentViewDao {
@@ -44,13 +44,13 @@ public class PaymentViewDao {
         this.jdbi = jdbi;
     }
 
-    public List<CollectPaymentResponse> searchPaymentView(PaymentViewSearchParams searchParams) {
+    public List<PaymentResponse> searchPaymentView(PaymentViewSearchParams searchParams) {
         String searchExtraFields = searchParams.generateQuery();
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
             searchParams.getQueryMap().forEach(query::bind);
             return query
-                    .map(new CollectPaymentResponseMapper())
+                    .map(new PaymentResponseMapper())
                     .list();
         });
     }
