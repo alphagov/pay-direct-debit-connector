@@ -22,20 +22,18 @@ public class PaymentViewSearchParams {
     private static final String PAGE_SIZE_FIELD = "limit";
     private static final String FROM_DATE_FIELD = "fromDate";
     private static final String TO_DATE_FIELD = "toDate";
-    private static final String EMAIL_FIELD = "email";
     private static final String REFERENCE_FIELD = "reference";
     private static final String AMOUNT_FIELD = "amount";
-    private static final String MANDATE_ID_INTERNAL_KEY = "mandate_id";
-    private static final String MANDATE_ID_EXTERNAL_KEY = "agreement_id";
+    private static final String MANDATE_ID_KEY = "mandate_id";
     private static final String FROM_DATE_KEY = "from_date";
     private static final String TO_DATE_KEY = "to_date";
     private static final String STATE_FIELD = "state";
+    
     private final String gatewayExternalId;
     private Long page;
     private Long displaySize;
     private String fromDateString;
     private String toDateString;
-    private String email;
     private String reference;
     private Long amount;
     private String mandateId;
@@ -84,11 +82,6 @@ public class PaymentViewSearchParams {
         return this;
     }
 
-    public PaymentViewSearchParams withEmail(String email) {
-        this.email = email;
-        return this;
-    }
-
     public PaymentViewSearchParams withReference(String reference) {
         this.reference = reference;
         return this;
@@ -124,8 +117,6 @@ public class PaymentViewSearchParams {
 
     public String getToDateString() { return toDateString; }
 
-    public String getEmail() { return email; }
-
     public String getReference() { return reference; }
 
     public Long getAmount() { return amount; }
@@ -151,7 +142,7 @@ public class PaymentViewSearchParams {
     public String generateQuery() {
         StringBuilder sb = new StringBuilder();
         if (isNotBlank(mandateId)) {
-            sb.append(" AND m.external_id = :" + MANDATE_ID_INTERNAL_KEY);
+            sb.append(" AND m.external_id = :" + MANDATE_ID_KEY);
         }
         if (searchDateParams != null) {
             if (searchDateParams.getFromDate() != null) {
@@ -160,9 +151,6 @@ public class PaymentViewSearchParams {
             if (searchDateParams.getToDate() != null) {
                 sb.append(" AND p.created_date < :" + TO_DATE_FIELD);
             }
-        }
-        if (isNotBlank(email)) {
-            sb.append(" AND pa.email ILIKE :" + EMAIL_FIELD);
         }
         if (isNotBlank(reference)) {
             sb.append(" AND p.reference ILIKE :" + REFERENCE_FIELD);
@@ -183,7 +171,7 @@ public class PaymentViewSearchParams {
             queryMap.put(PAGE_NUMBER_FIELD, getPaginationParams().getPageNumber());
             queryMap.put(PAGE_SIZE_FIELD, getPaginationParams().getDisplaySize());
             if (isNotBlank(mandateId)) {
-                queryMap.put(MANDATE_ID_INTERNAL_KEY, mandateId);
+                queryMap.put(MANDATE_ID_KEY, mandateId);
             }
             if (searchDateParams != null) {
                 if (searchDateParams.getFromDate() != null) {
@@ -192,9 +180,6 @@ public class PaymentViewSearchParams {
                 if (searchDateParams.getToDate() != null) {
                     queryMap.put(TO_DATE_FIELD, searchDateParams.getToDate());
                 }
-            }
-            if (isNotBlank(email)) {
-                queryMap.put(EMAIL_FIELD, likeClause(email));
             }
             if (isNotBlank(reference)) {
                 queryMap.put(REFERENCE_FIELD, likeClause(reference));
@@ -209,7 +194,7 @@ public class PaymentViewSearchParams {
     public String buildQueryParamString() {
         String query = "";
         if (isNotBlank(mandateId)) {
-            query += "&" + MANDATE_ID_EXTERNAL_KEY + "=" + mandateId;
+            query += "&" + MANDATE_ID_KEY + "=" + mandateId;
         }
         if (searchDateParams != null) {
             if (searchDateParams.getFromDate() != null) {
@@ -218,9 +203,6 @@ public class PaymentViewSearchParams {
             if (searchDateParams.getToDate() != null) {
                 query += "&" + TO_DATE_KEY + "=" + searchDateParams.getToDate().toString();
             }
-        }
-        if (isNotBlank(email)) {
-            query += "&" + EMAIL_FIELD + "=" + email;
         }
         if (isNotBlank(reference)) {
             query += "&" + REFERENCE_FIELD + "=" + reference;

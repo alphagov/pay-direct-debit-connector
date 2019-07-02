@@ -8,11 +8,13 @@ import au.com.dius.pact.provider.junit.loader.PactBrokerAuth;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
@@ -92,10 +94,13 @@ public class PublicApiContractTest {
 
     @State("three payment records exist")
     public void threePaymentRecordsExist(Map<String, String> params) {
-        testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
+        testGatewayAccount.withPaymentProvider(PaymentProvider.GOCARDLESS)
+                .withExternalId(params.get("gateway_account_id"))
+                .insert(app.getTestContext().getJdbi());
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
-                .withExternalId(MandateExternalId.valueOf(params.get("agreement_id")));
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("MD1"))
+                .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")));
         testMandate.insert(app.getTestContext().getJdbi());
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
         testPayer.insert(app.getTestContext().getJdbi());

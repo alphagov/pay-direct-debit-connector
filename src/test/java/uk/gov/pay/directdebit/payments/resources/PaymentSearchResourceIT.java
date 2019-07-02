@@ -36,7 +36,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFi
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class PaymentViewResourceIT {
+public class PaymentSearchResourceIT { //TODO merge with PaymentResource
 
     private GatewayAccountFixture testGatewayAccount;
 
@@ -65,7 +65,7 @@ public class PaymentViewResourceIT {
                     .withName("J. Doe" + i)
                     .insert(testContext.getJdbi());
         }
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "1")
                 .replace(":display_size", "100");
@@ -86,7 +86,7 @@ public class PaymentViewResourceIT {
 
     @Test
     public void shouldReturn400_whenPresentedWithNegativeOffset() {
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "0")
                 .replace(":display_size", "100");
@@ -102,7 +102,7 @@ public class PaymentViewResourceIT {
 
     @Test
     public void shouldReturn404_whenGatewayAccountNotExists() {
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?page=:page&display_size=:display_size"
                 .replace("{accountId}", "non-existent-id")
                 .replace(":page", "1")
                 .replace(":display_size", "100");
@@ -129,7 +129,7 @@ public class PaymentViewResourceIT {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?page=:page&display_size=:display_size"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?page=:page&display_size=:display_size"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "2");
@@ -163,7 +163,7 @@ public class PaymentViewResourceIT {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "10")
@@ -205,7 +205,7 @@ public class PaymentViewResourceIT {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "1")
                 .replace(":display_size", "100")
@@ -228,7 +228,7 @@ public class PaymentViewResourceIT {
     public void shouldReturn400_whenMalformedDate() {
         String fromDate = "2018-05-05T15:00Z";
         String toDate = "2018-14-08T15:00Z";
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?page=:page&display_size=:display_size&from_date=:fromDate&to_date=:toDate"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":page", "2")
                 .replace(":display_size", "10")
@@ -241,33 +241,6 @@ public class PaymentViewResourceIT {
                 .contentType(JSON)
                 .body("message", contains("Input toDate (2018-14-08T15:00Z) is wrong format"))
                 .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
-    }
-
-    @Test
-    public void shouldReturn7Records_whenEmailSet() {
-        List<String> emailList = Arrays.asList("john.doe@example.com", "jane.doe@example.com");
-        for (int i = 0; i < 15; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-
-            aPaymentFixture()
-                    .withId((long) i)
-                    .withMandateFixture(mandateFixture)
-                    .insert(testContext.getJdbi());
-            aPayerFixture()
-                    .withMandateId(mandateFixture.getId())
-                    .withEmail(i % 2 == 0 ? emailList.get(0) : emailList.get(1))
-                    .insert(testContext.getJdbi());
-        }
-
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?email=:email"
-                .replace("{accountId}", testGatewayAccount.getExternalId())
-                .replace(":email", "Jane");
-        givenSetup()
-                .get(requestPath)
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .contentType(JSON)
-                .body("results", hasSize(7));
     }
 
     @Test
@@ -286,7 +259,7 @@ public class PaymentViewResourceIT {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?reference=:reference"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?reference=:reference"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":reference", "f1");
         givenSetup()
@@ -313,7 +286,7 @@ public class PaymentViewResourceIT {
                     .insert(testContext.getJdbi());
         }
 
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?amount=:amount"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?amount=:amount"
                 .replace("{accountId}", testGatewayAccount.getExternalId())
                 .replace(":amount", "2343");
         givenSetup()
@@ -360,7 +333,7 @@ public class PaymentViewResourceIT {
                     .withMandateFixture(mandateFixture1)
                     .insert(testContext.getJdbi());
         }
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?agreement_id=:mandateId"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?mandate_id=:mandateId"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
                 .replace(":mandateId", mandateFixture1.getExternalId().toString());
         givenSetup()
@@ -404,7 +377,7 @@ public class PaymentViewResourceIT {
                     .withState(PaymentState.EXPIRED)
                     .insert(testContext.getJdbi());
         }
-        String requestPath = "/v1/api/accounts/{accountId}/payments/view?state=:state"
+        String requestPath = "/v1/api/accounts/{accountId}/payments?state=:state"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
                 .replace(":state", ExternalPaymentState.EXTERNAL_FAILED.getStatus());
         givenSetup()

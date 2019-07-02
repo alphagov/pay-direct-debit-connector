@@ -45,7 +45,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PaymentViewServiceTest {
+public class PaymentSearchServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     private String gatewayAccountExternalId = RandomIdGenerator.newId();
@@ -57,7 +57,7 @@ public class PaymentViewServiceTest {
     private GatewayAccountDao gatewayAccountDao;
     @Mock
     UriInfo mockUriInfo;
-    private PaymentViewService paymentViewService;
+    private PaymentSearchService paymentSearchService;
     private GatewayAccount gatewayAccount;
 
     @Before
@@ -82,7 +82,7 @@ public class PaymentViewServiceTest {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        paymentViewService = new PaymentViewService(paymentViewDao, gatewayAccountDao)
+        paymentSearchService = new PaymentSearchService(paymentViewDao, gatewayAccountDao)
                 .withUriInfo(mockUriInfo);
     }
 
@@ -97,7 +97,7 @@ public class PaymentViewServiceTest {
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(4L);
-        PaymentViewResponse response = paymentViewService.getPaymentViewResponse(searchParams);
+        PaymentViewResponse response = paymentSearchService.getPaymentSearchResponse(searchParams);
         assertThat(response.getPaymentViewResponses().get(3).getAmount(), is(1003L));
         assertThat(response.getPaymentViewResponses().get(0).getState(),
                 is(new ExternalPaymentStateWithDetails(ExternalPaymentState.EXTERNAL_PENDING, "example_details")));
@@ -114,7 +114,7 @@ public class PaymentViewServiceTest {
         thrown.expect(GatewayAccountNotFoundException.class);
         thrown.expectMessage("Unknown gateway account: " + gatewayAccountExternalId);
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.empty());
-        paymentViewService.getPaymentViewResponse(searchParams);
+        paymentSearchService.getPaymentSearchResponse(searchParams);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class PaymentViewServiceTest {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(2L)
                 .withDisplaySize(20L);
-        PaymentViewResponse paymentViewResponse = paymentViewService.getPaymentViewResponse(searchParams);
+        PaymentViewResponse paymentViewResponse = paymentSearchService.getPaymentSearchResponse(searchParams);
         assertThat(paymentViewResponse.getCount(), is(20L));
         assertThat(paymentViewResponse.getPage(), is(2L));
         assertThat(paymentViewResponse.getTotal(), is(50L));
@@ -173,7 +173,7 @@ public class PaymentViewServiceTest {
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(2L);
-        PaymentViewResponse paymentViewResponse = paymentViewService.getPaymentViewResponse(searchParams);
+        PaymentViewResponse paymentViewResponse = paymentSearchService.getPaymentSearchResponse(searchParams);
         assertThat(paymentViewResponse.getCount(), is(0L));
         assertThat(paymentViewResponse.getPage(), is(2L));
         assertThat(paymentViewResponse.getTotal(), is(18L));

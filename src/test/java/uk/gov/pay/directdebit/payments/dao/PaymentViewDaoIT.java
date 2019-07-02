@@ -139,28 +139,7 @@ public class PaymentViewDaoIT {
         assertThat(paymentViewList.get(1).getCreatedDate().isAfter(zonedDateTime7DaysAgo), is(true));
         assertThat(paymentViewList.get(1).getCreatedDate().isBefore(zonedDateTimeNow), is(true));
     }
-
-    @Test
-    public void shouldReturn2PaymentView_withEmailSet() {
-        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
-        List<String> emailList = Arrays.asList("jane@example.com", "joe.bog@example.com", "jane.bog@example.com", "joe@example.com");
-        for (int i = 0; i < 4; i++) {
-            MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
-            aPayerFixture()
-                    .withMandateId(mandateFixture.getId())
-                    .withEmail(emailList.get(i))
-                    .insert(testContext.getJdbi());
-            aPaymentFixture()
-                    .withId((long) i)
-                    .withMandateFixture(mandateFixture)
-                    .insert(testContext.getJdbi());
-        }
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountFixture.getExternalId())
-                .withEmail("bog");
-        List<CollectPaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
-        assertThat(viewList.size(), is(2));
-    }
-
+    
     @Test
     public void shouldReturn2PaymentView_withReferenceSet() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
