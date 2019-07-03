@@ -1,7 +1,9 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.mandate.exception.MandateStateInvalidException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.model.Payment;
@@ -23,9 +25,15 @@ public class CollectService {
         Mandate mandate = mandateQueryService.findByExternalIdAndGatewayAccountExternalId(collectPaymentRequest.getMandateExternalId(),
                 gatewayAccount.getExternalId());
 
+        if (!(mandate.getState().equals(MandateState.SUBMITTED) || mandate.getState().equals(MandateState.PENDING) ||
+                mandate.getState().equals(MandateState.ACTIVE))) {
+            throw new MandateStateInvalidException("Mandate state invalid for Mandate with id: " +
+                    mandate.getExternalId());
+        }
+
         Payment payment = paymentService.createPayment(collectPaymentRequest.getAmount(), collectPaymentRequest.getDescription(),
                 collectPaymentRequest.getReference(), mandate);
-        
+
         return paymentService.submitPaymentToProvider(payment);
     }
 

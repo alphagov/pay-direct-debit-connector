@@ -336,6 +336,7 @@ public class PaymentResourceIT {
                 .body(postBody)
                 .post(requestPath)
                 .then()
+                .body("error_identifier", is("MANDATE_STATE_INVALID"))
                 .statusCode(500);
 
     }

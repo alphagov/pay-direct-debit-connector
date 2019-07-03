@@ -58,10 +58,6 @@ public class PaymentResource {
         LOGGER.info("Received collect payment from mandate request");
         collectPaymentRequestValidator.validate(collectPaymentRequestMap);
         Payment paymentToCollect = collectService.collect(gatewayAccount, CollectPaymentRequest.of(collectPaymentRequestMap));
-        if(!paymentService.isPaymentMandateStateValid(paymentToCollect)) {
-            throw new MandateStateInvalidException("Mandate state invalid for mandateId: " +
-                    paymentToCollect.getMandate().getExternalId());
-        }
         PaymentResponse response = PaymentResponse.from(paymentToCollect);
         return Response.status(SC_CREATED).entity(response).build();
     }

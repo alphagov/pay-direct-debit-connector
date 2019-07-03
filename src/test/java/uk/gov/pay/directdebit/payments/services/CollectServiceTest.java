@@ -9,6 +9,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
@@ -39,7 +40,7 @@ public class CollectServiceTest {
 
     private GatewayAccount gatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().withExternalId(GATEWAY_ACCOUNT_EXTERNAL_ID).toEntity();
 
-    private Mandate mandate = MandateFixture.aMandateFixture().withExternalId(MANDATE_EXTERNAL_ID).toEntity();
+    private Mandate mandate = MandateFixture.aMandateFixture().withExternalId(MANDATE_EXTERNAL_ID).withState(MandateState.PENDING).toEntity();
     
     private CollectPaymentRequest collectPaymentRequest = new CollectPaymentRequest(MANDATE_EXTERNAL_ID, AMOUNT, DESCRIPTION, REFERENCE);
     
