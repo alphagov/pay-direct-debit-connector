@@ -31,6 +31,7 @@ public class MandateSearchDao {
     private static final String PAYER_EMAIL_COLUMN_NAME = "email";
     
     private static final String LIMIT_QUERY_MAP = "limit";
+    private static final String OFFSET_QUERY_MAP = "offset";
 
     private final Jdbi jdbi;
 
@@ -68,8 +69,7 @@ public class MandateSearchDao {
             "  LEFT JOIN payers p ON p.mandate_id = m.id " +
             format("WHERE g.external_id = :%s ", MANDATE_GATEWAY_ACCOUNT_ID_COLUMN_NAME) +
             "  :searchExtraFields " + 
-            format("  ORDER BY m.id DESC LIMIT :%s", LIMIT_QUERY_MAP);
-//            "  ORDER BY m.id DESC OFFSET :offset LIMIT :limit";
+            format("  ORDER BY m.id DESC OFFSET :%s LIMIT :%s", OFFSET_QUERY_MAP, LIMIT_QUERY_MAP);
 
     @Inject
     public MandateSearchDao(Jdbi jdbi) {
@@ -81,15 +81,16 @@ public class MandateSearchDao {
         String searchExtraFields = generateQuery(params);
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
-            getQueryMap(params, mandateSearchParams.getDisplaySize()).forEach(query::bind);
+            getQueryMap(params, mandateSearchParams.getDisplaySize(), mandateSearchParams.getPage()).forEach(query::bind);
             return query.map(new MandateMapper()).list();
         });
     }
 
-    private Map<String, Object> getQueryMap(Params params, int pageSize) {
+    private Map<String, Object> getQueryMap(Params params, int pageSize, int pageNumber) {
         Map<String, Object> queryMap = new HashMap<>();
         queryMap.put(MANDATE_GATEWAY_ACCOUNT_ID_COLUMN_NAME, params.gatewayAccountExternalId.getValue());
         queryMap.put(LIMIT_QUERY_MAP, pageSize);
+        queryMap.put(OFFSET_QUERY_MAP, pageNumber * pageSize - 1);
         params.getCaseInsensitivePartialSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
         params.getCaseInsensitivePartialSearchTermsOnPayer().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
         params.getExactSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), e.getValue()));
@@ -118,7 +119,6 @@ public class MandateSearchDao {
         final SimpleEntry<String, String> email;
         final SimpleEntry<String, ZonedDateTime> fromDate;
         final SimpleEntry<String, ZonedDateTime> toDate;
-//        final AbstractMap.SimpleEntry<String, Integer> page;
 
         private Params(MandateSearchParams mandateSearchParams) {
             Objects.requireNonNull(mandateSearchParams.getGatewayAccountExternalId());
@@ -135,7 +135,6 @@ public class MandateSearchDao {
             this.email = new SimpleEntry<>(PAYER_EMAIL_COLUMN_NAME, mandateSearchParams.getEmail());
             this.fromDate = new SimpleEntry<>(MANDATE_CREATED_DATE_COLUMN_NAME, mandateSearchParams.getFromDate());
             this.toDate = new SimpleEntry<>(MANDATE_CREATED_DATE_COLUMN_NAME, mandateSearchParams.getToDate());
-//            this.page = new AbstractMap.SimpleEntry<>("page;
         }
 
         List<SimpleEntry<String, ?>> getLessThanSearchTermsOnMandate() {

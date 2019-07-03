@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import java.util.List;
+import java.util.stream.LongStream;
 
 import static java.time.ZonedDateTime.now;
 import static java.util.stream.Collectors.toList;
@@ -143,7 +144,17 @@ public class SearchMandateDaoIT {
     
     @Test
     public void searchByPage() {
-        
+        LongStream.rangeClosed(101, 105).forEach(n -> {
+            aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withId(n).insert(testContext.getJdbi());
+        });
+        var searchParams = aMandateSearchParams()
+                .withFromDate(now().minusHours(1))
+                .withPage(3)
+                .withDisplaySize(2)
+                .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        List<Mandate> results = mandateSearchDao.search(searchParams);
+        assertThat(results.size()).isEqualTo(1);
+        assertThat(results.get(0).getId()).isEqualTo(101L);
     }
     
     @Test
