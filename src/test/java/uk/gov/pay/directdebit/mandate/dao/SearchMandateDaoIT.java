@@ -10,15 +10,13 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
-import java.util.List;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
-import static java.time.ZonedDateTime.now;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
@@ -47,6 +45,10 @@ public class SearchMandateDaoIT {
             .withState(FAILED)
             .withCreatedDate(now().minusHours(6));
     
+    private static ZonedDateTime now() {
+        return java.time.ZonedDateTime.now(ZoneOffset.UTC);
+    }
+    
     @Before
     public void setup() {
         mandateSearchDao = new MandateSearchDao(testContext.getJdbi());
@@ -60,17 +62,13 @@ public class SearchMandateDaoIT {
     @Parameters({"REF1234", "ref1234", "f12"})
     public void searchByReference(String searchString) {
         var searchParams = aMandateSearchParams().withReference(searchString).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results.get(0).getId()).isEqualTo(mandate1.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
     
     @Test
     public void searchByState() {
         var searchParams = aMandateSearchParams().withMandateState(FAILED).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results.get(0).getId()).isEqualTo(mandate2.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
     }
     
     @Test
@@ -79,53 +77,39 @@ public class SearchMandateDaoIT {
         var searchParams = aMandateSearchParams()
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(searchString))
                 .withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results.get(0).getId()).isEqualTo(mandate2.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
     }
     
     @Test
     @Parameters({"joe.bloggs@example.com", "joe.bloggs@EXAMPLE.com", "joe.bloggs"})
     public void searchByEmail(String searchString) {
         var searchParams = aMandateSearchParams().withEmail(searchString).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results.get(0).getId()).isEqualTo(mandate1.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
 
     @Test
     @Parameters({"JOe Bloggs", "joe bloggs", "bloggs"})
     public void searchByName(String searchString) {
         var searchParams = aMandateSearchParams().withName(searchString).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results.get(0).getId()).isEqualTo(mandate1.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
     
     @Test
     public void searchByFromDate() {
         var searchParams = aMandateSearchParams().withFromDate(now().minusHours(1)).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results.get(0).getId()).isEqualTo(mandate1.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
 
         searchParams = aMandateSearchParams().withFromDate(now().minusHours(7)).withGatewayAccountId("gateway-account-id");
-        results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(2);
-        assertThat(results.stream().map(m -> m.getId()).collect(toList())).contains(mandate1.getId(), mandate2.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
     }
     
     @Test
     public void searchByToDate() {
         var searchParams = aMandateSearchParams().withToDate(now().minusHours(1)).withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results.get(0).getId()).isEqualTo(mandate2.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
 
         searchParams = aMandateSearchParams().withToDate(now()).withGatewayAccountId("gateway-account-id");
-        results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(2);
-        assertThat(results.stream().map(m -> m.getId()).collect(toList())).contains(mandate1.getId(), mandate2.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
     }
     
     @Test
@@ -134,9 +118,7 @@ public class SearchMandateDaoIT {
                 .withToDate(now().minusHours(1))
                 .withFromDate(now().minusHours(7))
                 .withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results.get(0).getId()).isEqualTo(mandate2.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
     }
     
     @Test
@@ -162,8 +144,6 @@ public class SearchMandateDaoIT {
                 .withName("bloggs")
                 .withFromDate(now().minusHours(1))
                 .withGatewayAccountId("gateway-account-id");
-        List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results.size()).isEqualTo(1);
-        assertThat(results.get(0).getId()).isEqualTo(mandate1.getId());
+        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
 }
