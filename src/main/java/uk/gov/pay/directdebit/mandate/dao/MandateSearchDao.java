@@ -66,7 +66,7 @@ public class MandateSearchDao {
             " FROM mandates m" +
             format("  JOIN gateway_accounts g ON g.id = m.%s ", MANDATE_GATEWAY_ACCOUNT_ID_COLUMN_NAME) +
             "  LEFT JOIN payers p ON p.mandate_id = m.id " +
-            "WHERE g.external_id = :gatewayAccountExternalId " +
+            format("WHERE g.external_id = :%s ", MANDATE_GATEWAY_ACCOUNT_ID_COLUMN_NAME) +
             "  :searchExtraFields " + 
             format("  ORDER BY m.id DESC LIMIT :%s", LIMIT_QUERY_MAP);
 //            "  ORDER BY m.id DESC OFFSET :offset LIMIT :limit";
@@ -88,7 +88,7 @@ public class MandateSearchDao {
 
     private Map<String, Object> getQueryMap(Params params, int pageSize) {
         Map<String, Object> queryMap = new HashMap<>();
-        queryMap.put("gatewayAccountExternalId", params.gatewayAccountExternalId.getValue());
+        queryMap.put(MANDATE_GATEWAY_ACCOUNT_ID_COLUMN_NAME, params.gatewayAccountExternalId.getValue());
         queryMap.put(LIMIT_QUERY_MAP, pageSize);
         params.getCaseInsensitivePartialSearchTermsOnMandate().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
         params.getCaseInsensitivePartialSearchTermsOnPayer().forEach(e -> queryMap.put(e.getKey(), "%" + e.getValue() + "%"));
