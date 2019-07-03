@@ -15,7 +15,7 @@ public class MandateSearchParams {
     private ZonedDateTime fromDate;
     private ZonedDateTime toDate;
     private int page;
-    private int displaySize;
+    private int displaySize = 500;
     private String gatewayAccountExternalId;
 
     private MandateSearchParams() {
