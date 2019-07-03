@@ -77,6 +77,7 @@ public class PublicApiContractTest {
         testMandate.withGatewayAccountFixture(testGatewayAccount)
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
                 .withPayerFixture(PayerFixture.aPayerFixture())
+                .withState(MandateState.PENDING)
                 .insert(app.getTestContext().getJdbi());
     }
 

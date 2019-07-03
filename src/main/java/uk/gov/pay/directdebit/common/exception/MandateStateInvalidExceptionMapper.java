@@ -18,7 +18,7 @@ public class MandateStateInvalidExceptionMapper implements ExceptionMapper<Manda
     @Override
     public Response toResponse(MandateStateInvalidException exception) {
         LOGGER.error(exception.getMessage());
-        ErrorResponse errorResponse = new ErrorResponse(ErrorIdentifier.GENERIC, exception.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(ErrorIdentifier.MANDATE_STATE_INVALID, exception.getMessage());
         return Response.status(500).entity(errorResponse).type(APPLICATION_JSON).build();
     }
 }
