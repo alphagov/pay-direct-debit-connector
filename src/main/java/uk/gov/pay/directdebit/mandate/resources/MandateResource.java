@@ -52,8 +52,12 @@ public class MandateResource {
     @Timed
     public List<MandateResponse> searchMandates(@PathParam("accountId") GatewayAccount gatewayAccount,
                                                 @QueryParam("display_size") Integer displaySize,
-                                                @QueryParam("page") Integer page) {
+                                                @QueryParam("page") Integer page,
+                                                @QueryParam("from_date") String fromDate,
+                                                @QueryParam("to_date") String toDate) {
         var mandateSearchParams = aMandateSearchParams()
+                .withToDate(toDate)
+                .withFromDate(fromDate)
                 .withDisplaySize(displaySize)
                 .withPage(page);
         return List.of();

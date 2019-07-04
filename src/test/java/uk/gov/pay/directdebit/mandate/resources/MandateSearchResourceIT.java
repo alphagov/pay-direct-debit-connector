@@ -16,6 +16,9 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import javax.ws.rs.core.Response;
 
+import java.nio.charset.Charset;
+import java.util.Map;
+
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
@@ -39,16 +42,16 @@ public class MandateSearchResourceIT {
     
     @Test
     @Parameters({
+            "to_date, 2018-14-05T15:00Z, Input to_date (2018-14-05T15:00Z) is wrong format.", 
+            "from_date, 2018-14-05T15:00Z, Input from_date (2018-14-05T15:00Z) is wrong format.", 
             "page, -1, Query param 'page' should be a non zero positive integer.", 
             "display_size, 0, Query param 'display_size' should be between 1 and 500.", 
             "display_size, 501, Query param 'display_size' should be between 1 and 500."
     })
-    public void searchWithInvalidParams(String param, String value, String expectedErrorMessage) throws Exception {
-        var uri = new URIBuilder(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()));
-        uri.addParameter(param, value);
-
+    public void searchWithInvalidParams(String param, String value, String expectedErrorMessage) {
         givenSetup()
-                .get(uri.build())
+                .queryParams(Map.of(param, value))
+                .get(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()))
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .contentType(JSON)
@@ -57,17 +60,8 @@ public class MandateSearchResourceIT {
     }
     
     @Test
-    public void searchByMalformedDate() {
-        
-    }
-    
-    @Test
     public void searchByNonExistentGatewayAccount() {
         
-    }
-    
-    @Test
-    public void searchWithMissingGatewayAccountId() {
     }
     
     @Test

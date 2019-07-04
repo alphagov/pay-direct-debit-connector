@@ -6,7 +6,11 @@ import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Optional;
+
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MandateSearchParams {
 
@@ -124,4 +128,24 @@ public class MandateSearchParams {
         this.gatewayAccountExternalId = gatewayAccountId;
         return this;
     }
+
+    public MandateSearchParams withFromDate(String fromDate) {
+        return withFromDate(parseDate(fromDate, "from_date"));
+    }
+    
+    public MandateSearchParams withToDate(String toDate) {
+        return withToDate(parseDate(toDate, "to_date"));
+    }
+
+    private static ZonedDateTime parseDate(String date, String field) {
+        if (isNotBlank(date)) {
+            try {
+                return ZonedDateTime.parse(date);
+            } catch (DateTimeParseException e) {
+                throw new BadRequestException(format("Input %s (%s) is wrong format.", field, date));
+            }
+        }
+        return null;
+    }
+
 }
