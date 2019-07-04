@@ -4,6 +4,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 public class MandateSearchParams {
 
@@ -21,32 +22,32 @@ public class MandateSearchParams {
     private MandateSearchParams() {
     }
 
-    public String getReference() {
-        return reference;
+    public Optional<String> getReference() {
+        return Optional.ofNullable(reference);
     }
 
-    public MandateState getMandateState() {
-        return mandateState;
+    public Optional<MandateState> getMandateState() {
+        return Optional.ofNullable(mandateState);
     }
 
-    public MandateBankStatementReference getMandateBankStatementReference() {
-        return mandateBankStatementReference;
+    public Optional<MandateBankStatementReference> getMandateBankStatementReference() {
+        return Optional.ofNullable(mandateBankStatementReference);
     }
 
-    public String getName() {
-        return name;
+    public Optional<String> getName() {
+        return Optional.ofNullable(name);
     }
 
-    public String getEmail() {
-        return email;
+    public Optional<String> getEmail() {
+        return Optional.ofNullable(email);
     }
 
-    public ZonedDateTime getFromDate() {
-        return fromDate;
+    public Optional<ZonedDateTime> getFromDate() {
+        return Optional.ofNullable(fromDate);
     }
 
-    public ZonedDateTime getToDate() {
-        return toDate;
+    public Optional<ZonedDateTime> getToDate() {
+        return Optional.ofNullable(toDate);
     }
 
     public int getPage() {
