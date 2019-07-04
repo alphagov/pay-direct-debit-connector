@@ -21,7 +21,7 @@ public class MandateSearchDao {
     }
 
     public List<Mandate> search(MandateSearchParams mandateSearchParams) {
-        var sql = new StringBuilder();
+        var sql = new StringBuilder(2048);
         sql.append("SELECT DISTINCT" +
                 "  m.id AS mandate_id," +
                 "  m.external_id AS mandate_external_id," +
@@ -54,43 +54,43 @@ public class MandateSearchDao {
                 " FROM mandates m" +
                 "  JOIN gateway_accounts g ON g.id = m.gateway_account_id " +
                 "  LEFT JOIN payers p ON p.mandate_id = m.id " +
-                "WHERE g.external_id = :gatewayAccountExternalId ");
+                "WHERE g.external_id = :gatewayAccountExternalId");
         //            "  ORDER BY p.id DESC OFFSET :offset LIMIT :limit";
 
         var sqlParams = new HashMap<String, Object>();
         sqlParams.put("gatewayAccountExternalId", mandateSearchParams.getGatewayAccountExternalId());
 
-        Optional.ofNullable(mandateSearchParams.getReference()).ifPresent(reference -> {
+        mandateSearchParams.getReference().filter(s -> !s.isBlank()).ifPresent(serviceReference -> {
             sql.append(" AND m.service_reference ILIKE :serviceReference");
-            sqlParams.put("serviceReference", "%" + reference + "%");
+            sqlParams.put("serviceReference", "%" + serviceReference + "%");
         });
         
-        Optional.ofNullable(mandateSearchParams.getMandateBankStatementReference()).ifPresent(bankStatementRef -> {
+        mandateSearchParams.getMandateBankStatementReference().filter(s -> !s.toString().isBlank()).ifPresent(bankStatementRef -> {
             sql.append(" AND m.mandate_reference ILIKE :mandateRef");
-            sqlParams.put("mandateRef", "%" + bankStatementRef + "%");
+            sqlParams.put("mandateRef", "%" + bankStatementRef.toString() + "%");
         });
         
-        Optional.ofNullable(mandateSearchParams.getName()).ifPresent(name -> {
+        mandateSearchParams.getName().filter(s -> !s.isBlank()).ifPresent(name -> {
             sql.append(" AND p.name ILIKE :name");
             sqlParams.put("name", "%" + name + "%");
         });
         
-        Optional.ofNullable(mandateSearchParams.getEmail()).ifPresent(email -> {
+        mandateSearchParams.getEmail().filter(s -> !s.isBlank()).ifPresent(email -> {
             sql.append(" AND p.email ILIKE :email");
             sqlParams.put("email", "%" + email + "%");
         });
         
-        Optional.ofNullable(mandateSearchParams.getMandateState()).ifPresent(mandateState -> {
+        mandateSearchParams.getMandateState().ifPresent(mandateState -> {
             sql.append(" AND m.state = :state");
             sqlParams.put("state", mandateState);
         });
         
-        Optional.ofNullable(mandateSearchParams.getFromDate()).ifPresent(fromDate -> {
+        mandateSearchParams.getFromDate().ifPresent(fromDate -> {
             sql.append(" AND m.created_date > :createdDateFrom");
             sqlParams.put("createdDateFrom", fromDate);
         });
         
-        Optional.ofNullable(mandateSearchParams.getToDate()).ifPresent(toDate -> {
+        mandateSearchParams.getToDate().ifPresent(toDate -> {
             sql.append(" AND m.created_date < :createdDateTo");
             sqlParams.put("createdDateTo", toDate);
         });
