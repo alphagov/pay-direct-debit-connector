@@ -20,6 +20,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
@@ -29,31 +30,27 @@ import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
+import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
+import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 import static uk.gov.pay.directdebit.payments.resources.PaymentResource.CHARGE_API_PATH;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubGetCreditor;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
-import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
@@ -97,10 +94,11 @@ public class PaymentResourceIT {
 
     @Test
     public void shouldCollectAPayment_forSandbox() throws Exception {
-        PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+        PayerFixture payerFixture = aPayerFixture();
+        MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .withPayerFixture(payerFixture)
+                .withState(MandateState.PENDING)
                 .insert(testContext.getJdbi());
         String accountExternalId = testGatewayAccount.getExternalId();
         String expectedReference = "Test reference";
@@ -164,10 +162,11 @@ public class PaymentResourceIT {
 
     @Test
     public void shouldCollectAPayment_withNoDescription() throws Exception {
-        PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+        PayerFixture payerFixture = aPayerFixture();
+        MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .withPayerFixture(payerFixture)
+                .withState(MandateState.PENDING)
                 .insert(testContext.getJdbi());
         String accountExternalId = testGatewayAccount.getExternalId();
         String expectedReference = "Test reference";
@@ -194,12 +193,13 @@ public class PaymentResourceIT {
     public void shouldCollectAPayment_forGoCardless() throws Exception {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
-        PayerFixture payerFixture = PayerFixture.aPayerFixture();
+        PayerFixture payerFixture = aPayerFixture();
         GoCardlessMandateId goCardlessMandate = GoCardlessMandateId.valueOf("aGoCardlessMandateId");
-        Mandate mandate = MandateFixture.aMandateFixture()
+        Mandate mandate = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPaymentProviderId(goCardlessMandate)
                 .withPayerFixture(payerFixture)
+                .withState(MandateState.PENDING)
                 .insert(testContext.getJdbi())
                 .toEntity();
         
@@ -288,7 +288,7 @@ public class PaymentResourceIT {
 
         String accountExternalId = testGatewayAccount.getExternalId();
 
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
+        MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
 
@@ -309,6 +309,36 @@ public class PaymentResourceIT {
                 .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getStatus()))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
                 .body(JSON_STATE_DETAILS_KEY, is("example_details"));
+    }
+    
+    @Test
+    public void shouldTriggerAnInvalidMandateStateException() throws Exception {
+        String accountExternalId = testGatewayAccount.getExternalId();
+        PayerFixture payerFixture = aPayerFixture();
+        MandateFixture mandateFixture = aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .withPayerFixture(payerFixture)
+                .withState(MandateState.CANCELLED)
+                .insert(testContext.getJdbi());
+
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put(JSON_AMOUNT_KEY, AMOUNT)
+                .put(JSON_REFERENCE_KEY, "Test description")
+                .put(JSON_DESCRIPTION_KEY, "Test description")
+                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
+                .put(JSON_MANDATE_ID_KEY, mandateFixture.getExternalId().toString())
+                .build());
+
+        String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
+                .replace("{accountId}", accountExternalId);
+
+        ValidatableResponse response = givenSetup()
+                .body(postBody)
+                .post(requestPath)
+                .then()
+                .body("error_identifier", is("MANDATE_STATE_INVALID"))
+                .statusCode(500);
+
     }
     
     private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
