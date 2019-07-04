@@ -40,7 +40,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFi
 
 @RunWith(PactRunner.class)
 @Provider("direct-debit-connector")
-@PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
+@PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"PR-575"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
         consumers = {"publicapi"})
 //uncommenting the below is useful for testing pacts locally. grab the pact from the broker and put it in /pacts
@@ -69,6 +69,22 @@ public class PublicApiContractTest {
     @State("a gateway account with external id exists")
     public void aGatewayAccountWithExternalIdExists(Map<String, String> params) {
         testGatewayAccount.withExternalId(params.get("gateway_account_id")).insert(app.getTestContext().getJdbi());
+    }
+
+    @State("a confirmed mandate exists")
+    public void aConfirmedMandateExists(Map<String, String> params) {
+        testMandate.withGatewayAccountFixture(GatewayAccountFixture.aGatewayAccountFixture().withExternalId(params.get("gateway_account_id")))
+                .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
+                .withPayerFixture(PayerFixture.aPayerFixture())
+                .withMandateBankStatementReference(MandateBankStatementReference.valueOf(params.get("bank_mandate_reference")))
+                .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
+                .withState(MandateState.PENDING)
+                .insert(app.getTestContext().getJdbi());
+    }
+    
+    @State("something else exists")
+    public void somethingElseExists() {
+        System.out.println();
     }
 
     @State("a gateway account with external id and a mandate with external id exist")
