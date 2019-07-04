@@ -168,7 +168,7 @@ public class PaymentViewSearchParams {
         if (queryMap == null) {
             queryMap = new HashMap<>();
             queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, gatewayExternalId);
-            queryMap.put(PAGE_NUMBER_FIELD, getPaginationParams().getPageNumber());
+            queryMap.put(PAGE_NUMBER_FIELD, getPaginationParams().getPageNumber());//TODO fix this. offset is pageNubmer*pageSize
             queryMap.put(PAGE_SIZE_FIELD, getPaginationParams().getDisplaySize());
             if (isNotBlank(mandateId)) {
                 queryMap.put(MANDATE_ID_KEY, mandateId);
