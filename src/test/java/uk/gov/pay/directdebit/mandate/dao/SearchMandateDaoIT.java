@@ -130,7 +130,11 @@ public class SearchMandateDaoIT {
     
     @Test
     public void searchByDisplaySize() {
-        
+        var searchParams = aMandateSearchParams()
+                .withToDate(now())
+                .withDisplaySize(1)
+                .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        assertThat(mandateSearchDao.search(searchParams)).hasSize(1);
     }
     
     @Test

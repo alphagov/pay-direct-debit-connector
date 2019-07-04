@@ -54,7 +54,7 @@ public class MandateSearchDao {
                 " FROM mandates m" +
                 "  JOIN gateway_accounts g ON g.id = m.gateway_account_id " +
                 "  LEFT JOIN payers p ON p.mandate_id = m.id " +
-                "WHERE g.external_id = :gatewayAccountExternalId");
+                " WHERE g.external_id = :gatewayAccountExternalId");
         //            "  ORDER BY p.id DESC OFFSET :offset LIMIT :limit";
 
         var sqlParams = new HashMap<String, Object>();
@@ -95,6 +95,9 @@ public class MandateSearchDao {
             sqlParams.put("createdDateTo", toDate);
         });
 
+        sql.append(" ORDER BY m.id DESC LIMIT :limit");
+        sqlParams.put("limit", mandateSearchParams.getDisplaySize());
+        
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(sql.toString());
             sqlParams.forEach(query::bind);
