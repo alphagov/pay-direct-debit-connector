@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.MandateResponse;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+import uk.gov.pay.directdebit.mandate.params.MandateSearchParams;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 
@@ -21,13 +22,16 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
+import static uk.gov.pay.directdebit.mandate.params.MandateSearchParams.aMandateSearchParams;
 
 @Path("/")
 public class MandateResource {
@@ -39,6 +43,18 @@ public class MandateResource {
     public MandateResource(MandateService mandateService, MandateQueryService mandateQueryService) {
         this.mandateService = mandateService;
         this.mandateQueryService = mandateQueryService;
+    }
+    
+    @GET
+    @Path("/v1/api/accounts/{accountId}/mandates")
+    @Consumes(APPLICATION_JSON)
+    @Produces(APPLICATION_JSON)
+    @Timed
+    public List<MandateResponse> searchMandates(@PathParam("accountId") GatewayAccount gatewayAccount,
+                                                @QueryParam("display_size") Integer displaySize) {
+        var mandateSearchParams = aMandateSearchParams()
+                .withDisplaySize(displaySize);
+        return List.of();
     }
     
     @POST

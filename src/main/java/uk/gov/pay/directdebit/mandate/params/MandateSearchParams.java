@@ -1,7 +1,10 @@
 package uk.gov.pay.directdebit.mandate.params;
 
+import com.google.common.collect.Range;
+import uk.gov.pay.directdebit.common.exception.BadRequestException;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.payments.exception.NegativeSearchParamException;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -107,6 +110,9 @@ public class MandateSearchParams {
     }
 
     public MandateSearchParams withDisplaySize(int displaySize) {
+        if (!Range.closed(1, 500).contains(displaySize)) {
+            throw new BadRequestException("Query param 'display_size' should be between 1 and 500.");
+        }
         this.displaySize = displaySize;
         return this;
     }
