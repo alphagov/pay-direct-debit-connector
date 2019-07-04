@@ -51,9 +51,11 @@ public class MandateResource {
     @Produces(APPLICATION_JSON)
     @Timed
     public List<MandateResponse> searchMandates(@PathParam("accountId") GatewayAccount gatewayAccount,
-                                                @QueryParam("display_size") Integer displaySize) {
+                                                @QueryParam("display_size") Integer displaySize,
+                                                @QueryParam("page") Integer page) {
         var mandateSearchParams = aMandateSearchParams()
-                .withDisplaySize(displaySize);
+                .withDisplaySize(displaySize)
+                .withPage(page);
         return List.of();
     }
     

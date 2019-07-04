@@ -39,10 +39,11 @@ public class MandateSearchResourceIT {
     
     @Test
     @Parameters({
+            "page, -1, Query param 'page' should be a non zero positive integer.", 
             "display_size, 0, Query param 'display_size' should be between 1 and 500.", 
             "display_size, 501, Query param 'display_size' should be between 1 and 500."
     })
-    public void searchByInvalidDisplaySize(String param, String value, String expectedErrorMessage) throws Exception {
+    public void searchWithInvalidParams(String param, String value, String expectedErrorMessage) throws Exception {
         var uri = new URIBuilder(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()));
         uri.addParameter(param, value);
 
@@ -65,11 +66,6 @@ public class MandateSearchResourceIT {
         
     }
     
-    @Test
-    public void searchByInvalidPageNumber() {
-        
-    }
-
     @Test
     public void searchWithMissingGatewayAccountId() {
     }
