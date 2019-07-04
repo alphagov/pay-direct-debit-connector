@@ -10,12 +10,15 @@ import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
@@ -30,9 +33,11 @@ public class SearchMandateDaoIT {
 
     @DropwizardTestContext
     private TestContext testContext;
+    
+    private static final String GATEWAY_ACCOUNT_ID = "gateway-account-id";
 
     private MandateSearchDao mandateSearchDao;
-    private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withExternalId("gateway-account-id");
+    private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withExternalId(GATEWAY_ACCOUNT_ID);
     private PayerFixture joeBloggs = aPayerFixture().withEmail("joe.bloggs@example.com").withName("Joe Bloggs");
     private MandateFixture mandate1 = aMandateFixture()
             .withGatewayAccountFixture(gatewayAccountFixture)
@@ -61,13 +66,13 @@ public class SearchMandateDaoIT {
     @Test
     @Parameters({"REF1234", "ref1234", "f12"})
     public void searchByReference(String searchString) {
-        var searchParams = aMandateSearchParams().withReference(searchString).withGatewayAccountId("gateway-account-id");
+        var searchParams = aMandateSearchParams().withReference(searchString).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
     
     @Test
     public void searchByState() {
-        var searchParams = aMandateSearchParams().withMandateState(FAILED).withGatewayAccountId("gateway-account-id");
+        var searchParams = aMandateSearchParams().withMandateState(FAILED).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
     }
     
@@ -76,39 +81,39 @@ public class SearchMandateDaoIT {
     public void searchByBankStatementReference(String searchString) {
         var searchParams = aMandateSearchParams()
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(searchString))
-                .withGatewayAccountId("gateway-account-id");
+                .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
     }
     
     @Test
     @Parameters({"joe.bloggs@example.com", "joe.bloggs@EXAMPLE.com", "joe.bloggs"})
     public void searchByEmail(String searchString) {
-        var searchParams = aMandateSearchParams().withEmail(searchString).withGatewayAccountId("gateway-account-id");
+        var searchParams = aMandateSearchParams().withEmail(searchString).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
 
     @Test
     @Parameters({"JOe Bloggs", "joe bloggs", "bloggs"})
     public void searchByName(String searchString) {
-        var searchParams = aMandateSearchParams().withName(searchString).withGatewayAccountId("gateway-account-id");
+        var searchParams = aMandateSearchParams().withName(searchString).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
     
     @Test
     public void searchByFromDate() {
-        var searchParams = aMandateSearchParams().withFromDate(now().minusHours(1)).withGatewayAccountId("gateway-account-id");
+        var searchParams = aMandateSearchParams().withFromDate(now().minusHours(1)).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
 
-        searchParams = aMandateSearchParams().withFromDate(now().minusHours(7)).withGatewayAccountId("gateway-account-id");
+        searchParams = aMandateSearchParams().withFromDate(now().minusHours(7)).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
     }
     
     @Test
     public void searchByToDate() {
-        var searchParams = aMandateSearchParams().withToDate(now().minusHours(1)).withGatewayAccountId("gateway-account-id");
+        var searchParams = aMandateSearchParams().withToDate(now().minusHours(1)).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
 
-        searchParams = aMandateSearchParams().withToDate(now()).withGatewayAccountId("gateway-account-id");
+        searchParams = aMandateSearchParams().withToDate(now()).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
     }
     
@@ -117,23 +122,32 @@ public class SearchMandateDaoIT {
         var searchParams = aMandateSearchParams()
                 .withToDate(now().minusHours(1))
                 .withFromDate(now().minusHours(7))
-                .withGatewayAccountId("gateway-account-id");
+                .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
     }
     
     @Test
     public void searchByPage() {
-        
+        LongStream.rangeClosed(101, 105).forEach(n -> {
+            aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withId(n).insert(testContext.getJdbi());
+        });
+        var searchParams = aMandateSearchParams()
+                .withFromDate(now().minusHours(1))
+                .withPage(3)
+                .withDisplaySize(2)
+                .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        List<Mandate> results = mandateSearchDao.search(searchParams);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getId()).isEqualTo(101L);
     }
     
     @Test
     public void searchByDisplaySize() {
-        
-    }
-    
-    @Test
-    public void searchByInvalidDisplaySize() {
-        //this should be tested at ResourceIT level
+        var searchParams = aMandateSearchParams()
+                .withToDate(now())
+                .withDisplaySize(1)
+                .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        assertThat(mandateSearchDao.search(searchParams)).hasSize(1);
     }
     
     @Test
@@ -143,7 +157,7 @@ public class SearchMandateDaoIT {
                 .withEmail("joe.bloggs@example.com")
                 .withName("bloggs")
                 .withFromDate(now().minusHours(1))
-                .withGatewayAccountId("gateway-account-id");
+                .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
 }
