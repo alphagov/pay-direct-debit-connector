@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
@@ -81,7 +80,7 @@ public class PaymentService {
                 .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
                 .build();
         Long id = paymentDao.insert(payment);
-    
+
         Payment insertedPayment = fromPayment(payment).withId(id).build();
         paymentCreatedFor(insertedPayment);
         LOGGER.info("Created payment with external id {}", insertedPayment.getExternalId());
@@ -100,7 +99,7 @@ public class PaymentService {
 
         return paymentSubmittedToProviderFor(submittedPayment);
     }
-    
+
     public PaymentResponse getPaymentWithExternalId(String paymentExternalId) {
         Payment payment = findPaymentForExternalId(paymentExternalId);
         return PaymentResponse.from(payment);
@@ -120,7 +119,7 @@ public class PaymentService {
                 .findById(paymentId)
                 .orElseThrow(() -> new ChargeNotFoundException("payment id" + paymentId.toString()));
     }
-    
+
     public Optional<Payment> findPaymentByProviderId(PaymentProvider paymentProvider, PaymentProviderPaymentId providerId,
                                                      PaymentProviderServiceId paymentProviderServiceId) {
         return paymentDao.findPaymentByProviderId(paymentProvider, providerId, paymentProviderServiceId);
@@ -134,7 +133,7 @@ public class PaymentService {
     public DirectDebitEvent paymentCreatedFor(Payment payment) {
         return directDebitEventService.registerPaymentCreatedEventFor(payment);
     }
-    
+
     public DirectDebitEvent paymentExpired(Payment payment) {
         Payment updatePayment = updateStateFor(payment, SupportedEvent.PAYMENT_EXPIRED_BY_SYSTEM);
         return directDebitEventService.registerPaymentExpiredEventFor(updatePayment);

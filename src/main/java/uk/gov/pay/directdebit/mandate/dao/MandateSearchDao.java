@@ -65,7 +65,7 @@ public class MandateSearchDao {
             sqlParams.put("serviceReference", "%" + serviceReference + "%");
         });
         
-        mandateSearchParams.getMandateBankStatementReference().ifPresent(bankStatementRef -> {
+        mandateSearchParams.getMandateBankStatementReference().filter(s -> !s.toString().isBlank()).ifPresent(bankStatementRef -> {
             sql.append(" AND m.mandate_reference ILIKE :mandateRef");
             sqlParams.put("mandateRef", "%" + bankStatementRef.toString() + "%");
         });
