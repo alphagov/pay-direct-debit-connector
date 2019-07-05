@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.mandate.services.MandateService;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -51,15 +52,7 @@ public class MandateResource {
     @Produces(APPLICATION_JSON)
     @Timed
     public List<MandateResponse> searchMandates(@PathParam("accountId") GatewayAccount gatewayAccount,
-                                                @QueryParam("display_size") Integer displaySize,
-                                                @QueryParam("page") Integer page,
-                                                @QueryParam("from_date") String fromDate,
-                                                @QueryParam("to_date") String toDate) {
-        var mandateSearchParams = aMandateSearchParams()
-                .withToDate(toDate)
-                .withFromDate(fromDate)
-                .withDisplaySize(displaySize)
-                .withPage(page);
+                                                @Valid @BeanParam MandateSearchParams mandateSearchParams) {
         return List.of();
     }
     

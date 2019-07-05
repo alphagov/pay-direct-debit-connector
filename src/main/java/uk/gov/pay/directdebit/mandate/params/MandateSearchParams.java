@@ -1,16 +1,14 @@
 package uk.gov.pay.directdebit.mandate.params;
 
-import com.google.common.collect.Range;
-import uk.gov.pay.directdebit.common.exception.BadRequestException;
+import uk.gov.pay.commons.validation.ValidDate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Optional;
-
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MandateSearchParams {
 
@@ -19,14 +17,25 @@ public class MandateSearchParams {
     private MandateBankStatementReference mandateBankStatementReference;
     private String name;
     private String email;
-    private ZonedDateTime fromDate;
-    private ZonedDateTime toDate;
-    private int page;
-    private int displaySize = 500;
-    private String gatewayAccountExternalId;
 
-    private MandateSearchParams() {
-    }
+    @QueryParam("from_date")
+    @ValidDate(message = "Invalid attribute value: from_date. Must be a valid date")
+    private String fromDate;
+
+    @QueryParam("to_date")
+    @ValidDate(message = "Invalid attribute value: to_date. Must be a valid date")
+    private String toDate;
+
+    @QueryParam("page")
+    @Min(value = 1, message = "Invalid attribute value: page. Must be greater than or equal to {value}")
+    private Integer page = 0;
+
+    @QueryParam("display_size")
+    @Min(value = 1, message = "Invalid attribute value: display_size. Must be greater than or equal to {value}")
+    @Max(value = 500, message = "Invalid attribute value: display_size. Must be less than or equal to {value}")
+    private Integer displaySize = 500;
+    
+    private String gatewayAccountExternalId;
 
     public Optional<String> getReference() {
         return Optional.ofNullable(reference);
@@ -49,11 +58,11 @@ public class MandateSearchParams {
     }
 
     public Optional<ZonedDateTime> getFromDate() {
-        return Optional.ofNullable(fromDate);
+        return Optional.ofNullable(fromDate).map(ZonedDateTime::parse);
     }
 
     public Optional<ZonedDateTime> getToDate() {
-        return Optional.ofNullable(toDate);
+        return Optional.ofNullable(toDate).map(ZonedDateTime::parse);
     }
 
     public int getPage() {
@@ -98,54 +107,28 @@ public class MandateSearchParams {
     }
 
     public MandateSearchParams withFromDate(ZonedDateTime fromDate) {
-        this.fromDate = fromDate;
+        this.fromDate = fromDate.toString();
         return this;
     }
 
     public MandateSearchParams withToDate(ZonedDateTime toDate) {
-        this.toDate = toDate;
+        this.toDate = toDate.toString();
         return this;
     }
 
-    public MandateSearchParams withPage(Integer page) {
-        if (page != null && page < 1) {
-            throw new BadRequestException("Query param 'page' should be a non zero positive integer.");
-        }
-        this.page = Optional.ofNullable(page).orElse(0);
+    public MandateSearchParams withPage(int page) {
+        this.page = page;
         return this;
     }
 
     public MandateSearchParams withDisplaySize(Integer displaySize) {
-        int size = Optional.ofNullable(displaySize).orElse(500);
-        if (!Range.closed(1, 500).contains(size)) {
-            throw new BadRequestException("Query param 'display_size' should be between 1 and 500.");
-        }
-        this.displaySize = size;
+        this.displaySize = displaySize;
         return this;
     }
 
     public MandateSearchParams withGatewayAccountId(String gatewayAccountId) {
         this.gatewayAccountExternalId = gatewayAccountId;
         return this;
-    }
-
-    public MandateSearchParams withFromDate(String fromDate) {
-        return withFromDate(parseDate(fromDate, "from_date"));
-    }
-    
-    public MandateSearchParams withToDate(String toDate) {
-        return withToDate(parseDate(toDate, "to_date"));
-    }
-
-    private static ZonedDateTime parseDate(String date, String field) {
-        if (isNotBlank(date)) {
-            try {
-                return ZonedDateTime.parse(date);
-            } catch (DateTimeParseException e) {
-                throw new BadRequestException(format("Input %s (%s) is wrong format.", field, date));
-            }
-        }
-        return null;
     }
 
 }

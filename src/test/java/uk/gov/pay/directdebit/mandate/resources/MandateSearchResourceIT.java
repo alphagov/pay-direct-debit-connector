@@ -2,7 +2,7 @@ package uk.gov.pay.directdebit.mandate.resources;
 
 import io.restassured.specification.RequestSpecification;
 import junitparams.Parameters;
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,9 +14,6 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
-import javax.ws.rs.core.Response;
-
-import java.nio.charset.Charset;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
@@ -42,18 +39,18 @@ public class MandateSearchResourceIT {
     
     @Test
     @Parameters({
-            "to_date, 2018-14-05T15:00Z, Input to_date (2018-14-05T15:00Z) is wrong format.", 
-            "from_date, 2018-14-05T15:00Z, Input from_date (2018-14-05T15:00Z) is wrong format.", 
-            "page, -1, Query param 'page' should be a non zero positive integer.", 
-            "display_size, 0, Query param 'display_size' should be between 1 and 500.", 
-            "display_size, 501, Query param 'display_size' should be between 1 and 500."
+            "from_date, 2018-14-05T15:00Z, Invalid attribute value: from_date. Must be a valid date", 
+            "to_date, 2018-14-05T15:00Z, Invalid attribute value: to_date. Must be a valid date", 
+            "page, -1, Invalid attribute value: page. Must be greater than or equal to 1", 
+            "display_size, 0, Invalid attribute value: display_size. Must be greater than or equal to 1", 
+            "display_size, 501, Invalid attribute value: display_size. Must be less than or equal to 500"
     })
     public void searchWithInvalidParams(String param, String value, String expectedErrorMessage) {
         givenSetup()
                 .queryParams(Map.of(param, value))
                 .get(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()))
                 .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY)
                 .contentType(JSON)
                 .body("message", contains(expectedErrorMessage))
                 .body("error_identifier", is(ErrorIdentifier.GENERIC.toString()));
