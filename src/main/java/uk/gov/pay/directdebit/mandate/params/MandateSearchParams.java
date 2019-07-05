@@ -1,8 +1,12 @@
 package uk.gov.pay.directdebit.mandate.params;
 
+import uk.gov.pay.commons.validation.ValidDate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -13,14 +17,25 @@ public class MandateSearchParams {
     private MandateBankStatementReference mandateBankStatementReference;
     private String name;
     private String email;
-    private ZonedDateTime fromDate;
-    private ZonedDateTime toDate;
-    private int page;
-    private int displaySize = 500;
-    private String gatewayAccountExternalId;
 
-    private MandateSearchParams() {
-    }
+    @QueryParam("from_date")
+    @ValidDate(message = "Invalid attribute value: from_date. Must be a valid date")
+    private String fromDate;
+
+    @QueryParam("to_date")
+    @ValidDate(message = "Invalid attribute value: to_date. Must be a valid date")
+    private String toDate;
+
+    @QueryParam("page")
+    @Min(value = 1, message = "Invalid attribute value: page. Must be greater than or equal to {value}")
+    private Integer page = 0;
+
+    @QueryParam("display_size")
+    @Min(value = 1, message = "Invalid attribute value: display_size. Must be greater than or equal to {value}")
+    @Max(value = 500, message = "Invalid attribute value: display_size. Must be less than or equal to {value}")
+    private Integer displaySize = 500;
+    
+    private String gatewayAccountExternalId;
 
     public Optional<String> getReference() {
         return Optional.ofNullable(reference);
@@ -43,11 +58,11 @@ public class MandateSearchParams {
     }
 
     public Optional<ZonedDateTime> getFromDate() {
-        return Optional.ofNullable(fromDate);
+        return Optional.ofNullable(fromDate).map(ZonedDateTime::parse);
     }
 
     public Optional<ZonedDateTime> getToDate() {
-        return Optional.ofNullable(toDate);
+        return Optional.ofNullable(toDate).map(ZonedDateTime::parse);
     }
 
     public int getPage() {
@@ -92,12 +107,12 @@ public class MandateSearchParams {
     }
 
     public MandateSearchParams withFromDate(ZonedDateTime fromDate) {
-        this.fromDate = fromDate;
+        this.fromDate = fromDate.toString();
         return this;
     }
 
     public MandateSearchParams withToDate(ZonedDateTime toDate) {
-        this.toDate = toDate;
+        this.toDate = toDate.toString();
         return this;
     }
 
@@ -106,7 +121,7 @@ public class MandateSearchParams {
         return this;
     }
 
-    public MandateSearchParams withDisplaySize(int displaySize) {
+    public MandateSearchParams withDisplaySize(Integer displaySize) {
         this.displaySize = displaySize;
         return this;
     }
@@ -115,4 +130,5 @@ public class MandateSearchParams {
         this.gatewayAccountExternalId = gatewayAccountId;
         return this;
     }
+
 }
