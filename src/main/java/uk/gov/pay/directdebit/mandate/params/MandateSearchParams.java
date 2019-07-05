@@ -20,7 +20,11 @@ public class MandateSearchParams {
 
     @QueryParam("bank_statement_reference")
     private MandateBankStatementReference mandateBankStatementReference;
+    
+    @QueryParam("name")
     private String name;
+    
+    @QueryParam("email")
     private String email;
 
     @QueryParam("from_date")
