@@ -21,7 +21,7 @@ import static uk.gov.pay.directdebit.payments.model.GoCardlessEvent.GoCardlessEv
 
 public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture, GoCardlessEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
-    private Long eventId = RandomUtils.nextLong(1, 99999);
+    private Long internalEventId = RandomUtils.nextLong(1, 99999);
     private GoCardlessEventId goCardlessEventId = GoCardlessEventId.valueOf(RandomIdGenerator.newId());
     private String action = randomAlphabetic(20);
     private GoCardlessResourceType resourceType = GoCardlessResourceType.PAYMENTS;
@@ -60,12 +60,12 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
         return this;
     }
 
-    public Long getEventId() {
-        return eventId;
+    public Long getInternalEventId() {
+        return internalEventId;
     }
 
-    public GoCardlessEventFixture withEventId(Long eventId) {
-        this.eventId = eventId;
+    public GoCardlessEventFixture withInternalEventId(Long internalEventId) {
+        this.internalEventId = internalEventId;
         return this;
     }
 
@@ -289,7 +289,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                                 "    )\n" +
                                 "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
-                        eventId,
+                        internalEventId,
                         goCardlessEventId.toString(),
                         action,
                         resourceType.toString(),
@@ -319,7 +319,7 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     public GoCardlessEvent toEntity() {
         return aGoCardlessEvent()
                 .withId(id)
-                .withInternalEventId(eventId)
+                .withInternalEventId(internalEventId)
                 .withGoCardlessEventId(goCardlessEventId)
                 .withAction(action)
                 .withResourceId(resourceId)
