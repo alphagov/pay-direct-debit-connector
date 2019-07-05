@@ -4,6 +4,7 @@ import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
@@ -23,7 +24,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -32,11 +32,12 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
-import static uk.gov.pay.directdebit.mandate.params.MandateSearchParams.aMandateSearchParams;
 
 @Path("/")
 public class MandateResource {
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(MandateResource.class);
+    
     private final MandateService mandateService;
     private final MandateQueryService mandateQueryService;
 
