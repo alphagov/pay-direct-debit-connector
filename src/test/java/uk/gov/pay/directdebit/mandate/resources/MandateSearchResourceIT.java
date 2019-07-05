@@ -58,7 +58,10 @@ public class MandateSearchResourceIT {
     
     @Test
     public void searchByNonExistentGatewayAccount() {
-        
+        givenSetup()
+                .get("/v1/api/accounts/nexiste-pas/mandates")
+                .then()
+                .statusCode(HttpStatus.SC_NOT_FOUND);
     }
     
     @Test
