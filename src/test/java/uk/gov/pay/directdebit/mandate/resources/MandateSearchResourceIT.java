@@ -85,7 +85,7 @@ public class MandateSearchResourceIT {
         MandateFixture mandateFixture = aMandateFixture()
                 .withServiceReference("a service ref")
                 .withState(MandateState.PENDING)
-                .withMandateBankStatementReference(MandateBankStatementReference.valueOf("a bank statement ref"))
+                .withMandateBankStatementReference(MandateBankStatementReference.valueOf("a bstatement ref"))
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
 
