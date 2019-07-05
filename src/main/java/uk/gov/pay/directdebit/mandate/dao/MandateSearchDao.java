@@ -9,7 +9,6 @@ import uk.gov.pay.directdebit.mandate.params.MandateSearchParams;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 public class MandateSearchDao {
     
@@ -20,7 +19,7 @@ public class MandateSearchDao {
         this.jdbi = jdbi;
     }
 
-    public List<Mandate> search(MandateSearchParams mandateSearchParams) {
+    public List<Mandate> search(MandateSearchParams mandateSearchParams, String gatewayAccountId) {
         var sql = new StringBuilder(2048);
         sql.append("SELECT DISTINCT" +
                 "  m.id AS mandate_id," +
@@ -57,7 +56,7 @@ public class MandateSearchDao {
                 " WHERE g.external_id = :gatewayAccountExternalId");
 
         var sqlParams = new HashMap<String, Object>();
-        sqlParams.put("gatewayAccountExternalId", mandateSearchParams.getGatewayAccountExternalId());
+        sqlParams.put("gatewayAccountExternalId", gatewayAccountId);
 
         mandateSearchParams.getReference().filter(s -> !s.isBlank()).ifPresent(serviceReference -> {
             sql.append(" AND m.service_reference ILIKE :serviceReference");

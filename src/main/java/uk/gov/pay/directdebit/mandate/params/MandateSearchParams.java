@@ -12,8 +12,13 @@ import java.util.Optional;
 
 public class MandateSearchParams {
 
+    @QueryParam("reference")
     private String reference;
+
+    @QueryParam("state")
     private MandateState mandateState;
+
+    @QueryParam("bank_statement_reference")
     private MandateBankStatementReference mandateBankStatementReference;
     private String name;
     private String email;
@@ -35,8 +40,6 @@ public class MandateSearchParams {
     @Max(value = 500, message = "Invalid attribute value: display_size. Must be less than or equal to {value}")
     private Integer displaySize = 500;
     
-    private String gatewayAccountExternalId;
-
     public Optional<String> getReference() {
         return Optional.ofNullable(reference);
     }
@@ -71,10 +74,6 @@ public class MandateSearchParams {
 
     public int getDisplaySize() {
         return displaySize;
-    }
-
-    public String getGatewayAccountExternalId() {
-        return gatewayAccountExternalId;
     }
 
     public static MandateSearchParams aMandateSearchParams() {
@@ -125,10 +124,4 @@ public class MandateSearchParams {
         this.displaySize = displaySize;
         return this;
     }
-
-    public MandateSearchParams withGatewayAccountId(String gatewayAccountId) {
-        this.gatewayAccountExternalId = gatewayAccountId;
-        return this;
-    }
-
 }
