@@ -16,10 +16,6 @@ import javax.inject.Inject;
 
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_ACTIVE;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_CANCELLED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_FAILED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.MANDATE_PENDING;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.TOKEN_EXCHANGED;
 
 
@@ -62,8 +58,7 @@ public class MandateStateUpdateService {
     }
 
     public DirectDebitEvent mandateActiveFor(Mandate mandate) {
-        Mandate updatedMandate = updateStateFor(mandate, MANDATE_ACTIVE);
-        return directDebitEventService.registerMandateActiveEventFor(updatedMandate);
+        return directDebitEventService.registerMandateActiveEventFor(mandate);
     }
 
     public void mandateExpiredFor(Mandate mandate) {
@@ -72,20 +67,17 @@ public class MandateStateUpdateService {
     }
 
     public DirectDebitEvent mandateFailedFor(Mandate mandate) {
-        Mandate newMandate = updateStateFor(mandate, MANDATE_FAILED);
-        userNotificationService.sendMandateFailedEmailFor(newMandate);
-        return directDebitEventService.registerMandateFailedEventFor(newMandate);
+        userNotificationService.sendMandateFailedEmailFor(mandate);
+        return directDebitEventService.registerMandateFailedEventFor(mandate);
     }
 
     public DirectDebitEvent mandateCancelledFor(Mandate mandate) {
-        Mandate newMandate = updateStateFor(mandate, MANDATE_CANCELLED);
-        userNotificationService.sendMandateCancelledEmailFor(newMandate);
-        return directDebitEventService.registerMandateCancelledEventFor(newMandate);
+        userNotificationService.sendMandateCancelledEmailFor(mandate);
+        return directDebitEventService.registerMandateCancelledEventFor(mandate);
     }
 
     public DirectDebitEvent mandatePendingFor(Mandate mandate) {
-        Mandate newMandate = updateStateFor(mandate, MANDATE_PENDING);
-        return directDebitEventService.registerMandatePendingEventFor(newMandate);
+        return directDebitEventService.registerMandatePendingEventFor(mandate);
     }
 
     public Mandate receiveDirectDebitDetailsFor(Mandate mandate) {

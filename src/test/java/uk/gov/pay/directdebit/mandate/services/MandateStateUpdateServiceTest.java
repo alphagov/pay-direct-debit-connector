@@ -22,12 +22,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.CANCELLED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.EXPIRED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
 
@@ -58,14 +55,11 @@ public class MandateStateUpdateServiceTest {
                 .aMandateFixture()
                 .withState(PENDING)
                 .toEntity();
-        Mandate expectedMandateWithFailedStatus = fromMandate(mandate)
-                .withState(FAILED)
-                .build();
 
         service.mandateFailedFor(mandate);
 
-        verify(mockedDirectDebitEventService).registerMandateFailedEventFor(expectedMandateWithFailedStatus);
-        verify(mockedUserNotificationService).sendMandateFailedEmailFor(expectedMandateWithFailedStatus);
+        verify(mockedDirectDebitEventService).registerMandateFailedEventFor(mandate);
+        verify(mockedUserNotificationService).sendMandateFailedEmailFor(mandate);
     }
 
     @Test
@@ -75,14 +69,10 @@ public class MandateStateUpdateServiceTest {
                 .withState(PENDING)
                 .toEntity();
 
-        Mandate expectedMandateWithCancelledStatus = fromMandate(mandate)
-                .withState(CANCELLED)
-                .build();
-
         service.mandateCancelledFor(mandate);
 
-        verify(mockedDirectDebitEventService).registerMandateCancelledEventFor(expectedMandateWithCancelledStatus);
-        verify(mockedUserNotificationService).sendMandateCancelledEmailFor(expectedMandateWithCancelledStatus);
+        verify(mockedDirectDebitEventService).registerMandateCancelledEventFor(mandate);
+        verify(mockedUserNotificationService).sendMandateCancelledEmailFor(mandate);
     }
 
     @Test
@@ -91,13 +81,10 @@ public class MandateStateUpdateServiceTest {
                 .aMandateFixture()
                 .withState(PENDING)
                 .toEntity();
-        Mandate expectedMandateWithActiveStatus = fromMandate(mandate)
-                .withState(ACTIVE)
-                .build();
 
         service.mandateActiveFor(mandate);
 
-        verify(mockedDirectDebitEventService).registerMandateActiveEventFor(expectedMandateWithActiveStatus);
+        verify(mockedDirectDebitEventService).registerMandateActiveEventFor(mandate);
     }
 
     @Test
@@ -171,13 +158,10 @@ public class MandateStateUpdateServiceTest {
                 .aMandateFixture()
                 .withState(SUBMITTED)
                 .toEntity();
-        Mandate expectedMandateWithPendingState = fromMandate(mandate)
-                .withState(PENDING)
-                .build();
 
         service.mandatePendingFor(mandate);
 
-        verify(mockedDirectDebitEventService).registerMandatePendingEventFor(expectedMandateWithPendingState);
+        verify(mockedDirectDebitEventService).registerMandatePendingEventFor(mandate);
     }
 
     @Test

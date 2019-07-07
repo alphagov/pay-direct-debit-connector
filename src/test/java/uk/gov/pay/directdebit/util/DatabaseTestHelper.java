@@ -168,28 +168,6 @@ public class DatabaseTestHelper {
         );
     }
 
-    public Map<String, Object> getGoCardlessMandateById(Long id) {
-        return jdbi.withHandle(handle ->
-                handle
-                        .createQuery("SELECT * from gocardless_mandates g WHERE g.id = :id")
-                        .bind("id", id)
-                        .mapToMap()
-                        .findFirst()
-                        .get()
-        );
-    }
-
-    public Map<String, Object> getGoCardlessPaymentById(Long id) {
-        return jdbi.withHandle(handle ->
-                handle
-                        .createQuery("SELECT * from gocardless_payments g WHERE g.id = :id")
-                        .bind("id", id)
-                        .mapToMap()
-                        .findFirst()
-                        .get()
-        );
-    }
-
     public Map<String, Object> getGoCardlessEventById(Long id) {
         return jdbi.withHandle(handle ->
                 handle
