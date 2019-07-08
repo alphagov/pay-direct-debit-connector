@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessMandateStateUpdater;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
@@ -33,12 +34,15 @@ public class WebhookGoCardlessServiceTest {
     private GoCardlessPaymentHandler mockedGoCardlessPaymentHandler;
     @Mock
     private GoCardlessMandateHandler mockedGoCardlessMandateHandler;
+    @Mock
+    private GoCardlessMandateStateUpdater mockedGoCardlessMandateStateUpdater;
 
     private WebhookGoCardlessService webhookGoCardlessService;
 
     @Before
     public void setUp() {
-        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessEventService, mockedGoCardlessPaymentHandler, mockedGoCardlessMandateHandler);
+        webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessEventService, mockedGoCardlessPaymentHandler, mockedGoCardlessMandateHandler,
+                mockedGoCardlessMandateStateUpdater);
     }
 
     @Test

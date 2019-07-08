@@ -275,6 +275,44 @@ public class MandateDaoIT {
     }
 
     @Test
+    public void shouldUpdateStateByProviderIdAndReturnNumberOfAffectedRows() {
+        GatewayAccountFixture goCardlessGatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+                .withPaymentProvider(GOCARDLESS)
+                .withOrganisation(GoCardlessOrganisationId.valueOf("Organisation ID we want"))
+                .insert(testContext.getJdbi());
+
+        GatewayAccountFixture goCardlessGatewayAccountFixtureWithWrongOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+                .withPaymentProvider(GOCARDLESS)
+                .withOrganisation(GoCardlessOrganisationId.valueOf("Different organisation"))
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(goCardlessGatewayAccountFixture)
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("Mandate ID we want"))
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(goCardlessGatewayAccountFixture)
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("Different organisation"))
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(goCardlessGatewayAccountFixtureWithWrongOrganisation)
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("Mandate ID we want"))
+                .insert(testContext.getJdbi());
+
+        int numOfUpdatedMandates = mandateDao.updateStateByPaymentProviderMandateId(GOCARDLESS, GoCardlessOrganisationId.valueOf("Organisation ID we want"),
+                GoCardlessMandateId.valueOf("Mandate ID we want"), MandateState.PENDING);
+
+        assertThat(numOfUpdatedMandates, is(1));
+
+        Mandate mandate = mandateDao.findByPaymentProviderMandateId(GOCARDLESS, GoCardlessMandateId.valueOf("Mandate ID we want"),
+                GoCardlessOrganisationId.valueOf("Organisation ID we want")).get();
+
+        assertThat(mandate.getState(), is(MandateState.PENDING));
+    }
+
+    @Test
     public void shouldUpdateReferenceAndPaymentProviderId() {
         var bankStatementReference = MandateBankStatementReference.valueOf("newReference");
         var paymentProviderId = GoCardlessMandateId.valueOf("aPaymentProviderId");

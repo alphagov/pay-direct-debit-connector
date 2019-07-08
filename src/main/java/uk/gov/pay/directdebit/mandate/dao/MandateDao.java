@@ -114,6 +114,13 @@ public interface MandateDao {
     @SqlUpdate("UPDATE mandates m SET state = :state WHERE m.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
 
+    @SqlUpdate("UPDATE mandates m SET state = :state FROM gateway_accounts g WHERE m.payment_provider_id = :providerMandateId " +
+            "AND g.id = m.gateway_account_id AND g.organisation = :providerServiceId AND g.payment_provider = :provider")
+    int updateStateByPaymentProviderMandateId(@Bind("provider") PaymentProvider paymentProvider,
+                                              @Bind("providerServiceId") PaymentProviderServiceId paymentProviderServiceId,
+                                              @Bind("providerMandateId") PaymentProviderMandateId paymentProviderMandateId,
+                                              @Bind("state") MandateState mandateState);
+
     @SqlUpdate("UPDATE mandates m SET mandate_reference = :mandateBankStatementReference, payment_provider_id = :paymentProviderMandateId WHERE m.id = :id")
     int updateReferenceAndPaymentProviderId(@BindBean Mandate mandate);
 }
