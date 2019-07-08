@@ -54,7 +54,8 @@ public class MandateResource {
     @Timed
     public List<MandateResponse> searchMandates(@PathParam("accountId") GatewayAccount gatewayAccount,
                                                 @Valid @BeanParam MandateSearchParams mandateSearchParams) {
-        return List.of();
+        return mandateQueryService.findAllMandatesThatMatchSearchParams(mandateSearchParams, 
+                gatewayAccount.getExternalId());
     }
     
     @POST

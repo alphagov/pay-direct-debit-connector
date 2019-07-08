@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.mandate.resources;
 
-import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import junitparams.Parameters;
 import org.apache.http.HttpStatus;
@@ -9,6 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
@@ -19,7 +20,6 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
-import java.io.Serializable;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -28,9 +28,7 @@ import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
@@ -45,11 +43,23 @@ public class MandateSearchResourceIT {
     @DropwizardTestContext
     private TestContext testContext;
 
+    private static final PaymentProvider PAYMENT_PROVIDER = PaymentProvider.SANDBOX;
+    private static final String DESCRIPTION = "is awesome";
+    private static final String ANALYTICS_ID = "DD_234098_BBBLA";
+    private static final GatewayAccount.Type TYPE = GatewayAccount.Type.TEST;
+    private static final String EXTERNAL_ID = "osiuoisajd";
+
     private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture();
 
     @Before
     public void setUp() {
-        gatewayAccountFixture.insert(testContext.getJdbi());
+        gatewayAccountFixture
+                .withExternalId(EXTERNAL_ID)
+                .withPaymentProvider(PAYMENT_PROVIDER)
+                .withDescription(DESCRIPTION)
+                .withType(TYPE)
+                .withAnalyticsId(ANALYTICS_ID)
+                .insert(testContext.getJdbi());
     }
     
     @Test
@@ -81,10 +91,11 @@ public class MandateSearchResourceIT {
     
     @Test
     public void searchSuccessfully() {
-        PayerFixture payerFixture = aPayerFixture().withName("Joe Bloggs").withEmail("j.bloggs@email.com");
+        PayerFixture payerFixture = aPayerFixture().withName("Joe Bloggs").withEmail("j.bloggs@example.org");
         MandateFixture mandateFixture = aMandateFixture()
                 .withServiceReference("a service ref")
                 .withState(MandateState.PENDING)
+                .withGatewayAccountFixture(gatewayAccountFixture)
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf("a bstatement ref"))
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
@@ -92,12 +103,12 @@ public class MandateSearchResourceIT {
         Map<String, Object> params = Map.of(
                 "reference", "a service ref",
                 "state", "pending",
-                "bank_statement_reference", "a bank statement ref",
-                "name", "Joe Bloggs",
-                "email", "j.bloggs@gmail.com",
+                "bank_statement_reference", "a bstatement ref",
+                "name", payerFixture.getName(),
+                "email", payerFixture.getEmail(),
                 "from_date", ZonedDateTime.now(ZoneOffset.UTC).minusDays(1).toString(),
                 "to_date", ZonedDateTime.now(ZoneOffset.UTC).plusDays(1).toString(),
-                "page", 1,
+                "page", 0,
                 "display_size", 10
         );
 
@@ -105,11 +116,9 @@ public class MandateSearchResourceIT {
                 .queryParams(params)
                 .get(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()))
                 .then()
-                .statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY)
+                .statusCode(HttpStatus.SC_OK)
                 .contentType(JSON)
-                .body("page", is(1))
-                .body("total", is(1))
-                .body("count", is(1))
+                .log().body()
                 .body("results", hasSize(1))
                 .body("results[0].mandate_id", is(mandateFixture.getExternalId().toString()))
                 .body("results[0].return_url", isNumber(gatewayAccountFixture.getId()))

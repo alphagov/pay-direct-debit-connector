@@ -36,7 +36,7 @@ public class MandateSearchParams {
     private String toDate;
 
     @QueryParam("page")
-    @Min(value = 1, message = "Invalid attribute value: page. Must be greater than or equal to {value}")
+    @Min(value = 0, message = "Invalid attribute value: page. Must be greater than or equal to {value}")
     private Integer page = 0;
 
     @QueryParam("display_size")
