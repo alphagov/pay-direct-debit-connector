@@ -9,106 +9,138 @@ import uk.gov.pay.directdebit.mandate.params.MandateSearchParams;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
-public class MandateSearchDao {
+class MandateSearchDao {
     
     private final Jdbi jdbi;
 
     @Inject
-    public MandateSearchDao(Jdbi jdbi) {
+    MandateSearchDao(Jdbi jdbi) {
         this.jdbi = jdbi;
     }
 
-    public List<Mandate> search(MandateSearchParams mandateSearchParams) {
+    List<Mandate> search(MandateSearchParams mandateSearchParams) {
+        return jdbi.withHandle(handle -> {
+            var sqlQueryAndParameters = createSqlQuery(mandateSearchParams, SearchMode.SELECT);
+
+            Query query = handle.createQuery(sqlQueryAndParameters.query);
+            sqlQueryAndParameters.parameters.forEach(query::bind);
+            return query.map(new MandateMapper()).list();
+        });
+    }
+
+    int countTotalMatchingMandates(MandateSearchParams mandateSearchParams) {
+        return jdbi.withHandle(handle -> {
+            var sqlQueryAndParameters = createSqlQuery(mandateSearchParams, SearchMode.COUNT);
+            
+            Query query = handle.createQuery(sqlQueryAndParameters.query);
+            sqlQueryAndParameters.parameters.forEach(query::bind);
+            return query.mapTo(Integer.class).findOnly();
+        });
+    }
+
+    private SqlStatementAndParameters createSqlQuery(MandateSearchParams params, SearchMode searchMode) {
         var sql = new StringBuilder(2048);
-        sql.append("SELECT DISTINCT" +
-                "  m.id AS mandate_id," +
-                "  m.external_id AS mandate_external_id," +
-                "  m.mandate_reference AS mandate_mandate_reference," +
-                "  m.service_reference AS mandate_service_reference," +
-                "  m.gateway_account_id AS mandate_gateway_account_id," +
-                "  m.return_url AS mandate_return_url," +
-                "  m.state AS mandate_state," +
-                "  m.created_date AS mandate_created_date," +
-                "  m.payment_provider_id AS mandate_payment_provider_id," +
-                "  g.id AS gateway_account_id," +
-                "  g.external_id AS gateway_account_external_id," +
-                "  g.payment_provider AS gateway_account_payment_provider," +
-                "  g.type AS gateway_account_type," +
-                "  g.description AS gateway_account_description," +
-                "  g.analytics_id AS gateway_account_analytics_id," +
-                "  g.access_token AS gateway_account_access_token," +
-                "  g.organisation AS gateway_account_organisation," +
-                "  p.id AS payer_id," +
-                "  p.mandate_id AS payer_mandate_id," +
-                "  p.external_id AS payer_external_id," +
-                "  p.name AS payer_name," +
-                "  p.email AS payer_email," +
-                "  p.bank_account_number_last_two_digits AS payer_bank_account_number_last_two_digits," +
-                "  p.bank_account_requires_authorisation AS payer_bank_account_requires_authorisation," +
-                "  p.bank_account_number AS payer_bank_account_number," +
-                "  p.bank_account_sort_code AS payer_bank_account_sort_code," +
-                "  p.bank_name AS payer_bank_name," +
-                "  p.created_date AS payer_created_date" +
-                " FROM mandates m" +
-                "  JOIN gateway_accounts g ON g.id = m.gateway_account_id " +
-                "  LEFT JOIN payers p ON p.mandate_id = m.id " +
-                " WHERE g.external_id = :gatewayAccountExternalId");
+        if (searchMode.equals(SearchMode.COUNT)) {
+            sql.append("SELECT COUNT(*) ");
+        } else {
+            sql.append("SELECT DISTINCT" +
+                    "  m.id AS mandate_id," +
+                    "  m.external_id AS mandate_external_id," +
+                    "  m.mandate_reference AS mandate_mandate_reference," +
+                    "  m.service_reference AS mandate_service_reference," +
+                    "  m.gateway_account_id AS mandate_gateway_account_id," +
+                    "  m.return_url AS mandate_return_url," +
+                    "  m.state AS mandate_state," +
+                    "  m.created_date AS mandate_created_date," +
+                    "  m.payment_provider_id AS mandate_payment_provider_id," +
+                    "  g.id AS gateway_account_id," +
+                    "  g.external_id AS gateway_account_external_id," +
+                    "  g.payment_provider AS gateway_account_payment_provider," +
+                    "  g.type AS gateway_account_type," +
+                    "  g.description AS gateway_account_description," +
+                    "  g.analytics_id AS gateway_account_analytics_id," +
+                    "  g.access_token AS gateway_account_access_token," +
+                    "  g.organisation AS gateway_account_organisation," +
+                    "  p.id AS payer_id," +
+                    "  p.mandate_id AS payer_mandate_id," +
+                    "  p.external_id AS payer_external_id," +
+                    "  p.name AS payer_name," +
+                    "  p.email AS payer_email," +
+                    "  p.bank_account_number_last_two_digits AS payer_bank_account_number_last_two_digits," +
+                    "  p.bank_account_requires_authorisation AS payer_bank_account_requires_authorisation," +
+                    "  p.bank_account_number AS payer_bank_account_number," +
+                    "  p.bank_account_sort_code AS payer_bank_account_sort_code," +
+                    "  p.bank_name AS payer_bank_name," +
+                    "  p.created_date AS payer_created_date");
+        }
 
-        var sqlParams = new HashMap<String, Object>();
-        sqlParams.put("gatewayAccountExternalId", mandateSearchParams.getGatewayAccountExternalId());
+        sql.append(" FROM mandates m JOIN gateway_accounts g ON g.id = m.gateway_account_id " +
+                "  LEFT JOIN payers p ON p.mandate_id = m.id ");
 
-        mandateSearchParams.getReference().filter(s -> !s.isBlank()).ifPresent(serviceReference -> {
+        Map<String, Object> sqlParams = new HashMap<>();
+        
+        sql.append(" WHERE g.external_id = :gatewayAccountExternalId");
+        sqlParams.put("gatewayAccountExternalId", params.getGatewayAccountExternalId());
+        
+        params.getServiceReference().filter(s -> !s.isBlank()).ifPresent(serviceReference -> {
             sql.append(" AND m.service_reference ILIKE :serviceReference");
             sqlParams.put("serviceReference", "%" + serviceReference + "%");
         });
-        
-        mandateSearchParams.getMandateBankStatementReference().filter(s -> !s.toString().isBlank()).ifPresent(bankStatementRef -> {
+
+        params.getMandateBankStatementReference().filter(s -> !s.toString().isBlank()).ifPresent(bankStatementRef -> {
             sql.append(" AND m.mandate_reference ILIKE :mandateRef");
             sqlParams.put("mandateRef", "%" + bankStatementRef.toString() + "%");
         });
-        
-        mandateSearchParams.getName().filter(s -> !s.isBlank()).ifPresent(name -> {
+
+        params.getName().filter(s -> !s.isBlank()).ifPresent(name -> {
             sql.append(" AND p.name ILIKE :name");
             sqlParams.put("name", "%" + name + "%");
         });
-        
-        mandateSearchParams.getEmail().filter(s -> !s.isBlank()).ifPresent(email -> {
+
+        params.getEmail().filter(s -> !s.isBlank()).ifPresent(email -> {
             sql.append(" AND p.email ILIKE :email");
             sqlParams.put("email", "%" + email + "%");
         });
-        
-        mandateSearchParams.getMandateState().ifPresent(mandateState -> {
+
+        params.getMandateState().ifPresent(mandateState -> {
             sql.append(" AND m.state = :state");
             sqlParams.put("state", mandateState);
         });
-        
-        mandateSearchParams.getFromDate().ifPresent(fromDate -> {
+
+        params.getFromDate().ifPresent(fromDate -> {
             sql.append(" AND m.created_date > :createdDateFrom");
             sqlParams.put("createdDateFrom", fromDate);
         });
-        
-        mandateSearchParams.getToDate().ifPresent(toDate -> {
+
+        params.getToDate().ifPresent(toDate -> {
             sql.append(" AND m.created_date < :createdDateTo");
             sqlParams.put("createdDateTo", toDate);
         });
 
-        sql.append(" ORDER BY m.id DESC OFFSET :offset LIMIT :limit");
-        sqlParams.put("limit", mandateSearchParams.getDisplaySize());
-        sqlParams.put("offset", calcuateOffset(mandateSearchParams));
-        
-        return jdbi.withHandle(handle -> {
-            Query query = handle.createQuery(sql.toString());
-            sqlParams.forEach(query::bind);
-            return query.map(new MandateMapper()).list();
-        });
+        if (searchMode.equals(SearchMode.SELECT)) {
+            sql.append(" ORDER BY m.id DESC OFFSET :offset LIMIT :limit");
+            sqlParams.put("limit", params.getDisplaySize());
+            sqlParams.put("offset", calculateOffset(params));
+        }
+
+        return new SqlStatementAndParameters(sql.toString(), sqlParams);
+    }
+
+    private int calculateOffset(MandateSearchParams params) {
+        return params.getPage() == 1 ? 0 : (params.getPage() - 1) * params.getDisplaySize();
     }
     
-    private static int calcuateOffset(MandateSearchParams params) {
-        if (params.getPage() == 0) {
-            return 0;
+    private static class SqlStatementAndParameters {
+        private final String query;
+        private final Map<String, Object> parameters;
+
+        SqlStatementAndParameters(String query, Map<String, Object> parameters) {
+            this.query = query;
+            this.parameters = parameters;
         }
-        return params.getPage() * params.getDisplaySize() - 1;
     }
+    
+    private enum SearchMode {COUNT, SELECT};
 }
