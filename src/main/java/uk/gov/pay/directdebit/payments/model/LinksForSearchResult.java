@@ -12,20 +12,20 @@ import java.net.URI;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
-public class ViewPaginationBuilder {
+public class LinksForSearchResult {
 
     private static final String SELF_LINK = "self";
     private static final String FIRST_LINK = "first_page";
     private static final String LAST_LINK = "last_page";
     private static final String PREV_LINK = "prev_page";
     private static final String NEXT_LINK = "next_page";
-    private PaymentViewSearchParams searchParams;
-    private UriInfo uriInfo;
+    private final PaymentViewSearchParams searchParams;
+    private final UriInfo uriInfo;
 
     @JsonIgnore
-    private Long totalCount;
+    private final Long totalCount;
     @JsonIgnore
-    private Long selfPageNum;
+    private final Long selfPageNum;
     @JsonProperty(SELF_LINK)
     private PaginationLink selfLink;
     @JsonProperty(FIRST_LINK)
@@ -37,23 +37,12 @@ public class ViewPaginationBuilder {
     @JsonProperty(NEXT_LINK)
     private PaginationLink nextLink;
 
-    public ViewPaginationBuilder(PaymentViewSearchParams searchParams, UriInfo uriInfo) {
+    public LinksForSearchResult(PaymentViewSearchParams searchParams, UriInfo uriInfo, Long totalCount) {
         this.searchParams = searchParams;
         this.uriInfo = uriInfo;
-        selfPageNum = searchParams.getPage();
-    }
-
-    public ViewPaginationBuilder withTotalCount(Long total) {
-        this.totalCount = total;
-        return this;
-    }
-
-    public ViewPaginationBuilder buildResponse() {
-        Long size = searchParams.getDisplaySize();
-        long lastPage = totalCount > 0 ? (totalCount + size - 1) / size : 1;
-        buildLinks(lastPage);
-        
-        return this;
+        this.selfPageNum = searchParams.getPage();
+        this.totalCount = totalCount;
+        buildLinks();
     }
 
     public PaginationLink getSelfLink() { return selfLink; }
@@ -66,7 +55,10 @@ public class ViewPaginationBuilder {
 
     public PaginationLink getNextLink() { return nextLink; }
 
-    private void buildLinks(long lastPage) {
+    private void buildLinks() {
+        Long size = searchParams.getDisplaySize();
+        long lastPage = totalCount > 0 ? (totalCount + size - 1) / size : 1;
+        
         selfLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());
         
         searchParams.withPage(1L);
