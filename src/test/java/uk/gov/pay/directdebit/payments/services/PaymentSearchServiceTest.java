@@ -7,6 +7,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.common.model.SearchResponse;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
@@ -14,10 +15,9 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentStateWithDetails;
-import uk.gov.pay.directdebit.payments.api.PaymentViewResponse;
+import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
@@ -97,11 +97,11 @@ public class PaymentSearchServiceTest {
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(4L);
-        PaymentViewResponse response = paymentSearchService.getPaymentSearchResponse(searchParams);
-        assertThat(response.getPaymentViewResponses().get(3).getAmount(), is(1003L));
-        assertThat(response.getPaymentViewResponses().get(0).getState(),
+        SearchResponse<PaymentResponse> response = paymentSearchService.getPaymentSearchResponse(searchParams);
+        assertThat(response.getResults().get(3).getAmount(), is(1003L));
+        assertThat(response.getResults().get(0).getState(),
                 is(new ExternalPaymentStateWithDetails(ExternalPaymentState.EXTERNAL_PENDING, "example_details")));
-        assertThat(response.getPaymentViewResponses().get(2).getCreatedDate(), is(createdDate));
+        assertThat(response.getResults().get(2).getCreatedDate(), is(createdDate));
     }
 
     @Test
@@ -152,15 +152,15 @@ public class PaymentSearchServiceTest {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(2L)
                 .withDisplaySize(20L);
-        PaymentViewResponse paymentViewResponse = paymentSearchService.getPaymentSearchResponse(searchParams);
-        assertThat(paymentViewResponse.getCount(), is(20L));
+        SearchResponse paymentViewResponse = paymentSearchService.getPaymentSearchResponse(searchParams);
+        assertThat(paymentViewResponse.getCount(), is(20));
         assertThat(paymentViewResponse.getPage(), is(2L));
         assertThat(paymentViewResponse.getTotal(), is(50L));
-        assertThat(paymentViewResponse.getPaginationBuilder().getFirstLink().getHref().contains("?page=1"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getLastLink().getHref().contains("?page=3"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getPrevLink().getHref().contains("?page=1"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getNextLink().getHref().contains("?page=3"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getSelfLink().getHref().contains("?page=2"), is(true));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getFirstLink().getHref().contains("?page=1"), is(true));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getLastLink().getHref().contains("?page=3"), is(true));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getPrevLink().getHref().contains("?page=1"), is(true));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getNextLink().getHref().contains("?page=3"), is(true));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getSelfLink().getHref().contains("?page=2"), is(true));
     }
 
     @Test
@@ -173,15 +173,15 @@ public class PaymentSearchServiceTest {
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(2L);
-        PaymentViewResponse paymentViewResponse = paymentSearchService.getPaymentSearchResponse(searchParams);
-        assertThat(paymentViewResponse.getCount(), is(0L));
+        SearchResponse<PaymentResponse> paymentViewResponse = paymentSearchService.getPaymentSearchResponse(searchParams);
+        assertThat(paymentViewResponse.getCount(), is(0));
         assertThat(paymentViewResponse.getPage(), is(2L));
         assertThat(paymentViewResponse.getTotal(), is(18L));
-        assertThat(paymentViewResponse.getPaymentViewResponses().size(), is(0));
-        assertThat(paymentViewResponse.getPaginationBuilder().getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getLastLink().getHref().contains("?page=1&display_size=500"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getPrevLink().getHref().contains("?page=1&display_size=500"), is(true));
-        assertThat(paymentViewResponse.getPaginationBuilder().getNextLink(), is(nullValue()));
-        assertThat(paymentViewResponse.getPaginationBuilder().getSelfLink().getHref().contains("?page=2&display_size=500"), is(true));
+        assertThat(paymentViewResponse.getResults().size(), is(0));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getLastLink().getHref().contains("?page=1&display_size=500"), is(true));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getPrevLink().getHref().contains("?page=1&display_size=500"), is(true));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getNextLink(), is(nullValue()));
+        assertThat(paymentViewResponse.getLinksForSearchResult().getSelfLink().getHref().contains("?page=2&display_size=500"), is(true));
     }
 }

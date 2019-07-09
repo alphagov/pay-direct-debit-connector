@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ViewPaginationBuilderTest {
+public class LinksForSearchResultTest {
 
     @Mock
     private UriInfo mockedUriInfo;
@@ -37,9 +37,7 @@ public class ViewPaginationBuilderTest {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(1L)
                 .withDisplaySize(500L);
-        ViewPaginationBuilder builder = new ViewPaginationBuilder(searchParams, mockedUriInfo)
-                .withTotalCount(120L);
-        builder = builder.buildResponse();
+        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120L);
         assertThat(builder.getPrevLink(), is(nullValue()));
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
         assertThat(builder.getLastLink().getHref().contains("?page=1&display_size=500"), is(true));
@@ -52,9 +50,7 @@ public class ViewPaginationBuilderTest {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(777L)
                 .withDisplaySize(500L);
-        ViewPaginationBuilder builder = new ViewPaginationBuilder(searchParams, mockedUriInfo)
-                .withTotalCount(120L);
-        builder = builder.buildResponse();
+        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120L);
         assertThat(builder.getPrevLink().getHref().contains("?page=1&display_size=500"), is(true));
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
         assertThat(builder.getLastLink().getHref().contains("?page=1&display_size=500"), is(true));
@@ -66,9 +62,7 @@ public class ViewPaginationBuilderTest {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(2L)
                 .withDisplaySize(50L);
-        ViewPaginationBuilder builder = new ViewPaginationBuilder(searchParams, mockedUriInfo)
-                .withTotalCount(120L);
-        builder = builder.buildResponse();
+        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120L);
         assertThat(builder.getPrevLink().getHref().contains("?page=1&display_size=50"), is(true));
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=50"), is(true));
         assertThat(builder.getLastLink().getHref().contains("?page=3&display_size=50"), is(true));
@@ -81,9 +75,7 @@ public class ViewPaginationBuilderTest {
         PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(3L)
                 .withDisplaySize(10L);
-        ViewPaginationBuilder builder = new ViewPaginationBuilder(searchParams, mockedUriInfo)
-                .withTotalCount(120L);
-        builder = builder.buildResponse();
+        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120L);
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=10"), is(true));
         assertThat(builder.getLastLink().getHref().contains("?page=12&display_size=10"), is(true));
         assertThat(builder.getPrevLink().getHref().contains("?page=2&display_size=10"), is(true));
