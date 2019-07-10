@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.model.LinksForSearchResult;
 
 import java.util.List;
@@ -18,17 +19,17 @@ public class SearchResponse<T> {
     @JsonIgnore
     private final String gatewayExternalId;
     @JsonProperty("total")
-    private final Long total;
+    private final Integer total;
     @JsonProperty("count")
-    private final int count;
+    private final Integer count;
     @JsonProperty("page")
-    private final Long page;
+    private final Integer page;
     @JsonProperty("results")
     private final List<T> results;
     @JsonProperty("_links")
     private final LinksForSearchResult linksForSearchResult;
 
-    public SearchResponse(String gatewayExternalId, Long total, Long page, List<T> results, LinksForSearchResult linksForSearchResult) {
+    public SearchResponse(String gatewayExternalId, Integer total, Integer page, List<T> results, LinksForSearchResult linksForSearchResult) {
         this.gatewayExternalId = gatewayExternalId;
         this.total = total;
         this.count = results.size();
@@ -41,11 +42,11 @@ public class SearchResponse<T> {
         return results;
     }
 
-    public Long getTotal() { return total; }
+    public Integer getTotal() { return total; }
 
-    public int getCount() { return count; }
+    public Integer getCount() { return count; }
 
-    public Long getPage() { return page; }
+    public Integer getPage() { return page; }
 
     public LinksForSearchResult getLinksForSearchResult() { return linksForSearchResult; }
 

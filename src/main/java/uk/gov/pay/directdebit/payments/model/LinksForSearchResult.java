@@ -10,6 +10,7 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams.PaymentViewSearchParamsBuilder.fromPaymentViewParams;
 
 @JsonInclude(Include.NON_NULL)
 public class LinksForSearchResult {
@@ -23,9 +24,7 @@ public class LinksForSearchResult {
     private final UriInfo uriInfo;
 
     @JsonIgnore
-    private final Long totalCount;
-    @JsonIgnore
-    private final Long selfPageNum;
+    private final Integer totalCount;
     @JsonProperty(SELF_LINK)
     private PaginationLink selfLink;
     @JsonProperty(FIRST_LINK)
@@ -37,10 +36,9 @@ public class LinksForSearchResult {
     @JsonProperty(NEXT_LINK)
     private PaginationLink nextLink;
 
-    public LinksForSearchResult(PaymentViewSearchParams searchParams, UriInfo uriInfo, Long totalCount) {
+    public LinksForSearchResult(PaymentViewSearchParams searchParams, UriInfo uriInfo, Integer totalCount) {
         this.searchParams = searchParams;
         this.uriInfo = uriInfo;
-        this.selfPageNum = searchParams.getPage();
         this.totalCount = totalCount;
         buildLinks();
     }
@@ -56,25 +54,26 @@ public class LinksForSearchResult {
     public PaginationLink getNextLink() { return nextLink; }
 
     private void buildLinks() {
-        Long size = searchParams.getDisplaySize();
-        long lastPage = totalCount > 0 ? (totalCount + size - 1) / size : 1;
+        int currentPageNumber = searchParams.getPage();
+        int lastPageNumber = totalCount > 0 ? (totalCount + searchParams.getDisplaySize() - 1) / searchParams.getDisplaySize() : 1;
         
-        selfLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());
+        selfLink = createLink(currentPageNumber);
+        firstLink = createLink(1);
+        lastLink = createLink(lastPageNumber);
         
-        searchParams.withPage(1L);
-        firstLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());
-
-        searchParams.withPage(lastPage);
-        lastLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());
-
-        searchParams.withPage(selfPageNum - 1);
-        prevLink = selfPageNum == 1L ? null : 
-                selfPageNum > lastPage ? 
-                        PaginationLink.ofValue(uriWithParams(searchParams.withPage(lastPage).buildQueryParamString()).toString()) :
-                        PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());
-
-        searchParams.withPage(selfPageNum + 1);
-        nextLink = selfPageNum >= lastPage ? null : PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());;
+        if (currentPageNumber > 1) {
+            int previousPageNumber = currentPageNumber > lastPageNumber ? lastPageNumber : currentPageNumber - 1;
+            prevLink = createLink(previousPageNumber);
+        }
+        
+        if (currentPageNumber < lastPageNumber) {
+            nextLink = createLink(currentPageNumber + 1);
+        }
+    }
+    
+    private PaginationLink createLink(Integer pageNumber) {
+        var searchParamsForPage = fromPaymentViewParams(searchParams).withPage(pageNumber).build();
+        return PaginationLink.ofValue(uriWithParams(searchParamsForPage.buildQueryParamString()).toString());
     }
 
     private URI uriWithParams(String params) {
