@@ -43,6 +43,7 @@ import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.api.PaymentResponse.PaymentResponseBuilder.aPaymentResponse;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
+import static uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams.PaymentViewSearchParamsBuilder.aPaymentViewSearchParams;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentSearchServiceTest {
@@ -88,11 +89,12 @@ public class PaymentSearchServiceTest {
 
     @Test
     public void getPaymentViewList_withGatewayAccountIdAndOffsetAndLimit_shouldPopulateResponse() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(1L)
                 .withDisplaySize(100L)
                 .withFromDateString(createdDate.toString())
-                .withToDateString(createdDate.toString());
+                .withToDateString(createdDate.toString())
+                .build();
         
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(gatewayAccount));
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
@@ -106,11 +108,12 @@ public class PaymentSearchServiceTest {
 
     @Test
     public void shouldThrowGatewayAccountNotFoundException_whenGatewayNotExists() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(10L)
                 .withDisplaySize(100L)
                 .withFromDateString(createdDate.toString())
-                .withToDateString(createdDate.toString());
+                .withToDateString(createdDate.toString())
+                .build();
         thrown.expect(GatewayAccountNotFoundException.class);
         thrown.expectMessage("Unknown gateway account: " + gatewayAccountExternalId);
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.empty());
@@ -149,9 +152,10 @@ public class PaymentSearchServiceTest {
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(50L);
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(2L)
-                .withDisplaySize(20L);
+                .withDisplaySize(20L)
+                .build();
         SearchResponse paymentViewResponse = paymentSearchService.getPaymentSearchResponse(searchParams);
         assertThat(paymentViewResponse.getCount(), is(20));
         assertThat(paymentViewResponse.getPage(), is(2L));
@@ -171,8 +175,9 @@ public class PaymentSearchServiceTest {
         when(gatewayAccountDao.findByExternalId(gatewayAccountExternalId)).thenReturn(Optional.of(testGatewayAccount));
         when(paymentViewDao.getPaymentViewCount(any(PaymentViewSearchParams.class))).thenReturn(18L);
         when(paymentViewDao.searchPaymentView(any(PaymentViewSearchParams.class))).thenReturn(paymentViewList);
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
-                .withPage(2L);
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
+                .withPage(2L)
+                .build();
         SearchResponse<PaymentResponse> paymentViewResponse = paymentSearchService.getPaymentSearchResponse(searchParams);
         assertThat(paymentViewResponse.getCount(), is(0));
         assertThat(paymentViewResponse.getPage(), is(2L));

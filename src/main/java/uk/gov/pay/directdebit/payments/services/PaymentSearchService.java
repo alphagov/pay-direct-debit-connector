@@ -32,14 +32,13 @@ public class PaymentSearchService {
                 .orElseThrow(() -> new GatewayAccountNotFoundException(searchParams.getGatewayExternalId()));
 
         PaymentViewSearchParams validatedSearchParams = paymentViewValidator.validateParams(searchParams);
-        long originalPageNumber = validatedSearchParams.getPage();
         Long total = getTotal(validatedSearchParams);
         List<PaymentResponse> foundPayments = total > 0 ? getPaymentViewResultResponse(validatedSearchParams) : Collections.emptyList();
         LinksForSearchResult linksForSearchResult = new LinksForSearchResult(validatedSearchParams, uriInfo, total);
         
         return new SearchResponse<>(validatedSearchParams.getGatewayExternalId(),
                 total,
-                originalPageNumber,
+                validatedSearchParams.getPage(),
                 foundPayments,
                 linksForSearchResult);
     }

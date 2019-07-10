@@ -10,6 +10,7 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams.PaymentViewSearchParamsBuilder.fromPaymentViewParams;
 
 @JsonInclude(Include.NON_NULL)
 public class LinksForSearchResult {
@@ -56,25 +57,26 @@ public class LinksForSearchResult {
     public PaginationLink getNextLink() { return nextLink; }
 
     private void buildLinks() {
-        Long size = searchParams.getDisplaySize();
-        long lastPage = totalCount > 0 ? (totalCount + size - 1) / size : 1;
+        long currentPageNumber = searchParams.getPage();
+        long lastPageNumber = totalCount > 0 ? (totalCount + searchParams.getDisplaySize() - 1) / searchParams.getDisplaySize() : 1;
         
-        selfLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());
+        selfLink = createLink(currentPageNumber);
+        firstLink = createLink(1L);
+        lastLink = createLink(lastPageNumber);
         
-        searchParams.withPage(1L);
-        firstLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());
-
-        searchParams.withPage(lastPage);
-        lastLink = PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());
-
-        searchParams.withPage(selfPageNum - 1);
-        prevLink = selfPageNum == 1L ? null : 
-                selfPageNum > lastPage ? 
-                        PaginationLink.ofValue(uriWithParams(searchParams.withPage(lastPage).buildQueryParamString()).toString()) :
-                        PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());
-
-        searchParams.withPage(selfPageNum + 1);
-        nextLink = selfPageNum >= lastPage ? null : PaginationLink.ofValue(uriWithParams(searchParams.buildQueryParamString()).toString());;
+        if (currentPageNumber > 1) {
+            long previousPageNumber = currentPageNumber > lastPageNumber ? lastPageNumber : currentPageNumber - 1;
+            prevLink = createLink(previousPageNumber);
+        }
+        
+        if (currentPageNumber < lastPageNumber) {
+            nextLink = createLink(currentPageNumber + 1);
+        }
+    }
+    
+    private PaginationLink createLink(long pageNumber) {
+        var searchParamsForPage = fromPaymentViewParams(searchParams).withPage(pageNumber).build();
+        return PaginationLink.ofValue(uriWithParams(searchParamsForPage.buildQueryParamString()).toString());
     }
 
     private URI uriWithParams(String params) {

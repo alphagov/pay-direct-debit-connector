@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams.PaymentViewSearchParamsBuilder.aPaymentViewSearchParams;
 
 public class PaymentViewSearchParamsTest {
 
@@ -18,11 +19,12 @@ public class PaymentViewSearchParamsTest {
     
     @Test
     public void shouldCreateQueryMap() {
-        searchParams = new PaymentViewSearchParams("account-id")
-                                .withPage(2L)
-        .withDisplaySize(600L)
-        .withFromDateString(fromDate.toString())
-        .withToDateString(toDate.toString());        
+        searchParams = aPaymentViewSearchParams("account-id")
+                .withPage(2L)
+                .withDisplaySize(600L)
+                .withFromDateString(fromDate.toString())
+                .withToDateString(toDate.toString())
+                .build();        
         searchParams = new PaymentViewValidator().validateParams(searchParams);
         assertThat(searchParams.getQueryMap().get("gatewayAccountExternalId"), is("account-id"));
         assertThat(searchParams.getQueryMap().get("offset"), is(500L));

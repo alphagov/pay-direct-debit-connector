@@ -30,16 +30,16 @@ public class PaymentViewSearchParams {
     private static final String STATE_FIELD = "state";
     
     private final String gatewayExternalId;
-    private Long page;
-    private Long displaySize;
-    private String fromDateString;
-    private String toDateString;
-    private String reference;
-    private Long amount;
-    private String mandateId;
-    private String state;
-    private SearchDateParams searchDateParams;
-    private PaginationParams paginationParams;
+    private final Long page;
+    private final Long displaySize;
+    private final String fromDateString;
+    private final String toDateString;
+    private final String reference;
+    private final Long amount;
+    private final String mandateId;
+    private final String state;
+    private final SearchDateParams searchDateParams;
+    private final PaginationParams paginationParams;
     private Map<String, Object> queryMap;
 
     private static Map<String, String> externalPaymentToInternalStateQueryMap = new HashMap<>(4);
@@ -58,53 +58,18 @@ public class PaymentViewSearchParams {
                 .put(ExternalPaymentState.EXTERNAL_FAILED.getStatus(), FAILED.toSingleQuoteString() + ", " + CANCELLED.toSingleQuoteString() + ", " + EXPIRED.toSingleQuoteString());
     }
 
-    public PaymentViewSearchParams(String gatewayExternalId) {
-        this.gatewayExternalId = gatewayExternalId;
-    }
-
-    public PaymentViewSearchParams withDisplaySize(Long displaySize) {
-        this.displaySize = displaySize;
-        return this;
-    }
-
-    public PaymentViewSearchParams withFromDateString(String fromDateString) {
-        this.fromDateString = fromDateString;
-        return this;
-    }
-
-    public PaymentViewSearchParams withAmount(Long amount) {
-        this.amount = amount;
-        return this;
-    }
-
-    public PaymentViewSearchParams withToDateString(String toDateString) {
-        this.toDateString = toDateString;
-        return this;
-    }
-
-    public PaymentViewSearchParams withReference(String reference) {
-        this.reference = reference;
-        return this;
-    }
-
-    public PaymentViewSearchParams withMandateId(String mandateId) {
-        this.mandateId = mandateId;
-        return this;
-    }
-
-    public PaymentViewSearchParams withState(String state) {
-        this.state = state;
-        return this;
-    }
-
-    public PaymentViewSearchParams withPaginationParams(PaginationParams paginationParams) {
-        this.paginationParams = paginationParams;
-        return this;
-    }
-
-    public PaymentViewSearchParams withSearchDateParams(SearchDateParams searchDateParams) {
-        this.searchDateParams = searchDateParams;
-        return this;
+    private PaymentViewSearchParams(PaymentViewSearchParamsBuilder builder) {
+        this.gatewayExternalId = builder.gatewayAccountExternalId;
+        this.page = builder.page;
+        this.displaySize = builder.displaySize;
+        this.fromDateString = builder.fromDateString;
+        this.toDateString = builder.toDateString;
+        this.reference = builder.reference;
+        this.amount = builder.amount;
+        this.mandateId = builder.mandateId;
+        this.state = builder.state;
+        this.searchDateParams = builder.searchDateParams;
+        this.paginationParams = builder.paginationParams;
     }
 
     public String getGatewayExternalId() { return gatewayExternalId; }
@@ -133,11 +98,6 @@ public class PaymentViewSearchParams {
     }
 
     public SearchDateParams getSearchDateParams() { return searchDateParams; }
-    
-    public PaymentViewSearchParams withPage(Long page) {
-        this.page = page;
-        return this;
-    }
 
     public String generateQuery() {
         StringBuilder sb = new StringBuilder();
@@ -227,4 +187,95 @@ public class PaymentViewSearchParams {
         return "%" + rawUserInputText + "%";
     }
 
+
+    public static final class PaymentViewSearchParamsBuilder {
+        private final String gatewayAccountExternalId;
+        private Long page;
+        private Long displaySize;
+        private String fromDateString;
+        private String toDateString;
+        private String reference;
+        private Long amount;
+        private String mandateId;
+        private String state;
+        private SearchDateParams searchDateParams;
+        private PaginationParams paginationParams;
+
+        private PaymentViewSearchParamsBuilder(String gatewayAccountExternalId) {
+            this.gatewayAccountExternalId = gatewayAccountExternalId;
+        }
+        
+        public static PaymentViewSearchParamsBuilder fromPaymentViewParams(PaymentViewSearchParams paymentViewSearchParams) {
+            var builder = new PaymentViewSearchParamsBuilder(paymentViewSearchParams.getGatewayExternalId());
+            builder.page = paymentViewSearchParams.page;
+            builder.displaySize = paymentViewSearchParams.displaySize;
+            builder.fromDateString = paymentViewSearchParams.fromDateString;
+            builder.toDateString = paymentViewSearchParams.toDateString;
+            builder.reference = paymentViewSearchParams.reference;
+            builder.amount = paymentViewSearchParams.amount;
+            builder.mandateId = paymentViewSearchParams.mandateId;
+            builder.state = paymentViewSearchParams.state;
+            builder.searchDateParams = paymentViewSearchParams.searchDateParams;
+            builder.paginationParams = paymentViewSearchParams.paginationParams;
+            return builder;
+        }
+
+        public static PaymentViewSearchParamsBuilder aPaymentViewSearchParams(String gatewayAccountExternalId) {
+            return new PaymentViewSearchParamsBuilder(gatewayAccountExternalId);
+        }
+
+        public PaymentViewSearchParamsBuilder withPage(Long page) {
+            this.page = page;
+            return this;
+        }
+
+        public PaymentViewSearchParamsBuilder withDisplaySize(Long displaySize) {
+            this.displaySize = displaySize;
+            return this;
+        }
+
+        public PaymentViewSearchParamsBuilder withFromDateString(String fromDateString) {
+            this.fromDateString = fromDateString;
+            return this;
+        }
+
+        public PaymentViewSearchParamsBuilder withToDateString(String toDateString) {
+            this.toDateString = toDateString;
+            return this;
+        }
+
+        public PaymentViewSearchParamsBuilder withReference(String reference) {
+            this.reference = reference;
+            return this;
+        }
+
+        public PaymentViewSearchParamsBuilder withAmount(Long amount) {
+            this.amount = amount;
+            return this;
+        }
+
+        public PaymentViewSearchParamsBuilder withMandateId(String mandateId) {
+            this.mandateId = mandateId;
+            return this;
+        }
+
+        public PaymentViewSearchParamsBuilder withState(String state) {
+            this.state = state;
+            return this;
+        }
+
+        public PaymentViewSearchParamsBuilder withSearchDateParams(SearchDateParams searchDateParams) {
+            this.searchDateParams = searchDateParams;
+            return this;
+        }
+
+        public PaymentViewSearchParamsBuilder withPaginationParams(PaginationParams paginationParams) {
+            this.paginationParams = paginationParams;
+            return this;
+        }
+
+        public PaymentViewSearchParams build() {
+            return new PaymentViewSearchParams(this);
+        }
+    }
 }

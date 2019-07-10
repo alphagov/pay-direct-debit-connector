@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams.PaymentViewSearchParamsBuilder.aPaymentViewSearchParams;
 
 public class PaymentViewValidator {
 
@@ -22,7 +23,7 @@ public class PaymentViewValidator {
     public PaymentViewSearchParams validateParams(PaymentViewSearchParams searchParams) {
         PaginationParams paginationParams = validatePagination(searchParams);
         SearchDateParams searchDateParams = validateSearchDate(searchParams);
-        return new PaymentViewSearchParams(searchParams.getGatewayExternalId())
+        return aPaymentViewSearchParams(searchParams.getGatewayExternalId())
                 .withPage(searchParams.getPage() == null ? DEFAULT_PAGE_NUMBER : searchParams.getPage())        
                 .withDisplaySize(searchParams.getDisplaySize() == null ? MAX_PAGE_NUMBER : searchParams.getDisplaySize())
                 .withFromDateString(searchParams.getFromDateString())
@@ -32,7 +33,8 @@ public class PaymentViewValidator {
                 .withMandateId(searchParams.getMandateId())
                 .withPaginationParams(paginationParams)
                 .withSearchDateParams(searchDateParams)
-                .withState(searchParams.getState());
+                .withState(searchParams.getState())
+                .build();
     }
 
     private PaginationParams validatePagination(PaymentViewSearchParams searchParams) {

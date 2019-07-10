@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams.PaymentViewSearchParamsBuilder.aPaymentViewSearchParams;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LinksForSearchResultTest {
@@ -34,9 +35,10 @@ public class LinksForSearchResultTest {
 
     @Test
     public void shouldNotShowPrevLinkAndFirstLinkIsEqualToLastLink_whenOnlyOnePage() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(1L)
-                .withDisplaySize(500L);
+                .withDisplaySize(500L)
+                .build();
         LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120L);
         assertThat(builder.getPrevLink(), is(nullValue()));
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
@@ -47,9 +49,10 @@ public class LinksForSearchResultTest {
 
     @Test
     public void shouldShowPrevLinkAndFirstLinkAndLastLinkAsPage1_whenCurrentPageIsBiggerThanLastPage() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(777L)
-                .withDisplaySize(500L);
+                .withDisplaySize(500L)
+                .build();
         LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120L);
         assertThat(builder.getPrevLink().getHref().contains("?page=1&display_size=500"), is(true));
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
@@ -59,9 +62,10 @@ public class LinksForSearchResultTest {
 
     @Test
     public void shouldShowPrevLinkAndFirstLinkAsEqualsAndLastLinkAndNextLinkAsEquals() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(2L)
-                .withDisplaySize(50L);
+                .withDisplaySize(50L)
+                .build();
         LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120L);
         assertThat(builder.getPrevLink().getHref().contains("?page=1&display_size=50"), is(true));
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=50"), is(true));
@@ -72,9 +76,10 @@ public class LinksForSearchResultTest {
 
     @Test
     public void shouldShowAllLinksCorrectly_whenMultiplePagesExists() {
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
                 .withPage(3L)
-                .withDisplaySize(10L);
+                .withDisplaySize(10L)
+                .build();
         LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120L);
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=10"), is(true));
         assertThat(builder.getLastLink().getHref().contains("?page=12&display_size=10"), is(true));

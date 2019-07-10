@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams.PaymentViewSearchParamsBuilder.aPaymentViewSearchParams;
 
 @Path("/")
 public class PaymentSearchResource {
@@ -42,7 +43,7 @@ public class PaymentSearchResource {
             @QueryParam("state") String state,
             @Context UriInfo uriInfo) {
 
-        PaymentViewSearchParams searchParams = new PaymentViewSearchParams(accountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(accountExternalId)
                 .withPage(pageNumber)
                 .withDisplaySize(displaySize)
                 .withFromDateString(fromDate)
@@ -50,7 +51,8 @@ public class PaymentSearchResource {
                 .withReference(reference)
                 .withAmount(amount)
                 .withMandateId(mandateId)
-                .withState(state);
+                .withState(state)
+                .build();
         return Response.ok().entity(paymentSearchService.withUriInfo(uriInfo).getPaymentSearchResponse(searchParams)).build();
     }
 }
