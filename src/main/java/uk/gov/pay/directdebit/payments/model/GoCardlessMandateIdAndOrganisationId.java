@@ -2,10 +2,11 @@ package uk.gov.pay.directdebit.payments.model;
 
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
+import uk.gov.pay.directdebit.mandate.model.MandateLookupKey;
 
 import java.util.Objects;
 
-public class GoCardlessMandateIdAndOrganisationId {
+public class GoCardlessMandateIdAndOrganisationId implements MandateLookupKey {
 
     private final GoCardlessMandateId goCardlessMandateId;
     private final GoCardlessOrganisationId goCardlessOrganisationId;

@@ -57,13 +57,7 @@ public class WebhookGoCardlessService {
     }
 
     private void updateStateForMandateEvents(List<GoCardlessEvent> eventsThatAffectMandates) {
-        determineAffectedMandates(eventsThatAffectMandates)
-                .forEach(goCardlessMandateIdAndOrganisationId ->
-                        goCardlessMandateStateUpdater.updateState(
-                                goCardlessMandateIdAndOrganisationId.getGoCardlessMandateId(),
-                                goCardlessMandateIdAndOrganisationId.getGoCardlessOrganisationId()
-                        )
-                );
+        determineAffectedMandates(eventsThatAffectMandates).forEach(goCardlessMandateStateUpdater::updateState);
     }
 
     private Set<GoCardlessMandateIdAndOrganisationId> determineAffectedMandates(List<GoCardlessEvent> eventsThatAffectMandates) {

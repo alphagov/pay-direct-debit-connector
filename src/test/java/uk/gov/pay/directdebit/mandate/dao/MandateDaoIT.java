@@ -180,8 +180,7 @@ public class MandateDaoIT {
 
         assertThat(mandateDao.findByExternalIdAndGatewayAccountExternalId(mandateFixture.getExternalId(), "xxxx"), is(Optional.empty()));
     }
-    
-    
+
     @Test
     public void shouldFindAMandateByPaymentProviderIdAndOrganisationId() {
         MandateExternalId mandateExternalId = MandateExternalId.valueOf("expectedExternalId");
@@ -275,7 +274,7 @@ public class MandateDaoIT {
     }
 
     @Test
-    public void shouldUpdateStateByProviderIdAndReturnNumberOfAffectedRows() {
+    public void shouldUpdateStateByProviderIdAndOrganisationAndReturnNumberOfAffectedRows() {
         GatewayAccountFixture goCardlessGatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS)
                 .withOrganisation(GoCardlessOrganisationId.valueOf("Organisation ID we want"))
@@ -288,12 +287,13 @@ public class MandateDaoIT {
 
         MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(goCardlessGatewayAccountFixture)
+                .withExternalId(MandateExternalId.valueOf("Mandate we want"))
                 .withPaymentProviderId(GoCardlessMandateId.valueOf("Mandate ID we want"))
                 .insert(testContext.getJdbi());
 
         MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(goCardlessGatewayAccountFixture)
-                .withPaymentProviderId(GoCardlessMandateId.valueOf("Different organisation"))
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("Different mandate ID"))
                 .insert(testContext.getJdbi());
 
         MandateFixture.aMandateFixture()
@@ -301,14 +301,50 @@ public class MandateDaoIT {
                 .withPaymentProviderId(GoCardlessMandateId.valueOf("Mandate ID we want"))
                 .insert(testContext.getJdbi());
 
-        int numOfUpdatedMandates = mandateDao.updateStateByPaymentProviderMandateId(GOCARDLESS, GoCardlessOrganisationId.valueOf("Organisation ID we want"),
+        int numOfUpdatedMandates = mandateDao.updateStateByPaymentProviderMandateIdAndOrganisationId(GOCARDLESS, GoCardlessOrganisationId.valueOf("Organisation ID we want"),
                 GoCardlessMandateId.valueOf("Mandate ID we want"), MandateState.PENDING);
 
         assertThat(numOfUpdatedMandates, is(1));
 
-        Mandate mandate = mandateDao.findByPaymentProviderMandateId(GOCARDLESS, GoCardlessMandateId.valueOf("Mandate ID we want"),
-                GoCardlessOrganisationId.valueOf("Organisation ID we want")).get();
+        Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
+        assertThat(mandate.getState(), is(MandateState.PENDING));
+    }
 
+    @Test
+    public void shouldUpdateStateByProviderIdAndNoOrganisationAndReturnNumberOfAffectedRows() {
+        GatewayAccountFixture gatewayAccountFixtureWithNoOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+                .withPaymentProvider(SANDBOX)
+                .withOrganisation(null)
+                .insert(testContext.getJdbi());
+
+        GatewayAccountFixture gatewayAccountFixtureWithWrongOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+                .withPaymentProvider(SANDBOX)
+                .withOrganisation(GoCardlessOrganisationId.valueOf("Different organisation"))
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixtureWithNoOrganisation)
+                .withExternalId(MandateExternalId.valueOf("Mandate we want"))
+                .withPaymentProviderId(SandboxMandateId.valueOf("Mandate ID we want"))
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixtureWithNoOrganisation)
+                .withPaymentProviderId(SandboxMandateId.valueOf("Different mandate ID"))
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixtureWithWrongOrganisation)
+                .withPaymentProviderId(SandboxMandateId.valueOf("Mandate ID we want"))
+                .insert(testContext.getJdbi());
+
+        int numOfUpdatedMandates = mandateDao.updateStateByPaymentProviderMandateIdAndOrganisationId(SANDBOX,
+                SandboxMandateId.valueOf("Mandate ID we want"),
+                MandateState.PENDING);
+
+        assertThat(numOfUpdatedMandates, is(1));
+
+        Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
         assertThat(mandate.getState(), is(MandateState.PENDING));
     }
 
