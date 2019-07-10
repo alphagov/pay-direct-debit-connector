@@ -6,10 +6,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 
 import java.util.Optional;
 
@@ -22,10 +21,7 @@ import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessManda
 public class GoCardlessMandateStateCalculatorTest {
 
     @Mock
-    private GoCardlessMandateId mockGoCardlessMandateId;
-
-    @Mock
-    private GoCardlessOrganisationId mockGoCardlessOrganisationId;
+    private GoCardlessMandateIdAndOrganisationId mockGoCardlessMandateIdAndOrganisationId;
     
     @Mock
     private GoCardlessEvent mockGoCardlessEvent;
@@ -37,8 +33,8 @@ public class GoCardlessMandateStateCalculatorTest {
 
     @Before
     public void setUp() {
-        given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(mockGoCardlessMandateId, mockGoCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE)).willReturn(Optional.of(mockGoCardlessEvent));
+        given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(mockGoCardlessMandateIdAndOrganisationId, GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                .willReturn(Optional.of(mockGoCardlessEvent));
 
         goCardlessMandateStateCalculator = new GoCardlessMandateStateCalculator(mockGoCardlessEventDao);
     }
@@ -47,7 +43,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void createdActionMapsToCreatedState() {
         given(mockGoCardlessEvent.getAction()).willReturn("created");
 
-        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateId, mockGoCardlessOrganisationId);
+        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
         
         assertThat(mandateState.get(), is(MandateState.CREATED));
     }
@@ -56,7 +52,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void submittedActionMapsToSubmittedState() {
         given(mockGoCardlessEvent.getAction()).willReturn("submitted");
 
-        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateId, mockGoCardlessOrganisationId);
+        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
 
         assertThat(mandateState.get(), is(MandateState.SUBMITTED));
     }
@@ -65,7 +61,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void activeActionMapsToActiveState() {
         given(mockGoCardlessEvent.getAction()).willReturn("active");
 
-        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateId, mockGoCardlessOrganisationId);
+        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
 
         assertThat(mandateState.get(), is(MandateState.ACTIVE));
     }
@@ -74,7 +70,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void cancelledActionMapsToCancelledState() {
         given(mockGoCardlessEvent.getAction()).willReturn("cancelled");
 
-        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateId, mockGoCardlessOrganisationId);
+        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
 
         assertThat(mandateState.get(), is(MandateState.CANCELLED));
     }
@@ -83,7 +79,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void failedActionMapsToFailedState() {
         given(mockGoCardlessEvent.getAction()).willReturn("failed");
 
-        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateId, mockGoCardlessOrganisationId);
+        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
 
         assertThat(mandateState.get(), is(MandateState.FAILED));
     }
@@ -92,17 +88,17 @@ public class GoCardlessMandateStateCalculatorTest {
     public void unrecognisedActionMapsToNothing() {
         given(mockGoCardlessEvent.getAction()).willReturn("eaten_by_wolves");
 
-        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateId, mockGoCardlessOrganisationId);
+        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
 
         assertThat(mandateState, is(Optional.empty()));
     }
 
     @Test
     public void noApplicableEventsMapsToNothing() {
-        given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(mockGoCardlessMandateId, mockGoCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE)).willReturn(Optional.empty());
+        given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(mockGoCardlessMandateIdAndOrganisationId, GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                .willReturn(Optional.empty());
 
-        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateId, mockGoCardlessOrganisationId);
+        Optional<MandateState> mandateState = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
 
         assertThat(mandateState, is(Optional.empty()));
     }

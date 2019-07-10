@@ -10,11 +10,10 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.events.dao.mapper.GoCardlessEventMapper;
 import uk.gov.pay.directdebit.events.model.GoCardlessOrganisationIdArgumentFactory;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
+import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdArgumentFactory;
 
 import java.util.Optional;
@@ -99,13 +98,12 @@ public interface GoCardlessEventDao {
             "json, " +
             "event_id " +
             "FROM gocardless_events " +
-            "WHERE links_mandate = :linksMandate " +
-            "AND links_organisation = :linksOrganisation " +
+            "WHERE links_mandate = :goCardlessMandateId " +
+            "AND links_organisation = :goCardlessOrganisationId " +
             "AND action IN (<applicableActions>) " +
             "ORDER BY created_at DESC " +
             "LIMIT 1")
-    Optional<GoCardlessEvent> findLatestApplicableEventForMandate(@Bind("linksMandate") GoCardlessMandateId goCardlessMandateId,
-                                                                        @Bind("linksOrganisation") GoCardlessOrganisationId goCardlessOrganisationId,
-                                                                        @BindList("applicableActions") Set<String> applicableActions);
+    Optional<GoCardlessEvent> findLatestApplicableEventForMandate(@BindBean GoCardlessMandateIdAndOrganisationId goCardlessMandateIdAndOrganisationId,
+                                                                  @BindList("applicableActions") Set<String> applicableActions);
 
 }

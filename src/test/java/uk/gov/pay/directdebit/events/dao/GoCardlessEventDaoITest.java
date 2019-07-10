@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
@@ -110,16 +111,18 @@ public class GoCardlessEventDaoITest {
         goCardlessEventDao.insert(laterEventWrongMandateId.toEntity());
         goCardlessEventDao.insert(laterEventWrongOrganisationId.toEntity());
 
-        GoCardlessEvent event = goCardlessEventDao.findLatestApplicableEventForMandate(GoCardlessMandateId.valueOf("Mandate ID we want"),
-                GoCardlessOrganisationId.valueOf("Organisation ID we want"), Set.of("Action we want")).get();
+        GoCardlessEvent event = goCardlessEventDao.findLatestApplicableEventForMandate(
+                new GoCardlessMandateIdAndOrganisationId(
+                        GoCardlessMandateId.valueOf("Mandate ID we want"), GoCardlessOrganisationId.valueOf("Organisation ID we want")),
+                Set.of("Action we want")).get();
 
         assertThat(event.getGoCardlessEventId(), is(GoCardlessEventId.valueOf("This is the latest applicable event")));
     }
 
     @Test
     public void shouldNotFindAnythingIfNoApplicableEventForMandate() {
-        Optional<GoCardlessEvent> event = goCardlessEventDao.findLatestApplicableEventForMandate(GoCardlessMandateId.valueOf("Mandate ID we want"),
-                GoCardlessOrganisationId.valueOf("Organisation ID we want"), Set.of("Action we want"));
+        Optional<GoCardlessEvent> event = goCardlessEventDao.findLatestApplicableEventForMandate(new GoCardlessMandateIdAndOrganisationId(
+                GoCardlessMandateId.valueOf("Mandate ID we want"), GoCardlessOrganisationId.valueOf("Organisation ID we want")), Set.of("Action we want"));
         
         assertThat(event, is(Optional.empty()));
     }
