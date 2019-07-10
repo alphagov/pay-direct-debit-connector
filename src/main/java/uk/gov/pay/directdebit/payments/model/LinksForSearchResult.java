@@ -1,45 +1,45 @@
 package uk.gov.pay.directdebit.payments.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.pay.directdebit.common.model.SearchParams;
 import uk.gov.pay.directdebit.payments.links.PaginationLink;
-import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
-import static uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams.PaymentViewSearchParamsBuilder.fromPaymentViewParams;
 
 @JsonInclude(Include.NON_NULL)
 public class LinksForSearchResult {
 
-    private static final String SELF_LINK = "self";
-    private static final String FIRST_LINK = "first_page";
-    private static final String LAST_LINK = "last_page";
-    private static final String PREV_LINK = "prev_page";
-    private static final String NEXT_LINK = "next_page";
-    private final PaymentViewSearchParams searchParams;
+    private final SearchParams searchParams;
     private final UriInfo uriInfo;
-
-    @JsonIgnore
     private final Integer totalCount;
-    @JsonProperty(SELF_LINK)
+    private final String queryForSelfLink;
+    private final Integer pageNumberForSelfLink;
+    private final Integer lastPageNumber;
+    private final Integer previousPageNumber;
+
+    @JsonProperty("self")
     private PaginationLink selfLink;
-    @JsonProperty(FIRST_LINK)
+    @JsonProperty("first_page")
     private PaginationLink firstLink;
-    @JsonProperty(LAST_LINK)
+    @JsonProperty("last_page")
     private PaginationLink lastLink;
-    @JsonProperty(PREV_LINK)
+    @JsonProperty("prev_page")
     private PaginationLink prevLink;
-    @JsonProperty(NEXT_LINK)
+    @JsonProperty("next_page")
     private PaginationLink nextLink;
 
-    public LinksForSearchResult(PaymentViewSearchParams searchParams, UriInfo uriInfo, Integer totalCount) {
-        this.searchParams = searchParams;
+    public LinksForSearchResult(SearchParams searchParams, UriInfo uriInfo, Integer totalCount) {
         this.uriInfo = uriInfo;
         this.totalCount = totalCount;
+        this.searchParams = searchParams;
+        this.queryForSelfLink = searchParams.buildQueryParamString();
+        this.pageNumberForSelfLink = searchParams.getPage();
+        this.lastPageNumber = calculateLastPageNumber();
+        this.previousPageNumber = calculatePreviousPageNumber();
         buildLinks();
     }
 
@@ -54,26 +54,41 @@ public class LinksForSearchResult {
     public PaginationLink getNextLink() { return nextLink; }
 
     private void buildLinks() {
-        int currentPageNumber = searchParams.getPage();
-        int lastPageNumber = totalCount > 0 ? (totalCount + searchParams.getDisplaySize() - 1) / searchParams.getDisplaySize() : 1;
-        
-        selfLink = createLink(currentPageNumber);
-        firstLink = createLink(1);
-        lastLink = createLink(lastPageNumber);
-        
-        if (currentPageNumber > 1) {
-            int previousPageNumber = currentPageNumber > lastPageNumber ? lastPageNumber : currentPageNumber - 1;
-            prevLink = createLink(previousPageNumber);
+        selfLink = createLinkWithQueryOf(queryForSelfLink);
+        firstLink = createLinkWithQueryOf(queryWithPageNumberOf(1));
+        lastLink = createLinkWithQueryOf(queryWithPageNumberOf(lastPageNumber));
+
+        if (notOnFirstPage()) {
+            prevLink = createLinkWithQueryOf(queryWithPageNumberOf(previousPageNumber));
         }
-        
-        if (currentPageNumber < lastPageNumber) {
-            nextLink = createLink(currentPageNumber + 1);
+
+        if (notOnLastPage()) {
+            nextLink = createLinkWithQueryOf(queryWithPageNumberOf(pageNumberForSelfLink + 1));
         }
     }
-    
-    private PaginationLink createLink(Integer pageNumber) {
-        var searchParamsForPage = fromPaymentViewParams(searchParams).withPage(pageNumber).build();
-        return PaginationLink.ofValue(uriWithParams(searchParamsForPage.buildQueryParamString()).toString());
+
+    private boolean notOnFirstPage() {
+        return pageNumberForSelfLink > 1;
+    }
+
+    private boolean notOnLastPage() {
+        return pageNumberForSelfLink < lastPageNumber;
+    }
+
+    private int calculateLastPageNumber() {
+        return totalCount > 0 ? (totalCount + searchParams.getDisplaySize() - 1) / searchParams.getDisplaySize() : 1;
+    }
+
+    private int calculatePreviousPageNumber() {
+        return pageNumberForSelfLink > lastPageNumber ? lastPageNumber : pageNumberForSelfLink - 1;
+    }
+
+    private String queryWithPageNumberOf(Integer newPageNumber) {
+        return queryForSelfLink.replace("page=" + pageNumberForSelfLink, "page=" + newPageNumber);
+    }
+
+    private PaginationLink createLinkWithQueryOf(String query) {
+        return PaginationLink.ofValue(uriWithParams(query).toString());
     }
 
     private URI uriWithParams(String params) {

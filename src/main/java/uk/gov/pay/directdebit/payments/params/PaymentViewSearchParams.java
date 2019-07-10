@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.params;
 
+import uk.gov.pay.directdebit.common.model.SearchParams;
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 
 import java.util.HashMap;
@@ -15,7 +16,7 @@ import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
 
-public class PaymentViewSearchParams {
+public class PaymentViewSearchParams implements SearchParams {
 
     private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "gatewayAccountExternalId";
     private static final String PAGE_NUMBER_FIELD = "offset";
@@ -203,21 +204,6 @@ public class PaymentViewSearchParams {
 
         private PaymentViewSearchParamsBuilder(String gatewayAccountExternalId) {
             this.gatewayAccountExternalId = gatewayAccountExternalId;
-        }
-        
-        public static PaymentViewSearchParamsBuilder fromPaymentViewParams(PaymentViewSearchParams paymentViewSearchParams) {
-            var builder = new PaymentViewSearchParamsBuilder(paymentViewSearchParams.getGatewayExternalId());
-            builder.page = paymentViewSearchParams.page;
-            builder.displaySize = paymentViewSearchParams.displaySize;
-            builder.fromDateString = paymentViewSearchParams.fromDateString;
-            builder.toDateString = paymentViewSearchParams.toDateString;
-            builder.reference = paymentViewSearchParams.reference;
-            builder.amount = paymentViewSearchParams.amount;
-            builder.mandateId = paymentViewSearchParams.mandateId;
-            builder.state = paymentViewSearchParams.state;
-            builder.searchDateParams = paymentViewSearchParams.searchDateParams;
-            builder.paginationParams = paymentViewSearchParams.paginationParams;
-            return builder;
         }
 
         public static PaymentViewSearchParamsBuilder aPaymentViewSearchParams(String gatewayAccountExternalId) {
