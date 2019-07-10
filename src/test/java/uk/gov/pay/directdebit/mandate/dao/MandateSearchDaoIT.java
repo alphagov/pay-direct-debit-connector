@@ -29,7 +29,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class SearchMandateDaoIT {
+public class MandateSearchDaoIT {
 
     @DropwizardTestContext
     private TestContext testContext;
@@ -67,12 +67,16 @@ public class SearchMandateDaoIT {
     @Parameters({"REF1234", "ref1234", "f12"})
     public void searchByReference(String searchString) {
         var searchParams = aMandateSearchParams().withReference(searchString).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(1);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
     
     @Test
     public void searchByState() {
         var searchParams = aMandateSearchParams().withMandateState(FAILED).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(1);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
     }
     
@@ -82,6 +86,8 @@ public class SearchMandateDaoIT {
         var searchParams = aMandateSearchParams()
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(searchString))
                 .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(1);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
     }
     
@@ -89,6 +95,8 @@ public class SearchMandateDaoIT {
     @Parameters({"joe.bloggs@example.com", "joe.bloggs@EXAMPLE.com", "joe.bloggs"})
     public void searchByEmail(String searchString) {
         var searchParams = aMandateSearchParams().withEmail(searchString).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(1);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
 
@@ -96,6 +104,8 @@ public class SearchMandateDaoIT {
     @Parameters({"JOe Bloggs", "joe bloggs", "bloggs"})
     public void searchByName(String searchString) {
         var searchParams = aMandateSearchParams().withName(searchString).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(1);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
     }
     
@@ -103,18 +113,26 @@ public class SearchMandateDaoIT {
     public void searchByFromDate() {
         var searchParams = aMandateSearchParams().withFromDate(now().minusHours(1)).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(1);
 
         searchParams = aMandateSearchParams().withFromDate(now().minusHours(7)).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
+        total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(2);
     }
     
     @Test
     public void searchByToDate() {
         var searchParams = aMandateSearchParams().withToDate(now().minusHours(1)).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(1);
 
         searchParams = aMandateSearchParams().withToDate(now()).withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
+        total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(2);
     }
     
     @Test
@@ -123,6 +141,8 @@ public class SearchMandateDaoIT {
                 .withToDate(now().minusHours(1))
                 .withFromDate(now().minusHours(7))
                 .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(1);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
     }
     
@@ -137,8 +157,11 @@ public class SearchMandateDaoIT {
                 .withDisplaySize(2)
                 .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         List<Mandate> results = mandateSearchDao.search(searchParams);
-        assertThat(results).hasSize(1);
-        assertThat(results.get(0).getId()).isEqualTo(101L);
+        assertThat(results).hasSize(2);
+        assertThat(results.get(0).getId()).isEqualTo(102L);
+        assertThat(results.get(1).getId()).isEqualTo(101L);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(6);
     }
     
     @Test
@@ -148,6 +171,8 @@ public class SearchMandateDaoIT {
                 .withDisplaySize(1)
                 .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).hasSize(1);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(2);
     }
     
     @Test
@@ -159,5 +184,7 @@ public class SearchMandateDaoIT {
                 .withFromDate(now().minusHours(1))
                 .withGatewayAccountId(GATEWAY_ACCOUNT_ID);
         assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(total).isEqualTo(1);
     }
 }
