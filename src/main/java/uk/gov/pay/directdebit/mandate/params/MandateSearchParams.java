@@ -77,57 +77,89 @@ public class MandateSearchParams {
         return gatewayAccountExternalId;
     }
 
-    public static MandateSearchParams aMandateSearchParams() {
-        return new MandateSearchParams();
-    }
+    public static final class MandateSearchParamsBuilder {
+        private String serviceReference;
+        private MandateState mandateState;
+        private MandateBankStatementReference mandateBankStatementReference;
+        private String name;
+        private String email;
+        private String fromDate;
+        private String toDate;
+        private Integer page = 1;
+        private Integer displaySize = 500;
+        private String gatewayAccountExternalId;
 
-    public MandateSearchParams withReference(String serviceReference) {
-        this.serviceReference = serviceReference;
-        return this;
-    }
+        private MandateSearchParamsBuilder(String gatewayAccountExternalId) {
+            this.gatewayAccountExternalId = gatewayAccountExternalId;
+        }
 
-    public MandateSearchParams withMandateState(MandateState mandateState) {
-        this.mandateState = mandateState;
-        return this;
-    }
+        public static MandateSearchParamsBuilder aMandateSearchParams(String gatewayAccountExternalId) {
+            return new MandateSearchParamsBuilder(gatewayAccountExternalId);
+        }
 
-    public MandateSearchParams withMandateBankStatementReference(MandateBankStatementReference mandateBankStatementReference) {
-        this.mandateBankStatementReference = mandateBankStatementReference;
-        return this;
-    }
+        public MandateSearchParamsBuilder withServiceReference(String serviceReference) {
+            this.serviceReference = serviceReference;
+            return this;
+        }
 
-    public MandateSearchParams withName(String name) {
-        this.name = name;
-        return this;
-    }
+        public MandateSearchParamsBuilder withMandateState(MandateState mandateState) {
+            this.mandateState = mandateState;
+            return this;
+        }
 
-    public MandateSearchParams withEmail(String email) {
-        this.email = email;
-        return this;
-    }
+        public MandateSearchParamsBuilder withMandateBankStatementReference(MandateBankStatementReference mandateBankStatementReference) {
+            this.mandateBankStatementReference = mandateBankStatementReference;
+            return this;
+        }
 
-    public MandateSearchParams withFromDate(ZonedDateTime fromDate) {
-        this.fromDate = fromDate.toString();
-        return this;
-    }
+        public MandateSearchParamsBuilder withName(String name) {
+            this.name = name;
+            return this;
+        }
 
-    public MandateSearchParams withToDate(ZonedDateTime toDate) {
-        this.toDate = toDate.toString();
-        return this;
-    }
+        public MandateSearchParamsBuilder withEmail(String email) {
+            this.email = email;
+            return this;
+        }
 
-    public MandateSearchParams withPage(int page) {
-        this.page = page;
-        return this;
-    }
+        public MandateSearchParamsBuilder withFromDate(String fromDate) {
+            this.fromDate = fromDate;
+            return this;
+        }
 
-    public MandateSearchParams withDisplaySize(Integer displaySize) {
-        this.displaySize = displaySize;
-        return this;
-    }
+        public MandateSearchParamsBuilder withToDate(String toDate) {
+            this.toDate = toDate;
+            return this;
+        }
 
-    public MandateSearchParams withGatewayAccountId(String gatewayAccountId) {
-        this.gatewayAccountExternalId = gatewayAccountId;
-        return this;
+        public MandateSearchParamsBuilder withPage(Integer page) {
+            this.page = page;
+            return this;
+        }
+
+        public MandateSearchParamsBuilder withDisplaySize(Integer displaySize) {
+            this.displaySize = displaySize;
+            return this;
+        }
+
+        public MandateSearchParamsBuilder withGatewayAccountExternalId(String gatewayAccountExternalId) {
+            this.gatewayAccountExternalId = gatewayAccountExternalId;
+            return this;
+        }
+
+        public MandateSearchParams build() {
+            MandateSearchParams mandateSearchParams = new MandateSearchParams();
+            mandateSearchParams.mandateBankStatementReference = this.mandateBankStatementReference;
+            mandateSearchParams.page = this.page;
+            mandateSearchParams.serviceReference = this.serviceReference;
+            mandateSearchParams.displaySize = this.displaySize;
+            mandateSearchParams.toDate = this.toDate;
+            mandateSearchParams.name = this.name;
+            mandateSearchParams.gatewayAccountExternalId = this.gatewayAccountExternalId;
+            mandateSearchParams.email = this.email;
+            mandateSearchParams.fromDate = this.fromDate;
+            mandateSearchParams.mandateState = this.mandateState;
+            return mandateSearchParams;
+        }
     }
 }
