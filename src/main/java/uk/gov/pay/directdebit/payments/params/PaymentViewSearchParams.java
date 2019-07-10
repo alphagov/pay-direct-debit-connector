@@ -30,8 +30,8 @@ public class PaymentViewSearchParams {
     private static final String STATE_FIELD = "state";
     
     private final String gatewayExternalId;
-    private final Long page;
-    private final Long displaySize;
+    private final Integer page;
+    private final Integer displaySize;
     private final String fromDateString;
     private final String toDateString;
     private final String reference;
@@ -74,9 +74,9 @@ public class PaymentViewSearchParams {
 
     public String getGatewayExternalId() { return gatewayExternalId; }
 
-    public Long getPage() { return page; }
+    public Integer getPage() { return page; }
 
-    public Long getDisplaySize() { return displaySize; }
+    public Integer getDisplaySize() { return displaySize; }
 
     public String getFromDateString() { return fromDateString; }
 
@@ -190,8 +190,8 @@ public class PaymentViewSearchParams {
 
     public static final class PaymentViewSearchParamsBuilder {
         private final String gatewayAccountExternalId;
-        private Long page;
-        private Long displaySize;
+        private Integer page;
+        private Integer displaySize;
         private String fromDateString;
         private String toDateString;
         private String reference;
@@ -224,12 +224,12 @@ public class PaymentViewSearchParams {
             return new PaymentViewSearchParamsBuilder(gatewayAccountExternalId);
         }
 
-        public PaymentViewSearchParamsBuilder withPage(Long page) {
+        public PaymentViewSearchParamsBuilder withPage(Integer page) {
             this.page = page;
             return this;
         }
 
-        public PaymentViewSearchParamsBuilder withDisplaySize(Long displaySize) {
+        public PaymentViewSearchParamsBuilder withDisplaySize(Integer displaySize) {
             this.displaySize = displaySize;
             return this;
         }

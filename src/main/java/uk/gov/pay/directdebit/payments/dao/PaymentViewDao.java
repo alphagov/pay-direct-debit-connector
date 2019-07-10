@@ -55,13 +55,13 @@ public class PaymentViewDao {
         });
     }
     
-    public Long getPaymentViewCount(PaymentViewSearchParams searchParams) {
+    public Integer getPaymentViewCount(PaymentViewSearchParams searchParams) {
         String searchExtraFields = searchParams.generateQuery();
         return jdbi.withHandle(handle -> {
             Query query = handle.createQuery(COUNT_QUERY_STRING.replace(":searchExtraFields", searchExtraFields));
             searchParams.getQueryMap().forEach(query::bind);
             return query
-                    .mapTo(Long.class)
+                    .mapTo(Integer.class)
                     .findOnly();
         });
     }

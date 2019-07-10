@@ -20,15 +20,15 @@ public class PaymentViewSearchParamsTest {
     @Test
     public void shouldCreateQueryMap() {
         searchParams = aPaymentViewSearchParams("account-id")
-                .withPage(2L)
-                .withDisplaySize(600L)
+                .withPage(2)
+                .withDisplaySize(600)
                 .withFromDateString(fromDate.toString())
                 .withToDateString(toDate.toString())
                 .build();        
         searchParams = new PaymentViewValidator().validateParams(searchParams);
         assertThat(searchParams.getQueryMap().get("gatewayAccountExternalId"), is("account-id"));
-        assertThat(searchParams.getQueryMap().get("offset"), is(500L));
-        assertThat(searchParams.getQueryMap().get("limit"), is(500L));
+        assertThat(searchParams.getQueryMap().get("offset"), is(500));
+        assertThat(searchParams.getQueryMap().get("limit"), is(500));
         assertThat(searchParams.getQueryMap().containsKey("fromDate"), is(true));
         assertThat(searchParams.getQueryMap().containsKey("toDate"), is(true));
     }

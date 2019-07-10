@@ -2,19 +2,19 @@ package uk.gov.pay.directdebit.payments.params;
 
 public class PaginationParams {
 
-    private Long pageNumber;
-    private Long displaySize;
+    private Integer pageNumber;
+    private Integer displaySize;
 
-    public PaginationParams(Long pageNumber, Long displaySize) {
+    public PaginationParams(Integer pageNumber, Integer displaySize) {
         this.pageNumber = pageNumber;
         this.displaySize = displaySize;
     }
 
-    public Long getPageNumber() {
+    public Integer getPageNumber() {
         return pageNumber;
     }
 
-    public Long getDisplaySize() {
+    public Integer getDisplaySize() {
         return displaySize;
     }
 }

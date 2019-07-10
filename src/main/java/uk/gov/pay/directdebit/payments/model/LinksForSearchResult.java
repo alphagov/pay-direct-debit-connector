@@ -24,9 +24,7 @@ public class LinksForSearchResult {
     private final UriInfo uriInfo;
 
     @JsonIgnore
-    private final Long totalCount;
-    @JsonIgnore
-    private final Long selfPageNum;
+    private final Integer totalCount;
     @JsonProperty(SELF_LINK)
     private PaginationLink selfLink;
     @JsonProperty(FIRST_LINK)
@@ -38,10 +36,9 @@ public class LinksForSearchResult {
     @JsonProperty(NEXT_LINK)
     private PaginationLink nextLink;
 
-    public LinksForSearchResult(PaymentViewSearchParams searchParams, UriInfo uriInfo, Long totalCount) {
+    public LinksForSearchResult(PaymentViewSearchParams searchParams, UriInfo uriInfo, Integer totalCount) {
         this.searchParams = searchParams;
         this.uriInfo = uriInfo;
-        this.selfPageNum = searchParams.getPage();
         this.totalCount = totalCount;
         buildLinks();
     }
@@ -57,15 +54,15 @@ public class LinksForSearchResult {
     public PaginationLink getNextLink() { return nextLink; }
 
     private void buildLinks() {
-        long currentPageNumber = searchParams.getPage();
-        long lastPageNumber = totalCount > 0 ? (totalCount + searchParams.getDisplaySize() - 1) / searchParams.getDisplaySize() : 1;
+        int currentPageNumber = searchParams.getPage();
+        int lastPageNumber = totalCount > 0 ? (totalCount + searchParams.getDisplaySize() - 1) / searchParams.getDisplaySize() : 1;
         
         selfLink = createLink(currentPageNumber);
-        firstLink = createLink(1L);
+        firstLink = createLink(1);
         lastLink = createLink(lastPageNumber);
         
         if (currentPageNumber > 1) {
-            long previousPageNumber = currentPageNumber > lastPageNumber ? lastPageNumber : currentPageNumber - 1;
+            int previousPageNumber = currentPageNumber > lastPageNumber ? lastPageNumber : currentPageNumber - 1;
             prevLink = createLink(previousPageNumber);
         }
         
@@ -74,7 +71,7 @@ public class LinksForSearchResult {
         }
     }
     
-    private PaginationLink createLink(long pageNumber) {
+    private PaginationLink createLink(Integer pageNumber) {
         var searchParamsForPage = fromPaymentViewParams(searchParams).withPage(pageNumber).build();
         return PaginationLink.ofValue(uriWithParams(searchParamsForPage.buildQueryParamString()).toString());
     }

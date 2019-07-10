@@ -15,8 +15,8 @@ import static uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams.Pay
 
 public class PaymentViewValidator {
 
-    private static final Long MAX_PAGE_NUMBER = 500L;
-    private static final Long DEFAULT_PAGE_NUMBER = 1L;
+    private static final Integer MAX_PAGE_NUMBER = 500;
+    private static final Integer DEFAULT_PAGE_NUMBER = 1;
     private static final String FROM_DATE_FIELD = "fromDate";
     private static final String TO_DATE_FIELD = "toDate";
 
@@ -38,8 +38,8 @@ public class PaymentViewValidator {
     }
 
     private PaginationParams validatePagination(PaymentViewSearchParams searchParams) {
-        Long pageNumber = DEFAULT_PAGE_NUMBER - 1;
-        Long displaySize = MAX_PAGE_NUMBER;
+        Integer pageNumber = DEFAULT_PAGE_NUMBER - 1;
+        Integer displaySize = MAX_PAGE_NUMBER;
         PaginationParams paginationParams = searchParams.getPaginationParams();
         if (paginationParams.getDisplaySize() != null) {
             if (paginationParams.getDisplaySize() < 1) {

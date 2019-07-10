@@ -28,8 +28,8 @@ public class PaymentViewValidatorTest {
     @Test
     public void shouldReturnNoErrors_withValidPagination() {
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(2L)
-                .withDisplaySize(3L)
+                .withPage(2)
+                .withDisplaySize(3)
                 .build();
         validator.validateParams(searchParams);
     }
@@ -37,8 +37,8 @@ public class PaymentViewValidatorTest {
     @Test
     public void shouldReturnAnError_whenPageIsZero() {
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(0L)
-                .withDisplaySize(300L)
+                .withPage(0)
+                .withDisplaySize(300)
                 .build();
         thrown.expect(NegativeSearchParamException.class);
         thrown.expectMessage("Query param 'page' should be a non zero positive integer");
@@ -48,19 +48,19 @@ public class PaymentViewValidatorTest {
     @Test
     public void shouldResetDisplaySizeTo500() {
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(2L)
-                .withDisplaySize(600L)
+                .withPage(2)
+                .withDisplaySize(600)
                 .build();
         searchParams = validator.validateParams(searchParams);
-        assertThat(searchParams.getPaginationParams().getDisplaySize(), is(500L));
+        assertThat(searchParams.getPaginationParams().getDisplaySize(), is(500));
     }
 
     @Test
     public void shouldSetPaginationWithDefaultValues() {
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account").build(); 
         searchParams = validator.validateParams(searchParams);
-        assertThat(searchParams.getPaginationParams().getDisplaySize(), is(500L));
-        assertThat(searchParams.getPaginationParams().getPageNumber(), is(0L));
+        assertThat(searchParams.getPaginationParams().getDisplaySize(), is(500));
+        assertThat(searchParams.getPaginationParams().getPageNumber(), is(0));
     }
     
     @Test
@@ -68,8 +68,8 @@ public class PaymentViewValidatorTest {
         String fromDate = "2018-05-03T15:00Z";
         String toDate = "2018-05-04T15:00Z";
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(2L)
-                .withDisplaySize(42L)
+                .withPage(2)
+                .withDisplaySize(42)
                 .withFromDateString(fromDate)
                 .withToDateString(toDate)
                 .build();
@@ -82,8 +82,8 @@ public class PaymentViewValidatorTest {
     public void shouldLeaveToDateNull_whenMissing() {
         String fromDate = "2018-05-03T15:00Z";
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(2L)
-                .withDisplaySize(3L)
+                .withPage(2)
+                .withDisplaySize(3)
                 .withFromDateString(fromDate)
                 .build();
         searchParams = validator.validateParams(searchParams);
@@ -95,8 +95,8 @@ public class PaymentViewValidatorTest {
     public void shouldLeaveFromDateNull_whenMissing() {
         String toDate = "2018-05-04T15:00Z";
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(2L)
-                .withDisplaySize(3L)
+                .withPage(2)
+                .withDisplaySize(3)
                 .withToDateString(toDate)
                 .build();
         searchParams = validator.validateParams(searchParams);
@@ -111,8 +111,8 @@ public class PaymentViewValidatorTest {
         thrown.expect(InvalidDateException.class);
         thrown.expectMessage("from_date (2018-05-05T15:00Z) must be earlier then to_date (2018-05-04T15:00Z)");
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(2L)
-                .withDisplaySize(3L)
+                .withPage(2)
+                .withDisplaySize(3)
                 .withFromDateString(fromDate)
                 .withToDateString(toDate)
                 .build();
@@ -126,8 +126,8 @@ public class PaymentViewValidatorTest {
         thrown.expect(UnparsableDateException.class);
         thrown.expectMessage("Input toDate (2018-05-35T15:00Z) is wrong format");
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(3L)
-                .withDisplaySize(256L)
+                .withPage(3)
+                .withDisplaySize(256)
                 .withFromDateString(fromDate)
                 .withToDateString(toDate)
                 .build();
@@ -141,8 +141,8 @@ public class PaymentViewValidatorTest {
         thrown.expect(UnparsableDateException.class);
         thrown.expectMessage("Input fromDate (2018-05-03T15:00Z') is wrong format");
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(2L)
-                .withDisplaySize(3L)
+                .withPage(2)
+                .withDisplaySize(3)
                 .withFromDateString(fromDate)
                 .withToDateString(toDate)
                 .build();
@@ -156,8 +156,8 @@ public class PaymentViewValidatorTest {
         thrown.expect(UnparsableDateException.class);
         thrown.expectMessage("Input fromDate (%2018-05-03T15:00Z) is wrong format");
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams("a-gateway-account")
-                .withPage(2L)
-                .withDisplaySize(3L)
+                .withPage(2)
+                .withDisplaySize(3)
                 .withFromDateString(fromDate)
                 .withToDateString(toDate)
                 .build();

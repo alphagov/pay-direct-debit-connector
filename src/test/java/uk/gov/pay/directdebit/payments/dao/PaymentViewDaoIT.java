@@ -69,8 +69,8 @@ public class PaymentViewDaoIT {
                     .insert(testContext.getJdbi());
         }
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
-                .withPage(0L)
-                .withDisplaySize(100L)
+                .withPage(0)
+                .withDisplaySize(100)
                 .withSearchDateParams(searchDateParams)
                 .build();
         List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
@@ -96,8 +96,8 @@ public class PaymentViewDaoIT {
                     .insert(testContext.getJdbi());
         }
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
-                .withPage(2L)
-                .withDisplaySize(1L)
+                .withPage(2)
+                .withDisplaySize(1)
                 .withSearchDateParams(searchDateParams)
                 .build();
         List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
@@ -131,8 +131,8 @@ public class PaymentViewDaoIT {
                     .insert(testContext.getJdbi());
         }
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
-                .withPage(1L)
-                .withDisplaySize(100L)
+                .withPage(1)
+                .withDisplaySize(100)
                 .withFromDateString(zonedDateTime7DaysAgo.toString())
                 .withSearchDateParams(new SearchDateParams(zonedDateTime7DaysAgo, zonedDateTimeNow))
                 .build();
@@ -213,8 +213,8 @@ public class PaymentViewDaoIT {
                     .insert(testContext.getJdbi());
         }
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
-                .withPage(2L)
-                .withDisplaySize(100L)
+                .withPage(2)
+                .withDisplaySize(100)
                 .withSearchDateParams(searchDateParams)
                 .build();
         List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
@@ -240,8 +240,8 @@ public class PaymentViewDaoIT {
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withMandateId(mandateFixture.getExternalId().toString())
                 .build();
-        Long count = paymentViewDao.getPaymentViewCount(searchParams);
-        assertThat(count, is(3L));
+        Integer count = paymentViewDao.getPaymentViewCount(searchParams);
+        assertThat(count, is(3));
     }
 
     @Test
@@ -281,8 +281,8 @@ public class PaymentViewDaoIT {
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withMandateId(mandateFixture1.getExternalId().toString())
                 .build();
-        Long count = paymentViewDao.getPaymentViewCount(searchParams);
-        assertThat(count, is(3L));
+        Integer count = paymentViewDao.getPaymentViewCount(searchParams);
+        assertThat(count, is(3));
         List<PaymentResponse> paymentViews = paymentViewDao.searchPaymentView(searchParams);
         assertThat(paymentViews.size(), is(3));
     }

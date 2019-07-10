@@ -33,8 +33,8 @@ public class PaymentSearchResource {
     @Timed
     public Response searchPayments(
             @PathParam("accountId") String accountExternalId,
-            @QueryParam("page") Long pageNumber,
-            @QueryParam("display_size") Long displaySize,
+            @QueryParam("page") Integer pageNumber,
+            @QueryParam("display_size") Integer displaySize,
             @QueryParam("from_date") String fromDate,
             @QueryParam("to_date") String toDate,
             @QueryParam("reference") String reference,
