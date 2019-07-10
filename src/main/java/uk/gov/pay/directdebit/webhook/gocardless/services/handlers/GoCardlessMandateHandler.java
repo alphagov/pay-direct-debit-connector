@@ -11,6 +11,7 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
@@ -89,8 +90,10 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                 .map((handledAction -> {
                     Mandate mandate = mandateQueryService.findByPaymentProviderMandateId(
                             GOCARDLESS,
-                            event.getLinksMandate().orElseThrow(() -> new GoCardlessEventHasNoMandateIdException(event.getGoCardlessEventId())),
-                            event.getLinksOrganisation()
+                            new GoCardlessMandateIdAndOrganisationId(
+                                    event.getLinksMandate().orElseThrow(() -> new GoCardlessEventHasNoMandateIdException(event.getGoCardlessEventId())),
+                                    event.getLinksOrganisation()
+                            )
                     );
 
                     if (isValidOrganisation(mandate, event)) {

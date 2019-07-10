@@ -9,8 +9,8 @@ import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.PaymentProviderServiceIdArgumentFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 import uk.gov.pay.directdebit.mandate.dao.mapper.MandateMapper;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumentFactory;
@@ -103,10 +103,14 @@ public interface MandateDao {
     Optional<Mandate> findByExternalIdAndGatewayAccountExternalId(@Bind("mandateExternalId") MandateExternalId mandateExternalId,
                                                                   @Bind("gatewayAccountExternalId") String gatewayAccountExternalId);
 
-    @SqlQuery(query + "WHERE m.payment_provider_id = :paymentProviderMandateId AND g.organisation = :paymentProviderServiceId AND g.payment_provider = :provider")
+    @SqlQuery(query + "WHERE m.payment_provider_id = :paymentProviderMandateId AND g.organisation = :goCardlessOrganisationId AND g.payment_provider = :provider")
+    Optional<Mandate> findByPaymentProviderMandateIdAndOrganisation(@Bind("provider") PaymentProvider paymentProvider,
+                                                                    @Bind("paymentProviderMandateId") PaymentProviderMandateId paymentProviderMandateId,
+                                                                    @Bind("goCardlessOrganisationId") GoCardlessOrganisationId goCardlessOrganisationId);
+
+    @SqlQuery(query + "WHERE m.payment_provider_id = :paymentProviderMandateId AND g.organisation IS NULL AND g.payment_provider = :provider")
     Optional<Mandate> findByPaymentProviderMandateId(@Bind("provider") PaymentProvider paymentProvider,
-                                                     @Bind("paymentProviderMandateId") PaymentProviderMandateId paymentProviderMandateId,
-                                                     @Bind("paymentProviderServiceId") PaymentProviderServiceId paymentProviderServiceId);
+                                                     @Bind("paymentProviderMandateId") PaymentProviderMandateId paymentProviderMandateId);
 
     @SqlQuery(query + "WHERE m.state IN (<states>) AND m.created_date < :maxDateTime")
     List<Mandate> findAllMandatesBySetOfStatesAndMaxCreationTime(@BindList("states") Set<MandateState> states, @Bind("maxDateTime") ZonedDateTime maxDateTime);
@@ -115,9 +119,9 @@ public interface MandateDao {
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
 
     @SqlUpdate("UPDATE mandates m SET state = :state FROM gateway_accounts g WHERE m.payment_provider_id = :providerMandateId " +
-            "AND g.id = m.gateway_account_id AND g.organisation = :providerServiceId AND g.payment_provider = :provider")
+            "AND g.id = m.gateway_account_id AND g.organisation = :goCardlessOrganisationId AND g.payment_provider = :provider")
     int updateStateByPaymentProviderMandateIdAndOrganisationId(@Bind("provider") PaymentProvider paymentProvider,
-                                                               @Bind("providerServiceId") PaymentProviderServiceId paymentProviderServiceId,
+                                                               @Bind("goCardlessOrganisationId") GoCardlessOrganisationId goCardlessOrganisationId,
                                                                @Bind("providerMandateId") PaymentProviderMandateId paymentProviderMandateId,
                                                                @Bind("state") MandateState mandateState);
 
