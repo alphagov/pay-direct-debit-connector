@@ -14,6 +14,8 @@ import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
@@ -114,6 +116,52 @@ public class GoCardlessEventDaoITest {
         GoCardlessEvent event = goCardlessEventDao.findLatestApplicableEventForMandate(
                 new GoCardlessMandateIdAndOrganisationId(
                         GoCardlessMandateId.valueOf("Mandate ID we want"), GoCardlessOrganisationId.valueOf("Organisation ID we want")),
+                Set.of("Action we want")).get();
+
+        assertThat(event.getGoCardlessEventId(), is(GoCardlessEventId.valueOf("This is the latest applicable event")));
+    }
+
+    @Test
+    public void shouldFindLatestApplicableEventForPayment() {
+        GoCardlessEventFixture latestEvent = aGoCardlessEventFixture().withLinksPayment(GoCardlessPaymentId.valueOf("Payment ID we want"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("Organisation ID we want"))
+                .withAction("Action we want")
+                .withCreatedAt(ZonedDateTime.of(2019, 7, 5, 12, 0, 0, 0, UTC))
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("This is the latest applicable event"));
+
+        GoCardlessEventFixture earlierEvent = aGoCardlessEventFixture().withLinksPayment(GoCardlessPaymentId.valueOf("Payment ID we want"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("Organisation ID we want"))
+                .withAction("Action we want")
+                .withCreatedAt(ZonedDateTime.of(2019, 7, 5, 11, 59, 59, 999_999_999, UTC))
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("This is an earlier event"));
+
+        GoCardlessEventFixture laterEventWrongAction = aGoCardlessEventFixture().withLinksPayment(GoCardlessPaymentId.valueOf("Payment ID we want"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("Organisation ID we want"))
+                .withAction("Different action")
+                .withCreatedAt(ZonedDateTime.of(2019, 7, 5, 13, 0, 0, 0, UTC))
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("This is a later event but with the wrong action"));
+
+        GoCardlessEventFixture laterEventWrongPaymentId = aGoCardlessEventFixture().withLinksPayment(GoCardlessPaymentId.valueOf("Different payment ID"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("Organisation ID we want"))
+                .withAction("Action we want")
+                .withCreatedAt(ZonedDateTime.of(2019, 7, 5, 13, 0, 0, 0, UTC))
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("This is an later event but with the wrong payment ID"));
+
+        GoCardlessEventFixture laterEventWrongOrganisationId = aGoCardlessEventFixture().withLinksPayment(GoCardlessPaymentId.valueOf("Payment ID we want"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("Different organisation ID"))
+                .withAction("Action we want")
+                .withCreatedAt(ZonedDateTime.of(2019, 7, 5, 13, 0, 0, 0, UTC))
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("This is an later event with the wrong organisation ID"));
+
+        goCardlessEventDao.insert(latestEvent.toEntity());
+        goCardlessEventDao.insert(earlierEvent.toEntity());
+        goCardlessEventDao.insert(laterEventWrongAction.toEntity());
+        goCardlessEventDao.insert(laterEventWrongPaymentId.toEntity());
+        goCardlessEventDao.insert(laterEventWrongOrganisationId.toEntity());
+
+        GoCardlessEvent event = goCardlessEventDao.findLatestApplicableEventForPayment(
+                new GoCardlessPaymentIdAndOrganisationId(
+                        GoCardlessPaymentId.valueOf("Payment ID we want"), GoCardlessOrganisationId.valueOf("Organisation ID we want")),
                 Set.of("Action we want")).get();
 
         assertThat(event.getGoCardlessEventId(), is(GoCardlessEventId.valueOf("This is the latest applicable event")));
