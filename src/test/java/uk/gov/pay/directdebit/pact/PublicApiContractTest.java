@@ -168,4 +168,39 @@ public class PublicApiContractTest {
                 .insert(app.getTestContext().getJdbi());
         
     }
+    
+    @State("a gateway account with an external id and a confirmed mandate searchable by all parameters")
+    public void twoGateWayAccountWith4MandatesExists(Map<String, String> params) {
+        GatewayAccountFixture testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture();
+        
+        testGatewayAccount
+                .withExternalId(params.get("gateway_account_id"))
+                .insert(app.getTestContext().getJdbi());
+
+        testMandate.withGatewayAccountFixture(testGatewayAccount)
+                .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
+                .withPayerFixture(
+                        PayerFixture
+                                .aPayerFixture()
+                                .withName(params.get("name"))
+                                .withEmail(params.get("email"))
+                )
+                .withServiceReference(params.get("reference"))
+                .withMandateBankStatementReference(
+                        MandateBankStatementReference.valueOf(params.get("bank_statement_reference")))
+                .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
+                .withState(MandateState.PENDING)
+                
+                .insert(app.getTestContext().getJdbi());
+        aPaymentFixture()
+                .withMandateFixture(testMandate)
+                .withExternalId(params.get("charge_id"))
+                .withAmount(1000L)
+                .withReference("FGHIJ")
+                .withState(PaymentState.PENDING)
+                .withCreatedDate(ZonedDateTime.parse("2019-07-11T12:30:48.317Z"))
+                .withPaymentProviderId(GoCardlessPaymentId.valueOf("AAAA1111"))
+                .insert(app.getTestContext().getJdbi());
+    }
+    
 }
