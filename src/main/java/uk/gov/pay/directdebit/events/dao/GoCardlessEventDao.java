@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdArgumentFactory;
 
 import java.util.Optional;
@@ -104,6 +105,38 @@ public interface GoCardlessEventDao {
             "ORDER BY created_at DESC " +
             "LIMIT 1")
     Optional<GoCardlessEvent> findLatestApplicableEventForMandate(@BindBean GoCardlessMandateIdAndOrganisationId goCardlessMandateIdAndOrganisationId,
+                                                                  @BindList("applicableActions") Set<String> applicableActions);
+
+    @SqlQuery("SELECT id, " +
+            "internal_event_id, " +
+            "event_id, " +
+            "action, " +
+            "created_at, " +
+            "details_cause, " +
+            "details_description, " +
+            "details_origin, " +
+            "details_reason_code, " +
+            "details_scheme, " +
+            "resource_type," +
+            "links_mandate, " +
+            "links_new_customer_bank_account, " +
+            "links_new_mandate, " +
+            "links_organisation, " +
+            "links_parent_event, " +
+            "links_payment, " +
+            "links_payout, " +
+            "links_previous_customer_bank_account, " +
+            "links_refund, " +
+            "links_subscription, " +
+            "json, " +
+            "event_id " +
+            "FROM gocardless_events " +
+            "WHERE links_payment = :goCardlessPaymentId " +
+            "AND links_organisation = :goCardlessOrganisationId " +
+            "AND action IN (<applicableActions>) " +
+            "ORDER BY created_at DESC " +
+            "LIMIT 1")
+    Optional<GoCardlessEvent> findLatestApplicableEventForPayment(@BindBean GoCardlessPaymentIdAndOrganisationId goCardlessPaymentIdAndOrganisationId,
                                                                   @BindList("applicableActions") Set<String> applicableActions);
 
 }
