@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.mandate.params;
 
 import uk.gov.pay.commons.validation.ValidDate;
+import uk.gov.pay.directdebit.common.model.SearchParams;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 
@@ -10,31 +11,50 @@ import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-public class MandateSearchParams {
+public class MandateSearchParams implements SearchParams {
 
+    private static final String REFERENCE = "reference";
+    private static final String STATE = "state";
+    private static final String BANK_STATEMENT_REFERENCE = "bank_statement_reference";
+    private static final String NAME = "name";
+    private static final String EMAIL = "email";
+    private static final String FROM_DATE = "from_date";
+    private static final String TO_DATE = "to_date";
+    private static final String PAGE = "page";
+    private static final String DISPLAY_SIZE = "display_size";
+
+    @QueryParam(REFERENCE)
     private String serviceReference;
+
+    @QueryParam(STATE)
     private MandateState mandateState;
+
+    @QueryParam(BANK_STATEMENT_REFERENCE)
     private MandateBankStatementReference mandateBankStatementReference;
+
+    @QueryParam(NAME)
     private String name;
+
+    @QueryParam(EMAIL)
     private String email;
 
-    @QueryParam("from_date")
+    @QueryParam(FROM_DATE)
     @ValidDate(message = "Invalid attribute value: from_date. Must be a valid date")
     private String fromDate;
 
-    @QueryParam("to_date")
+    @QueryParam(TO_DATE)
     @ValidDate(message = "Invalid attribute value: to_date. Must be a valid date")
     private String toDate;
 
-    @QueryParam("page")
+    @QueryParam(PAGE)
     @Min(value = 1, message = "Invalid attribute value: page. Must be greater than or equal to {value}")
     private Integer page = 1;
 
-    @QueryParam("display_size")
+    @QueryParam(DISPLAY_SIZE)
     @Min(value = 1, message = "Invalid attribute value: display_size. Must be greater than or equal to {value}")
     @Max(value = 500, message = "Invalid attribute value: display_size. Must be less than or equal to {value}")
     private Integer displaySize = 500;
-    
+
     private String gatewayAccountExternalId;
 
     public Optional<String> getServiceReference() {
@@ -65,12 +85,63 @@ public class MandateSearchParams {
         return Optional.ofNullable(toDate).map(ZonedDateTime::parse);
     }
 
-    public int getPage() {
+    public Integer getPage() {
         return page;
     }
 
-    public int getDisplaySize() {
+    public Integer getDisplaySize() {
         return displaySize;
+    }
+
+    @Override
+    public String getGatewayExternalId() {
+        return this.gatewayAccountExternalId;
+    }
+
+    @Override
+    public String buildQueryParamString() {
+        var query = new StringBuilder();
+
+        query.append(createQueryParamFor(PAGE, page.toString()));
+        query.append(appendQueryParam(DISPLAY_SIZE, displaySize.toString()));
+
+        if (serviceReference != null) {
+            query.append(appendQueryParam(REFERENCE, serviceReference));
+        }
+
+        if (mandateState != null) {
+            query.append(appendQueryParam(STATE, mandateState.toString()));
+        }
+
+        if (mandateBankStatementReference != null) {
+            query.append(appendQueryParam(BANK_STATEMENT_REFERENCE, mandateBankStatementReference.toString()));
+        }
+
+        if (name != null) {
+            query.append(appendQueryParam(NAME, name));
+        }
+
+        if (email != null) {
+            query.append(appendQueryParam(EMAIL, email));
+        }
+
+        if (fromDate != null) {
+            query.append(appendQueryParam(FROM_DATE, fromDate));
+        }
+
+        if (toDate != null) {
+            query.append(appendQueryParam(TO_DATE, toDate));
+        }
+
+        return query.toString();
+    }
+
+    private String appendQueryParam(String name, String value) {
+        return "&" + createQueryParamFor(name, value);
+    }
+
+    private String createQueryParamFor(String name, String value) {
+        return name + "=" + value;
     }
 
     public String getGatewayAccountExternalId() {
