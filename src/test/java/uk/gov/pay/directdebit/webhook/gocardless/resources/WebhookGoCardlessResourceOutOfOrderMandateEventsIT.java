@@ -31,7 +31,7 @@ import static org.hamcrest.core.Is.is;
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class WebhookGoCardlessResourceOutOfOrderEventsIT {
+public class WebhookGoCardlessResourceOutOfOrderMandateEventsIT {
 
     private static final GoCardlessOrganisationId GOCARDLESS_ORGANISATION_ID = GoCardlessOrganisationId.valueOf("OR123");
     private static final GoCardlessMandateId GOCARDLESS_MANDATE_ID = GoCardlessMandateId.valueOf("MD123");
