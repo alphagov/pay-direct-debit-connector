@@ -13,7 +13,8 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.params.MandateSearchParams;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
-import uk.gov.pay.directdebit.mandate.services.MandateQueryService.MandateSearchResults;
+import uk.gov.pay.directdebit.mandate.services.MandateSearchService;
+import uk.gov.pay.directdebit.mandate.services.MandateSearchService.MandateSearchResults;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
 import uk.gov.pay.directdebit.payments.model.LinksForSearchResult;
 
@@ -43,11 +44,13 @@ public class MandateResource {
     
     private final MandateService mandateService;
     private final MandateQueryService mandateQueryService;
+    private final MandateSearchService mandateSearchService;
 
     @Inject
-    public MandateResource(MandateService mandateService, MandateQueryService mandateQueryService) {
+    public MandateResource(MandateService mandateService, MandateQueryService mandateQueryService, MandateSearchService mandateSearchService) {
         this.mandateService = mandateService;
         this.mandateQueryService = mandateQueryService;
+        this.mandateSearchService = mandateSearchService;
     }
     
     @GET
@@ -59,7 +62,7 @@ public class MandateResource {
                                                           @Valid @BeanParam MandateSearchParams mandateSearchParams,
                                                           @Context UriInfo uriInfo) {
 
-        MandateSearchResults results = mandateQueryService.search(mandateSearchParams, gatewayAccount.getExternalId());
+        MandateSearchResults results = mandateSearchService.search(mandateSearchParams, gatewayAccount.getExternalId());
         List<MandateResponse> mandateResponses = results.getMandatesForRequestedPage()
                 .stream()
                 .map(mandate -> mandateService.populateGetMandateResponse(mandate, uriInfo))

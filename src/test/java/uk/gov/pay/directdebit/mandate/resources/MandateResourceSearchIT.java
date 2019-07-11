@@ -32,7 +32,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class MandateSearchResourceIT {
+public class MandateResourceSearchIT {
 
     @DropwizardTestContext
     private TestContext testContext;
