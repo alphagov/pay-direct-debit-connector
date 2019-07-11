@@ -5,8 +5,10 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessMandateStateUpdater;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
+import uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessPaymentStateUpdater;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessActionHandler;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
@@ -15,8 +17,7 @@ import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -28,16 +29,19 @@ public class WebhookGoCardlessService {
     private final GoCardlessPaymentHandler goCardlessPaymentHandler;
     private final GoCardlessMandateHandler goCardlessMandateHandler;
     private final GoCardlessMandateStateUpdater goCardlessMandateStateUpdater;
-    
+    private final GoCardlessPaymentStateUpdater goCardlessPaymentStateUpdater;
+
     @Inject
-    public WebhookGoCardlessService(GoCardlessEventService goCardlessService,
-                                    GoCardlessPaymentHandler goCardlessPaymentHandler,
-                                    GoCardlessMandateHandler goCardlessMandateHandler,
-                                    GoCardlessMandateStateUpdater goCardlessMandateStateUpdater) {
+    WebhookGoCardlessService(GoCardlessEventService goCardlessService,
+                             GoCardlessPaymentHandler goCardlessPaymentHandler,
+                             GoCardlessMandateHandler goCardlessMandateHandler,
+                             GoCardlessMandateStateUpdater goCardlessMandateStateUpdater,
+                             GoCardlessPaymentStateUpdater goCardlessPaymentStateUpdater) {
         this.goCardlessService = goCardlessService;
         this.goCardlessPaymentHandler = goCardlessPaymentHandler;
         this.goCardlessMandateHandler = goCardlessMandateHandler;
         this.goCardlessMandateStateUpdater = goCardlessMandateStateUpdater;
+        this.goCardlessPaymentStateUpdater = goCardlessPaymentStateUpdater;
     }
 
     public void handleEvents(List<GoCardlessEvent> events) {
@@ -45,6 +49,7 @@ public class WebhookGoCardlessService {
 
         Map<GoCardlessResourceType, List<GoCardlessEvent>> eventsGroupedByResourceType = events.stream().collect(groupingBy(GoCardlessEvent::getResourceType));
         updateStateForMandateEvents(eventsGroupedByResourceType.getOrDefault(GoCardlessResourceType.MANDATES, Collections.emptyList()));
+        updateStateForPaymentEvents(eventsGroupedByResourceType.getOrDefault(GoCardlessResourceType.PAYMENTS, Collections.emptyList()));
 
         events.forEach(event -> {
             GoCardlessActionHandler handler = getHandlerFor(event.getResourceType());
@@ -57,19 +62,39 @@ public class WebhookGoCardlessService {
     }
 
     private void updateStateForMandateEvents(List<GoCardlessEvent> eventsThatAffectMandates) {
-        determineAffectedMandates(eventsThatAffectMandates).forEach(goCardlessMandateStateUpdater::updateState);
+        eventsThatAffectMandates.stream()
+                .map(WebhookGoCardlessService::toGoCardlessMandateIdAndOrganisationId)
+                .flatMap(Optional::stream)
+                .distinct()
+                .forEach(goCardlessMandateStateUpdater::updateState);
     }
 
-    private Set<GoCardlessMandateIdAndOrganisationId> determineAffectedMandates(List<GoCardlessEvent> eventsThatAffectMandates) {
-       return eventsThatAffectMandates.stream()
-                .map(goCardlessEvent -> goCardlessEvent.getLinksMandate()
-                        .map(mandateId -> new GoCardlessMandateIdAndOrganisationId(mandateId, goCardlessEvent.getLinksOrganisation()))
-                        .orElseGet(() -> {
-                            LOGGER.error("GoCardless event " + goCardlessEvent.getGoCardlessEventId() + " has resource_type mandate but no links.mandate");
-                            return null;
-                        })
-                )
-                .collect(Collectors.toSet());
+    private static Optional<GoCardlessMandateIdAndOrganisationId> toGoCardlessMandateIdAndOrganisationId(GoCardlessEvent goCardlessEvent) {
+        var goCardlessMandateIdAndOrganisationId = goCardlessEvent.getLinksMandate()
+                .map(mandateId -> new GoCardlessMandateIdAndOrganisationId(mandateId, goCardlessEvent.getLinksOrganisation()))
+                .orElseGet(() -> {
+                    LOGGER.error("GoCardless event " + goCardlessEvent.getGoCardlessEventId() + " has resource_type mandate but no links.mandate");
+                    return null;
+                });
+        return Optional.ofNullable(goCardlessMandateIdAndOrganisationId);
+    }
+
+    private void updateStateForPaymentEvents(List<GoCardlessEvent> eventsThatAffectPayments) {
+        eventsThatAffectPayments.stream()
+                .map(WebhookGoCardlessService::toGoCardlessPaymentIdAndOrganisationId)
+                .flatMap(Optional::stream)
+                .distinct()
+                .forEach(goCardlessPaymentStateUpdater::updateState);
+    }
+
+    private static Optional<GoCardlessPaymentIdAndOrganisationId> toGoCardlessPaymentIdAndOrganisationId(GoCardlessEvent goCardlessEvent) {
+        var goCardlessPaymentIdAndOrganisationId = goCardlessEvent.getLinksPayment()
+                .map(paymentId -> new GoCardlessPaymentIdAndOrganisationId(paymentId, goCardlessEvent.getLinksOrganisation()))
+                .orElseGet(() -> {
+                    LOGGER.error("GoCardless event " + goCardlessEvent.getGoCardlessEventId() + " has resource_type payment but no links.payment");
+                    return null;
+                });
+        return Optional.ofNullable(goCardlessPaymentIdAndOrganisationId);
     }
 
     private void logUnknownResourceTypeForEvent(GoCardlessEvent event) {

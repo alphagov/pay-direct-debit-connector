@@ -5,11 +5,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessMandateStateUpdater;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
+import uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessPaymentStateUpdater;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
@@ -36,13 +42,15 @@ public class WebhookGoCardlessServiceTest {
     private GoCardlessMandateHandler mockedGoCardlessMandateHandler;
     @Mock
     private GoCardlessMandateStateUpdater mockedGoCardlessMandateStateUpdater;
+    @Mock
+    private GoCardlessPaymentStateUpdater mockedGoCardlessPaymentStateUpdater;
 
     private WebhookGoCardlessService webhookGoCardlessService;
 
     @Before
     public void setUp() {
         webhookGoCardlessService = new WebhookGoCardlessService(mockedGoCardlessEventService, mockedGoCardlessPaymentHandler, mockedGoCardlessMandateHandler,
-                mockedGoCardlessMandateStateUpdater);
+                mockedGoCardlessMandateStateUpdater, mockedGoCardlessPaymentStateUpdater);
     }
 
     @Test
@@ -127,4 +135,105 @@ public class WebhookGoCardlessServiceTest {
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
     }
+
+    @Test
+    public void shouldUpdateStatesForMandatesAndPaymentsAffectedByEvents() {
+        GoCardlessOrganisationId goCardlessOrganisationId1 = GoCardlessOrganisationId.valueOf("OR1");
+        GoCardlessOrganisationId goCardlessOrganisationId2 = GoCardlessOrganisationId.valueOf("OR2");
+        
+        GoCardlessMandateId goCardlessMandateId1 = GoCardlessMandateId.valueOf("MD1");
+        GoCardlessMandateId goCardlessMandateId2 = GoCardlessMandateId.valueOf("MD2");
+
+        GoCardlessPaymentId goCardlessPaymentId1 = GoCardlessPaymentId.valueOf("PM1");
+        GoCardlessPaymentId goCardlessPaymentId2 = GoCardlessPaymentId.valueOf("PM2");
+        
+        GoCardlessEvent goCardlessOrganisation1Mandate1Event = aGoCardlessEventFixture()
+                .withResourceType(MANDATES)
+                .withLinksMandate(goCardlessMandateId1)
+                .withLinksOrganisation(goCardlessOrganisationId1)
+                .toEntity();
+
+        GoCardlessEvent anotherGoCardlessOrganisation1Mandate1Event = aGoCardlessEventFixture()
+                .withResourceType(MANDATES)
+                .withLinksMandate(goCardlessMandateId1)
+                .withLinksOrganisation(goCardlessOrganisationId1)
+                .toEntity();
+        
+        GoCardlessEvent goCardlessOrganisation1Mandate2Event = aGoCardlessEventFixture()
+                .withResourceType(MANDATES)
+                .withLinksMandate(goCardlessMandateId2)
+                .withLinksOrganisation(goCardlessOrganisationId1)
+                .toEntity();
+
+        GoCardlessEvent goCardlessOrganisation1Payment1Event = aGoCardlessEventFixture()
+                .withResourceType(PAYMENTS)
+                .withLinksPayment(goCardlessPaymentId1)
+                .withLinksOrganisation(goCardlessOrganisationId1)
+                .toEntity();
+        
+        GoCardlessEvent goCardlessOrganisation1Payment2Event = aGoCardlessEventFixture()
+                .withResourceType(PAYMENTS)
+                .withLinksPayment(goCardlessPaymentId2)
+                .withLinksOrganisation(goCardlessOrganisationId1)
+                .toEntity();
+
+        GoCardlessEvent goCardlessOrganisation2Mandate1Event = aGoCardlessEventFixture()
+                .withResourceType(MANDATES)
+                .withLinksMandate(goCardlessMandateId1)
+                .withLinksOrganisation(goCardlessOrganisationId2)
+                .toEntity();
+
+        webhookGoCardlessService.handleEvents(List.of(
+                goCardlessOrganisation1Mandate1Event,
+                goCardlessOrganisation1Mandate2Event,
+                anotherGoCardlessOrganisation1Mandate1Event,
+                goCardlessOrganisation1Payment1Event,
+                goCardlessOrganisation1Payment2Event,
+                goCardlessOrganisation2Mandate1Event));
+        
+        verify(mockedGoCardlessMandateStateUpdater).updateState(new GoCardlessMandateIdAndOrganisationId(goCardlessMandateId1, goCardlessOrganisationId1));
+        verify(mockedGoCardlessMandateStateUpdater).updateState(new GoCardlessMandateIdAndOrganisationId(goCardlessMandateId2, goCardlessOrganisationId1));
+        verify(mockedGoCardlessMandateStateUpdater).updateState(new GoCardlessMandateIdAndOrganisationId(goCardlessMandateId1, goCardlessOrganisationId2));
+        verify(mockedGoCardlessPaymentStateUpdater).updateState(new GoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId1, goCardlessOrganisationId1));
+        verify(mockedGoCardlessPaymentStateUpdater).updateState(new GoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId2, goCardlessOrganisationId1));
+    }
+
+    @Test
+    public void shouldNotBreakHorriblyIfAMandateEventIsNotLinkedToAMandateOrAPaymentEventIsNotLinkedToAPayment() {
+        GoCardlessEvent legitimateMandateEvent = aGoCardlessEventFixture()
+                .withResourceType(MANDATES)
+                .withLinksMandate(GoCardlessMandateId.valueOf("MD123"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("OR123"))
+                .toEntity();
+
+        GoCardlessEvent legitimatePaymentEvent = aGoCardlessEventFixture()
+                .withResourceType(PAYMENTS)
+                .withLinksPayment(GoCardlessPaymentId.valueOf("PM123"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("OR123"))
+                .toEntity();
+
+        GoCardlessEvent cursedMandateEventNotLinkedToMandate = aGoCardlessEventFixture()
+                .withResourceType(MANDATES)
+                .withLinksMandate(null)
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("OR123"))
+                .toEntity();
+
+        GoCardlessEvent cursedPaymentEventNotLinkedToPayment = aGoCardlessEventFixture()
+                .withResourceType(PAYMENTS)
+                .withLinksPayment(null)
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("OR123"))
+                .toEntity();
+
+        webhookGoCardlessService.handleEvents(List.of(
+                legitimateMandateEvent,
+                legitimatePaymentEvent,
+                cursedMandateEventNotLinkedToMandate,
+                cursedPaymentEventNotLinkedToPayment));
+
+        verify(mockedGoCardlessMandateStateUpdater).updateState(new GoCardlessMandateIdAndOrganisationId(GoCardlessMandateId.valueOf("MD123"),
+                GoCardlessOrganisationId.valueOf("OR123")));
+        verify(mockedGoCardlessPaymentStateUpdater).updateState(new GoCardlessPaymentIdAndOrganisationId(GoCardlessPaymentId.valueOf("PM123"),
+                GoCardlessOrganisationId.valueOf("OR123")));
+    }
+    
 }

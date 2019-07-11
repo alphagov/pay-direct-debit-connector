@@ -143,13 +143,15 @@ public class PaymentService {
     }
 
     private DirectDebitEvent paymentFailedFor(Payment payment) {
-        Payment updatedPayment = updateStateFor(payment, SupportedEvent.PAYMENT_FAILED);
-        return directDebitEventService.registerPaymentFailedEventFor(updatedPayment);
+        return directDebitEventService.registerPaymentFailedEventFor(payment);
     }
 
-    public DirectDebitEvent paymentPaidOutFor(Payment payment) {
-        Payment updatedPayment = updateStateFor(payment, PAID_OUT);
-        return directDebitEventService.registerPaymentPaidOutEventFor(updatedPayment);
+    public DirectDebitEvent paymentPaidOutFor(Payment payment, boolean isSandbox) {
+        if (isSandbox) {
+            Payment updatedPayment = updateStateFor(payment, PAID_OUT);
+            return directDebitEventService.registerPaymentPaidOutEventFor(updatedPayment);
+        }
+        return directDebitEventService.registerPaymentPaidOutEventFor(payment);
     }
 
     public DirectDebitEvent paymentAcknowledgedFor(Payment payment) {

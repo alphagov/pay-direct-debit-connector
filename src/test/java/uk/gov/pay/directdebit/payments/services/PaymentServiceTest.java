@@ -45,7 +45,6 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.EXPIRED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
@@ -170,7 +169,20 @@ public class PaymentServiceTest {
                 .withState(PENDING)
                 .toEntity();
 
-        service.paymentPaidOutFor(payment);
+        service.paymentPaidOutFor(payment, false);
+
+        verify(mockedDirectDebitEventService).registerPaymentPaidOutEventFor(payment);
+    }
+
+    @Test
+    public void paymentPaidOutFor_sandbox_shouldSetPaymentAsSucceeded_andRegisterAPaidOutEvent() {
+
+        Payment payment = PaymentFixture
+                .aPaymentFixture()
+                .withState(PENDING)
+                .toEntity();
+
+        service.paymentPaidOutFor(payment, true);
 
         Payment updatedPayment = fromPayment(payment).withState(SUCCESS).build();
         verify(mockedPaymentDao).updateState(updatedPayment.getId(), SUCCESS);
@@ -187,10 +199,8 @@ public class PaymentServiceTest {
 
         service.paymentFailedWithoutEmailFor(payment);
 
-        Payment updatedPayment = fromPayment(payment).withState(FAILED).build();
-        verify(mockedUserNotificationService, times(0)).sendPaymentFailedEmailFor(updatedPayment);
-        verify(mockedPaymentDao).updateState(payment.getId(), FAILED);
-        verify(mockedDirectDebitEventService).registerPaymentFailedEventFor(updatedPayment);
+        verify(mockedUserNotificationService, times(0)).sendPaymentFailedEmailFor(payment);
+        verify(mockedDirectDebitEventService).registerPaymentFailedEventFor(payment);
     }
 
     @Test
@@ -203,10 +213,7 @@ public class PaymentServiceTest {
         service.paymentFailedWithEmailFor(payment);
 
         verify(mockedUserNotificationService).sendPaymentFailedEmailFor(payment);
-
-        Payment updatedPayment = fromPayment(payment).withState(FAILED).build();
-        verify(mockedPaymentDao).updateState(updatedPayment.getId(), FAILED);
-        verify(mockedDirectDebitEventService).registerPaymentFailedEventFor(updatedPayment);
+        verify(mockedDirectDebitEventService).registerPaymentFailedEventFor(payment);
     }
 
     @Test
