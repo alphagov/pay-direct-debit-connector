@@ -136,7 +136,7 @@ public class PaymentDaoIT {
     }
 
     @Test
-    public void shouldGetAPaymentByProviderId() {
+    public void shouldGetAPaymentByProviderIdAndOrganisationId() {
         var goCardlessOrganisationId = GoCardlessOrganisationId.valueOf("orgId");
         var expectedProviderId = GoCardlessPaymentId.valueOf("aProviderId");
 
@@ -154,11 +154,12 @@ public class PaymentDaoIT {
                 .withPaymentProviderId(expectedProviderId)
                 .insert(testContext.getJdbi());
 
-        Payment payment = paymentDao.findPaymentByProviderId(GOCARDLESS, expectedProviderId, goCardlessOrganisationId).get();
+        Payment payment = paymentDao.findPaymentByProviderIdAndOrganisationId(GOCARDLESS, expectedProviderId, goCardlessOrganisationId).get();
 
         assertThat(payment.getId(), is(testPayment.getId()));
         assertThat(payment.getMandate(), is(testMandate.toEntity()));
         assertThat(payment.getExternalId(), is(testPayment.getExternalId()));
+        assertThat(payment.getProviderId().get(), is(expectedProviderId));
         assertThat(payment.getDescription(), is(testPayment.getDescription()));
         assertThat(payment.getReference(), is(testPayment.getReference()));
         assertThat(payment.getAmount(), is(AMOUNT));
@@ -185,7 +186,7 @@ public class PaymentDaoIT {
                 .withPaymentProviderId(expectedProviderId)
                 .insert(testContext.getJdbi());
 
-        Optional<Payment> payment = paymentDao.findPaymentByProviderId(GOCARDLESS, expectedProviderId, GoCardlessOrganisationId.valueOf("differentOrg"));
+        Optional<Payment> payment = paymentDao.findPaymentByProviderIdAndOrganisationId(GOCARDLESS, expectedProviderId, GoCardlessOrganisationId.valueOf("differentOrg"));
 
         assertThat(payment, is(Optional.empty()));
     }
@@ -209,11 +210,105 @@ public class PaymentDaoIT {
                 .withPaymentProviderId(expectedProviderId)
                 .insert(testContext.getJdbi());
 
-        Optional<Payment> payment = paymentDao.findPaymentByProviderId(SANDBOX, expectedProviderId, goCardlessOrganisationId);
+        Optional<Payment> payment = paymentDao.findPaymentByProviderIdAndOrganisationId(SANDBOX, expectedProviderId, goCardlessOrganisationId);
 
         assertThat(payment, is(Optional.empty()));
     }
 
+    @Test
+    public void shouldGetAPaymentByProviderIdAndNoOrganisationId() {
+        var expectedProviderId = SandboxPaymentId.valueOf("aProviderId");
+
+        testGatewayAccount = aGatewayAccountFixture()
+                .withPaymentProvider(SANDBOX)
+                .withOrganisation(null)
+                .insert(testContext.getJdbi());
+
+        testMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
+        testPayment
+                .withMandateFixture(testMandate)
+                .withPaymentProviderId(expectedProviderId)
+                .insert(testContext.getJdbi());
+
+        Payment payment = paymentDao.findPaymentByProviderId(SANDBOX, expectedProviderId).get();
+
+        assertThat(payment.getId(), is(testPayment.getId()));
+        assertThat(payment.getExternalId(), is(testPayment.getExternalId()));
+        assertThat(payment.getProviderId().get(), is(expectedProviderId));
+    }
+    
+    @Test
+    public void shouldNotGetAPaymentByProviderIdAndNoOrganisationIdIfPaymentProviderIdDoesNotMatch() {
+        var expectedProviderId = SandboxPaymentId.valueOf("aProviderId");
+
+        testGatewayAccount = aGatewayAccountFixture()
+                .withPaymentProvider(SANDBOX)
+                .withOrganisation(null)
+                .insert(testContext.getJdbi());
+
+        testMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
+        testPayment
+                .withMandateFixture(testMandate)
+                .withPaymentProviderId(expectedProviderId)
+                .insert(testContext.getJdbi());
+
+        Optional<Payment> payment = paymentDao.findPaymentByProviderId(SANDBOX, SandboxPaymentId.valueOf("differentPaymentId"));
+
+        assertThat(payment, is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldNotGetAPaymentByProviderIdAndNoOrganisationIdIfProviderDoesNotMatch() {
+        var expectedProviderId = SandboxPaymentId.valueOf("aProviderId");
+
+        testGatewayAccount = aGatewayAccountFixture()
+                .withPaymentProvider(SANDBOX)
+                .withOrganisation(null)
+                .insert(testContext.getJdbi());
+
+        testMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
+        testPayment
+                .withMandateFixture(testMandate)
+                .withPaymentProviderId(expectedProviderId)
+                .insert(testContext.getJdbi());
+
+        Optional<Payment> payment = paymentDao.findPaymentByProviderId(GOCARDLESS, expectedProviderId);
+
+        assertThat(payment, is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldNotGetAPaymentByProviderIdAndNoOrganisationIdIfOrganisationIsNotNull() {
+        var expectedProviderId = SandboxPaymentId.valueOf("aProviderId");
+
+        testGatewayAccount = aGatewayAccountFixture()
+                .withPaymentProvider(SANDBOX)
+                .withOrganisation(GoCardlessOrganisationId.valueOf("organisationId"))
+                .insert(testContext.getJdbi());
+
+        testMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(testGatewayAccount)
+                .insert(testContext.getJdbi());
+
+        testPayment
+                .withMandateFixture(testMandate)
+                .withPaymentProviderId(expectedProviderId)
+                .insert(testContext.getJdbi());
+
+        Optional<Payment> payment = paymentDao.findPaymentByProviderId(SANDBOX, expectedProviderId);
+
+        assertThat(payment, is(Optional.empty()));
+    }
+    
     @Test
     public void shouldFindAllPaymentsByPaymentStateAndProvider() {
         GatewayAccountFixture goCardlessGatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());

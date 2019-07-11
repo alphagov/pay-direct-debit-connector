@@ -5,11 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
-import uk.gov.pay.directdebit.payments.exception.PaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
+import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
@@ -23,10 +24,13 @@ import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCAR
 public class GoCardlessPaymentHandler extends GoCardlessHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessPaymentHandler.class);
 
+    private final PaymentQueryService paymentQueryService;
+    
     @Inject
-    public GoCardlessPaymentHandler(PaymentService paymentService,
+    public GoCardlessPaymentHandler(PaymentService paymentService, PaymentQueryService paymentQueryService,
                                     GoCardlessEventService goCardlessService) {
         super(paymentService, goCardlessService);
+        this.paymentQueryService = paymentQueryService;
     }
 
     /**
@@ -50,13 +54,11 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
 
     @Override
     protected Optional<DirectDebitEvent> process(GoCardlessEvent event) {
-        var goCardlessPaymentId = event.getLinksPayment()
-                .orElseThrow(() -> new GoCardlessEventHasNoPaymentIdException(event.getGoCardlessEventId()));
+        var goCardlessPaymentIdAndOrganisationId = new GoCardlessPaymentIdAndOrganisationId(
+                event.getLinksPayment().orElseThrow(() -> new GoCardlessEventHasNoPaymentIdException(event.getGoCardlessEventId())),
+                event.getLinksOrganisation());
 
-        var goCardlessOrganisationId = event.getLinksOrganisation();
-
-        Payment payment = paymentService.findPaymentByProviderId(GOCARDLESS, goCardlessPaymentId, goCardlessOrganisationId)
-                .orElseThrow(() -> new PaymentNotFoundException(GOCARDLESS, goCardlessPaymentId, goCardlessOrganisationId));
+        Payment payment = paymentQueryService.findByProviderPaymentId(GOCARDLESS, goCardlessPaymentIdAndOrganisationId);
 
         return GoCardlessPaymentAction.fromString(event.getAction())
                 .map(action -> getHandledActions().get(action))
@@ -76,9 +78,4 @@ public class GoCardlessPaymentHandler extends GoCardlessHandler {
                 .build();
     }
 
-    private boolean isValidOrganisation(Payment payment, GoCardlessEvent event) {
-        return payment.getMandate().getGatewayAccount().getOrganisation()
-                .map(organisationIdentifier -> organisationIdentifier.equals(event.getLinksOrganisation()))
-                .orElse(false);
-    }
 }

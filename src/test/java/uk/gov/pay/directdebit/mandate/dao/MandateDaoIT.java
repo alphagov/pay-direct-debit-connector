@@ -276,7 +276,7 @@ public class MandateDaoIT {
     }
     
     @Test
-    public void shouldNotFindAMandateByPaymentProviderIdAndNoOrganisationIfPaymentProviderDoesNotMatch() {
+    public void shouldNotFindAMandateByPaymentProviderIdAndNoOrganisationIfPaymentProviderIdDoesNotMatch() {
         var mandateExternalId = MandateExternalId.valueOf("expectedExternalId");
         var sandboxMandateId = SandboxMandateId.valueOf("expectedSandboxMandateId");
 
@@ -297,7 +297,28 @@ public class MandateDaoIT {
     }
 
     @Test
-    public void shouldNotFindAMandateByPaymentProviderIdAndNoOrganisationIfOrganisationDoesNotMatch() {
+    public void shouldNotFindAMandateByPaymentProviderIdAndNoOrganisationIfProviderDoesNotMatch() {
+        var mandateExternalId = MandateExternalId.valueOf("expectedExternalId");
+        var goCardlessMandateId = GoCardlessMandateId.valueOf("expectedSandboxMandateId");
+
+        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+                .withPaymentProvider(SANDBOX)
+                .withOrganisation(null)
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withExternalId(mandateExternalId)
+                .withPaymentProviderId(goCardlessMandateId)
+                .insert(testContext.getJdbi());
+
+        Optional<Mandate> mandate = mandateDao.findByPaymentProviderMandateId(GOCARDLESS, goCardlessMandateId);
+
+        assertThat(mandate, is(Optional.empty()));
+    }
+    
+    @Test
+    public void shouldNotFindAMandateByPaymentProviderIdAndNoOrganisationIdIfOrganisationIsNotNull() {
         var mandateExternalId = MandateExternalId.valueOf("expectedExternalId");
         var goCardlessMandateId = GoCardlessMandateId.valueOf("expectedSandboxMandateId");
 

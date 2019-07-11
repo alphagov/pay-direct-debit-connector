@@ -8,18 +8,18 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import uk.gov.pay.directdebit.events.model.GoCardlessOrganisationIdArgumentFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.mapper.GatewayAccountMapper;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 
 import java.util.List;
 import java.util.Optional;
 
 @RegisterRowMapper(GatewayAccountMapper.class)
 @RegisterArgumentFactory(PaymentProviderAccessTokenArgumentFactory.class)
-@RegisterArgumentFactory(PaymentProviderServiceIdArgumentFactory.class)
+@RegisterArgumentFactory(GoCardlessOrganisationIdArgumentFactory.class)
 public interface GatewayAccountDao {
     @SqlQuery("SELECT * FROM gateway_accounts p WHERE p.id = :id")
     Optional<GatewayAccount> findById(@Bind("id") Long id);
@@ -43,7 +43,7 @@ public interface GatewayAccountDao {
     @SqlUpdate("UPDATE gateway_accounts g SET access_token = :accessToken, organisation = :organisation WHERE g.external_id = :externalId")
     int updateAccessTokenAndOrganisation(@Bind("externalId") String externalId,
                                          @Bind("accessToken") PaymentProviderAccessToken accessToken,
-                                         @Bind("organisation") PaymentProviderServiceId organisation);
+                                         @Bind("organisation") GoCardlessOrganisationId organisation);
     
     @SqlQuery("SELECT EXISTS (SELECT * FROM gateway_accounts where organisation = :organisation)")
     boolean existsWithOrganisation(@Bind("organisation") GoCardlessOrganisationId organisation);

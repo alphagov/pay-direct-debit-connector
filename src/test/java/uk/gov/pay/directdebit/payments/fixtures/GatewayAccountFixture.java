@@ -9,7 +9,6 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderAccessToken;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 
 public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, GatewayAccount> {
 
@@ -20,7 +19,7 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
     private String description = RandomStringUtils.randomAlphabetic(25);
     private String analyticsId = RandomStringUtils.randomAlphanumeric(25);
     private PaymentProviderAccessToken accessToken = PaymentProviderAccessToken.of(RandomStringUtils.randomAlphabetic(25));
-    private PaymentProviderServiceId organisation = GoCardlessOrganisationId.valueOf(RandomStringUtils.randomAlphanumeric(25));
+    private GoCardlessOrganisationId organisation = GoCardlessOrganisationId.valueOf(RandomStringUtils.randomAlphanumeric(25));
 
     private GatewayAccountFixture() {
     }
@@ -59,7 +58,7 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
         return this;
     }
 
-    public GatewayAccountFixture withOrganisation(PaymentProviderServiceId organisation) {
+    public GatewayAccountFixture withOrganisation(GoCardlessOrganisationId organisation) {
         this.organisation = organisation;
         return this;
     }
@@ -92,7 +91,7 @@ public class GatewayAccountFixture implements DbFixture<GatewayAccountFixture, G
         return accessToken;
     }
 
-    public PaymentProviderServiceId getOrganisation() { return organisation; }
+    public GoCardlessOrganisationId getOrganisation() { return organisation; }
 
     @Override
     public GatewayAccountFixture insert(Jdbi jdbi) {
