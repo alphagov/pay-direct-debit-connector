@@ -22,11 +22,11 @@ public class MandateUpdateService {
     public int updateStateByPaymentProviderMandateId(PaymentProvider paymentProvider, MandateLookupKey mandateLookupKey, MandateState mandateState) {
         if (mandateLookupKey.getClass() == GoCardlessMandateIdAndOrganisationId.class) {
             var goCardlessMandateIdAndOrganisationId = (GoCardlessMandateIdAndOrganisationId) mandateLookupKey;
-            return mandateDao.updateStateByPaymentProviderMandateIdAndOrganisationId(paymentProvider, goCardlessMandateIdAndOrganisationId.getGoCardlessOrganisationId(),
+            return mandateDao.updateStateByProviderIdAndOrganisationId(paymentProvider, goCardlessMandateIdAndOrganisationId.getGoCardlessOrganisationId(),
                     goCardlessMandateIdAndOrganisationId.getGoCardlessMandateId(), mandateState);
         } else if (mandateLookupKey.getClass() == SandboxMandateId.class) {
             var paymentProviderMandateId = (PaymentProviderMandateId) mandateLookupKey;
-            return mandateDao.updateStateByPaymentProviderMandateIdAndOrganisationId(paymentProvider, paymentProviderMandateId, mandateState);
+            return mandateDao.updateStateByProviderId(paymentProvider, paymentProviderMandateId, mandateState);
         }
         throw new IllegalArgumentException("Unrecognised MandateLookupKey of type " + mandateLookupKey.getClass());
     }

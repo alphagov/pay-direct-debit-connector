@@ -108,4 +108,16 @@ public interface PaymentDao {
     @SqlQuery(joinQuery + " WHERE p.payment_provider_id = :providerId AND g.organisation IS NULL AND g.payment_provider = :provider")
     Optional<Payment> findPaymentByProviderId(@Bind("provider") PaymentProvider paymentProvider,
                                                                @Bind("providerId") PaymentProviderPaymentId providerId);
+
+    @SqlUpdate("UPDATE payments p SET state = :state FROM mandates m, gateway_accounts g WHERE p.payment_provider_id = :providerPaymentId " +
+            "AND m.id = p.mandate_id AND g.id = m.gateway_account_id AND g.organisation = :goCardlessOrganisationId AND g.payment_provider = :provider")
+    int updateStateByProviderIdAndOrganisationId(@Bind("provider") PaymentProvider paymentProvider,
+                                                               @Bind("goCardlessOrganisationId") GoCardlessOrganisationId goCardlessOrganisationId,
+                                                               @Bind("providerPaymentId") PaymentProviderPaymentId paymentProviderPaymentId,
+                                                               @Bind("state") PaymentState mandateState);
+
+    @SqlUpdate("UPDATE payments p SET state = :state FROM mandates m, gateway_accounts g WHERE p.payment_provider_id = :providerPaymentId " +
+            "AND m.id = p.mandate_id AND g.id = m.gateway_account_id AND g.organisation IS NULL AND g.payment_provider = :provider")
+    int updateStateByProviderId(@Bind("provider") PaymentProvider paymentProvider, @Bind("providerPaymentId") PaymentProviderPaymentId paymentProviderPaymentId,
+                                                               @Bind("state") PaymentState mandateState);
 }
