@@ -387,7 +387,7 @@ public class MandateDaoIT {
                 .withPaymentProviderId(GoCardlessMandateId.valueOf("Mandate ID we want"))
                 .insert(testContext.getJdbi());
 
-        int numOfUpdatedMandates = mandateDao.updateStateByPaymentProviderMandateIdAndOrganisationId(GOCARDLESS, GoCardlessOrganisationId.valueOf("Organisation ID we want"),
+        int numOfUpdatedMandates = mandateDao.updateStateByProviderIdAndOrganisationId(GOCARDLESS, GoCardlessOrganisationId.valueOf("Organisation ID we want"),
                 GoCardlessMandateId.valueOf("Mandate ID we want"), MandateState.PENDING);
 
         assertThat(numOfUpdatedMandates, is(1));
@@ -424,7 +424,7 @@ public class MandateDaoIT {
                 .withPaymentProviderId(SandboxMandateId.valueOf("Mandate ID we want"))
                 .insert(testContext.getJdbi());
 
-        int numOfUpdatedMandates = mandateDao.updateStateByPaymentProviderMandateIdAndOrganisationId(SANDBOX,
+        int numOfUpdatedMandates = mandateDao.updateStateByProviderId(SANDBOX,
                 SandboxMandateId.valueOf("Mandate ID we want"),
                 MandateState.PENDING);
 

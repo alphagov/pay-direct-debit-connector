@@ -42,7 +42,7 @@ public class MandateUpdateServiceTest {
 
     @Test
     public void updateStateByPaymentProviderMandateIdWithSandboxMandateIdReturnsUpdateCount() {
-        given(mockMandateDao.updateStateByPaymentProviderMandateIdAndOrganisationId(SANDBOX, SANDBOX_MANDATE_ID, PENDING)).willReturn(1);
+        given(mockMandateDao.updateStateByProviderId(SANDBOX, SANDBOX_MANDATE_ID, PENDING)).willReturn(1);
 
         int updated = mandateUpdateService.updateStateByPaymentProviderMandateId(SANDBOX, SANDBOX_MANDATE_ID, PENDING);
 
@@ -53,7 +53,8 @@ public class MandateUpdateServiceTest {
 
     @Test
     public void updateStateByPaymentProviderMandateIdWithGoCardlessMandateIdAndOrganisationIdReturnsUpdateCount() {
-        given(mockMandateDao.updateStateByPaymentProviderMandateIdAndOrganisationId(GOCARDLESS, GOCARDLESS_ORGANISATION_ID, GOCARDLESS_MANDATE_ID, PENDING)).willReturn(1);
+        given(mockMandateDao.updateStateByProviderIdAndOrganisationId(GOCARDLESS, GOCARDLESS_ORGANISATION_ID, GOCARDLESS_MANDATE_ID,
+                PENDING)).willReturn(1);
 
         int updated = mandateUpdateService.updateStateByPaymentProviderMandateId(GOCARDLESS, GOCARDLESS_MANDATE_ID_AND_ORGANISATION_ID, PENDING);
 
