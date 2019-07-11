@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProviderServiceId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
@@ -17,7 +16,6 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
-import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -112,17 +110,6 @@ public class PaymentService {
 
     public List<Payment> findAllPaymentsBySetOfStatesAndCreationTime(Set<PaymentState> states, ZonedDateTime creationTime) {
         return paymentDao.findAllPaymentsBySetOfStatesAndCreationTime(states, creationTime);
-    }
-
-    public Payment findPayment(Long paymentId) {
-        return paymentDao
-                .findById(paymentId)
-                .orElseThrow(() -> new ChargeNotFoundException("payment id" + paymentId.toString()));
-    }
-
-    public Optional<Payment> findPaymentByProviderId(PaymentProvider paymentProvider, PaymentProviderPaymentId providerId,
-                                                     PaymentProviderServiceId paymentProviderServiceId) {
-        return paymentDao.findPaymentByProviderId(paymentProvider, providerId, paymentProviderServiceId);
     }
 
     // todo we might want to split this service in query / state update like mandate

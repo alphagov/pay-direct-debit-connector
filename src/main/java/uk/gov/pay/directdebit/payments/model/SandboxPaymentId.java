@@ -3,7 +3,7 @@ package uk.gov.pay.directdebit.payments.model;
 /**
  * The ID of the payment used by Sandbox provider
  */
-public class SandboxPaymentId extends PaymentProviderPaymentId {
+public class SandboxPaymentId extends PaymentProviderPaymentId implements PaymentLookupKey {
 
     private SandboxPaymentId(String sandboxPaymentId) {
         super(sandboxPaymentId);

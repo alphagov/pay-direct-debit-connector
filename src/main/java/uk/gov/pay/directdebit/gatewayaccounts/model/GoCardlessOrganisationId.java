@@ -1,5 +1,7 @@
 package uk.gov.pay.directdebit.gatewayaccounts.model;
 
+import uk.gov.pay.commons.model.WrappedStringValue;
+
 /**
  * An ID that GoCardless assign to a GoCardless account belonging to a
  * service that is connected to our GoCardless partner app e.g. "OR123"
@@ -9,7 +11,7 @@ package uk.gov.pay.directdebit.gatewayaccounts.model;
  * <br>
  * {@code "organisation"} or {@code "organisation_id"} in GoCardless JSON
  */
-public class GoCardlessOrganisationId extends PaymentProviderServiceId {
+public class GoCardlessOrganisationId extends WrappedStringValue {
 
     private GoCardlessOrganisationId(String goCardlessOrganisationId) {
         super(goCardlessOrganisationId);

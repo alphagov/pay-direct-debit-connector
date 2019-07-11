@@ -29,10 +29,10 @@ public class GatewayAccount {
     private String description;
     private String analyticsId;
     private PaymentProviderAccessToken accessToken;
-    private PaymentProviderServiceId organisation;
+    private GoCardlessOrganisationId organisation;
 
     public GatewayAccount(Long id, String externalId, PaymentProvider paymentProvider, Type type, String description, String analyticsId,
-                          PaymentProviderAccessToken accessToken, PaymentProviderServiceId organisation) {
+                          PaymentProviderAccessToken accessToken, GoCardlessOrganisationId organisation) {
         this.id = id;
         this.externalId = externalId;
         this.paymentProvider = paymentProvider;
@@ -116,7 +116,7 @@ public class GatewayAccount {
         return this;
     }
 
-    public Optional<PaymentProviderServiceId> getOrganisation() {
+    public Optional<GoCardlessOrganisationId> getOrganisation() {
         return Optional.ofNullable(organisation);
     }
 

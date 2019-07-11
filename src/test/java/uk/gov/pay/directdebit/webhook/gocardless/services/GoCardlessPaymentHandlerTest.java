@@ -13,17 +13,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.payments.exception.PaymentNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
+import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
@@ -42,6 +42,8 @@ public class GoCardlessPaymentHandlerTest {
     @Mock
     private PaymentService mockedPaymentService;
     @Mock
+    private PaymentQueryService mockedPaymentQueryService;
+    @Mock
     private GoCardlessEventService mockedGoCardlessEventService;
     @Captor
     private ArgumentCaptor<GoCardlessEvent> geCaptor;
@@ -59,15 +61,16 @@ public class GoCardlessPaymentHandlerTest {
     
     @Before
     public void setUp() {
-        goCardlessPaymentHandler = new GoCardlessPaymentHandler(mockedPaymentService, mockedGoCardlessEventService);
+        goCardlessPaymentHandler = new GoCardlessPaymentHandler(mockedPaymentService, mockedPaymentQueryService, mockedGoCardlessEventService);
     }
 
     @Test
     public void handle_onPaidOutPaymentGoCardlessEvent_shouldSetAPayEventAsPaidOut() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("paid_out").toEntity());
 
-        when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(Optional.of(payment));
+        when(mockedPaymentQueryService.findByProviderPaymentId(GOCARDLESS,
+                        new GoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation())))
+                .thenReturn(payment);
         when(mockedPaymentService.paymentPaidOutFor(payment)).thenReturn(directDebitEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
@@ -84,8 +87,9 @@ public class GoCardlessPaymentHandlerTest {
     public void handle_onCreatePaymentGoCardlessEvent_shouldSetAPayEventAsPaymentAcknowledged() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("created").toEntity());
 
-        when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(Optional.of(payment));
+        when(mockedPaymentQueryService.findByProviderPaymentId(GOCARDLESS,
+                        new GoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation())))
+                .thenReturn(payment);
         when(mockedPaymentService.paymentAcknowledgedFor(payment)).thenReturn(
                 directDebitEvent);
 
@@ -104,8 +108,9 @@ public class GoCardlessPaymentHandlerTest {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("paid")
                 .withResourceType(GoCardlessResourceType.PAYOUTS).toEntity());
 
-        when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(Optional.of(payment));
+        when(mockedPaymentQueryService.findByProviderPaymentId(GOCARDLESS,
+                        new GoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation())))
+                .thenReturn(payment);
         when(mockedPaymentService.payoutPaidFor(payment)).thenReturn(directDebitEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
@@ -122,8 +127,9 @@ public class GoCardlessPaymentHandlerTest {
     public void handle_onSubmittedPaymentGoCardlessEvent_shouldSetRegisterPaymentSubmittedEvent() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("submitted").toEntity());
 
-        when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(Optional.of(payment));
+        when(mockedPaymentQueryService.findByProviderPaymentId(GOCARDLESS,
+                        new GoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation())))
+                .thenReturn(payment);
         when(mockedPaymentService.paymentSubmittedFor(payment)).thenReturn(directDebitEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
@@ -140,8 +146,9 @@ public class GoCardlessPaymentHandlerTest {
     public void handle_onConfirmedPaymentGoCardlessEvent_shouldLinkTheEventToAnExistingPaymentSubmittedPayEvent() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("confirmed").toEntity());
 
-        when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(Optional.of(payment));
+        when(mockedPaymentQueryService.findByProviderPaymentId(GOCARDLESS,
+                        new GoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation())))
+                .thenReturn(payment);
         when(mockedPaymentService.findPaymentSubmittedEventFor(payment)).thenReturn(Optional.of(
                 directDebitEvent));
 
@@ -158,8 +165,9 @@ public class GoCardlessPaymentHandlerTest {
     public void handle_onFailedPaymentGoCardlessEvent_shouldSetAPayEventAsFailed() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("failed").toEntity());
 
-        when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(Optional.of(payment));
+        when(mockedPaymentQueryService.findByProviderPaymentId(GOCARDLESS,
+                        new GoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation())))
+                .thenReturn(payment);
         when(mockedPaymentService.paymentFailedWithEmailFor(payment)).thenReturn(
                 directDebitEvent);
 
@@ -177,8 +185,9 @@ public class GoCardlessPaymentHandlerTest {
     public void handle_onPayoutPaidGoCardlessEvent_shouldLinkTheEventToAnExistingPaymentPaidOutPayEvent() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("paid").toEntity());
 
-        when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(Optional.of(payment));
+        when(mockedPaymentQueryService.findByProviderPaymentId(GOCARDLESS,
+                        new GoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation())))
+                .thenReturn(payment);
         when(mockedPaymentService.payoutPaidFor(payment)).thenReturn(directDebitEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
@@ -197,8 +206,9 @@ public class GoCardlessPaymentHandlerTest {
                 .withAction("paid")
                 .toEntity());
 
-        when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(Optional.of(payment));
+        when(mockedPaymentQueryService.findByProviderPaymentId(GOCARDLESS,
+                        new GoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation())))
+                .thenReturn(payment);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
         verify(mockedGoCardlessEventService, never()).storeEvent(goCardlessEvent);
@@ -216,19 +226,4 @@ public class GoCardlessPaymentHandlerTest {
         goCardlessPaymentHandler.handle(goCardlessEvent);
     }
 
-    @Test
-    public void handle_onCreatePaymentGoCardlessEvent_shouldThrowPaymentNotFoundException() {
-        GoCardlessPaymentId expectedPaymentProvider = GoCardlessPaymentId.valueOf("expected");
-        GoCardlessEvent goCardlessEvent = goCardlessEventFixture
-                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("does_not_exist"))
-                .withAction("created")
-                .withLinksPayment(expectedPaymentProvider)
-                .toEntity();
-        
-        when(mockedPaymentService.findPaymentByProviderId(GOCARDLESS, expectedPaymentProvider, goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(Optional.empty());
-
-        thrown.expect(PaymentNotFoundException.class);
-        goCardlessPaymentHandler.handle(goCardlessEvent);
-    }
 }

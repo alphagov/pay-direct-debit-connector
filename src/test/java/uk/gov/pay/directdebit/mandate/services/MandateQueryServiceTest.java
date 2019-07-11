@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
+import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateLookupKey;
@@ -46,7 +47,7 @@ public class MandateQueryServiceTest {
     }
 
     @Test
-    public void findByPaymentProviderMandateIdWithSandboxMandateIdReturnsUpdateCount() {
+    public void findByPaymentProviderMandateIdWithSandboxMandateIdReturnsMandate() {
         given(mockMandateDao.findByPaymentProviderMandateId(SANDBOX, SANDBOX_MANDATE_ID)).willReturn(Optional.of(mockMandate));
 
         Mandate result = mandateQueryService.findByPaymentProviderMandateId(SANDBOX, SANDBOX_MANDATE_ID);
@@ -56,8 +57,15 @@ public class MandateQueryServiceTest {
         verifyZeroInteractions(ignoreStubs(mockMandateDao));
     }
 
+    @Test(expected = MandateNotFoundException.class)
+    public void findByPaymentProviderMandateIdWithSandboxMandateIdForNonExistantMandateThrowsException() {
+        given(mockMandateDao.findByPaymentProviderMandateId(SANDBOX, SANDBOX_MANDATE_ID)).willReturn(Optional.empty());
+
+        mandateQueryService.findByPaymentProviderMandateId(SANDBOX, SANDBOX_MANDATE_ID);
+    }
+
     @Test
-    public void findByPaymentProviderMandateIdWithGoCardlessMandateIdAndOrganisationIdReturnsUpdateCount() {
+    public void findByPaymentProviderMandateIdWithGoCardlessMandateIdAndOrganisationIdReturnsMandate() {
         given(mockMandateDao.findByPaymentProviderMandateIdAndOrganisation(GOCARDLESS, GOCARDLESS_MANDATE_ID, GOCARDLESS_ORGANISATION_ID))
                 .willReturn(Optional.of(mockMandate));
 
@@ -66,6 +74,14 @@ public class MandateQueryServiceTest {
         assertThat(result, is(mockMandate));
         
         verifyZeroInteractions(ignoreStubs(mockMandateDao));
+    }
+
+    @Test(expected = MandateNotFoundException.class)
+    public void findByPaymentProviderMandateIdWithGoCardlessMandateIdAndOrganisationIdForNonExistentMandateThrowsException() {
+        given(mockMandateDao.findByPaymentProviderMandateIdAndOrganisation(GOCARDLESS, GOCARDLESS_MANDATE_ID, GOCARDLESS_ORGANISATION_ID))
+                .willReturn(Optional.empty());
+
+        mandateQueryService.findByPaymentProviderMandateId(GOCARDLESS, GOCARDLESS_MANDATE_ID_AND_ORGANISATION_ID);
     }
 
     @Test(expected = IllegalArgumentException.class)
