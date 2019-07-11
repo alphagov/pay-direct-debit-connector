@@ -8,6 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
+import uk.gov.pay.directdebit.mandate.dao.MandateSearchDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateLookupKey;
@@ -37,13 +38,16 @@ public class MandateQueryServiceTest {
     private MandateDao mockMandateDao;
     
     @Mock
+    private MandateSearchDao mockMandateSearchDao;
+    
+    @Mock
     private Mandate mockMandate;
 
     private MandateQueryService mandateQueryService;
 
     @Before
     public void setUp() {
-        mandateQueryService = new MandateQueryService(mockMandateDao);
+        mandateQueryService = new MandateQueryService(mockMandateDao, mockMandateSearchDao);
     }
 
     @Test

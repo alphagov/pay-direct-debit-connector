@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -47,15 +48,29 @@ public class MandateSearchParams implements SearchParams {
     private String toDate;
 
     @QueryParam(PAGE)
+    @DefaultValue("1")
     @Min(value = 1, message = "Invalid attribute value: page. Must be greater than or equal to {value}")
     private Integer page = 1;
 
     @QueryParam(DISPLAY_SIZE)
+    @DefaultValue("500")
     @Min(value = 1, message = "Invalid attribute value: display_size. Must be greater than or equal to {value}")
     @Max(value = 500, message = "Invalid attribute value: display_size. Must be less than or equal to {value}")
     private Integer displaySize = 500;
-
-    private String gatewayAccountExternalId;
+    
+    public MandateSearchParams() { };
+    
+    private MandateSearchParams(MandateSearchParamsBuilder builder) {
+        this.serviceReference = builder.serviceReference; 
+        this.mandateState = builder.mandateState;
+        this.mandateBankStatementReference = builder.mandateBankStatementReference;
+        this.name = builder.name;
+        this.email = builder.email;
+        this.fromDate = builder.fromDate;
+        this.toDate = builder.toDate;
+        this.page = builder.page;
+        this.displaySize = builder.displaySize;
+    }
 
     public Optional<String> getServiceReference() {
         return Optional.ofNullable(serviceReference);
@@ -92,12 +107,7 @@ public class MandateSearchParams implements SearchParams {
     public Integer getDisplaySize() {
         return displaySize;
     }
-
-    @Override
-    public String getGatewayExternalId() {
-        return this.gatewayAccountExternalId;
-    }
-
+    
     @Override
     public String buildQueryParamString() {
         var query = new StringBuilder();
@@ -143,11 +153,7 @@ public class MandateSearchParams implements SearchParams {
     private String createQueryParamFor(String name, String value) {
         return name + "=" + value;
     }
-
-    public String getGatewayAccountExternalId() {
-        return gatewayAccountExternalId;
-    }
-
+    
     public static final class MandateSearchParamsBuilder {
         private String serviceReference;
         private MandateState mandateState;
@@ -158,14 +164,9 @@ public class MandateSearchParams implements SearchParams {
         private String toDate;
         private Integer page = 1;
         private Integer displaySize = 500;
-        private String gatewayAccountExternalId;
-
-        private MandateSearchParamsBuilder(String gatewayAccountExternalId) {
-            this.gatewayAccountExternalId = gatewayAccountExternalId;
-        }
-
-        public static MandateSearchParamsBuilder aMandateSearchParams(String gatewayAccountExternalId) {
-            return new MandateSearchParamsBuilder(gatewayAccountExternalId);
+        
+        public static MandateSearchParamsBuilder aMandateSearchParams() {
+            return new MandateSearchParamsBuilder();
         }
 
         public MandateSearchParamsBuilder withServiceReference(String serviceReference) {
@@ -213,24 +214,8 @@ public class MandateSearchParams implements SearchParams {
             return this;
         }
 
-        public MandateSearchParamsBuilder withGatewayAccountExternalId(String gatewayAccountExternalId) {
-            this.gatewayAccountExternalId = gatewayAccountExternalId;
-            return this;
-        }
-
         public MandateSearchParams build() {
-            MandateSearchParams mandateSearchParams = new MandateSearchParams();
-            mandateSearchParams.mandateBankStatementReference = this.mandateBankStatementReference;
-            mandateSearchParams.page = this.page;
-            mandateSearchParams.serviceReference = this.serviceReference;
-            mandateSearchParams.displaySize = this.displaySize;
-            mandateSearchParams.toDate = this.toDate;
-            mandateSearchParams.name = this.name;
-            mandateSearchParams.gatewayAccountExternalId = this.gatewayAccountExternalId;
-            mandateSearchParams.email = this.email;
-            mandateSearchParams.fromDate = this.fromDate;
-            mandateSearchParams.mandateState = this.mandateState;
-            return mandateSearchParams;
+            return new MandateSearchParams(this);
         }
     }
 }

@@ -66,88 +66,88 @@ public class MandateSearchDaoIT {
     @Test
     @Parameters({"REF1234", "ref1234", "f12"})
     public void searchByReference(String searchString) {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID).withServiceReference(searchString).build();
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        var searchParams = aMandateSearchParams().withServiceReference(searchString).build();
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
-        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate1.toEntity());
     }
     
     @Test
     public void searchByState() {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID).withMandateState(FAILED).build();
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        var searchParams = aMandateSearchParams().withMandateState(FAILED).build();
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
-        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate2.toEntity());
     }
     
     @Test
     @Parameters({"STATEMENT123", "statement123", "ment"})
     public void searchByBankStatementReference(String searchString) {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID)
+        var searchParams = aMandateSearchParams()
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(searchString)).build();
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
-        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate2.toEntity());
     }
     
     @Test
     @Parameters({"joe.bloggs@example.com", "joe.bloggs@EXAMPLE.com", "joe.bloggs"})
     public void searchByEmail(String searchString) {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID).withEmail(searchString).build();
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        var searchParams = aMandateSearchParams().withEmail(searchString).build();
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
-        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate1.toEntity());
     }
 
     @Test
     @Parameters({"JOe Bloggs", "joe bloggs", "bloggs"})
     public void searchByName(String searchString) {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID).withName(searchString).build();
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        var searchParams = aMandateSearchParams().withName(searchString).build();
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
-        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate1.toEntity());
     }
     
     @Test
     public void searchByFromDate() {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID)
+        var searchParams = aMandateSearchParams()
                 .withFromDate(String.valueOf(now().minusHours(1)))
                 .build();
-        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate1.toEntity());
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
 
-        searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID)
+        searchParams = aMandateSearchParams()
                 .withFromDate(String.valueOf(now().minusHours(7))).build();
-        assertThat(mandateSearchDao.search(searchParams)).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
-        total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
+        total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(2);
     }
     
     @Test
     public void searchByToDate() {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID)
+        var searchParams = aMandateSearchParams()
                 .withToDate(String.valueOf(now().minusHours(1))).build();
-        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate2.toEntity());
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
 
-        searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID)
+        searchParams = aMandateSearchParams()
                 .withToDate(String.valueOf(now())).build();
-        assertThat(mandateSearchDao.search(searchParams)).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
-        total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
+        total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(2);
     }
     
     @Test
     public void searchByDateRange() {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID)
+        var searchParams = aMandateSearchParams()
                 .withToDate(String.valueOf(now().minusHours(1)))
                 .withFromDate(String.valueOf(now().minusHours(7)))
                 .build();
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
-        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate2.toEntity());
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate2.toEntity());
     }
     
     @Test
@@ -155,40 +155,40 @@ public class MandateSearchDaoIT {
         LongStream.rangeClosed(101, 105).forEach(n -> {
             aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withId(n).insert(testContext.getJdbi());
         });
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID)
+        var searchParams = aMandateSearchParams()
                 .withFromDate(String.valueOf(now().minusHours(1)))
                 .withPage(3)
                 .withDisplaySize(2)
                 .build();
-        List<Mandate> results = mandateSearchDao.search(searchParams);
+        List<Mandate> results = mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(results).hasSize(2);
         assertThat(results.get(0).getId()).isEqualTo(102L);
         assertThat(results.get(1).getId()).isEqualTo(101L);
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(6);
     }
     
     @Test
     public void searchByDisplaySize() {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID)
+        var searchParams = aMandateSearchParams()
                 .withToDate(String.valueOf(now()))
                 .withDisplaySize(1)
                 .build();
-        assertThat(mandateSearchDao.search(searchParams)).hasSize(1);
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).hasSize(1);
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(2);
     }
     
     @Test
     public void searchByMultipleParams() {
-        var searchParams = aMandateSearchParams(GATEWAY_ACCOUNT_ID)
+        var searchParams = aMandateSearchParams()
                 .withServiceReference("REF1234")
                 .withEmail("joe.bloggs@example.com")
                 .withName("bloggs")
                 .withFromDate(String.valueOf(now().minusHours(1)))
                 .build();
-        assertThat(mandateSearchDao.search(searchParams)).containsExactly(mandate1.toEntity());
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams);
+        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate1.toEntity());
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
     }
 }

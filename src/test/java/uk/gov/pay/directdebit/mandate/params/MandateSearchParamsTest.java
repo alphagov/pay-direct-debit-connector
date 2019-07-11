@@ -27,7 +27,7 @@ public class MandateSearchParamsTest {
 
     @Test
     public void shouldCreateQueryWithAllParams() {
-        var mandateSearchParams = aMandateSearchParams(gatewayAccountExternalId)
+        var mandateSearchParams = aMandateSearchParams()
                 .withFromDate(fromDate)
                 .withToDate(toDate)
                 .withDisplaySize(displaySize)
@@ -54,7 +54,7 @@ public class MandateSearchParamsTest {
 
     @Test
     public void shouldCreateQueryWithNoParams() {
-        var mandateSearchParams = aMandateSearchParams(gatewayAccountExternalId).build();
+        var mandateSearchParams = aMandateSearchParams().build();
 
         String expectedQuery = "page=1&display_size=500";
 

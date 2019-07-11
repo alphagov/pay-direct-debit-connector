@@ -3,8 +3,8 @@ package uk.gov.pay.directdebit.mandate.resources;
 import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.common.model.SearchResponse;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.gatewayaccounts.services.GatewayAccountService;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
@@ -13,7 +13,9 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.params.MandateSearchParams;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
+import uk.gov.pay.directdebit.mandate.services.MandateQueryService.MandateSearchResults;
 import uk.gov.pay.directdebit.mandate.services.MandateService;
+import uk.gov.pay.directdebit.payments.model.LinksForSearchResult;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -29,6 +31,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.created;
@@ -52,9 +55,26 @@ public class MandateResource {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @Timed
-    public List<MandateResponse> searchMandates(@PathParam("accountId") GatewayAccount gatewayAccount,
-                                                @Valid @BeanParam MandateSearchParams mandateSearchParams) {
-        return List.of();
+    public SearchResponse<MandateResponse> searchMandates(@PathParam("accountId") GatewayAccount gatewayAccount,
+                                                          @Valid @BeanParam MandateSearchParams mandateSearchParams,
+                                                          @Context UriInfo uriInfo) {
+
+        MandateSearchResults results = mandateQueryService.search(mandateSearchParams, gatewayAccount.getExternalId());
+        List<MandateResponse> mandateResponses = results.getMandatesForRequestedPage()
+                .stream()
+                .map(mandate -> mandateService.populateGetMandateResponse(mandate, uriInfo))
+                .collect(Collectors.toList());
+
+        LinksForSearchResult linksForSearchResult =
+                new LinksForSearchResult(mandateSearchParams, uriInfo, results.getTotalMatchingMandates(), gatewayAccount.getExternalId());
+
+        return new SearchResponse<>(
+                gatewayAccount.getExternalId(),
+                results.getTotalMatchingMandates(),
+                mandateSearchParams.getPage(),
+                mandateResponses,
+                linksForSearchResult
+        );
     }
     
     @POST

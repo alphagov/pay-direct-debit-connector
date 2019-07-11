@@ -12,14 +12,21 @@ import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
 import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
@@ -65,8 +72,81 @@ public class MandateSearchResourceIT {
     }
     
     @Test
-    public void searchSuccessfully() {
+    public void shouldFindOneMandateUsingAllParams() {
         
+        var matchingMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withId(100L)
+                .withServiceReference("expectedReference")
+                .withExternalId(MandateExternalId.valueOf("expectedExternalId"))
+                .withMandateBankStatementReference(MandateBankStatementReference.valueOf("bankRef"))
+                .withState(MandateState.PENDING)
+                .withCreatedDate(ZonedDateTime.now().minusDays(2))
+                .insert(testContext.getJdbi())
+                .toEntity();
+
+        var payerFixture = PayerFixture.aPayerFixture()
+                .withMandateId(100L)
+                .withEmail("expected@example.com")
+                .withName("expectedName")
+                .insert(testContext.getJdbi());
+
+        var notMatchingMandate = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withServiceReference("should not match")
+                .insert(testContext.getJdbi());
+        
+        var params = Map.of(
+                "reference", matchingMandate.getServiceReference(),
+                "bank_statement_reference", matchingMandate.getMandateBankStatementReference().get().toString(),
+                "state", matchingMandate.getState().toString(),
+                "name", payerFixture.getName(),
+                "email", payerFixture.getEmail(),
+                "page", "1",
+                "display_size", "100",
+                "to_date", ZonedDateTime.now().minusDays(2).toString(),
+                "from_date", ZonedDateTime.now().minusDays(3).toString()
+        );
+        
+        givenSetup()
+                .queryParams(params)
+                .get(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()))
+                .then()
+                .body("total", is(1))
+                .body("count", is(1))
+                .body("page", is(1))
+                .body("results", hasSize(1))
+                .body("results[0].service_reference", is("expectedReference"))
+                .body("results[0].mandate_id", is("expectedExternalId"))
+                .statusCode(HttpStatus.SC_OK);
+    }
+
+    @Test
+    public void shouldFindTwoMandatesWithNoParams() {
+
+        var matchingMandateOne = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withId(1L)
+                .withServiceReference("matchingMandateOne")
+                .insert(testContext.getJdbi());
+
+        var matchingMandateTwo = MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withId(2L)
+                .withServiceReference("matchingMandateTwo")
+                .insert(testContext.getJdbi());
+
+        givenSetup()
+                .get(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()))
+                .then()
+                .log().body()
+                .body("total", is(2))
+                .body("count", is(2))
+                .body("page", is(1))
+                .body("results", hasSize(2))
+                .body("results[0].service_reference", is("matchingMandateTwo"))
+                .body("results[1].service_reference", is("matchingMandateOne"))
+                .statusCode(HttpStatus.SC_OK);
     }
 
     private RequestSpecification givenSetup() {

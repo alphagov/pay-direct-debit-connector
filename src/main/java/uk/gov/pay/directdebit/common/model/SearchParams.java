@@ -4,6 +4,5 @@ public interface SearchParams {
 
     Integer getPage();
     Integer getDisplaySize();
-    String getGatewayExternalId();
     String buildQueryParamString();
 }
