@@ -143,6 +143,11 @@ public class MandateService {
         List<Map<String, Object>> dataLinks = createLinks(mandate, accountExternalId, uriInfo);
         return new MandateResponse(mandate, dataLinks);
     }
+    
+    public MandateResponse populateGetMandateResponse(Mandate mandate, UriInfo uriInfo) {
+        var dataLinks = createLinks(mandate, mandate.getGatewayAccount().getExternalId(), uriInfo);
+        return new MandateResponse(mandate, dataLinks);
+    }
 
     public Mandate findByExternalId(MandateExternalId externalId) {
         return mandateDao

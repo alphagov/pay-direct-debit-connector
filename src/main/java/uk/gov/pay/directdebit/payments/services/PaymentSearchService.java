@@ -34,7 +34,7 @@ public class PaymentSearchService {
         PaymentViewSearchParams validatedSearchParams = paymentViewValidator.validateParams(searchParams);
         Integer total = getTotal(validatedSearchParams);
         List<PaymentResponse> foundPayments = total > 0 ? getPaymentViewResultResponse(validatedSearchParams) : Collections.emptyList();
-        LinksForSearchResult linksForSearchResult = new LinksForSearchResult(validatedSearchParams, uriInfo, total);
+        LinksForSearchResult linksForSearchResult = new LinksForSearchResult(validatedSearchParams, uriInfo, total, searchParams.getGatewayExternalId());
         
         return new SearchResponse<PaymentResponse>(validatedSearchParams.getGatewayExternalId(),
                 total,

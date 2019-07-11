@@ -39,7 +39,7 @@ public class LinksForSearchResultTest {
                 .withPage(1)
                 .withDisplaySize(500)
                 .build();
-        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120);
+        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120, gatewayAccountExternalId);
         assertThat(builder.getPrevLink(), is(nullValue()));
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
         assertThat(builder.getLastLink().getHref().contains("?page=1&display_size=500"), is(true));
@@ -53,7 +53,7 @@ public class LinksForSearchResultTest {
                 .withPage(777)
                 .withDisplaySize(500)
                 .build();
-        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120);
+        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120, gatewayAccountExternalId);
         assertThat(builder.getPrevLink().getHref().contains("?page=1&display_size=500"), is(true));
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=500"), is(true));
         assertThat(builder.getLastLink().getHref().contains("?page=1&display_size=500"), is(true));
@@ -66,7 +66,7 @@ public class LinksForSearchResultTest {
                 .withPage(2)
                 .withDisplaySize(50)
                 .build();
-        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120);
+        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120, gatewayAccountExternalId);
         assertThat(builder.getPrevLink().getHref().contains("?page=1&display_size=50"), is(true));
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=50"), is(true));
         assertThat(builder.getLastLink().getHref().contains("?page=3&display_size=50"), is(true));
@@ -80,7 +80,7 @@ public class LinksForSearchResultTest {
                 .withPage(3)
                 .withDisplaySize(10)
                 .build();
-        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120);
+        LinksForSearchResult builder = new LinksForSearchResult(searchParams, mockedUriInfo, 120, gatewayAccountExternalId);
         assertThat(builder.getFirstLink().getHref().contains("?page=1&display_size=10"), is(true));
         assertThat(builder.getLastLink().getHref().contains("?page=12&display_size=10"), is(true));
         assertThat(builder.getPrevLink().getHref().contains("?page=2&display_size=10"), is(true));

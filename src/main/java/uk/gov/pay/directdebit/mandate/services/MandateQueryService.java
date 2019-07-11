@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.mandate.services;
 
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
+import uk.gov.pay.directdebit.mandate.dao.MandateSearchDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateLookupKey;

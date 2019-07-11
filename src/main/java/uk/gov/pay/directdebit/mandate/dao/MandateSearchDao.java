@@ -11,18 +11,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class MandateSearchDao {
+public class MandateSearchDao {
     
     private final Jdbi jdbi;
 
     @Inject
-    MandateSearchDao(Jdbi jdbi) {
+    public MandateSearchDao(Jdbi jdbi) {
         this.jdbi = jdbi;
     }
 
-    List<Mandate> search(MandateSearchParams mandateSearchParams) {
+    public List<Mandate> search(MandateSearchParams mandateSearchParams, String gatewayAccountExternalId) {
         return jdbi.withHandle(handle -> {
-            var sqlQueryAndParameters = createSqlQuery(mandateSearchParams, SearchMode.SELECT);
+            var sqlQueryAndParameters = createSqlQuery(mandateSearchParams, gatewayAccountExternalId, SearchMode.SELECT);
 
             Query query = handle.createQuery(sqlQueryAndParameters.query);
             sqlQueryAndParameters.parameters.forEach(query::bind);
@@ -30,9 +30,9 @@ class MandateSearchDao {
         });
     }
 
-    int countTotalMatchingMandates(MandateSearchParams mandateSearchParams) {
+    public int countTotalMatchingMandates(MandateSearchParams mandateSearchParams, String gatewayAccountExternalId) {
         return jdbi.withHandle(handle -> {
-            var sqlQueryAndParameters = createSqlQuery(mandateSearchParams, SearchMode.COUNT);
+            var sqlQueryAndParameters = createSqlQuery(mandateSearchParams, gatewayAccountExternalId, SearchMode.COUNT);
             
             Query query = handle.createQuery(sqlQueryAndParameters.query);
             sqlQueryAndParameters.parameters.forEach(query::bind);
@@ -40,7 +40,7 @@ class MandateSearchDao {
         });
     }
 
-    private SqlStatementAndParameters createSqlQuery(MandateSearchParams params, SearchMode searchMode) {
+    private SqlStatementAndParameters createSqlQuery(MandateSearchParams params, String gatewayAccountExternalId, SearchMode searchMode) {
         var sql = new StringBuilder(2048);
         if (searchMode.equals(SearchMode.COUNT)) {
             sql.append("SELECT COUNT(*) ");
@@ -82,7 +82,7 @@ class MandateSearchDao {
         Map<String, Object> sqlParams = new HashMap<>();
         
         sql.append(" WHERE g.external_id = :gatewayAccountExternalId");
-        sqlParams.put("gatewayAccountExternalId", params.getGatewayAccountExternalId());
+        sqlParams.put("gatewayAccountExternalId", gatewayAccountExternalId);
         
         params.getServiceReference().filter(s -> !s.isBlank()).ifPresent(serviceReference -> {
             sql.append(" AND m.service_reference ILIKE :serviceReference");

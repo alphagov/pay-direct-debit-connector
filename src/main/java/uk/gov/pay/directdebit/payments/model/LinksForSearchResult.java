@@ -20,6 +20,7 @@ public class LinksForSearchResult {
     private final Integer pageNumberForSelfLink;
     private final Integer lastPageNumber;
     private final Integer previousPageNumber;
+    private final String gatewayAccountExternalId;
 
     @JsonProperty("self")
     private PaginationLink selfLink;
@@ -32,7 +33,7 @@ public class LinksForSearchResult {
     @JsonProperty("next_page")
     private PaginationLink nextLink;
 
-    public LinksForSearchResult(SearchParams searchParams, UriInfo uriInfo, Integer totalCount) {
+    public LinksForSearchResult(SearchParams searchParams, UriInfo uriInfo, Integer totalCount, String gatewayAccountExternalId) {
         this.uriInfo = uriInfo;
         this.totalCount = totalCount;
         this.searchParams = searchParams;
@@ -40,6 +41,7 @@ public class LinksForSearchResult {
         this.pageNumberForSelfLink = searchParams.getPage();
         this.lastPageNumber = calculateLastPageNumber();
         this.previousPageNumber = calculatePreviousPageNumber();
+        this.gatewayAccountExternalId = gatewayAccountExternalId;
         buildLinks();
     }
 
@@ -95,6 +97,6 @@ public class LinksForSearchResult {
         return uriInfo.getBaseUriBuilder()
                 .path(uriInfo.getPath())
                 .replaceQuery(params)
-                .build(searchParams.getGatewayExternalId());
+                .build(gatewayAccountExternalId);
     }
 }
