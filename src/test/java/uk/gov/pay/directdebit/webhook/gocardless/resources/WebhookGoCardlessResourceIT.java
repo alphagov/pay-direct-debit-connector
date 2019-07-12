@@ -173,7 +173,7 @@ public class WebhookGoCardlessResourceIT {
     }
 
     @Test
-    public void handleWebhook_whenAMandateFailedWebhookArrives_shouldInsertGoCardlessEventsUpdatePaymentToFailedAndReturn200() {
+    public void handleWebhook_whenAMandateFailedWebhookArrives_shouldInsertGoCardlessEventsUpdateMandateToFailedAndReturn200() {
 
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
@@ -181,7 +181,7 @@ public class WebhookGoCardlessResourceIT {
                 .withPaymentProviderId(GoCardlessMandateId.valueOf("MD00008Q30R2BR"))
                 .insert(testContext.getJdbi());
 
-        PaymentFixture paymentFixture = aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withPaymentProviderId(GoCardlessPaymentId.valueOf("PM00008Q30R2BR"))
                 .withState(PaymentState.PENDING)
@@ -231,8 +231,6 @@ public class WebhookGoCardlessResourceIT {
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         MatcherAssert.assertThat(mandate.get("state"), is("FAILED"));
-
-        Map<String, Object> transaction = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        MatcherAssert.assertThat(transaction.get("state"), is("FAILED"));
     }
+
 }
