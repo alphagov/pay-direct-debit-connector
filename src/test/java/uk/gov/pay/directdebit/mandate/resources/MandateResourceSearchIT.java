@@ -99,7 +99,7 @@ public class MandateResourceSearchIT {
         var params = Map.of(
                 "reference", matchingMandate.getServiceReference(),
                 "bank_statement_reference", matchingMandate.getMandateBankStatementReference().get().toString(),
-                "state", matchingMandate.getState().toString(),
+                "state", matchingMandate.getState().toExternal().getState(),
                 "name", payerFixture.getName(),
                 "email", payerFixture.getEmail(),
                 "page", "1",

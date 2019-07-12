@@ -10,7 +10,10 @@ import javax.validation.constraints.Min;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MandateSearchParams implements SearchParams {
 
@@ -28,7 +31,7 @@ public class MandateSearchParams implements SearchParams {
     private String serviceReference;
 
     @QueryParam(STATE)
-    private MandateState mandateState;
+    private String externalMandateState;
 
     @QueryParam(BANK_STATEMENT_REFERENCE)
     private MandateBankStatementReference mandateBankStatementReference;
@@ -62,7 +65,7 @@ public class MandateSearchParams implements SearchParams {
     
     private MandateSearchParams(MandateSearchParamsBuilder builder) {
         this.serviceReference = builder.serviceReference; 
-        this.mandateState = builder.mandateState;
+        this.externalMandateState = builder.externalMandateState;
         this.mandateBankStatementReference = builder.mandateBankStatementReference;
         this.name = builder.name;
         this.email = builder.email;
@@ -76,8 +79,8 @@ public class MandateSearchParams implements SearchParams {
         return Optional.ofNullable(serviceReference);
     }
 
-    public Optional<MandateState> getMandateState() {
-        return Optional.ofNullable(mandateState);
+    public Optional<String> getExternalMandateState() {
+        return Optional.ofNullable(externalMandateState);
     }
 
     public Optional<MandateBankStatementReference> getMandateBankStatementReference() {
@@ -107,7 +110,13 @@ public class MandateSearchParams implements SearchParams {
     public Integer getDisplaySize() {
         return displaySize;
     }
-    
+
+    public List<MandateState> getInternalStates() {
+        return Arrays.stream(MandateState.values())
+                .filter(state -> state.toExternal().getState().equals(this.externalMandateState))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
     @Override
     public String buildQueryParamString() {
         var query = new StringBuilder();
@@ -119,8 +128,8 @@ public class MandateSearchParams implements SearchParams {
             query.append(appendQueryParam(REFERENCE, serviceReference));
         }
 
-        if (mandateState != null) {
-            query.append(appendQueryParam(STATE, mandateState.toString()));
+        if (externalMandateState != null) {
+            query.append(appendQueryParam(STATE, externalMandateState));
         }
 
         if (mandateBankStatementReference != null) {
@@ -156,7 +165,7 @@ public class MandateSearchParams implements SearchParams {
     
     public static final class MandateSearchParamsBuilder {
         private String serviceReference;
-        private MandateState mandateState;
+        private String externalMandateState;
         private MandateBankStatementReference mandateBankStatementReference;
         private String name;
         private String email;
@@ -174,8 +183,8 @@ public class MandateSearchParams implements SearchParams {
             return this;
         }
 
-        public MandateSearchParamsBuilder withMandateState(MandateState mandateState) {
-            this.mandateState = mandateState;
+        public MandateSearchParamsBuilder withExternalMandateState(String externalMandateState) {
+            this.externalMandateState = externalMandateState;
             return this;
         }
 
