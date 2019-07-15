@@ -26,6 +26,8 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     private MandateBankStatementReference mandateReference = MandateBankStatementReference.valueOf(RandomStringUtils.randomAlphanumeric(18));
     private String serviceReference = RandomStringUtils.randomAlphanumeric(18);
     private MandateState state = MandateState.CREATED;
+    private String stateDetails = null;
+    private String stateDetailsDescription = null;
     private String returnUrl = "http://service.test/success-page";
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private PayerFixture payerFixture = null;
@@ -97,6 +99,24 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
 
     public MandateFixture withState(MandateState state) {
         this.state = state;
+        return this;
+    }
+
+    public String getStateDetails() {
+        return stateDetails;
+    }
+
+    public MandateFixture withStateDetails(String stateDetails) {
+        this.stateDetailsDescription = stateDetails;
+        return this;
+    }
+
+    public String getStateDetailsDescription() {
+        return stateDetailsDescription;
+    }
+
+    public MandateFixture withStateDetailsDescription(String stateDetailsDescription) {
+        this.stateDetailsDescription = stateDetailsDescription;
         return this;
     }
 

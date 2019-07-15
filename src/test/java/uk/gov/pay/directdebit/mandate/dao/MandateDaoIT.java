@@ -388,12 +388,40 @@ public class MandateDaoIT {
                 .insert(testContext.getJdbi());
 
         int numOfUpdatedMandates = mandateDao.updateStateByProviderIdAndOrganisationId(GOCARDLESS, GoCardlessOrganisationId.valueOf("Organisation ID we want"),
-                GoCardlessMandateId.valueOf("Mandate ID we want"), MandateState.PENDING);
+                GoCardlessMandateId.valueOf("Mandate ID we want"), MandateState.PENDING, "state details","state details description");
 
         assertThat(numOfUpdatedMandates, is(1));
 
         Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
         assertThat(mandate.getState(), is(MandateState.PENDING));
+        assertThat(mandate.getStateDetails(), is(Optional.of("state details")));
+        assertThat(mandate.getStateDetailsDescription(), is(Optional.of("state details description")));
+    }
+
+    @Test
+    public void shouldUpdateStateByProviderIdAndOrganisationWithNoDetailsAndDescriptionAndReturnNumberOfAffectedRows() {
+        GatewayAccountFixture goCardlessGatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+                .withPaymentProvider(GOCARDLESS)
+                .withOrganisation(GoCardlessOrganisationId.valueOf("Organisation ID we want"))
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(goCardlessGatewayAccountFixture)
+                .withExternalId(MandateExternalId.valueOf("Mandate we want"))
+                .withPaymentProviderId(GoCardlessMandateId.valueOf("Mandate ID we want"))
+                .withStateDetails("state details before update")
+                .withStateDetailsDescription("state details description before update")
+                .insert(testContext.getJdbi());
+
+        int numOfUpdatedMandates = mandateDao.updateStateByProviderIdAndOrganisationId(GOCARDLESS, GoCardlessOrganisationId.valueOf("Organisation ID we want"),
+                GoCardlessMandateId.valueOf("Mandate ID we want"), MandateState.PENDING, null, null);
+
+        assertThat(numOfUpdatedMandates, is(1));
+
+        Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
+        assertThat(mandate.getState(), is(MandateState.PENDING));
+        assertThat(mandate.getStateDetails(), is(Optional.empty()));
+        assertThat(mandate.getStateDetails(), is(Optional.empty()));
     }
 
     @Test
@@ -426,12 +454,43 @@ public class MandateDaoIT {
 
         int numOfUpdatedMandates = mandateDao.updateStateByProviderId(SANDBOX,
                 SandboxMandateId.valueOf("Mandate ID we want"),
-                MandateState.PENDING);
+                MandateState.PENDING,
+                "state details",
+                "state details description");
 
         assertThat(numOfUpdatedMandates, is(1));
 
         Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
         assertThat(mandate.getState(), is(MandateState.PENDING));
+        assertThat(mandate.getStateDetails(), is(Optional.of("state details")));
+        assertThat(mandate.getStateDetailsDescription(), is(Optional.of("state details description")));
+    }
+
+    @Test
+    public void shouldUpdateStateByProviderIdAndNoOrganisationWithNoDetailsOrDescriptionAndReturnNumberOfAffectedRows() {
+        GatewayAccountFixture gatewayAccountFixtureWithNoOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+                .withPaymentProvider(SANDBOX)
+                .withOrganisation(null)
+                .insert(testContext.getJdbi());
+
+        MandateFixture.aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixtureWithNoOrganisation)
+                .withExternalId(MandateExternalId.valueOf("Mandate we want"))
+                .withPaymentProviderId(SandboxMandateId.valueOf("Mandate ID we want"))
+                .withStateDetails("state details before update")
+                .withStateDetailsDescription("state details description before update")
+                .insert(testContext.getJdbi());
+
+        int numOfUpdatedMandates = mandateDao.updateStateByProviderId(SANDBOX,
+                SandboxMandateId.valueOf("Mandate ID we want"),
+                MandateState.PENDING, null, null);
+
+        assertThat(numOfUpdatedMandates, is(1));
+
+        Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
+        assertThat(mandate.getState(), is(MandateState.PENDING));
+        assertThat(mandate.getStateDetails(), is(Optional.empty()));
+        assertThat(mandate.getStateDetailsDescription(), is(Optional.empty()));
     }
 
     @Test

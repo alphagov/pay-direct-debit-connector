@@ -25,17 +25,17 @@ public class GoCardlessMandateStateUpdater {
 
     public void updateState(GoCardlessMandateIdAndOrganisationId goCardlessMandateIdAndOrganisationId) {
         goCardlessMandateStateCalculator.calculate(goCardlessMandateIdAndOrganisationId)
-                .ifPresentOrElse(state -> {
-                    int updated = mandateUpdateService.updateStateByPaymentProviderMandateId(GOCARDLESS, goCardlessMandateIdAndOrganisationId, state);
+                .ifPresentOrElse(stateAndDetails -> {
+                    int updated = mandateUpdateService.updateStateByPaymentProviderMandateId(GOCARDLESS, goCardlessMandateIdAndOrganisationId, stateAndDetails);
                     if (updated == 1) {
                         LOGGER.info(format("Updated status of GoCardless mandate %s for organisation %s to %s", 
                                 goCardlessMandateIdAndOrganisationId.getGoCardlessMandateId(),
                                 goCardlessMandateIdAndOrganisationId.getGoCardlessOrganisationId(),
-                                state));
+                                stateAndDetails.getState()));
                     } else {
                         LOGGER.error(format("Could not update status of GoCardless mandate %s for organisation %s to %s because the mandate was not found",
                                 goCardlessMandateIdAndOrganisationId.getGoCardlessMandateId(),
-                                goCardlessMandateIdAndOrganisationId.getGoCardlessOrganisationId(), state));
+                                goCardlessMandateIdAndOrganisationId.getGoCardlessOrganisationId(), stateAndDetails.getState()));
                     }
                 }, () -> LOGGER.info(format("Asked to update the status for GoCardless mandate %s for organisation %s " +
                                 "but there appear to be no events stored that require it to be updated",
