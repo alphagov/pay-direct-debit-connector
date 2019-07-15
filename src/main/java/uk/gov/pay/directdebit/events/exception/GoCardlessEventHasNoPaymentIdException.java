@@ -8,6 +8,6 @@ import static java.lang.String.format;
 public class GoCardlessEventHasNoPaymentIdException extends NotFoundException {
 
     public GoCardlessEventHasNoPaymentIdException(GoCardlessEventId id) {
-        super(format("Event with id: %s has no linked payment", id));
+        super(format("GoCardless event with id: %s has no linked payment", id));
     }
 }
