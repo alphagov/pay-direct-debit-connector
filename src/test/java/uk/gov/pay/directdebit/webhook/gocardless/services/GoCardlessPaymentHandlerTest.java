@@ -71,11 +71,11 @@ public class GoCardlessPaymentHandlerTest {
         when(mockedPaymentQueryService.findByProviderPaymentId(GOCARDLESS,
                         new GoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation())))
                 .thenReturn(payment);
-        when(mockedPaymentService.paymentPaidOutFor(payment, false)).thenReturn(directDebitEvent);
+        when(mockedPaymentService.paymentPaidOutFor(payment)).thenReturn(directDebitEvent);
 
         goCardlessPaymentHandler.handle(goCardlessEvent);
 
-        verify(mockedPaymentService).paymentPaidOutFor(payment, false);
+        verify(mockedPaymentService).paymentPaidOutFor(payment);
         verify(goCardlessEvent).setInternalEventId(directDebitEvent.getId());
         verify(mockedGoCardlessEventService).updateInternalEventId(geCaptor.capture());
         GoCardlessEvent storedGoCardlessEvent = geCaptor.getValue();

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
@@ -146,11 +145,7 @@ public class PaymentService {
         return directDebitEventService.registerPaymentFailedEventFor(payment);
     }
 
-    public DirectDebitEvent paymentPaidOutFor(Payment payment, boolean isSandbox) {
-        if (isSandbox) {
-            Payment updatedPayment = updateStateFor(payment, PAID_OUT);
-            return directDebitEventService.registerPaymentPaidOutEventFor(updatedPayment);
-        }
+    public DirectDebitEvent paymentPaidOutFor(Payment payment) {
         return directDebitEventService.registerPaymentPaidOutEventFor(payment);
     }
 

@@ -169,24 +169,9 @@ public class PaymentServiceTest {
                 .withState(PENDING)
                 .toEntity();
 
-        service.paymentPaidOutFor(payment, false);
+        service.paymentPaidOutFor(payment);
 
         verify(mockedDirectDebitEventService).registerPaymentPaidOutEventFor(payment);
-    }
-
-    @Test
-    public void paymentPaidOutFor_sandbox_shouldSetPaymentAsSucceeded_andRegisterAPaidOutEvent() {
-
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withState(PENDING)
-                .toEntity();
-
-        service.paymentPaidOutFor(payment, true);
-
-        Payment updatedPayment = fromPayment(payment).withState(SUCCESS).build();
-        verify(mockedPaymentDao).updateState(updatedPayment.getId(), SUCCESS);
-        verify(mockedDirectDebitEventService).registerPaymentPaidOutEventFor(updatedPayment);
     }
 
     @Test
