@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.events.dao;
+package uk.gov.pay.directdebit.events.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
