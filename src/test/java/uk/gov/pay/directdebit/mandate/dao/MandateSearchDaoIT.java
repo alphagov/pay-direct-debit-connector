@@ -12,6 +12,7 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 
@@ -22,7 +23,6 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
 import static uk.gov.pay.directdebit.mandate.params.MandateSearchParams.MandateSearchParamsBuilder.aMandateSearchParams;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -43,11 +43,12 @@ public class MandateSearchDaoIT {
             .withGatewayAccountFixture(gatewayAccountFixture)
             .withServiceReference("REF1234")
             .withPayerFixture(joeBloggs)
+            .withState(MandateState.PENDING)
             .withCreatedDate(now());
     private MandateFixture mandate2 = aMandateFixture()
             .withGatewayAccountFixture(gatewayAccountFixture)
             .withMandateBankStatementReference(MandateBankStatementReference.valueOf("STATEMENT123"))
-            .withState(FAILED)
+            .withState(MandateState.SUBMITTED)
             .withCreatedDate(now().minusHours(6));
     
     private static ZonedDateTime now() {
@@ -70,14 +71,6 @@ public class MandateSearchDaoIT {
         var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
         assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate1.toEntity());
-    }
-    
-    @Test
-    public void searchByState() {
-        var searchParams = aMandateSearchParams().withMandateState(FAILED).build();
-        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
-        assertThat(total).isEqualTo(1);
-        assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate2.toEntity());
     }
     
     @Test
@@ -190,5 +183,25 @@ public class MandateSearchDaoIT {
         assertThat(mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId())).containsExactly(mandate1.toEntity());
         var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
         assertThat(total).isEqualTo(1);
+    }
+
+    @Test
+    public void searchByExternalState() {
+        var mandateWithWrongState = aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .withId(999L)
+                .withState(MandateState.EXPIRED)
+                .insert(testContext.getJdbi());
+
+        var searchParams = aMandateSearchParams()
+                .withExternalMandateState("pending")
+                .build();
+
+        var results = mandateSearchDao.search(searchParams, gatewayAccountFixture.getExternalId());
+        assertThat(results).hasSize(2);
+        assertThat(results).containsExactlyInAnyOrder(mandate1.toEntity(), mandate2.toEntity());
+
+        var total = mandateSearchDao.countTotalMatchingMandates(searchParams, gatewayAccountFixture.getExternalId());
+        assertThat(total).isEqualTo(2);
     }
 }

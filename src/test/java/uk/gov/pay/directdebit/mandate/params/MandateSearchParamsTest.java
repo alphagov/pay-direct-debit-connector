@@ -2,8 +2,8 @@ package uk.gov.pay.directdebit.mandate.params;
 
 
 import org.junit.Test;
+import uk.gov.pay.directdebit.mandate.api.ExternalMandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
-import uk.gov.pay.directdebit.mandate.model.MandateState;
 
 import java.time.LocalDate;
 
@@ -22,7 +22,7 @@ public class MandateSearchParamsTest {
         String serviceReference = "aServiceReference";
         String toDate = LocalDate.now().toString();
         String fromDate = LocalDate.now().minusDays(3).toString();
-        MandateState mandateState = MandateState.PENDING;
+        String mandateState = ExternalMandateState.EXTERNAL_CREATED.getState();
         MandateBankStatementReference mandateBankStatementReference = 
                 MandateBankStatementReference.valueOf("bankReference");
         
@@ -35,7 +35,7 @@ public class MandateSearchParamsTest {
                 .withName(name)
                 .withServiceReference(serviceReference)
                 .withMandateBankStatementReference(mandateBankStatementReference)
-                .withMandateState(mandateState)
+                .withExternalMandateState(mandateState)
                 .withPage(page)
                 .build();
 

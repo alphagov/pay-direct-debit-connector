@@ -25,19 +25,29 @@ public class MandateSearchDao {
             var sqlQueryAndParameters = createSqlQuery(mandateSearchParams, gatewayAccountExternalId, SearchMode.SELECT);
 
             Query query = handle.createQuery(sqlQueryAndParameters.query);
-            sqlQueryAndParameters.parameters.forEach(query::bind);
-            return query.map(new MandateMapper()).list();
+            return bindQuery(query, sqlQueryAndParameters).map(new MandateMapper()).list();
         });
     }
 
     public int countTotalMatchingMandates(MandateSearchParams mandateSearchParams, String gatewayAccountExternalId) {
         return jdbi.withHandle(handle -> {
             var sqlQueryAndParameters = createSqlQuery(mandateSearchParams, gatewayAccountExternalId, SearchMode.COUNT);
-            
+
             Query query = handle.createQuery(sqlQueryAndParameters.query);
-            sqlQueryAndParameters.parameters.forEach(query::bind);
-            return query.mapTo(Integer.class).findOnly();
+            return bindQuery(query, sqlQueryAndParameters).mapTo(Integer.class).findOnly();
         });
+    }
+
+    private Query bindQuery(Query query, SqlStatementAndParameters sqlStatementAndParameters) {
+        if (sqlStatementAndParameters.parameters.containsKey("states")) {
+            @SuppressWarnings("unchecked")
+            List<String> states = (List<String>) sqlStatementAndParameters.parameters.get("states");
+
+            query.bindList("states", states);
+            sqlStatementAndParameters.parameters.remove("states");
+        }
+        sqlStatementAndParameters.parameters.forEach(query::bind);
+        return query;
     }
 
     private SqlStatementAndParameters createSqlQuery(MandateSearchParams params, String gatewayAccountExternalId, SearchMode searchMode) {
@@ -104,9 +114,9 @@ public class MandateSearchDao {
             sqlParams.put("email", "%" + email + "%");
         });
 
-        params.getMandateState().ifPresent(mandateState -> {
-            sql.append(" AND m.state = :state");
-            sqlParams.put("state", mandateState);
+        params.getExternalMandateState().ifPresent(mandateState -> {
+            sql.append(" AND m.state IN (<states>)");
+            sqlParams.put("states", params.getInternalStates());
         });
 
         params.getFromDate().ifPresent(fromDate -> {
