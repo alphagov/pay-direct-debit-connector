@@ -1,13 +1,13 @@
 package uk.gov.pay.directdebit.payments.dao;
 
-import java.util.List;
-import javax.inject.Inject;
-
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.mapper.PaymentResponseMapper;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
+
+import javax.inject.Inject;
+import java.util.List;
 
 public class PaymentViewDao {
     private final Jdbi jdbi;
@@ -18,6 +18,7 @@ public class PaymentViewDao {
             "p.description AS description, " +
             "p.created_date as created_date, " +
             "p.state AS state, " +
+            "p.state_details AS state_details, " +
             "pa.name AS name, " +
             "pa.email AS email, " +
             "ga.payment_provider as payment_provider, " +

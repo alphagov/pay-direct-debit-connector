@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import uk.gov.pay.directdebit.payments.services.PaymentUpdateService;
 
@@ -15,12 +17,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SandboxPaymentStateUpdaterTest {
 
     private static final SandboxPaymentId SANDBOX_PAYMENT_ID = SandboxPaymentId.valueOf("Sandbox payment ID");
+
+    @Mock
+    private DirectDebitStateWithDetails<PaymentState> mockPaymentStateWithDetails;
 
     @Mock
     private PaymentUpdateService mockPaymentUpdateService;
@@ -37,11 +41,11 @@ public class SandboxPaymentStateUpdaterTest {
 
     @Test
     public void updatesPaymentWithStateReturnedByCalculator() {
-        given(mockSandboxPaymentStateCalculator.calculate(SANDBOX_PAYMENT_ID)).willReturn(Optional.of(SUCCESS));
+        given(mockSandboxPaymentStateCalculator.calculate(SANDBOX_PAYMENT_ID)).willReturn(Optional.of(mockPaymentStateWithDetails));
 
         mockSandboxPaymentStateUpdater.updateState(SANDBOX_PAYMENT_ID);
 
-        verify(mockPaymentUpdateService).updateStateByProviderId(SANDBOX, SANDBOX_PAYMENT_ID, SUCCESS);
+        verify(mockPaymentUpdateService).updateStateByProviderId(SANDBOX, SANDBOX_PAYMENT_ID, mockPaymentStateWithDetails);
     }
 
     @Test

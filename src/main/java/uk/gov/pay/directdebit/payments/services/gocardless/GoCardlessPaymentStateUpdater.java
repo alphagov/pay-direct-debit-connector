@@ -25,17 +25,17 @@ public class GoCardlessPaymentStateUpdater {
 
     public void updateState(GoCardlessPaymentIdAndOrganisationId goCardlessPaymentIdAndOrganisationId) {
         goCardlessPaymentStateCalculator.calculate(goCardlessPaymentIdAndOrganisationId)
-                .ifPresentOrElse(state -> {
-                    int updated = paymentUpdateService.updateStateByProviderId(GOCARDLESS, goCardlessPaymentIdAndOrganisationId, state);
+                .ifPresentOrElse(stateAndDetails -> {
+                    int updated = paymentUpdateService.updateStateByProviderId(GOCARDLESS, goCardlessPaymentIdAndOrganisationId, stateAndDetails);
                     if (updated == 1) {
                         LOGGER.info(format("Updated status of GoCardless payment %s for organisation %s to %s",
                                 goCardlessPaymentIdAndOrganisationId.getGoCardlessPaymentId(),
                                 goCardlessPaymentIdAndOrganisationId.getGoCardlessOrganisationId(),
-                                state));
+                                stateAndDetails.getState()));
                     } else {
                         LOGGER.error(format("Could not update status of GoCardless payment %s for organisation %s to %s because the payment was not found",
                                 goCardlessPaymentIdAndOrganisationId.getGoCardlessPaymentId(),
-                                goCardlessPaymentIdAndOrganisationId.getGoCardlessOrganisationId(), state));
+                                goCardlessPaymentIdAndOrganisationId.getGoCardlessOrganisationId(), stateAndDetails.getState()));
                     }
                 }, () -> LOGGER.info(format("Asked to update the status for GoCardless payment %s for organisation %s " +
                                 "but there appear to be no events stored that require it to be updated",

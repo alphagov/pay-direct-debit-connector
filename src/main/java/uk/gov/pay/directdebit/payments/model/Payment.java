@@ -13,6 +13,8 @@ public class Payment {
     private final String externalId;
     private final Long amount;
     private final PaymentState state;
+    private final String stateDetails;
+    private final String stateDetailsDescription;
     private final String description;
     private final String reference;
     private final PaymentProviderPaymentId providerId;
@@ -25,6 +27,8 @@ public class Payment {
         this.externalId = Objects.requireNonNull(builder.externalId);
         this.amount = Objects.requireNonNull(builder.amount);
         this.state = Objects.requireNonNull(builder.state);
+        this.stateDetails = builder.stateDetails;
+        this.stateDetailsDescription = builder.stateDetailsDescription;
         this.description = builder.description;
         this.reference = Objects.requireNonNull(builder.reference);
         this.createdDate = Objects.requireNonNull(builder.createdDate);
@@ -47,6 +51,14 @@ public class Payment {
 
     public PaymentState getState() {
         return state;
+    }
+
+    public Optional<String> getStateDetails() {
+        return Optional.ofNullable(stateDetails);
+    }
+
+    public Optional<String> getStateDetailsDescription() {
+        return Optional.ofNullable(stateDetailsDescription);
     }
 
     public String getDescription() {
@@ -82,6 +94,8 @@ public class Payment {
                 externalId.equals(payment.externalId) &&
                 amount.equals(payment.amount) &&
                 state == payment.state &&
+                Objects.equals(stateDetails, payment.stateDetails) &&
+                Objects.equals(stateDetailsDescription, payment.stateDetailsDescription) &&
                 Objects.equals(description, payment.description) &&
                 Objects.equals(reference, payment.reference) &&
                 Objects.equals(providerId, payment.providerId) &&
@@ -92,7 +106,8 @@ public class Payment {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, externalId, amount, state, description, reference, providerId, createdDate, mandate, chargeDate);
+        return Objects.hash(id, externalId, amount, state, stateDetails, stateDetailsDescription, description, reference, providerId, createdDate, mandate,
+                chargeDate);
     }
 
 
@@ -101,6 +116,8 @@ public class Payment {
         private String externalId;
         private Long amount;
         private PaymentState state;
+        private String stateDetails;
+        private String stateDetailsDescription;
         private String description;
         private String reference;
         private PaymentProviderPaymentId providerId;
@@ -149,6 +166,16 @@ public class Payment {
 
         public PaymentBuilder withState(PaymentState state) {
             this.state = state;
+            return this;
+        }
+
+        public PaymentBuilder withStateDetails(String stateDetails) {
+            this.stateDetails = stateDetails;
+            return this;
+        }
+
+        public PaymentBuilder withStateDetailsDescription(String stateDetailsDescription) {
+            this.stateDetailsDescription = stateDetailsDescription;
             return this;
         }
 

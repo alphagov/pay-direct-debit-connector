@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.payments.services.sandbox;
 
+import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.events.dao.SandboxEventDao;
-import uk.gov.pay.directdebit.events.model.SandboxEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
@@ -28,10 +28,12 @@ public class SandboxPaymentStateCalculator {
         this.sandboxEventDao = sandboxEventDao;
     }
 
-    Optional<PaymentState> calculate(SandboxPaymentId sandboxPaymentId) {
+    Optional<DirectDebitStateWithDetails<PaymentState>> calculate(SandboxPaymentId sandboxPaymentId) {
         return sandboxEventDao.findLatestApplicableEventForPayment(sandboxPaymentId, SANDBOX_ACTIONS_THAT_CHANGE_STATE)
-                .map(SandboxEvent::getEventAction)
-                .map(SANDBOX_ACTION_TO_PAYMENT_STATE::get);
+                .filter(sandboxEvent -> SANDBOX_ACTION_TO_PAYMENT_STATE.get(sandboxEvent.getEventAction()) != null)
+                .map(sandboxEvent -> new DirectDebitStateWithDetails<>(
+                        SANDBOX_ACTION_TO_PAYMENT_STATE.get(sandboxEvent.getEventAction()), null, null)
+                );
     }
 
 }

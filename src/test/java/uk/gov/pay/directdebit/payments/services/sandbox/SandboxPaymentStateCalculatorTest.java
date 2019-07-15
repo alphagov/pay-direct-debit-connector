@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.events.dao.SandboxEventDao;
 import uk.gov.pay.directdebit.events.model.SandboxEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
@@ -43,27 +44,27 @@ public class SandboxPaymentStateCalculatorTest {
     public void paidOutActionMapsToSuccessState() {
         given(mockSandboxEvent.getEventAction()).willReturn(SandboxEventAction.PAID_OUT.toString());
 
-        Optional<PaymentState> paymentState = sandboxPaymentStateCalculator.calculate(SANDBOX_PAYMENT_ID);
+        Optional<DirectDebitStateWithDetails<PaymentState>> result = sandboxPaymentStateCalculator.calculate(SANDBOX_PAYMENT_ID);
 
-        assertThat(paymentState.get(), is(PaymentState.SUCCESS));
+        assertThat(result.get().getState(), is(PaymentState.SUCCESS));
     }
 
     @Test
     public void unrecognisedActionMapsToNothing() {
         given(mockSandboxEvent.getEventAction()).willReturn("EATEN_BY_WOLVES");
 
-        Optional<PaymentState> paymentState = sandboxPaymentStateCalculator.calculate(SANDBOX_PAYMENT_ID);
+        Optional<DirectDebitStateWithDetails<PaymentState>> result = sandboxPaymentStateCalculator.calculate(SANDBOX_PAYMENT_ID);
 
-        assertThat(paymentState, is(Optional.empty()));
+        assertThat(result, is(Optional.empty()));
     }
 
     @Test
     public void noApplicableEventsMapsToNothing() {
         given(mockSandboxEventDao.findLatestApplicableEventForPayment(SANDBOX_PAYMENT_ID, SANDBOX_ACTIONS_THAT_CHANGE_STATE)).willReturn(Optional.empty());
 
-        Optional<PaymentState> paymentState = sandboxPaymentStateCalculator.calculate(SANDBOX_PAYMENT_ID);
+        Optional<DirectDebitStateWithDetails<PaymentState>> result = sandboxPaymentStateCalculator.calculate(SANDBOX_PAYMENT_ID);
 
-        assertThat(paymentState, is(Optional.empty()));
+        assertThat(result, is(Optional.empty()));
     }
 
 }

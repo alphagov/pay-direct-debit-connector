@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
+import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
@@ -19,14 +20,17 @@ public class PaymentUpdateService {
         this.paymentDao = paymentDao;
     }
 
-    public int updateStateByProviderId(PaymentProvider paymentProvider, PaymentLookupKey paymentLookupKey, PaymentState paymentState) {
+    public int updateStateByProviderId(PaymentProvider paymentProvider, PaymentLookupKey paymentLookupKey,
+                                       DirectDebitStateWithDetails<PaymentState> stateAndDetails) {
         if (paymentLookupKey.getClass() == GoCardlessPaymentIdAndOrganisationId.class) {
             var goCardlessPaymentIdAndOrganisationId = (GoCardlessPaymentIdAndOrganisationId) paymentLookupKey;
             return paymentDao.updateStateByProviderIdAndOrganisationId(paymentProvider, goCardlessPaymentIdAndOrganisationId.getGoCardlessOrganisationId(),
-                    goCardlessPaymentIdAndOrganisationId.getGoCardlessPaymentId(), paymentState);
+                    goCardlessPaymentIdAndOrganisationId.getGoCardlessPaymentId(), stateAndDetails.getState(), stateAndDetails.getDetails().orElse(null),
+                    stateAndDetails.getDetailsDescription().orElse(null));
         } else if (paymentLookupKey.getClass() == SandboxPaymentId.class) {
             var paymentProviderPaymentId = (PaymentProviderPaymentId) paymentLookupKey;
-            return paymentDao.updateStateByProviderId(paymentProvider, paymentProviderPaymentId, paymentState);
+            return paymentDao.updateStateByProviderId(paymentProvider, paymentProviderPaymentId, stateAndDetails.getState(),
+                    stateAndDetails.getDetails().orElse(null), stateAndDetails.getDetailsDescription().orElse(null));
         }
         throw new IllegalArgumentException("Unrecognised PaymentLooupKey of type " + paymentLookupKey.getClass());
     }

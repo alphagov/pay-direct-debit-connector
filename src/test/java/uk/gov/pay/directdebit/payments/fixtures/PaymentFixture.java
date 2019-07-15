@@ -24,6 +24,8 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
     private String externalId = RandomIdGenerator.newId();
     private Long amount = RandomUtils.nextLong(1, 99999);
     private PaymentState state = PaymentState.NEW;
+    private String stateDetails = null;
+    private String stateDetailsDescription = null;
     private String reference = RandomStringUtils.randomAlphanumeric(10);
     private String description = RandomStringUtils.randomAlphanumeric(20);
     private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
@@ -80,6 +82,24 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
 
     public PaymentFixture withState(PaymentState state) {
         this.state = state;
+        return this;
+    }
+
+    public String getStateDetails() {
+        return stateDetails;
+    }
+
+    public PaymentFixture withStateDetails(String stateDetails) {
+        this.stateDetails = stateDetails;
+        return this;
+    }
+
+    public String getStateDetailsDescription() {
+        return stateDetailsDescription;
+    }
+
+    public PaymentFixture withStateDetailsDescription(String stateDetailsDescription) {
+        this.stateDetailsDescription = stateDetailsDescription;
         return this;
     }
 
