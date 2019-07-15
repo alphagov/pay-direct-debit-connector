@@ -208,6 +208,17 @@ public class DatabaseTestHelper {
                         .get());
     }
 
+    public Map<String, Object> getGovUkPayEventById(Long id) {
+        return jdbi.withHandle(handle ->
+                handle
+                        .createQuery("SELECT * from govukpay_events g WHERE g.id = :id")
+                        .bind("id", id)
+                        .mapToMap()
+                        .findFirst()
+                        .get()
+        );
+    }
+
     public void truncateAllData() {
         jdbi.withHandle(h -> h.createScript(
                 "TRUNCATE TABLE events CASCADE; " +
