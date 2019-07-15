@@ -214,7 +214,6 @@ public class WebhookGoCardlessResourceIT {
                 .accept(APPLICATION_JSON)
                 .post(REQUEST_PATH)
                 .then()
-                .log().body()
                 .statusCode(Response.Status.OK.getStatusCode());
 
         List<Map<String, Object>> events = testContext.getDatabaseTestHelper().getAllGoCardlessEvents();

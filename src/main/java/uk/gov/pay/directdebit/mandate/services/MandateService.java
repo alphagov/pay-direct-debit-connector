@@ -13,6 +13,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
+import uk.gov.pay.directdebit.mandate.api.ExternalMandateState;
 import uk.gov.pay.directdebit.mandate.api.MandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
@@ -45,7 +46,6 @@ import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
-import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_CREATED;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.DIRECT_DEBIT_DETAILS_CONFIRMED;
@@ -202,7 +202,7 @@ public class MandateService {
                 accountExternalId,
                 mandate.getExternalId().toString())));
 
-        if (mandate.getState().toExternal() == EXTERNAL_CREATED) {
+        if (mandate.getState().toExternal() == ExternalMandateState.CREATED) {
             Token token = tokenService.generateNewTokenFor(mandate);
             dataLinks.add(createLink("next_url",
                     GET,

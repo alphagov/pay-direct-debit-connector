@@ -22,7 +22,7 @@ public class MandateSearchParamsTest {
         String serviceReference = "aServiceReference";
         String toDate = LocalDate.now().toString();
         String fromDate = LocalDate.now().minusDays(3).toString();
-        String mandateState = ExternalMandateState.EXTERNAL_CREATED.getState();
+        String mandateState = ExternalMandateState.CREATED.getState();
         MandateBankStatementReference mandateBankStatementReference = 
                 MandateBankStatementReference.valueOf("bankReference");
         

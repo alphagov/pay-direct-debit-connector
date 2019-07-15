@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.mandate.params;
 
 import uk.gov.pay.commons.validation.ValidDate;
+import uk.gov.pay.directdebit.common.exception.validation.ValidExternalMandateState;
 import uk.gov.pay.directdebit.common.model.SearchParams;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
@@ -31,6 +32,7 @@ public class MandateSearchParams implements SearchParams {
     private String serviceReference;
 
     @QueryParam(STATE)
+    @ValidExternalMandateState(message = "Invalid attribute value: state is not a valid mandate external state")
     private String externalMandateState;
 
     @QueryParam(BANK_STATEMENT_REFERENCE)
