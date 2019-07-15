@@ -29,6 +29,8 @@ public class MandateMapper implements RowMapper<Mandate> {
     private static final String ID_COLUMN = "mandate_id";
     private static final String EXTERNAL_ID_COLUMN = "mandate_external_id";
     private static final String STATE_COLUMN = "mandate_state";
+    private static final String STATE_DETAILS_COLUMN = "mandate_state_details";
+    private static final String STATE_DETAILS_DESCRIPTION_COLUMN = "mandate_state_details_description";
     private static final String PAYMENT_PROVIDER_ID = "mandate_payment_provider_id";
     private static final String MANDATE_MANDATE_REFERENCE_COLUMN = "mandate_mandate_reference";
     private static final String MANDATE_SERVICE_REFERENCE_COLUMN = "mandate_service_reference";
@@ -106,6 +108,9 @@ public class MandateMapper implements RowMapper<Mandate> {
         Optional.ofNullable(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN))
                 .map(MandateBankStatementReference::valueOf)
                 .ifPresent(mandateBuilder::withMandateBankStatementReference);
+
+        Optional.ofNullable(resultSet.getString(STATE_DETAILS_COLUMN)).ifPresent(mandateBuilder::withStateDetails);
+        Optional.ofNullable(resultSet.getString(STATE_DETAILS_DESCRIPTION_COLUMN)).ifPresent(mandateBuilder::withStateDetailsDescription);
 
         return mandateBuilder.build();
     }

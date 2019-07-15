@@ -13,6 +13,8 @@ public class Mandate {
     private final Long id;
     private final MandateExternalId externalId;
     private final MandateState state;
+    private final String stateDetails;
+    private final String stateDetailsDescription;
     private final GatewayAccount gatewayAccount;
     private final String returnUrl;
     private final MandateBankStatementReference mandateBankStatementReference;
@@ -33,6 +35,8 @@ public class Mandate {
         this.mandateBankStatementReference = builder.mandateBankStatementReference;
         this.paymentProviderMandateId = builder.paymentProviderId;
         this.description = builder.description;
+        this.stateDetails = builder.stateDetails;
+        this.stateDetailsDescription = builder.stateDetailsDescription;
     }
 
     public Optional<String> getDescription() {
@@ -65,6 +69,14 @@ public class Mandate {
 
     public MandateState getState() {
         return state;
+    }
+
+    public Optional<String> getStateDetails() {
+        return Optional.ofNullable(stateDetails);
+    }
+
+    public Optional<String> getStateDetailsDescription() {
+        return Optional.ofNullable(stateDetailsDescription);
     }
 
     public Optional<MandateBankStatementReference> getMandateBankStatementReference() {
@@ -106,6 +118,8 @@ public class Mandate {
         private Long id;
         private MandateExternalId externalId;
         private MandateState state;
+        private String stateDetails;
+        private String stateDetailsDescription;
         private GatewayAccount gatewayAccount;
         private String returnUrl;
         private MandateBankStatementReference mandateBankStatementReference;
@@ -130,6 +144,8 @@ public class Mandate {
             .withMandateBankStatementReference(mandate.mandateBankStatementReference)
             .withServiceReference(mandate.serviceReference)
             .withState(mandate.state)
+            .withStateDetails(mandate.stateDetails)
+            .withStateDetailsDescription(mandate.stateDetailsDescription)
             .withReturnUrl(mandate.returnUrl)
             .withCreatedDate(mandate.createdDate)
             .withPayer(mandate.payer)
@@ -149,6 +165,16 @@ public class Mandate {
 
         public MandateBuilder withState(MandateState state) {
             this.state = state;
+            return this;
+        }
+
+        public MandateBuilder withStateDetails(String stateDetails) {
+            this.stateDetails = stateDetails;
+            return this;
+        }
+
+        public MandateBuilder withStateDetailsDescription(String stateDetailsDescription) {
+            this.stateDetailsDescription = stateDetailsDescription;
             return this;
         }
 

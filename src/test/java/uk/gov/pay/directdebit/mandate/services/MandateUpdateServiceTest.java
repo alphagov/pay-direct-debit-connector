@@ -5,10 +5,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateLookupKey;
+import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 
@@ -29,6 +31,11 @@ public class MandateUpdateServiceTest {
     private static final GoCardlessOrganisationId GOCARDLESS_ORGANISATION_ID = GoCardlessOrganisationId.valueOf("OR123");
     private static final GoCardlessMandateIdAndOrganisationId GOCARDLESS_MANDATE_ID_AND_ORGANISATION_ID =
             new GoCardlessMandateIdAndOrganisationId(GOCARDLESS_MANDATE_ID, GOCARDLESS_ORGANISATION_ID);
+    
+    private static final String MANDATE_STATE_DETAILS = "state details";
+    private static final String MANDATE_STATE_DETAILS_DESCRIPTION = "state details description";
+    private static final DirectDebitStateWithDetails<MandateState> MANDATE_STATE_WITH_DETAILS = new DirectDebitStateWithDetails<>(PENDING,
+            MANDATE_STATE_DETAILS, MANDATE_STATE_DETAILS_DESCRIPTION);
 
     @Mock
     private MandateDao mockMandateDao;
@@ -42,9 +49,9 @@ public class MandateUpdateServiceTest {
 
     @Test
     public void updateStateByPaymentProviderMandateIdWithSandboxMandateIdReturnsUpdateCount() {
-        given(mockMandateDao.updateStateByProviderId(SANDBOX, SANDBOX_MANDATE_ID, PENDING)).willReturn(1);
+        given(mockMandateDao.updateStateByProviderId(SANDBOX, SANDBOX_MANDATE_ID, PENDING, MANDATE_STATE_DETAILS, MANDATE_STATE_DETAILS_DESCRIPTION)).willReturn(1);
 
-        int updated = mandateUpdateService.updateStateByPaymentProviderMandateId(SANDBOX, SANDBOX_MANDATE_ID, PENDING);
+        int updated = mandateUpdateService.updateStateByPaymentProviderMandateId(SANDBOX, SANDBOX_MANDATE_ID, MANDATE_STATE_WITH_DETAILS);
 
         assertThat(updated, is(1));
 
@@ -54,9 +61,10 @@ public class MandateUpdateServiceTest {
     @Test
     public void updateStateByPaymentProviderMandateIdWithGoCardlessMandateIdAndOrganisationIdReturnsUpdateCount() {
         given(mockMandateDao.updateStateByProviderIdAndOrganisationId(GOCARDLESS, GOCARDLESS_ORGANISATION_ID, GOCARDLESS_MANDATE_ID,
-                PENDING)).willReturn(1);
+                PENDING, MANDATE_STATE_DETAILS, MANDATE_STATE_DETAILS_DESCRIPTION)).willReturn(1);
 
-        int updated = mandateUpdateService.updateStateByPaymentProviderMandateId(GOCARDLESS, GOCARDLESS_MANDATE_ID_AND_ORGANISATION_ID, PENDING);
+        int updated = mandateUpdateService.updateStateByPaymentProviderMandateId(GOCARDLESS, GOCARDLESS_MANDATE_ID_AND_ORGANISATION_ID,
+                MANDATE_STATE_WITH_DETAILS);
 
         assertThat(updated, is(1));
 
@@ -66,7 +74,8 @@ public class MandateUpdateServiceTest {
     @Test(expected = IllegalArgumentException.class)
     public void updateStateByPaymentProviderMandateIdWithUnrecognisedTypeThrowsException() {
         
-        mandateUpdateService.updateStateByPaymentProviderMandateId(GOCARDLESS, new UnrecognisedMandateLookupKeyImplementation(), PENDING);
+        mandateUpdateService.updateStateByPaymentProviderMandateId(GOCARDLESS, new UnrecognisedMandateLookupKeyImplementation(),
+                MANDATE_STATE_WITH_DETAILS);
     }
     
     private static class UnrecognisedMandateLookupKeyImplementation implements MandateLookupKey {

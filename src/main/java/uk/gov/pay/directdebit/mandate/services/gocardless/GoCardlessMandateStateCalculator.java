@@ -1,8 +1,8 @@
 package uk.gov.pay.directdebit.mandate.services.gocardless;
 
+import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 
 import javax.inject.Inject;
@@ -35,10 +35,14 @@ class GoCardlessMandateStateCalculator {
         this.goCardlessEventDao = goCardlessEventDao;
     }
 
-    Optional<MandateState> calculate(GoCardlessMandateIdAndOrganisationId goCardlessMandateIdAndOrganisationId) {
+    Optional<DirectDebitStateWithDetails<MandateState>> calculate(GoCardlessMandateIdAndOrganisationId goCardlessMandateIdAndOrganisationId) {
         return goCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateIdAndOrganisationId, GOCARDLESS_ACTIONS_THAT_CHANGE_STATE)
-                .map(GoCardlessEvent::getAction)
-                .map(GOCARDLESS_ACTION_TO_MANDATE_STATE::get);
+                .filter(goCardlessEvent -> GOCARDLESS_ACTION_TO_MANDATE_STATE.get(goCardlessEvent.getAction()) != null)
+                .map(goCardlessEvent -> new DirectDebitStateWithDetails<>(
+                        GOCARDLESS_ACTION_TO_MANDATE_STATE.get(goCardlessEvent.getAction()),
+                        goCardlessEvent.getDetailsCause(),
+                        goCardlessEvent.getDetailsDescription())
+                );
     }
 
 }
