@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.BaseEncoding.base16;
+import static java.lang.String.format;
 
 /**
  * Webhook verifier
@@ -34,7 +35,8 @@ public class WebhookVerifier {
         String computedSignature = base16().lowerCase().encode(mac.doFinal(body.getBytes(UTF_8)));
 
         if (!StringUtils.equals(expectedSignature, computedSignature)) {
-            throw new InvalidWebhookException("Invalid GoCardless webhook signature");
+            throw new InvalidWebhookException(format("Invalid GoCardless webhook signature, received %s but computed %s",
+                    expectedSignature, computedSignature));
         }
     }
 
