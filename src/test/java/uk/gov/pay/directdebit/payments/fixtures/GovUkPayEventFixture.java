@@ -86,7 +86,7 @@ public class GovUkPayEventFixture implements DbFixture<GovUkPayEventFixture, Gov
         return this;
     }
 
-    public GovUkPayEventFixture withEventType(String eventType) {
+    public GovUkPayEventFixture withEventType(GovUkPayEvent.GovUkPayEventType eventType) {
         this.eventType = eventType;
         return this;
     }

@@ -54,6 +54,24 @@ public class GovUkPayEvent {
         return eventType;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GovUkPayEvent that = (GovUkPayEvent) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(mandateId, that.mandateId) &&
+                Objects.equals(paymentId, that.paymentId) &&
+                eventDate.equals(that.eventDate) &&
+                resourceType == that.resourceType &&
+                eventType == that.eventType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, mandateId, paymentId, eventDate, resourceType, eventType);
+    }
+
     public enum ResourceType {
         PAYMENT,
         MANDATE

@@ -5,11 +5,17 @@ import uk.gov.pay.directdebit.events.model.GovUkPayEvent;
 import static java.lang.String.format;
 
 public class InvalidGovUkPayEventInsertionException extends RuntimeException {
-    public InvalidGovUkPayEventInsertionException(GovUkPayEvent previousEvent, GovUkPayEvent newEvent) {
-        super(format("GOV.UK Pay event {} is invalid following event {}", newEvent.getEventType(), previousEvent.getEventType()));
+    private InvalidGovUkPayEventInsertionException(String message) {
+        super(message);
     }
-    
-    public InvalidGovUkPayEventInsertionException(GovUkPayEvent event) {
-        super(format("GOV.UK Pay event {} is invalid when there are no previous events", event.getEventType()));
+
+    public static InvalidGovUkPayEventInsertionException invalidTransitionException(GovUkPayEvent newEvent, GovUkPayEvent previousEvent) {
+        return new InvalidGovUkPayEventInsertionException(format("GOV.UK Pay event %s is invalid following event %s",
+                newEvent.getEventType(), previousEvent.getEventType()));
+    }
+
+    public static InvalidGovUkPayEventInsertionException invalidInitialEventException(GovUkPayEvent event) {
+        return new InvalidGovUkPayEventInsertionException(format("GOV.UK Pay event %s is invalid when there are no previous events",
+                event.getEventType()));
     }
 }
