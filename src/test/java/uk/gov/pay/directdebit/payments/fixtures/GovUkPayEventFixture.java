@@ -18,10 +18,9 @@ public class GovUkPayEventFixture implements DbFixture<GovUkPayEventFixture, Gov
     private Payment payment;
     private ZonedDateTime eventDate = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
     private GovUkPayEvent.ResourceType resourceType = GovUkPayEvent.ResourceType.MANDATE;
-    private String eventType = "CREATED";
+    private GovUkPayEvent.GovUkPayEventType eventType = GovUkPayEvent.GovUkPayEventType.MANDATE_CREATED;
 
     private GovUkPayEventFixture() {
-
     }
 
     @Override
