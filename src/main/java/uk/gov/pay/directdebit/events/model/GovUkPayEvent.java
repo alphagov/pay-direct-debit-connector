@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.events.model;
 
-import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.payments.model.Payment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -9,14 +9,16 @@ import java.util.Optional;
 
 public class GovUkPayEvent {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GovUkPayEvent.class);
+
     private final Long id;
     private final Long mandateId;
     private final Long paymentId;
     private final ZonedDateTime eventDate;
     private final ResourceType resourceType;
-    private final String eventType;
+    private final GovUkPayEventType eventType;
 
-    public GovUkPayEvent(Long id, Long mandateId, Long paymentId, ZonedDateTime eventDate, ResourceType resourceType, String eventType) {
+    public GovUkPayEvent(Long id, Long mandateId, Long paymentId, ZonedDateTime eventDate, ResourceType resourceType, GovUkPayEventType eventType) {
         this.id = id;
         this.mandateId = mandateId;
         this.paymentId = paymentId;
@@ -45,14 +47,53 @@ public class GovUkPayEvent {
         return resourceType;
     }
 
-    public String getEventType() {
+    public GovUkPayEventType getEventType() {
         return eventType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GovUkPayEvent that = (GovUkPayEvent) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(mandateId, that.mandateId) &&
+                Objects.equals(paymentId, that.paymentId) &&
+                eventDate.equals(that.eventDate) &&
+                resourceType == that.resourceType &&
+                eventType == that.eventType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, mandateId, paymentId, eventDate, resourceType, eventType);
+    }
+
+    @Override
+    public String toString() {
+        return "GovUkPayEvent{" +
+                "id=" + id +
+                ", mandateId=" + mandateId +
+                ", paymentId=" + paymentId +
+                ", eventDate=" + eventDate +
+                ", resourceType=" + resourceType +
+                ", eventType=" + eventType +
+                '}';
     }
 
     public enum ResourceType {
         PAYMENT,
-        MANDATE,
-        PAYER
+        MANDATE
+    }
+    
+    public enum GovUkPayEventType {
+        MANDATE_CREATED,
+        MANDATE_TOKEN_EXCHANGED,
+        MANDATE_SUBMITTED,
+        MANDATE_EXPIRED_BY_SYSTEM,
+        MANDATE_CANCELLED_BY_USER,
+        MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE,
+        PAYMENT_SUBMITTED;
     }
 
     public static final class GovUkPayEventBuilder {
@@ -61,7 +102,7 @@ public class GovUkPayEvent {
         private Long paymentId;
         private ZonedDateTime eventDate;
         private ResourceType resourceType;
-        private String eventType;
+        private GovUkPayEventType eventType;
 
         private GovUkPayEventBuilder() {
         }
@@ -75,16 +116,16 @@ public class GovUkPayEvent {
             return this;
         }
 
-        public GovUkPayEventBuilder withMandate(Mandate mandate) {
-            if (mandate != null) {
-                this.mandateId = mandate.getId();
+        public GovUkPayEventBuilder withMandateId(Long mandateId) {
+            if (mandateId != null) {
+                this.mandateId = mandateId;
             }
             return this;
         }
 
-        public GovUkPayEventBuilder withPayment(Payment payment) {
-            if (payment != null) {
-                this.paymentId = payment.getId();
+        public GovUkPayEventBuilder withPaymentId(Long paymentId) {
+            if (paymentId != null) {
+                this.paymentId = paymentId;
             }
             return this;
         }
@@ -99,7 +140,7 @@ public class GovUkPayEvent {
             return this;
         }
 
-        public GovUkPayEventBuilder withEventType(String eventType) {
+        public GovUkPayEventBuilder withEventType(GovUkPayEventType eventType) {
             this.eventType = eventType;
             return this;
         }

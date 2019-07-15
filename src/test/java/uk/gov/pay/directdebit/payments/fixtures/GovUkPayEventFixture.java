@@ -14,22 +14,21 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventBui
 
 public class GovUkPayEventFixture implements DbFixture<GovUkPayEventFixture, GovUkPayEvent> {
     private Long id = RandomUtils.nextLong();
-    private Mandate mandate;
-    private Payment payment;
+    private Long mandateId;
+    private Long paymentId;
     private ZonedDateTime eventDate = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
     private GovUkPayEvent.ResourceType resourceType = GovUkPayEvent.ResourceType.MANDATE;
-    private String eventType = "CREATED";
+    private GovUkPayEvent.GovUkPayEventType eventType = GovUkPayEvent.GovUkPayEventType.MANDATE_CREATED;
 
     private GovUkPayEventFixture() {
-
     }
 
     @Override
     public GovUkPayEvent toEntity() {
         return aGovUkPayEvent()
                 .withId(id)
-                .withMandate(mandate)
-                .withPayment(payment)
+                .withMandateId(mandateId)
+                .withPaymentId(paymentId)
                 .withEventDate(eventDate)
                 .withResourceType(resourceType)
                 .withEventType(eventType)
@@ -49,8 +48,8 @@ public class GovUkPayEventFixture implements DbFixture<GovUkPayEventFixture, Gov
                         "       event_type) " +
                         "   VALUES(?, ?, ?, ?, ?, ?)",
                 id,
-                mandate == null ? null : mandate.getId(),
-                payment == null ? null : payment.getId(),
+                mandateId,
+                paymentId,
                 Timestamp.from(eventDate.toInstant()),
                 resourceType.toString(),
                 eventType
@@ -67,13 +66,13 @@ public class GovUkPayEventFixture implements DbFixture<GovUkPayEventFixture, Gov
         return this;
     }
     
-    public GovUkPayEventFixture withMandate(Mandate mandate) {
-        this.mandate = mandate;
+    public GovUkPayEventFixture withMandateId(Long mandateId) {
+        this.mandateId = mandateId;
         return this;
     }
 
-    public GovUkPayEventFixture withPayment(Payment payment) {
-        this.payment = payment;
+    public GovUkPayEventFixture withPaymentId(Long paymentId) {
+        this.paymentId = paymentId;
         return this;
     }
 
@@ -87,7 +86,7 @@ public class GovUkPayEventFixture implements DbFixture<GovUkPayEventFixture, Gov
         return this;
     }
 
-    public GovUkPayEventFixture withEventType(String eventType) {
+    public GovUkPayEventFixture withEventType(GovUkPayEvent.GovUkPayEventType eventType) {
         this.eventType = eventType;
         return this;
     }

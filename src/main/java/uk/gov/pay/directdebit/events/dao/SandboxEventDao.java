@@ -8,6 +8,7 @@ import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import uk.gov.pay.directdebit.events.dao.mapper.SandboxEventMapper;
 import uk.gov.pay.directdebit.events.model.SandboxEvent;
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
