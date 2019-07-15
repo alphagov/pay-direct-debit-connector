@@ -7,13 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum ExternalMandateState {
-    EXTERNAL_CREATED("created", false),
-    EXTERNAL_STARTED("started", false),
-    EXTERNAL_PENDING("pending", false),
-    EXTERNAL_SUBMITTED("submitted", false),
-    EXTERNAL_ACTIVE("active", true),
-    EXTERNAL_INACTIVE("inactive", true),
-    EXTERNAL_CANCELLED("cancelled", true);
+    CREATED("created", false),
+    STARTED("started", false),
+    PENDING("pending", false),
+    SUBMITTED("submitted", false),
+    ACTIVE("active", true),
+    INACTIVE("inactive", true),
+    CANCELLED("cancelled", true);
 
     private final String value;
     private final boolean finished;

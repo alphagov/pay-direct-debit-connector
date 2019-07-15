@@ -327,7 +327,6 @@ public class MandateResourceIT {
                 .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
-                .log().body()
                 .body("external_id", is(mandateFixture.getExternalId().toString()))
                 .body("gateway_account_id", isNumber(gatewayAccountFixture.getId()))
                 .body("gateway_account_external_id", is(gatewayAccountFixture.getExternalId()))
@@ -397,7 +396,7 @@ public class MandateResourceIT {
 
         ValidatableResponse getMandateResponse = givenSetup()
                 .get(requestPath)
-                .then().log().body()
+                .then()
                 .statusCode(OK.getStatusCode())
                 .contentType(JSON)
                 .body("mandate_id", is(mandateFixture.getExternalId().toString()))

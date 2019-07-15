@@ -50,7 +50,8 @@ public class MandateResourceSearchIT {
             "to_date, 2018-14-05T15:00Z, Invalid attribute value: to_date. Must be a valid date", 
             "page, -1, Invalid attribute value: page. Must be greater than or equal to 1", 
             "display_size, 0, Invalid attribute value: display_size. Must be greater than or equal to 1", 
-            "display_size, 501, Invalid attribute value: display_size. Must be less than or equal to 500"
+            "display_size, 501, Invalid attribute value: display_size. Must be less than or equal to 500",
+            "state, INVALID, Invalid attribute value: state is not a valid mandate external state"
     })
     public void searchWithInvalidParams(String param, String value, String expectedErrorMessage) {
         givenSetup()
@@ -139,7 +140,6 @@ public class MandateResourceSearchIT {
         givenSetup()
                 .get(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()))
                 .then()
-                .log().body()
                 .body("total", is(2))
                 .body("count", is(2))
                 .body("page", is(1))

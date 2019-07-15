@@ -114,10 +114,10 @@ public class MandateSearchDao {
             sqlParams.put("email", "%" + email + "%");
         });
 
-        params.getExternalMandateState().ifPresent(mandateState -> {
+        if (!params.getInternalStates().isEmpty()) {
             sql.append(" AND m.state IN (<states>)");
             sqlParams.put("states", params.getInternalStates());
-        });
+        }
 
         params.getFromDate().ifPresent(fromDate -> {
             sql.append(" AND m.created_date > :createdDateFrom");

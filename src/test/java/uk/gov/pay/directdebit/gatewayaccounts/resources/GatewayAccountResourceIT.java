@@ -346,7 +346,7 @@ public class GatewayAccountResourceIT {
                 .post(GATEWAY_ACCOUNTS_API_PATH)
                 .then()
                 .contentType(JSON)
-                .statusCode(422).log().body()
+                .statusCode(422)
                 .body("error_identifier", is("GENERIC"))
                 .body("message", contains("Field [description] must have a maximum length of 255"));
     }
