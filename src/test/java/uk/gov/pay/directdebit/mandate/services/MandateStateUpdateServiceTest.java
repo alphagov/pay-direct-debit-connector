@@ -1,10 +1,10 @@
 package uk.gov.pay.directdebit.mandate.services;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -13,7 +13,8 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
-import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
+import uk.gov.pay.directdebit.events.services.DirectDebitEventService;
+import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 
 import java.time.ZonedDateTime;
 
@@ -21,6 +22,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_CREATED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_EXPIRED_BY_SYSTEM;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_SUBMITTED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
@@ -30,24 +35,29 @@ import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MandateStateUpdateServiceTest {
+    
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    
     @Mock
     private MandateDao mockedMandateDao;
+    
     @Mock
     private DirectDebitEventService mockedDirectDebitEventService;
+    
     @Mock
     private UserNotificationService mockedUserNotificationService;
+    
+    @Mock
+    private GovUkPayEventService mockedGovUkPayEventService;
+    
+    @InjectMocks
     private MandateStateUpdateService service;
+    
     private Mandate mandate = MandateFixture
             .aMandateFixture()
             .withState(AWAITING_DIRECT_DEBIT_DETAILS)
             .toEntity();
-
-    @Before
-    public void setUp() {
-        service = new MandateStateUpdateService(mockedMandateDao, mockedDirectDebitEventService, mockedUserNotificationService);
-    }
 
     @Test
     public void shouldUpdateMandateStateRegisterEventAndSendEmail_whenMandateFails() {
@@ -96,6 +106,7 @@ public class MandateStateUpdateServiceTest {
         service.mandateCreatedFor(mandate);
         
         verify(mockedDirectDebitEventService).registerMandateCreatedEventFor(mandate);
+        verify(mockedGovUkPayEventService).storeEventForMandate(mandate, MANDATE_CREATED);
         assertThat(mandate.getState(), is(CREATED));
     }
     
@@ -138,6 +149,7 @@ public class MandateStateUpdateServiceTest {
         service.tokenExchangedFor(mandate);
 
         verify(mockedDirectDebitEventService).registerTokenExchangedEventFor(expectedMandateWithAwaitingDetailsState);
+        verify(mockedGovUkPayEventService).storeEventForMandate(mandate, MANDATE_TOKEN_EXCHANGED);
     }
 
     @Test
@@ -149,6 +161,7 @@ public class MandateStateUpdateServiceTest {
         verify(mockedMandateDao).updateReferenceAndPaymentProviderId(confirmedMandate);
 
         verify(mockedDirectDebitEventService).registerDirectDebitConfirmedEventFor(confirmedMandate);
+        verify(mockedGovUkPayEventService).storeEventForMandate(mandate, MANDATE_SUBMITTED);
 
     }
 
@@ -178,6 +191,7 @@ public class MandateStateUpdateServiceTest {
 
         verify(mockedDirectDebitEventService).registerMandateExpiredEventFor(expectedMandateWithExpiredStatus);
         verify(mockedMandateDao).updateState(mandate.getId(), MandateState.EXPIRED);
+        verify(mockedGovUkPayEventService).storeEventForMandate(mandate, MANDATE_EXPIRED_BY_SYSTEM);
     }
 
     @Test
@@ -195,6 +209,7 @@ public class MandateStateUpdateServiceTest {
 
         verify(mockedDirectDebitEventService).registerMandateExpiredEventFor(expectedMandateWithExpiredStatus);
         verify(mockedMandateDao).updateState(mandate.getId(), MandateState.EXPIRED);
+        verify(mockedGovUkPayEventService).storeEventForMandate(mandate, MANDATE_EXPIRED_BY_SYSTEM);
     }
 
     @Test
@@ -212,6 +227,7 @@ public class MandateStateUpdateServiceTest {
 
         verify(mockedDirectDebitEventService).registerMandateExpiredEventFor(expectedMandateWithExpiredState);
         verify(mockedMandateDao).updateState(mandate.getId(), MandateState.EXPIRED);
+        verify(mockedGovUkPayEventService).storeEventForMandate(mandate, MANDATE_EXPIRED_BY_SYSTEM);
     }
 
     @Test(expected = InvalidStateTransitionException.class)

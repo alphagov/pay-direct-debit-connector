@@ -1,14 +1,16 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
+import uk.gov.pay.directdebit.events.services.DirectDebitEventService;
+import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
@@ -57,39 +60,47 @@ public class PaymentServiceTest {
 
     @Mock
     private PaymentDao mockedPaymentDao;
+    
     @Mock
     private UserNotificationService mockedUserNotificationService;
+    
     @Mock
     private TokenService mockedTokenService;
+    
     @Mock
     private GatewayAccountDao mockedGatewayAccountDao;
+    
     @Mock
     private DirectDebitConfig mockedDirectDebitConfig;
+    
     @Mock
     private DirectDebitEventService mockedDirectDebitEventService;
+    
     @Mock
     private LinksConfig mockedLinksConfig;
+    
     @Mock
     private UriInfo mockedUriInfo;
+    
     @Mock
     private UriBuilder mockedUriBuilder;
+    
     @Mock
     private PaymentProviderFactory mockedPaymentProviderFactory;
+    
     @Mock
     private SandboxService mockedSandboxService;
-
-    private PayerFixture payerFixture = PayerFixture.aPayerFixture();
+    
+    @Mock
+    private GovUkPayEventService mockedGovUkPayEventService;
+    
+    @InjectMocks
     private PaymentService service;
 
-
+    private PayerFixture payerFixture = PayerFixture.aPayerFixture();
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withPayerFixture(payerFixture);
     private PaymentFixture paymentFixture = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture);
-    @Before
-    public void setUp() {
-        service = new PaymentService(mockedTokenService, mockedDirectDebitConfig, mockedPaymentDao,
-                mockedDirectDebitEventService, mockedUserNotificationService, mockedPaymentProviderFactory);
-    }
 
     @Test
     public void findByTransactionExternalIdAndAccountId_shouldFindATransaction() {
@@ -145,6 +156,7 @@ public class PaymentServiceTest {
         Payment updatedPayment = fromPayment(payment).withState(PENDING).build();
         verify(mockedPaymentDao).updateState(updatedPayment.getId(), PaymentState.PENDING);
         verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(updatedPayment);
+        verify(mockedGovUkPayEventService).storeEventForPayment(payment, PAYMENT_SUBMITTED);
     }
 
     @Test

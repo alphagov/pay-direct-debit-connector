@@ -1,17 +1,16 @@
-package uk.gov.pay.directdebit.payments.services;
+package uk.gov.pay.directdebit.events.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.dao.GovUkPayEventDao;
-import uk.gov.pay.directdebit.events.exception.GovUkPayEventHasNoMandateIdException;
-import uk.gov.pay.directdebit.events.exception.GovUkPayEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.events.exception.InvalidGovUkPayEventInsertionException;
 import uk.gov.pay.directdebit.events.model.GovUkPayEvent;
 import uk.gov.pay.directdebit.events.model.GovUkPayEventStateGraph;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
 import javax.inject.Inject;
 
-import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.ResourceType.MANDATE;
 
 public class GovUkPayEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GovUkPayEventService.class);
@@ -26,32 +25,24 @@ public class GovUkPayEventService {
         this.govUkPayEventStateGraph = govUkPayEventStateGraph;
     }
 
-    public void storeEvent(GovUkPayEvent event) {
-        if (event.getResourceType() == MANDATE) {
-            storeEventForMandate(event);
-        } else {
-            storeEventForPayment(event);
-        }
-    }
-
-    private void storeEventForMandate(GovUkPayEvent event) {
-        Long mandateId = event.getMandateId().orElseThrow(() -> new GovUkPayEventHasNoMandateIdException(event.getId()));
-        govUkPayEventDao.findLatestEventForMandate(mandateId)
+    public void storeEventForMandate(Mandate mandate, GovUkPayEvent.GovUkPayEventType eventType) {
+        var event = new GovUkPayEvent(mandate, eventType);
+        govUkPayEventDao.findLatestEventForMandate(mandate.getId())
                 .ifPresentOrElse(latestEvent -> validateEventTransition(event, latestEvent),
                         () -> validateInitialEvent(event));
         
         govUkPayEventDao.insert(event);
-        LOGGER.info("Inserted GOV.UK Pay event for mandate {}", mandateId);
+        LOGGER.info("Inserted GOV.UK Pay event of type {} for mandate {}", eventType, mandate.getExternalId());
     }
 
-    private void storeEventForPayment(GovUkPayEvent event) {
-        Long paymentId = event.getPaymentId().orElseThrow(() -> new GovUkPayEventHasNoPaymentIdException(event.getId()));
-        govUkPayEventDao.findLatestEventForPayment(paymentId)
+    public void storeEventForPayment(Payment payment, GovUkPayEvent.GovUkPayEventType eventType) {
+        var event = new GovUkPayEvent(payment, eventType);
+        govUkPayEventDao.findLatestEventForPayment(payment.getId())
                 .ifPresentOrElse(latestEvent -> validateEventTransition(event, latestEvent),
                         () -> validateInitialEvent(event));
         
         govUkPayEventDao.insert(event);
-        LOGGER.info("Inserted GOV.UK Pay event for payment {}", paymentId);
+        LOGGER.info("Inserted GOV.UK Pay event of type {} for payment {}", eventType, payment.getExternalId());
     }
 
     private void validateInitialEvent(GovUkPayEvent event) {
