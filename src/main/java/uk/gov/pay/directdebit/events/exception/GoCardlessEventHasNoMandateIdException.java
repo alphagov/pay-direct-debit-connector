@@ -8,6 +8,6 @@ import static java.lang.String.format;
 public class GoCardlessEventHasNoMandateIdException extends NotFoundException {
 
     public GoCardlessEventHasNoMandateIdException(GoCardlessEventId id) {
-        super(format("Event with id: %s has no linked mandate", id));
+        super(format("GoCardless event with id: %s has no linked mandate", id));
     }
 }
