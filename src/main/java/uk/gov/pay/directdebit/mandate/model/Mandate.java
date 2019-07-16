@@ -98,6 +98,8 @@ public class Mandate {
         return Objects.equals(id, mandate.id) &&
                 Objects.equals(externalId, mandate.externalId) &&
                 state == mandate.state &&
+                Objects.equals(stateDetails, mandate.stateDetails) &&
+                Objects.equals(stateDetailsDescription, mandate.stateDetailsDescription) &&
                 Objects.equals(gatewayAccount, mandate.gatewayAccount) &&
                 Objects.equals(returnUrl, mandate.returnUrl) &&
                 Objects.equals(mandateBankStatementReference, mandate.mandateBankStatementReference) &&
@@ -109,7 +111,7 @@ public class Mandate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, externalId, state, gatewayAccount, returnUrl,
+        return Objects.hash(id, externalId, state, stateDetails, stateDetailsDescription, gatewayAccount, returnUrl,
                 mandateBankStatementReference, serviceReference, createdDate, payer, paymentProviderMandateId);
     }
 

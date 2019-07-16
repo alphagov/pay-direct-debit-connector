@@ -25,12 +25,13 @@ public class SandboxPaymentStateUpdater {
 
     public void updateState(SandboxPaymentId sandboxPaymentId) {
         sandboxPaymentStateCalculator.calculate(sandboxPaymentId)
-                .ifPresentOrElse(state -> {
-                    int updated = paymentUpdateService.updateStateByProviderId(SANDBOX, sandboxPaymentId, state);
+                .ifPresentOrElse(stateAndDetails -> {
+                    int updated = paymentUpdateService.updateStateByProviderId(SANDBOX, sandboxPaymentId, stateAndDetails);
                     if (updated == 1) {
-                        LOGGER.info(format("Updated status of sandbox payment %s to %s", sandboxPaymentId, state));
+                        LOGGER.info(format("Updated status of sandbox payment %s to %s", sandboxPaymentId, stateAndDetails.getState()));
                     } else {
-                        LOGGER.error(format("Could not update status of sandbox payment %s to %s because the payment was not found", sandboxPaymentId, state));
+                        LOGGER.error(format("Could not update status of sandbox payment %s to %s because the payment was not found", sandboxPaymentId,
+                                stateAndDetails.getState()));
                     }
                 }, () -> LOGGER.info(format("Asked to update the status for sandbox payment %s " +
                                 "but there appear to be no events stored that require it to be updated", sandboxPaymentId)));

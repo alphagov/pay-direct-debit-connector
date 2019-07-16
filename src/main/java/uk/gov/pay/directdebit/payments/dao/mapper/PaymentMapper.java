@@ -32,6 +32,8 @@ public class PaymentMapper implements RowMapper<Payment> {
     private static final String PAYMENT_ID_COLUMN = "payment_id";
     private static final String PAYMENT_AMOUNT_COLUMN = "payment_amount";
     private static final String PAYMENT_STATE_COLUMN = "payment_state";
+    private static final String PAYMENT_STATE__DETAILS_COLUMN = "payment_state_details";
+    private static final String PAYMENT_STATE_DETAILS_DESCRIPTION_COLUMN = "payment_state_details_description";
     private static final String PAYMENT_EXTERNAL_ID_COLUMN = "payment_external_id";
     private static final String PAYMENT_REFERENCE_COLUMN = "payment_reference";
     private static final String PAYMENT_DESCRIPTION_COLUMN = "payment_description";
@@ -128,6 +130,9 @@ public class PaymentMapper implements RowMapper<Payment> {
         Optional.ofNullable(resultSet.getDate(PAYMENT_CHARGE_DATE_COLUMN))
                 .map(Date::toLocalDate)
                 .ifPresent(paymentBuilder::withChargeDate);
+
+        Optional.ofNullable(resultSet.getString(PAYMENT_STATE__DETAILS_COLUMN)).ifPresent(paymentBuilder::withStateDetails);
+        Optional.ofNullable(resultSet.getString(PAYMENT_STATE_DETAILS_DESCRIPTION_COLUMN)).ifPresent(paymentBuilder::withStateDetailsDescription);
 
         return paymentBuilder.build();
     }
