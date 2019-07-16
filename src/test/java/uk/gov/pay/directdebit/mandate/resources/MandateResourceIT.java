@@ -58,11 +58,13 @@ import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.commons.model.ApiResponseDateTimeFormatter.ISO_INSTANT_MILLISECOND_PRECISION;
 import static uk.gov.pay.commons.testing.matchers.HamcrestMatchers.optionalMatcher;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomer;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreateCustomerBankAccount;
@@ -430,6 +432,11 @@ public class MandateResourceIT {
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
 
+        aGovUkPayEventFixture()
+                .withMandateId(mandateFixture.getId())
+                .withEventType(MANDATE_TOKEN_EXCHANGED)
+                .insert(testContext.getJdbi());
+
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/cancel"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
                 .replace("{mandateExternalId}", mandateFixture.getExternalId().toString());
@@ -449,6 +456,11 @@ public class MandateResourceIT {
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
+        
+        aGovUkPayEventFixture()
+                .withMandateId(testMandate.getId())
+                .withEventType(MANDATE_TOKEN_EXCHANGED)
+                .insert(testContext.getJdbi());
 
         String requestPath = "/v1/api/accounts/{accountId}/mandates/{mandateExternalId}/change-payment-method"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
@@ -467,10 +479,16 @@ public class MandateResourceIT {
     public void confirm_shouldCreateACustomerBankAccountMandate() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
+        
         MandateFixture mandateFixture = aMandateFixture()
                 .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPayerFixture(payerFixture)
+                .insert(testContext.getJdbi());
+
+        aGovUkPayEventFixture()
+                .withMandateId(mandateFixture.getId())
+                .withEventType(MANDATE_TOKEN_EXCHANGED)
                 .insert(testContext.getJdbi());
 
         String customerId = "CU000358S3A2FP";

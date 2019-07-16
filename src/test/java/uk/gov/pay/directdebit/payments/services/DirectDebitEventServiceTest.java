@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.pay.directdebit.events.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;

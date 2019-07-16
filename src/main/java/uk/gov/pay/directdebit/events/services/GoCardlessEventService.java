@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.services;
+package uk.gov.pay.directdebit.events.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,15 +1,14 @@
 package uk.gov.pay.directdebit.events.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.payments.model.Payment;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
 public class GovUkPayEvent {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(GovUkPayEvent.class);
 
     private final Long id;
     private final Long mandateId;
@@ -18,13 +17,31 @@ public class GovUkPayEvent {
     private final ResourceType resourceType;
     private final GovUkPayEventType eventType;
 
-    public GovUkPayEvent(Long id, Long mandateId, Long paymentId, ZonedDateTime eventDate, ResourceType resourceType, GovUkPayEventType eventType) {
-        this.id = id;
-        this.mandateId = mandateId;
-        this.paymentId = paymentId;
-        this.eventDate = Objects.requireNonNull(eventDate);
-        this.resourceType = Objects.requireNonNull(resourceType);
-        this.eventType = Objects.requireNonNull(eventType);
+    public GovUkPayEvent(Mandate mandate, GovUkPayEventType eventType) {
+        this.mandateId = mandate.getId();
+        this.resourceType = ResourceType.MANDATE;
+        this.eventDate = ZonedDateTime.now(ZoneOffset.UTC);
+        this.eventType = eventType;
+        this.id = null;
+        this.paymentId = null;
+    }
+
+    public GovUkPayEvent(Payment payment, GovUkPayEventType eventType) {
+        this.paymentId = payment.getId();
+        this.resourceType = ResourceType.PAYMENT;
+        this.eventDate = ZonedDateTime.now(ZoneOffset.UTC);
+        this.eventType = eventType;
+        this.id = null;
+        this.mandateId = null;
+    }
+
+    private GovUkPayEvent(GovUkPayEventBuilder builder) {
+        this.id = builder.id;
+        this.mandateId = builder.mandateId;
+        this.paymentId = builder.paymentId;
+        this.eventDate = Objects.requireNonNull(builder.eventDate);
+        this.resourceType = Objects.requireNonNull(builder.resourceType);
+        this.eventType = Objects.requireNonNull(builder.eventType);
     }
 
     public Long getId() {
@@ -146,7 +163,7 @@ public class GovUkPayEvent {
         }
 
         public GovUkPayEvent build() {
-            return new GovUkPayEvent(id, mandateId, paymentId, eventDate, resourceType, eventType);
+            return new GovUkPayEvent(this);
         }
     }
 }

@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.services;
+package uk.gov.pay.directdebit.events.services;
 
 import java.util.Optional;
 import javax.inject.Inject;

@@ -24,8 +24,8 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
-import uk.gov.pay.directdebit.payments.services.DirectDebitEventService;
-import uk.gov.pay.directdebit.payments.services.GoCardlessEventService;
+import uk.gov.pay.directdebit.events.services.DirectDebitEventService;
+import uk.gov.pay.directdebit.events.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
 

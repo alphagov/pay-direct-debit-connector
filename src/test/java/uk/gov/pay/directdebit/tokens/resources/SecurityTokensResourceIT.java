@@ -19,7 +19,9 @@ import static io.restassured.http.ContentType.JSON;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
@@ -42,6 +44,12 @@ public class SecurityTokensResourceIT {
     public void shouldReturn200WithMandateForValidToken() {
         MandateFixture testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
+
+        aGovUkPayEventFixture()
+                .withMandateId(testMandate.getId())
+                .withEventType(MANDATE_CREATED)
+                .insert(testContext.getJdbi());
+        
         TokenFixture testToken = aTokenFixture().withMandateId(testMandate.getId()).insert(testContext.getJdbi());
         String requestPath = "/v1/tokens/{token}/mandate".replace("{token}", testToken.getToken());
         givenSetup()

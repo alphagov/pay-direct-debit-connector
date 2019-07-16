@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.events.services.DirectDebitEventService;
+import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
@@ -43,19 +46,23 @@ public class PaymentService {
     private final DirectDebitEventService directDebitEventService;
     private final UserNotificationService userNotificationService;
     private final PaymentProviderFactory paymentProviderFactory;
+    private final GovUkPayEventService govUkPayEventService;
 
     @Inject
     public PaymentService(TokenService tokenService,
                           DirectDebitConfig directDebitConfig,
                           PaymentDao paymentDao,
                           DirectDebitEventService directDebitEventService,
-                          UserNotificationService userNotificationService, PaymentProviderFactory paymentProviderFactory) {
+                          UserNotificationService userNotificationService,
+                          PaymentProviderFactory paymentProviderFactory,
+                          GovUkPayEventService govUkPayEventService) {
         this.tokenService = tokenService;
         this.directDebitConfig = directDebitConfig;
         this.directDebitEventService = directDebitEventService;
         this.paymentDao = paymentDao;
         this.userNotificationService = userNotificationService;
         this.paymentProviderFactory = paymentProviderFactory;
+        this.govUkPayEventService = govUkPayEventService;
     }
 
     public Payment findPaymentForExternalId(String externalId) {
@@ -129,6 +136,7 @@ public class PaymentService {
         Payment updatedPayment = updateStateFor(payment, PAYMENT_SUBMITTED_TO_PROVIDER);
         userNotificationService.sendPaymentConfirmedEmailFor(updatedPayment);
         directDebitEventService.registerPaymentSubmittedToProviderEventFor(updatedPayment);
+        govUkPayEventService.storeEventForPayment(payment, PAYMENT_SUBMITTED);
         return updatedPayment;
     }
 
