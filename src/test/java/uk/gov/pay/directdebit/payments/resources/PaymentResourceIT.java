@@ -32,7 +32,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
@@ -292,7 +295,7 @@ public class PaymentResourceIT {
                 .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
 
-        PaymentFixture paymentFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW);
+        PaymentFixture paymentFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW, "state details");
 
         String requestPath = CHARGE_API_PATH
                 .replace("{accountId}", accountExternalId)
@@ -308,7 +311,7 @@ public class PaymentResourceIT {
                 .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
                 .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getStatus()))
                 .body(JSON_STATE_FINISHED_KEY, is(false))
-                .body(JSON_STATE_DETAILS_KEY, is("example_details"));
+                .body(JSON_STATE_DETAILS_KEY, is(paymentFixture.getStateDetails()));
     }
     
     @Test
@@ -341,10 +344,12 @@ public class PaymentResourceIT {
 
     }
     
-    private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState) {
+    private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState,
+                                                        String paymentStateDetails) {
         return aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withState(paymentState)
+                .withStateDetails(paymentStateDetails)
                 .insert(testContext.getJdbi());
     }
 

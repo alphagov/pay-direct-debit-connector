@@ -27,7 +27,7 @@ public class PaymentResponseMapper implements RowMapper<PaymentResponse> {
         PaymentResponse.PaymentResponseBuilder paymentResponse = aPaymentResponse()
                 .withState(
                         new ExternalPaymentStateWithDetails(
-                                PaymentState.valueOf(rs.getString("state")).toExternal(), ""))
+                                PaymentState.valueOf(rs.getString("state")).toExternal(), rs.getString("state_details")))
                 .withAmount(rs.getLong("amount"))
                 .withPaymentExternalId(rs.getString("payment_external_id"))
                 .withDescription(rs.getString("description"))

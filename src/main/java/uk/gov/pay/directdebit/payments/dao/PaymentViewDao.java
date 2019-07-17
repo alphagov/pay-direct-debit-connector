@@ -19,6 +19,7 @@ public class PaymentViewDao {
             "p.created_date as created_date, " +
             "p.state AS state, " +
             "p.state_details AS state_details, " +
+            "p.state_details_description AS state_details_description, " +
             "pa.name AS name, " +
             "pa.email AS email, " +
             "ga.payment_provider as payment_provider, " +

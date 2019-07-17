@@ -48,7 +48,7 @@ public class DirectDebitInfoFrontendResponse {
     private final ZonedDateTime createdDate;
 
     @JsonProperty
-    private final ExternalMandateState state;
+    private final ExternalMandateStateWithDetails state;
 
     @JsonProperty("internal_state")
     private final MandateState internalState;
@@ -58,14 +58,14 @@ public class DirectDebitInfoFrontendResponse {
                                            Payment payment) {
         this.mandateExternalId = mandate.getExternalId().toString();
         this.internalState = mandate.getState();
-        this.state = internalState.toExternal();
+        this.state = new ExternalMandateStateWithDetails(internalState.toExternal(), mandate.getStateDetails().orElse(null));
         this.gatewayAccountId = mandate.getGatewayAccount().getId();
         this.gatewayAccountExternalId = gatewayAccountExternalId;
         this.returnUrl = mandate.getReturnUrl();
         this.mandateReference = mandate.getMandateBankStatementReference().orElse(null);
         this.createdDate = mandate.getCreatedDate();
         this.payment = initPayment(payment);
-        this.payer = mandate.getPayer().map(p -> initPayer(p)).orElse(null);
+        this.payer = mandate.getPayer().map(this::initPayer).orElse(null);
     }
 
     private PaymentDetails initPayment(Payment payment) {
@@ -73,8 +73,7 @@ public class DirectDebitInfoFrontendResponse {
             return new PaymentDetails(
                     payment.getExternalId(),
                     payment.getAmount(),
-                    // TODO: should extract state details (go cardless cause details) from events table somehow
-                    new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"),
+                    new ExternalPaymentStateWithDetails(payment.getState().toExternal(), payment.getStateDetails().orElse(null)),
                     payment.getDescription(),
                     payment.getReference()
             );
@@ -122,7 +121,7 @@ public class DirectDebitInfoFrontendResponse {
         return createdDate;
     }
 
-    public ExternalMandateState getState() {
+    public ExternalMandateStateWithDetails getState() {
         return state;
     }
 
@@ -158,7 +157,7 @@ public class DirectDebitInfoFrontendResponse {
         if (!internalState.equals(that.internalState)) {
             return false;
         }
-        return state == that.state;
+        return state.equals(that.state);
     }
 
     @Override
@@ -182,7 +181,8 @@ public class DirectDebitInfoFrontendResponse {
                 "payerId='" + payer.externalId + "'" +
                 ", paymentId='" + payment.externalId + "'" +
                 ", mandateId='" + mandateExternalId + "'" +
-                ", state='" + state.getState() + "'" +
+                ", state='" + state.getMandateState() + "'" +
+                ", stateDetails='" + state.getDetails() + "'" +
                 ", internalState='" + internalState + "'" +
                 ", returnUrl='" + returnUrl + "'" +
                 ", mandateReference='" + mandateReference + "'" +

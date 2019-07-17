@@ -97,8 +97,7 @@ public class PaymentResponse {
     public static PaymentResponse from(Payment payment) {
         PaymentResponseBuilder paymentResponseBuilder = aPaymentResponse()
                 .withPaymentExternalId(payment.getExternalId())
-                // TODO: should extract state details (go cardless cause details) from events table somehow
-                .withState(new ExternalPaymentStateWithDetails(payment.getState().toExternal(), "example_details"))
+                .withState(new ExternalPaymentStateWithDetails(payment.getState().toExternal(), payment.getStateDetails().orElse(null)))
                 .withAmount(payment.getAmount())
                 .withMandateId(payment.getMandate().getExternalId())
                 .withDescription(payment.getDescription())

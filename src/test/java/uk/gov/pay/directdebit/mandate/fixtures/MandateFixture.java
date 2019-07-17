@@ -107,7 +107,7 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
     }
 
     public MandateFixture withStateDetails(String stateDetails) {
-        this.stateDetailsDescription = stateDetails;
+        this.stateDetails = stateDetails;
         return this;
     }
 
@@ -155,10 +155,12 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                                 "  service_reference,\n" +
                                 "  return_url,\n" +
                                 "  state,\n" +
+                                "  state_details,\n" +
+                                "  state_details_description,\n" +
                                 "  created_date,\n" +
                                 "  payment_provider_id\n" +
                                 ") VALUES (\n" +
-                                "  ?, ?, ?, ?, ?, ?, ?, ?, ?\n" +
+                                "  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?\n" +
                                 ")\n",
                         id,
                         gatewayAccountFixture.getId(),
@@ -167,6 +169,8 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                         serviceReference,
                         returnUrl,
                         state.toString(),
+                        stateDetails,
+                        stateDetailsDescription,
                         createdDate,
                         paymentProviderId
                 )
@@ -188,6 +192,8 @@ public class MandateFixture implements DbFixture<MandateFixture, Mandate> {
                 .withMandateBankStatementReference(mandateReference)
                 .withServiceReference(serviceReference)
                 .withState(state)
+                .withStateDetails(stateDetails)
+                .withStateDetailsDescription(stateDetailsDescription)
                 .withReturnUrl(returnUrl)
                 .withCreatedDate(createdDate)
                 .withPayer(payer)

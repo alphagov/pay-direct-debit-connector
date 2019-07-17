@@ -32,7 +32,7 @@ public class MandateResponse {
     private final List<Map<String, Object>> dataLinks;
 
     @JsonProperty
-    private final ExternalMandateState state;
+    private ExternalMandateStateWithDetails state;
 
     @JsonProperty("service_reference")
     private final String serviceReference;
@@ -63,14 +63,14 @@ public class MandateResponse {
         mandateId = mandate.getExternalId();
         returnUrl = mandate.getReturnUrl();
         this.dataLinks = dataLinks;
-        state = mandate.getState().toExternal();
+        state = new ExternalMandateStateWithDetails(mandate.getState().toExternal(), mandate.getStateDetails().orElse(null));
         serviceReference = mandate.getServiceReference();
         mandateReference = mandate.getMandateBankStatementReference().orElse(null);
         paymentProviderId = mandate.getPaymentProviderMandateId().orElse(null);
         createdDate = mandate.getCreatedDate();
         paymentProvider = mandate.getGatewayAccount().getPaymentProvider();
         description = mandate.getDescription().orElse(null);
-        payer = mandate.getPayer().map(p -> Payer.from(p)).orElse(null);
+        payer = mandate.getPayer().map(Payer::from).orElse(null);
     }
 
     public Optional<URI> getLink(String rel) {
@@ -92,7 +92,7 @@ public class MandateResponse {
         return dataLinks;
     }
 
-    public ExternalMandateState getState() {
+    public ExternalMandateStateWithDetails getState() {
         return state;
     }
 

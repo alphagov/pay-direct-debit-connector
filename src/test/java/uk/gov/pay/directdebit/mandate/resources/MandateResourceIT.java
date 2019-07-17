@@ -284,6 +284,7 @@ public class MandateResourceIT {
                 .body("return_url", is(returnUrl))
                 .body("created_date", is(notNullValue()))
                 .body("state.status", is("created"))
+                .body("state.details", is(nullValue()))
                 .body("state.finished", is(false))
                 .body("service_reference", is("test-service-reference"))
                 .body("payment_provider", is(gatewayAccountFixture.getPaymentProvider().toString().toLowerCase()))
@@ -313,6 +314,7 @@ public class MandateResourceIT {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
         MandateFixture mandateFixture = aMandateFixture()
+                .withStateDetails("state details")
                 .withPayerFixture(payerFixture)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
@@ -333,7 +335,7 @@ public class MandateResourceIT {
                 .body("gateway_account_id", isNumber(gatewayAccountFixture.getId()))
                 .body("gateway_account_external_id", is(gatewayAccountFixture.getExternalId()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
-                .body("state.details", is("example details"))
+                .body("state.details", is(mandateFixture.getStateDetails()))
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
@@ -353,6 +355,7 @@ public class MandateResourceIT {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
         MandateFixture mandateFixture = aMandateFixture()
+                .withStateDetails("state details")
                 .withPayerFixture(payerFixture)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
@@ -371,7 +374,7 @@ public class MandateResourceIT {
                 .body("gateway_account_id", isNumber(gatewayAccountFixture.getId()))
                 .body("gateway_account_external_id", is(gatewayAccountFixture.getExternalId()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
-                .body("state.details", is("example details"))
+                .body("state.details", is(mandateFixture.getStateDetails()))
                 .body("internal_state", is(mandateFixture.getState().toString()))
                 .body("mandate_reference", is(mandateFixture.getMandateReference().toString()))
                 .body("created_date", is(mandateFixture.getCreatedDate().format(ISO_INSTANT_MILLISECOND_PRECISION)))
@@ -387,6 +390,7 @@ public class MandateResourceIT {
         String accountExternalId = gatewayAccountFixture.getExternalId();
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
         MandateFixture mandateFixture = aMandateFixture()
+                .withStateDetails("state details")
                 .withPayerFixture(payerFixture)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
@@ -405,7 +409,7 @@ public class MandateResourceIT {
                 .body("return_url", is(mandateFixture.getReturnUrl()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
                 .body("state.finished", is(mandateFixture.getState().toExternal().isFinished()))
-                .body("state.details", is("example details"))
+                .body("state.details", is(mandateFixture.getStateDetails()))
                 .body("service_reference", is(mandateFixture.getServiceReference()))
                 .body("mandate_reference", is(notNullValue()))
                 .body("created_date", matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(.\\d{1,3})?Z"));

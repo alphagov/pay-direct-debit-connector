@@ -63,6 +63,8 @@ public class PaymentMapper implements RowMapper<Payment> {
     private static final String MANDATE_EXTERNAL_ID_COLUMN = "mandate_external_id";
     private static final String MANDATE_RETURN_URL_COLUMN = "mandate_return_url";
     private static final String MANDATE_STATE_COLUMN = "mandate_state";
+    private static final String MANDATE_STATE_DETAILS_COLUMN = "mandate_state_details";
+    private static final String MANDATE_STATE_DETAILS_DESCRIPTION_COLUMN = "mandate_state_details_description";
     private static final String MANDATE_MANDATE_REFERENCE_COLUMN = "mandate_mandate_reference";
     private static final String MANDATE_SERVICE_REFERENCE_COLUMN = "mandate_service_reference";
     private static final String MANDATE_CREATED_DATE_COLUMN = "mandate_created_date";
@@ -108,6 +110,8 @@ public class PaymentMapper implements RowMapper<Payment> {
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(resultSet.getString(MANDATE_MANDATE_REFERENCE_COLUMN)))
                 .withServiceReference(resultSet.getString(MANDATE_SERVICE_REFERENCE_COLUMN))
                 .withState(MandateState.valueOf(resultSet.getString(MANDATE_STATE_COLUMN)))
+                .withStateDetails(resultSet.getString(MANDATE_STATE_DETAILS_COLUMN))
+                .withStateDetailsDescription(resultSet.getString(MANDATE_STATE_DETAILS_DESCRIPTION_COLUMN))
                 .withReturnUrl(resultSet.getString(MANDATE_RETURN_URL_COLUMN))
                 .withCreatedDate(ZonedDateTime.ofInstant(resultSet.getTimestamp(MANDATE_CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC))
                 .withPayer(payer)
