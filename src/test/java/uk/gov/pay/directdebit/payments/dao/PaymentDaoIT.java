@@ -59,7 +59,7 @@ public class PaymentDaoIT {
     public void setup() {
         paymentDao = testContext.getJdbi().onDemand(PaymentDao.class);
         testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
-        testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+        testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).withStateDetails("state details").insert(testContext.getJdbi());
         testPayment = generateNewPaymentFixture(testMandate, STATE, AMOUNT);
     }
 

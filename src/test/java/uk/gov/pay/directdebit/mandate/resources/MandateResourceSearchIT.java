@@ -82,6 +82,7 @@ public class MandateResourceSearchIT {
                 .withExternalId(MandateExternalId.valueOf("expectedExternalId"))
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf("bankRef"))
                 .withState(MandateState.PENDING)
+                .withStateDetails("state_details")
                 .withCreatedDate(ZonedDateTime.now().minusDays(2))
                 .insert(testContext.getJdbi())
                 .toEntity();
@@ -119,6 +120,7 @@ public class MandateResourceSearchIT {
                 .body("results", hasSize(1))
                 .body("results[0].service_reference", is("expectedReference"))
                 .body("results[0].mandate_id", is("expectedExternalId"))
+                .body("results[0].state.details", is("state_details"))
                 .statusCode(HttpStatus.SC_OK);
     }
 

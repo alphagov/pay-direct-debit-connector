@@ -369,12 +369,14 @@ public class PaymentSearchResourceIT { //TODO merge with PaymentResource
                 aPaymentFixture()
                         .withMandateFixture(mandateFixture)
                         .withState(PaymentState.CANCELLED)
+                        .withStateDetails("state_details")
                         .insert(testContext.getJdbi());
                 continue;
             }
             aPaymentFixture()
                     .withMandateFixture(mandateFixture)
                     .withState(PaymentState.EXPIRED)
+                    .withStateDetails("state_details")
                     .insert(testContext.getJdbi());
         }
         String requestPath = "/v1/api/accounts/{accountId}/payments?state=:state"
@@ -388,7 +390,8 @@ public class PaymentSearchResourceIT { //TODO merge with PaymentResource
                 .body("count", is(6))
                 .body("results", hasSize(6))
                 .body("results[0].state.finished", is(true))
-                .body("results[0].state.status", is("failed"));
+                .body("results[0].state.status", is("failed"))
+                .body("results[0].state.details", is("state_details"));
     }
 
     private RequestSpecification givenSetup() {

@@ -151,18 +151,22 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
                                 "        external_id,\n" +
                                 "        amount,\n" +
                                 "        state,\n" +
+                                "        state_details,\n" +
+                                "        state_details_description,\n" +
                                 "        reference,\n" +
                                 "        description,\n" +
                                 "        created_date,\n" +
                                 "        payment_provider_id,\n" +
                                 "        charge_date\n" +
                                 "    )\n" +
-                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
+                                "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
                         mandateFixture.getId(),
                         externalId,
                         amount,
-                        state,
+                        state.toString(),
+                        stateDetails,
+                        stateDetailsDescription,
                         reference,
                         description,
                         createdDate,
@@ -180,6 +184,8 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
                 .withExternalId(externalId)
                 .withAmount(amount)
                 .withState(state)
+                .withStateDetails(stateDetails)
+                .withStateDetailsDescription(stateDetailsDescription)
                 .withDescription(description)
                 .withReference(reference)
                 .withMandate(mandateFixture.toEntity())
