@@ -122,7 +122,7 @@ public class MandateSearchDao {
         }
 
         params.getFromDate().ifPresent(fromDate -> {
-            sql.append(" AND m.created_date > :createdDateFrom");
+            sql.append(" AND m.created_date >= :createdDateFrom");
             sqlParams.put("createdDateFrom", fromDate);
         });
 
