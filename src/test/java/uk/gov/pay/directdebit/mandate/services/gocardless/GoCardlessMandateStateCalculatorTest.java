@@ -7,23 +7,26 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
+import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessMandateStateCalculator.GOCARDLESS_ACTIONS_THAT_CHANGE_STATE;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoCardlessMandateStateCalculatorTest {
 
-    @Mock
-    private GoCardlessMandateIdAndOrganisationId mockGoCardlessMandateIdAndOrganisationId;
-    
     @Mock
     private GoCardlessEvent mockGoCardlessEvent;
 
@@ -32,9 +35,24 @@ public class GoCardlessMandateStateCalculatorTest {
 
     private GoCardlessMandateStateCalculator goCardlessMandateStateCalculator;
 
+    private GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("a-mandate-id");
+
+    private GoCardlessOrganisationId goCardlessOrganisationId = GoCardlessOrganisationId.valueOf("an-organisation-id");
+
+    private Mandate mandate;
+    
     @Before
     public void setUp() {
-        given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(mockGoCardlessMandateIdAndOrganisationId, GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
+                .withPaymentProvider(GOCARDLESS)
+                .withOrganisation(goCardlessOrganisationId);
+
+        mandate = aMandateFixture()
+                .withPaymentProviderId(goCardlessMandateId)
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .toEntity();
+        
+        given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateId, goCardlessOrganisationId, GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
                 .willReturn(Optional.of(mockGoCardlessEvent));
 
         goCardlessMandateStateCalculator = new GoCardlessMandateStateCalculator(mockGoCardlessEventDao);
@@ -44,8 +62,8 @@ public class GoCardlessMandateStateCalculatorTest {
     public void createdActionMapsToCreatedState() {
         given(mockGoCardlessEvent.getAction()).willReturn("created");
 
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
-        
+        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
+
         assertThat(result.get().getState(), is(MandateState.CREATED));
     }
 
@@ -53,7 +71,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void submittedActionMapsToSubmittedState() {
         given(mockGoCardlessEvent.getAction()).willReturn("submitted");
 
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
         assertThat(result.get().getState(), is(MandateState.SUBMITTED));
     }
@@ -62,7 +80,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void activeActionMapsToActiveState() {
         given(mockGoCardlessEvent.getAction()).willReturn("active");
 
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
         assertThat(result.get().getState(), is(MandateState.ACTIVE));
     }
@@ -71,7 +89,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void cancelledActionMapsToCancelledState() {
         given(mockGoCardlessEvent.getAction()).willReturn("cancelled");
 
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
         assertThat(result.get().getState(), is(MandateState.CANCELLED));
     }
@@ -80,7 +98,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void failedActionMapsToFailedState() {
         given(mockGoCardlessEvent.getAction()).willReturn("failed");
 
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
         assertThat(result.get().getState(), is(MandateState.FAILED));
     }
@@ -91,7 +109,7 @@ public class GoCardlessMandateStateCalculatorTest {
         given(mockGoCardlessEvent.getDetailsCause()).willReturn("details_cause");
         given(mockGoCardlessEvent.getDetailsDescription()).willReturn("This is a description.");
 
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
         assertThat(result.get().getDetails(), is(Optional.of("details_cause")));
         assertThat(result.get().getDetailsDescription(), is(Optional.of("This is a description.")));
@@ -101,17 +119,17 @@ public class GoCardlessMandateStateCalculatorTest {
     public void unrecognisedActionMapsToNothing() {
         given(mockGoCardlessEvent.getAction()).willReturn("eaten_by_wolves");
 
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
     public void noApplicableEventsMapsToNothing() {
-        given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(mockGoCardlessMandateIdAndOrganisationId, GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+        given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateId, goCardlessOrganisationId, GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
                 .willReturn(Optional.empty());
 
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mockGoCardlessMandateIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
         assertThat(result, is(Optional.empty()));
     }

@@ -2,8 +2,9 @@ package uk.gov.pay.directdebit.mandate.exception;
 
 
 import uk.gov.pay.directdebit.common.exception.NotFoundException;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 
 import static java.lang.String.format;
 
@@ -21,8 +22,7 @@ public class MandateNotFoundException extends NotFoundException {
         super(format("Couldn't find mandate for gateway account %s with id: %s", gatewayAccountExternalId, mandateExternalId));
     }
 
-    public MandateNotFoundException(GoCardlessMandateIdAndOrganisationId goCardlessMandateIdAndOrganisationId) {
-        super(format("Couldn't find GoCardless mandate %s for organisation %s", goCardlessMandateIdAndOrganisationId.getGoCardlessMandateId(),
-                goCardlessMandateIdAndOrganisationId.getGoCardlessOrganisationId()));
+    public MandateNotFoundException(PaymentProviderMandateId paymentProviderMandateId, GoCardlessOrganisationId organisationId) {
+        super(format("Couldn't find GoCardless mandate %s for organisation %s", paymentProviderMandateId, organisationId));
     }
 }

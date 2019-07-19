@@ -1,16 +1,14 @@
 package uk.gov.pay.directdebit.mandate.services;
 
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
-import uk.gov.pay.directdebit.mandate.dao.MandateSearchDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.mandate.model.MandateLookupKey;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 
 import javax.inject.Inject;
 import java.time.ZonedDateTime;
@@ -37,21 +35,18 @@ public class MandateQueryService {
                 .orElseThrow(() -> new MandateNotFoundException(mandateExternalId, gatewayAccountExternalId));
     }
 
-    public Mandate findByPaymentProviderMandateId(PaymentProvider paymentProvider, MandateLookupKey mandateLookupKey) {
-        if (mandateLookupKey.getClass() == GoCardlessMandateIdAndOrganisationId.class) {
-            var goCardlessMandateIdAndOrganisationId = (GoCardlessMandateIdAndOrganisationId) mandateLookupKey;
-            return mandateDao
-                    .findByPaymentProviderMandateIdAndOrganisation(paymentProvider, goCardlessMandateIdAndOrganisationId.getGoCardlessMandateId(),
-                            goCardlessMandateIdAndOrganisationId.getGoCardlessOrganisationId())
-                    .orElseThrow(() -> new MandateNotFoundException(goCardlessMandateIdAndOrganisationId));
-        } else if (mandateLookupKey.getClass() == SandboxMandateId.class) {
-            var paymentProviderMandateId = (PaymentProviderMandateId) mandateLookupKey;
-            return mandateDao
-                    .findByPaymentProviderMandateId(paymentProvider, paymentProviderMandateId)
-                    .orElseThrow(() -> new MandateNotFoundException(paymentProviderMandateId.toString()));
-        }
-        throw new IllegalArgumentException("Unrecognised MandateLookupKey of type " + mandateLookupKey.getClass());
+    public Mandate findByProviderMandateIdAndOrganisationId(
+            PaymentProvider paymentProvider,
+            GoCardlessMandateId goCardlessMandateId,
+            GoCardlessOrganisationId organisationId) {
+        return mandateDao.findByPaymentProviderMandateIdAndOrganisation(paymentProvider, goCardlessMandateId, organisationId)
+                .orElseThrow(() -> new MandateNotFoundException(goCardlessMandateId, organisationId));
     }
+    
+    public Mandate findBySandboxMandateId(SandboxMandateId sandboxMandateId) {
+        return mandateDao.findByPaymentProviderMandateId(PaymentProvider.SANDBOX, sandboxMandateId)
+                .orElseThrow(() -> new MandateNotFoundException(sandboxMandateId.toString()));
+     }
 
     public Mandate findById(Long mandateId) {
         return mandateDao
