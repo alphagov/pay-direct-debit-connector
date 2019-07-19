@@ -65,7 +65,7 @@ public class MandateQueryServiceTest {
         given(mockMandateDao.findByPaymentProviderMandateIdAndOrganisation(GOCARDLESS, GOCARDLESS_MANDATE_ID, GOCARDLESS_ORGANISATION_ID))
                 .willReturn(Optional.of(mockMandate));
 
-        Mandate result = mandateQueryService.findByProviderMandateIdAndOrganisationId(GOCARDLESS, GOCARDLESS_MANDATE_ID, GOCARDLESS_ORGANISATION_ID);
+        Mandate result = mandateQueryService.findByGoCardlessMandateIdAndOrganisationId(GOCARDLESS_MANDATE_ID, GOCARDLESS_ORGANISATION_ID);
         
         assertThat(result, is(mockMandate));
         
@@ -77,6 +77,6 @@ public class MandateQueryServiceTest {
         given(mockMandateDao.findByPaymentProviderMandateIdAndOrganisation(GOCARDLESS, GOCARDLESS_MANDATE_ID, GOCARDLESS_ORGANISATION_ID))
                 .willReturn(Optional.empty());
 
-        mandateQueryService.findByProviderMandateIdAndOrganisationId(GOCARDLESS, GOCARDLESS_MANDATE_ID, GOCARDLESS_ORGANISATION_ID);
+        mandateQueryService.findByGoCardlessMandateIdAndOrganisationId(GOCARDLESS_MANDATE_ID, GOCARDLESS_ORGANISATION_ID);
     }
 }

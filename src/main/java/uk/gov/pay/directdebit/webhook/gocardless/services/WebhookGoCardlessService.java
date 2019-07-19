@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.groupingBy;
-import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 
 public class WebhookGoCardlessService {
 
@@ -72,7 +71,7 @@ public class WebhookGoCardlessService {
 
     private void updateStateForMandateEvents(List<GoCardlessEvent> eventsThatAffectMandates) {
         eventsThatAffectMandates.stream()
-                .map(this::toMandateBusinessKey)
+                .map(this::toGoCardlessMandateIdAndOrganisationId)
                 .flatMap(Optional::stream)
                 .distinct()
                 .map(this::getMandate)
@@ -80,7 +79,7 @@ public class WebhookGoCardlessService {
                 .forEach(goCardlessMandateStateUpdater::updateState);
     }
 
-    private Optional<Pair<GoCardlessMandateId, GoCardlessOrganisationId>> toMandateBusinessKey(GoCardlessEvent goCardlessEvent) {
+    private Optional<Pair<GoCardlessMandateId, GoCardlessOrganisationId>> toGoCardlessMandateIdAndOrganisationId(GoCardlessEvent goCardlessEvent) {
         var goCardlessMandateIdAndOrganisationId = goCardlessEvent.getLinksMandate()
                 .map(mandateId -> Pair.of(mandateId, goCardlessEvent.getLinksOrganisation()))
                 .orElseGet(() -> {
@@ -91,20 +90,21 @@ public class WebhookGoCardlessService {
     }
 
     private Optional<Mandate> getMandate(Pair<GoCardlessMandateId, GoCardlessOrganisationId> goCardlessMandateBusinessKey) {
-        Mandate mandate = null;
-
+        GoCardlessMandateId goCardlessMandateId = goCardlessMandateBusinessKey.getLeft();
+        GoCardlessOrganisationId goCardlessOrganisationId = goCardlessMandateBusinessKey.getRight();
         try {
-            mandate = mandateQueryService.findByProviderMandateIdAndOrganisationId(
-                    GOCARDLESS,
-                    goCardlessMandateBusinessKey.getLeft(),
-                    goCardlessMandateBusinessKey.getRight());
+            Mandate mandate = mandateQueryService.findByGoCardlessMandateIdAndOrganisationId(
+                    goCardlessMandateId,
+                    goCardlessOrganisationId);
+
+            return Optional.of(mandate);
         } catch (MandateNotFoundException e) {
             LOGGER.error(String.format("Could not update status of GoCardless mandate %s for organisation %s because the mandate was not found",
-                    goCardlessMandateBusinessKey.getLeft(),
-                    goCardlessMandateBusinessKey.getRight()));
+                    goCardlessMandateId,
+                    goCardlessOrganisationId));
         }
 
-        return Optional.ofNullable(mandate);
+        return Optional.empty();
     }
 
     private void updateStateForPaymentEvents(List<GoCardlessEvent> eventsThatAffectPayments) {

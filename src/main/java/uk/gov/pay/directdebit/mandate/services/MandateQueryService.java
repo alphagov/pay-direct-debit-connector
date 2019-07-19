@@ -15,6 +15,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+
 public class MandateQueryService {
     private MandateDao mandateDao;
 
@@ -35,11 +37,10 @@ public class MandateQueryService {
                 .orElseThrow(() -> new MandateNotFoundException(mandateExternalId, gatewayAccountExternalId));
     }
 
-    public Mandate findByProviderMandateIdAndOrganisationId(
-            PaymentProvider paymentProvider,
+    public Mandate findByGoCardlessMandateIdAndOrganisationId(
             GoCardlessMandateId goCardlessMandateId,
             GoCardlessOrganisationId organisationId) {
-        return mandateDao.findByPaymentProviderMandateIdAndOrganisation(paymentProvider, goCardlessMandateId, organisationId)
+        return mandateDao.findByPaymentProviderMandateIdAndOrganisation(GOCARDLESS, goCardlessMandateId, organisationId)
                 .orElseThrow(() -> new MandateNotFoundException(goCardlessMandateId, organisationId));
     }
     

@@ -40,7 +40,7 @@ class GoCardlessMandateStateCalculator {
     }
 
     Optional<DirectDebitStateWithDetails<MandateState>> calculate(Mandate mandate) {
-        Optional<GoCardlessEvent> latestGoCardlessEvent = mandate.getPaymentProviderMandateId()
+        Optional<GoCardlessEvent> latestApplicableGoCardlessEvent = mandate.getPaymentProviderMandateId()
                 .map(paymentProviderMandateId -> {
                     GoCardlessOrganisationId goCardlessOrganisationId = mandate.getGatewayAccount().getOrganisation()
                             .orElseThrow(() -> new GatewayAccountMissingOrganisationIdException(mandate.getGatewayAccount()));
@@ -52,7 +52,7 @@ class GoCardlessMandateStateCalculator {
                 })
                 .orElse(Optional.empty());
 
-        return latestGoCardlessEvent
+        return latestApplicableGoCardlessEvent
                 .filter(goCardlessEvent -> GOCARDLESS_ACTION_TO_MANDATE_STATE.get(goCardlessEvent.getAction()) != null)
                 .map(goCardlessEvent -> new DirectDebitStateWithDetails<>(
                         GOCARDLESS_ACTION_TO_MANDATE_STATE.get(goCardlessEvent.getAction()),
