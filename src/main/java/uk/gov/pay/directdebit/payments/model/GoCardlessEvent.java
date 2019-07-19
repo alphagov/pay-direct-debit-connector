@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.payments.model;
 
+import uk.gov.pay.directdebit.events.model.Event;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 
@@ -7,7 +8,7 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
-public class GoCardlessEvent {
+public class GoCardlessEvent implements Event {
 
     private final Long id;
     private final String resourceId;
@@ -154,6 +155,11 @@ public class GoCardlessEvent {
     }
 
     public ZonedDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    @Override
+    public ZonedDateTime getTimestamp() {
         return createdAt;
     }
 

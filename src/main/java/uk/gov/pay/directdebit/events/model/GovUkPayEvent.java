@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
-public class GovUkPayEvent {
+public class GovUkPayEvent implements Event {
 
     private final Long id;
     private final Long mandateId;
@@ -66,6 +66,11 @@ public class GovUkPayEvent {
 
     public GovUkPayEventType getEventType() {
         return eventType;
+    }
+
+    @Override
+    public ZonedDateTime getTimestamp() {
+        return eventDate;
     }
 
     @Override

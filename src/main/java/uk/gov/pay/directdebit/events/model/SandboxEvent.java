@@ -6,7 +6,7 @@ import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-public class SandboxEvent {
+public class SandboxEvent implements Event {
     
     private final SandboxMandateId mandateId;
     private final SandboxPaymentId paymentId;
@@ -42,6 +42,10 @@ public class SandboxEvent {
         return createdAt;
     }
 
+    @Override
+    public ZonedDateTime getTimestamp() {
+        return createdAt;
+    }
 
     public static final class SandboxEventBuilder {
         private SandboxMandateId mandateId;
