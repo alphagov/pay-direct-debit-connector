@@ -120,24 +120,12 @@ public interface MandateDao {
     @SqlUpdate("UPDATE mandates m SET state = :state WHERE m.id = :id")
     int updateState(@Bind("id") Long id, @Bind("state") MandateState mandateState);
 
-    @SqlUpdate("UPDATE mandates m SET state = :state, state_details = :stateDetails, state_details_description = :stateDetailsDescription " +
-            "FROM gateway_accounts g WHERE m.payment_provider_id = :providerMandateId " +
-            "AND g.id = m.gateway_account_id AND g.organisation = :goCardlessOrganisationId AND g.payment_provider = :provider")
-    int updateStateByProviderIdAndOrganisationId(@Bind("provider") PaymentProvider paymentProvider,
-                                                 @Bind("goCardlessOrganisationId") GoCardlessOrganisationId goCardlessOrganisationId,
-                                                 @Bind("providerMandateId") PaymentProviderMandateId paymentProviderMandateId,
-                                                 @Bind("state") MandateState mandateState,
-                                                 @Bind("stateDetails") String details,
-                                                 @Bind("stateDetailsDescription") String detailsDescription);
-
-    @SqlUpdate("UPDATE mandates m SET state = :state, state_details = :stateDetails, state_details_description = :stateDetailsDescription " +
-            "FROM gateway_accounts g WHERE m.payment_provider_id = :providerMandateId " +
-            "AND g.id = m.gateway_account_id AND g.organisation IS NULL AND g.payment_provider = :provider")
-    int updateStateByProviderId(@Bind("provider") PaymentProvider paymentProvider,
-                                @Bind("providerMandateId") PaymentProviderMandateId paymentProviderMandateId,
-                                @Bind("state") MandateState mandateState,
-                                @Bind("stateDetails") String details,
-                                @Bind("stateDetailsDescription") String detailsDescription);
+    @SqlUpdate("UPDATE mandates SET state = :state, state_details = :stateDetails, state_details_description = :stateDetailsDescription " +
+            "WHERE id = :id")
+    int updateStateAndDetails(@Bind("id") Long id,
+                              @Bind("state") MandateState mandateState,
+                              @Bind("stateDetails") String details,
+                              @Bind("stateDetailsDescription") String detailsDescription);
 
     @SqlUpdate("UPDATE mandates m SET mandate_reference = :mandateBankStatementReference, payment_provider_id = :paymentProviderMandateId WHERE m.id = :id")
     int updateReferenceAndPaymentProviderId(@BindBean Mandate mandate);

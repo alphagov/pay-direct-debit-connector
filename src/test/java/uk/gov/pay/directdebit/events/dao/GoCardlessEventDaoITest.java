@@ -13,7 +13,6 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessMandateIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 
@@ -114,8 +113,8 @@ public class GoCardlessEventDaoITest {
         goCardlessEventDao.insert(laterEventWrongOrganisationId.toEntity());
 
         GoCardlessEvent event = goCardlessEventDao.findLatestApplicableEventForMandate(
-                new GoCardlessMandateIdAndOrganisationId(
-                        GoCardlessMandateId.valueOf("Mandate ID we want"), GoCardlessOrganisationId.valueOf("Organisation ID we want")),
+                GoCardlessMandateId.valueOf("Mandate ID we want"),
+                GoCardlessOrganisationId.valueOf("Organisation ID we want"),
                 Set.of("Action we want")).get();
 
         assertThat(event.getGoCardlessEventId(), is(GoCardlessEventId.valueOf("This is the latest applicable event")));
@@ -169,9 +168,11 @@ public class GoCardlessEventDaoITest {
 
     @Test
     public void shouldNotFindAnythingIfNoApplicableEventForMandate() {
-        Optional<GoCardlessEvent> event = goCardlessEventDao.findLatestApplicableEventForMandate(new GoCardlessMandateIdAndOrganisationId(
-                GoCardlessMandateId.valueOf("Mandate ID we want"), GoCardlessOrganisationId.valueOf("Organisation ID we want")), Set.of("Action we want"));
-        
+        Optional<GoCardlessEvent> event = goCardlessEventDao.findLatestApplicableEventForMandate(
+                GoCardlessMandateId.valueOf("Mandate ID we want"),
+                GoCardlessOrganisationId.valueOf("Organisation ID we want"),
+                Set.of("Action we want"));
+
         assertThat(event, is(Optional.empty()));
     }
 
