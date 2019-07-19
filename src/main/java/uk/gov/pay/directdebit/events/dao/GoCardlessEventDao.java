@@ -13,8 +13,8 @@ import uk.gov.pay.directdebit.events.model.GoCardlessOrganisationIdArgumentFacto
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdArgumentFactory;
 

@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.model;
+package uk.gov.pay.directdebit.events.model;
 
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
 import org.jdbi.v3.core.argument.Argument;

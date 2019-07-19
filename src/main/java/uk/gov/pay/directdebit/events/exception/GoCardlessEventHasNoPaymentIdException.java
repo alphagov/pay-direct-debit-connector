@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.events.exception;
 
 import uk.gov.pay.directdebit.common.exception.NotFoundException;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventId;
 
 import static java.lang.String.format;
 

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.payments.exception.InvalidStateException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.events.services.GoCardlessEventService;

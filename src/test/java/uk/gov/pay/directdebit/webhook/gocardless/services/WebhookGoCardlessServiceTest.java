@@ -13,7 +13,7 @@ import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessMandateStateUpdater;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 import uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessPaymentStateUpdater;
@@ -30,9 +30,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.MANDATES;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.UNHANDLED;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.MANDATES;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYMENTS;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.UNHANDLED;
 
 @RunWith(MockitoJUnitRunner.class)
 

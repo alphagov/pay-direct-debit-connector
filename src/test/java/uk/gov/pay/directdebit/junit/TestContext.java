@@ -7,7 +7,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEventIdArgumentFactory;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdArgumentFactory;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
