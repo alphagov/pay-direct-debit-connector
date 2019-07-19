@@ -115,7 +115,7 @@ public class GovUkPayEvent implements Event {
         MANDATE_EXPIRED_BY_SYSTEM,
         MANDATE_CANCELLED_BY_USER,
         MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE,
-        PAYMENT_SUBMITTED;
+        PAYMENT_SUBMITTED
     }
 
     public static final class GovUkPayEventBuilder {

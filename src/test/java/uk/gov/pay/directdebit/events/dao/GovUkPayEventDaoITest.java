@@ -17,12 +17,14 @@ import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_CANCELLED_BY_USER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_CREATED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_EXPIRED_BY_SYSTEM;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_SUBMITTED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
@@ -86,7 +88,7 @@ public class GovUkPayEventDaoITest {
                 .withEventType(MANDATE_SUBMITTED)
                 .insert(testContext.getJdbi())
                 .toEntity();
-        var earliestEvent = aGovUkPayEventFixture()
+        var latestEvent = aGovUkPayEventFixture()
                 .withMandateId(mandate.getId())
                 .withEventDate(ZonedDateTime.parse("2019-01-01T13:30:40Z"))
                 .withEventType(MANDATE_CREATED)
@@ -101,7 +103,7 @@ public class GovUkPayEventDaoITest {
 
         Optional<GovUkPayEvent> govUkPayEvent = govUkPayEventDao.findLatestEventForMandate(mandate.getId());
 
-        assertThat(govUkPayEvent.get(), is(earliestEvent));
+        assertThat(govUkPayEvent.get(), is(latestEvent));
     }
 
     @Test
@@ -140,6 +142,48 @@ public class GovUkPayEventDaoITest {
     @Test
     public void shouldReturnEmptyOptional_whenNoPreviousPaymentEvent() {
         Optional<GovUkPayEvent> govUkPayEvent = govUkPayEventDao.findLatestEventForPayment(payment.getId());
+        assertThat(govUkPayEvent, is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldFindLatestApplicableEventForMandate() {
+        aGovUkPayEventFixture()
+                .withMandateId(mandate.getId())
+                .withEventDate(ZonedDateTime.parse("2019-01-01T14:30:40Z"))
+                .withEventType(MANDATE_EXPIRED_BY_SYSTEM)
+                .insert(testContext.getJdbi())
+                .toEntity();
+        var latestApplicableEvent = aGovUkPayEventFixture()
+                .withMandateId(mandate.getId())
+                .withEventDate(ZonedDateTime.parse("2019-01-01T13:30:40Z"))
+                .withEventType(MANDATE_CREATED)
+                .insert(testContext.getJdbi())
+                .toEntity();
+        aGovUkPayEventFixture()
+                .withMandateId(mandate.getId())
+                .withEventDate(ZonedDateTime.parse("2019-01-01T11:30:40Z"))
+                .withEventType(MANDATE_CANCELLED_BY_USER)
+                .insert(testContext.getJdbi())
+                .toEntity();
+
+        var applicableEvents = Set.of(MANDATE_CREATED, MANDATE_CANCELLED_BY_USER);
+        Optional<GovUkPayEvent> govUkPayEvent = govUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), applicableEvents);
+
+        assertThat(govUkPayEvent.get(), is(latestApplicableEvent));
+    }
+
+    @Test
+    public void shouldReturnEmptyOptionalWhenNoApplicableEvent() {
+        aGovUkPayEventFixture()
+                .withMandateId(mandate.getId())
+                .withEventDate(ZonedDateTime.parse("2019-01-01T14:30:40Z"))
+                .withEventType(MANDATE_EXPIRED_BY_SYSTEM)
+                .insert(testContext.getJdbi())
+                .toEntity();
+
+        var applicableEvents = Set.of(MANDATE_CREATED, MANDATE_CANCELLED_BY_USER);
+        Optional<GovUkPayEvent> govUkPayEvent = govUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), applicableEvents);
+
         assertThat(govUkPayEvent, is(Optional.empty()));
     }
 }
