@@ -1,4 +1,4 @@
-package uk.gov.pay.directdebit.payments.model;
+package uk.gov.pay.directdebit.events.model;
 
 import uk.gov.pay.commons.model.WrappedStringValue;
 

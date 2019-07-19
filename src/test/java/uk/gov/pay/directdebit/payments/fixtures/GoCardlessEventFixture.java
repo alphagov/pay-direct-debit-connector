@@ -6,10 +6,10 @@ import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
+import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 
 import java.sql.Timestamp;
 import java.time.ZoneOffset;
@@ -17,7 +17,7 @@ import java.time.ZonedDateTime;
 
 import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang.RandomStringUtils.randomAlphanumeric;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent;
+import static uk.gov.pay.directdebit.events.model.GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent;
 
 public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture, GoCardlessEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);

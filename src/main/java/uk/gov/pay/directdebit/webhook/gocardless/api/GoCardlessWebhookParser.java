@@ -6,11 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent.GoCardlessEventBuilder;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent.GoCardlessEventBuilder;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
+import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
 
 import javax.inject.Inject;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.pay.directdebit.payments.model.GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent;
+import static uk.gov.pay.directdebit.events.model.GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent;
 
 public class GoCardlessWebhookParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessWebhookParser.class);

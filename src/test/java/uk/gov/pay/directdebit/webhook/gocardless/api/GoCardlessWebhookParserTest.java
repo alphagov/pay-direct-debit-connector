@@ -8,8 +8,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.WebhookParserException;
 
 import javax.json.Json;
@@ -23,9 +23,9 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.MANDATES;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYOUTS;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.MANDATES;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYMENTS;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYOUTS;
 
 public class GoCardlessWebhookParserTest {
 

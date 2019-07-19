@@ -18,10 +18,10 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessResourceType;
+import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -33,7 +33,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture.aDirectDebitEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
-import static uk.gov.pay.directdebit.payments.model.GoCardlessResourceType.PAYMENTS;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYMENTS;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
 @RunWith(DropwizardJUnitRunner.class)
