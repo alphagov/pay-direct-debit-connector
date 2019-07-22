@@ -1,0 +1,1 @@
+ALTER TABLE mandates ALTER COLUMN service_reference SET NOT NULL; 
