@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class GovUkPayEvent implements Event {
-
+    
     private final Long id;
     private final Long mandateId;
     private final Long paymentId;
