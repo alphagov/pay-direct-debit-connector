@@ -32,7 +32,7 @@ public class SandboxPaymentStateCalculator {
         return sandboxEventDao.findLatestApplicableEventForPayment(sandboxPaymentId, SANDBOX_ACTIONS_THAT_CHANGE_STATE)
                 .filter(sandboxEvent -> SANDBOX_ACTION_TO_PAYMENT_STATE.get(sandboxEvent.getEventAction()) != null)
                 .map(sandboxEvent -> new DirectDebitStateWithDetails<>(
-                        SANDBOX_ACTION_TO_PAYMENT_STATE.get(sandboxEvent.getEventAction()), null, null)
+                        SANDBOX_ACTION_TO_PAYMENT_STATE.get(sandboxEvent.getEventAction()))
                 );
     }
 

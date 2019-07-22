@@ -3,6 +3,7 @@ package uk.gov.pay.directdebit.events.dao.mapper;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.gov.pay.directdebit.events.model.GovUkPayEvent;
+import uk.gov.pay.directdebit.events.model.GovUkPayEventType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,7 +19,7 @@ public class GovUkPayEventMapper implements RowMapper<GovUkPayEvent> {
                 .withResourceType(GovUkPayEvent.ResourceType.valueOf(rs.getString("resource_type")))
                 .withEventDate(ZonedDateTime.ofInstant(
                         rs.getTimestamp("event_date").toInstant(), ZoneOffset.UTC))
-                .withEventType(GovUkPayEvent.GovUkPayEventType.valueOf(rs.getString("event_type")));
+                .withEventType(GovUkPayEventType.valueOf(rs.getString("event_type")));
 
         Optional.ofNullable(rs.getObject("mandate_id"))
                 .map(mandateId -> (Long)mandateId)

@@ -9,6 +9,7 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.events.dao.mapper.GovUkPayEventMapper;
 import uk.gov.pay.directdebit.events.model.GovUkPayEvent;
+import uk.gov.pay.directdebit.events.model.GovUkPayEventType;
 
 import java.util.Optional;
 import java.util.Set;
@@ -46,7 +47,7 @@ public interface GovUkPayEventDao {
             "ORDER BY event_date DESC " +
             "LIMIT 1")
     Optional<GovUkPayEvent> findLatestApplicableEventForMandate(@Bind("mandateId") Long mandateId,
-                                                                @BindList("applicableEventTypes") Set<GovUkPayEvent.GovUkPayEventType> applicableEventTypes);
+                                                                @BindList("applicableEventTypes") Set<GovUkPayEventType> applicableEventTypes);
 
     @SqlQuery("SELECT id, " +
             "mandate_id, " +

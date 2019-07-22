@@ -6,6 +6,7 @@ import uk.gov.pay.directdebit.events.dao.GovUkPayEventDao;
 import uk.gov.pay.directdebit.events.exception.InvalidGovUkPayEventInsertionException;
 import uk.gov.pay.directdebit.events.model.GovUkPayEvent;
 import uk.gov.pay.directdebit.events.model.GovUkPayEventStateGraph;
+import uk.gov.pay.directdebit.events.model.GovUkPayEventType;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payments.model.Payment;
 
@@ -25,7 +26,7 @@ public class GovUkPayEventService {
         this.govUkPayEventStateGraph = govUkPayEventStateGraph;
     }
 
-    public void storeEventForMandate(Mandate mandate, GovUkPayEvent.GovUkPayEventType eventType) {
+    public void storeEventForMandate(Mandate mandate, GovUkPayEventType eventType) {
         var event = new GovUkPayEvent(mandate, eventType);
         govUkPayEventDao.findLatestEventForMandate(mandate.getId())
                 .ifPresentOrElse(latestEvent -> validateEventTransition(event, latestEvent),
@@ -35,7 +36,7 @@ public class GovUkPayEventService {
         LOGGER.info("Inserted GOV.UK Pay event of type {} for mandate {}", eventType, mandate.getExternalId());
     }
 
-    public void storeEventForPayment(Payment payment, GovUkPayEvent.GovUkPayEventType eventType) {
+    public void storeEventForPayment(Payment payment, GovUkPayEventType eventType) {
         var event = new GovUkPayEvent(payment, eventType);
         govUkPayEventDao.findLatestEventForPayment(payment.getId())
                 .ifPresentOrElse(latestEvent -> validateEventTransition(event, latestEvent),

@@ -2,8 +2,6 @@ package uk.gov.pay.directdebit.mandate.services.gocardless;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-import junitparams.converters.Param;
-import org.apache.commons.lang3.builder.ToStringExclude;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,21 +10,19 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.MockitoRule;
 import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.events.dao.GovUkPayEventDao;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.events.model.GovUkPayEvent;
+import uk.gov.pay.directdebit.events.model.GovUkPayEventType;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountMissingOrganisationIdException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
-import uk.gov.pay.directdebit.mandate.exception.UnexpectedGoCardlessEventActionException;
-import uk.gov.pay.directdebit.mandate.exception.UnexpectedGovUkPayEventTypeException;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -35,8 +31,8 @@ import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_CANCELLED_BY_USER;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.PAYMENT_SUBMITTED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessMandateStateCalculator.GOCARDLESS_ACTIONS_THAT_CHANGE_STATE;
@@ -111,7 +107,7 @@ public class GoCardlessMandateStateCalculatorTest {
             "MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE"
     })
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
-        GovUkPayEvent.GovUkPayEventType govUkPayEventType = GovUkPayEvent.GovUkPayEventType.valueOf(eventType);
+        GovUkPayEventType govUkPayEventType = GovUkPayEventType.valueOf(eventType);
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture().withEventType(govUkPayEventType).toEntity();
         given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE))
                 .willReturn(Optional.of(govUkPayEvent));
@@ -179,33 +175,6 @@ public class GoCardlessMandateStateCalculatorTest {
         Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
         assertThat(result.get().getState(), is(MandateState.ACTIVE));
-    }
-
-    @Test
-    public void unexpectedGoCardlessEventActionThrowsException() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction("eaten_by_wolves").toEntity();
-        given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
-                .willReturn(Optional.of(goCardlessEvent));
-
-        thrown.expect(UnexpectedGoCardlessEventActionException.class);
-
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
-
-        assertThat(result, is(Optional.empty()));
-    }
-
-    @Test
-    public void unexpectedGovUkPayEventTypeThrowsException() {
-        GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture().withEventType(PAYMENT_SUBMITTED).toEntity();
-        given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE))
-                .willReturn(Optional.of(govUkPayEvent));
-
-        thrown.expect(UnexpectedGovUkPayEventTypeException.class);
-
-        Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
-
-        assertThat(result, is(Optional.empty()));
     }
 
     @Test

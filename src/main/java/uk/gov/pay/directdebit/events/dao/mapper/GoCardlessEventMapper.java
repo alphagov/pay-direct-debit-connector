@@ -2,12 +2,12 @@ package uk.gov.pay.directdebit.events.dao.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
-import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.events.model.GoCardlessEventId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
+import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
