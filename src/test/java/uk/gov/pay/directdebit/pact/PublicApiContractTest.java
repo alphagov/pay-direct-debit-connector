@@ -8,7 +8,6 @@ import au.com.dius.pact.provider.junit.loader.PactBrokerAuth;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -29,12 +28,10 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
-import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
-import java.util.Optional;
 
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
@@ -90,6 +87,7 @@ public class PublicApiContractTest {
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(params.get("bank_mandate_reference")))
                 .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
                 .withState(MandateState.PENDING)
+                .withStateDetails("mandate_state_details")
                 .insert(app.getTestContext().getJdbi());
     }
 
@@ -106,7 +104,7 @@ public class PublicApiContractTest {
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
         testPayer.insert(app.getTestContext().getJdbi());
         for (int x = 0; x < 3; x++) {
-            aPaymentFixture().withMandateFixture(testMandate).insert(app.getTestContext().getJdbi());
+            aPaymentFixture().withStateDetails("payment_state_details").withMandateFixture(testMandate).insert(app.getTestContext().getJdbi());
         }
     }
 
@@ -124,12 +122,12 @@ public class PublicApiContractTest {
                 .withExternalId(mandateExternalId);
 
         MandateDao mandateDao = app.getTestContext().getJdbi().onDemand(MandateDao.class);
-        Optional<Mandate> mandateByExternalId = mandateDao.findByExternalId(mandateExternalId);
-        if (!mandateByExternalId.isPresent()) {
-            mandateFixture.insert(app.getTestContext().getJdbi());
-        } else {
-            mandateFixture.withId(mandateByExternalId.get().getId());
-        }
+        mandateDao.findByExternalId(mandateExternalId)
+                .map(Mandate::getId)
+                .ifPresentOrElse(
+                        mandateFixture::withId,
+                        () -> mandateFixture.insert(app.getTestContext().getJdbi())
+                );
 
         PaymentFixture payment = aPaymentFixture()
                 .withMandateFixture(mandateFixture)
@@ -163,6 +161,7 @@ public class PublicApiContractTest {
                 .withAmount(1000L)
                 .withReference("ABCDE")
                 .withState(PaymentState.PENDING)
+                .withStateDetails("payment_state_details")
                 .withCreatedDate(ZonedDateTime.parse("1995-10-27T10:21:01.499Z"))
                 .withPaymentProviderId(GoCardlessPaymentId.valueOf("AAAA1111"))
                 .insert(app.getTestContext().getJdbi());
