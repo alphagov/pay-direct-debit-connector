@@ -14,6 +14,7 @@ import uk.gov.pay.directdebit.events.dao.GovUkPayEventDao;
 import uk.gov.pay.directdebit.events.exception.InvalidGovUkPayEventInsertionException;
 import uk.gov.pay.directdebit.events.model.GovUkPayEvent;
 import uk.gov.pay.directdebit.events.model.GovUkPayEventStateGraph;
+import uk.gov.pay.directdebit.events.model.GovUkPayEventType;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.payments.model.Payment;
@@ -25,12 +26,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_CREATED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_EXPIRED_BY_SYSTEM;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.MANDATE_SUBMITTED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.ResourceType.MANDATE;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.ResourceType.PAYMENT;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_EXPIRED_BY_SYSTEM;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
@@ -72,7 +73,7 @@ public class GovUkPayEventServiceTest {
                 .withMandateId(mandateId)
                 .withEventType(MANDATE_CREATED)
                 .toEntity();
-        GovUkPayEvent.GovUkPayEventType newEventType = MANDATE_EXPIRED_BY_SYSTEM;
+        GovUkPayEventType newEventType = MANDATE_EXPIRED_BY_SYSTEM;
 
         when(govUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.of(previousEvent));
         when(govUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(true);
@@ -91,7 +92,7 @@ public class GovUkPayEventServiceTest {
 
     @Test
     public void insertMandateEvent_insertedForValidInitialEvent() {
-        GovUkPayEvent.GovUkPayEventType eventType = MANDATE_CREATED;
+        GovUkPayEventType eventType = MANDATE_CREATED;
 
         when(govUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.empty());
         when(govUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(true);
@@ -115,7 +116,7 @@ public class GovUkPayEventServiceTest {
                 .withMandateId(mandateId)
                 .withEventType(MANDATE_EXPIRED_BY_SYSTEM)
                 .toEntity();
-        GovUkPayEvent.GovUkPayEventType newEventType = MANDATE_CREATED;
+        GovUkPayEventType newEventType = MANDATE_CREATED;
 
         when(govUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.of(previousEvent));
         when(govUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(false);
@@ -128,7 +129,7 @@ public class GovUkPayEventServiceTest {
 
     @Test
     public void insertMandateEvent_shouldThrowForInvalidInitialEvent() {
-        GovUkPayEvent.GovUkPayEventType eventType = MANDATE_SUBMITTED;
+        GovUkPayEventType eventType = MANDATE_SUBMITTED;
 
         when(govUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.empty());
         when(govUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(false);
@@ -141,7 +142,7 @@ public class GovUkPayEventServiceTest {
 
     @Test
     public void insertPaymentEvent_insertedForValidInitialEvent() {
-        GovUkPayEvent.GovUkPayEventType eventType = PAYMENT_SUBMITTED;
+        GovUkPayEventType eventType = PAYMENT_SUBMITTED;
 
         when(govUkPayEventDao.findLatestEventForPayment(paymentId)).thenReturn(Optional.empty());
         when(govUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(true);
@@ -165,7 +166,7 @@ public class GovUkPayEventServiceTest {
                 .withPaymentId(paymentId)
                 .withEventType(PAYMENT_SUBMITTED)
                 .toEntity();
-        GovUkPayEvent.GovUkPayEventType newEventType = PAYMENT_SUBMITTED;
+        GovUkPayEventType newEventType = PAYMENT_SUBMITTED;
 
         when(govUkPayEventDao.findLatestEventForPayment(paymentId)).thenReturn(Optional.of(previousEvent));
         when(govUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(false);

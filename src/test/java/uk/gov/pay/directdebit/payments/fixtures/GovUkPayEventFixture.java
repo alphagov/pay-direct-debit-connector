@@ -4,8 +4,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.fixtures.DbFixture;
 import uk.gov.pay.directdebit.events.model.GovUkPayEvent;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
-import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.events.model.GovUkPayEventType;
 
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
@@ -18,7 +17,7 @@ public class GovUkPayEventFixture implements DbFixture<GovUkPayEventFixture, Gov
     private Long paymentId;
     private ZonedDateTime eventDate = ZonedDateTime.parse("2019-06-07T08:46:01.123456Z");
     private GovUkPayEvent.ResourceType resourceType = GovUkPayEvent.ResourceType.MANDATE;
-    private GovUkPayEvent.GovUkPayEventType eventType = GovUkPayEvent.GovUkPayEventType.MANDATE_CREATED;
+    private GovUkPayEventType eventType = GovUkPayEventType.MANDATE_CREATED;
 
     private GovUkPayEventFixture() {
     }
@@ -86,7 +85,7 @@ public class GovUkPayEventFixture implements DbFixture<GovUkPayEventFixture, Gov
         return this;
     }
 
-    public GovUkPayEventFixture withEventType(GovUkPayEvent.GovUkPayEventType eventType) {
+    public GovUkPayEventFixture withEventType(GovUkPayEventType eventType) {
         this.eventType = eventType;
         return this;
     }

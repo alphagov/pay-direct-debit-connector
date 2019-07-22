@@ -11,6 +11,10 @@ public class DirectDebitStateWithDetails<T extends DirectDebitState> {
     private final String details;
     private final String detailsDescription;
 
+    public DirectDebitStateWithDetails(T state) {
+        this(state, null, null);
+    }
+
     public DirectDebitStateWithDetails(T state, String details, String detailsDescription) {
         this.state = Objects.requireNonNull(state);
         this.details = details;
