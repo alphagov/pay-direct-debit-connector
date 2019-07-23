@@ -9,8 +9,8 @@ import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
-import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessMandateStateUpdater;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.mandate.services.MandateStateUpdater;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessPaymentStateUpdater;
@@ -33,7 +33,7 @@ public class WebhookGoCardlessService {
     private final GoCardlessEventService goCardlessService;
     private final GoCardlessPaymentHandler goCardlessPaymentHandler;
     private final GoCardlessMandateHandler goCardlessMandateHandler;
-    private final GoCardlessMandateStateUpdater goCardlessMandateStateUpdater;
+    private final MandateStateUpdater mandateStateUpdater;
     private final GoCardlessPaymentStateUpdater goCardlessPaymentStateUpdater;
     private final MandateQueryService mandateQueryService;
 
@@ -41,13 +41,13 @@ public class WebhookGoCardlessService {
     WebhookGoCardlessService(GoCardlessEventService goCardlessService,
                              GoCardlessPaymentHandler goCardlessPaymentHandler,
                              GoCardlessMandateHandler goCardlessMandateHandler,
-                             GoCardlessMandateStateUpdater goCardlessMandateStateUpdater,
+                             MandateStateUpdater mandateStateUpdater,
                              GoCardlessPaymentStateUpdater goCardlessPaymentStateUpdater,
                              MandateQueryService mandateQueryService) {
         this.goCardlessService = goCardlessService;
         this.goCardlessPaymentHandler = goCardlessPaymentHandler;
         this.goCardlessMandateHandler = goCardlessMandateHandler;
-        this.goCardlessMandateStateUpdater = goCardlessMandateStateUpdater;
+        this.mandateStateUpdater = mandateStateUpdater;
         this.goCardlessPaymentStateUpdater = goCardlessPaymentStateUpdater;
         this.mandateQueryService = mandateQueryService;
     }
@@ -76,7 +76,7 @@ public class WebhookGoCardlessService {
                 .distinct()
                 .map(this::getMandate)
                 .flatMap(Optional::stream)
-                .forEach(goCardlessMandateStateUpdater::updateState);
+                .forEach(mandateStateUpdater::updateState);
     }
 
     private Optional<Pair<GoCardlessMandateId, GoCardlessOrganisationId>> toGoCardlessMandateIdAndOrganisationId(GoCardlessEvent goCardlessEvent) {

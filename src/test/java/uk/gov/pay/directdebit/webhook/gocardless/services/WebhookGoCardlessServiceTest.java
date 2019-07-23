@@ -10,7 +10,7 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
-import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessMandateStateUpdater;
+import uk.gov.pay.directdebit.mandate.services.MandateStateUpdater;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotFoundException;
 import uk.gov.pay.directdebit.payments.exception.GoCardlessPaymentNotFoundException;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
@@ -47,7 +47,7 @@ public class WebhookGoCardlessServiceTest {
     private GoCardlessMandateHandler mockedGoCardlessMandateHandler;
 
     @Mock
-    private GoCardlessMandateStateUpdater mockedGoCardlessMandateStateUpdater;
+    private MandateStateUpdater mockedMandateStateUpdater;
 
     @Mock
     private GoCardlessPaymentStateUpdater mockedGoCardlessPaymentStateUpdater;
@@ -223,9 +223,9 @@ public class WebhookGoCardlessServiceTest {
                 goCardlessOrganisation1Payment2Event,
                 goCardlessOrganisation2Mandate1Event));
 
-        verify(mockedGoCardlessMandateStateUpdater).updateState(mandate1);
-        verify(mockedGoCardlessMandateStateUpdater).updateState(mandate2);
-        verify(mockedGoCardlessMandateStateUpdater).updateState(mandate3);
+        verify(mockedMandateStateUpdater).updateState(mandate1);
+        verify(mockedMandateStateUpdater).updateState(mandate2);
+        verify(mockedMandateStateUpdater).updateState(mandate3);
         verify(mockedGoCardlessPaymentStateUpdater).updateState(new GoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId1, goCardlessOrganisationId1));
         verify(mockedGoCardlessPaymentStateUpdater).updateState(new GoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId2, goCardlessOrganisationId1));
     }
@@ -267,7 +267,7 @@ public class WebhookGoCardlessServiceTest {
                 cursedMandateEventNotLinkedToMandate,
                 cursedPaymentEventNotLinkedToPayment));
 
-        verify(mockedGoCardlessMandateStateUpdater).updateState(mandate);
+        verify(mockedMandateStateUpdater).updateState(mandate);
         verify(mockedGoCardlessPaymentStateUpdater).updateState(new GoCardlessPaymentIdAndOrganisationId(GoCardlessPaymentId.valueOf("PM123"),
                 GoCardlessOrganisationId.valueOf("OR123")));
     }
