@@ -223,9 +223,9 @@ public class WebhookGoCardlessServiceTest {
                 goCardlessOrganisation1Payment2Event,
                 goCardlessOrganisation2Mandate1Event));
 
-        verify(mockedMandateStateUpdater).updateState(mandate1);
-        verify(mockedMandateStateUpdater).updateState(mandate2);
-        verify(mockedMandateStateUpdater).updateState(mandate3);
+        verify(mockedMandateStateUpdater).updateStateIfNecessary(mandate1);
+        verify(mockedMandateStateUpdater).updateStateIfNecessary(mandate2);
+        verify(mockedMandateStateUpdater).updateStateIfNecessary(mandate3);
         verify(mockedGoCardlessPaymentStateUpdater).updateState(new GoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId1, goCardlessOrganisationId1));
         verify(mockedGoCardlessPaymentStateUpdater).updateState(new GoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId2, goCardlessOrganisationId1));
     }
@@ -267,7 +267,7 @@ public class WebhookGoCardlessServiceTest {
                 cursedMandateEventNotLinkedToMandate,
                 cursedPaymentEventNotLinkedToPayment));
 
-        verify(mockedMandateStateUpdater).updateState(mandate);
+        verify(mockedMandateStateUpdater).updateStateIfNecessary(mandate);
         verify(mockedGoCardlessPaymentStateUpdater).updateState(new GoCardlessPaymentIdAndOrganisationId(GoCardlessPaymentId.valueOf("PM123"),
                 GoCardlessOrganisationId.valueOf("OR123")));
     }

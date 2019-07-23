@@ -29,12 +29,15 @@ public class MandateStateUpdater {
         this.sandboxMandateStateCalculator = sandboxMandateStateCalculator;
     }
 
-    public void updateState(Mandate mandate) {
-        getStateCalculator(mandate)
+    public Mandate updateStateIfNecessary(Mandate mandate) {
+        return getStateCalculator(mandate)
                 .calculate(mandate)
-                .ifPresentOrElse(stateAndDetails -> mandateUpdateService.updateState(mandate, stateAndDetails),
-                        () -> LOGGER.info(format("Asked to update the status for mandate %s but there appear to be " +
-                                "no events stored that require it to be updated", mandate.getExternalId())));
+                .map(stateAndDetails -> mandateUpdateService.updateState(mandate, stateAndDetails))
+                .orElseGet(() -> {
+                    LOGGER.info(format("Asked to update the status for mandate %s but there appear to be " +
+                            "no events stored that require it to be updated", mandate.getExternalId()));
+                    return mandate;
+                });
     }
 
     private MandateStateCalculator getStateCalculator(Mandate mandate) {

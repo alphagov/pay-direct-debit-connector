@@ -76,7 +76,7 @@ public class WebhookGoCardlessService {
                 .distinct()
                 .map(this::getMandate)
                 .flatMap(Optional::stream)
-                .forEach(mandateStateUpdater::updateState);
+                .forEach(mandateStateUpdater::updateStateIfNecessary);
     }
 
     private Optional<Pair<GoCardlessMandateId, GoCardlessOrganisationId>> toGoCardlessMandateIdAndOrganisationId(GoCardlessEvent goCardlessEvent) {

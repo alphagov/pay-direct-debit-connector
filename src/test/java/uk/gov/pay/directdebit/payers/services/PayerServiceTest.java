@@ -13,7 +13,6 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
-import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
 import uk.gov.pay.directdebit.payers.api.PayerParser;
 import uk.gov.pay.directdebit.payers.dao.PayerDao;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -25,7 +24,6 @@ import java.util.Optional;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,10 +32,10 @@ public class PayerServiceTest {
 
     @Mock
     private PayerDao payerDao;
+
     @Mock
     private MandateQueryService mandateQueryService;
-    @Mock
-    private MandateStateUpdateService mandateStateUpdateService;
+    
     @Mock
     private
     PayerParser mockedPayerParser;
@@ -63,19 +61,15 @@ public class PayerServiceTest {
 
     @Before
     public void setUp() {
-        service = new PayerService(payerDao, mandateQueryService, mockedPayerParser, mandateStateUpdateService);
+        service = new PayerService(payerDao, mandateQueryService, mockedPayerParser);
         when(mandateQueryService.findByExternalId(mandateExternalId)).thenReturn(mandateFixture.toEntity());
-        when(mandateStateUpdateService.receiveDirectDebitDetailsFor(mandateFixture.toEntity())).thenReturn(mandateFixture.toEntity());
         when(mockedPayerParser.parse(createPayerRequest, mandateFixture.getId())).thenReturn(payer);
     }
 
     @Test
     public void shouldCreateAndStoreAPayerWhenReceivingCreatePayerRequest() {
         service.createOrUpdatePayer(mandateExternalId, createPayerRequest);
-        Mandate mandate = mandateFixture.toEntity();
         verify(payerDao).insert(payer);
-        verify(mandateStateUpdateService).payerCreatedFor(mandate);
-        verify(mandateStateUpdateService, never()).payerEditedFor(mandate);
     }
 
     @Test
@@ -92,8 +86,6 @@ public class PayerServiceTest {
 
         service.createOrUpdatePayer(mandateExternalId, createPayerRequest);
         verify(payerDao).updatePayerDetails(originalPayer.getId(), editedPayer);
-        verify(mandateStateUpdateService).payerEditedFor(mandate);
-        verify(mandateStateUpdateService, never()).payerCreatedFor(mandate);
     }
 
     @Test

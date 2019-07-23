@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.events.model.GovUkPayEvent;
 import uk.gov.pay.directdebit.events.model.GovUkPayEventStateGraph;
 import uk.gov.pay.directdebit.events.model.GovUkPayEventType;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.services.MandateStateUpdater;
 import uk.gov.pay.directdebit.payments.model.Payment;
 
 import javax.inject.Inject;
@@ -18,15 +19,18 @@ public class GovUkPayEventService {
 
     private final GovUkPayEventDao govUkPayEventDao;
     private final GovUkPayEventStateGraph govUkPayEventStateGraph;
+    private final MandateStateUpdater mandateStateUpdater;
 
     @Inject
     public GovUkPayEventService(GovUkPayEventDao govUkPayEventDao,
-                                GovUkPayEventStateGraph govUkPayEventStateGraph) {
+                                GovUkPayEventStateGraph govUkPayEventStateGraph,
+                                MandateStateUpdater mandateStateUpdater) {
         this.govUkPayEventDao = govUkPayEventDao;
         this.govUkPayEventStateGraph = govUkPayEventStateGraph;
+        this.mandateStateUpdater = mandateStateUpdater;
     }
 
-    public void storeEventForMandate(Mandate mandate, GovUkPayEventType eventType) {
+    public Mandate storeEventAndUpdateStateForMandate(Mandate mandate, GovUkPayEventType eventType) {
         var event = new GovUkPayEvent(mandate, eventType);
         govUkPayEventDao.findLatestEventForMandate(mandate.getId())
                 .ifPresentOrElse(latestEvent -> validateEventTransition(event, latestEvent),
@@ -34,6 +38,8 @@ public class GovUkPayEventService {
         
         govUkPayEventDao.insert(event);
         LOGGER.info("Inserted GOV.UK Pay event of type {} for mandate {}", eventType, mandate.getExternalId());
+        
+        return mandateStateUpdater.updateStateIfNecessary(mandate);
     }
 
     public void storeEventForPayment(Payment payment, GovUkPayEventType eventType) {

@@ -221,7 +221,6 @@ public class MandateServiceTest {
                 SandboxMandateId.valueOf(mandate.getExternalId().toString()),
                 MandateBankStatementReference.valueOf(RandomStringUtils.randomAlphanumeric(5)));
 
-        when(mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)).thenReturn(true);
         when(paymentProviderFactory.getCommandServiceFor(SANDBOX)).thenReturn(sandboxService);
         when(sandboxService.confirmMandate(mandate, bankAccountDetails)).thenReturn(confirmMandateResponse);
 
@@ -234,29 +233,6 @@ public class MandateServiceTest {
                 .build();
 
         verify(mandateStateUpdateService).confirmedDirectDebitDetailsFor(expectedMandateWithStateDetailsConfirmed);
-    }
-
-    @Test
-    public void confirm_shouldNotConfirmOnDemandMandateForInvalidState() {
-        GatewayAccount gatewayAccount = aGatewayAccountFixture().withPaymentProvider(SANDBOX).toEntity();
-        Mandate mandate = aMandate()
-                .withGatewayAccount(gatewayAccount)
-                .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
-                .withMandateBankStatementReference(MandateBankStatementReference.valueOf("mandateReference"))
-                .withServiceReference("reference")
-                .withState(MandateState.CANCELLED)
-                .withReturnUrl("http://returnUrl")
-                .withCreatedDate(ZonedDateTime.now(ZoneOffset.UTC))
-                .build();
-
-        Map<String, String> confirmMandateRequest = Map.of("sort_code", "123456", "account_number", "12345678");
-        ConfirmMandateRequest mandateConfirmationRequest = ConfirmMandateRequest.of(confirmMandateRequest);
-
-        when(mandateStateUpdateService.canUpdateStateFor(mandate, DIRECT_DEBIT_DETAILS_CONFIRMED)).thenReturn(false);
-        thrown.expect(InvalidStateTransitionException.class);
-        thrown.expectMessage("Transition DIRECT_DEBIT_DETAILS_CONFIRMED from state CANCELLED is not valid");
-
-        service.confirm(gatewayAccount, mandate, mandateConfirmationRequest);
     }
 
     @Test

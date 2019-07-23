@@ -22,14 +22,23 @@ public class MandateUpdateService {
         this.mandateDao = mandateDao;
     }
 
-    public void updateState(Mandate mandate,
-                           DirectDebitStateWithDetails<MandateState> stateAndDetails) {
+    public Mandate updateState(Mandate mandate, DirectDebitStateWithDetails<MandateState> stateAndDetails) {
+        
+        String details = stateAndDetails.getDetails().orElse(null);
+        String description = stateAndDetails.getDetailsDescription().orElse(null);
+        
         mandateDao.updateStateAndDetails(mandate.getId(),
                 stateAndDetails.getState(),
-                stateAndDetails.getDetails().orElse(null),
-                stateAndDetails.getDetailsDescription().orElse(null));
+                details,
+                description);
 
         LOGGER.info(format("Updated status of mandate %s to %s", mandate.getExternalId(), stateAndDetails.getState()));
-    }
 
+        return Mandate.MandateBuilder.fromMandate(mandate)
+                .withState(stateAndDetails.getState())
+                .withStateDetails(details)
+                .withStateDetailsDescription(description)
+                .build();
+    }
+    
 }
