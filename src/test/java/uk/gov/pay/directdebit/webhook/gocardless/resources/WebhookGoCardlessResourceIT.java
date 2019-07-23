@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -162,14 +161,17 @@ public class WebhookGoCardlessResourceIT {
         assertThat(firstEvent.get("event_id"), is("EV0000ED6V59V1"));
         assertThat(firstEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(firstEvent.get("action"), is("submitted"));
+        assertThat(firstEvent.get("details_cause"), is("payment_submitted"));
 
         Map<String, Object> secondEvent = events.get(1);
         assertThat(secondEvent.get("event_id"), is("EV0000ED6WBEQ0"));
         assertThat(secondEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(secondEvent.get("action"), is("paid_out"));
+        assertThat(secondEvent.get("details_cause"), is("paid_out"));
 
         Map<String, Object> transaction = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        MatcherAssert.assertThat(transaction.get("state"), is("SUCCESS"));
+        assertThat(transaction.get("state"), is("SUCCESS"));
+        assertThat(transaction.get("state_details"), is("paid_out"));
     }
 
     @Test
@@ -222,14 +224,17 @@ public class WebhookGoCardlessResourceIT {
         assertThat(firstEvent.get("event_id"), is("EV0000ED6V59V1"));
         assertThat(firstEvent.get("resource_type"), is("PAYMENTS"));
         assertThat(firstEvent.get("action"), is("submitted"));
+        assertThat(firstEvent.get("details_cause"), is("payment_submitted"));
 
         Map<String, Object> secondEvent = events.get(1);
         assertThat(secondEvent.get("event_id"), is("EV0000ED6WBEQ0"));
         assertThat(secondEvent.get("resource_type"), is("MANDATES"));
         assertThat(secondEvent.get("action"), is("failed"));
+        assertThat(secondEvent.get("details_cause"), is("failed"));
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        MatcherAssert.assertThat(mandate.get("state"), is("FAILED"));
+        assertThat(mandate.get("state"), is("FAILED"));
+        assertThat(mandate.get("state_details"), is("failed"));
     }
 
 }
