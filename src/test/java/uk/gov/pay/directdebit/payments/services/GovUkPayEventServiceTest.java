@@ -17,6 +17,7 @@ import uk.gov.pay.directdebit.events.model.GovUkPayEventStateGraph;
 import uk.gov.pay.directdebit.events.model.GovUkPayEventType;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.services.MandateStateUpdater;
 import uk.gov.pay.directdebit.payments.model.Payment;
 
 import java.util.Optional;
@@ -40,10 +41,13 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFi
 public class GovUkPayEventServiceTest {
 
     @Mock
-    private GovUkPayEventDao govUkPayEventDao;
+    private GovUkPayEventDao mockGovUkPayEventDao;
 
     @Mock
-    private GovUkPayEventStateGraph govUkPayEventStateGraph;
+    private GovUkPayEventStateGraph mockGovUkPayEventStateGraph;
+    
+    @Mock
+    private MandateStateUpdater mockMandateStateUpdater;
 
     @InjectMocks
     private GovUkPayEventService govUkPayEventService;
@@ -75,12 +79,13 @@ public class GovUkPayEventServiceTest {
                 .toEntity();
         GovUkPayEventType newEventType = MANDATE_EXPIRED_BY_SYSTEM;
 
-        when(govUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.of(previousEvent));
-        when(govUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(true);
+        when(mockGovUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.of(previousEvent));
+        when(mockGovUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(true);
 
-        govUkPayEventService.storeEventForMandate(mandate, newEventType);
+        govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, newEventType);
 
-        verify(govUkPayEventDao).insert(eventCaptor.capture());
+        verify(mockGovUkPayEventDao).insert(eventCaptor.capture());
+        verify(mockMandateStateUpdater).updateStateIfNecessary(mandate);
 
         GovUkPayEvent insertedEvent = eventCaptor.getValue();
         assertThat(insertedEvent.getEventType(), is(newEventType));
@@ -94,12 +99,13 @@ public class GovUkPayEventServiceTest {
     public void insertMandateEvent_insertedForValidInitialEvent() {
         GovUkPayEventType eventType = MANDATE_CREATED;
 
-        when(govUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.empty());
-        when(govUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(true);
+        when(mockGovUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.empty());
+        when(mockGovUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(true);
 
-        govUkPayEventService.storeEventForMandate(mandate, eventType);
+        govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, eventType);
 
-        verify(govUkPayEventDao).insert(eventCaptor.capture());
+        verify(mockGovUkPayEventDao).insert(eventCaptor.capture());
+        verify(mockMandateStateUpdater).updateStateIfNecessary(mandate);
 
         GovUkPayEvent insertedEvent = eventCaptor.getValue();
         assertThat(insertedEvent.getEventType(), is(eventType));
@@ -118,38 +124,38 @@ public class GovUkPayEventServiceTest {
                 .toEntity();
         GovUkPayEventType newEventType = MANDATE_CREATED;
 
-        when(govUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.of(previousEvent));
-        when(govUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(false);
+        when(mockGovUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.of(previousEvent));
+        when(mockGovUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(false);
 
         expectedException.expect(InvalidGovUkPayEventInsertionException.class);
         expectedException.expectMessage("GOV.UK Pay event MANDATE_CREATED is invalid following event MANDATE_EXPIRED_BY_SYSTEM");
 
-        govUkPayEventService.storeEventForMandate(mandate, newEventType);
+        govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, newEventType);
     }
 
     @Test
     public void insertMandateEvent_shouldThrowForInvalidInitialEvent() {
         GovUkPayEventType eventType = MANDATE_SUBMITTED;
 
-        when(govUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.empty());
-        when(govUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(false);
+        when(mockGovUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.empty());
+        when(mockGovUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(false);
 
         expectedException.expect(InvalidGovUkPayEventInsertionException.class);
         expectedException.expectMessage("GOV.UK Pay event MANDATE_SUBMITTED is invalid when there are no previous events");
 
-        govUkPayEventService.storeEventForMandate(mandate, eventType);
+        govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, eventType);
     }
 
     @Test
     public void insertPaymentEvent_insertedForValidInitialEvent() {
         GovUkPayEventType eventType = PAYMENT_SUBMITTED;
 
-        when(govUkPayEventDao.findLatestEventForPayment(paymentId)).thenReturn(Optional.empty());
-        when(govUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(true);
+        when(mockGovUkPayEventDao.findLatestEventForPayment(paymentId)).thenReturn(Optional.empty());
+        when(mockGovUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(true);
 
         govUkPayEventService.storeEventForPayment(payment, eventType);
 
-        verify(govUkPayEventDao).insert(eventCaptor.capture());
+        verify(mockGovUkPayEventDao).insert(eventCaptor.capture());
 
         GovUkPayEvent insertedEvent = eventCaptor.getValue();
         assertThat(insertedEvent.getEventType(), is(eventType));
@@ -168,8 +174,8 @@ public class GovUkPayEventServiceTest {
                 .toEntity();
         GovUkPayEventType newEventType = PAYMENT_SUBMITTED;
 
-        when(govUkPayEventDao.findLatestEventForPayment(paymentId)).thenReturn(Optional.of(previousEvent));
-        when(govUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(false);
+        when(mockGovUkPayEventDao.findLatestEventForPayment(paymentId)).thenReturn(Optional.of(previousEvent));
+        when(mockGovUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(false);
 
         expectedException.expect(InvalidGovUkPayEventInsertionException.class);
         expectedException.expectMessage("GOV.UK Pay event PAYMENT_SUBMITTED is invalid following event PAYMENT_SUBMITTED");

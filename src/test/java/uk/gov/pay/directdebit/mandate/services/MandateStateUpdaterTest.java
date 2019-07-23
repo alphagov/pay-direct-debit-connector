@@ -48,7 +48,7 @@ public class MandateStateUpdaterTest {
         given(mockGoCardlessMandateStateCalculator.calculate(mandate))
                 .willReturn(Optional.of(mockMandateStateWithDetails));
 
-        mockMandateStateUpdater.updateState(mandate);
+        mockMandateStateUpdater.updateStateIfNecessary(mandate);
 
         verify(mockMandateUpdateService).updateState(mandate, mockMandateStateWithDetails);
     }
@@ -61,7 +61,7 @@ public class MandateStateUpdaterTest {
         given(mockSandboxStateCalculator.calculate(mandate))
                 .willReturn(Optional.of(mockMandateStateWithDetails));
 
-        mockMandateStateUpdater.updateState(mandate);
+        mockMandateStateUpdater.updateStateIfNecessary(mandate);
         
         verify(mockMandateUpdateService).updateState(mandate, mockMandateStateWithDetails);
     }
@@ -73,7 +73,7 @@ public class MandateStateUpdaterTest {
 
         given(mockGoCardlessMandateStateCalculator.calculate(mandate)).willReturn(Optional.empty());
 
-        mockMandateStateUpdater.updateState(mandate);
+        mockMandateStateUpdater.updateStateIfNecessary(mandate);
 
         verify(mockMandateUpdateService, never()).updateState(any(), any());
     }
