@@ -35,7 +35,7 @@ public class GovUkPayEventToMandateStateMapper {
     public static final Set<GovUkPayEventType> GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE = GOV_UK_PAY_EVENT_TYPE_TO_MANDATE_STATE.keySet();
 
     public static Optional<DirectDebitStateWithDetails<MandateState>> mapGovUkPayEventToState(GovUkPayEvent govUkPayEvent) {
-        return Optional.of(GOV_UK_PAY_EVENT_TYPE_TO_MANDATE_STATE.get(govUkPayEvent.getEventType()))
+        return Optional.ofNullable(GOV_UK_PAY_EVENT_TYPE_TO_MANDATE_STATE.get(govUkPayEvent.getEventType()))
                 .map(DirectDebitStateWithDetails::new);
     }
 }

@@ -15,34 +15,19 @@ import uk.gov.pay.directdebit.mandate.services.MandateStateCalculator;
 
 import javax.inject.Inject;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.CANCELLED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
 import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE;
 import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.mapGovUkPayEventToState;
+import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessEventToMandateStateMapper.GOCARDLESS_ACTIONS_THAT_CHANGE_STATE;
+import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessEventToMandateStateMapper.mapGoCardlessEventToState;
 
 public class GoCardlessMandateStateCalculator implements MandateStateCalculator {
 
     private final GoCardlessEventDao goCardlessEventDao;
     private final GovUkPayEventDao govUkPayEventDao;
-
-    private static final Map<String, MandateState> GOCARDLESS_ACTION_TO_MANDATE_STATE = Map.of(
-            "created", CREATED,
-            "submitted", SUBMITTED,
-            "active", ACTIVE,
-            "cancelled", CANCELLED,
-            "failed", FAILED
-    );
-
-    static final Set<String> GOCARDLESS_ACTIONS_THAT_CHANGE_STATE = GOCARDLESS_ACTION_TO_MANDATE_STATE.keySet();
 
 
     @Inject
@@ -85,12 +70,6 @@ public class GoCardlessMandateStateCalculator implements MandateStateCalculator 
         } else {
             throw new IllegalArgumentException(format("Unexpected Event of type %s", event.getClass()));
         }
-    }
-
-    private Optional<DirectDebitStateWithDetails<MandateState>> mapGoCardlessEventToState(GoCardlessEvent goCardlessEvent) {
-        return Optional.ofNullable(GOCARDLESS_ACTION_TO_MANDATE_STATE.get(goCardlessEvent.getAction()))
-                .map(mandateState -> new DirectDebitStateWithDetails<>(
-                        mandateState, goCardlessEvent.getDetailsCause(), goCardlessEvent.getDetailsDescription()));
     }
 
 }

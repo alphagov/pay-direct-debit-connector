@@ -2,6 +2,7 @@ package uk.gov.pay.directdebit.mandate.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.pay.directdebit.gatewayaccounts.exception.InvalidPaymentProviderException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessMandateStateCalculator;
 import uk.gov.pay.directdebit.mandate.services.sandbox.SandboxMandateStateCalculator;
@@ -37,8 +38,13 @@ public class MandateStateUpdater {
     }
 
     private MandateStateCalculator getStateCalculator(Mandate mandate) {
-        return mandate.getGatewayAccount().getPaymentProvider() == GOCARDLESS
-                ? goCardlessMandateStateCalculator
-                : sandboxMandateStateCalculator;
+        switch (mandate.getGatewayAccount().getPaymentProvider()){
+            case SANDBOX:
+                return sandboxMandateStateCalculator;
+            case GOCARDLESS:
+                return goCardlessMandateStateCalculator;
+            default:
+                throw new InvalidPaymentProviderException(mandate.getGatewayAccount().getPaymentProvider().toString());
+        }
     }
 }

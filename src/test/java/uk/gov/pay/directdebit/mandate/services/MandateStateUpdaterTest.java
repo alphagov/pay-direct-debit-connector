@@ -50,9 +50,7 @@ public class MandateStateUpdaterTest {
 
         mockMandateStateUpdater.updateState(mandate);
 
-        verify(mockGoCardlessMandateStateCalculator).calculate(mandate);
-        verify(mockMandateUpdateService).updateState(mandate,
-                mockMandateStateWithDetails);
+        verify(mockMandateUpdateService).updateState(mandate, mockMandateStateWithDetails);
     }
 
     @Test
@@ -64,10 +62,8 @@ public class MandateStateUpdaterTest {
                 .willReturn(Optional.of(mockMandateStateWithDetails));
 
         mockMandateStateUpdater.updateState(mandate);
-
-        verify(mockSandboxStateCalculator).calculate(mandate);
-        verify(mockMandateUpdateService).updateState(mandate,
-                mockMandateStateWithDetails);
+        
+        verify(mockMandateUpdateService).updateState(mandate, mockMandateStateWithDetails);
     }
 
     @Test
