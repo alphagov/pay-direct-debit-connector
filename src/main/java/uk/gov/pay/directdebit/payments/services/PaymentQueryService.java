@@ -1,15 +1,16 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
-import uk.gov.pay.directdebit.payments.exception.PaymentNotFoundException;
-import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
-import uk.gov.pay.directdebit.payments.model.PaymentLookupKey;
-import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentId;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
 import javax.inject.Inject;
+import java.util.Optional;
+
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
 
 public class PaymentQueryService {
 
@@ -19,21 +20,15 @@ public class PaymentQueryService {
     public PaymentQueryService(PaymentDao paymentDao) {
         this.paymentDao = paymentDao;
     }
-
-    public Payment findByProviderPaymentId(PaymentProvider paymentProvider, PaymentLookupKey paymentLookupKey) {
-        if (paymentLookupKey.getClass() == GoCardlessPaymentIdAndOrganisationId.class) {
-            var goCardlessPaymentIdAndOrganisationId = (GoCardlessPaymentIdAndOrganisationId) paymentLookupKey;
-            return paymentDao
-                    .findPaymentByProviderIdAndOrganisationId(paymentProvider, goCardlessPaymentIdAndOrganisationId.getGoCardlessPaymentId(),
-                            goCardlessPaymentIdAndOrganisationId.getGoCardlessOrganisationId())
-                    .orElseThrow(() -> new PaymentNotFoundException(goCardlessPaymentIdAndOrganisationId));
-        } else if (paymentLookupKey.getClass() == SandboxPaymentId.class) {
-            var paymentProviderPaymentId = (PaymentProviderPaymentId) paymentLookupKey;
-            return paymentDao
-                    .findPaymentByProviderId(paymentProvider, paymentProviderPaymentId)
-                    .orElseThrow(() -> new PaymentNotFoundException(paymentProvider, paymentProviderPaymentId));
-        }
-        throw new IllegalArgumentException("Unrecognised PaymentLookupKey of type " + paymentLookupKey.getClass());
+    
+    public Optional<Payment> findByGoCardlessPaymentIdAndOrganisationId(
+            GoCardlessPaymentId goCardlessPaymentId,
+            GoCardlessOrganisationId goCardlessOrganisationId) {
+        return paymentDao.findPaymentByProviderIdAndOrganisationId(GOCARDLESS, goCardlessPaymentId, goCardlessOrganisationId);
+    }
+    
+    public Optional<Payment> findBySandboxPaymentId(SandboxPaymentId sandboxPaymentId) {
+        return paymentDao.findPaymentByProviderId(SANDBOX, sandboxPaymentId);
     }
 
 }

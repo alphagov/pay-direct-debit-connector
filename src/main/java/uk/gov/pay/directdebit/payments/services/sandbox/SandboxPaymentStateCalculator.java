@@ -2,8 +2,11 @@ package uk.gov.pay.directdebit.payments.services.sandbox;
 
 import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.events.dao.SandboxEventDao;
+import uk.gov.pay.directdebit.events.model.SandboxEvent;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
+import uk.gov.pay.directdebit.payments.services.PaymentStateCalculator;
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
 
 import javax.inject.Inject;
@@ -13,7 +16,7 @@ import java.util.Set;
 
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
 
-public class SandboxPaymentStateCalculator {
+public class SandboxPaymentStateCalculator implements PaymentStateCalculator {
 
     private final SandboxEventDao sandboxEventDao;
 
@@ -28,12 +31,19 @@ public class SandboxPaymentStateCalculator {
         this.sandboxEventDao = sandboxEventDao;
     }
 
-    Optional<DirectDebitStateWithDetails<PaymentState>> calculate(SandboxPaymentId sandboxPaymentId) {
-        return sandboxEventDao.findLatestApplicableEventForPayment(sandboxPaymentId, SANDBOX_ACTIONS_THAT_CHANGE_STATE)
+    public Optional<DirectDebitStateWithDetails<PaymentState>> calculate(Payment payment) {
+        return getLatestApplicableSandboxEvent(payment)
                 .filter(sandboxEvent -> SANDBOX_ACTION_TO_PAYMENT_STATE.get(sandboxEvent.getEventAction()) != null)
                 .map(sandboxEvent -> new DirectDebitStateWithDetails<>(
-                        SANDBOX_ACTION_TO_PAYMENT_STATE.get(sandboxEvent.getEventAction()))
-                );
+                        SANDBOX_ACTION_TO_PAYMENT_STATE.get(sandboxEvent.getEventAction())
+                ));
+    }
+
+    private Optional<SandboxEvent> getLatestApplicableSandboxEvent(Payment payment) {
+        return payment.getProviderId().flatMap(providerId ->
+                sandboxEventDao.findLatestApplicableEventForPayment(
+                        (SandboxPaymentId) providerId,
+                        SANDBOX_ACTIONS_THAT_CHANGE_STATE));
     }
 
 }

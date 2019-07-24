@@ -9,13 +9,13 @@ import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.events.dao.mapper.GoCardlessEventMapper;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventIdArgumentFactory;
 import uk.gov.pay.directdebit.events.model.GoCardlessOrganisationIdArgumentFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
-import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.events.model.GoCardlessEventIdArgumentFactory;
-import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdArgumentFactory;
 
 import java.util.Optional;
@@ -75,7 +75,7 @@ public interface GoCardlessEventDao {
 
     @SqlUpdate("UPDATE gocardless_events SET internal_event_id = :eventId WHERE id = :id")
     int updateEventId(@Bind("id") Long id, @Bind("eventId") Long eventId);
-    
+
     @SqlQuery("SELECT id, " +
             "internal_event_id, " +
             "event_id, " +
@@ -138,7 +138,8 @@ public interface GoCardlessEventDao {
             "AND action IN (<applicableActions>) " +
             "ORDER BY created_at DESC " +
             "LIMIT 1")
-    Optional<GoCardlessEvent> findLatestApplicableEventForPayment(@BindBean GoCardlessPaymentIdAndOrganisationId goCardlessPaymentIdAndOrganisationId,
+    Optional<GoCardlessEvent> findLatestApplicableEventForPayment(@Bind("goCardlessPaymentId") GoCardlessPaymentId goCardlessPaymentId,
+                                                                  @Bind("goCardlessOrganisationId") GoCardlessOrganisationId goCardlessOrganisationId,
                                                                   @BindList("applicableActions") Set<String> applicableActions);
 
 }

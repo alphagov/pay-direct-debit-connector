@@ -1,14 +1,24 @@
 package uk.gov.pay.directdebit.payments.services.gocardless;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
+import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
+import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import java.util.Optional;
@@ -16,75 +26,97 @@ import java.util.Optional;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
+import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 import static uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessPaymentStateCalculator.GOCARDLESS_ACTIONS_THAT_CHANGE_STATE;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnitParamsRunner.class)
 public class GoCardlessPaymentStateCalculatorTest {
 
-    @Mock
-    private GoCardlessPaymentIdAndOrganisationId mockGoCardlessPaymentIdAndOrganisationId;
-
-    @Mock
-    private GoCardlessEvent mockGoCardlessEvent;
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock
     private GoCardlessEventDao mockGoCardlessEventDao;
 
+    @InjectMocks
     private GoCardlessPaymentStateCalculator goCardlessPaymentStateCalculator;
+
+    private GoCardlessOrganisationId goCardlessOrganisationId = GoCardlessOrganisationId.valueOf("an-organisation-id");
+
+    private GoCardlessPaymentId goCardlessPaymentId = GoCardlessPaymentId.valueOf("a-payment-id");
+
+    private Payment payment;
 
     @Before
     public void setUp() {
-        given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(mockGoCardlessPaymentIdAndOrganisationId, GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
-                .willReturn(Optional.of(mockGoCardlessEvent));
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
+                .withPaymentProvider(PaymentProvider.GOCARDLESS)
+                .withOrganisation(goCardlessOrganisationId);
 
-        goCardlessPaymentStateCalculator = new GoCardlessPaymentStateCalculator(mockGoCardlessEventDao);
+        MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture);
+
+        payment = aPaymentFixture()
+                .withMandateFixture(mandateFixture)
+                .withPaymentProviderId(goCardlessPaymentId)
+                .toEntity();
     }
 
     @Test
-    public void failedActionMapsToFailedState() {
-        given(mockGoCardlessEvent.getAction()).willReturn("failed");
+    @Parameters({
+            "failed, FAILED",
+            "paid_out, SUCCESS"
+    })
+    public void goCardlessEventActionMapsToState(String action, String expectedState) {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction(action).toEntity();
+        given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(goCardlessPaymentId, goCardlessOrganisationId,
+                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                .willReturn(Optional.of(goCardlessEvent));
 
-        Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(mockGoCardlessPaymentIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
 
-        assertThat(result.get().getState(), is(PaymentState.FAILED));
-    }
-
-    @Test
-    public void paidOutActionMapsToSuccessState() {
-        given(mockGoCardlessEvent.getAction()).willReturn("paid_out");
-
-        Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(mockGoCardlessPaymentIdAndOrganisationId);
-
-        assertThat(result.get().getState(), is(PaymentState.SUCCESS));
+        assertThat(result.get().getState(), is(PaymentState.valueOf(expectedState)));
     }
 
     @Test
     public void detailsCauseAndDescriptionReturned() {
-        given(mockGoCardlessEvent.getAction()).willReturn("failed");
-        given(mockGoCardlessEvent.getDetailsCause()).willReturn("details_cause");
-        given(mockGoCardlessEvent.getDetailsDescription()).willReturn("This is a description.");
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction("failed")
+                .withDetailsCause("details_cause")
+                .withDetailsDescription("This is a description")
+                .toEntity();
 
-        Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(mockGoCardlessPaymentIdAndOrganisationId);
+        given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(goCardlessPaymentId, goCardlessOrganisationId,
+                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                .willReturn(Optional.of(goCardlessEvent));
 
-        assertThat(result.get().getDetails(), is(Optional.of("details_cause")));
-        assertThat(result.get().getDetailsDescription(), is(Optional.of("This is a description.")));
+        Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
+
+        assertThat(result.get().getDetails(), is(Optional.of(goCardlessEvent.getDetailsCause())));
+        assertThat(result.get().getDetailsDescription(), is(Optional.of(goCardlessEvent.getDetailsDescription())));
     }
 
     @Test
     public void unrecognisedActionMapsToNothing() {
-        given(mockGoCardlessEvent.getAction()).willReturn("eaten_by_wolves");
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction("eaten_by_wolves").toEntity();
+        
+        given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(goCardlessPaymentId, goCardlessOrganisationId,
+                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                .willReturn(Optional.of(goCardlessEvent));
 
-        Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(mockGoCardlessPaymentIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
 
         assertThat(result, is(Optional.empty()));
     }
 
     @Test
     public void noApplicableEventsMapsToNothing() {
-        given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(mockGoCardlessPaymentIdAndOrganisationId, GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+        given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(goCardlessPaymentId, goCardlessOrganisationId,
+                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
                 .willReturn(Optional.empty());
 
-        Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(mockGoCardlessPaymentIdAndOrganisationId);
+        Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
 
         assertThat(result, is(Optional.empty()));
     }
