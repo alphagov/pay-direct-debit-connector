@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_PROVIDER;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -67,7 +67,7 @@ public class ExpireServiceTest {
     public void expireMandates_shouldCallMandateServiceWithPriorStatesToPending() {
         Mandate mandate = MandateFixture.aMandateFixture().withState(CREATED).toEntity();
         when(mandateQueryService
-                .findAllMandatesBySetOfStatesAndMaxCreationTime(eq(mandateStatesGraph.getPriorStates(SUBMITTED)), any()))
+                .findAllMandatesBySetOfStatesAndMaxCreationTime(eq(mandateStatesGraph.getPriorStates(SUBMITTED_TO_PROVIDER)), any()))
                 .thenReturn(Collections.singletonList(mandate));
         int numberOfExpiredMandates = expireService.expireMandates();
         assertEquals(1, numberOfExpiredMandates);
@@ -82,7 +82,7 @@ public class ExpireServiceTest {
 
     @Test
     public void shouldGetCorrectMandateStatesPriorToPending() {
-        var paymentStates = mandateStatesGraph.getPriorStates(SUBMITTED);
+        var paymentStates = mandateStatesGraph.getPriorStates(SUBMITTED_TO_PROVIDER);
         var expectedPaymentStates = Set.of(CREATED, AWAITING_DIRECT_DEBIT_DETAILS);
         assertEquals(expectedPaymentStates, paymentStates);
     }

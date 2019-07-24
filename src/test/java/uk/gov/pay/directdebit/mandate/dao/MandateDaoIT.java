@@ -562,7 +562,7 @@ public class MandateDaoIT {
                 .insert(testContext.getJdbi());
 
         MandateFixture.aMandateFixture()
-                .withState(MandateState.SUBMITTED)
+                .withState(MandateState.SUBMITTED_TO_PROVIDER)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
                 .insert(testContext.getJdbi());

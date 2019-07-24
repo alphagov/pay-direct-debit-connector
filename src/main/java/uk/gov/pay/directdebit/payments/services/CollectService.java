@@ -25,7 +25,7 @@ public class CollectService {
         Mandate mandate = mandateQueryService.findByExternalIdAndGatewayAccountExternalId(collectPaymentRequest.getMandateExternalId(),
                 gatewayAccount.getExternalId());
 
-        if (!(mandate.getState().equals(MandateState.SUBMITTED) || mandate.getState().equals(MandateState.PENDING) ||
+        if (!(mandate.getState().equals(MandateState.SUBMITTED_TO_PROVIDER) || mandate.getState().equals(MandateState.PENDING) ||
                 mandate.getState().equals(MandateState.ACTIVE))) {
             throw new MandateStateInvalidException("Mandate state invalid for Mandate with id: " +
                     mandate.getExternalId());

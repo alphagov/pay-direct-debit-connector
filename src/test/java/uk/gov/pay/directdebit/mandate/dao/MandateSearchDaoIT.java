@@ -48,7 +48,7 @@ public class MandateSearchDaoIT {
     private MandateFixture mandate2 = aMandateFixture()
             .withGatewayAccountFixture(gatewayAccountFixture)
             .withMandateBankStatementReference(MandateBankStatementReference.valueOf("STATEMENT123"))
-            .withState(MandateState.SUBMITTED)
+            .withState(MandateState.SUBMITTED_TO_PROVIDER)
             .withCreatedDate(now().minusHours(6));
     
     private static ZonedDateTime now() {
