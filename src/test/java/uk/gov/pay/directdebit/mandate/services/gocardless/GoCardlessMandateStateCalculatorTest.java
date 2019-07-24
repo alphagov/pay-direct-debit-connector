@@ -79,7 +79,7 @@ public class GoCardlessMandateStateCalculatorTest {
     @Test
     @Parameters({
             "created, CREATED",
-            "submitted, SUBMITTED",
+            "submitted, SUBMITTED_TO_PROVIDER",
             "active, ACTIVE",
             "cancelled, CANCELLED",
             "failed, FAILED"
@@ -100,7 +100,7 @@ public class GoCardlessMandateStateCalculatorTest {
     @Parameters({
             "MANDATE_CREATED, CREATED",
             "MANDATE_TOKEN_EXCHANGED, AWAITING_DIRECT_DEBIT_DETAILS",
-            "MANDATE_SUBMITTED, SUBMITTED",
+            "MANDATE_SUBMITTED, SUBMITTED_TO_PROVIDER",
             "MANDATE_EXPIRED_BY_SYSTEM, EXPIRED",
             "MANDATE_CANCELLED_BY_USER, CANCELLED",
             "MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE"

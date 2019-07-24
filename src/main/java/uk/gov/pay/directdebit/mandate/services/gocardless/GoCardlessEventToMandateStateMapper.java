@@ -12,12 +12,12 @@ import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CANCELLED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_PROVIDER;
 
 class GoCardlessEventToMandateStateMapper {
     private static final Map<String, MandateState> GOCARDLESS_ACTION_TO_MANDATE_STATE = Map.of(
             "created", CREATED,
-            "submitted", SUBMITTED,
+            "submitted", SUBMITTED_TO_PROVIDER,
             "active", ACTIVE,
             "cancelled", CANCELLED,
             "failed", FAILED

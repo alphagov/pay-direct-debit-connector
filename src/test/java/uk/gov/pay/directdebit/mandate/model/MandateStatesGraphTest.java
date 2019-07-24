@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -58,7 +57,7 @@ public class MandateStatesGraphTest {
         assertThat(mandateStatesGraph.getPriorStates(MandateState.PENDING), 
                 is(new HashSet<>(Arrays.asList(
                         MandateState.CREATED,
-                        MandateState.SUBMITTED,
+                        MandateState.SUBMITTED_TO_PROVIDER,
                         MandateState.AWAITING_DIRECT_DEBIT_DETAILS))));
     }
     
