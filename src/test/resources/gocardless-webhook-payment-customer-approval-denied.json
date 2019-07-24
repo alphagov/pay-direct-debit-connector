@@ -1,0 +1,20 @@
+{
+  "events": [
+    {
+      "id": "EVTESTKSNM4G2Y",
+      "created_at": "2019-07-24T17:40:44.250Z",
+      "resource_type": "payments",
+      "action": "customer_approval_denied",
+      "links": {
+        "payment": "PM000JWCBM6ABD",
+        "organisation": "OR00003V8M32F0"
+      },
+      "details": {
+        "origin": "customer",
+        "cause": "customer_approval_denied",
+        "description": "The customer denied approval for this payment"
+      },
+      "metadata": {}
+    }
+  ]
+}
