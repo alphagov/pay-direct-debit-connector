@@ -54,7 +54,7 @@ public class MandateQueryServiceTest {
     }
 
     @Test(expected = MandateNotFoundException.class)
-    public void findByPaymentProviderMandateIdWithSandboxMandateIdForNonExistantMandateThrowsException() {
+    public void findByPaymentProviderMandateIdWithSandboxMandateIdForNonExistentMandateThrowsException() {
         given(mockMandateDao.findByPaymentProviderMandateId(SANDBOX, SANDBOX_MANDATE_ID)).willReturn(Optional.empty());
 
         mandateQueryService.findBySandboxMandateId(SANDBOX_MANDATE_ID);

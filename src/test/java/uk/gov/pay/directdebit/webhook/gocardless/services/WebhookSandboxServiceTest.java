@@ -1,32 +1,36 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.events.model.SandboxEvent;
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
-import uk.gov.pay.directdebit.payments.services.sandbox.SandboxPaymentStateUpdater;
+import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
+import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
 
 import java.util.List;
+import java.util.Optional;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.events.model.SandboxEvent.SandboxEventBuilder.aSandboxEvent;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WebhookSandboxServiceTest {
     
     @Mock
-    private SandboxPaymentStateUpdater mockSandboxPaymentStateUpdater;
+    private PaymentStateUpdater mockPaymentStateUpdater;
+    
+    @Mock
+    private PaymentQueryService paymentQueryService;
 
+    @InjectMocks
     private WebhookSandboxService webhookSandboxService;
-
-    @Before
-    public void setUp() {
-        webhookSandboxService = new WebhookSandboxService(mockSandboxPaymentStateUpdater);
-    }
 
     @Test
     public void shouldUpdateStatesForPaymentsAffectedByEvents() {
@@ -49,7 +53,13 @@ public class WebhookSandboxServiceTest {
         SandboxEvent sandboxMandate1Event = aSandboxEvent()
                 .withMandateId(sandboxMandateId1)
                 .build();
-
+        
+        Payment payment1 = mock(Payment.class);
+        Payment payment2 = mock(Payment.class);
+        
+        when(paymentQueryService.findBySandboxPaymentId(sandboxPaymentId1)).thenReturn(Optional.of(payment1));
+        when(paymentQueryService.findBySandboxPaymentId(sandboxPaymentId2)).thenReturn(Optional.of(payment2));
+        
         webhookSandboxService.updateStateOfPaymentsAffectedByEvents(List.of(
                 sandboxPayment1Event,
                 anotherSandboxPayment1Event,
@@ -57,8 +67,8 @@ public class WebhookSandboxServiceTest {
                 sandboxMandate1Event
         ));
 
-        verify(mockSandboxPaymentStateUpdater).updateState(sandboxPaymentId1);
-        verify(mockSandboxPaymentStateUpdater).updateState(sandboxPaymentId2);
+        verify(mockPaymentStateUpdater).updateStateIfNecessary(payment1);
+        verify(mockPaymentStateUpdater).updateStateIfNecessary(payment2);
     }
 
 }

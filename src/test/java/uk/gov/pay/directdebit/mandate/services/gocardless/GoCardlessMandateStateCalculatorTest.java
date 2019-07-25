@@ -84,7 +84,6 @@ public class GoCardlessMandateStateCalculatorTest {
             "cancelled, CANCELLED",
             "failed, FAILED"
     })
-
     public void goCardlessEventActionMapsToState(String action, String expectedState) {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction(action).toEntity();
         given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateId, goCardlessOrganisationId,

@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.junit.DropwizardConfig;
 import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
@@ -11,10 +13,7 @@ import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
-import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.events.model.GoCardlessEventId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
-import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdAndOrganisationId;
 
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
@@ -159,8 +158,8 @@ public class GoCardlessEventDaoITest {
         goCardlessEventDao.insert(laterEventWrongOrganisationId.toEntity());
 
         GoCardlessEvent event = goCardlessEventDao.findLatestApplicableEventForPayment(
-                new GoCardlessPaymentIdAndOrganisationId(
-                        GoCardlessPaymentId.valueOf("Payment ID we want"), GoCardlessOrganisationId.valueOf("Organisation ID we want")),
+                GoCardlessPaymentId.valueOf("Payment ID we want"),
+                GoCardlessOrganisationId.valueOf("Organisation ID we want"),
                 Set.of("Action we want")).get();
 
         assertThat(event.getGoCardlessEventId(), is(GoCardlessEventId.valueOf("This is the latest applicable event")));

@@ -129,4 +129,11 @@ public interface PaymentDao {
                                                                @Bind("state") PaymentState mandateState,
                                                                @Bind("stateDetails") String details,
                                                                @Bind("stateDetailsDescription") String detailsDescription);
+
+    @SqlUpdate("UPDATE payments SET state = :state, state_details = :stateDetails, state_details_description = :stateDetailsDescription " +
+            "WHERE id = :id")
+    int updateStateAndDetails(@Bind("id") Long id,
+                              @Bind("state") PaymentState paymentState,
+                              @Bind("stateDetails") String details,
+                              @Bind("stateDetailsDescription") String detailsDescription);
 }
