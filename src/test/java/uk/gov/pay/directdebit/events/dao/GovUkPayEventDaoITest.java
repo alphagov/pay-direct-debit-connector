@@ -173,7 +173,7 @@ public class GovUkPayEventDaoITest {
     }
 
     @Test
-    public void shouldReturnEmptyOptionalWhenNoApplicableEvent() {
+    public void shouldReturnEmptyOptionalWhenNoApplicableEventForMandate() {
         aGovUkPayEventFixture()
                 .withMandateId(mandate.getId())
                 .withEventDate(ZonedDateTime.parse("2019-01-01T14:30:40Z"))
@@ -183,6 +183,48 @@ public class GovUkPayEventDaoITest {
 
         var applicableEvents = Set.of(MANDATE_CREATED, MANDATE_CANCELLED_BY_USER);
         Optional<GovUkPayEvent> govUkPayEvent = govUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), applicableEvents);
+
+        assertThat(govUkPayEvent, is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldFindLatestApplicableEventForPayment() {
+        aGovUkPayEventFixture()
+                .withPaymentId(payment.getId())
+                .withEventDate(ZonedDateTime.parse("2019-01-01T14:30:40Z"))
+                .withEventType(MANDATE_SUBMITTED)
+                .insert(testContext.getJdbi())
+                .toEntity();
+        var latestApplicableEvent = aGovUkPayEventFixture()
+                .withPaymentId(payment.getId())
+                .withEventDate(ZonedDateTime.parse("2019-01-01T13:30:40Z"))
+                .withEventType(PAYMENT_SUBMITTED)
+                .insert(testContext.getJdbi())
+                .toEntity();
+        aGovUkPayEventFixture()
+                .withPaymentId(payment.getId())
+                .withEventDate(ZonedDateTime.parse("2019-01-01T11:30:40Z"))
+                .withEventType(PAYMENT_SUBMITTED)
+                .insert(testContext.getJdbi())
+                .toEntity();
+
+        var applicableEvents = Set.of(PAYMENT_SUBMITTED);
+        Optional<GovUkPayEvent> govUkPayEvent = govUkPayEventDao.findLatestApplicableEventForPayment(payment.getId(), applicableEvents);
+
+        assertThat(govUkPayEvent.get(), is(latestApplicableEvent));
+    }
+
+    @Test
+    public void shouldReturnEmptyOptionalWhenNoApplicableEventForPayment() {
+        aGovUkPayEventFixture()
+                .withPaymentId(payment.getId())
+                .withEventDate(ZonedDateTime.parse("2019-01-01T14:30:40Z"))
+                .withEventType(MANDATE_SUBMITTED)
+                .insert(testContext.getJdbi())
+                .toEntity();
+
+        var applicableEvents = Set.of(PAYMENT_SUBMITTED);
+        Optional<GovUkPayEvent> govUkPayEvent = govUkPayEventDao.findLatestApplicableEventForPayment(payment.getId(), applicableEvents);
 
         assertThat(govUkPayEvent, is(Optional.empty()));
     }
