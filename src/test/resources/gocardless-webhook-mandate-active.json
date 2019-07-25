@@ -1,0 +1,20 @@
+{
+  "events": [
+    {
+      "id": "EVTESTCWTEMXVF",
+      "created_at": "2019-07-24T12:49:47.773Z",
+      "resource_type": "mandates",
+      "action": "active",
+      "links": {
+        "mandate": "MD0006APPY4N63",
+        "organisation": "OR00003V8M32F0"
+      },
+      "details": {
+        "origin": "gocardless",
+        "cause": "mandate_activated",
+        "description": "The time window after submission for the banks to refuse a mandate has ended without any errors being received, so this mandate is now active."
+      },
+      "metadata": {}
+    }
+  ]
+}

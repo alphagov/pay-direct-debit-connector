@@ -2,8 +2,6 @@ package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
@@ -118,9 +116,6 @@ public class WebhookGoCardlessResourceOutOfOrderMandateEventsIT {
 
     @DropwizardTestContext
     private TestContext testContext;
-
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(10111);
 
     private ObjectMapper objectMapper = new ObjectMapper().configure(ORDER_MAP_ENTRIES_BY_KEYS, true);
 

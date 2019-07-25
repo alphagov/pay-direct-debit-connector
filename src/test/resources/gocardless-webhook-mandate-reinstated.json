@@ -1,0 +1,22 @@
+{
+  "events": [
+    {
+      "id": "EVTESTKYD263DQ",
+      "created_at": "2019-07-24T12:57:04.137Z",
+      "resource_type": "mandates",
+      "action": "reinstated",
+      "links": {
+        "mandate": "MD0006APPY4N63",
+        "organisation": "OR00003V8M32F0"
+      },
+      "details": {
+        "origin": "bank",
+        "cause": "mandate_reinstated",
+        "scheme": "bacs",
+        "reason_code": "ADDACS-R",
+        "description": "A cancelled mandate has been re-instated by the customer's bank."
+      },
+      "metadata": {}
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "events": [
+    {
+      "id": "EVTEST8W5AWMDA",
+      "created_at": "2019-07-24T17:17:02.222Z",
+      "resource_type": "mandates",
+      "action": "expired",
+      "links": {
+        "mandate": "MD0006APPY4N63",
+        "organisation": "OR00003V8M32F0"
+      },
+      "details": {
+        "origin": "gocardless",
+        "cause": "mandate_expired",
+        "description": "The mandate is being marked as expired, because no payments have been collected against it for the dormancy period of your service user number. If you have access to the mandate reinstation API endpoint, you can use this to attempt to set this mandate up again."
+      },
+      "metadata": {}
+    }
+  ]
+}
