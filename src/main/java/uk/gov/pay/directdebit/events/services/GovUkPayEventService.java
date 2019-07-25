@@ -10,6 +10,7 @@ import uk.gov.pay.directdebit.events.model.GovUkPayEventType;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateStateUpdater;
 import uk.gov.pay.directdebit.payments.model.Payment;
+import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
 
 import javax.inject.Inject;
 
@@ -20,14 +21,17 @@ public class GovUkPayEventService {
     private final GovUkPayEventDao govUkPayEventDao;
     private final GovUkPayEventStateGraph govUkPayEventStateGraph;
     private final MandateStateUpdater mandateStateUpdater;
+    private final PaymentStateUpdater paymentStateUpdater;
 
     @Inject
     public GovUkPayEventService(GovUkPayEventDao govUkPayEventDao,
                                 GovUkPayEventStateGraph govUkPayEventStateGraph,
-                                MandateStateUpdater mandateStateUpdater) {
+                                MandateStateUpdater mandateStateUpdater,
+                                PaymentStateUpdater paymentStateUpdater) {
         this.govUkPayEventDao = govUkPayEventDao;
         this.govUkPayEventStateGraph = govUkPayEventStateGraph;
         this.mandateStateUpdater = mandateStateUpdater;
+        this.paymentStateUpdater = paymentStateUpdater;
     }
 
     public Mandate storeEventAndUpdateStateForMandate(Mandate mandate, GovUkPayEventType eventType) {
@@ -35,21 +39,23 @@ public class GovUkPayEventService {
         govUkPayEventDao.findLatestEventForMandate(mandate.getId())
                 .ifPresentOrElse(latestEvent -> validateEventTransition(event, latestEvent),
                         () -> validateInitialEvent(event));
-        
+
         govUkPayEventDao.insert(event);
         LOGGER.info("Inserted GOV.UK Pay event of type {} for mandate {}", eventType, mandate.getExternalId());
-        
+
         return mandateStateUpdater.updateStateIfNecessary(mandate);
     }
 
-    public void storeEventForPayment(Payment payment, GovUkPayEventType eventType) {
+    public Payment storeEventAndUpdateStateForPayment(Payment payment, GovUkPayEventType eventType) {
         var event = new GovUkPayEvent(payment, eventType);
         govUkPayEventDao.findLatestEventForPayment(payment.getId())
                 .ifPresentOrElse(latestEvent -> validateEventTransition(event, latestEvent),
                         () -> validateInitialEvent(event));
-        
+
         govUkPayEventDao.insert(event);
         LOGGER.info("Inserted GOV.UK Pay event of type {} for payment {}", eventType, payment.getExternalId());
+
+        return paymentStateUpdater.updateStateIfNecessary(payment);
     }
 
     private void validateInitialEvent(GovUkPayEvent event) {

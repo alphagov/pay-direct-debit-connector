@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.payments.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.events.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
@@ -13,14 +12,11 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
-import uk.gov.pay.directdebit.payments.exception.InvalidStateTransitionException;
 import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
-import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
-import uk.gov.pay.directdebit.tokens.services.TokenService;
 
 import javax.inject.Inject;
 import java.time.ZoneOffset;
@@ -31,17 +27,13 @@ import java.util.Set;
 
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.aPayment;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
-import static uk.gov.pay.directdebit.payments.model.PaymentStatesGraph.getStates;
 
 public class PaymentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentService.class);
-    private final TokenService tokenService;
-    private final DirectDebitConfig directDebitConfig;
     private final PaymentDao paymentDao;
     private final DirectDebitEventService directDebitEventService;
     private final UserNotificationService userNotificationService;
@@ -49,15 +41,11 @@ public class PaymentService {
     private final GovUkPayEventService govUkPayEventService;
 
     @Inject
-    public PaymentService(TokenService tokenService,
-                          DirectDebitConfig directDebitConfig,
-                          PaymentDao paymentDao,
+    public PaymentService(PaymentDao paymentDao,
                           DirectDebitEventService directDebitEventService,
                           UserNotificationService userNotificationService,
                           PaymentProviderFactory paymentProviderFactory,
                           GovUkPayEventService govUkPayEventService) {
-        this.tokenService = tokenService;
-        this.directDebitConfig = directDebitConfig;
         this.directDebitEventService = directDebitEventService;
         this.paymentDao = paymentDao;
         this.userNotificationService = userNotificationService;
@@ -127,17 +115,14 @@ public class PaymentService {
         return directDebitEventService.registerPaymentCreatedEventFor(payment);
     }
 
+    // TODO: a remnant from one-off payments, should be removed
     public DirectDebitEvent paymentExpired(Payment payment) {
-        Payment updatePayment = updateStateFor(payment, SupportedEvent.PAYMENT_EXPIRED_BY_SYSTEM);
-        return directDebitEventService.registerPaymentExpiredEventFor(updatePayment);
+        return directDebitEventService.registerPaymentExpiredEventFor(payment);
     }
 
     public Payment paymentSubmittedToProviderFor(Payment payment) {
-        Payment updatedPayment = updateStateFor(payment, PAYMENT_SUBMITTED_TO_PROVIDER);
-        userNotificationService.sendPaymentConfirmedEmailFor(updatedPayment);
-        directDebitEventService.registerPaymentSubmittedToProviderEventFor(updatedPayment);
-        govUkPayEventService.storeEventForPayment(payment, PAYMENT_SUBMITTED);
-        return updatedPayment;
+        userNotificationService.sendPaymentConfirmedEmailFor(payment);
+        return govUkPayEventService.storeEventAndUpdateStateForPayment(payment, PAYMENT_SUBMITTED);
     }
 
     public DirectDebitEvent paymentFailedWithEmailFor(Payment payment) {
@@ -161,36 +146,12 @@ public class PaymentService {
         return directDebitEventService.registerPaymentAcknowledgedEventFor(payment);
     }
 
-    public DirectDebitEvent paymentCancelledFor(Payment payment) {
-        Payment newPayment = updateStateFor(payment, SupportedEvent.PAYMENT_CANCELLED_BY_USER);
-        return directDebitEventService
-                .registerPaymentCancelledEventFor(payment.getMandate(), newPayment);
-    }
-
-    public DirectDebitEvent paymentMethodChangedFor(Payment payment) {
-        Payment newPayment = updateStateFor(payment, SupportedEvent.PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
-        return directDebitEventService.registerPaymentMethodChangedEventFor(newPayment.getMandate());
-    }
-
     public DirectDebitEvent paymentSubmittedFor(Payment payment) {
         return directDebitEventService.registerPaymentSubmittedEventFor(payment);
     }
 
     public DirectDebitEvent payoutPaidFor(Payment payment) {
         return directDebitEventService.registerPayoutPaidEventFor(payment);
-    }
-
-    private Payment updateStateFor(Payment payment, SupportedEvent event) {
-        PaymentState newState = getStates()
-                .getNextStateForEvent(payment.getState(), event)
-                .orElseThrow(() -> new InvalidStateTransitionException(event.toString(), payment.getState().toString()));
-
-        paymentDao.updateState(payment.getId(), newState);
-        LOGGER.info("Updated payment {} - from {} to {}",
-                payment.getExternalId(),
-                payment.getState(),
-                newState);
-        return fromPayment(payment).withState(newState).build();
     }
 
     public Optional<DirectDebitEvent> findPaymentSubmittedEventFor(Payment payment) {
