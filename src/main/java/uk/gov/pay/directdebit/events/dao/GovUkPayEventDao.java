@@ -60,4 +60,18 @@ public interface GovUkPayEventDao {
             "ORDER BY event_date DESC " +
             "LIMIT 1")
     Optional<GovUkPayEvent> findLatestEventForPayment(@Bind("paymentId") Long paymentId);
+
+    @SqlQuery("SELECT id, " +
+            "mandate_id, " +
+            "payment_id, " +
+            "event_date, " +
+            "resource_type, " +
+            "event_type " +
+            "FROM govukpay_events " +
+            "WHERE payment_id = :paymentId " +
+            "AND event_type IN (<applicableEventTypes>) " +
+            "ORDER BY event_date DESC " +
+            "LIMIT 1")
+    Optional<GovUkPayEvent> findLatestApplicableEventForPayment(@Bind("paymentId") Long paymentId,
+                                                                @BindList("applicableEventTypes") Set<GovUkPayEventType> applicableEventTypes);
 }
