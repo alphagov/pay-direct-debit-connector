@@ -10,13 +10,13 @@ import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_
 
 public enum PaymentState implements DirectDebitState {
 
-    NEW(EXTERNAL_STARTED),
-    PENDING(EXTERNAL_PENDING),
+    CREATED(EXTERNAL_STARTED),
+    SUBMITTED_TO_PROVIDER(EXTERNAL_PENDING),
     FAILED(EXTERNAL_FAILED),
     CANCELLED(EXTERNAL_FAILED),
     EXPIRED(EXTERNAL_FAILED),
     USER_CANCEL_NOT_ELIGIBLE(EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE),
-    SUCCESS(EXTERNAL_SUCCESS);
+    PAID_OUT(EXTERNAL_SUCCESS);
 
     private ExternalPaymentState externalState;
 

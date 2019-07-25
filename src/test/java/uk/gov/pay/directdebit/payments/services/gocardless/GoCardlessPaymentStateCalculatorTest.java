@@ -84,7 +84,7 @@ public class GoCardlessPaymentStateCalculatorTest {
     @Test
     @Parameters({
             "failed, FAILED",
-            "paid_out, SUCCESS"
+            "paid_out, PAID_OUT"
     })
     public void goCardlessEventActionMapsToState(String action, String expectedState) {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction(action).toEntity();
@@ -99,7 +99,7 @@ public class GoCardlessPaymentStateCalculatorTest {
 
     @Test
     @Parameters({
-            "PAYMENT_SUBMITTED, PENDING"
+            "PAYMENT_SUBMITTED, SUBMITTED_TO_PROVIDER"
     })
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
         GovUkPayEventType govUkPayEventType = GovUkPayEventType.valueOf(eventType);
@@ -148,7 +148,7 @@ public class GoCardlessPaymentStateCalculatorTest {
 
         Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
 
-        assertThat(result.get().getState(), is(PaymentState.PENDING));
+        assertThat(result.get().getState(), is(PaymentState.SUBMITTED_TO_PROVIDER));
     }
 
     @Test

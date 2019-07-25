@@ -14,15 +14,14 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.EXPIRED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
 
 public class PaymentStatesGraph extends DirectDebitStatesGraph<PaymentState> {
 
     public static PaymentState initialState() {
-        return NEW;
+        return CREATED;
     }
 
     public static PaymentStatesGraph getStates() {
@@ -37,14 +36,14 @@ public class PaymentStatesGraph extends DirectDebitStatesGraph<PaymentState> {
 
         addNodes(graph, PaymentState.values());
 
-        graph.putEdgeValue(NEW, USER_CANCEL_NOT_ELIGIBLE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
-        graph.putEdgeValue(NEW, CANCELLED, PAYMENT_CANCELLED_BY_USER);
-        graph.putEdgeValue(NEW, PENDING, PAYMENT_SUBMITTED_TO_PROVIDER);
+        graph.putEdgeValue(CREATED, USER_CANCEL_NOT_ELIGIBLE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
+        graph.putEdgeValue(CREATED, CANCELLED, PAYMENT_CANCELLED_BY_USER);
+        graph.putEdgeValue(CREATED, SUBMITTED_TO_PROVIDER, PAYMENT_SUBMITTED_TO_PROVIDER);
         
-        graph.putEdgeValue(NEW, EXPIRED, PAYMENT_EXPIRED_BY_SYSTEM);
+        graph.putEdgeValue(CREATED, EXPIRED, PAYMENT_EXPIRED_BY_SYSTEM);
 
-        graph.putEdgeValue(PENDING, FAILED, PAYMENT_FAILED);
-        graph.putEdgeValue(PENDING, SUCCESS, PAID_OUT);
+        graph.putEdgeValue(SUBMITTED_TO_PROVIDER, FAILED, PAYMENT_FAILED);
+        graph.putEdgeValue(SUBMITTED_TO_PROVIDER, PaymentState.PAID_OUT, PAID_OUT);
 
         return ImmutableValueGraph.copyOf(graph);
     }

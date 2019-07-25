@@ -16,7 +16,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentUpdateServiceTest {
@@ -34,7 +34,7 @@ public class PaymentUpdateServiceTest {
 
     @Test
     public void callsToUpdateStateAndReturnsUpdatedPayment_whenDetailsAndDescriptionAreEmpty() {
-        PaymentState state = PENDING;
+        PaymentState state = SUBMITTED_TO_PROVIDER;
         DirectDebitStateWithDetails<PaymentState> stateWithDetails = new DirectDebitStateWithDetails<>(state);
 
         Payment updatedPayment = paymentUpdateService.updateState(payment, stateWithDetails);
@@ -49,7 +49,7 @@ public class PaymentUpdateServiceTest {
 
     @Test
     public void callsToUpdateStateAndReturnsUpdatedPayment_withDetailsAndDescription() {
-        PaymentState state = PENDING;
+        PaymentState state = SUBMITTED_TO_PROVIDER;
         String details = "new-details";
         String description = "new-description";
         DirectDebitStateWithDetails<PaymentState> stateWithDetails = new DirectDebitStateWithDetails<>(state, details, description);

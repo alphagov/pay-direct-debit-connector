@@ -160,7 +160,7 @@ public class PublicApiContractTest {
                 .withExternalId(params.get("charge_id"))
                 .withAmount(1000L)
                 .withReference("ABCDE")
-                .withState(PaymentState.PENDING)
+                .withState(PaymentState.SUBMITTED_TO_PROVIDER)
                 .withStateDetails("payment_state_details")
                 .withCreatedDate(ZonedDateTime.parse("1995-10-27T10:21:01.499Z"))
                 .withPaymentProviderId(GoCardlessPaymentId.valueOf("AAAA1111"))

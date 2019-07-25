@@ -362,7 +362,7 @@ public class PaymentSearchResourceIT { //TODO merge with PaymentResource
                 .insert(testContext.getJdbi());
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(PaymentState.NEW)
+                .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
         for (int i = 0; i < 6; i++) {
             if (i % 2 == 0) {

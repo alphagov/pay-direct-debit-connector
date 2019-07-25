@@ -23,7 +23,7 @@ public class PaymentFixture implements DbFixture<PaymentFixture, Payment> {
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture();
     private String externalId = RandomIdGenerator.newId();
     private Long amount = RandomUtils.nextLong(1, 99999);
-    private PaymentState state = PaymentState.NEW;
+    private PaymentState state = PaymentState.CREATED;
     private String stateDetails = null;
     private String stateDetailsDescription = null;
     private String reference = RandomStringUtils.randomAlphanumeric(10);

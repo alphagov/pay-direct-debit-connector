@@ -54,9 +54,9 @@ public class ExpireServiceTest {
     
     @Test
     public void expirePayments_shouldCallTransactionServiceWithPriorStatesToPending() {
-        Payment payment = PaymentFixture.aPaymentFixture().withState(PaymentState.NEW).toEntity();
+        Payment payment = PaymentFixture.aPaymentFixture().withState(PaymentState.CREATED).toEntity();
         when(paymentService
-                .findAllPaymentsBySetOfStatesAndCreationTime(eq(paymentStatesGraph.getPriorStates(PaymentState.PENDING)), any()))
+                .findAllPaymentsBySetOfStatesAndCreationTime(eq(paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER)), any()))
                 .thenReturn(Collections.singletonList(payment));
         
         int numberOfExpiredPayments = expireService.expirePayments();
@@ -75,8 +75,8 @@ public class ExpireServiceTest {
 
     @Test
     public void shouldGetCorrectPaymentsStatesPriorToPending() {
-        Set<PaymentState> paymentStates = paymentStatesGraph.getPriorStates(PaymentState.PENDING);
-        Set<PaymentState> expectedPaymentStates = new HashSet<>(Collections.singletonList(PaymentState.NEW));
+        Set<PaymentState> paymentStates = paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER);
+        Set<PaymentState> expectedPaymentStates = new HashSet<>(Collections.singletonList(PaymentState.CREATED));
         assertEquals(expectedPaymentStates, paymentStates);
     }
 

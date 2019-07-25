@@ -319,7 +319,7 @@ public class MandateResourceIT {
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
 
-        PaymentFixture paymentFixture = createPaymentFixtureWith(mandateFixture, PaymentState.NEW);
+        PaymentFixture paymentFixture = createPaymentFixtureWith(mandateFixture, PaymentState.CREATED);
 
         String requestPath = format("/v1/accounts/%s/mandates/%s/payments/%s",
                 accountExternalId,

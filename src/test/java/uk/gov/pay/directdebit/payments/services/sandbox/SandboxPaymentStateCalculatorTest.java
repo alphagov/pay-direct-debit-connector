@@ -66,7 +66,7 @@ public class SandboxPaymentStateCalculatorTest {
         
         Optional<DirectDebitStateWithDetails<PaymentState>> result = sandboxPaymentStateCalculator.calculate(payment);
 
-        assertThat(result.get().getState(), is(PaymentState.SUCCESS));
+        assertThat(result.get().getState(), is(PaymentState.PAID_OUT));
     }
 
     @Test
