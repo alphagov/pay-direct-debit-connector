@@ -3,7 +3,6 @@ package uk.gov.pay.directdebit.webhook.gocardless.resources;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -34,7 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static com.google.common.base.Charsets.UTF_8;
+import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static io.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -75,7 +74,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
 
     @Test
     @Ignore
-    public void submittedChangesStateToSubmittedToBank() throws IOException {
+    public void submittedChangesStateToSubmittedToBank() {
         postWebhook("gocardless-webhook-mandate-submitted.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
@@ -85,7 +84,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     }
 
     @Test
-    public void activeChangesStateToActive() throws IOException {
+    public void activeChangesStateToActive() {
         postWebhook("gocardless-webhook-mandate-active.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
@@ -97,7 +96,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
 
     @Test
     @Ignore
-    public void reinstatedChangesStateToActive() throws IOException {
+    public void reinstatedChangesStateToActive() {
         postWebhook("gocardless-webhook-mandate-reinstated.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
@@ -136,7 +135,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
 
     @Test
     @Ignore
-    public void expiredChangesStateToFailed() throws IOException {
+    public void expiredChangesStateToFailed() {
         postWebhook("gocardless-webhook-mandate-expired.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
@@ -147,8 +146,8 @@ public class WebhookGoCardlessResourceMandateActionsIT {
                 "this to attempt to set this mandate up again."));
     }
 
-    private void postWebhook(String webhookBodyResourceName) throws IOException {
-        String body = Resources.toString(Resources.getResource(webhookBodyResourceName), UTF_8);
+    private void postWebhook(String webhookBodyFileName) {
+        String body = fixture(webhookBodyFileName);
         given().port(testContext.getPort())
                 .body(body)
                 .header("Webhook-Signature", goCardlessWebhookSignatureCalculator.calculate(body))
