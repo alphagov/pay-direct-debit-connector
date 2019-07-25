@@ -52,6 +52,6 @@ final class DropwizardTestApplications {
     static TestContext getTestContextOf(Class<? extends Application<?>> appClass, String configClasspathLocation) {
         Pair<Class<? extends Application>, String> appConfig = Pair.of(appClass, configClasspathLocation);
         DropwizardTestSupport application = apps.get(appConfig);
-        return new TestContext(application.getLocalPort(), ((DirectDebitConfig) application.getConfiguration()).getDataSourceFactory());
+        return new TestContext(application.getLocalPort(), ((DirectDebitConfig) application.getConfiguration()));
     }
 }

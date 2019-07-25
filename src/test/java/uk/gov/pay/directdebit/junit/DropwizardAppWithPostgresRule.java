@@ -45,7 +45,7 @@ public class DropwizardAppWithPostgresRule implements TestRule {
             public void evaluate() throws Throwable {
                 app.getApplication().run("db", "migrate", configFilePath);
                 createTemplate(getDbUri(), getDbUsername(), getDbPassword());
-                testContext = new TestContext(app.getLocalPort(), app.getConfiguration().getDataSourceFactory());
+                testContext = new TestContext(app.getLocalPort(), app.getConfiguration());
                 databaseTestHelper = new DatabaseTestHelper(testContext.getJdbi());
                 base.evaluate();
             }

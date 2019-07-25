@@ -3,8 +3,6 @@ package uk.gov.pay.directdebit.webhook.gocardless.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gocardless.GoCardlessClient;
 import io.dropwizard.Configuration;
-import org.apache.commons.lang3.StringUtils;
-import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
 
 import javax.validation.constraints.NotNull;
 
@@ -35,14 +33,6 @@ public class GoCardlessFactory extends Configuration {
 
     public GoCardlessClient.Environment getEnvironment() {
         return environment;
-    }
-
-    public WebhookVerifier buildSignatureVerifier() {
-        if (StringUtils.isBlank(webhookSecret)) {
-            throw new RuntimeException("GoCardless webhook secret is blank");
-        }
-
-        return new WebhookVerifier(webhookSecret);
     }
 
 }

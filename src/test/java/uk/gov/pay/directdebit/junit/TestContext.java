@@ -1,18 +1,19 @@
 package uk.gov.pay.directdebit.junit;
 
-import io.dropwizard.db.DataSourceFactory;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
+import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReferenceArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalIdArgumentFactory;
-import uk.gov.pay.directdebit.events.model.GoCardlessEventIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdArgumentFactory;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 public class TestContext {
 
+    private final DirectDebitConfig configuration;
     private final String databaseUrl;
     private final String databaseUser;
     private final String databasePassword;
@@ -22,10 +23,10 @@ public class TestContext {
     private DatabaseTestHelper databaseTestHelper;
     private int port;
 
-    public TestContext(int port, DataSourceFactory dataSourceFactory) {
-        databaseUrl = dataSourceFactory.getUrl();
-        databaseUser = dataSourceFactory.getUser();
-        databasePassword = dataSourceFactory.getPassword();
+    public TestContext(int port, DirectDebitConfig configuration) {
+        databaseUrl = configuration.getDataSourceFactory().getUrl();
+        databaseUser = configuration.getDataSourceFactory().getUser();
+        databasePassword = configuration.getDataSourceFactory().getPassword();
         jdbi = Jdbi.create(databaseUrl, databaseUser, databasePassword);
         jdbi.installPlugin(new SqlObjectPlugin());
         jdbi.registerArgument(new MandateExternalIdArgumentFactory());
@@ -36,6 +37,7 @@ public class TestContext {
         jdbi.registerArgument(new GoCardlessEventIdArgumentFactory());
         this.databaseTestHelper = new DatabaseTestHelper(jdbi);
         this.port = port;
+        this.configuration = configuration;
     }
 
     public Jdbi getJdbi() {
@@ -50,6 +52,10 @@ public class TestContext {
         return port;
     }
 
+    public String getGoCardlessWebhookSecret() {
+        return configuration.getGoCardless().getWebhookSecret();
+    }
+
     String getDatabaseUrl() {
         return databaseUrl;
     }
@@ -61,4 +67,5 @@ public class TestContext {
     String getDatabasePassword() {
         return databasePassword;
     }
+
 }
