@@ -15,8 +15,8 @@ public enum MandateState implements DirectDebitState {
     PENDING(ExternalMandateState.PENDING),
     ACTIVE(ExternalMandateState.ACTIVE),
     FAILED(INACTIVE),
-    CANCELLED(INACTIVE),
-    EXPIRED(INACTIVE);
+    USER_SETUP_CANCELLED(INACTIVE),
+    USER_SETUP_EXPIRED(INACTIVE);
 
     private ExternalMandateState externalState;
 

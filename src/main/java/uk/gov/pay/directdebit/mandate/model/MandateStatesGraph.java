@@ -8,9 +8,9 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitStatesGraph;
 
 import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.CANCELLED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.EXPIRED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_PROVIDER;
@@ -46,18 +46,18 @@ public class MandateStatesGraph extends DirectDebitStatesGraph<MandateState> {
 
         graph.putEdgeValue(CREATED, AWAITING_DIRECT_DEBIT_DETAILS, TOKEN_EXCHANGED);
         graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, SUBMITTED_TO_PROVIDER, DIRECT_DEBIT_DETAILS_CONFIRMED);
-        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, CANCELLED, PAYMENT_CANCELLED_BY_USER);
+        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, USER_SETUP_CANCELLED, PAYMENT_CANCELLED_BY_USER);
         graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, USER_CANCEL_NOT_ELIGIBLE, PAYMENT_CANCELLED_BY_USER_NOT_ELIGIBLE);
         
-        graph.putEdgeValue(CREATED, EXPIRED, MANDATE_EXPIRED_BY_SYSTEM);
-        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, EXPIRED, MANDATE_EXPIRED_BY_SYSTEM);
-        graph.putEdgeValue(SUBMITTED_TO_PROVIDER, EXPIRED, MANDATE_EXPIRED_BY_SYSTEM);
+        graph.putEdgeValue(CREATED, USER_SETUP_EXPIRED, MANDATE_EXPIRED_BY_SYSTEM);
+        graph.putEdgeValue(AWAITING_DIRECT_DEBIT_DETAILS, USER_SETUP_EXPIRED, MANDATE_EXPIRED_BY_SYSTEM);
+        graph.putEdgeValue(SUBMITTED_TO_PROVIDER, USER_SETUP_EXPIRED, MANDATE_EXPIRED_BY_SYSTEM);
 
         graph.putEdgeValue(SUBMITTED_TO_PROVIDER, PENDING, MANDATE_PENDING);
         graph.putEdgeValue(PENDING, ACTIVE, MANDATE_ACTIVE);
         graph.putEdgeValue(PENDING, FAILED, MANDATE_FAILED);
-        graph.putEdgeValue(PENDING, CANCELLED, MANDATE_CANCELLED);
-        graph.putEdgeValue(ACTIVE, CANCELLED, MANDATE_CANCELLED);
+        graph.putEdgeValue(PENDING, USER_SETUP_CANCELLED, MANDATE_CANCELLED);
+        graph.putEdgeValue(ACTIVE, USER_SETUP_CANCELLED, MANDATE_CANCELLED);
 
         return ImmutableValueGraph.copyOf(graph);
     }

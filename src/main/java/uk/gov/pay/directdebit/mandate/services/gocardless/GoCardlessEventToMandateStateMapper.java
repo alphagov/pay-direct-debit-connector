@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.CANCELLED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_PROVIDER;
@@ -19,7 +19,7 @@ class GoCardlessEventToMandateStateMapper {
             "created", CREATED,
             "submitted", SUBMITTED_TO_PROVIDER,
             "active", ACTIVE,
-            "cancelled", CANCELLED,
+            "cancelled", USER_SETUP_CANCELLED,
             "failed", FAILED
     );
 

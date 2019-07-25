@@ -16,9 +16,9 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_EXPI
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.CANCELLED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.EXPIRED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_CANCEL_NOT_ELIGIBLE;
 
@@ -27,8 +27,8 @@ public class GovUkPayEventToMandateStateMapper {
             MANDATE_CREATED, CREATED,
             MANDATE_TOKEN_EXCHANGED, AWAITING_DIRECT_DEBIT_DETAILS,
             MANDATE_SUBMITTED, SUBMITTED_TO_PROVIDER,
-            MANDATE_EXPIRED_BY_SYSTEM, EXPIRED,
-            MANDATE_CANCELLED_BY_USER, CANCELLED,
+            MANDATE_EXPIRED_BY_SYSTEM, USER_SETUP_EXPIRED,
+            MANDATE_CANCELLED_BY_USER, USER_SETUP_CANCELLED,
             MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE
     );
 
