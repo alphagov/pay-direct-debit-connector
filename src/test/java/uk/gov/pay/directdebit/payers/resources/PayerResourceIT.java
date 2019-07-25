@@ -154,7 +154,7 @@ public class PayerResourceIT {
         testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
         aPaymentFixture()
                 .withMandateFixture(testMandate)
-                .withState(PaymentState.NEW)
+                .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
     }
 }

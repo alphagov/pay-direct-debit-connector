@@ -48,9 +48,9 @@ import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEv
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.EXPIRED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.NEW;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PENDING;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -148,13 +148,13 @@ public class PaymentServiceTest {
         Payment payment = PaymentFixture
                 .aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(NEW)
+                .withState(CREATED)
                 .toEntity();
 
         service.paymentSubmittedToProviderFor(payment);
 
-        Payment updatedPayment = fromPayment(payment).withState(PENDING).build();
-        verify(mockedPaymentDao).updateState(updatedPayment.getId(), PaymentState.PENDING);
+        Payment updatedPayment = fromPayment(payment).withState(SUBMITTED_TO_PROVIDER).build();
+        verify(mockedPaymentDao).updateState(updatedPayment.getId(), PaymentState.SUBMITTED_TO_PROVIDER);
         verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(updatedPayment);
         verify(mockedGovUkPayEventService).storeEventForPayment(payment, PAYMENT_SUBMITTED);
     }
@@ -163,14 +163,14 @@ public class PaymentServiceTest {
     public void paymentAcknowledgedFor_shouldRegisterAPaymentPendingEvent() {
         Payment payment = PaymentFixture
                 .aPaymentFixture()
-                .withState(PENDING)
+                .withState(SUBMITTED_TO_PROVIDER)
                 .toEntity();
 
         service.paymentAcknowledgedFor(payment);
 
         verify(mockedDirectDebitEventService).registerPaymentAcknowledgedEventFor(payment);
         verifyZeroInteractions(mockedPaymentDao);
-        assertThat(payment.getState(), is(PENDING));
+        assertThat(payment.getState(), is(SUBMITTED_TO_PROVIDER));
     }
 
     @Test
@@ -178,7 +178,7 @@ public class PaymentServiceTest {
 
         Payment payment = PaymentFixture
                 .aPaymentFixture()
-                .withState(PENDING)
+                .withState(SUBMITTED_TO_PROVIDER)
                 .toEntity();
 
         service.paymentPaidOutFor(payment);
@@ -191,7 +191,7 @@ public class PaymentServiceTest {
 
         Payment payment = PaymentFixture
                 .aPaymentFixture()
-                .withState(PENDING)
+                .withState(SUBMITTED_TO_PROVIDER)
                 .toEntity();
 
         service.paymentFailedWithoutEmailFor(payment);
@@ -204,7 +204,7 @@ public class PaymentServiceTest {
     public void paymentFailedFor_shouldSetPaymentAsFailed_andRegisterAPaymentFailedEvent_andSendEmail() {
         Payment payment = PaymentFixture
                 .aPaymentFixture()
-                .withState(PENDING)
+                .withState(SUBMITTED_TO_PROVIDER)
                 .toEntity();
 
         service.paymentFailedWithEmailFor(payment);
@@ -218,14 +218,14 @@ public class PaymentServiceTest {
 
         Payment payment = PaymentFixture
                 .aPaymentFixture()
-                .withState(SUCCESS)
+                .withState(PAID_OUT)
                 .toEntity();
 
         service.payoutPaidFor(payment);
 
         verify(mockedDirectDebitEventService).registerPayoutPaidEventFor(payment);
         verifyZeroInteractions(mockedPaymentDao);
-        assertThat(payment.getState(), is(SUCCESS));
+        assertThat(payment.getState(), is(PAID_OUT));
     }
 
 
@@ -234,7 +234,7 @@ public class PaymentServiceTest {
 
         Payment payment = PaymentFixture
                 .aPaymentFixture()
-                .withState(PENDING)
+                .withState(SUBMITTED_TO_PROVIDER)
                 .toEntity();
 
         DirectDebitEvent directDebitEvent = DirectDebitEventFixture.aDirectDebitEventFixture().toEntity();
@@ -254,7 +254,7 @@ public class PaymentServiceTest {
         Payment payment = PaymentFixture
                 .aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(NEW)
+                .withState(CREATED)
                 .toEntity();
 
         service.paymentCancelledFor(payment);
@@ -269,7 +269,7 @@ public class PaymentServiceTest {
         Payment payment = PaymentFixture
                 .aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(NEW)
+                .withState(CREATED)
                 .toEntity();
 
         service.paymentMethodChangedFor(payment);
@@ -284,7 +284,7 @@ public class PaymentServiceTest {
         Payment payment = PaymentFixture
                 .aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(NEW)
+                .withState(CREATED)
                 .toEntity();
 
         service.paymentExpired(payment);
@@ -302,7 +302,7 @@ public class PaymentServiceTest {
 
         assertThat(returnedPayment.getAmount(), is(123456L));
         assertThat(returnedPayment.getMandate(), is(mandate));
-        assertThat(returnedPayment.getState(), is(NEW));
+        assertThat(returnedPayment.getState(), is(CREATED));
         assertThat(returnedPayment.getDescription(), is("a description"));
         assertThat(returnedPayment.getReference(), is("a reference"));
         assertThat(returnedPayment.getProviderId(), is(Optional.empty()));
@@ -321,7 +321,7 @@ public class PaymentServiceTest {
                 .withMandateFixture(mandateFixture)
                 .withDescription("a description")
                 .withReference("a reference")
-                .withState(NEW)
+                .withState(CREATED)
                 .toEntity();
 
         SandboxPaymentId sandboxPaymentId = SandboxPaymentId.valueOf("123");
@@ -334,13 +334,13 @@ public class PaymentServiceTest {
 
         assertThat(returnedPayment.getAmount(), is(payment.getAmount()));
         assertThat(returnedPayment.getMandate(), is(payment.getMandate()));
-        assertThat(returnedPayment.getState(), is(PENDING));
+        assertThat(returnedPayment.getState(), is(SUBMITTED_TO_PROVIDER));
         assertThat(returnedPayment.getDescription(), is("a description"));
         assertThat(returnedPayment.getReference(), is("a reference"));
         assertThat(returnedPayment.getProviderId(), is(Optional.of(sandboxPaymentId)));
         assertThat(returnedPayment.getChargeDate(), is(Optional.of(chargeDate)));
 
-        Payment expectedPaymentWithStatePending = fromPayment(returnedPayment).withState(PENDING).build();
+        Payment expectedPaymentWithStatePending = fromPayment(returnedPayment).withState(SUBMITTED_TO_PROVIDER).build();
         verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(expectedPaymentWithStatePending);
     }
 

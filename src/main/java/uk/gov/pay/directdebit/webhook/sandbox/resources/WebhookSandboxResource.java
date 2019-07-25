@@ -45,7 +45,7 @@ public class WebhookSandboxResource {
     @POST
     @Timed
     public Response handleWebhook() {
-        paymentService.findAllByPaymentStateAndProvider(PaymentState.PENDING, PaymentProvider.SANDBOX)
+        paymentService.findAllByPaymentStateAndProvider(PaymentState.SUBMITTED_TO_PROVIDER, PaymentProvider.SANDBOX)
                 .forEach(this::processPayment);
         return Response.status(OK).build();
     }

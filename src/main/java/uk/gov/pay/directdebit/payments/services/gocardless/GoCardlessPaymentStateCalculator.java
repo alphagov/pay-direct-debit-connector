@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
 
 public class GoCardlessPaymentStateCalculator implements PaymentStateCalculator {
 
@@ -33,13 +33,13 @@ public class GoCardlessPaymentStateCalculator implements PaymentStateCalculator 
 
     private static final Map<String, PaymentState> GOCARDLESS_ACTION_TO_PAYMENT_STATE = Map.of(
             "failed", FAILED,
-            "paid_out", SUCCESS
+            "paid_out", PAID_OUT
     );
 
     static final Set<String> GOCARDLESS_ACTIONS_THAT_CHANGE_STATE = GOCARDLESS_ACTION_TO_PAYMENT_STATE.keySet();
     
     private static final Map<GovUkPayEventType, PaymentState> GOV_UK_PAY_EVENT_TYPE_TO_PAYMENT_STATE = Map.of(
-            PAYMENT_SUBMITTED, PaymentState.PENDING
+            PAYMENT_SUBMITTED, PaymentState.SUBMITTED_TO_PROVIDER
     );
     
     static final Set<GovUkPayEventType> GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE = GOV_UK_PAY_EVENT_TYPE_TO_PAYMENT_STATE.keySet();

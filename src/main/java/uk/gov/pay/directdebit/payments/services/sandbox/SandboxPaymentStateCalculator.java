@@ -14,14 +14,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUCCESS;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
 
 public class SandboxPaymentStateCalculator implements PaymentStateCalculator {
 
     private final SandboxEventDao sandboxEventDao;
 
     private static final Map<String, PaymentState> SANDBOX_ACTION_TO_PAYMENT_STATE = Map.of(
-            WebhookSandboxResource.SandboxEventAction.PAID_OUT.toString(), SUCCESS
+            WebhookSandboxResource.SandboxEventAction.PAID_OUT.toString(), PAID_OUT
     );
 
     static final Set<String> SANDBOX_ACTIONS_THAT_CHANGE_STATE = SANDBOX_ACTION_TO_PAYMENT_STATE.keySet();

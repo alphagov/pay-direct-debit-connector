@@ -43,7 +43,7 @@ public class WebhookSandboxResourceIT {
                 .withExternalId(sandboxPaymentExternalAndProviderId)
                 .withPaymentProviderId(SandboxPaymentId.valueOf(sandboxPaymentExternalAndProviderId))
                 .withMandateFixture(mandateFixture)
-                .withState(PaymentState.PENDING).insert(testContext.getJdbi()).getId();
+                .withState(PaymentState.SUBMITTED_TO_PROVIDER).insert(testContext.getJdbi()).getId();
 
         String requestPath = "/v1/webhooks/sandbox";
 
@@ -54,7 +54,7 @@ public class WebhookSandboxResourceIT {
                 .statusCode(Response.Status.OK.getStatusCode());
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentId);
-        assertThat(payment.get("state"), is("SUCCESS"));
+        assertThat(payment.get("state"), is("PAID_OUT"));
     }
 
 }

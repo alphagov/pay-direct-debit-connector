@@ -45,7 +45,7 @@ public class ExpireResourceIT {
     public void shouldExpireATransactionInStateStartedOlderThanOneDay() {
         MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
         PaymentFixture.aPaymentFixture()
-                .withState(PaymentState.NEW)
+                .withState(PaymentState.CREATED)
                 .withCreatedDate(ZonedDateTime.of(2018,1,1,1,1,1,1,ZoneId.systemDefault()))
                 .withMandateFixture(mandateFixture)
                 .insert(testContext.getJdbi());

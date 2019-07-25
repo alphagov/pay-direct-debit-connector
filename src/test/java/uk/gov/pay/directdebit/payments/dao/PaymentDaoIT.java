@@ -44,7 +44,7 @@ import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class PaymentDaoIT {
 
-    private static final PaymentState STATE = PaymentState.NEW;
+    private static final PaymentState STATE = PaymentState.CREATED;
     private static final long AMOUNT = 10L;
 
     @DropwizardTestContext
@@ -317,38 +317,38 @@ public class PaymentDaoIT {
         MandateFixture sandboxMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(sandboxGatewayAccount).insert(testContext.getJdbi());
         MandateFixture goCardlessMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(goCardlessGatewayAccount).insert(testContext.getJdbi());
         PaymentFixture sandboxCharge =
-                generateNewPaymentFixture(sandboxMandate, PaymentState.NEW, AMOUNT);
+                generateNewPaymentFixture(sandboxMandate, PaymentState.CREATED, AMOUNT);
         
-        generateNewPaymentFixture(goCardlessMandate, PaymentState.NEW, AMOUNT);
+        generateNewPaymentFixture(goCardlessMandate, PaymentState.CREATED, AMOUNT);
         sandboxCharge.insert(testContext.getJdbi());
 
         PaymentFixture successSandboxCharge =
-                generateNewPaymentFixture(sandboxMandate, PaymentState.SUCCESS, AMOUNT);
+                generateNewPaymentFixture(sandboxMandate, PaymentState.PAID_OUT, AMOUNT);
         successSandboxCharge.insert(testContext.getJdbi());
 
         PaymentFixture goCardlessSuccessCharge =
-                generateNewPaymentFixture(goCardlessMandate, PaymentState.SUCCESS, AMOUNT);
+                generateNewPaymentFixture(goCardlessMandate, PaymentState.PAID_OUT, AMOUNT);
         goCardlessSuccessCharge.insert(testContext.getJdbi());
 
-        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, SANDBOX);
+        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.PAID_OUT, SANDBOX);
         assertThat(successPaymentsList.size(), is(1));
-        assertThat(successPaymentsList.get(0).getState(), is(PaymentState.SUCCESS));
+        assertThat(successPaymentsList.get(0).getState(), is(PaymentState.PAID_OUT));
         assertThat(successPaymentsList.get(0).getMandate().getGatewayAccount().getPaymentProvider(), is(SANDBOX));
     }
 
     @Test
     public void shouldNotFindAnyPaymentByPaymentState_ifPaymentStateIsNotUsed() {
         PaymentFixture processingDirectDebitPaymentStatePaymentFixture =
-                generateNewPaymentFixture(testMandate, PaymentState.NEW, AMOUNT);
+                generateNewPaymentFixture(testMandate, PaymentState.CREATED, AMOUNT);
         processingDirectDebitPaymentStatePaymentFixture.insert(testContext.getJdbi());
 
-        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.SUCCESS, SANDBOX);
+        List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.PAID_OUT, SANDBOX);
         assertThat(successPaymentsList.size(), is(0));
     }
 
     @Test
     public void shouldUpdateStateAndReturnNumberOfAffectedRows() {
-        PaymentState newState = PaymentState.NEW;
+        PaymentState newState = PaymentState.CREATED;
         testPayment.insert(testContext.getJdbi());
         int numOfUpdatedPayments = paymentDao.updateState(testPayment.getId(), newState);
         Map<String, Object> transactionAfterUpdate = testContext.getDatabaseTestHelper().getPaymentById(testPayment.getId());
@@ -395,23 +395,23 @@ public class PaymentDaoIT {
 
     @Test
     public void shouldNotUpdateAnythingIfPaymentDoesNotExist() {
-        int numOfUpdatedPayments = paymentDao.updateState(34L, PaymentState.NEW);
+        int numOfUpdatedPayments = paymentDao.updateState(34L, PaymentState.CREATED);
         assertThat(numOfUpdatedPayments, is(0));
     }
     
     @Test
     public void findAllPaymentsBySetOfStatesAndCreationTime_shouldFindThreePayments() {
-        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
+        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.CREATED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
         
-        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
+        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.CREATED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
         
-        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
+        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.CREATED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
         
         PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
-        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.PENDING);
+        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER);
         List<Payment> payments = paymentDao.findAllPaymentsBySetOfStatesAndCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
         assertThat(payments.size(), is(3));
     }
@@ -453,12 +453,12 @@ public class PaymentDaoIT {
                 .insert(testContext.getJdbi());
 
         int numOfUpdatedPayments = paymentDao.updateStateByProviderIdAndOrganisationId(GOCARDLESS, GoCardlessOrganisationId.valueOf("Organisation ID we want"),
-                GoCardlessPaymentId.valueOf("Payment ID we want"), PaymentState.PENDING, "state details", "state details description");
+                GoCardlessPaymentId.valueOf("Payment ID we want"), PaymentState.SUBMITTED_TO_PROVIDER, "state details", "state details description");
 
         assertThat(numOfUpdatedPayments, is(1));
 
         Payment payment = paymentDao.findByExternalId("Payment we want").get();
-        assertThat(payment.getState(), is(PaymentState.PENDING));
+        assertThat(payment.getState(), is(PaymentState.SUBMITTED_TO_PROVIDER));
         assertThat(payment.getStateDetails(), is(Optional.of("state details")));
         assertThat(payment.getStateDetailsDescription(), is(Optional.of("state details description")));
     }
@@ -502,12 +502,12 @@ public class PaymentDaoIT {
                 .insert(testContext.getJdbi());
 
         int numOfUpdatedPayments = paymentDao.updateStateByProviderIdAndOrganisationId(GOCARDLESS, GoCardlessOrganisationId.valueOf("Organisation ID we want"),
-                GoCardlessPaymentId.valueOf("Payment ID we want"), PaymentState.PENDING, null, null);
+                GoCardlessPaymentId.valueOf("Payment ID we want"), PaymentState.SUBMITTED_TO_PROVIDER, null, null);
 
         assertThat(numOfUpdatedPayments, is(1));
 
         Payment payment = paymentDao.findByExternalId("Payment we want").get();
-        assertThat(payment.getState(), is(PaymentState.PENDING));
+        assertThat(payment.getState(), is(PaymentState.SUBMITTED_TO_PROVIDER));
         assertThat(payment.getStateDetails(), is(Optional.empty()));
         assertThat(payment.getStateDetailsDescription(), is(Optional.empty()));
     }
@@ -550,14 +550,14 @@ public class PaymentDaoIT {
 
         int numOfUpdatedPayments = paymentDao.updateStateByProviderId(SANDBOX,
                 SandboxPaymentId.valueOf("Payment ID we want"),
-                PaymentState.PENDING,
+                PaymentState.SUBMITTED_TO_PROVIDER,
                 "state details",
                 "state details description");
 
         assertThat(numOfUpdatedPayments, is(1));
 
         Payment payment = paymentDao.findByExternalId("Payment we want").get();
-        assertThat(payment.getState(), is(PaymentState.PENDING));
+        assertThat(payment.getState(), is(PaymentState.SUBMITTED_TO_PROVIDER));
         assertThat(payment.getStateDetails(), is(Optional.of("state details")));
         assertThat(payment.getStateDetailsDescription(), is(Optional.of("state details description")));
     }
@@ -602,36 +602,36 @@ public class PaymentDaoIT {
 
         int numOfUpdatedPayments = paymentDao.updateStateByProviderId(SANDBOX,
                 SandboxPaymentId.valueOf("Payment ID we want"),
-                PaymentState.PENDING,
+                PaymentState.SUBMITTED_TO_PROVIDER,
                 null,
                 null);
 
         assertThat(numOfUpdatedPayments, is(1));
 
         Payment payment = paymentDao.findByExternalId("Payment we want").get();
-        assertThat(payment.getState(), is(PaymentState.PENDING));
+        assertThat(payment.getState(), is(PaymentState.SUBMITTED_TO_PROVIDER));
         assertThat(payment.getStateDetails(), is(Optional.empty()));
         assertThat(payment.getStateDetailsDescription(), is(Optional.empty()));
     }
 
     @Test
     public void findAllPaymentsBySetOfStatesAndCreationTime_shouldNotFindPayment_TooEarly() {
-        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.NEW)
+        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.CREATED)
                 .withCreatedDate(ZonedDateTime.now()).insert(testContext.getJdbi());
 
         PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
-        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.PENDING);
+        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER);
         List<Payment> payments = paymentDao.findAllPaymentsBySetOfStatesAndCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
         assertThat(payments.size(), is(0));
     }
 
     @Test
     public void findAllPaymentsBySetOfStatesAndCreationTime_shouldNotFindPayment_WrongState() {
-        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.PENDING)
+        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.SUBMITTED_TO_PROVIDER)
                 .withCreatedDate(ZonedDateTime.now()).insert(testContext.getJdbi());
 
         PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
-        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.PENDING);
+        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER);
         List<Payment> payments = paymentDao.findAllPaymentsBySetOfStatesAndCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
         assertThat(payments.size(), is(0));
     }

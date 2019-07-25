@@ -304,7 +304,7 @@ public class PaymentViewDaoIT {
 
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(PaymentState.NEW)
+                .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
@@ -336,11 +336,11 @@ public class PaymentViewDaoIT {
 
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(PaymentState.NEW)
+                .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(PaymentState.PENDING)
+                .withState(PaymentState.SUBMITTED_TO_PROVIDER)
                 .insert(testContext.getJdbi());
 
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
@@ -368,7 +368,7 @@ public class PaymentViewDaoIT {
 
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(PaymentState.NEW)
+                .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
@@ -400,11 +400,11 @@ public class PaymentViewDaoIT {
 
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(PaymentState.NEW)
+                .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(PaymentState.SUCCESS)
+                .withState(PaymentState.PAID_OUT)
                 .insert(testContext.getJdbi());
 
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
@@ -432,7 +432,7 @@ public class PaymentViewDaoIT {
 
         aPaymentFixture()
                 .withMandateFixture(mandateFixture)
-                .withState(PaymentState.NEW)
+                .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
         for (int i = 0; i < 6; i++) {
             if (i % 3 == 0) {

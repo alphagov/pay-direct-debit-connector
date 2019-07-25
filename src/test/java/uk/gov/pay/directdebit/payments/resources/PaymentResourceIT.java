@@ -295,7 +295,7 @@ public class PaymentResourceIT {
                 .withGatewayAccountFixture(testGatewayAccount)
                 .insert(testContext.getJdbi());
 
-        PaymentFixture paymentFixture = createTransactionFixtureWith(mandateFixture, PaymentState.NEW, "state details");
+        PaymentFixture paymentFixture = createTransactionFixtureWith(mandateFixture, PaymentState.CREATED, "state details");
 
         String requestPath = CHARGE_API_PATH
                 .replace("{accountId}", accountExternalId)
