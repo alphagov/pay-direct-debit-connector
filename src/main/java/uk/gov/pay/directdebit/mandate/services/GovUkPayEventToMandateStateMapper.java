@@ -16,11 +16,11 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_EXPI
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_CANCEL_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_CANCELLED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_EXPIRED;
 
 public class GovUkPayEventToMandateStateMapper {
     private static final Map<GovUkPayEventType, MandateState> GOV_UK_PAY_EVENT_TYPE_TO_MANDATE_STATE = Map.of(
@@ -32,9 +32,9 @@ public class GovUkPayEventToMandateStateMapper {
             MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE
     );
 
-    public static final Set<GovUkPayEventType> GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE = GOV_UK_PAY_EVENT_TYPE_TO_MANDATE_STATE.keySet();
+    public static final Set<GovUkPayEventType> GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE = GOV_UK_PAY_EVENT_TYPE_TO_MANDATE_STATE.keySet();
 
-    public static Optional<DirectDebitStateWithDetails<MandateState>> mapGovUkPayEventToState(GovUkPayEvent govUkPayEvent) {
+    public static Optional<DirectDebitStateWithDetails<MandateState>> mapGovUkPayEventToMandateState(GovUkPayEvent govUkPayEvent) {
         return Optional.ofNullable(GOV_UK_PAY_EVENT_TYPE_TO_MANDATE_STATE.get(govUkPayEvent.getEventType()))
                 .map(DirectDebitStateWithDetails::new);
     }

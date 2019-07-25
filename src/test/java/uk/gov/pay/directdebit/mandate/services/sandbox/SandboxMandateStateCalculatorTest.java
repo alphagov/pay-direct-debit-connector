@@ -25,7 +25,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
-import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE;
+import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
 
@@ -65,7 +65,7 @@ public class SandboxMandateStateCalculatorTest {
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
         GovUkPayEventType govUkPayEventType = GovUkPayEventType.valueOf(eventType);
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture().withEventType(govUkPayEventType).toEntity();
-        given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE))
+        given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE))
                 .willReturn(Optional.of(govUkPayEvent));
 
         Optional<DirectDebitStateWithDetails<MandateState>> result = sandboxMandateStateCalculator.calculate(mandate);

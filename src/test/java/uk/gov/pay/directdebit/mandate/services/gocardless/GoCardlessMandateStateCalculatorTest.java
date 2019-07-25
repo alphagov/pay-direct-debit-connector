@@ -34,8 +34,8 @@ import static org.mockito.BDDMockito.given;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
-import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE;
-import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessEventToMandateStateMapper.GOCARDLESS_ACTIONS_THAT_CHANGE_STATE;
+import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE;
+import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessEventToMandateStateMapper.GOCARDLESS_ACTIONS_THAT_CHANGE_MANDATE_STATE;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
@@ -87,7 +87,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void goCardlessEventActionMapsToState(String action, String expectedState) {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction(action).toEntity();
         given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_MANDATE_STATE))
                 .willReturn(Optional.of(goCardlessEvent));
 
         Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
@@ -107,7 +107,7 @@ public class GoCardlessMandateStateCalculatorTest {
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
         GovUkPayEventType govUkPayEventType = GovUkPayEventType.valueOf(eventType);
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture().withEventType(govUkPayEventType).toEntity();
-        given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE))
+        given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE))
                 .willReturn(Optional.of(govUkPayEvent));
 
         Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
@@ -122,7 +122,7 @@ public class GoCardlessMandateStateCalculatorTest {
                 .withDetailsDescription("This is a description")
                 .toEntity();
         given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_MANDATE_STATE))
                 .willReturn(Optional.of(goCardlessEvent));
 
         Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
@@ -138,14 +138,14 @@ public class GoCardlessMandateStateCalculatorTest {
                 .withCreatedAt(ZonedDateTime.of(2019, 7, 22, 9, 0, 0, 0, UTC))
                 .toEntity();
         given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_MANDATE_STATE))
                 .willReturn(Optional.of(goCardlessEvent));
 
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture()
                 .withEventType(MANDATE_CANCELLED_BY_USER)
                 .withEventDate(ZonedDateTime.of(2019, 7, 22, 10, 0, 0, 0, UTC))
                 .toEntity();
-        given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE))
+        given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE))
                 .willReturn(Optional.of(govUkPayEvent));
 
         Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
@@ -160,14 +160,14 @@ public class GoCardlessMandateStateCalculatorTest {
                 .withCreatedAt(ZonedDateTime.of(2019, 7, 22, 10, 0, 0, 0, UTC))
                 .toEntity();
         given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_MANDATE_STATE))
                 .willReturn(Optional.of(goCardlessEvent));
 
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture()
                 .withEventType(MANDATE_CANCELLED_BY_USER)
                 .withEventDate(ZonedDateTime.of(2019, 7, 22, 9, 0, 0, 0, UTC))
                 .toEntity();
-        given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE))
+        given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE))
                 .willReturn(Optional.of(govUkPayEvent));
 
         Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
@@ -178,14 +178,14 @@ public class GoCardlessMandateStateCalculatorTest {
     @Test
     public void noApplicableEventsMapsToNothing() {
         given(mockGoCardlessEventDao.findLatestApplicableEventForMandate(goCardlessMandateId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_MANDATE_STATE))
                 .willReturn(Optional.empty());
 
         Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
         assertThat(result, is(Optional.empty()));
     }
-    
+
     @Test
     public void gatewayAccountMissingOrganisationIdThrowsException() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
@@ -196,7 +196,7 @@ public class GoCardlessMandateStateCalculatorTest {
                 .withPaymentProviderId(goCardlessMandateId)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .toEntity();
-        
+
         thrown.expect(GatewayAccountMissingOrganisationIdException.class);
 
         goCardlessMandateStateCalculator.calculate(mandate);

@@ -10,7 +10,7 @@ import uk.gov.pay.directdebit.mandate.services.MandateStateCalculator;
 import javax.inject.Inject;
 import java.util.Optional;
 
-import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE;
+import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE;
 
 public class SandboxMandateStateCalculator implements MandateStateCalculator {
     private final GovUkPayEventDao govUkPayEventDao;
@@ -21,7 +21,7 @@ public class SandboxMandateStateCalculator implements MandateStateCalculator {
     }
 
     public Optional<DirectDebitStateWithDetails<MandateState>> calculate(Mandate mandate) {
-        return govUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE)
-                .flatMap(GovUkPayEventToMandateStateMapper::mapGovUkPayEventToState);
+        return govUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE)
+                .flatMap(GovUkPayEventToMandateStateMapper::mapGovUkPayEventToMandateState);
     }
 }
