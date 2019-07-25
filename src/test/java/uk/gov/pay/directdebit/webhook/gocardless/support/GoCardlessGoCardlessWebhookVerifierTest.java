@@ -7,17 +7,14 @@ import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExcepti
 import static com.google.common.base.Charsets.UTF_8;
 
 /**
- * Webhook verifier test<br>
- * <br>
- * We use secret and signatures which are defined for the test only.<br>
- * They are the same as in GoCardless Java example:<br>
- * <a href="https://github.com/gocardless/gocardless-pro-java-example/blob/2d2b04f46f5786ededd14b48cf2e63a5d9d375d3/src/test/java/com/enterprisesolutions/core/WebhookVerifierTest.java">WebhookVerifierTest.java</a>
+ * Secret and signatures from the tests for the GoCardless Pro Java client library example
  *
- * @see <a href="https://github.com/gocardless/gocardless-pro-java-example">https://github.com/gocardless/gocardless-pro-java-example</a>
+ * @see <a href="https://github.com/gocardless/gocardless-pro-java-example/blob/2d2b04f46f5786ededd14b48cf2e63a5d9d375d3/src/test/java/com/enterprisesolutions/core/WebhookVerifierTest.java">GoCardlessGoCardlessWebhookVerifierTest</a></a>
  */
-public class WebhookVerifierTest {
+public class GoCardlessGoCardlessWebhookVerifierTest {
 
-    private static WebhookVerifier verifier = new WebhookVerifier("ElfJ-3tF9I_zutNVK2lBABQrw-BgAhkZKIlvmbgk");
+    private final GoCardlessWebhookVerifier verifier = new GoCardlessWebhookVerifier(
+            new GoCardlessWebhookSignatureCalculator("ElfJ-3tF9I_zutNVK2lBABQrw-BgAhkZKIlvmbgk"));
 
     @Test
     public void shouldVerifyWebhookWithCorrectSignature() throws Exception {

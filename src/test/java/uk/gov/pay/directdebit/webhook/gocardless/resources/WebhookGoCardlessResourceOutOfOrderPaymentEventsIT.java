@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.DirectDebitConnectorApp;
@@ -17,8 +17,9 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
+import uk.gov.pay.directdebit.webhook.gocardless.support.GoCardlessWebhookSignatureCalculator;
 
-import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.Map;
 import static com.fasterxml.jackson.databind.SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS;
 import static io.restassured.RestAssured.given;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
@@ -35,7 +37,7 @@ public class WebhookGoCardlessResourceOutOfOrderPaymentEventsIT {
 
     private static final GoCardlessOrganisationId GOCARDLESS_ORGANISATION_ID = GoCardlessOrganisationId.valueOf("OR123");
     private static final GoCardlessPaymentId GOCARDLESS_PAYMENT_ID = GoCardlessPaymentId.valueOf("PM123");
-    
+
     private static final Map<String, Object> PAYMENT_PAID_OUT_FAILED_OUT_OF_ORDER_WEBHOOK = Map.of(
             "events", List.of(
                     Map.of(
@@ -74,16 +76,21 @@ public class WebhookGoCardlessResourceOutOfOrderPaymentEventsIT {
                     )
             )
     );
-    
-    private static final String PAYMENT_PAID_OUT_FAILED_OUT_OF_ORDER_WEBHOOK_SIGNATURE = "dcb40e789df3aa6be84e91a567d00db269b4a107e22c49681a9d87a5e4909ad7";
 
     @DropwizardTestContext
     private TestContext testContext;
 
+    private GoCardlessWebhookSignatureCalculator goCardlessWebhookSignatureCalculator;
+
     private ObjectMapper objectMapper = new ObjectMapper().configure(ORDER_MAP_ENTRIES_BY_KEYS, true);
 
+    @Before
+    public void setUp() {
+        goCardlessWebhookSignatureCalculator = new GoCardlessWebhookSignatureCalculator(testContext.getGoCardlessWebhookSecret());
+    }
+
     @Test
-    public void handlesOutOfOrderWebhooksByUsingLatestTimestampedEvent() throws JsonProcessingException {
+    public void handlesOutOfOrderWebhooksByUsingLatestTimestampedEvent() throws IOException {
         GatewayAccountFixture gatewayAccount = GatewayAccountFixture.aGatewayAccountFixture()
                 .withPaymentProvider(PaymentProvider.GOCARDLESS)
                 .withOrganisation(GOCARDLESS_ORGANISATION_ID)
@@ -101,13 +108,15 @@ public class WebhookGoCardlessResourceOutOfOrderPaymentEventsIT {
                 .withPaymentProviderId(GOCARDLESS_PAYMENT_ID)
                 .insert(testContext.getJdbi());
 
+        String json = objectMapper.writeValueAsString(PAYMENT_PAID_OUT_FAILED_OUT_OF_ORDER_WEBHOOK);
+
         given().port(testContext.getPort())
-                .body(objectMapper.writeValueAsString(PAYMENT_PAID_OUT_FAILED_OUT_OF_ORDER_WEBHOOK))
-                .header("Webhook-Signature", PAYMENT_PAID_OUT_FAILED_OUT_OF_ORDER_WEBHOOK_SIGNATURE)
+                .body(json)
+                .header("Webhook-Signature", goCardlessWebhookSignatureCalculator.calculate(json))
                 .accept(APPLICATION_JSON)
                 .post("/v1/webhooks/gocardless")
                 .then()
-                .statusCode(Response.Status.OK.getStatusCode());
+                .statusCode(OK.getStatusCode());
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is("FAILED"));

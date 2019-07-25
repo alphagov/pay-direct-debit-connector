@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.webhook.gocardless.api.GoCardlessWebhookParser;
 import uk.gov.pay.directdebit.webhook.gocardless.services.WebhookGoCardlessService;
-import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
+import uk.gov.pay.directdebit.webhook.gocardless.support.GoCardlessWebhookVerifier;
 
 import javax.inject.Inject;
 import javax.ws.rs.HeaderParam;
@@ -21,13 +21,13 @@ import static javax.ws.rs.core.Response.Status.OK;
 public class WebhookGoCardlessResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebhookGoCardlessResource.class);
 
-    private final WebhookVerifier webhookVerifier;
+    private final GoCardlessWebhookVerifier goCardlessWebhookVerifier;
     private final GoCardlessWebhookParser goCardlessWebhookParser;
     private final WebhookGoCardlessService webhookGoCardlessService;
 
     @Inject
-    public WebhookGoCardlessResource(WebhookVerifier webhookVerifier, GoCardlessWebhookParser goCardlessWebhookParser, WebhookGoCardlessService webhookGoCardlessService) {
-        this.webhookVerifier = webhookVerifier;
+    public WebhookGoCardlessResource(GoCardlessWebhookVerifier goCardlessWebhookVerifier, GoCardlessWebhookParser goCardlessWebhookParser, WebhookGoCardlessService webhookGoCardlessService) {
+        this.goCardlessWebhookVerifier = goCardlessWebhookVerifier;
         this.goCardlessWebhookParser = goCardlessWebhookParser;
         this.webhookGoCardlessService = webhookGoCardlessService;
     }
@@ -36,7 +36,7 @@ public class WebhookGoCardlessResource {
     @Timed
     public Response handleWebhook(@HeaderParam("Webhook-Signature") String webhookSignature,
                                   String body) {
-        webhookVerifier.verify(body, webhookSignature);
+        goCardlessWebhookVerifier.verify(body, webhookSignature);
         List<GoCardlessEvent> events = goCardlessWebhookParser.parse(body);
         LOGGER.info("Received valid webhook from GoCardless, containing {} events", events.size());
         webhookGoCardlessService.handleEvents(events);

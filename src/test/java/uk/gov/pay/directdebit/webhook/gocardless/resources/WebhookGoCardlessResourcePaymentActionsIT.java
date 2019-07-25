@@ -22,6 +22,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.directdebit.webhook.gocardless.support.GoCardlessWebhookSignatureCalculator;
 
 import java.io.IOException;
 import java.util.Map;
@@ -45,8 +46,13 @@ import static uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTempl
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class WebhookGoCardlessResourcePaymentActionsIT {
 
-@Rule
+    @Rule
     public WireMockRule wireMockRuleForAdminUsersPort = new WireMockRule(10110);
+
+    @DropwizardTestContext
+    private TestContext testContext;
+
+    private GoCardlessWebhookSignatureCalculator goCardlessWebhookSignatureCalculator;
 
     private final GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
             .withPaymentProvider(PaymentProvider.GOCARDLESS)
@@ -62,11 +68,10 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
             .withMandateFixture(mandateFixture)
             .withPaymentProviderId(GoCardlessPaymentId.valueOf("PM000JWCBM6ABD"));
 
-    @DropwizardTestContext
-    private TestContext testContext;
-
     @Before
     public void setUp() {
+        goCardlessWebhookSignatureCalculator = new GoCardlessWebhookSignatureCalculator(testContext.getGoCardlessWebhookSecret());
+
         gatewayAccountFixture.insert(testContext.getJdbi());
         mandateFixture.insert(testContext.getJdbi());
         payerFixture.insert(testContext.getJdbi());
@@ -76,8 +81,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     @Test
     @Ignore
     public void customerApprovalDeniedChangesStateToCustomerApprovalDenied() throws IOException {
-        postWebhook("gocardless-webhook-payment-customer-approval-denied.json",
-                "d8040d2583728992037e0c345cc1818c264b192ec62c6a0fd2ac654ac7f4823e");
+        postWebhook("gocardless-webhook-payment-customer-approval-denied.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is("CUSTOMER_APPROVAL_DENIED"));
@@ -88,8 +92,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     @Test
     @Ignore
     public void submittedChangesStateToSubmittedToBank() throws IOException {
-        postWebhook("gocardless-webhook-payment-submitted.json",
-                "492f08e710849470e7103212b8ee4256dc193fa57561488ed6640435684bab39");
+        postWebhook("gocardless-webhook-payment-submitted.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is("SUBMITTED_TO_BANK"));
@@ -100,8 +103,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     @Test
     @Ignore
     public void confirmedChangesStateToCollectedByProvider() throws IOException {
-        postWebhook("gocardless-webhook-payment-confirmed.json",
-                "f74dfd27f3e71acc8c7ba1b3da57746029aeff2e000c6e62024e934bcbbb23e3");
+        postWebhook("gocardless-webhook-payment-confirmed.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is("COLLECTED_BY_PROVIDER"));
@@ -113,8 +115,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     @Test
     @Ignore
     public void cancelledChangesStateToCancelled() throws IOException {
-        postWebhook("gocardless-webhook-payment-cancelled.json",
-                "36d1d0d673afc558ec00aef28f5d2cede58465a92099bef7dd267eb06b9bf514");
+        postWebhook("gocardless-webhook-payment-cancelled.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is("USER_SETUP_CANCELLED"));
@@ -126,8 +127,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     public void failedChangesStateToFailedAndSendsPaymentFailedEmail() throws IOException {
         stubEmail(EmailTemplate.PAYMENT_FAILED);
 
-        postWebhook("gocardless-webhook-payment-failed.json",
-                "453fef43c250008afb6c7d058b0c2bc517babfbe90ab9d956cc3462416896a40");
+        postWebhook("gocardless-webhook-payment-failed.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is(PaymentState.FAILED.toString()));
@@ -140,8 +140,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     @Test
     @Ignore
     public void chargedBackChangesStateToIndemnityClaim() throws IOException {
-        postWebhook("gocardless-webhook-payment-charged-back.json",
-                "a4f5e932f207943de5ddc318948303be8f9df77631c515dbd20a518ae8997cbc");
+        postWebhook("gocardless-webhook-payment-charged-back.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is("INDEMNITY_CLAIM"));
@@ -153,8 +152,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     @Test
     @Ignore
     public void chargebackCancelledChangesStateToPaidOut() throws IOException {
-        postWebhook("gocardless-webhook-payment-chargeback-cancelled.json",
-                "d87c8a2b43272c2175d4c50adc608f52a91d26f2be17f43a73b44d5eac65f835");
+        postWebhook("gocardless-webhook-payment-chargeback-cancelled.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is("PAID_OUT"));
@@ -165,8 +163,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     @Test
     @Ignore
     public void paidOutChangesStateToPaidOut() throws IOException {
-        postWebhook("gocardless-webhook-payment-paid-out.json",
-                "744d261836938a7e9f79d2157ccd3be06765f4d63cb605b5e3299a132d9ab7b7");
+        postWebhook("gocardless-webhook-payment-paid-out.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is("PAID_OUT"));
@@ -177,8 +174,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     @Test
     @Ignore
     public void chargebackSettledChangesStateToIndemnityClaim() throws IOException {
-        postWebhook("gocardless-webhook-payment-chargeback-settled.json",
-                "c663b23fb23b655b8181390235e015e2c7c50198403192505820d19e9af9ba24");
+        postWebhook("gocardless-webhook-payment-chargeback-settled.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
         assertThat(payment.get("state"), is("INDEMNITY_CLAIM"));
@@ -186,10 +182,11 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
         assertThat(payment.get("state_details_description"), is("This charged back payment has been settled against a payout."));
     }
 
-    private void postWebhook(String webhookBodyResourceName, String webhookSignature) throws IOException {
+    private void postWebhook(String webhookBodyResourceName) throws IOException {
+        String body = Resources.toString(Resources.getResource(webhookBodyResourceName), UTF_8);
         given().port(testContext.getPort())
-                .body(Resources.toString(Resources.getResource(webhookBodyResourceName), UTF_8))
-                .header("Webhook-Signature", webhookSignature)
+                .body(body)
+                .header("Webhook-Signature", goCardlessWebhookSignatureCalculator.calculate(body))
                 .accept(APPLICATION_JSON)
                 .post("/v1/webhooks/gocardless")
                 .then()

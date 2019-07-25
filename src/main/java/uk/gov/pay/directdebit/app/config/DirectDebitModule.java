@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import io.dropwizard.setup.Environment;
+import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
@@ -23,7 +24,7 @@ import uk.gov.pay.directdebit.payments.dao.DirectDebitEventDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.tokens.dao.TokenDao;
-import uk.gov.pay.directdebit.webhook.gocardless.support.WebhookVerifier;
+import uk.gov.pay.directdebit.webhook.gocardless.support.GoCardlessWebhookSignatureCalculator;
 
 public class DirectDebitModule extends AbstractModule {
 
@@ -68,8 +69,11 @@ public class DirectDebitModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public WebhookVerifier provideWebhookVerifier() {
-        return configuration.getGoCardless().buildSignatureVerifier();
+    public GoCardlessWebhookSignatureCalculator provideGoCardlessWebhookSignatureCalculator() {
+        if (StringUtils.isBlank(configuration.getGoCardless().getWebhookSecret())) {
+            throw new RuntimeException("GoCardless webhook secret is blank");
+        }
+        return new GoCardlessWebhookSignatureCalculator(configuration.getGoCardless().getWebhookSecret());
     }
 
     @Provides

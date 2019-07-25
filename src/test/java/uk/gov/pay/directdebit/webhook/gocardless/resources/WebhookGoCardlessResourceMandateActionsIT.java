@@ -22,6 +22,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.webhook.gocardless.support.GoCardlessWebhookSignatureCalculator;
 
 import java.io.IOException;
 import java.util.Map;
@@ -47,6 +48,11 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     @Rule
     public WireMockRule wireMockRuleForAdminUsersPort = new WireMockRule(10110);
 
+    @DropwizardTestContext
+    private TestContext testContext;
+
+    private GoCardlessWebhookSignatureCalculator goCardlessWebhookSignatureCalculator;
+
     private final GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
             .withPaymentProvider(PaymentProvider.GOCARDLESS)
             .withOrganisation(GoCardlessOrganisationId.valueOf("OR00003V8M32F0"));
@@ -58,11 +64,10 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     private final PayerFixture payerFixture = PayerFixture.aPayerFixture()
             .withMandateId(mandateFixture.getId());
 
-    @DropwizardTestContext
-    private TestContext testContext;
-
     @Before
     public void setUp() {
+        goCardlessWebhookSignatureCalculator = new GoCardlessWebhookSignatureCalculator(testContext.getGoCardlessWebhookSecret());
+
         gatewayAccountFixture.insert(testContext.getJdbi());
         mandateFixture.insert(testContext.getJdbi());
         payerFixture.insert(testContext.getJdbi());
@@ -71,8 +76,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     @Test
     @Ignore
     public void submittedChangesStateToSubmittedToBank() throws IOException {
-        postWebhook("gocardless-webhook-mandate-submitted.json",
-                "d661429adff81d7a7b584eb8f91fece6ee642002a7295db3289eb7fa5da6b750");
+        postWebhook("gocardless-webhook-mandate-submitted.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         assertThat(mandate.get("state"), is("SUBMITTED_TO_BANK"));
@@ -82,8 +86,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
 
     @Test
     public void activeChangesStateToActive() throws IOException {
-        postWebhook("gocardless-webhook-mandate-active.json",
-                "c6ce7e71e092661519d161f5798d5f2730949e1338a59eaaec774c769154ae6e");
+        postWebhook("gocardless-webhook-mandate-active.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         assertThat(mandate.get("state"), is(MandateState.ACTIVE.toString()));
@@ -95,8 +98,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     @Test
     @Ignore
     public void reinstatedChangesStateToActive() throws IOException {
-        postWebhook("gocardless-webhook-mandate-reinstated.json",
-                "3c6d041f03bc2b591addf64f8e5933626eacb3f765b4e444d5d78e2f7b084526");
+        postWebhook("gocardless-webhook-mandate-reinstated.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         assertThat(mandate.get("state"), is(MandateState.ACTIVE.toString()));
@@ -108,8 +110,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     public void cancelledChangesStateToCancelledAndSendsMandateCancelledEmail() throws IOException {
         stubEmail(EmailTemplate.MANDATE_CANCELLED);
 
-        postWebhook("gocardless-webhook-mandate-cancelled.json",
-                "b019901d05cedd31ca878b33789010cbd012f579b079af760cf03c275eeb6b13");
+        postWebhook("gocardless-webhook-mandate-cancelled.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         assertThat(mandate.get("state"), is(MandateState.USER_SETUP_CANCELLED.toString()));
@@ -123,8 +124,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     public void failedChangesStateToFailedAndSendsMandateFailedEmail() throws IOException {
         stubEmail(EmailTemplate.MANDATE_FAILED);
 
-        postWebhook("gocardless-webhook-mandate-failed.json",
-                "1978e4564c85b026146649b149d6ebb20e3395d5213b2eba72fd32da98ecfff2");
+        postWebhook("gocardless-webhook-mandate-failed.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         assertThat(mandate.get("state"), is(MandateState.FAILED.toString()));
@@ -137,8 +137,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     @Test
     @Ignore
     public void expiredChangesStateToFailed() throws IOException {
-        postWebhook("gocardless-webhook-mandate-expired.json",
-                "492f08e710849470e7103212b8ee4256dc193fa57561488ed6640435684bab39");
+        postWebhook("gocardless-webhook-mandate-expired.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
         assertThat(mandate.get("state"), is(MandateState.USER_SETUP_EXPIRED.toString()));
@@ -148,10 +147,11 @@ public class WebhookGoCardlessResourceMandateActionsIT {
                 "this to attempt to set this mandate up again."));
     }
 
-    private void postWebhook(String webhookBodyResourceName, String webhookSignature) throws IOException {
+    private void postWebhook(String webhookBodyResourceName) throws IOException {
+        String body = Resources.toString(Resources.getResource(webhookBodyResourceName), UTF_8);
         given().port(testContext.getPort())
-                .body(Resources.toString(Resources.getResource(webhookBodyResourceName), UTF_8))
-                .header("Webhook-Signature", webhookSignature)
+                .body(body)
+                .header("Webhook-Signature", goCardlessWebhookSignatureCalculator.calculate(body))
                 .accept(APPLICATION_JSON)
                 .post("/v1/webhooks/gocardless")
                 .then()
