@@ -49,7 +49,7 @@ public class MandateStatesGraphTest {
 
     @Test
     public void isValidTransition_shouldReturnFalseWhenTransitionIsInvalid() {
-        assertThat(mandateStatesGraph.isValidTransition(MandateState.CANCELLED, MandateState.PENDING, MANDATE_FAILED), is(false));
+        assertThat(mandateStatesGraph.isValidTransition(MandateState.USER_SETUP_CANCELLED, MandateState.PENDING, MANDATE_FAILED), is(false));
     }
 
     @Test

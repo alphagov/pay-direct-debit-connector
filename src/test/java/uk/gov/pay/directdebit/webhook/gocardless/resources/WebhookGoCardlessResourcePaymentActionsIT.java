@@ -117,7 +117,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
                 "36d1d0d673afc558ec00aef28f5d2cede58465a92099bef7dd267eb06b9bf514");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        assertThat(payment.get("state"), is("CANCELLED"));
+        assertThat(payment.get("state"), is("USER_SETUP_CANCELLED"));
         assertThat(payment.get("state_details"), is("mandate_cancelled"));
         assertThat(payment.get("state_details_description"), is("The mandate for this payment was cancelled at a bank branch."));
     }

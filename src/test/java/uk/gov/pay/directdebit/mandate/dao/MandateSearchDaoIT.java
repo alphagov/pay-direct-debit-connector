@@ -190,7 +190,7 @@ public class MandateSearchDaoIT {
         var mandateWithWrongState = aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withId(999L)
-                .withState(MandateState.EXPIRED)
+                .withState(MandateState.USER_SETUP_EXPIRED)
                 .insert(testContext.getJdbi());
 
         var searchParams = aMandateSearchParams()

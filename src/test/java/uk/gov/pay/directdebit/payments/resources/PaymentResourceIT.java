@@ -321,7 +321,7 @@ public class PaymentResourceIT {
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .withPayerFixture(payerFixture)
-                .withState(MandateState.CANCELLED)
+                .withState(MandateState.USER_SETUP_CANCELLED)
                 .insert(testContext.getJdbi());
 
         String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()

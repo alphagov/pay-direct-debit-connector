@@ -142,7 +142,7 @@ public class WebhookGoCardlessResourceOutOfOrderMandateEventsIT {
                 .statusCode(Response.Status.OK.getStatusCode());
 
         Map<String, Object> mandateAfterFirstWebhook = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandateAfterFirstWebhook.get("state"), is("CANCELLED"));
+        assertThat(mandateAfterFirstWebhook.get("state"), is("USER_SETUP_CANCELLED"));
 
         given().port(testContext.getPort())
                 .body(objectMapper.writeValueAsString(MANDATE_ACTIVE_WEBHOOK))
@@ -153,7 +153,7 @@ public class WebhookGoCardlessResourceOutOfOrderMandateEventsIT {
                 .statusCode(Response.Status.OK.getStatusCode());
 
         Map<String, Object> mandateAfterSecondWebhook = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandateAfterSecondWebhook.get("state"), is("CANCELLED"));
+        assertThat(mandateAfterSecondWebhook.get("state"), is("USER_SETUP_CANCELLED"));
     }
 
 }

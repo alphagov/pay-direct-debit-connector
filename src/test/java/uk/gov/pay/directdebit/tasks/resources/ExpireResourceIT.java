@@ -83,6 +83,6 @@ public class ExpireResourceIT {
             .body("numberOfExpiredMandates", is(1));
 
         MandateDao mandateDao = testContext.getJdbi().onDemand(MandateDao.class);
-        assertEquals(MandateState.EXPIRED, mandateDao.findById(mandate.getId()).get().getState());
+        assertEquals(MandateState.USER_SETUP_EXPIRED, mandateDao.findById(mandate.getId()).get().getState());
     }
 }

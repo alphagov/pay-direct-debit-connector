@@ -81,7 +81,7 @@ public class GoCardlessMandateStateCalculatorTest {
             "created, CREATED",
             "submitted, SUBMITTED_TO_PROVIDER",
             "active, ACTIVE",
-            "cancelled, CANCELLED",
+            "cancelled, USER_SETUP_CANCELLED",
             "failed, FAILED"
     })
     public void goCardlessEventActionMapsToState(String action, String expectedState) {
@@ -100,8 +100,8 @@ public class GoCardlessMandateStateCalculatorTest {
             "MANDATE_CREATED, CREATED",
             "MANDATE_TOKEN_EXCHANGED, AWAITING_DIRECT_DEBIT_DETAILS",
             "MANDATE_SUBMITTED, SUBMITTED_TO_PROVIDER",
-            "MANDATE_EXPIRED_BY_SYSTEM, EXPIRED",
-            "MANDATE_CANCELLED_BY_USER, CANCELLED",
+            "MANDATE_EXPIRED_BY_SYSTEM, USER_SETUP_EXPIRED",
+            "MANDATE_CANCELLED_BY_USER, USER_SETUP_CANCELLED",
             "MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE"
     })
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
@@ -150,7 +150,7 @@ public class GoCardlessMandateStateCalculatorTest {
 
         Optional<DirectDebitStateWithDetails<MandateState>> result = goCardlessMandateStateCalculator.calculate(mandate);
 
-        assertThat(result.get().getState(), is(MandateState.CANCELLED));
+        assertThat(result.get().getState(), is(MandateState.USER_SETUP_CANCELLED));
     }
 
     @Test

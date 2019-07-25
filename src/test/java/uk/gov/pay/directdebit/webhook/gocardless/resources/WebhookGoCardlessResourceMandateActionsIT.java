@@ -112,7 +112,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
                 "b019901d05cedd31ca878b33789010cbd012f579b079af760cf03c275eeb6b13");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandate.get("state"), is(MandateState.CANCELLED.toString()));
+        assertThat(mandate.get("state"), is(MandateState.USER_SETUP_CANCELLED.toString()));
         assertThat(mandate.get("state_details"), is("mandate_cancelled"));
         assertThat(mandate.get("state_details_description"), is("The mandate was cancelled at a bank branch."));
 
@@ -141,7 +141,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
                 "492f08e710849470e7103212b8ee4256dc193fa57561488ed6640435684bab39");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandate.get("state"), is(MandateState.EXPIRED.toString()));
+        assertThat(mandate.get("state"), is(MandateState.USER_SETUP_EXPIRED.toString()));
         assertThat(mandate.get("state_details"), is("mandate_expired"));
         assertThat(mandate.get("state_details_description"), is("The mandate is being marked as expired, because no payments have been collected " +
                 "against it for the dormancy period of your service user number. If you have access to the mandate reinstation API endpoint, you can use " +
