@@ -19,10 +19,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE;
-import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.mapGovUkPayEventToState;
-import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessEventToMandateStateMapper.GOCARDLESS_ACTIONS_THAT_CHANGE_STATE;
-import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessEventToMandateStateMapper.mapGoCardlessEventToState;
+import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE;
+import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.mapGovUkPayEventToMandateState;
+import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessEventToMandateStateMapper.GOCARDLESS_ACTIONS_THAT_CHANGE_MANDATE_STATE;
+import static uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessEventToMandateStateMapper.mapGoCardlessEventToMandateState;
 
 public class GoCardlessMandateStateCalculator implements MandateStateCalculator {
 
@@ -40,7 +40,7 @@ public class GoCardlessMandateStateCalculator implements MandateStateCalculator 
         Optional<GoCardlessEvent> latestApplicableGoCardlessEvent = getLatestApplicableGoCardlessEvent(mandate);
 
         Optional<GovUkPayEvent> latestApplicableGovUkPayEvent
-                = govUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE);
+                = govUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE);
 
         return Stream.of(latestApplicableGoCardlessEvent, latestApplicableGovUkPayEvent)
                 .flatMap(Optional::stream)
@@ -57,15 +57,15 @@ public class GoCardlessMandateStateCalculator implements MandateStateCalculator 
                     return goCardlessEventDao.findLatestApplicableEventForMandate(
                             (GoCardlessMandateId) paymentProviderMandateId,
                             goCardlessOrganisationId,
-                            GOCARDLESS_ACTIONS_THAT_CHANGE_STATE);
+                            GOCARDLESS_ACTIONS_THAT_CHANGE_MANDATE_STATE);
                 });
     }
 
     private Optional<DirectDebitStateWithDetails<MandateState>> mapEventToState(Event event) {
         if (event instanceof GoCardlessEvent) {
-            return mapGoCardlessEventToState((GoCardlessEvent) event);
+            return mapGoCardlessEventToMandateState((GoCardlessEvent) event);
         } else if (event instanceof GovUkPayEvent) {
-            return mapGovUkPayEventToState((GovUkPayEvent) event);
+            return mapGovUkPayEventToMandateState((GovUkPayEvent) event);
         } else {
             throw new IllegalArgumentException(format("Unexpected Event of type %s", event.getClass()));
         }

@@ -40,8 +40,8 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
-import static uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessPaymentStateCalculator.GOCARDLESS_ACTIONS_THAT_CHANGE_STATE;
-import static uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessPaymentStateCalculator.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE;
+import static uk.gov.pay.directdebit.payments.services.GovUkPayEventToPaymentStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_PAYMENT_STATE;
+import static uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessEventToPaymentStateMapper.GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE;
 
 @RunWith(JUnitParamsRunner.class)
 public class GoCardlessPaymentStateCalculatorTest {
@@ -89,7 +89,7 @@ public class GoCardlessPaymentStateCalculatorTest {
     public void goCardlessEventActionMapsToState(String action, String expectedState) {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction(action).toEntity();
         given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(goCardlessPaymentId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE))
                 .willReturn(Optional.of(goCardlessEvent));
 
         Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
@@ -104,7 +104,7 @@ public class GoCardlessPaymentStateCalculatorTest {
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
         GovUkPayEventType govUkPayEventType = GovUkPayEventType.valueOf(eventType);
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture().withEventType(govUkPayEventType).toEntity();
-        given(mockGovUkPayEventDao.findLatestApplicableEventForPayment(payment.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE))
+        given(mockGovUkPayEventDao.findLatestApplicableEventForPayment(payment.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_PAYMENT_STATE))
                 .willReturn(Optional.of(govUkPayEvent));
 
         Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
@@ -120,7 +120,7 @@ public class GoCardlessPaymentStateCalculatorTest {
                 .toEntity();
 
         given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(goCardlessPaymentId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE))
                 .willReturn(Optional.of(goCardlessEvent));
 
         Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
@@ -136,14 +136,14 @@ public class GoCardlessPaymentStateCalculatorTest {
                 .withCreatedAt(ZonedDateTime.of(2019, 7, 22, 9, 0, 0, 0, UTC))
                 .toEntity();
         given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(goCardlessPaymentId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE))
                 .willReturn(Optional.of(goCardlessEvent));
 
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture()
                 .withEventType(PAYMENT_SUBMITTED)
                 .withEventDate(ZonedDateTime.of(2019, 7, 22, 10, 0, 0, 0, UTC))
                 .toEntity();
-        given(mockGovUkPayEventDao.findLatestApplicableEventForPayment(payment.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE))
+        given(mockGovUkPayEventDao.findLatestApplicableEventForPayment(payment.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_PAYMENT_STATE))
                 .willReturn(Optional.of(govUkPayEvent));
 
         Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
@@ -158,14 +158,14 @@ public class GoCardlessPaymentStateCalculatorTest {
                 .withCreatedAt(ZonedDateTime.of(2019, 7, 22, 10, 0, 0, 0, UTC))
                 .toEntity();
         given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(goCardlessPaymentId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE))
                 .willReturn(Optional.of(goCardlessEvent));
 
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture()
                 .withEventType(PAYMENT_SUBMITTED)
                 .withEventDate(ZonedDateTime.of(2019, 7, 22, 9, 0, 0, 0, UTC))
                 .toEntity();
-        given(mockGovUkPayEventDao.findLatestApplicableEventForPayment(payment.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_STATE))
+        given(mockGovUkPayEventDao.findLatestApplicableEventForPayment(payment.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_PAYMENT_STATE))
                 .willReturn(Optional.of(govUkPayEvent));
 
         Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
@@ -176,7 +176,7 @@ public class GoCardlessPaymentStateCalculatorTest {
     @Test
     public void noApplicableEventsMapsToNothing() {
         given(mockGoCardlessEventDao.findLatestApplicableEventForPayment(goCardlessPaymentId, goCardlessOrganisationId,
-                GOCARDLESS_ACTIONS_THAT_CHANGE_STATE))
+                GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE))
                 .willReturn(Optional.empty());
 
         Optional<DirectDebitStateWithDetails<PaymentState>> result = goCardlessPaymentStateCalculator.calculate(payment);
