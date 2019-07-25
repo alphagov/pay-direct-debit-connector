@@ -30,6 +30,10 @@ public class AdminUsersClient {
 
     public void sendEmail(EmailTemplate template, Mandate mandate, Map<String, String> personalisation) {
         String gatewayAccountExternalId = mandate.getGatewayAccount().getExternalId();
+        LOGGER.info("Calling adminusers to send {} email for mandate id {} for gateway account id {}",
+                template.toString(),
+                mandate.getExternalId(),
+                gatewayAccountExternalId);
         String email = mandate.getPayer().orElseThrow(() -> new PayerNotFoundException(mandate.getExternalId())).getEmail();
         var emailPayloadRequest = new EmailPayloadRequest(email, gatewayAccountExternalId, template, personalisation);
         try {
