@@ -21,7 +21,6 @@ import static uk.gov.pay.directdebit.events.model.GoCardlessEvent.GoCardlessEven
 
 public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture, GoCardlessEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
-    private Long internalEventId = RandomUtils.nextLong(1, 99999);
     private GoCardlessEventId goCardlessEventId = GoCardlessEventId.valueOf(RandomIdGenerator.newId());
     private String action = randomAlphabetic(20);
     private GoCardlessResourceType resourceType = GoCardlessResourceType.PAYMENTS;
@@ -57,15 +56,6 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
 
     public GoCardlessEventFixture withId(Long id) {
         this.id = id;
-        return this;
-    }
-
-    public Long getInternalEventId() {
-        return internalEventId;
-    }
-
-    public GoCardlessEventFixture withInternalEventId(Long internalEventId) {
-        this.internalEventId = internalEventId;
         return this;
     }
 
@@ -265,7 +255,6 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                         "INSERT INTO" +
                                 "    gocardless_events(\n" +
                                 "        id,\n" +
-                                "        internal_event_id,\n" +
                                 "        event_id,\n" +
                                 "        action,\n" +
                                 "        resource_type,\n" +
@@ -289,7 +278,6 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
                                 "    )\n" +
                                 "   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n",
                         id,
-                        internalEventId,
                         goCardlessEventId.toString(),
                         action,
                         resourceType.toString(),
@@ -319,7 +307,6 @@ public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture,
     public GoCardlessEvent toEntity() {
         return aGoCardlessEvent()
                 .withId(id)
-                .withInternalEventId(internalEventId)
                 .withGoCardlessEventId(goCardlessEventId)
                 .withAction(action)
                 .withResourceId(resourceId)

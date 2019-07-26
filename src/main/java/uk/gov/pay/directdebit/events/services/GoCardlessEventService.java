@@ -22,9 +22,4 @@ public class GoCardlessEventService {
         LOGGER.info("Inserted gocardless event with gocardless event id {} ", event.getGoCardlessEventId());
     }
 
-    public void updateInternalEventId(GoCardlessEvent event) {
-        goCardlessEventDao.updateEventId(event.getId(), event.getInternalEventId());
-        LOGGER.info("Updated gocardless event with gocardless event id {}, internal event id {} ", event.getGoCardlessEventId(), event.getInternalEventId());
-    }
-
 }
