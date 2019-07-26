@@ -74,7 +74,6 @@ public interface GoCardlessEventDao {
     Long insert(@BindBean GoCardlessEvent goCardlessEvent);
 
     @SqlQuery("SELECT id, " +
-            "internal_event_id, " +
             "event_id, " +
             "action, " +
             "created_at, " +
@@ -107,7 +106,6 @@ public interface GoCardlessEventDao {
                                                                   @BindList("applicableActions") Set<String> applicableActions);
 
     @SqlQuery("SELECT id, " +
-            "internal_event_id, " +
             "event_id, " +
             "action, " +
             "created_at, " +
