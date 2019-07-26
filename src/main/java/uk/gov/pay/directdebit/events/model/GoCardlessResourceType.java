@@ -1,11 +1,8 @@
 package uk.gov.pay.directdebit.events.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public enum GoCardlessResourceType {
-    PAYMENTS, MANDATES, PAYOUTS, UNHANDLED;
-    private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessResourceType.class);
+
+    PAYMENTS, MANDATES, PAYOUTS, REFUNDS, SUBSCRIPTIONS;
 
     public static GoCardlessResourceType fromString(String type) {
         for (GoCardlessResourceType typeEnum : GoCardlessResourceType.values()) {
@@ -13,7 +10,7 @@ public enum GoCardlessResourceType {
                 return typeEnum;
             }
         }
-        LOGGER.warn("Unhandled resource type received in a GoCardless Webhook: {}", type);
-        return UNHANDLED;
+        throw new IllegalArgumentException("Unhandled GoCardless resource_type " + type);
     }
+
 }

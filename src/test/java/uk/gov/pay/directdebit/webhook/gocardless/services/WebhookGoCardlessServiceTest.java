@@ -33,7 +33,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.MANDATES;
 import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYMENTS;
-import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.UNHANDLED;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.REFUNDS;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.SUBSCRIPTIONS;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -74,8 +75,17 @@ public class WebhookGoCardlessServiceTest {
     }
 
     @Test
-    public void shouldStoreEventsWithAnUnhandledResource() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(UNHANDLED).withAction("created").toEntity();
+    public void shouldStoreButNotHandleEventsWithRefundsResource() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(REFUNDS).withAction("created").toEntity();
+
+        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
+        webhookGoCardlessService.handleEvents(events);
+        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
+    }
+
+    @Test
+    public void shouldStoreButNotHandleEventsWithSubscriptionsResource() {
+        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(SUBSCRIPTIONS).withAction("created").toEntity();
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
