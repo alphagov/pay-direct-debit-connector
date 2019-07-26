@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
-import uk.gov.pay.directdebit.events.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
@@ -20,11 +19,8 @@ import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
-import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
-import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
-import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
@@ -39,16 +35,10 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentServiceTest {
@@ -60,22 +50,7 @@ public class PaymentServiceTest {
 
     @Mock
     private UserNotificationService mockedUserNotificationService;
-
-    @Mock
-    private GatewayAccountDao mockedGatewayAccountDao;
-
-    @Mock
-    private DirectDebitEventService mockedDirectDebitEventService;
-
-    @Mock
-    private LinksConfig mockedLinksConfig;
-
-    @Mock
-    private UriInfo mockedUriInfo;
-
-    @Mock
-    private UriBuilder mockedUriBuilder;
-
+    
     @Mock
     private PaymentProviderFactory mockedPaymentProviderFactory;
 
@@ -155,96 +130,7 @@ public class PaymentServiceTest {
     }
 
     @Test
-    public void paymentAcknowledgedFor_shouldRegisterAPaymentPendingEvent() {
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withState(SUBMITTED_TO_PROVIDER)
-                .toEntity();
-
-        service.paymentAcknowledgedFor(payment);
-
-        verify(mockedDirectDebitEventService).registerPaymentAcknowledgedEventFor(payment);
-        verifyZeroInteractions(mockedPaymentDao);
-        assertThat(payment.getState(), is(SUBMITTED_TO_PROVIDER));
-    }
-
-    @Test
-    public void paymentPaidOutFor_shouldSetPaymentAsSucceeded_andRegisterAPaidOutEvent() {
-
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withState(SUBMITTED_TO_PROVIDER)
-                .toEntity();
-
-        service.paymentPaidOutFor(payment);
-
-        verify(mockedDirectDebitEventService).registerPaymentPaidOutEventFor(payment);
-    }
-
-    @Test
-    public void paymentFailedFor_shouldSetPaymentAsFailed_andRegisterAPaymentFailedEvent_andDoNotSendEmail() {
-
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withState(SUBMITTED_TO_PROVIDER)
-                .toEntity();
-
-        service.paymentFailedWithoutEmailFor(payment);
-
-        verify(mockedUserNotificationService, times(0)).sendPaymentFailedEmailFor(payment);
-        verify(mockedDirectDebitEventService).registerPaymentFailedEventFor(payment);
-    }
-
-    @Test
-    public void paymentFailedFor_shouldSetPaymentAsFailed_andRegisterAPaymentFailedEvent_andSendEmail() {
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withState(SUBMITTED_TO_PROVIDER)
-                .toEntity();
-
-        service.paymentFailedWithEmailFor(payment);
-
-        verify(mockedUserNotificationService).sendPaymentFailedEmailFor(payment);
-        verify(mockedDirectDebitEventService).registerPaymentFailedEventFor(payment);
-    }
-
-    @Test
-    public void payoutPaid_shouldRegisterAPayoutPaidEvent() {
-
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withState(PAID_OUT)
-                .toEntity();
-
-        service.payoutPaidFor(payment);
-
-        verify(mockedDirectDebitEventService).registerPayoutPaidEventFor(payment);
-        verifyZeroInteractions(mockedPaymentDao);
-        assertThat(payment.getState(), is(PAID_OUT));
-    }
-
-
-    @Test
-    public void findPaymentSubmittedToBankEventFor_shouldFindEvent() {
-
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withState(SUBMITTED_TO_PROVIDER)
-                .toEntity();
-
-        DirectDebitEvent directDebitEvent = DirectDebitEventFixture.aDirectDebitEventFixture().toEntity();
-
-        when(mockedDirectDebitEventService.findBy(payment.getId(), Type.CHARGE,
-                PAYMENT_SUBMITTED_TO_BANK))
-                .thenReturn(Optional.of(directDebitEvent));
-
-        DirectDebitEvent foundDirectDebitEvent = service.findPaymentSubmittedEventFor(payment).get();
-
-        assertThat(foundDirectDebitEvent, is(directDebitEvent));
-    }
-
-    @Test
-    public void createShouldCreatePaymentAndRegisterPaymentCreatedEvent() {
+    public void createShouldCreatePayment() {
         Mandate mandate = mandateFixture.toEntity();
 
         Payment returnedPayment = service.createPayment(123456L, "a description", "a reference", mandate);
@@ -256,8 +142,7 @@ public class PaymentServiceTest {
         assertThat(returnedPayment.getReference(), is("a reference"));
         assertThat(returnedPayment.getProviderId(), is(Optional.empty()));
         assertThat(returnedPayment.getChargeDate(), is(Optional.empty()));
-
-        verify(mockedDirectDebitEventService).registerPaymentCreatedEventFor(returnedPayment);
+        
     }
 
     @Test

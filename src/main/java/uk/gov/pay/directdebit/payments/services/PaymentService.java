@@ -3,7 +3,6 @@ package uk.gov.pay.directdebit.payments.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
-import uk.gov.pay.directdebit.events.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -22,12 +21,9 @@ import javax.inject.Inject;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
-import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type.CHARGE;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.aPayment;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
 
@@ -35,18 +31,15 @@ public class PaymentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentService.class);
     private final PaymentDao paymentDao;
-    private final DirectDebitEventService directDebitEventService;
     private final UserNotificationService userNotificationService;
     private final PaymentProviderFactory paymentProviderFactory;
     private final GovUkPayEventService govUkPayEventService;
 
     @Inject
     public PaymentService(PaymentDao paymentDao,
-                          DirectDebitEventService directDebitEventService,
                           UserNotificationService userNotificationService,
                           PaymentProviderFactory paymentProviderFactory,
                           GovUkPayEventService govUkPayEventService) {
-        this.directDebitEventService = directDebitEventService;
         this.paymentDao = paymentDao;
         this.userNotificationService = userNotificationService;
         this.paymentProviderFactory = paymentProviderFactory;
@@ -74,7 +67,6 @@ public class PaymentService {
         Long id = paymentDao.insert(payment);
 
         Payment insertedPayment = fromPayment(payment).withId(id).build();
-        paymentCreatedFor(insertedPayment);
         LOGGER.info("Created payment with external id {}", insertedPayment.getExternalId());
         return insertedPayment;
     }
@@ -111,50 +103,12 @@ public class PaymentService {
         return paymentDao.findAllByMandateExternalId(mandateExternalId);
     }
 
-    public DirectDebitEvent paymentCreatedFor(Payment payment) {
-        return directDebitEventService.registerPaymentCreatedEventFor(payment);
-    }
-
-    // TODO: a remnant from one-off payments, should be removed
-    public DirectDebitEvent paymentExpired(Payment payment) {
-        return directDebitEventService.registerPaymentExpiredEventFor(payment);
-    }
-
     public Payment paymentSubmittedToProviderFor(Payment payment) {
         userNotificationService.sendPaymentConfirmedEmailFor(payment);
         return govUkPayEventService.storeEventAndUpdateStateForPayment(payment, PAYMENT_SUBMITTED);
     }
 
-    public DirectDebitEvent paymentFailedWithEmailFor(Payment payment) {
+    public void paymentFailedWithEmailFor(Payment payment) {
         userNotificationService.sendPaymentFailedEmailFor(payment);
-        return paymentFailedFor(payment);
-    }
-
-    public DirectDebitEvent paymentFailedWithoutEmailFor(Payment payment) {
-        return paymentFailedFor(payment);
-    }
-
-    private DirectDebitEvent paymentFailedFor(Payment payment) {
-        return directDebitEventService.registerPaymentFailedEventFor(payment);
-    }
-
-    public DirectDebitEvent paymentPaidOutFor(Payment payment) {
-        return directDebitEventService.registerPaymentPaidOutEventFor(payment);
-    }
-
-    public DirectDebitEvent paymentAcknowledgedFor(Payment payment) {
-        return directDebitEventService.registerPaymentAcknowledgedEventFor(payment);
-    }
-
-    public DirectDebitEvent paymentSubmittedFor(Payment payment) {
-        return directDebitEventService.registerPaymentSubmittedEventFor(payment);
-    }
-
-    public DirectDebitEvent payoutPaidFor(Payment payment) {
-        return directDebitEventService.registerPayoutPaidEventFor(payment);
-    }
-
-    public Optional<DirectDebitEvent> findPaymentSubmittedEventFor(Payment payment) {
-        return directDebitEventService.findBy(payment.getId(), CHARGE, PAYMENT_SUBMITTED_TO_BANK);
     }
 }
