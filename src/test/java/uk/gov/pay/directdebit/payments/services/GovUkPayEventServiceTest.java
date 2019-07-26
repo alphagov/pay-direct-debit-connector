@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.ResourceType.MANDATE;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.ResourceType.PAYMENT;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_EXPIRED_BY_SYSTEM;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
@@ -80,7 +80,7 @@ public class GovUkPayEventServiceTest {
                 .withMandateId(mandateId)
                 .withEventType(MANDATE_CREATED)
                 .toEntity();
-        GovUkPayEventType newEventType = MANDATE_EXPIRED_BY_SYSTEM;
+        GovUkPayEventType newEventType = MANDATE_USER_SETUP_EXPIRED;
 
         when(mockGovUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.of(previousEvent));
         when(mockGovUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(true);
@@ -123,7 +123,7 @@ public class GovUkPayEventServiceTest {
         var previousEvent = aGovUkPayEventFixture()
                 .withResourceType(MANDATE)
                 .withMandateId(mandateId)
-                .withEventType(MANDATE_EXPIRED_BY_SYSTEM)
+                .withEventType(MANDATE_USER_SETUP_EXPIRED)
                 .toEntity();
         GovUkPayEventType newEventType = MANDATE_CREATED;
 
@@ -131,7 +131,7 @@ public class GovUkPayEventServiceTest {
         when(mockGovUkPayEventStateGraph.isValidTransition(previousEvent.getEventType(), newEventType)).thenReturn(false);
 
         expectedException.expect(InvalidGovUkPayEventInsertionException.class);
-        expectedException.expectMessage("GOV.UK Pay event MANDATE_CREATED is invalid following event MANDATE_EXPIRED_BY_SYSTEM");
+        expectedException.expectMessage("GOV.UK Pay event MANDATE_CREATED is invalid following event MANDATE_USER_SETUP_EXPIRED");
 
         govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, newEventType);
     }
