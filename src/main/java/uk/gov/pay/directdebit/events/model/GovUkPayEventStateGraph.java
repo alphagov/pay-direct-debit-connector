@@ -8,7 +8,7 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANC
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_EXPIRED_BY_SYSTEM;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 
@@ -25,7 +25,7 @@ public class GovUkPayEventStateGraph {
 
         graph.putEdge(MANDATE_CREATED, MANDATE_TOKEN_EXCHANGED);
         graph.putEdge(MANDATE_CREATED, MANDATE_EXPIRED_BY_SYSTEM);
-        graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_SUBMITTED);
+        graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_SUBMITTED_TO_PROVIDER);
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_CANCELLED_BY_USER);
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE);
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_EXPIRED_BY_SYSTEM);

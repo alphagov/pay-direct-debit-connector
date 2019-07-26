@@ -31,7 +31,7 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.ResourceType.MAN
 import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.ResourceType.PAYMENT;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_EXPIRED_BY_SYSTEM;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
@@ -138,13 +138,13 @@ public class GovUkPayEventServiceTest {
 
     @Test
     public void insertMandateEvent_shouldThrowForInvalidInitialEvent() {
-        GovUkPayEventType eventType = MANDATE_SUBMITTED;
+        GovUkPayEventType eventType = MANDATE_SUBMITTED_TO_PROVIDER;
 
         when(mockGovUkPayEventDao.findLatestEventForMandate(mandateId)).thenReturn(Optional.empty());
         when(mockGovUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(false);
 
         expectedException.expect(InvalidGovUkPayEventInsertionException.class);
-        expectedException.expectMessage("GOV.UK Pay event MANDATE_SUBMITTED is invalid when there are no previous events");
+        expectedException.expectMessage("GOV.UK Pay event MANDATE_SUBMITTED_TO_PROVIDER is invalid when there are no previous events");
 
         govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, eventType);
     }

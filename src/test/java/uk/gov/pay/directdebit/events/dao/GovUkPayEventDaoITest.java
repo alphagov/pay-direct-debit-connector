@@ -25,7 +25,7 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_EXPIRED_BY_SYSTEM;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
@@ -85,7 +85,7 @@ public class GovUkPayEventDaoITest {
         aGovUkPayEventFixture()
                 .withMandateId(mandate.getId())
                 .withEventDate(ZonedDateTime.parse("2019-01-01T12:30:40Z"))
-                .withEventType(MANDATE_SUBMITTED)
+                .withEventType(MANDATE_SUBMITTED_TO_PROVIDER)
                 .insert(testContext.getJdbi())
                 .toEntity();
         var latestEvent = aGovUkPayEventFixture()
@@ -192,7 +192,7 @@ public class GovUkPayEventDaoITest {
         aGovUkPayEventFixture()
                 .withPaymentId(payment.getId())
                 .withEventDate(ZonedDateTime.parse("2019-01-01T14:30:40Z"))
-                .withEventType(MANDATE_SUBMITTED)
+                .withEventType(MANDATE_SUBMITTED_TO_PROVIDER)
                 .insert(testContext.getJdbi())
                 .toEntity();
         var latestApplicableEvent = aGovUkPayEventFixture()
@@ -219,7 +219,7 @@ public class GovUkPayEventDaoITest {
         aGovUkPayEventFixture()
                 .withPaymentId(payment.getId())
                 .withEventDate(ZonedDateTime.parse("2019-01-01T14:30:40Z"))
-                .withEventType(MANDATE_SUBMITTED)
+                .withEventType(MANDATE_SUBMITTED_TO_PROVIDER)
                 .insert(testContext.getJdbi())
                 .toEntity();
 
