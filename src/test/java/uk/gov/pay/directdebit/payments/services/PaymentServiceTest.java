@@ -4,10 +4,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.events.services.DirectDebitEventService;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
@@ -27,9 +28,7 @@ import uk.gov.pay.directdebit.payments.model.DirectDebitEvent.Type;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
-import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
-import uk.gov.pay.directdebit.tokens.services.TokenService;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -39,19 +38,17 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.DirectDebitEvent.SupportedEvent.PAYMENT_SUBMITTED_TO_BANK;
-import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.EXPIRED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.USER_CANCEL_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentServiceTest {
@@ -60,40 +57,40 @@ public class PaymentServiceTest {
 
     @Mock
     private PaymentDao mockedPaymentDao;
-    
+
     @Mock
     private UserNotificationService mockedUserNotificationService;
-    
-    @Mock
-    private TokenService mockedTokenService;
-    
+
     @Mock
     private GatewayAccountDao mockedGatewayAccountDao;
-    
-    @Mock
-    private DirectDebitConfig mockedDirectDebitConfig;
-    
+
     @Mock
     private DirectDebitEventService mockedDirectDebitEventService;
-    
+
     @Mock
     private LinksConfig mockedLinksConfig;
-    
+
     @Mock
     private UriInfo mockedUriInfo;
-    
+
     @Mock
     private UriBuilder mockedUriBuilder;
-    
+
     @Mock
     private PaymentProviderFactory mockedPaymentProviderFactory;
-    
+
     @Mock
     private SandboxService mockedSandboxService;
-    
+
     @Mock
     private GovUkPayEventService mockedGovUkPayEventService;
     
+    @Captor
+    private ArgumentCaptor<Payment> capturedPayment;
+    
+    @Mock
+    private Payment mockPayment;
+
     @InjectMocks
     private PaymentService service;
 
@@ -134,6 +131,7 @@ public class PaymentServiceTest {
         assertThat(paymentResponse.getReference(), is(paymentFixture.getReference()));
         assertThat(paymentResponse.getPaymentProvider(), is(gatewayAccountFixture.getPaymentProvider()));
     }
+
     @Test
     public void shouldCreateATransactionResponseWithLinksFromAValidTransaction() {
         var paymentResponse = PaymentResponse.from(paymentFixture.toEntity());
@@ -153,10 +151,7 @@ public class PaymentServiceTest {
 
         service.paymentSubmittedToProviderFor(payment);
 
-        Payment updatedPayment = fromPayment(payment).withState(SUBMITTED_TO_PROVIDER).build();
-        verify(mockedPaymentDao).updateState(updatedPayment.getId(), PaymentState.SUBMITTED_TO_PROVIDER);
-        verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(updatedPayment);
-        verify(mockedGovUkPayEventService).storeEventForPayment(payment, PAYMENT_SUBMITTED);
+        verify(mockedGovUkPayEventService).storeEventAndUpdateStateForPayment(payment, PAYMENT_SUBMITTED);
     }
 
     @Test
@@ -249,56 +244,10 @@ public class PaymentServiceTest {
     }
 
     @Test
-    public void paymentCancelledFor_shouldUpdateTransactionAsCancelled_shouldRegisterAPaymentCancelledEvent() {
-
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withMandateFixture(mandateFixture)
-                .withState(CREATED)
-                .toEntity();
-
-        service.paymentCancelledFor(payment);
-
-        Payment updatedPayment = fromPayment(payment).withState(CANCELLED).build();
-        verify(mockedDirectDebitEventService).registerPaymentCancelledEventFor(mandateFixture.toEntity(), updatedPayment);
-        verify(mockedPaymentDao).updateState(updatedPayment.getId(), CANCELLED);
-    }
-
-    @Test
-    public void userNotEligibleFor_shouldUpdateTransactionAsCancelled_shouldRegisterAUserNotEligibledEvent_ifMandateIsOneOff() {
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withMandateFixture(mandateFixture)
-                .withState(CREATED)
-                .toEntity();
-
-        service.paymentMethodChangedFor(payment);
-
-        Payment updatedPayment = fromPayment(payment).withState(USER_CANCEL_NOT_ELIGIBLE).build();
-        verify(mockedDirectDebitEventService).registerPaymentMethodChangedEventFor(mandateFixture.toEntity());
-        verify(mockedPaymentDao).updateState(updatedPayment.getId(), USER_CANCEL_NOT_ELIGIBLE);
-    }
-
-    @Test
-    public void paymentExpired_shouldSetStatusToExpired() {
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withMandateFixture(mandateFixture)
-                .withState(CREATED)
-                .toEntity();
-
-        service.paymentExpired(payment);
-
-        Payment updatedPayment = fromPayment(payment).withState(EXPIRED).build();
-        verify(mockedDirectDebitEventService).registerPaymentExpiredEventFor(updatedPayment);
-        verify(mockedPaymentDao).updateState(updatedPayment.getId(), EXPIRED);
-    }
-
-    @Test
     public void createShouldCreatePaymentAndRegisterPaymentCreatedEvent() {
         Mandate mandate = mandateFixture.toEntity();
 
-        Payment returnedPayment = service.createPayment(123456L,"a description", "a reference", mandate);
+        Payment returnedPayment = service.createPayment(123456L, "a description", "a reference", mandate);
 
         assertThat(returnedPayment.getAmount(), is(123456L));
         assertThat(returnedPayment.getMandate(), is(mandate));
@@ -329,19 +278,20 @@ public class PaymentServiceTest {
 
         when(mockedPaymentProviderFactory.getCommandServiceFor(mandate.getGatewayAccount().getPaymentProvider())).thenReturn(mockedSandboxService);
         when(mockedSandboxService.collect(mandate, payment)).thenReturn(new PaymentProviderPaymentIdAndChargeDate(sandboxPaymentId, chargeDate));
+        
+        when(mockedGovUkPayEventService.storeEventAndUpdateStateForPayment(capturedPayment.capture(), eq(PAYMENT_SUBMITTED))).thenReturn(mockPayment);
 
         Payment returnedPayment = service.submitPaymentToProvider(payment);
+        assertThat(returnedPayment, is(mockPayment));
 
-        assertThat(returnedPayment.getAmount(), is(payment.getAmount()));
-        assertThat(returnedPayment.getMandate(), is(payment.getMandate()));
-        assertThat(returnedPayment.getState(), is(SUBMITTED_TO_PROVIDER));
-        assertThat(returnedPayment.getDescription(), is("a description"));
-        assertThat(returnedPayment.getReference(), is("a reference"));
-        assertThat(returnedPayment.getProviderId(), is(Optional.of(sandboxPaymentId)));
-        assertThat(returnedPayment.getChargeDate(), is(Optional.of(chargeDate)));
-
-        Payment expectedPaymentWithStatePending = fromPayment(returnedPayment).withState(SUBMITTED_TO_PROVIDER).build();
-        verify(mockedDirectDebitEventService).registerPaymentSubmittedToProviderEventFor(expectedPaymentWithStatePending);
+        Payment submittedPayment = capturedPayment.getValue();
+        assertThat(submittedPayment.getAmount(), is(payment.getAmount()));
+        assertThat(submittedPayment.getMandate(), is(payment.getMandate()));
+        assertThat(submittedPayment.getState(), is(CREATED));
+        assertThat(submittedPayment.getDescription(), is("a description"));
+        assertThat(submittedPayment.getReference(), is("a reference"));
+        assertThat(submittedPayment.getProviderId(), is(Optional.of(sandboxPaymentId)));
+        assertThat(submittedPayment.getChargeDate(), is(Optional.of(chargeDate)));
     }
 
 }

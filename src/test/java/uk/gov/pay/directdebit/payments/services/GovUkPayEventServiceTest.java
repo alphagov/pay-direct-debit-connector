@@ -45,9 +45,12 @@ public class GovUkPayEventServiceTest {
 
     @Mock
     private GovUkPayEventStateGraph mockGovUkPayEventStateGraph;
-    
+
     @Mock
     private MandateStateUpdater mockMandateStateUpdater;
+
+    @Mock
+    private PaymentStateUpdater mockPaymentStateUpdater;
 
     @InjectMocks
     private GovUkPayEventService govUkPayEventService;
@@ -153,9 +156,10 @@ public class GovUkPayEventServiceTest {
         when(mockGovUkPayEventDao.findLatestEventForPayment(paymentId)).thenReturn(Optional.empty());
         when(mockGovUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(true);
 
-        govUkPayEventService.storeEventForPayment(payment, eventType);
+        govUkPayEventService.storeEventAndUpdateStateForPayment(payment, eventType);
 
         verify(mockGovUkPayEventDao).insert(eventCaptor.capture());
+        verify(mockPaymentStateUpdater).updateStateIfNecessary(payment);
 
         GovUkPayEvent insertedEvent = eventCaptor.getValue();
         assertThat(insertedEvent.getEventType(), is(eventType));
@@ -180,6 +184,6 @@ public class GovUkPayEventServiceTest {
         expectedException.expect(InvalidGovUkPayEventInsertionException.class);
         expectedException.expectMessage("GOV.UK Pay event PAYMENT_SUBMITTED is invalid following event PAYMENT_SUBMITTED");
 
-        govUkPayEventService.storeEventForPayment(payment, newEventType);
+        govUkPayEventService.storeEventAndUpdateStateForPayment(payment, newEventType);
     }
 }
