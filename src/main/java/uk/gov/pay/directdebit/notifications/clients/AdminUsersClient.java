@@ -39,6 +39,7 @@ public class AdminUsersClient {
                     .path("/v1/emails/send")
                     .request()
                     .post(Entity.entity(emailPayloadRequest, MediaType.APPLICATION_JSON_TYPE));
+            response.readEntity(String.class);
             if (response.getStatus() != 200) {
                 LOGGER.error("Sending email failed with status {} and response {}", response.getStatus(),
                         response.readEntity(String.class));
