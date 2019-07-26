@@ -53,7 +53,6 @@ public class WebhookSandboxResource {
     private void processPayment(Payment payment) {
         var event = createSandboxEventFromPayment(payment);
         sandboxEventService.insertEvent(event);
-        paymentService.paymentPaidOutFor(payment);
         webhookSandboxService.updateStateOfPaymentsAffectedByEvents(List.of(event));
     }
 

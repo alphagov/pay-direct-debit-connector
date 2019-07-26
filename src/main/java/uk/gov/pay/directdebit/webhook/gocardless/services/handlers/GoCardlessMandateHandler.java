@@ -9,7 +9,6 @@ import uk.gov.pay.directdebit.events.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
-import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
@@ -19,7 +18,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class GoCardlessMandateHandler extends GoCardlessHandler {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessMandateHandler.class);
     private final MandateStateUpdateService mandateStateUpdateService;
     private final MandateQueryService mandateQueryService;
@@ -56,24 +55,12 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
 
     private Map<GoCardlessAction, Consumer<Mandate>> getHandledActions() {
         return ImmutableMap.of(
-                GoCardlessMandateAction.CANCELLED, (Mandate mandate) -> {
-                    paymentService.findPaymentsForMandate(mandate.getExternalId()).stream()
-                            .filter(payment -> paymentService.findPaymentSubmittedEventFor(payment).isEmpty())
-                            .forEach(paymentService::paymentFailedWithoutEmailFor);
-
-                    mandateStateUpdateService.mandateCancelledFor(mandate);
-                },
-                GoCardlessMandateAction.FAILED, (Mandate mandate) -> {
-                    paymentService
-                            .findPaymentsForMandate(mandate.getExternalId())
-                            .forEach(paymentService::paymentFailedWithoutEmailFor);
-
-                    mandateStateUpdateService.mandateFailedFor(mandate);
-                });
+                GoCardlessMandateAction.CANCELLED, mandateStateUpdateService::mandateCancelledFor,
+                GoCardlessMandateAction.FAILED, mandateStateUpdateService::mandateFailedFor);
     }
 
     @Override
-    protected Optional<DirectDebitEvent> process(GoCardlessEvent event) {
+    protected void process(GoCardlessEvent event) {
         Optional.ofNullable(GoCardlessMandateAction.fromString(event.getAction()))
                 .map(action -> getHandledActions().get(action))
                 .ifPresent((handledAction -> {
@@ -88,9 +75,6 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                                 event.getGoCardlessEventId(), event.getLinksOrganisation());
                     }
                 }));
-        
-        // TODO: this shouldn't return anything if it stays around, currently return empty as required by interface
-        return Optional.empty();
     }
 
     private boolean isValidOrganisation(Mandate mandate, GoCardlessEvent event) {
