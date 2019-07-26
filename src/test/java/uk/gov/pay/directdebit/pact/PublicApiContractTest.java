@@ -12,21 +12,15 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
-import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
-import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payments.fixtures.DirectDebitEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
-import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
@@ -106,44 +100,6 @@ public class PublicApiContractTest {
         for (int x = 0; x < 3; x++) {
             aPaymentFixture().withStateDetails("payment_state_details").withMandateFixture(testMandate).insert(app.getTestContext().getJdbi());
         }
-    }
-
-    @State("a direct debit event exists")
-    public void aDirectDebitEventExists(Map<String, String> params) {
-
-        String paymentExternalId = params.getOrDefault("payment_external_id", RandomIdGenerator.newId());
-        MandateExternalId mandateExternalId = MandateExternalId.valueOf(params.getOrDefault("mandate_external_id", RandomIdGenerator.newId()));
-
-        GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
-                .insert(app.getTestContext().getJdbi());
-
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-                .withGatewayAccountFixture(gatewayAccountFixture)
-                .withExternalId(mandateExternalId);
-
-        MandateDao mandateDao = app.getTestContext().getJdbi().onDemand(MandateDao.class);
-        mandateDao.findByExternalId(mandateExternalId)
-                .map(Mandate::getId)
-                .ifPresentOrElse(
-                        mandateFixture::withId,
-                        () -> mandateFixture.insert(app.getTestContext().getJdbi())
-                );
-
-        PaymentFixture payment = aPaymentFixture()
-                .withMandateFixture(mandateFixture)
-                .withExternalId(paymentExternalId)
-                .insert(app.getTestContext().getJdbi());
-
-        Long eventId = Long.valueOf(params.get("event_id"));
-        DirectDebitEventFixture.aDirectDebitEventFixture()
-                .withId(eventId)
-                .withMandateId(mandateFixture.getId())
-                .withTransactionId(payment.getId())
-                .withEvent(DirectDebitEvent.SupportedEvent.valueOf(params.get("event")))
-                .withEventType(DirectDebitEvent.Type.valueOf(params.get("event_type")))
-                .withEventDate(ZonedDateTime.parse(params.getOrDefault("event_date", ZonedDateTime.now().toString())))
-                .withExternalId(params.getOrDefault("external_id", RandomIdGenerator.newId()))
-                .insert(app.getTestContext().getJdbi());
     }
 
     @State("a gateway account with external id and a confirmed mandate with a payment on it exists")
