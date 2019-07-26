@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
@@ -29,7 +29,7 @@ public class GovUkPayEventToMandateStateMapper {
             MANDATE_SUBMITTED_TO_PROVIDER, SUBMITTED_TO_PROVIDER,
             MANDATE_USER_SETUP_EXPIRED, USER_SETUP_EXPIRED,
             MANDATE_USER_SETUP_CANCELLED, USER_SETUP_CANCELLED,
-            MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE
+            MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE
     );
 
     public static final Set<GovUkPayEventType> GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE = GOV_UK_PAY_EVENT_TYPE_TO_MANDATE_STATE.keySet();

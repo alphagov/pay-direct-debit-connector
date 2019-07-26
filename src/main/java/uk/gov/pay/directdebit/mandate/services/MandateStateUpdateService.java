@@ -8,7 +8,7 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import javax.inject.Inject;
 
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
@@ -42,7 +42,7 @@ public class MandateStateUpdateService {
     }
 
     Mandate changePaymentMethodFor(Mandate mandate) {
-        return govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE);
+        return govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE);
     }
 
     Mandate cancelMandateCreation(Mandate mandate) {
