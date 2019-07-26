@@ -73,9 +73,6 @@ public interface GoCardlessEventDao {
     @GetGeneratedKeys
     Long insert(@BindBean GoCardlessEvent goCardlessEvent);
 
-    @SqlUpdate("UPDATE gocardless_events SET internal_event_id = :eventId WHERE id = :id")
-    int updateEventId(@Bind("id") Long id, @Bind("eventId") Long eventId);
-
     @SqlQuery("SELECT id, " +
             "internal_event_id, " +
             "event_id, " +

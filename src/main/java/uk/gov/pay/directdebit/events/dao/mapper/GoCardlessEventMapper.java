@@ -21,7 +21,6 @@ public class GoCardlessEventMapper implements RowMapper<GoCardlessEvent> {
     public GoCardlessEvent map(ResultSet resultSet, StatementContext statementContext) throws SQLException {
         var builder = GoCardlessEvent.GoCardlessEventBuilder.aGoCardlessEvent()
                 .withId(resultSet.getLong("id"))
-                .withInternalEventId(resultSet.getLong("internal_event_id"))
                 .withGoCardlessEventId(GoCardlessEventId.valueOf(resultSet.getString("event_id")))
                 .withAction(resultSet.getString("action"))
                 .withResourceType(GoCardlessResourceType.fromString(resultSet.getString("resource_type")))
