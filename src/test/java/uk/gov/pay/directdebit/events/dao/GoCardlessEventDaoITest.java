@@ -50,7 +50,6 @@ public class GoCardlessEventDaoITest {
         Map<String, Object> goCardlessEvent = testContext.getDatabaseTestHelper().getGoCardlessEventById(id);
 
         assertThat(goCardlessEvent.get("id"), is(id));
-        assertThat(goCardlessEvent.get("internal_event_id"), is(nullValue()));
         assertThat(goCardlessEvent.get("event_id"), is(goCardlessEventFixture.getGoCardlessEventId().toString()));
         assertThat(goCardlessEvent.get("action"), is(goCardlessEventFixture.getAction()));
         assertThat(goCardlessEvent.get("resource_type"), is(goCardlessEventFixture.getResourceType().toString()));
