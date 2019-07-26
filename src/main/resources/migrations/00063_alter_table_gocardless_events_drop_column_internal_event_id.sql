@@ -1,0 +1,2 @@
+ALTER TABLE gocardless_events DROP CONSTRAINT gocardless_events_events_fk;
+ALTER TABLE gocardless_events DROP COLUMN internal_event_id;
