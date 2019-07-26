@@ -42,24 +42,6 @@ public class ExpireResourceIT {
     }
 
     @Test
-    public void shouldExpireATransactionInStateStartedOlderThanOneDay() {
-        MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
-        PaymentFixture.aPaymentFixture()
-                .withState(PaymentState.CREATED)
-                .withCreatedDate(ZonedDateTime.of(2018,1,1,1,1,1,1,ZoneId.systemDefault()))
-                .withMandateFixture(mandateFixture)
-                .insert(testContext.getJdbi());
-        String requestPath = "/v1/api/tasks/expire-payments-and-mandates";
-        given().port(testContext.getPort())
-            .contentType(JSON)
-            .post(requestPath)
-            .then()
-            .statusCode(Response.Status.OK.getStatusCode())
-            .contentType(JSON)
-            .body("numberOfExpiredPayments", is(1));
-    }
-
-    @Test
     public void shouldExpireAMandateInState_CREATED_OlderThan_90Minutes() {
         Mandate mandate = MandateFixture.aMandateFixture()
                 .withState(MandateState.CREATED)

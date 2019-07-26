@@ -28,9 +28,8 @@ public class ExpireResource {
     @Produces(APPLICATION_JSON)
     @Timed
     public Response expirePaymentsAndMandates() {
-        int numberOfExpiredPayments = expireService.expirePayments();
         int numberOfExpiredMandates = expireService.expireMandates();
-        ResourceResponse resourceResponse =  new ResourceResponse(numberOfExpiredPayments, numberOfExpiredMandates);
+        ResourceResponse resourceResponse =  new ResourceResponse(0, numberOfExpiredMandates);
         return Response.ok(resourceResponse).build();
     }
     
@@ -38,6 +37,7 @@ public class ExpireResource {
     private static class ResourceResponse {
         
         @JsonProperty
+        @Deprecated
         private final int numberOfExpiredPayments;
         
         @JsonProperty
