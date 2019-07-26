@@ -19,8 +19,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_EXPIRED_BY_SYSTEM;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
@@ -103,7 +103,7 @@ public class MandateStateUpdateServiceTest {
         verify(mockedUserNotificationService).sendMandateCreatedEmailFor(mandate);
         verify(mockedMandateDao).updateReferenceAndPaymentProviderId(mandate);
 
-        verify(mockedGovUkPayEventService).storeEventAndUpdateStateForMandate(mandate, MANDATE_SUBMITTED);
+        verify(mockedGovUkPayEventService).storeEventAndUpdateStateForMandate(mandate, MANDATE_SUBMITTED_TO_PROVIDER);
     }
 
     @Test
@@ -115,6 +115,6 @@ public class MandateStateUpdateServiceTest {
 
         service.mandateExpiredFor(mandate);
 
-        verify(mockedGovUkPayEventService).storeEventAndUpdateStateForMandate(mandate, MANDATE_EXPIRED_BY_SYSTEM);
+        verify(mockedGovUkPayEventService).storeEventAndUpdateStateForMandate(mandate, MANDATE_USER_SETUP_EXPIRED);
     }
 }

@@ -57,10 +57,10 @@ public class SandboxMandateStateCalculatorTest {
     @Parameters({
             "MANDATE_CREATED, CREATED",
             "MANDATE_TOKEN_EXCHANGED, AWAITING_DIRECT_DEBIT_DETAILS",
-            "MANDATE_SUBMITTED, SUBMITTED_TO_PROVIDER",
-            "MANDATE_EXPIRED_BY_SYSTEM, USER_SETUP_EXPIRED",
-            "MANDATE_CANCELLED_BY_USER, USER_SETUP_CANCELLED",
-            "MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE"
+            "MANDATE_SUBMITTED_TO_PROVIDER, SUBMITTED_TO_PROVIDER",
+            "MANDATE_USER_SETUP_EXPIRED, USER_SETUP_EXPIRED",
+            "MANDATE_USER_SETUP_CANCELLED, USER_SETUP_CANCELLED",
+            "MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE"
     })
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
         GovUkPayEventType govUkPayEventType = GovUkPayEventType.valueOf(eventType);
