@@ -16,7 +16,6 @@ import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
 import java.sql.Date;
@@ -37,6 +36,7 @@ import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDB
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 
@@ -44,7 +44,7 @@ import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class PaymentDaoIT {
 
-    private static final PaymentState STATE = PaymentState.CREATED;
+    private static final PaymentState STATE = CREATED;
     private static final long AMOUNT = 10L;
 
     @DropwizardTestContext
@@ -317,9 +317,9 @@ public class PaymentDaoIT {
         MandateFixture sandboxMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(sandboxGatewayAccount).insert(testContext.getJdbi());
         MandateFixture goCardlessMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(goCardlessGatewayAccount).insert(testContext.getJdbi());
         PaymentFixture sandboxCharge =
-                generateNewPaymentFixture(sandboxMandate, PaymentState.CREATED, AMOUNT);
+                generateNewPaymentFixture(sandboxMandate, CREATED, AMOUNT);
         
-        generateNewPaymentFixture(goCardlessMandate, PaymentState.CREATED, AMOUNT);
+        generateNewPaymentFixture(goCardlessMandate, CREATED, AMOUNT);
         sandboxCharge.insert(testContext.getJdbi());
 
         PaymentFixture successSandboxCharge =
@@ -339,7 +339,7 @@ public class PaymentDaoIT {
     @Test
     public void shouldNotFindAnyPaymentByPaymentState_ifPaymentStateIsNotUsed() {
         PaymentFixture processingDirectDebitPaymentStatePaymentFixture =
-                generateNewPaymentFixture(testMandate, PaymentState.CREATED, AMOUNT);
+                generateNewPaymentFixture(testMandate, CREATED, AMOUNT);
         processingDirectDebitPaymentStatePaymentFixture.insert(testContext.getJdbi());
 
         List<Payment> successPaymentsList = paymentDao.findAllByPaymentStateAndProvider(PaymentState.PAID_OUT, SANDBOX);
@@ -348,7 +348,7 @@ public class PaymentDaoIT {
 
     @Test
     public void shouldUpdateStateAndReturnNumberOfAffectedRows() {
-        PaymentState newState = PaymentState.CREATED;
+        PaymentState newState = CREATED;
         testPayment.insert(testContext.getJdbi());
         int numOfUpdatedPayments = paymentDao.updateState(testPayment.getId(), newState);
         Map<String, Object> transactionAfterUpdate = testContext.getDatabaseTestHelper().getPaymentById(testPayment.getId());
@@ -395,23 +395,22 @@ public class PaymentDaoIT {
 
     @Test
     public void shouldNotUpdateAnythingIfPaymentDoesNotExist() {
-        int numOfUpdatedPayments = paymentDao.updateState(34L, PaymentState.CREATED);
+        int numOfUpdatedPayments = paymentDao.updateState(34L, CREATED);
         assertThat(numOfUpdatedPayments, is(0));
     }
     
     @Test
     public void findAllPaymentsBySetOfStatesAndCreationTime_shouldFindThreePayments() {
-        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.CREATED)
+        aPaymentFixture().withMandateFixture(testMandate).withState(CREATED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
         
-        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.CREATED)
+        aPaymentFixture().withMandateFixture(testMandate).withState(CREATED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
         
-        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.CREATED)
+        aPaymentFixture().withMandateFixture(testMandate).withState(CREATED)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L)).insert(testContext.getJdbi());
         
-        PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
-        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER);
+        Set<PaymentState> states = Set.of(CREATED);
         List<Payment> payments = paymentDao.findAllPaymentsBySetOfStatesAndCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
         assertThat(payments.size(), is(3));
     }
@@ -616,11 +615,10 @@ public class PaymentDaoIT {
 
     @Test
     public void findAllPaymentsBySetOfStatesAndCreationTime_shouldNotFindPayment_TooEarly() {
-        aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.CREATED)
+        aPaymentFixture().withMandateFixture(testMandate).withState(CREATED)
                 .withCreatedDate(ZonedDateTime.now()).insert(testContext.getJdbi());
 
-        PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
-        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER);
+        Set<PaymentState> states = Set.of(CREATED);
         List<Payment> payments = paymentDao.findAllPaymentsBySetOfStatesAndCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
         assertThat(payments.size(), is(0));
     }
@@ -630,8 +628,7 @@ public class PaymentDaoIT {
         aPaymentFixture().withMandateFixture(testMandate).withState(PaymentState.SUBMITTED_TO_PROVIDER)
                 .withCreatedDate(ZonedDateTime.now()).insert(testContext.getJdbi());
 
-        PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
-        Set<PaymentState> states = paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER);
+        Set<PaymentState> states = Set.of(CREATED);
         List<Payment> payments = paymentDao.findAllPaymentsBySetOfStatesAndCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
         assertThat(payments.size(), is(0));
     }

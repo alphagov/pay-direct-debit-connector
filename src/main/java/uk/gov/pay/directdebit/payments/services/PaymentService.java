@@ -11,11 +11,9 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
-import uk.gov.pay.directdebit.payments.model.DirectDebitEvent;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
 
 import javax.inject.Inject;
 import java.time.ZoneOffset;
@@ -58,7 +56,7 @@ public class PaymentService {
         Payment payment = aPayment()
                 .withExternalId(RandomIdGenerator.newId())
                 .withAmount(amount)
-                .withState(PaymentStatesGraph.initialState())
+                .withState(PaymentState.CREATED)
                 .withDescription(description)
                 .withReference(reference)
                 .withMandate(mandate)
