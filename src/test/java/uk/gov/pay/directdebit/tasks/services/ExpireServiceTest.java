@@ -12,14 +12,8 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateStatesGraph;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
-import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
-import uk.gov.pay.directdebit.payments.model.Payment;
-import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.payments.model.PaymentStatesGraph;
-import uk.gov.pay.directdebit.payments.services.PaymentService;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -36,31 +30,20 @@ public class ExpireServiceTest {
 
     @DropwizardTestContext
     private TestContext testContext;
-
-    private PaymentStatesGraph paymentStatesGraph = new PaymentStatesGraph();
+    
     private MandateStatesGraph mandateStatesGraph = new MandateStatesGraph();
-    @Mock
-    private PaymentService paymentService;
+
     @Mock
     private MandateQueryService mandateQueryService;
+    
     @Mock
     private MandateStateUpdateService mandateStateUpdateService;
+    
     private ExpireService expireService;
     
     @Before
     public void setup() {
-        expireService = new ExpireService(paymentService, mandateStatesGraph, paymentStatesGraph, mandateQueryService, mandateStateUpdateService);
-    }
-    
-    @Test
-    public void expirePayments_shouldCallTransactionServiceWithPriorStatesToPending() {
-        Payment payment = PaymentFixture.aPaymentFixture().withState(PaymentState.CREATED).toEntity();
-        when(paymentService
-                .findAllPaymentsBySetOfStatesAndCreationTime(eq(paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER)), any()))
-                .thenReturn(Collections.singletonList(payment));
-        
-        int numberOfExpiredPayments = expireService.expirePayments();
-        assertEquals(1, numberOfExpiredPayments);
+        expireService = new ExpireService(mandateStatesGraph, mandateQueryService, mandateStateUpdateService);
     }
 
     @Test
@@ -71,13 +54,6 @@ public class ExpireServiceTest {
                 .thenReturn(Collections.singletonList(mandate));
         int numberOfExpiredMandates = expireService.expireMandates();
         assertEquals(1, numberOfExpiredMandates);
-    }
-
-    @Test
-    public void shouldGetCorrectPaymentsStatesPriorToPending() {
-        Set<PaymentState> paymentStates = paymentStatesGraph.getPriorStates(PaymentState.SUBMITTED_TO_PROVIDER);
-        Set<PaymentState> expectedPaymentStates = new HashSet<>(Collections.singletonList(PaymentState.CREATED));
-        assertEquals(expectedPaymentStates, paymentStates);
     }
 
     @Test
