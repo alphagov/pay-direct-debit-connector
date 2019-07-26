@@ -4,7 +4,7 @@ import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.ImmutableGraph;
 import com.google.common.graph.MutableGraph;
 
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
@@ -26,7 +26,7 @@ public class GovUkPayEventStateGraph {
         graph.putEdge(MANDATE_CREATED, MANDATE_TOKEN_EXCHANGED);
         graph.putEdge(MANDATE_CREATED, MANDATE_USER_SETUP_EXPIRED);
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_SUBMITTED_TO_PROVIDER);
-        graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_CANCELLED_BY_USER);
+        graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_USER_SETUP_CANCELLED);
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE);
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_USER_SETUP_EXPIRED);
         

@@ -22,7 +22,7 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
@@ -97,7 +97,7 @@ public class GovUkPayEventDaoITest {
         aGovUkPayEventFixture()
                 .withMandateId(mandate.getId())
                 .withEventDate(ZonedDateTime.parse("2019-01-01T11:30:40Z"))
-                .withEventType(MANDATE_CANCELLED_BY_USER)
+                .withEventType(MANDATE_USER_SETUP_CANCELLED)
                 .insert(testContext.getJdbi())
                 .toEntity();
 
@@ -162,11 +162,11 @@ public class GovUkPayEventDaoITest {
         aGovUkPayEventFixture()
                 .withMandateId(mandate.getId())
                 .withEventDate(ZonedDateTime.parse("2019-01-01T11:30:40Z"))
-                .withEventType(MANDATE_CANCELLED_BY_USER)
+                .withEventType(MANDATE_USER_SETUP_CANCELLED)
                 .insert(testContext.getJdbi())
                 .toEntity();
 
-        var applicableEvents = Set.of(MANDATE_CREATED, MANDATE_CANCELLED_BY_USER);
+        var applicableEvents = Set.of(MANDATE_CREATED, MANDATE_USER_SETUP_CANCELLED);
         Optional<GovUkPayEvent> govUkPayEvent = govUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), applicableEvents);
 
         assertThat(govUkPayEvent.get(), is(latestApplicableEvent));
@@ -181,7 +181,7 @@ public class GovUkPayEventDaoITest {
                 .insert(testContext.getJdbi())
                 .toEntity();
 
-        var applicableEvents = Set.of(MANDATE_CREATED, MANDATE_CANCELLED_BY_USER);
+        var applicableEvents = Set.of(MANDATE_CREATED, MANDATE_USER_SETUP_CANCELLED);
         Optional<GovUkPayEvent> govUkPayEvent = govUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), applicableEvents);
 
         assertThat(govUkPayEvent, is(Optional.empty()));

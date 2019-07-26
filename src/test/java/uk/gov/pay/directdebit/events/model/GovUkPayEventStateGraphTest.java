@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
@@ -51,7 +51,7 @@ public class GovUkPayEventStateGraphTest {
 
     @Test
     public void isValidStartState_shouldReturnFalseForNotInitialState() {
-        boolean validStartValue = govUkPayEventStateGraph.isValidStartValue(MANDATE_CANCELLED_BY_USER);
+        boolean validStartValue = govUkPayEventStateGraph.isValidStartValue(MANDATE_USER_SETUP_CANCELLED);
         assertThat(validStartValue, is(false));
     }
 }

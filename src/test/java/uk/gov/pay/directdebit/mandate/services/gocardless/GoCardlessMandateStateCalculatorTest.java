@@ -31,7 +31,7 @@ import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CANCELLED_BY_USER;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.mandate.services.GovUkPayEventToMandateStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE;
@@ -101,7 +101,7 @@ public class GoCardlessMandateStateCalculatorTest {
             "MANDATE_TOKEN_EXCHANGED, AWAITING_DIRECT_DEBIT_DETAILS",
             "MANDATE_SUBMITTED_TO_PROVIDER, SUBMITTED_TO_PROVIDER",
             "MANDATE_USER_SETUP_EXPIRED, USER_SETUP_EXPIRED",
-            "MANDATE_CANCELLED_BY_USER, USER_SETUP_CANCELLED",
+            "MANDATE_USER_SETUP_CANCELLED, USER_SETUP_CANCELLED",
             "MANDATE_CANCELLED_BY_USER_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE"
     })
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
@@ -142,7 +142,7 @@ public class GoCardlessMandateStateCalculatorTest {
                 .willReturn(Optional.of(goCardlessEvent));
 
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture()
-                .withEventType(MANDATE_CANCELLED_BY_USER)
+                .withEventType(MANDATE_USER_SETUP_CANCELLED)
                 .withEventDate(ZonedDateTime.of(2019, 7, 22, 10, 0, 0, 0, UTC))
                 .toEntity();
         given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE))
@@ -164,7 +164,7 @@ public class GoCardlessMandateStateCalculatorTest {
                 .willReturn(Optional.of(goCardlessEvent));
 
         GovUkPayEvent govUkPayEvent = aGovUkPayEventFixture()
-                .withEventType(MANDATE_CANCELLED_BY_USER)
+                .withEventType(MANDATE_USER_SETUP_CANCELLED)
                 .withEventDate(ZonedDateTime.of(2019, 7, 22, 9, 0, 0, 0, UTC))
                 .toEntity();
         given(mockGovUkPayEventDao.findLatestApplicableEventForMandate(mandate.getId(), GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE))
