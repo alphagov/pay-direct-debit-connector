@@ -14,12 +14,13 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
+import uk.gov.pay.commons.utils.healthchecks.DatabaseHealthCheck;
 import uk.gov.pay.commons.utils.logging.LoggingFilter;
+import uk.gov.pay.commons.utils.metrics.DatabaseMetricsService;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.DirectDebitModule;
 import uk.gov.pay.directdebit.app.config.GraphiteConfig;
-import uk.gov.pay.directdebit.app.healthcheck.Database;
 import uk.gov.pay.directdebit.app.healthcheck.Ping;
 import uk.gov.pay.directdebit.common.exception.BadRequestExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.ConflictExceptionMapper;
@@ -102,7 +103,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
         environment.healthChecks().register("ping", new Ping());
-        environment.healthChecks().register("database", injector.getInstance(Database.class));
+        environment.healthChecks().register("database", new DatabaseHealthCheck(configuration.getDataSourceFactory()));
         environment.jersey().register(injector.getInstance(GatewayAccountParamConverterProvider.class));
         environment.jersey().register(injector.getInstance(HealthCheckResource.class));
         environment.jersey().register(injector.getInstance(WebhookSandboxResource.class));
@@ -145,6 +146,15 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
 
     private void initialiseMetrics(DirectDebitConfig configuration, Environment environment) {
         GraphiteConfig graphiteConfig = configuration.getGraphiteConfig();
+        DatabaseMetricsService metricsService = new DatabaseMetricsService(configuration.getDataSourceFactory(), environment.metrics(), "directdebit_connector");
+
+        environment
+                .lifecycle()
+                .scheduledExecutorService("metricscollector")
+                .threads(1)
+                .build()
+                .scheduleAtFixedRate(metricsService::updateMetricData, 0, graphiteConfig.getSendingPeriod() / 2, TimeUnit.SECONDS);
+
         GraphiteSender graphiteUDP = new GraphiteUDP(graphiteConfig.getHost(), graphiteConfig.getPort());
         GraphiteReporter.forRegistry(environment.metrics())
                 .prefixedWith(graphiteConfig.getNode())
