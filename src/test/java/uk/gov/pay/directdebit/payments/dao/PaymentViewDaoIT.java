@@ -413,7 +413,7 @@ public class PaymentViewDaoIT {
                     .withState(PaymentState.FAILED)
                     .insert(testContext.getJdbi());
         });
-        
+
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withState("failed")
                 .build();

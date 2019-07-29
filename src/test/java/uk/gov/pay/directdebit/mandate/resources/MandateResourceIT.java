@@ -476,7 +476,7 @@ public class MandateResourceIT {
                 .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getMandateById(testMandate.getId());
-        assertThat(payment.get("state"), is("USER_CANCEL_NOT_ELIGIBLE"));
+        assertThat(payment.get("state"), is("USER_SETUP_CANCELLED"));
     }
 
     @Test

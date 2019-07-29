@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 
 public class GovUkPayEventToPaymentStateMapper {
     private static final Map<GovUkPayEventType, PaymentState> GOV_UK_PAY_EVENT_TYPE_TO_PAYMENT_STATE = Map.of(
+            PAYMENT_CREATED, PaymentState.CREATED,
             PAYMENT_SUBMITTED, PaymentState.SUBMITTED_TO_PROVIDER
     );
 

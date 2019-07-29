@@ -18,7 +18,6 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKE
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_PROVIDER;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_CANCEL_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_EXPIRED;
 
@@ -29,7 +28,7 @@ public class GovUkPayEventToMandateStateMapper {
             MANDATE_SUBMITTED_TO_PROVIDER, SUBMITTED_TO_PROVIDER,
             MANDATE_USER_SETUP_EXPIRED, USER_SETUP_EXPIRED,
             MANDATE_USER_SETUP_CANCELLED, USER_SETUP_CANCELLED,
-            MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE, USER_CANCEL_NOT_ELIGIBLE
+            MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE, USER_SETUP_CANCELLED
     );
 
     public static final Set<GovUkPayEventType> GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_MANDATE_STATE = GOV_UK_PAY_EVENT_TYPE_TO_MANDATE_STATE.keySet();
