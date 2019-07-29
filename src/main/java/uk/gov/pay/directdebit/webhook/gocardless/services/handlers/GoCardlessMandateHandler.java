@@ -8,7 +8,7 @@ import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.events.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
-import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
+import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
@@ -20,17 +20,17 @@ import java.util.function.Consumer;
 public class GoCardlessMandateHandler extends GoCardlessHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessMandateHandler.class);
-    private final MandateStateUpdateService mandateStateUpdateService;
     private final MandateQueryService mandateQueryService;
+    private final UserNotificationService userNotificationService;
 
     @Inject
     public GoCardlessMandateHandler(PaymentService paymentService,
                                     GoCardlessEventService goCardlessService,
-                                    MandateStateUpdateService mandateStateUpdateService,
-                                    MandateQueryService mandateQueryService) {
+                                    MandateQueryService mandateQueryService,
+                                    UserNotificationService userNotificationService) {
         super(paymentService, goCardlessService);
-        this.mandateStateUpdateService = mandateStateUpdateService;
         this.mandateQueryService = mandateQueryService;
+        this.userNotificationService = userNotificationService;
     }
 
     /**
@@ -55,8 +55,8 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
 
     private Map<GoCardlessAction, Consumer<Mandate>> getHandledActions() {
         return ImmutableMap.of(
-                GoCardlessMandateAction.CANCELLED, mandateStateUpdateService::mandateCancelledFor,
-                GoCardlessMandateAction.FAILED, mandateStateUpdateService::mandateFailedFor);
+                GoCardlessMandateAction.CANCELLED, userNotificationService::sendMandateCancelledEmailFor,
+                GoCardlessMandateAction.FAILED, userNotificationService::sendMandateFailedEmailFor);
     }
 
     @Override
@@ -68,19 +68,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
                             event.getLinksMandate().orElseThrow(() -> new GoCardlessEventHasNoMandateIdException(event.getGoCardlessEventId())),
                             event.getLinksOrganisation());
 
-                    if (isValidOrganisation(mandate, event)) {
-                        handledAction.accept(mandate);
-                    } else {
-                        LOGGER.info("Event from GoCardless with goCardlessEventId: {} has unrecognised organisation: {}",
-                                event.getGoCardlessEventId(), event.getLinksOrganisation());
-                    }
+                    handledAction.accept(mandate);
                 }));
-    }
-
-    private boolean isValidOrganisation(Mandate mandate, GoCardlessEvent event) {
-        return mandate.getGatewayAccount().getOrganisation()
-                .map(organisationIdentifier -> organisationIdentifier.equals(event.getLinksOrganisation()))
-                // TODO: replace true with false after going live. kept now for backwards compatibility with GetDirectDebitEventsIT
-                .orElse(true);
     }
 }

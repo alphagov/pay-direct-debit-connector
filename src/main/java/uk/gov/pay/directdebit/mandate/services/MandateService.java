@@ -7,6 +7,7 @@ import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.common.exception.UnlinkedGCMerchantAccountException;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
+import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -21,6 +22,7 @@ import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
@@ -44,6 +46,11 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
@@ -56,8 +63,9 @@ public class MandateService {
     private final GatewayAccountDao gatewayAccountDao;
     private final TokenService tokenService;
     private final PaymentService paymentService;
-    private final MandateStateUpdateService mandateStateUpdateService;
     private final PaymentProviderFactory paymentProviderFactory;
+    private final UserNotificationService userNotificationService;
+    private final GovUkPayEventService govUkPayEventService;
 
     @Inject
     public MandateService(DirectDebitConfig directDebitConfig,
@@ -65,15 +73,17 @@ public class MandateService {
                           GatewayAccountDao gatewayAccountDao,
                           TokenService tokenService,
                           PaymentService paymentService,
-                          MandateStateUpdateService mandateStateUpdateService,
-                          PaymentProviderFactory paymentProviderFactory) {
+                          PaymentProviderFactory paymentProviderFactory,
+                          UserNotificationService userNotificationService,
+                          GovUkPayEventService govUkPayEventService) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
         this.paymentService = paymentService;
         this.mandateDao = mandateDao;
-        this.mandateStateUpdateService = mandateStateUpdateService;
         this.linksConfig = directDebitConfig.getLinks();
         this.paymentProviderFactory = paymentProviderFactory;
+        this.userNotificationService = userNotificationService;
+        this.govUkPayEventService = govUkPayEventService;
     }
 
     public Mandate createMandate(CreateMandateRequest createRequest, String accountExternalId) {
@@ -100,8 +110,7 @@ public class MandateService {
 
                     Mandate insertedMandate = fromMandate(mandate).withId(id).build();
 
-                    mandateStateUpdateService.mandateCreatedFor(insertedMandate);
-                    return insertedMandate;
+                    return govUkPayEventService.storeEventAndUpdateStateForMandate(insertedMandate, MANDATE_CREATED);
                 })
                 .orElseThrow(() -> {
                     LOGGER.error("Gateway account with id {} not found", accountExternalId);
@@ -118,7 +127,7 @@ public class MandateService {
     public TokenExchangeDetails getMandateFor(String token) {
         return mandateDao
                 .findByTokenId(token)
-                .map(mandateStateUpdateService::tokenExchangedFor)
+                .map(mandate -> govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, MANDATE_TOKEN_EXCHANGED))
                 .map(TokenExchangeDetails::new)
                 .orElseThrow(TokenNotFoundException::new);
     }
@@ -159,12 +168,12 @@ public class MandateService {
 
     public void changePaymentMethodFor(MandateExternalId mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        mandateStateUpdateService.changePaymentMethodFor(mandate);
+        govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE);
     }
 
     public void cancelMandateCreation(MandateExternalId mandateExternalId) {
         Mandate mandate = findByExternalId(mandateExternalId);
-        mandateStateUpdateService.cancelMandateCreation(mandate);
+        govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, MANDATE_USER_SETUP_CANCELLED);
     }
 
     public void confirm(GatewayAccount gatewayAccount, Mandate mandate, ConfirmMandateRequest confirmDetailsRequest) {
@@ -182,7 +191,9 @@ public class MandateService {
                 .withPaymentProviderId(paymentProviderMandateIdAndBankReference.getPaymentProviderMandateId())
                 .build();
 
-        mandateStateUpdateService.confirmedDirectDebitDetailsFor(updatedMandate);
+        mandateDao.updateReferenceAndPaymentProviderId(updatedMandate);
+        userNotificationService.sendMandateCreatedEmailFor(updatedMandate);
+        govUkPayEventService.storeEventAndUpdateStateForMandate(updatedMandate, MANDATE_SUBMITTED_TO_PROVIDER);
     }
 
     private List<Map<String, Object>> createLinks(Mandate mandate, String accountExternalId, UriInfo uriInfo) {
