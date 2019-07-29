@@ -352,38 +352,6 @@ public class PaymentViewDaoIT {
     }
 
     @Test
-    public void shouldReturn1Records_whenSearchingByUserCancelNotEligibleExternalState() {
-        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
-                .withExternalId("gateway-external-id")
-                .insert(testContext.getJdbi());
-        MandateExternalId mandateExternalId = MandateExternalId.valueOf("a-mandate-external-id");
-        MandateFixture mandateFixture = aMandateFixture()
-                .withGatewayAccountFixture(gatewayAccountFixture)
-                .withExternalId(mandateExternalId)
-                .insert(testContext.getJdbi());
-        aPayerFixture()
-                .withMandateId(mandateFixture.getId())
-                .withEmail("j.citizen@mail.test")
-                .insert(testContext.getJdbi());
-
-        aPaymentFixture()
-                .withMandateFixture(mandateFixture)
-                .withState(PaymentState.CREATED)
-                .insert(testContext.getJdbi());
-        aPaymentFixture()
-                .withMandateFixture(mandateFixture)
-                .withState(PaymentState.USER_CANCEL_NOT_ELIGIBLE)
-                .insert(testContext.getJdbi());
-
-        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
-                .withState("cancelled")
-                .build();
-
-        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
-        assertThat(viewList.size(), is(1));
-    }
-
-    @Test
     public void shouldReturn1Records_whenSearchingBySuccessExternalState() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withExternalId("gateway-external-id")
