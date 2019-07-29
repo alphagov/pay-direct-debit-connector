@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
@@ -26,14 +27,12 @@ import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.mandate.services.gocardless.GoCardlessService;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.dao.GoCardlessCustomerDao;
-import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.SortCode;
-import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
@@ -57,57 +56,65 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
-import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
+import static uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture.aGoCardlessCustomerFixture;
+import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoCardlessServiceTest {
 
     private static final String CUSTOMER_ID = "CU328471";
-    static final String BANK_ACCOUNT_ID = "BA34983496";
-    static final MandateExternalId MANDATE_ID = MandateExternalId.valueOf("sdkfhsdkjfhjdks");
+    private static final String BANK_ACCOUNT_ID = "BA34983496";
+    private static final MandateExternalId MANDATE_ID = MandateExternalId.valueOf("sdkfhsdkjfhjdks");
     private static final String TRANSACTION_ID = "sdkfhsd2jfhjdks";
-    static final SortCode SORT_CODE = SortCode.of("123456");
-    static final AccountNumber ACCOUNT_NUMBER = AccountNumber.of("12345678");
+    private static final SortCode SORT_CODE = SortCode.of("123456");
+    private static final AccountNumber ACCOUNT_NUMBER = AccountNumber.of("12345678");
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+
     @Mock
     protected GoCardlessClientFacade mockedGoCardlessClientFacade;
+
     @Mock
     protected GoCardlessCustomerDao mockedGoCardlessCustomerDao;
+
     @Mock
     protected GoCardlessClientFactory mockedGoCardlessClientFactory;
+
     @Mock
     protected GoCardlessApiException mockedGoCardlessException;
+
     @Mock
     protected ValidationFailedException mockedGoCardlessValidationFailedException;
-    @Mock
-    protected PaymentDao mockedPaymentDao;
 
-    GoCardlessService service;
+    @InjectMocks
+    private GoCardlessService service;
 
-    GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture
-            .aGatewayAccountFixture().withPaymentProvider(PaymentProvider.GOCARDLESS);
-    PayerFixture payerFixture = PayerFixture.aPayerFixture();
-    GoCardlessCustomer goCardlessCustomer = GoCardlessCustomerFixture.aGoCardlessCustomerFixture()
+    private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
+            .withPaymentProvider(PaymentProvider.GOCARDLESS);
+
+    private PayerFixture payerFixture = PayerFixture.aPayerFixture();
+
+    private GoCardlessCustomer goCardlessCustomer = aGoCardlessCustomerFixture()
             .withPayerId(payerFixture.getId())
             .withCustomerId(CUSTOMER_ID)
             .withCustomerBankAccountId(BANK_ACCOUNT_ID).toEntity();
-    MandateFixture mandateFixture = aMandateFixture()
+
+    private MandateFixture mandateFixture = aMandateFixture()
             .withPayerFixture(payerFixture)
             .withGatewayAccountFixture(gatewayAccountFixture)
             .withExternalId(MANDATE_ID);
-    Payment payment = PaymentFixture.aPaymentFixture()
+
+    private Payment payment = PaymentFixture.aPaymentFixture()
             .withMandateFixture(mandateFixture)
             .withExternalId(TRANSACTION_ID)
             .toEntity();
 
 
-    BankAccountDetails bankAccountDetails = new BankAccountDetails(ACCOUNT_NUMBER, SORT_CODE);
+    private BankAccountDetails bankAccountDetails = new BankAccountDetails(ACCOUNT_NUMBER, SORT_CODE);
 
     @Before
     public void setUp() {
-        service = new GoCardlessService(mockedGoCardlessClientFactory, mockedGoCardlessCustomerDao, mockedPaymentDao);
         when(mockedGoCardlessClientFactory.getClientFor(Optional.of(gatewayAccountFixture.getAccessToken()))).thenReturn(mockedGoCardlessClientFacade);
         when(mockedGoCardlessClientFacade.createCustomer(MANDATE_ID, payerFixture.toEntity())).thenReturn(goCardlessCustomer);
         when(mockedGoCardlessClientFacade.createCustomerBankAccount(MANDATE_ID, goCardlessCustomer, payerFixture.getName(), SORT_CODE, ACCOUNT_NUMBER)).thenReturn(goCardlessCustomer);
@@ -257,9 +264,6 @@ public class GoCardlessServiceTest {
                 .thenReturn(new PaymentProviderPaymentIdAndChargeDate(goCardlessPaymentId, chargeDateFromGoCardless));
 
         PaymentProviderPaymentIdAndChargeDate collectResponse = service.collect(mandate, payment);
-
-        Payment paymentWithProviderIdAndChargeDate = fromPayment(payment).withProviderId(goCardlessPaymentId).withChargeDate(chargeDateFromGoCardless).build();
-        verify(mockedPaymentDao).updateProviderIdAndChargeDate(paymentWithProviderIdAndChargeDate);
 
         assertThat(collectResponse.getChargeDate(), is(chargeDateFromGoCardless));
         assertThat(collectResponse.getPaymentProviderPaymentId(), is(goCardlessPaymentId));

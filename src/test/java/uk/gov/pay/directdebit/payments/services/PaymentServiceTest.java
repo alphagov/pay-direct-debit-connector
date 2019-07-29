@@ -4,14 +4,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
@@ -26,19 +22,19 @@ import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
-import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
+import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentServiceTest {
@@ -50,7 +46,7 @@ public class PaymentServiceTest {
 
     @Mock
     private UserNotificationService mockedUserNotificationService;
-    
+
     @Mock
     private PaymentProviderFactory mockedPaymentProviderFactory;
 
@@ -59,12 +55,6 @@ public class PaymentServiceTest {
 
     @Mock
     private GovUkPayEventService mockedGovUkPayEventService;
-    
-    @Captor
-    private ArgumentCaptor<Payment> capturedPayment;
-    
-    @Mock
-    private Payment mockPayment;
 
     @InjectMocks
     private PaymentService service;
@@ -117,23 +107,12 @@ public class PaymentServiceTest {
     }
 
     @Test
-    public void paymentSubmittedToProvider_shouldUpdatePaymentAsPending_andRegisterAPaymentSubmittedEvent() {
-        Payment payment = PaymentFixture
-                .aPaymentFixture()
-                .withMandateFixture(mandateFixture)
-                .withState(CREATED)
-                .toEntity();
-
-        service.paymentSubmittedToProviderFor(payment);
-
-        verify(mockedGovUkPayEventService).storeEventAndUpdateStateForPayment(payment, PAYMENT_SUBMITTED);
-    }
-
-    @Test
     public void createShouldCreatePayment() {
         Mandate mandate = mandateFixture.toEntity();
 
         Payment returnedPayment = service.createPayment(123456L, "a description", "a reference", mandate);
+
+        verify(mockedPaymentDao).insert(any(Payment.class));
 
         assertThat(returnedPayment.getAmount(), is(123456L));
         assertThat(returnedPayment.getMandate(), is(mandate));
@@ -142,7 +121,7 @@ public class PaymentServiceTest {
         assertThat(returnedPayment.getReference(), is("a reference"));
         assertThat(returnedPayment.getProviderId(), is(Optional.empty()));
         assertThat(returnedPayment.getChargeDate(), is(Optional.empty()));
-        
+
     }
 
     @Test
@@ -161,22 +140,30 @@ public class PaymentServiceTest {
         SandboxPaymentId sandboxPaymentId = SandboxPaymentId.valueOf("123");
         LocalDate chargeDate = LocalDate.now().plusDays(2);
 
+        Payment paymentWithProviderIdAndChargeDate = fromPayment(payment)
+                .withProviderId(sandboxPaymentId)
+                .withChargeDate(chargeDate)
+                .build();
+
         when(mockedPaymentProviderFactory.getCommandServiceFor(mandate.getGatewayAccount().getPaymentProvider())).thenReturn(mockedSandboxService);
         when(mockedSandboxService.collect(mandate, payment)).thenReturn(new PaymentProviderPaymentIdAndChargeDate(sandboxPaymentId, chargeDate));
-        
-        when(mockedGovUkPayEventService.storeEventAndUpdateStateForPayment(capturedPayment.capture(), eq(PAYMENT_SUBMITTED))).thenReturn(mockPayment);
+
+        when(mockedGovUkPayEventService.storeEventAndUpdateStateForPayment(paymentWithProviderIdAndChargeDate, PAYMENT_SUBMITTED))
+                .thenAnswer(invocationOnMock -> {
+                    Payment paymentToUpdate = invocationOnMock.getArgument(0, Payment.class);
+                    return Payment.PaymentBuilder.fromPayment(paymentToUpdate).withState(SUBMITTED_TO_PROVIDER).build();
+                });
 
         Payment returnedPayment = service.submitPaymentToProvider(payment);
-        assertThat(returnedPayment, is(mockPayment));
 
-        Payment submittedPayment = capturedPayment.getValue();
-        assertThat(submittedPayment.getAmount(), is(payment.getAmount()));
-        assertThat(submittedPayment.getMandate(), is(payment.getMandate()));
-        assertThat(submittedPayment.getState(), is(CREATED));
-        assertThat(submittedPayment.getDescription(), is("a description"));
-        assertThat(submittedPayment.getReference(), is("a reference"));
-        assertThat(submittedPayment.getProviderId(), is(Optional.of(sandboxPaymentId)));
-        assertThat(submittedPayment.getChargeDate(), is(Optional.of(chargeDate)));
+        verify(mockedPaymentDao).updateProviderIdAndChargeDate(paymentWithProviderIdAndChargeDate);
+        verify(mockedUserNotificationService).sendPaymentConfirmedEmailFor(paymentWithProviderIdAndChargeDate);
+
+        Payment paymentWithUpdatedState = fromPayment(paymentWithProviderIdAndChargeDate)
+                .withState(SUBMITTED_TO_PROVIDER)
+                .build();
+
+        assertThat(returnedPayment, is(paymentWithUpdatedState));
     }
 
 }
