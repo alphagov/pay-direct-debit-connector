@@ -364,21 +364,15 @@ public class PaymentSearchResourceIT { //TODO merge with PaymentResource
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
-        for (int i = 0; i < 6; i++) {
-            if (i % 2 == 0) {
-                aPaymentFixture()
-                        .withMandateFixture(mandateFixture)
-                        .withState(PaymentState.CANCELLED)
-                        .withStateDetails("state_details")
-                        .insert(testContext.getJdbi());
-                continue;
-            }
+        
+        List.of(1,2,3).forEach(i -> {
             aPaymentFixture()
                     .withMandateFixture(mandateFixture)
-                    .withState(PaymentState.EXPIRED)
+                    .withState(PaymentState.CANCELLED)
                     .withStateDetails("state_details")
                     .insert(testContext.getJdbi());
-        }
+        });
+        
         String requestPath = "/v1/api/accounts/{accountId}/payments?state=:state"
                 .replace("{accountId}", gatewayAccountFixture.getExternalId())
                 .replace(":state", ExternalPaymentState.EXTERNAL_FAILED.getStatus());
@@ -387,8 +381,8 @@ public class PaymentSearchResourceIT { //TODO merge with PaymentResource
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .contentType(JSON)
-                .body("count", is(6))
-                .body("results", hasSize(6))
+                .body("count", is(3))
+                .body("results", hasSize(3))
                 .body("results[0].state.finished", is(true))
                 .body("results[0].state.status", is("failed"))
                 .body("results[0].state.details", is("state_details"));

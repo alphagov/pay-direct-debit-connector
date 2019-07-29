@@ -9,7 +9,6 @@ import java.util.Map;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.EXPIRED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
@@ -53,7 +52,7 @@ public class PaymentViewSearchParams implements SearchParams {
         externalPaymentToInternalStateQueryMap
                 .put(ExternalPaymentState.EXTERNAL_SUCCESS.getStatus(), PAID_OUT.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_FAILED.getStatus(), FAILED.toSingleQuoteString() + ", " + CANCELLED.toSingleQuoteString() + ", " + EXPIRED.toSingleQuoteString());
+                .put(ExternalPaymentState.EXTERNAL_FAILED.getStatus(), FAILED.toSingleQuoteString() + ", " + CANCELLED.toSingleQuoteString());
     }
 
     private PaymentViewSearchParams(PaymentViewSearchParamsBuilder builder) {

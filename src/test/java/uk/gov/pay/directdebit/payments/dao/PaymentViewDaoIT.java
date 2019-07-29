@@ -402,32 +402,23 @@ public class PaymentViewDaoIT {
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
-        for (int i = 0; i < 6; i++) {
-            if (i % 3 == 0) {
-                aPaymentFixture()
-                        .withMandateFixture(mandateFixture)
-                        .withState(PaymentState.CANCELLED)
-                        .insert(testContext.getJdbi());
-                continue;
-            }
-            if (i % 2 == 0) {
-                aPaymentFixture()
-                        .withMandateFixture(mandateFixture)
-                        .withState(PaymentState.EXPIRED)
-                        .insert(testContext.getJdbi());
-                continue;
-            }
+        
+        List.of(1,2).forEach(i -> {
+            aPaymentFixture()
+                    .withMandateFixture(mandateFixture)
+                    .withState(PaymentState.CANCELLED)
+                    .insert(testContext.getJdbi());
             aPaymentFixture()
                     .withMandateFixture(mandateFixture)
                     .withState(PaymentState.FAILED)
                     .insert(testContext.getJdbi());
-        }
-
+        });
+        
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
                 .withState("failed")
                 .build();
 
         List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
-        assertThat(viewList.size(), is(6));
+        assertThat(viewList.size(), is(4));
     }
 }
