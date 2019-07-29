@@ -101,7 +101,7 @@ public class PaymentResourceIT {
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .withPayerFixture(payerFixture)
-                .withState(MandateState.PENDING)
+                .withState(MandateState.ACTIVE)
                 .insert(testContext.getJdbi());
         String accountExternalId = testGatewayAccount.getExternalId();
         String expectedReference = "Test reference";
@@ -169,7 +169,7 @@ public class PaymentResourceIT {
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .withPayerFixture(payerFixture)
-                .withState(MandateState.PENDING)
+                .withState(MandateState.ACTIVE)
                 .insert(testContext.getJdbi());
         String accountExternalId = testGatewayAccount.getExternalId();
         String expectedReference = "Test reference";
@@ -202,7 +202,7 @@ public class PaymentResourceIT {
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPaymentProviderId(goCardlessMandate)
                 .withPayerFixture(payerFixture)
-                .withState(MandateState.PENDING)
+                .withState(MandateState.ACTIVE)
                 .insert(testContext.getJdbi())
                 .toEntity();
         

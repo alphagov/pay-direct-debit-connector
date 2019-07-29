@@ -30,7 +30,7 @@ public class MandateUpdateServiceTest {
     
     @Test
     public void callsToUpdateStateAndReturnsUpdatedMandate_whenDetailsAndDescriptionAreEmpty() {
-        MandateState state = MandateState.PENDING;
+        MandateState state = MandateState.SUBMITTED_TO_PROVIDER;
         DirectDebitStateWithDetails<MandateState> stateWithDetails = new DirectDebitStateWithDetails<>(state);
 
         Mandate updatedMandate = mandateUpdateService.updateState(mandate, stateWithDetails);
@@ -45,7 +45,7 @@ public class MandateUpdateServiceTest {
 
     @Test
     public void callsToUpdateStateAndReturnsUpdatedMandate_withDetailsAndDescription() {
-        MandateState state = MandateState.PENDING;
+        MandateState state = MandateState.SUBMITTED_TO_PROVIDER;
         String details = "a-details";
         String description = "a-description";
         DirectDebitStateWithDetails<MandateState> stateWithDetails = new DirectDebitStateWithDetails<>(state, details, description);

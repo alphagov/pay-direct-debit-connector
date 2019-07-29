@@ -24,7 +24,8 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBM
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.FAILED;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_CANCEL_NOT_ELIGIBLE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MandateStateUpdateServiceTest {
@@ -53,7 +54,7 @@ public class MandateStateUpdateServiceTest {
     public void shouldSendEmailWhenMandateFails() {
         Mandate mandate = MandateFixture
                 .aMandateFixture()
-                .withState(PENDING)
+                .withState(FAILED)
                 .toEntity();
 
         service.mandateFailedFor(mandate);
@@ -65,7 +66,7 @@ public class MandateStateUpdateServiceTest {
     public void shouldSendEmailWhenMandateIsCancelled() {
         Mandate mandate = MandateFixture
                 .aMandateFixture()
-                .withState(PENDING)
+                .withState(USER_CANCEL_NOT_ELIGIBLE)
                 .toEntity();
 
         service.mandateCancelledFor(mandate);

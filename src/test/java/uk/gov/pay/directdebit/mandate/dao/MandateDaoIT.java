@@ -36,9 +36,9 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
-import static uk.gov.pay.directdebit.mandate.model.MandateState.PENDING;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.tokens.fixtures.TokenFixture.aTokenFixture;
 import static uk.gov.pay.directdebit.util.ZonedDateTimeTimestampMatcher.isDate;
@@ -67,7 +67,7 @@ public class MandateDaoIT {
                         .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
                         .withMandateBankStatementReference(MandateBankStatementReference.valueOf("test-reference"))
                         .withServiceReference("test-service-reference")
-                        .withState(PENDING)
+                        .withState(ACTIVE)
                         .withReturnUrl("https://www.example.com/return_url")
                         .withCreatedDate(createdDate)
                         .build());
@@ -78,7 +78,7 @@ public class MandateDaoIT {
         assertThat(mandate.get("mandate_reference"), is("test-reference"));
         assertThat(mandate.get("service_reference"), is("test-service-reference"));
         assertThat(mandate.get("return_url"), is("https://www.example.com/return_url"));
-        assertThat(mandate.get("state"), is("PENDING"));
+        assertThat(mandate.get("state"), is("ACTIVE"));
         assertThat((Timestamp) mandate.get("created_date"), isDate(createdDate));
         assertThat(mandate.get("payment_provider"), is(nullValue()));
     }
@@ -390,13 +390,13 @@ public class MandateDaoIT {
                 .withPaymentProviderId(GoCardlessMandateId.valueOf("Mandate ID we want"))
                 .insert(testContext.getJdbi());
 
-        int numOfUpdatedMandates = mandateDao.updateStateAndDetails(mandateFixture.getId(), PENDING,
+        int numOfUpdatedMandates = mandateDao.updateStateAndDetails(mandateFixture.getId(), SUBMITTED_TO_PROVIDER,
                 "state details","state details description");
 
         assertThat(numOfUpdatedMandates, is(1));
 
         Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
-        assertThat(mandate.getState(), is(PENDING));
+        assertThat(mandate.getState(), is(SUBMITTED_TO_PROVIDER));
         assertThat(mandate.getStateDetails(), is(Optional.of("state details")));
         assertThat(mandate.getStateDetailsDescription(), is(Optional.of("state details description")));
     }
@@ -416,13 +416,13 @@ public class MandateDaoIT {
                 .withStateDetailsDescription("state details description before update")
                 .insert(testContext.getJdbi());
 
-        int numOfUpdatedMandates = mandateDao.updateStateAndDetails(mandateFixture.getId(), PENDING,
+        int numOfUpdatedMandates = mandateDao.updateStateAndDetails(mandateFixture.getId(), SUBMITTED_TO_PROVIDER,
                 null, null);
 
         assertThat(numOfUpdatedMandates, is(1));
 
         Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
-        assertThat(mandate.getState(), is(PENDING));
+        assertThat(mandate.getState(), is(SUBMITTED_TO_PROVIDER));
         assertThat(mandate.getStateDetails(), is(Optional.empty()));
         assertThat(mandate.getStateDetails(), is(Optional.empty()));
     }
@@ -457,14 +457,14 @@ public class MandateDaoIT {
 
         int numOfUpdatedMandates = mandateDao.updateStateAndDetails(
                 mandateFixture.getId(),
-                PENDING,
+                SUBMITTED_TO_PROVIDER,
                 "state details",
                 "state details description");
 
         assertThat(numOfUpdatedMandates, is(1));
 
         Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
-        assertThat(mandate.getState(), is(PENDING));
+        assertThat(mandate.getState(), is(SUBMITTED_TO_PROVIDER));
         assertThat(mandate.getStateDetails(), is(Optional.of("state details")));
         assertThat(mandate.getStateDetailsDescription(), is(Optional.of("state details description")));
     }
@@ -485,12 +485,12 @@ public class MandateDaoIT {
                 .insert(testContext.getJdbi());
 
         int numOfUpdatedMandates = mandateDao.updateStateAndDetails(
-                mandateFixture.getId(), PENDING, null, null);
+                mandateFixture.getId(), SUBMITTED_TO_PROVIDER, null, null);
 
         assertThat(numOfUpdatedMandates, is(1));
 
         Mandate mandate = mandateDao.findByExternalId(MandateExternalId.valueOf("Mandate we want")).get();
-        assertThat(mandate.getState(), is(PENDING));
+        assertThat(mandate.getState(), is(SUBMITTED_TO_PROVIDER));
         assertThat(mandate.getStateDetails(), is(Optional.empty()));
         assertThat(mandate.getStateDetailsDescription(), is(Optional.empty()));
     }
@@ -525,7 +525,7 @@ public class MandateDaoIT {
     @Test
     public void shouldNotFindMandateInWrongState() {
         MandateFixture.aMandateFixture()
-                .withState(PENDING)
+                .withState(SUBMITTED_TO_PROVIDER)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
                 .insert(testContext.getJdbi());
