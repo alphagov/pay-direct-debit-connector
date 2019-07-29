@@ -5,11 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoMandateIdException;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.events.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
-import uk.gov.pay.directdebit.payments.services.PaymentService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
 import javax.inject.Inject;
@@ -17,18 +15,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class GoCardlessMandateHandler extends GoCardlessHandler {
+public class GoCardlessMandateHandler implements GoCardlessActionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessMandateHandler.class);
     private final MandateQueryService mandateQueryService;
     private final UserNotificationService userNotificationService;
 
     @Inject
-    public GoCardlessMandateHandler(PaymentService paymentService,
-                                    GoCardlessEventService goCardlessService,
-                                    MandateQueryService mandateQueryService,
+    public GoCardlessMandateHandler(MandateQueryService mandateQueryService,
                                     UserNotificationService userNotificationService) {
-        super(paymentService, goCardlessService);
         this.mandateQueryService = mandateQueryService;
         this.userNotificationService = userNotificationService;
     }
@@ -60,7 +55,7 @@ public class GoCardlessMandateHandler extends GoCardlessHandler {
     }
 
     @Override
-    protected void process(GoCardlessEvent event) {
+    public void handle(GoCardlessEvent event) {
         Optional.ofNullable(GoCardlessMandateAction.fromString(event.getAction()))
                 .map(action -> getHandledActions().get(action))
                 .ifPresent((handledAction -> {

@@ -71,8 +71,4 @@ public class PaymentService {
         userNotificationService.sendPaymentConfirmedEmailFor(submittedPayment);
         return govUkPayEventService.storeEventAndUpdateStateForPayment(submittedPayment, PAYMENT_SUBMITTED);
     }
-
-    public void paymentFailedWithEmailFor(Payment payment) {
-        userNotificationService.sendPaymentFailedEmailFor(payment);
-    }
 }
