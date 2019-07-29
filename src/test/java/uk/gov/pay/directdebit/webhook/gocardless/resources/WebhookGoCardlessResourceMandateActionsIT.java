@@ -78,7 +78,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
         postWebhook("gocardless-webhook-mandate-submitted.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandate.get("state"), is("SUBMITTED_TO_BANK"));
+        assertThat(mandate.get("state"), is(MandateState.SUBMITTED_TO_BANK.toString()));
         assertThat(mandate.get("state_details"), is("mandate_submitted"));
         assertThat(mandate.get("state_details_description"), is("The mandate has been submitted to the banks."));
     }
@@ -135,11 +135,11 @@ public class WebhookGoCardlessResourceMandateActionsIT {
 
     @Test
     @Ignore
-    public void expiredChangesStateToFailed() {
+    public void expiredChangesStateToExpired() {
         postWebhook("gocardless-webhook-mandate-expired.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandate.get("state"), is(MandateState.USER_SETUP_EXPIRED.toString()));
+        assertThat(mandate.get("state"), is(MandateState.EXPIRED.toString()));
         assertThat(mandate.get("state_details"), is("mandate_expired"));
         assertThat(mandate.get("state_details_description"), is("The mandate is being marked as expired, because no payments have been collected " +
                 "against it for the dormancy period of your service user number. If you have access to the mandate reinstation API endpoint, you can use " +
