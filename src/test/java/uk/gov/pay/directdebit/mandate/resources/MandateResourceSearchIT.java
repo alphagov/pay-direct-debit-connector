@@ -81,7 +81,7 @@ public class MandateResourceSearchIT {
                 .withServiceReference("expectedReference")
                 .withExternalId(MandateExternalId.valueOf("expectedExternalId"))
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf("bankRef"))
-                .withState(MandateState.PENDING)
+                .withState(MandateState.SUBMITTED_TO_PROVIDER)
                 .withStateDetails("state_details")
                 .withCreatedDate(ZonedDateTime.now().minusDays(2))
                 .insert(testContext.getJdbi())
@@ -93,7 +93,7 @@ public class MandateResourceSearchIT {
                 .withName("expectedName")
                 .insert(testContext.getJdbi());
 
-        var notMatchingMandate = MandateFixture.aMandateFixture()
+        MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withServiceReference("should not match")
                 .insert(testContext.getJdbi());

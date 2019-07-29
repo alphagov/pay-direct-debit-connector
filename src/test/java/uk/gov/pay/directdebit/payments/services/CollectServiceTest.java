@@ -40,7 +40,7 @@ public class CollectServiceTest {
 
     private GatewayAccount gatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().withExternalId(GATEWAY_ACCOUNT_EXTERNAL_ID).toEntity();
 
-    private Mandate mandate = MandateFixture.aMandateFixture().withExternalId(MANDATE_EXTERNAL_ID).withState(MandateState.PENDING).toEntity();
+    private Mandate mandate = MandateFixture.aMandateFixture().withExternalId(MANDATE_EXTERNAL_ID).withState(MandateState.SUBMITTED_TO_PROVIDER).toEntity();
 
     private CollectPaymentRequest collectPaymentRequest = new CollectPaymentRequest(MANDATE_EXTERNAL_ID, AMOUNT, DESCRIPTION, REFERENCE);
 

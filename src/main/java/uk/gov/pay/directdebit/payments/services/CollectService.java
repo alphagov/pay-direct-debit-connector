@@ -9,6 +9,12 @@ import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.model.Payment;
 
 import javax.inject.Inject;
+import java.util.List;
+
+import static java.lang.String.format;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.ACTIVE;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_BANK;
+import static uk.gov.pay.directdebit.mandate.model.MandateState.SUBMITTED_TO_PROVIDER;
 
 public class CollectService {
 
@@ -25,10 +31,8 @@ public class CollectService {
         Mandate mandate = mandateQueryService.findByExternalIdAndGatewayAccountExternalId(collectPaymentRequest.getMandateExternalId(),
                 gatewayAccount.getExternalId());
 
-        if (!(mandate.getState().equals(MandateState.SUBMITTED_TO_PROVIDER) || mandate.getState().equals(MandateState.PENDING) ||
-                mandate.getState().equals(MandateState.ACTIVE))) {
-            throw new MandateStateInvalidException("Mandate state invalid for Mandate with id: " +
-                    mandate.getExternalId());
+        if (!List.of(SUBMITTED_TO_PROVIDER, ACTIVE).contains(mandate.getState())) {
+            throw new MandateStateInvalidException(format("Mandate state invalid for Mandate with id: %s", mandate.getExternalId()));
         }
 
         Payment payment = paymentService.createPayment(collectPaymentRequest.getAmount(), collectPaymentRequest.getDescription(),

@@ -12,7 +12,6 @@ public enum MandateState implements DirectDebitState {
     USER_CANCEL_NOT_ELIGIBLE(ExternalMandateState.CANCELLED),
     SUBMITTED_TO_PROVIDER(ExternalMandateState.PENDING),
     SUBMITTED_TO_BANK(ExternalMandateState.PENDING),
-    PENDING(ExternalMandateState.PENDING),
     ACTIVE(ExternalMandateState.ACTIVE),
     FAILED(INACTIVE),
     EXPIRED(INACTIVE),

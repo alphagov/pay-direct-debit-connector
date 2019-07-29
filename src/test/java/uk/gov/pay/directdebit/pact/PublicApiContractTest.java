@@ -31,7 +31,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFi
 
 @RunWith(PactRunner.class)
 @Provider("direct-debit-connector")
-@PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test", "staging", "production"},
+@PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"master", "test", "staging", "production"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
         consumers = {"publicapi"})
 //uncommenting the below is useful for testing pacts locally. grab the pact from the broker and put it in /pacts
@@ -68,7 +68,7 @@ public class PublicApiContractTest {
         testMandate.withGatewayAccountFixture(testGatewayAccount)
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
                 .withPayerFixture(PayerFixture.aPayerFixture())
-                .withState(MandateState.PENDING)
+                .withState(MandateState.SUBMITTED_TO_PROVIDER)
                 .insert(app.getTestContext().getJdbi());
     }
 
@@ -80,7 +80,7 @@ public class PublicApiContractTest {
                 .withPayerFixture(PayerFixture.aPayerFixture())
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(params.get("bank_mandate_reference")))
                 .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
-                .withState(MandateState.PENDING)
+                .withState(MandateState.SUBMITTED_TO_PROVIDER)
                 .withStateDetails("mandate_state_details")
                 .insert(app.getTestContext().getJdbi());
     }
@@ -109,7 +109,7 @@ public class PublicApiContractTest {
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
                 .withPayerFixture(PayerFixture.aPayerFixture())
                 .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
-                .withState(MandateState.PENDING)
+                .withState(MandateState.SUBMITTED_TO_PROVIDER)
                 .insert(app.getTestContext().getJdbi());
         aPaymentFixture()
                 .withMandateFixture(testMandate)

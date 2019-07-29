@@ -43,7 +43,7 @@ public class MandateSearchDaoIT {
             .withGatewayAccountFixture(gatewayAccountFixture)
             .withServiceReference("REF1234")
             .withPayerFixture(joeBloggs)
-            .withState(MandateState.PENDING)
+            .withState(MandateState.SUBMITTED_TO_BANK)
             .withCreatedDate(now());
     private MandateFixture mandate2 = aMandateFixture()
             .withGatewayAccountFixture(gatewayAccountFixture)
@@ -187,7 +187,7 @@ public class MandateSearchDaoIT {
 
     @Test
     public void searchByExternalState() {
-        var mandateWithWrongState = aMandateFixture()
+        aMandateFixture()
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withId(999L)
                 .withState(MandateState.USER_SETUP_EXPIRED)
