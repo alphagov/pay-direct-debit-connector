@@ -13,7 +13,7 @@ public class CollectPaymentRequestValidator extends ApiValidation {
     private final static String REFERENCE_KEY = "reference";
     private final static String MANDATE_ID_KEY = "mandate_id";
 
-    private final static int MIN_AMOUNT_IN_PENCE = 1;
+    private final static int MIN_AMOUNT_IN_PENCE = 100;
     private final static int MAX_AMOUNT_IN_PENCE = 5000_00;
 
     private final static Map<String, Function<String, Boolean>> validators =
