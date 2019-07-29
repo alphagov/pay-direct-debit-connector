@@ -32,6 +32,7 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEvent.ResourceType.PAY
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
@@ -151,7 +152,7 @@ public class GovUkPayEventServiceTest {
 
     @Test
     public void insertPaymentEvent_insertedForValidInitialEvent() {
-        GovUkPayEventType eventType = PAYMENT_SUBMITTED;
+        GovUkPayEventType eventType = PAYMENT_CREATED;
 
         when(mockGovUkPayEventDao.findLatestEventForPayment(paymentId)).thenReturn(Optional.empty());
         when(mockGovUkPayEventStateGraph.isValidStartValue(eventType)).thenReturn(true);
