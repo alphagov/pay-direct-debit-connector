@@ -6,11 +6,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
 import uk.gov.pay.directdebit.app.config.LinksConfig;
 import uk.gov.pay.directdebit.common.exception.UnlinkedGCMerchantAccountException;
+import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
@@ -26,6 +28,7 @@ import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
+import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
@@ -51,10 +54,15 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
+import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.AWAITING_DIRECT_DEBIT_DETAILS;
 import static uk.gov.pay.directdebit.mandate.model.MandateState.CREATED;
@@ -64,51 +72,72 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 public class MandateServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    @Mock
-    private MandateDao mandateDao;
-    @Mock
-    private GatewayAccountDao gatewayAccountDao;
-    @Mock
-    private TokenService tokenService;
-    @Mock
-    private PaymentService paymentService;
-    @Mock
-    private MandateStateUpdateService mandateStateUpdateService;
-    @Mock
-    private DirectDebitConfig directDebitConfig;
-    @Mock
-    private LinksConfig linksConfig;
-    @Mock
-    private UriInfo uriInfo;
-    @Mock
-    private UriBuilder uriBuilder;
-    @Mock
-    private PaymentProviderFactory paymentProviderFactory;
-    @Mock
-    private SandboxService sandboxService;
 
+    @Mock
+    private MandateDao mockMandateDao;
+
+    @Mock
+    private GatewayAccountDao mockGatewayAccountDao;
+
+    @Mock
+    private TokenService mockTokenService;
+
+    @Mock
+    private PaymentService mockPaymentService;
+
+    @Mock
+    private GovUkPayEventService mockGovUkPayEventService;
+
+    @Mock
+    private UserNotificationService mockUserNotificationService;
+
+    @Mock
+    private DirectDebitConfig mockDirectDebitConfig;
+
+    @Mock
+    private LinksConfig mockLinksConfig;
+
+    @Mock
+    private UriInfo mockUriInfo;
+
+    @Mock
+    private UriBuilder mockUriBuilder;
+
+    @Mock
+    private PaymentProviderFactory mockPaymentProviderFactory;
+
+    @Mock
+    private SandboxService mockSandboxService;
+    
     private MandateService service;
 
     @Before
     public void setUp() throws URISyntaxException {
-        when(directDebitConfig.getLinks()).thenReturn(linksConfig);
-        service = new MandateService(directDebitConfig, mandateDao, gatewayAccountDao, tokenService,
-                paymentService,
-                mandateStateUpdateService, paymentProviderFactory);
-        when(uriInfo.getBaseUriBuilder()).thenReturn(uriBuilder);
-        when(uriBuilder.path(anyString())).thenReturn(uriBuilder);
-        when(uriBuilder.build(any())).thenReturn(new URI("aaa"));
-        when(linksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
+        when(mockDirectDebitConfig.getLinks()).thenReturn(mockLinksConfig);
+
+        service = new MandateService(mockDirectDebitConfig,
+                mockMandateDao,
+                mockGatewayAccountDao,
+                mockTokenService,
+                mockPaymentService,
+                mockPaymentProviderFactory,
+                mockUserNotificationService,
+                mockGovUkPayEventService);
+
+        when(mockUriInfo.getBaseUriBuilder()).thenReturn(mockUriBuilder);
+        when(mockUriBuilder.path(anyString())).thenReturn(mockUriBuilder);
+        when(mockUriBuilder.build(any())).thenReturn(new URI("aaa"));
+        when(mockLinksConfig.getFrontendUrl()).thenReturn("https://frontend.test");
     }
 
     @Test
     public void nextUrlAndNextUrlPostShouldOnlyBePresentWhenMandateStateIsCreated() {
         Arrays.stream(MandateState.values()).forEach(state -> {
-            Mandate mandate = MandateFixture.aMandateFixture().withState(state).toEntity();
-            when(mandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
-            when(tokenService.generateNewTokenFor(mandate)).thenReturn(new Token("token", mandate.getId()));
+            Mandate mandate = aMandateFixture().withState(state).toEntity();
+            when(mockMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
+            when(mockTokenService.generateNewTokenFor(mandate)).thenReturn(new Token("token", mandate.getId()));
             MandateResponse mandateResponse = service.populateGetMandateResponse(
-                    mandate.getGatewayAccount().getExternalId(), mandate.getExternalId(), uriInfo);
+                    mandate.getGatewayAccount().getExternalId(), mandate.getExternalId(), mockUriInfo);
 
             if (state == CREATED) {
                 assertThat(mandateResponse.getLink("next_url").isPresent(), is(true));
@@ -124,22 +153,25 @@ public class MandateServiceTest {
     @Test
     public void findMandateForToken_shouldUpdateTransactionStateAndRegisterEventWhenExchangingTokens() {
         String token = "token";
-        Mandate mandate = MandateFixture.aMandateFixture().withState(CREATED).toEntity();
-        when(mandateDao.findByTokenId(token))
+        Mandate mandate = aMandateFixture().withState(CREATED).toEntity();
+        when(mockMandateDao.findByTokenId(token))
                 .thenReturn(Optional.of(mandate));
-        when(mandateStateUpdateService.tokenExchangedFor(mandate)).thenReturn(mandate);
+
+        Mandate tokenExchangedMandate = aMandateFixture().withState(AWAITING_DIRECT_DEBIT_DETAILS).toEntity();
+        when(mockGovUkPayEventService.storeEventAndUpdateStateForMandate(mandate, MANDATE_TOKEN_EXCHANGED))
+                .thenReturn(tokenExchangedMandate);
+
         TokenExchangeDetails tokenExchangeDetails = service.getMandateFor(token);
-        assertThat(tokenExchangeDetails.getMandate(), is(mandate));
+        assertThat(tokenExchangeDetails.getMandate(), is(tokenExchangedMandate));
     }
 
     @Test
     public void shouldPopulateGetMandateResponseForFrontend() {
-        Mandate mandate = MandateFixture
-                .aMandateFixture()
+        Mandate mandate = aMandateFixture()
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .toEntity();
-        when(mandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
-        MandateResponse getMandateResponse = service.populateGetMandateResponse(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId(), uriInfo);
+        when(mockMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
+        MandateResponse getMandateResponse = service.populateGetMandateResponse(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId(), mockUriInfo);
         assertThat(getMandateResponse.getReturnUrl(), is(mandate.getReturnUrl()));
         assertThat(getMandateResponse.getMandateId(), is(mandate.getExternalId()));
         assertThat(getMandateResponse.getState().getMandateState(), is(mandate.getState().toExternal()));
@@ -147,11 +179,10 @@ public class MandateServiceTest {
 
     @Test
     public void shouldPopulateGetMandateResponse() {
-        Mandate mandate = MandateFixture
-                .aMandateFixture()
+        Mandate mandate = aMandateFixture()
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .toEntity();
-        when(mandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
+        when(mockMandateDao.findByExternalId(mandate.getExternalId())).thenReturn(Optional.of(mandate));
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId());
         assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference().get()));
         assertThat(mandateResponseForFrontend.getReturnUrl(), is(mandate.getReturnUrl()));
@@ -161,8 +192,7 @@ public class MandateServiceTest {
     @Test
     public void shouldPopulateGetMandateResponseForFrontend_whenThereIsATransaction() {
         PayerFixture payerFixture = PayerFixture.aPayerFixture();
-        MandateFixture mandateFixture = MandateFixture
-                .aMandateFixture()
+        MandateFixture mandateFixture = aMandateFixture()
                 .withPayerFixture(payerFixture)
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS);
         PaymentFixture paymentFixture = PaymentFixture
@@ -170,7 +200,7 @@ public class MandateServiceTest {
                 .withMandateFixture(mandateFixture)
                 .withStateDetails("state details");
         Mandate mandate = mandateFixture.toEntity();
-        when(paymentService.findPaymentForExternalId(mandateFixture.getExternalId().toString())).thenReturn(paymentFixture.toEntity());
+        when(mockPaymentService.findPaymentForExternalId(mandateFixture.getExternalId().toString())).thenReturn(paymentFixture.toEntity());
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateWithPaymentResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId().toString());
         assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference().get()));
         assertThat(mandateResponseForFrontend.getGatewayAccountExternalId(), is(mandate.getGatewayAccount().getExternalId()));
@@ -214,18 +244,20 @@ public class MandateServiceTest {
                 SandboxMandateId.valueOf(mandate.getExternalId().toString()),
                 MandateBankStatementReference.valueOf(RandomStringUtils.randomAlphanumeric(5)));
 
-        when(paymentProviderFactory.getCommandServiceFor(SANDBOX)).thenReturn(sandboxService);
-        when(sandboxService.confirmMandate(mandate, bankAccountDetails)).thenReturn(confirmMandateResponse);
+        when(mockPaymentProviderFactory.getCommandServiceFor(SANDBOX)).thenReturn(mockSandboxService);
+        when(mockSandboxService.confirmMandate(mandate, bankAccountDetails)).thenReturn(confirmMandateResponse);
 
         service.confirm(gatewayAccount, mandate, mandateConfirmationRequest);
 
-        var expectedMandateWithStateDetailsConfirmed = fromMandate(mandate)
+        var expectedUpdatedMandate = fromMandate(mandate)
                 .withState(CREATED)
                 .withPaymentProviderId(confirmMandateResponse.getPaymentProviderMandateId())
                 .withMandateBankStatementReference(confirmMandateResponse.getMandateBankStatementReference())
                 .build();
 
-        verify(mandateStateUpdateService).confirmedDirectDebitDetailsFor(expectedMandateWithStateDetailsConfirmed);
+        verify(mockUserNotificationService).sendMandateCreatedEmailFor(expectedUpdatedMandate);
+        verify(mockMandateDao).updateReferenceAndPaymentProviderId(expectedUpdatedMandate);
+        verify(mockGovUkPayEventService).storeEventAndUpdateStateForMandate(expectedUpdatedMandate, MANDATE_SUBMITTED_TO_PROVIDER);
     }
 
     @Test
@@ -240,7 +272,7 @@ public class MandateServiceTest {
                 .withType(GatewayAccount.Type.TEST)
                 .withAccessToken(null)
                 .toEntity();
-        when(gatewayAccountDao.findByExternalId(gatewayAccount.getExternalId())).thenReturn(Optional.of(gatewayAccount));
+        when(mockGatewayAccountDao.findByExternalId(gatewayAccount.getExternalId())).thenReturn(Optional.of(gatewayAccount));
         service.createMandate(null, gatewayAccount.getExternalId());
     }
 
@@ -251,13 +283,20 @@ public class MandateServiceTest {
     }
 
     private Mandate getMandateForProvider(GatewayAccount gatewayAccount) {
-        when(gatewayAccountDao.findByExternalId(anyString())).thenReturn(Optional.of(gatewayAccount));
-        when(mandateDao.insert(any(Mandate.class))).thenReturn(1L);
+        when(mockGatewayAccountDao.findByExternalId(anyString())).thenReturn(Optional.of(gatewayAccount));
+        when(mockMandateDao.insert(any(Mandate.class))).thenReturn(1L);
+
+        when(mockGovUkPayEventService.storeEventAndUpdateStateForMandate(any(Mandate.class), eq(MANDATE_CREATED)))
+                .then(invocationOnMock -> {
+                    Mandate insertedMandate = invocationOnMock.getArgument(0, Mandate.class);
+                    return fromMandate(insertedMandate).withState(CREATED).build();
+                });
 
         var createMandateRequest = new CreateMandateRequest("https://example.com/return", "some-service-reference");
         Mandate mandate = service.createMandate(createMandateRequest, gatewayAccount.getExternalId());
 
-        verify(mandateStateUpdateService).mandateCreatedFor(mandate);
+        assertThat(mandate.getState(), is(CREATED));
+
         return mandate;
     }
 

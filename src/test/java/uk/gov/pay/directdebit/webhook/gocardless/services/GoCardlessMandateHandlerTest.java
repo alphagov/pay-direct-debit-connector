@@ -12,7 +12,7 @@ import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
-import uk.gov.pay.directdebit.mandate.services.MandateStateUpdateService;
+import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
@@ -27,26 +27,26 @@ public class GoCardlessMandateHandlerTest {
 
     @Mock
     private MandateQueryService mockMandateQueryService;
-    
+
     @Mock
-    private MandateStateUpdateService mockMandateStateUpdateService;
-    
+    private UserNotificationService userNotificationService;
+
     @InjectMocks
     private GoCardlessMandateHandler goCardlessMandateHandler;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    
+
     private PayerFixture payerFixture = PayerFixture.aPayerFixture();
     private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_organisation");
 
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
             .withOrganisation(organisationIdentifier);
-    
+
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture()
             .withGatewayAccountFixture(gatewayAccountFixture)
             .withPayerFixture(payerFixture);
-    
+
     private GoCardlessEventFixture goCardlessEventFixture = GoCardlessEventFixture.aGoCardlessEventFixture()
             .withLinksOrganisation(organisationIdentifier);
 
@@ -60,7 +60,7 @@ public class GoCardlessMandateHandlerTest {
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(mockMandateStateUpdateService).mandateFailedFor(mandateFixture.toEntity());
+        verify(userNotificationService).sendMandateFailedEmailFor(mandateFixture.toEntity());
     }
 
     @Test
@@ -73,9 +73,9 @@ public class GoCardlessMandateHandlerTest {
 
         goCardlessMandateHandler.handle(goCardlessEvent);
 
-        verify(mockMandateStateUpdateService).mandateCancelledFor(mandateFixture.toEntity());
+        verify(userNotificationService).sendMandateCancelledEmailFor(mandateFixture.toEntity());
     }
-    
+
     @Test
     public void handle_onCreateMandateGoCardlessEvent_shouldThrowExceptionWhenEventHasNoLinkedMandate() {
         GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture
