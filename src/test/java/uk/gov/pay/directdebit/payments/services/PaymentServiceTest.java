@@ -14,7 +14,6 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
-import uk.gov.pay.directdebit.payments.exception.ChargeNotFoundException;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
@@ -25,7 +24,6 @@ import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,29 +61,6 @@ public class PaymentServiceTest {
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).withPayerFixture(payerFixture);
     private PaymentFixture paymentFixture = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture);
-
-    @Test
-    public void findByTransactionExternalIdAndAccountId_shouldFindATransaction() {
-        when(mockedPaymentDao.findByExternalId(paymentFixture.getExternalId()))
-                .thenReturn(Optional.of(paymentFixture.toEntity()));
-        Payment foundPayment = service.findPaymentForExternalId(paymentFixture.getExternalId());
-        assertThat(foundPayment.getId(), is(notNullValue()));
-        assertThat(foundPayment.getExternalId(), is(paymentFixture.getExternalId()));
-        assertThat(foundPayment.getMandate(), is(mandateFixture.toEntity()));
-        assertThat(foundPayment.getState(), is(paymentFixture.getState()));
-        assertThat(foundPayment.getAmount(), is(paymentFixture.getAmount()));
-        assertThat(foundPayment.getDescription(), is(paymentFixture.getDescription()));
-        assertThat(foundPayment.getReference(), is(paymentFixture.getReference()));
-        assertThat(foundPayment.getCreatedDate(), is(paymentFixture.getCreatedDate()));
-    }
-
-    @Test
-    public void findChargeForExternalIdAndGatewayAccountId_shouldThrow_ifNoTransactionExistsWithExternalId() {
-        thrown.expect(ChargeNotFoundException.class);
-        thrown.expectMessage("No charges found for payment id: not-existing");
-        thrown.reportMissingExceptionWithMessage("ChargeNotFoundException expected");
-        service.findPaymentForExternalId("not-existing");
-    }
 
     @Test
     public void shouldCreateAPaymentResponseFromAValidTransaction() {

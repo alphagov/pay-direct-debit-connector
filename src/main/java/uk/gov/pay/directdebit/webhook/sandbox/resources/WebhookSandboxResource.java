@@ -8,7 +8,7 @@ import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
-import uk.gov.pay.directdebit.payments.services.PaymentService;
+import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.WebhookSandboxService;
 
 import javax.inject.Inject;
@@ -23,13 +23,13 @@ import static javax.ws.rs.core.Response.Status.OK;
 @Path("/v1/webhooks/sandbox")
 public class WebhookSandboxResource {
 
-    private final PaymentService paymentService;
+    private final PaymentQueryService paymentQueryService;
     private final SandboxEventService sandboxEventService;
     private final WebhookSandboxService webhookSandboxService;
 
     @Inject
-    public WebhookSandboxResource(PaymentService paymentService, SandboxEventService sandboxEventService, WebhookSandboxService webhookSandboxService) {
-        this.paymentService = paymentService;
+    public WebhookSandboxResource(PaymentQueryService paymentQueryService, SandboxEventService sandboxEventService, WebhookSandboxService webhookSandboxService) {
+        this.paymentQueryService = paymentQueryService;
         this.sandboxEventService = sandboxEventService;
         this.webhookSandboxService = webhookSandboxService;
     }
@@ -45,7 +45,7 @@ public class WebhookSandboxResource {
     @POST
     @Timed
     public Response handleWebhook() {
-        paymentService.findAllByPaymentStateAndProvider(PaymentState.SUBMITTED_TO_PROVIDER, PaymentProvider.SANDBOX)
+        paymentQueryService.findAllByPaymentStateAndProvider(PaymentState.SUBMITTED_TO_PROVIDER, PaymentProvider.SANDBOX)
                 .forEach(this::processPayment);
         return Response.status(OK).build();
     }
@@ -56,7 +56,7 @@ public class WebhookSandboxResource {
         webhookSandboxService.updateStateOfPaymentsAffectedByEvents(List.of(event));
     }
 
-    private SandboxEvent createSandboxEventFromPayment(Payment payment){
+    private SandboxEvent createSandboxEventFromPayment(Payment payment) {
         return SandboxEvent.SandboxEventBuilder.aSandboxEvent()
                 .withPaymentId(SandboxPaymentId.valueOf(payment.getExternalId()))
                 .withEventAction(SandboxEventAction.PAID_OUT.toString())

@@ -27,7 +27,7 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
-import uk.gov.pay.directdebit.payments.services.PaymentService;
+import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.tokens.exception.TokenNotFoundException;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -62,28 +62,28 @@ public class MandateService {
     private final LinksConfig linksConfig;
     private final GatewayAccountDao gatewayAccountDao;
     private final TokenService tokenService;
-    private final PaymentService paymentService;
     private final PaymentProviderFactory paymentProviderFactory;
     private final UserNotificationService userNotificationService;
     private final GovUkPayEventService govUkPayEventService;
+    private final PaymentQueryService paymentQueryService;
 
     @Inject
     public MandateService(DirectDebitConfig directDebitConfig,
                           MandateDao mandateDao,
                           GatewayAccountDao gatewayAccountDao,
                           TokenService tokenService,
-                          PaymentService paymentService,
                           PaymentProviderFactory paymentProviderFactory,
                           UserNotificationService userNotificationService,
-                          GovUkPayEventService govUkPayEventService) {
+                          GovUkPayEventService govUkPayEventService,
+                          PaymentQueryService paymentQueryService) {
         this.gatewayAccountDao = gatewayAccountDao;
         this.tokenService = tokenService;
-        this.paymentService = paymentService;
         this.mandateDao = mandateDao;
         this.linksConfig = directDebitConfig.getLinks();
         this.paymentProviderFactory = paymentProviderFactory;
         this.userNotificationService = userNotificationService;
         this.govUkPayEventService = govUkPayEventService;
+        this.paymentQueryService = paymentQueryService;
     }
 
     public Mandate createMandate(CreateMandateRequest createRequest, String accountExternalId) {
@@ -133,7 +133,7 @@ public class MandateService {
     }
 
     public DirectDebitInfoFrontendResponse populateGetMandateWithPaymentResponseForFrontend(String accountExternalId, String paymentExternalId) {
-        Payment payment = paymentService.findPaymentForExternalId(paymentExternalId);
+        Payment payment = paymentQueryService.findPaymentForExternalId(paymentExternalId);
         Mandate mandate = payment.getMandate();
         return new DirectDebitInfoFrontendResponse(mandate, accountExternalId, payment);
     }

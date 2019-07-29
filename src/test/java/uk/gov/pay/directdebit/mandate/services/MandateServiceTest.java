@@ -6,7 +6,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
@@ -34,7 +33,7 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
-import uk.gov.pay.directdebit.payments.services.PaymentService;
+import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.SandboxService;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
@@ -83,7 +82,7 @@ public class MandateServiceTest {
     private TokenService mockTokenService;
 
     @Mock
-    private PaymentService mockPaymentService;
+    private PaymentQueryService mockPaymentQueryService;
 
     @Mock
     private GovUkPayEventService mockGovUkPayEventService;
@@ -108,21 +107,22 @@ public class MandateServiceTest {
 
     @Mock
     private SandboxService mockSandboxService;
-    
+
     private MandateService service;
 
     @Before
     public void setUp() throws URISyntaxException {
         when(mockDirectDebitConfig.getLinks()).thenReturn(mockLinksConfig);
 
-        service = new MandateService(mockDirectDebitConfig,
+        service = new MandateService(
+                mockDirectDebitConfig,
                 mockMandateDao,
                 mockGatewayAccountDao,
                 mockTokenService,
-                mockPaymentService,
                 mockPaymentProviderFactory,
                 mockUserNotificationService,
-                mockGovUkPayEventService);
+                mockGovUkPayEventService,
+                mockPaymentQueryService);
 
         when(mockUriInfo.getBaseUriBuilder()).thenReturn(mockUriBuilder);
         when(mockUriBuilder.path(anyString())).thenReturn(mockUriBuilder);
@@ -200,7 +200,7 @@ public class MandateServiceTest {
                 .withMandateFixture(mandateFixture)
                 .withStateDetails("state details");
         Mandate mandate = mandateFixture.toEntity();
-        when(mockPaymentService.findPaymentForExternalId(mandateFixture.getExternalId().toString())).thenReturn(paymentFixture.toEntity());
+        when(mockPaymentQueryService.findPaymentForExternalId(mandateFixture.getExternalId().toString())).thenReturn(paymentFixture.toEntity());
         DirectDebitInfoFrontendResponse mandateResponseForFrontend = service.populateGetMandateWithPaymentResponseForFrontend(mandate.getGatewayAccount().getExternalId(), mandate.getExternalId().toString());
         assertThat(mandateResponseForFrontend.getMandateReference(), is(mandate.getMandateBankStatementReference().get()));
         assertThat(mandateResponseForFrontend.getGatewayAccountExternalId(), is(mandate.getGatewayAccount().getExternalId()));

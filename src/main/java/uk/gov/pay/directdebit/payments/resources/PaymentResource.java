@@ -4,13 +4,12 @@ import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.mandate.exception.MandateStateInvalidException;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequest;
 import uk.gov.pay.directdebit.payments.api.CollectPaymentRequestValidator;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.CollectService;
-import uk.gov.pay.directdebit.payments.services.PaymentService;
+import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -30,14 +29,14 @@ public class PaymentResource {
     public static final String CHARGE_API_PATH = "/v1/api/accounts/{accountId}/charges/{paymentExternalId}"; // TODO rename to /payments instead of /charges
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentResource.class);
-    
-    private final PaymentService paymentService;
+
+    private final PaymentQueryService paymentQueryService;
     private final CollectService collectService;
     private final CollectPaymentRequestValidator collectPaymentRequestValidator = new CollectPaymentRequestValidator();
 
     @Inject
-    public PaymentResource(PaymentService paymentService, CollectService collectService) {
-        this.paymentService = paymentService;
+    public PaymentResource(PaymentQueryService paymentQueryService, CollectService collectService) {
+        this.paymentQueryService = paymentQueryService;
         this.collectService = collectService;
     }
 
@@ -46,7 +45,7 @@ public class PaymentResource {
     @Produces(APPLICATION_JSON)
     @Timed
     public Response getCharge(@PathParam("paymentExternalId") String transactionExternalId) {
-        PaymentResponse response = paymentService.getPaymentWithExternalId(transactionExternalId);
+        PaymentResponse response = paymentQueryService.getPaymentWithExternalId(transactionExternalId);
         return Response.ok(response).build();
     }
 
