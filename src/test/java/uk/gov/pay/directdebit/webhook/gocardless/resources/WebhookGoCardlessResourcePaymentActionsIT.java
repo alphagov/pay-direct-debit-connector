@@ -83,7 +83,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
         postWebhook("gocardless-webhook-payment-customer-approval-denied.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        assertThat(payment.get("state"), is("CUSTOMER_APPROVAL_DENIED"));
+        assertThat(payment.get("state"), is(PaymentState.CUSTOMER_APPROVAL_DENIED.toString()));
         assertThat(payment.get("state_details"), is("customer_approval_denied"));
         assertThat(payment.get("state_details_description"), is("The customer denied approval for this payment"));
     }
@@ -94,7 +94,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
         postWebhook("gocardless-webhook-payment-submitted.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        assertThat(payment.get("state"), is("SUBMITTED_TO_BANK"));
+        assertThat(payment.get("state"), is(PaymentState.SUBMITTED_TO_BANK.toString()));
         assertThat(payment.get("state_details"), is("payment_submitted"));
         assertThat(payment.get("state_details_description"), is("Payment submitted to the banks. As a result, it can no longer be cancelled."));
     }
@@ -105,7 +105,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
         postWebhook("gocardless-webhook-payment-confirmed.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        assertThat(payment.get("state"), is("COLLECTED_BY_PROVIDER"));
+        assertThat(payment.get("state"), is(PaymentState.COLLECTED_BY_PROVIDER.toString()));
         assertThat(payment.get("state_details"), is("payment_confirmed"));
         assertThat(payment.get("state_details_description"), is("Enough time has passed since the payment was submitted for the banks to return an " +
                 "error, so this payment is now confirmed."));
@@ -117,7 +117,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
         postWebhook("gocardless-webhook-payment-cancelled.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        assertThat(payment.get("state"), is("USER_SETUP_CANCELLED"));
+        assertThat(payment.get("state"), is(PaymentState.CANCELLED.toString()));
         assertThat(payment.get("state_details"), is("mandate_cancelled"));
         assertThat(payment.get("state_details_description"), is("The mandate for this payment was cancelled at a bank branch."));
     }
@@ -142,7 +142,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
         postWebhook("gocardless-webhook-payment-charged-back.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        assertThat(payment.get("state"), is("INDEMNITY_CLAIM"));
+        assertThat(payment.get("state"), is(PaymentState.INDEMNITY_CLAIM.toString()));
         assertThat(payment.get("state_details"), is("authorisation_disputed"));
         assertThat(payment.get("state_details_description"), is("The customer has disputed that the amount taken differs from the amount they were " +
                 "notified of."));
@@ -154,18 +154,28 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
         postWebhook("gocardless-webhook-payment-chargeback-cancelled.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        assertThat(payment.get("state"), is("PAID_OUT"));
+        assertThat(payment.get("state"), is(PaymentState.PAID_OUT.toString()));
         assertThat(payment.get("state_details"), is("payment_confirmed"));
         assertThat(payment.get("state_details_description"), is("The chargeback for this payment was reversed"));
     }
 
     @Test
     @Ignore
+    public void lateFailureSettledChangesStateToFailed() {
+        postWebhook("gocardless-webhook-payment-late-failure-settled.json");
+
+        Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
+        assertThat(payment.get("state"), is(PaymentState.FAILED.toString()));
+        assertThat(payment.get("state_details"), is("late_failure_settled"));
+        assertThat(payment.get("state_details_description"), is("This late failed payment has been settled against a payout."));
+    }
+
+    @Test
     public void paidOutChangesStateToPaidOut() {
         postWebhook("gocardless-webhook-payment-paid-out.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        assertThat(payment.get("state"), is("PAID_OUT"));
+        assertThat(payment.get("state"), is(PaymentState.PAID_OUT.toString()));
         assertThat(payment.get("state_details"), is("payment_paid_out"));
         assertThat(payment.get("state_details_description"), is("The payment has been paid out by GoCardless."));
     }
@@ -176,7 +186,7 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
         postWebhook("gocardless-webhook-payment-chargeback-settled.json");
 
         Map<String, Object> payment = testContext.getDatabaseTestHelper().getPaymentById(paymentFixture.getId());
-        assertThat(payment.get("state"), is("INDEMNITY_CLAIM"));
+        assertThat(payment.get("state"), is(PaymentState.INDEMNITY_CLAIM.toString()));
         assertThat(payment.get("state_details"), is("chargeback_settled"));
         assertThat(payment.get("state_details_description"), is("This charged back payment has been settled against a payout."));
     }
