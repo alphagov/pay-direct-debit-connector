@@ -20,7 +20,8 @@ class GoCardlessEventToMandateStateMapper {
             "submitted", SUBMITTED_TO_PROVIDER,
             "active", ACTIVE,
             "cancelled", USER_SETUP_CANCELLED,
-            "failed", FAILED
+            "failed", FAILED,
+            "reinstated", ACTIVE
     );
 
     static final Set<String> GOCARDLESS_ACTIONS_THAT_CHANGE_MANDATE_STATE = GOCARDLESS_ACTION_TO_MANDATE_STATE.keySet();

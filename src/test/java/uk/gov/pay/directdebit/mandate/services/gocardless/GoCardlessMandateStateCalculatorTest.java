@@ -82,7 +82,8 @@ public class GoCardlessMandateStateCalculatorTest {
             "submitted, SUBMITTED_TO_PROVIDER",
             "active, ACTIVE",
             "cancelled, USER_SETUP_CANCELLED",
-            "failed, FAILED"
+            "failed, FAILED",
+            "reinstated, ACTIVE"
     })
     public void goCardlessEventActionMapsToState(String action, String expectedState) {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction(action).toEntity();
