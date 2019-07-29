@@ -5,6 +5,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 import uk.gov.pay.directdebit.app.config.AdminUsersConfig;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,7 @@ import uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 public class AdminUsersClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminUsersClient.class);
-    
+
     private final Client client;
     private final AdminUsersConfig config;
 
@@ -34,13 +35,22 @@ public class AdminUsersClient {
         String email = mandate.getPayer().orElseThrow(() -> new PayerNotFoundException(mandate.getExternalId())).getEmail();
         var emailPayloadRequest = new EmailPayloadRequest(email, gatewayAccountExternalId, template, personalisation);
         try {
-             Response response = client.target(config.getAdminUsersUrl())
+            Response response = client.target(config.getAdminUsersUrl())
                     .path("/v1/emails/send")
                     .request()
                     .post(Entity.entity(emailPayloadRequest, MediaType.APPLICATION_JSON_TYPE));
-            response.readEntity(String.class);
+            if (response.getStatus() != 200) {
+                LOGGER.error("Sending email failed with status {} and response {}", response.getStatus(),
+                        response.readEntity(String.class));
+            } else {
+                response.close();
+            }
         } catch (Exception exc) {
-            LOGGER.error("Making call to adminusers failed with exception {}", exc.getMessage());
+            LOGGER.error("Failed to send {} email for mandate id {} for gateway account id {}",
+                    template.toString(),
+                    mandate.getExternalId(),
+                    gatewayAccountExternalId,
+                    exc);
         }
     }
 }
