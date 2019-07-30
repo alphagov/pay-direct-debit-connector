@@ -80,8 +80,9 @@ public class GoCardlessMandateStateCalculatorTest {
     @Parameters({
             "submitted, SUBMITTED_TO_BANK",
             "active, ACTIVE",
-            "cancelled, CANCELLED",
             "failed, FAILED",
+            "cancelled, CANCELLED",
+            "expired, EXPIRED",
             "reinstated, ACTIVE"
     })
     public void goCardlessEventActionMapsToState(String action, String expectedState) {

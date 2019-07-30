@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,7 +77,6 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     }
 
     @Test
-    @Ignore
     public void customerApprovalDeniedChangesStateToCustomerApprovalDenied() {
         postWebhook("gocardless-webhook-payment-customer-approval-denied.json");
 
@@ -89,7 +87,6 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     }
 
     @Test
-    @Ignore
     public void submittedChangesStateToSubmittedToBank() {
         postWebhook("gocardless-webhook-payment-submitted.json");
 
@@ -100,7 +97,6 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     }
 
     @Test
-    @Ignore
     public void confirmedChangesStateToCollectedByProvider() {
         postWebhook("gocardless-webhook-payment-confirmed.json");
 
@@ -112,7 +108,6 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     }
 
     @Test
-    @Ignore
     public void cancelledChangesStateToCancelled() {
         postWebhook("gocardless-webhook-payment-cancelled.json");
 
@@ -137,7 +132,6 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     }
 
     @Test
-    @Ignore
     public void chargedBackChangesStateToIndemnityClaim() {
         postWebhook("gocardless-webhook-payment-charged-back.json");
 
@@ -149,7 +143,6 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     }
 
     @Test
-    @Ignore
     public void chargebackCancelledChangesStateToPaidOut() {
         postWebhook("gocardless-webhook-payment-chargeback-cancelled.json");
 
@@ -160,7 +153,6 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     }
 
     @Test
-    @Ignore
     public void lateFailureSettledChangesStateToFailed() {
         postWebhook("gocardless-webhook-payment-late-failure-settled.json");
 
@@ -181,7 +173,6 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
     }
 
     @Test
-    @Ignore
     public void chargebackSettledChangesStateToIndemnityClaim() {
         postWebhook("gocardless-webhook-payment-chargeback-settled.json");
 
