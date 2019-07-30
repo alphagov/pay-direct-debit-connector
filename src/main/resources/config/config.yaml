@@ -77,10 +77,10 @@ jerseyClient:
   # Defines the socket timeout (SO_TIMEOUT), which is the
   # timeout for waiting for data or, put differently, a maximum period inactivity
   # between two consecutive data packets).
-  timeout: 2000ms
+  timeout: 5000ms
 
   # Determines the timeout until a connection is established
-  connectionTimeout: 2000ms
+  connectionTimeout: 5000ms
 
   timeToLive: 1h
   cookiesEnabled: false
@@ -90,12 +90,3 @@ jerseyClient:
   retries: 0
   userAgent: directdebit-connector
   gzipEnabledForRequests: false
-
-customJerseyClient:
-  # Sets the read timeout to a specified timeout, in
-  # milliseconds. A non-zero value specifies the timeout when
-  # reading from Input stream when a connection is established to a
-  # resource. If the timeout expires before there is data available
-  # for read, a java.net.SocketTimeoutException is raised. A
-  # timeout of zero is interpreted as an infinite timeout.
-  readTimeout: 9000ms
