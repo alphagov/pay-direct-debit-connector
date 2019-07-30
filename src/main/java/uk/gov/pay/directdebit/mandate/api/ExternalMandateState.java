@@ -13,7 +13,9 @@ public enum ExternalMandateState {
     SUBMITTED("submitted", false),
     ACTIVE("active", true),
     INACTIVE("inactive", true),
-    CANCELLED("cancelled", true);
+    CANCELLED("cancelled", true),
+    FAILED("failed", true),
+    ABANDONED("abandoned", true);
 
     private final String value;
     private final boolean finished;

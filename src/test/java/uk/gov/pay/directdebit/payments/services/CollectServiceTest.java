@@ -76,10 +76,10 @@ public class CollectServiceTest {
     @Test(expected = MandateStateInvalidException.class)
     @Parameters({
             "CREATED", 
-            "AWAITING_DIRECT_DEBIT_DETAILS", 
-            "USER_CANCEL_NOT_ELIGIBLE", 
+            "AWAITING_DIRECT_DEBIT_DETAILS",
             "FAILED", 
             "EXPIRED", 
+            "CANCELLED",
             "USER_SETUP_CANCELLED", 
             "USER_SETUP_EXPIRED"})
     public void collectPaymentFailureForInvalidMandateStates(String mandateState) {
