@@ -16,7 +16,6 @@ import static uk.gov.pay.directdebit.mandate.model.MandateState.USER_SETUP_CANCE
 
 class GoCardlessEventToMandateStateMapper {
     private static final Map<String, MandateState> GOCARDLESS_ACTION_TO_MANDATE_STATE = Map.of(
-            "created", CREATED,
             "submitted", SUBMITTED_TO_PROVIDER,
             "active", ACTIVE,
             "cancelled", USER_SETUP_CANCELLED,
