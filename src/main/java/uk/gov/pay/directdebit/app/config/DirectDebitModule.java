@@ -55,7 +55,7 @@ public class DirectDebitModule extends AbstractModule {
     public GoCardlessAppConnectClient provideGoCardlessConnectClient(ClientFactory clientFactory) {
         return new GoCardlessAppConnectClient(
                 configuration.getGoCardlessAppConnectConfig(),
-                clientFactory.createWithDropwizardClient("gocardless-appconnect-client"));
+                clientFactory.createWithDropwizardClient("gocardless"));
     }
 
     @Provides
@@ -63,7 +63,7 @@ public class DirectDebitModule extends AbstractModule {
     public AdminUsersClient provideAdminusersClient(ClientFactory clientFactory) {
         return new AdminUsersClient(
                 configuration.getAdminUsersConfig(),
-                clientFactory.createWithDropwizardClient("adminusers-client"));
+                clientFactory.createWithDropwizardClient("adminusers"));
     }
 
     @Provides

@@ -32,9 +32,6 @@ public class DirectDebitConfig extends Configuration {
     @NotNull
     @JsonProperty("jerseyClient")
     private JerseyClientConfiguration jerseyClientConfig;
-
-    @NotNull
-    private CustomJerseyClientConfiguration customJerseyClient;
     
     @NotNull
     private GoCardlessAppConnectConfig goCardlessAppConnectConfig;
@@ -68,9 +65,5 @@ public class DirectDebitConfig extends Configuration {
 
     public JerseyClientConfiguration getClientConfiguration() {
         return jerseyClientConfig;
-    }
-
-    public CustomJerseyClientConfiguration getCustomJerseyClient() {
-        return customJerseyClient;
     }
 }

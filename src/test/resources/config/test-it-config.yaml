@@ -35,8 +35,8 @@ goCardlessConnect:
   goCardlessConnectUrlLive: https://connect-sandbox.gocardless.com
 
 jerseyClient:
-  timeout: 500ms
-  connectionTimeout: 500ms
+  timeout: 5000ms
+  connectionTimeout: 5000ms
   timeToLive: 1h
   cookiesEnabled: false
   maxConnections: 1024
@@ -45,9 +45,6 @@ jerseyClient:
   retries: 0
   userAgent: connector
   gzipEnabledForRequests: false
-
-customJerseyClient:
-  readTimeout: 9000ms
 
 database:
   driverClass: org.postgresql.Driver
