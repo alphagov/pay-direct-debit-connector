@@ -4,8 +4,6 @@ import org.exparity.hamcrest.date.LocalDateMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
@@ -15,7 +13,6 @@ import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.SortCode;
-import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
@@ -28,25 +25,20 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SandboxServiceTest {
-    
+
     private SandboxService service;
 
     private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture();
     private MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture);
 
-    @Mock
-    protected PaymentDao paymentDao;
-
     @Before
     public void setUp() {
-        service = new SandboxService(paymentDao);
+        service = new SandboxService();
     }
 
     @Test
@@ -72,8 +64,6 @@ public class SandboxServiceTest {
 
         assertThat(providerPaymentIdAndChargeDate.getChargeDate(), is(LocalDateMatchers
                 .within(1, ChronoUnit.DAYS, LocalDate.now().plusDays(4))));
-        
-        verify(paymentDao).updateProviderIdAndChargeDate(any(Payment.class));
     }
 
     @Test

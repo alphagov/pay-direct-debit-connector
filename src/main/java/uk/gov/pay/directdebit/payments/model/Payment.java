@@ -110,6 +110,22 @@ public class Payment {
                 chargeDate);
     }
 
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "id=" + id +
+                ", externalId='" + externalId + '\'' +
+                ", amount=" + amount +
+                ", state=" + state +
+                ", stateDetails='" + stateDetails + '\'' +
+                ", stateDetailsDescription='" + stateDetailsDescription + '\'' +
+                ", reference='" + reference + '\'' +
+                ", providerId=" + providerId +
+                ", createdDate=" + createdDate +
+                ", mandate=" + mandate +
+                ", chargeDate=" + chargeDate +
+                '}';
+    }
 
     public static final class PaymentBuilder {
         private Long id;

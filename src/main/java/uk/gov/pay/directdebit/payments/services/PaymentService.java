@@ -70,16 +70,19 @@ public class PaymentService {
     }
 
     Payment submitPaymentToProvider(Payment payment) {
-        var providerPaymentIdAndChargeDate = paymentProviderFactory
+        var providerIdAndChargeDate = paymentProviderFactory
                 .getCommandServiceFor(payment.getMandate().getGatewayAccount().getPaymentProvider())
                 .collect(payment.getMandate(), payment);
 
         Payment submittedPayment = fromPayment(payment)
-                .withProviderId(providerPaymentIdAndChargeDate.getPaymentProviderPaymentId())
-                .withChargeDate(providerPaymentIdAndChargeDate.getChargeDate())
+                .withProviderId(providerIdAndChargeDate.getPaymentProviderPaymentId())
+                .withChargeDate(providerIdAndChargeDate.getChargeDate())
                 .build();
 
-        return paymentSubmittedToProviderFor(submittedPayment);
+        paymentDao.updateProviderIdAndChargeDate(submittedPayment);
+
+        userNotificationService.sendPaymentConfirmedEmailFor(submittedPayment);
+        return govUkPayEventService.storeEventAndUpdateStateForPayment(submittedPayment, PAYMENT_SUBMITTED);
     }
 
     public PaymentResponse getPaymentWithExternalId(String paymentExternalId) {

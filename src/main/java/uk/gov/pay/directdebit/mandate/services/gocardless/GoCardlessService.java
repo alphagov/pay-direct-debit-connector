@@ -8,6 +8,7 @@ import uk.gov.pay.directdebit.common.clients.GoCardlessClientFacade;
 import uk.gov.pay.directdebit.common.clients.GoCardlessClientFactory;
 import uk.gov.pay.directdebit.common.exception.InternalServerErrorException;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
+import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
@@ -18,7 +19,6 @@ import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payers.model.GoCardlessBankAccountLookup;
 import uk.gov.pay.directdebit.payers.model.GoCardlessCustomer;
 import uk.gov.pay.directdebit.payers.model.Payer;
-import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
@@ -27,7 +27,6 @@ import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotConfirmed;
 import uk.gov.pay.directdebit.payments.model.DirectDebitPaymentProviderCommandService;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
-import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -38,16 +37,13 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
 
     private final GoCardlessClientFactory goCardlessClientFactory;
     private final GoCardlessCustomerDao goCardlessCustomerDao;
-    private final PaymentDao paymentDao;
 
     @Inject
     public GoCardlessService(
             GoCardlessClientFactory goCardlessClientFactory,
-            GoCardlessCustomerDao goCardlessCustomerDao,
-            PaymentDao paymentDao) {
+            GoCardlessCustomerDao goCardlessCustomerDao) {
         this.goCardlessClientFactory = goCardlessClientFactory;
         this.goCardlessCustomerDao = goCardlessCustomerDao;
-        this.paymentDao = paymentDao;
     }
 
     @Override
@@ -68,16 +64,9 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
         LOGGER.info("Collecting payment for GoCardless, mandate with id: {}, payment with id: {}", mandate.getExternalId(), payment.getExternalId());
         var goCardlessMandateId = mandate.getPaymentProviderMandateId()
                 .map(a -> (GoCardlessMandateId) a)
-                .orElseThrow( () -> new GoCardlessMandateNotConfirmed("mandate id", mandate.getExternalId().toString()));
+                .orElseThrow(() -> new GoCardlessMandateNotConfirmed("mandate id", mandate.getExternalId().toString()));
 
-        PaymentProviderPaymentIdAndChargeDate providerIdAndChargeDate = createPayment(payment, goCardlessMandateId);
-        Payment updatePayment = Payment.PaymentBuilder.fromPayment(payment)
-                .withProviderId(providerIdAndChargeDate.getPaymentProviderPaymentId())
-                .withChargeDate(providerIdAndChargeDate.getChargeDate())
-                .build();
-
-        paymentDao.updateProviderIdAndChargeDate(updatePayment);
-        return providerIdAndChargeDate;
+        return createPayment(payment, goCardlessMandateId);
     }
 
     @Override
