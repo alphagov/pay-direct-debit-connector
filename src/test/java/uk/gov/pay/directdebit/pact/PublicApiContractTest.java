@@ -15,9 +15,9 @@ import org.junit.runner.RunWith;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -79,7 +79,7 @@ public class PublicApiContractTest {
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
                 .withPayerFixture(PayerFixture.aPayerFixture())
                 .withMandateBankStatementReference(MandateBankStatementReference.valueOf(params.get("bank_mandate_reference")))
-                .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
+                .withPaymentProviderId(SandboxMandateId.valueOf(params.get("unique_identifier")))
                 .withState(MandateState.SUBMITTED_TO_PROVIDER)
                 .withStateDetails("mandate_state_details")
                 .insert(app.getTestContext().getJdbi());
@@ -92,7 +92,7 @@ public class PublicApiContractTest {
                 .insert(app.getTestContext().getJdbi());
         MandateFixture testMandate = MandateFixture.aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
-                .withPaymentProviderId(GoCardlessMandateId.valueOf("MD1"))
+                .withPaymentProviderId(SandboxMandateId.valueOf("MD1"))
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")));
         testMandate.insert(app.getTestContext().getJdbi());
         PayerFixture testPayer = PayerFixture.aPayerFixture().withMandateId(testMandate.getId());
@@ -108,7 +108,7 @@ public class PublicApiContractTest {
         testMandate.withGatewayAccountFixture(testGatewayAccount)
                 .withExternalId(MandateExternalId.valueOf(params.get("mandate_id")))
                 .withPayerFixture(PayerFixture.aPayerFixture())
-                .withPaymentProviderId(GoCardlessMandateId.valueOf(params.get("unique_identifier")))
+                .withPaymentProviderId(SandboxMandateId.valueOf(params.get("unique_identifier")))
                 .withState(MandateState.SUBMITTED_TO_PROVIDER)
                 .insert(app.getTestContext().getJdbi());
         aPaymentFixture()

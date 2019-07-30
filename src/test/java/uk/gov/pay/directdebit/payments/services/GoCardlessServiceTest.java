@@ -36,7 +36,6 @@ import uk.gov.pay.directdebit.payers.model.SortCode;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
 import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
-import uk.gov.pay.directdebit.payments.exception.GoCardlessMandateNotConfirmed;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
@@ -256,29 +255,13 @@ public class GoCardlessServiceTest {
         GoCardlessMandateId goCardlessMandateId = GoCardlessMandateId.valueOf("aGoCardlessMandateId");
         LocalDate chargeDateFromGoCardless = LocalDate.of(1969, JULY, 16);
 
-        Mandate mandate = mandateFixture
-                .withPaymentProviderId(goCardlessMandateId)
-                .toEntity();
-
         when(mockedGoCardlessClientFacade.createPayment(payment, goCardlessMandateId))
                 .thenReturn(new PaymentProviderPaymentIdAndChargeDate(goCardlessPaymentId, chargeDateFromGoCardless));
 
-        PaymentProviderPaymentIdAndChargeDate collectResponse = service.collect(mandate, payment);
+        PaymentProviderPaymentIdAndChargeDate collectResponse = service.collect(payment, goCardlessMandateId);
 
         assertThat(collectResponse.getChargeDate(), is(chargeDateFromGoCardless));
         assertThat(collectResponse.getPaymentProviderPaymentId(), is(goCardlessPaymentId));
     }
 
-    @Test
-    public void collect_shouldThrowIfTryingToCollectFromAnUnconfirmedMandate() {
-        Mandate mandate = mandateFixture
-                .withPaymentProviderId(null)
-                .toEntity();
-
-        thrown.expect(GoCardlessMandateNotConfirmed.class);
-        thrown.expectMessage(format("Mandate with mandate id: %s has not been confirmed with GoCardless", MANDATE_ID));
-        thrown.reportMissingExceptionWithMessage("GoCardlessMandateNotConfirmed expected");
-
-        service.collect(mandate, payment);
-    }
 }

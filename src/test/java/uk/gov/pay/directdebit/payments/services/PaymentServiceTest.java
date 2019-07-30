@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
@@ -24,8 +25,6 @@ import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,6 +39,9 @@ import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PR
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaymentServiceTest {
+
+    private static final SandboxMandateId SANDBOX_MANDATE_ID = SandboxMandateId.valueOf("sandbox-mandate-id");
+    
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -109,7 +111,7 @@ public class PaymentServiceTest {
 
     @Test
     public void submitPaymentToProvider_shouldSubmitAndRegisterPaymentSubmittedEvent() {
-        Mandate mandate = mandateFixture.toEntity();
+        Mandate mandate = mandateFixture.withPaymentProviderId(SANDBOX_MANDATE_ID).toEntity();
 
         Payment payment = PaymentFixture
                 .aPaymentFixture()
@@ -129,7 +131,7 @@ public class PaymentServiceTest {
                 .build();
 
         when(mockedPaymentProviderFactory.getCommandServiceFor(mandate.getGatewayAccount().getPaymentProvider())).thenReturn(mockedSandboxService);
-        when(mockedSandboxService.collect(mandate, payment)).thenReturn(new PaymentProviderPaymentIdAndChargeDate(sandboxPaymentId, chargeDate));
+        when(mockedSandboxService.collect(payment, SANDBOX_MANDATE_ID)).thenReturn(new PaymentProviderPaymentIdAndChargeDate(sandboxPaymentId, chargeDate));
 
         when(mockedGovUkPayEventService.storeEventAndUpdateStateForPayment(paymentWithProviderIdAndChargeDate, PAYMENT_SUBMITTED))
                 .thenAnswer(invocationOnMock -> {
@@ -137,7 +139,7 @@ public class PaymentServiceTest {
                     return Payment.PaymentBuilder.fromPayment(paymentToUpdate).withState(SUBMITTED_TO_PROVIDER).build();
                 });
 
-        Payment returnedPayment = service.submitPaymentToProvider(payment);
+        Payment returnedPayment = service.submitPaymentToProvider(payment, SANDBOX_MANDATE_ID);
 
         verify(mockedPaymentDao).updateProviderIdAndChargeDate(paymentWithProviderIdAndChargeDate);
         verify(mockedUserNotificationService).sendPaymentConfirmedEmailFor(paymentWithProviderIdAndChargeDate);
