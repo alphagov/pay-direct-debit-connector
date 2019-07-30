@@ -91,7 +91,8 @@ public class GoCardlessPaymentStateCalculatorTest {
             "confirmed, COLLECTED_BY_PROVIDER",
             "cancelled, CANCELLED",
             "charged_back, INDEMNITY_CLAIM",
-            "chargeback_cancelled, PAID_OUT"
+            "chargeback_cancelled, PAID_OUT",
+            "late_failure_settled, FAILED"
     })
     public void goCardlessEventActionMapsToState(String action, String expectedState) {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction(action).toEntity();

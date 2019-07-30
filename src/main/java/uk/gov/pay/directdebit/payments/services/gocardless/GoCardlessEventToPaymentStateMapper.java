@@ -25,7 +25,8 @@ public class GoCardlessEventToPaymentStateMapper {
             "confirmed", COLLECTED_BY_PROVIDER,
             "cancelled", CANCELLED,
             "charged_back", INDEMNITY_CLAIM,
-            "chargeback_cancelled", PAID_OUT
+            "chargeback_cancelled", PAID_OUT,
+            "late_failure_settled", FAILED
     );
 
     static final Set<String> GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE = GOCARDLESS_ACTION_TO_PAYMENT_STATE.keySet();
