@@ -31,7 +31,7 @@ public class CollectService {
         Mandate mandate = mandateQueryService.findByExternalIdAndGatewayAccountExternalId(collectPaymentRequest.getMandateExternalId(),
                 gatewayAccount.getExternalId());
 
-        if (!List.of(SUBMITTED_TO_PROVIDER, ACTIVE).contains(mandate.getState())) {
+        if (!List.of(SUBMITTED_TO_PROVIDER, ACTIVE, SUBMITTED_TO_BANK).contains(mandate.getState())) {
             throw new MandateStateInvalidException(format("Mandate state invalid for Mandate with id: %s", mandate.getExternalId()));
         }
 
