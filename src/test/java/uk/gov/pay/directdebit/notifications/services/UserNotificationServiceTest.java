@@ -76,7 +76,7 @@ public class UserNotificationServiceTest {
         SunName sunName = SunName.of("test sun Name");
         when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
         HashMap<String, String> emailPersonalisation = new HashMap<>();
-        emailPersonalisation.put("mandate reference", mandate.getMandateBankStatementReference().toString());
+        emailPersonalisation.put("mandate reference", mandate.getMandateBankStatementReference().get().toString());
         emailPersonalisation.put("bank account last 2 digits", mandate.getPayer().get().getAccountNumberLastTwoDigits());
         emailPersonalisation.put("statement name", sunName.toString());
         emailPersonalisation.put("dd guarantee link", "https://frontend.url.test/direct-debit-guarantee");
@@ -114,7 +114,7 @@ public class UserNotificationServiceTest {
         when(mockSunService.getSunNameFor(mandate)).thenReturn(Optional.of(sunName));
         HashMap<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("amount", "123.45");
-        emailPersonalisation.put("mandate reference", mandate.getMandateBankStatementReference().toString());
+        emailPersonalisation.put("mandate reference", mandate.getMandateBankStatementReference().get().toString());
         emailPersonalisation.put("collection date", payment.getChargeDate().get()
                 .format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.UK)));
         emailPersonalisation.put("bank account last 2 digits", payerFixture.getAccountNumberLastTwoDigits());

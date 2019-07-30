@@ -60,7 +60,7 @@ public class UserNotificationService {
             return;
         }
 
-        var personalisation = Map.of(MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString(),
+        var personalisation = Map.of(MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().get().toString(),
                 BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().orElseThrow(
                         () -> new PayerNotFoundException(mandate.getExternalId())).getAccountNumberLastTwoDigits(),
                 STATEMENT_NAME_KEY, sunName.get().toString(),
@@ -94,7 +94,7 @@ public class UserNotificationService {
 
         var personalisation = Map.of(AMOUNT_KEY, formatToPounds(payment.getAmount()),
                 COLLECTION_DATE_KEY, DATE_TIME_FORMATTER.format(chargeDate),
-                MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().toString(),
+                MANDATE_REFERENCE_KEY, mandate.getMandateBankStatementReference().get().toString(),
                 BANK_ACCOUNT_LAST_DIGITS_KEY, mandate.getPayer().orElseThrow(
                         () -> new PayerNotFoundException(mandate.getExternalId())).getAccountNumberLastTwoDigits(),
                 STATEMENT_NAME_KEY, sunName.get().toString(),
