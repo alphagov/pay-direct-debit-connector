@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static uk.gov.pay.directdebit.payments.model.PaymentState.COLLECTED_BY_PROVIDER;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CUSTOMER_APPROVAL_DENIED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
@@ -18,7 +19,8 @@ public class GoCardlessEventToPaymentStateMapper {
             "submitted", SUBMITTED_TO_BANK,
             "failed", FAILED,
             "paid_out", PAID_OUT,
-            "customer_approval_denied", CUSTOMER_APPROVAL_DENIED
+            "customer_approval_denied", CUSTOMER_APPROVAL_DENIED,
+            "confirmed", COLLECTED_BY_PROVIDER
     );
 
     static final Set<String> GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE = GOCARDLESS_ACTION_TO_PAYMENT_STATE.keySet();

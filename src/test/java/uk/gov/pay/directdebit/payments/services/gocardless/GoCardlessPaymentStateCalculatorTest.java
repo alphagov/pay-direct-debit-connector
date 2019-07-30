@@ -87,7 +87,8 @@ public class GoCardlessPaymentStateCalculatorTest {
             "submitted, SUBMITTED_TO_BANK",
             "failed, FAILED",
             "paid_out, PAID_OUT",
-            "customer_approval_denied, CUSTOMER_APPROVAL_DENIED"
+            "customer_approval_denied, CUSTOMER_APPROVAL_DENIED",
+            "confirmed, COLLECTED_BY_PROVIDER"
     })
     public void goCardlessEventActionMapsToState(String action, String expectedState) {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction(action).toEntity();
