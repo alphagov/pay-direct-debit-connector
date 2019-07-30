@@ -8,9 +8,10 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 
-public class GovUkPayEventStateGraphTest {
+public class GovUkPayEventStateGraphForMandatesTest {
 
     private GovUkPayEventStateGraph govUkPayEventStateGraph;
 
@@ -40,12 +41,6 @@ public class GovUkPayEventStateGraphTest {
     @Test 
     public void isValidStartState_shouldReturnTrueForMandateInitialState() {
         boolean validStartValue = govUkPayEventStateGraph.isValidStartValue(MANDATE_CREATED);
-        assertThat(validStartValue, is(true));
-    }
-
-    @Test 
-    public void isValidStartState_shouldReturnTrueForPaymentInitialState() {
-        boolean validStartValue = govUkPayEventStateGraph.isValidStartValue(PAYMENT_SUBMITTED);
         assertThat(validStartValue, is(true));
     }
 

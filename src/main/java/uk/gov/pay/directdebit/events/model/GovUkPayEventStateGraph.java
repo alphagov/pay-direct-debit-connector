@@ -10,6 +10,7 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREA
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 
 public class GovUkPayEventStateGraph {
@@ -30,7 +31,8 @@ public class GovUkPayEventStateGraph {
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE);
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_USER_SETUP_EXPIRED);
         
-        graph.addNode(PAYMENT_SUBMITTED);
+        graph.addNode(PAYMENT_CREATED);
+        graph.putEdge(PAYMENT_CREATED, PAYMENT_SUBMITTED);
 
         return ImmutableGraph.copyOf(graph);
     }

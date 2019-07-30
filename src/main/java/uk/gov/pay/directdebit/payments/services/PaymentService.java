@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.aPayment;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
@@ -53,7 +54,7 @@ public class PaymentService {
 
         Payment insertedPayment = fromPayment(payment).withId(id).build();
         LOGGER.info("Created payment with external id {}", insertedPayment.getExternalId());
-        return insertedPayment;
+        return govUkPayEventService.storeEventAndUpdateStateForPayment(insertedPayment, PAYMENT_CREATED);
     }
 
     Payment submitPaymentToProvider(Payment payment) {

@@ -24,11 +24,15 @@ import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
@@ -85,6 +89,9 @@ public class PaymentServiceTest {
     public void createShouldCreatePayment() {
         Mandate mandate = mandateFixture.toEntity();
 
+        when(mockedGovUkPayEventService.storeEventAndUpdateStateForPayment(any(Payment.class), eq(PAYMENT_CREATED)))
+                .thenAnswer(i -> i.getArguments()[0]);
+        
         Payment returnedPayment = service.createPayment(123456L, "a description", "a reference", mandate);
 
         verify(mockedPaymentDao).insert(any(Payment.class));
@@ -96,7 +103,8 @@ public class PaymentServiceTest {
         assertThat(returnedPayment.getReference(), is("a reference"));
         assertThat(returnedPayment.getProviderId(), is(Optional.empty()));
         assertThat(returnedPayment.getChargeDate(), is(Optional.empty()));
-
+        
+        verify(mockedGovUkPayEventService).storeEventAndUpdateStateForPayment(returnedPayment, PAYMENT_CREATED);
     }
 
     @Test
