@@ -83,6 +83,7 @@ public class GoCardlessPaymentStateCalculatorTest {
 
     @Test
     @Parameters({
+            "submitted, SUBMITTED_TO_BANK",
             "failed, FAILED",
             "paid_out, PAID_OUT"
     })
