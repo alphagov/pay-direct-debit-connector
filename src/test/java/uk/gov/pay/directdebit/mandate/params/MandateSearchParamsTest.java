@@ -9,6 +9,7 @@ import java.time.LocalDate;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_CREATED;
 import static uk.gov.pay.directdebit.mandate.params.MandateSearchParams.MandateSearchParamsBuilder.aMandateSearchParams;
 
 public class MandateSearchParamsTest {
@@ -22,7 +23,7 @@ public class MandateSearchParamsTest {
         String serviceReference = "aServiceReference";
         String toDate = LocalDate.now().toString();
         String fromDate = LocalDate.now().minusDays(3).toString();
-        String mandateState = ExternalMandateState.CREATED.getState();
+        String mandateState = EXTERNAL_CREATED.getState();
         MandateBankStatementReference mandateBankStatementReference = 
                 MandateBankStatementReference.valueOf("bankReference");
         
