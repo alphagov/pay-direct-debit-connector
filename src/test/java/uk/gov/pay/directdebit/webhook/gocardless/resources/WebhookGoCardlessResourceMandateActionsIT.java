@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +72,6 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     }
 
     @Test
-    @Ignore
     public void submittedChangesStateToSubmittedToBank() {
         postWebhook("gocardless-webhook-mandate-submitted.json");
 
@@ -95,7 +93,6 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     }
 
     @Test
-    @Ignore
     public void reinstatedChangesStateToActive() {
         postWebhook("gocardless-webhook-mandate-reinstated.json");
 
@@ -134,7 +131,6 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     }
 
     @Test
-    @Ignore
     public void expiredChangesStateToExpired() {
         postWebhook("gocardless-webhook-mandate-expired.json");
 
