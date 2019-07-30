@@ -80,7 +80,7 @@ public class GoCardlessMandateStateCalculatorTest {
     @Parameters({
             "submitted, SUBMITTED_TO_BANK",
             "active, ACTIVE",
-            "cancelled, USER_SETUP_CANCELLED",
+            "cancelled, CANCELLED",
             "failed, FAILED",
             "reinstated, ACTIVE"
     })

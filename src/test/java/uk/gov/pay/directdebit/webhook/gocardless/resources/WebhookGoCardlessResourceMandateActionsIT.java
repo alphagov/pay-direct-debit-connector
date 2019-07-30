@@ -112,7 +112,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
         postWebhook("gocardless-webhook-mandate-cancelled.json");
 
         Map<String, Object> mandate = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandate.get("state"), is(MandateState.USER_SETUP_CANCELLED.toString()));
+        assertThat(mandate.get("state"), is(MandateState.CANCELLED.toString()));
         assertThat(mandate.get("state_details"), is("mandate_cancelled"));
         assertThat(mandate.get("state_details_description"), is("The mandate was cancelled at a bank branch."));
 
