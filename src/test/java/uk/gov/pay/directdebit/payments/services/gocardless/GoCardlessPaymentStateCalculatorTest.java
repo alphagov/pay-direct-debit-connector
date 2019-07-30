@@ -40,6 +40,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.CUSTOMER_APPROVAL_DENIED;
 import static uk.gov.pay.directdebit.payments.services.GovUkPayEventToPaymentStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_PAYMENT_STATE;
 import static uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessEventToPaymentStateMapper.GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE;
 
@@ -83,8 +84,16 @@ public class GoCardlessPaymentStateCalculatorTest {
 
     @Test
     @Parameters({
+            "submitted, SUBMITTED_TO_BANK",
             "failed, FAILED",
-            "paid_out, PAID_OUT"
+            "paid_out, PAID_OUT",
+            "customer_approval_denied, CUSTOMER_APPROVAL_DENIED",
+            "confirmed, COLLECTED_BY_PROVIDER",
+            "cancelled, CANCELLED",
+            "charged_back, INDEMNITY_CLAIM",
+            "chargeback_cancelled, PAID_OUT",
+            "late_failure_settled, FAILED",
+            "chargeback_settled, INDEMNITY_CLAIM"
     })
     public void goCardlessEventActionMapsToState(String action, String expectedState) {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withAction(action).toEntity();

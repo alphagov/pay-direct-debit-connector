@@ -29,7 +29,6 @@ public class GoCardlessMandateStateCalculator implements MandateStateCalculator 
     private final GoCardlessEventDao goCardlessEventDao;
     private final GovUkPayEventDao govUkPayEventDao;
 
-
     @Inject
     GoCardlessMandateStateCalculator(GoCardlessEventDao goCardlessEventDao, GovUkPayEventDao govUkPayEventDao) {
         this.goCardlessEventDao = goCardlessEventDao;
