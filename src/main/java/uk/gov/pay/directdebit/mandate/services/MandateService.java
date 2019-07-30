@@ -52,6 +52,7 @@ import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKE
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_CREATED;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.aMandate;
 import static uk.gov.pay.directdebit.mandate.model.Mandate.MandateBuilder.fromMandate;
 
@@ -204,7 +205,7 @@ public class MandateService {
                 accountExternalId,
                 mandate.getExternalId().toString())));
 
-        if (mandate.getState().toExternal() == ExternalMandateState.CREATED) {
+        if (mandate.getState().toExternal() == EXTERNAL_CREATED) {
             Token token = tokenService.generateNewTokenFor(mandate);
             dataLinks.add(createLink("next_url",
                     GET,

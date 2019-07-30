@@ -3,21 +3,26 @@ package uk.gov.pay.directdebit.mandate.model;
 import uk.gov.pay.directdebit.mandate.api.ExternalMandateState;
 import uk.gov.pay.directdebit.payments.model.DirectDebitState;
 
-import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.INACTIVE;
-import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.STARTED;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_ABANDONED;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_ACTIVE;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_CANCELLED;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_CREATED;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_FAILED;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_INACTIVE;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_PENDING;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_STARTED;
 
 public enum MandateState implements DirectDebitState {
-    CREATED(ExternalMandateState.CREATED),
-    AWAITING_DIRECT_DEBIT_DETAILS(STARTED),
-    USER_CANCEL_NOT_ELIGIBLE(ExternalMandateState.CANCELLED),
-    SUBMITTED_TO_PROVIDER(ExternalMandateState.PENDING),
-    SUBMITTED_TO_BANK(ExternalMandateState.PENDING),
-    ACTIVE(ExternalMandateState.ACTIVE),
-    FAILED(INACTIVE),
-    EXPIRED(INACTIVE),
-    CANCELLED(ExternalMandateState.CANCELLED),
-    USER_SETUP_CANCELLED(INACTIVE),
-    USER_SETUP_EXPIRED(INACTIVE);
+    CREATED(EXTERNAL_CREATED),
+    AWAITING_DIRECT_DEBIT_DETAILS(EXTERNAL_STARTED),
+    SUBMITTED_TO_PROVIDER(EXTERNAL_PENDING),
+    SUBMITTED_TO_BANK(EXTERNAL_PENDING),
+    ACTIVE(EXTERNAL_ACTIVE),
+    FAILED(EXTERNAL_FAILED),
+    EXPIRED(EXTERNAL_INACTIVE),
+    CANCELLED(EXTERNAL_CANCELLED),
+    USER_SETUP_CANCELLED(EXTERNAL_ABANDONED),
+    USER_SETUP_EXPIRED(EXTERNAL_ABANDONED);
 
     private ExternalMandateState externalState;
 
