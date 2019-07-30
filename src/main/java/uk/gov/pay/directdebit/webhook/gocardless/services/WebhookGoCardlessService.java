@@ -16,7 +16,6 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessActionHandler;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
@@ -28,10 +27,16 @@ import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.partitioningBy;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.MANDATES;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYMENTS;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYOUTS;
 
 public class WebhookGoCardlessService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebhookGoCardlessService.class);
+    
+    private static final List<GoCardlessResourceType> VALID_RESOURCE_TYPES = List.of(PAYMENTS, MANDATES, PAYOUTS);
 
     private final GoCardlessEventService goCardlessService;
     private final GoCardlessPaymentHandler goCardlessPaymentHandler;
@@ -60,19 +65,46 @@ public class WebhookGoCardlessService {
 
     public void handleEvents(List<GoCardlessEvent> events) {
         events.forEach(goCardlessService::storeEvent);
+        updateStatesForEvents(events);
+        var mapOfBooleanToListOfEvents = events.stream().collect(partitioningBy(event -> shouldBeHandled(event)));
+        handleValidEvents(mapOfBooleanToListOfEvents.get(true));
+        handleInvalidEvents(mapOfBooleanToListOfEvents.get(false));
+    }
 
+    private void updateStatesForEvents(List<GoCardlessEvent> events) {
         Map<GoCardlessResourceType, List<GoCardlessEvent>> eventsGroupedByResourceType = events.stream().collect(groupingBy(GoCardlessEvent::getResourceType));
-        updateStateForMandateEvents(eventsGroupedByResourceType.getOrDefault(GoCardlessResourceType.MANDATES, Collections.emptyList()));
-        updateStateForPaymentEvents(eventsGroupedByResourceType.getOrDefault(GoCardlessResourceType.PAYMENTS, Collections.emptyList()));
+        updateStateForMandateEvents(eventsGroupedByResourceType.getOrDefault(MANDATES, Collections.emptyList()));
+        updateStateForPaymentEvents(eventsGroupedByResourceType.getOrDefault(PAYMENTS, Collections.emptyList()));
+    }
 
+    private void handleInvalidEvents(List<GoCardlessEvent> events) {
+//        LOGGER.info("unhandled resource type for event with id {} ", event.getGoCardlessEventId());
+    }
+
+    private void handleValidEvents(List<GoCardlessEvent> events) {
         events.forEach(event -> {
-            GoCardlessActionHandler handler = getHandlerFor(event.getResourceType());
             LOGGER.info("About to handle event of type: {}, action: {}, resource id: {}",
                     event.getResourceType(),
                     event.getAction(),
                     event.getResourceId());
-            handler.handle(event);
+            
+            if (event.getResourceType() == MANDATES) {
+                goCardlessMandateHandler.handle(event);
+            } else {
+                goCardlessPaymentHandler.handle(event);
+            }
         });
+    }
+
+    private static boolean shouldBeHandled(GoCardlessEvent event) {
+        if (VALID_RESOURCE_TYPES.contains(event.getResourceType())) {
+            if (event.getResourceType().equals(MANDATES)) {
+                return GoCardlessMandateHandler.GoCardlessMandateAction.fromString(event.getAction()).isPresent();
+            } else {
+                return GoCardlessPaymentHandler.GoCardlessPaymentAction.fromString(event.getAction()).isPresent();
+            }
+        }
+        return false;
     }
 
     private void updateStateForMandateEvents(List<GoCardlessEvent> eventsThatAffectMandates) {
@@ -143,21 +175,5 @@ public class WebhookGoCardlessService {
                             goCardlessOrganisationId));
                     return Optional.empty();
                 });
-    }
-
-    private void logUnknownResourceTypeForEvent(GoCardlessEvent event) {
-        LOGGER.info("unhandled resource type for event with id {} ", event.getGoCardlessEventId());
-    }
-
-    private GoCardlessActionHandler getHandlerFor(GoCardlessResourceType goCardlessResourceType) {
-        switch (goCardlessResourceType) {
-            case PAYMENTS:
-            case PAYOUTS:
-                return goCardlessPaymentHandler;
-            case MANDATES:
-                return goCardlessMandateHandler;
-            default:
-                return this::logUnknownResourceTypeForEvent;
-        }
     }
 }

@@ -22,7 +22,7 @@ import static uk.gov.pay.directdebit.events.model.GoCardlessEvent.GoCardlessEven
 public class GoCardlessEventFixture implements DbFixture<GoCardlessEventFixture, GoCardlessEvent> {
     private Long id = RandomUtils.nextLong(1, 99999);
     private GoCardlessEventId goCardlessEventId = GoCardlessEventId.valueOf(RandomIdGenerator.newId());
-    private String action = randomAlphabetic(20);
+    private String action = "active";
     private GoCardlessResourceType resourceType = GoCardlessResourceType.PAYMENTS;
     private String resourceId = randomAlphabetic(20);
     private String json = "{\"id\": \"somejson\"}";

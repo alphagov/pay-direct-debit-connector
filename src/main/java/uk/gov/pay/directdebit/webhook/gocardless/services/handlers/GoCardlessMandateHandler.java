@@ -11,6 +11,7 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.webhook.gocardless.services.GoCardlessAction;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -36,15 +37,15 @@ public class GoCardlessMandateHandler implements GoCardlessActionHandler {
     public enum GoCardlessMandateAction implements GoCardlessAction {
         CREATED, SUBMITTED, ACTIVE, FAILED, CANCELLED;
 
-        public static GoCardlessMandateAction fromString(String type) {
+        public static Optional<GoCardlessMandateAction> fromString(String type) {
             for (GoCardlessMandateAction typeEnum : values()) {
                 if (typeEnum.toString().equalsIgnoreCase(type)) {
                     LOGGER.info("Webhook from GoCardless with mandate action: {}", type);
-                    return typeEnum;
+                    return Optional.of(typeEnum);
                 }
             }
             LOGGER.error("Webhook from GoCardless with unhandled mandate action: {}", type);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -56,7 +57,7 @@ public class GoCardlessMandateHandler implements GoCardlessActionHandler {
 
     @Override
     public void handle(GoCardlessEvent event) {
-        Optional.ofNullable(GoCardlessMandateAction.fromString(event.getAction()))
+        GoCardlessMandateAction.fromString(event.getAction())
                 .map(action -> getHandledActions().get(action))
                 .ifPresent((handledAction -> {
                     Mandate mandate = mandateQueryService.findByGoCardlessMandateIdAndOrganisationId(
