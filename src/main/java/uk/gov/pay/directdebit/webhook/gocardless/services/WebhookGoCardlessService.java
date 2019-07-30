@@ -4,6 +4,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessMandateAction;
+import uk.gov.pay.directdebit.events.model.GoCardlessPaymentAction;
 import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.events.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
@@ -35,7 +37,6 @@ import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYOUTS
 public class WebhookGoCardlessService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebhookGoCardlessService.class);
-    
     private static final List<GoCardlessResourceType> VALID_RESOURCE_TYPES = List.of(PAYMENTS, MANDATES, PAYOUTS);
 
     private final GoCardlessEventService goCardlessService;
@@ -89,9 +90,9 @@ public class WebhookGoCardlessService {
                     event.getResourceId());
             
             if (event.getResourceType() == MANDATES) {
-                goCardlessMandateHandler.handle(event);
+                goCardlessMandateHandler.handle(event, GoCardlessMandateAction.fromString(event.getAction()).get());
             } else {
-                goCardlessPaymentHandler.handle(event);
+                goCardlessPaymentHandler.handle(event, GoCardlessPaymentAction.fromString(event.getAction()).get());
             }
         });
     }
@@ -99,9 +100,9 @@ public class WebhookGoCardlessService {
     private static boolean shouldBeHandled(GoCardlessEvent event) {
         if (VALID_RESOURCE_TYPES.contains(event.getResourceType())) {
             if (event.getResourceType().equals(MANDATES)) {
-                return GoCardlessMandateHandler.GoCardlessMandateAction.fromString(event.getAction()).isPresent();
+                return GoCardlessMandateAction.fromString(event.getAction()).isPresent();
             } else {
-                return GoCardlessPaymentHandler.GoCardlessPaymentAction.fromString(event.getAction()).isPresent();
+                return GoCardlessPaymentAction.fromString(event.getAction()).isPresent();
             }
         }
         return false;

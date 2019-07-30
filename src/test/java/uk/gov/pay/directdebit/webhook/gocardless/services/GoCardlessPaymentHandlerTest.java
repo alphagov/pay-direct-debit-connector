@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessPaymentAction;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
@@ -21,7 +22,6 @@ import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPay
 
 import java.util.Optional;
 
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,13 +48,13 @@ public class GoCardlessPaymentHandlerTest {
 
     @Test
     public void handle_onFailedPaymentGoCardlessEvent_shouldSendEmail() {
-        GoCardlessEvent goCardlessEvent = spy(goCardlessEventFixture.withAction("failed").toEntity());
+        GoCardlessEvent goCardlessEvent = goCardlessEventFixture.withAction("failed").toEntity();
 
         when(mockPaymentQueryService.findByGoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(),
                 goCardlessEvent.getLinksOrganisation()))
                 .thenReturn(Optional.of(payment));
 
-        goCardlessPaymentHandler.handle(goCardlessEvent);
+        goCardlessPaymentHandler.handle(goCardlessEvent, GoCardlessPaymentAction.FAILED);
 
         verify(mockUserNotificationService).sendPaymentFailedEmailFor(payment);
     }
@@ -68,7 +68,7 @@ public class GoCardlessPaymentHandlerTest {
                 .toEntity();
 
         thrown.expect(GoCardlessEventHasNoPaymentIdException.class);
-        goCardlessPaymentHandler.handle(goCardlessEvent);
+        goCardlessPaymentHandler.handle(goCardlessEvent, GoCardlessPaymentAction.CREATED);
     }
 
 }

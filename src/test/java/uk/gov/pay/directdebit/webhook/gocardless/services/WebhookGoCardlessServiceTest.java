@@ -6,6 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessMandateAction;
+import uk.gov.pay.directdebit.events.model.GoCardlessPaymentAction;
 import uk.gov.pay.directdebit.events.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
@@ -82,8 +84,8 @@ public class WebhookGoCardlessServiceTest {
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-        verify(mockedGoCardlessMandateHandler, never()).handle(any());
-        verify(mockedGoCardlessPaymentHandler, never()).handle(any());
+        verify(mockedGoCardlessMandateHandler, never()).handle(any(), any());
+        verify(mockedGoCardlessPaymentHandler, never()).handle(any(), any());
     }
 
     @Test
@@ -93,8 +95,8 @@ public class WebhookGoCardlessServiceTest {
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-        verify(mockedGoCardlessMandateHandler, never()).handle(any());
-        verify(mockedGoCardlessPaymentHandler, never()).handle(any());
+        verify(mockedGoCardlessMandateHandler, never()).handle(any(), any());
+        verify(mockedGoCardlessPaymentHandler, never()).handle(any(), any());
     }
 
     @Test
@@ -104,8 +106,8 @@ public class WebhookGoCardlessServiceTest {
 
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-        verify(mockedGoCardlessMandateHandler, never()).handle(any());
-        verify(mockedGoCardlessPaymentHandler, never()).handle(any());
+        verify(mockedGoCardlessMandateHandler, never()).handle(any(), any());
+        verify(mockedGoCardlessPaymentHandler, never()).handle(any(), any());
     }
 
     @Test
@@ -119,8 +121,8 @@ public class WebhookGoCardlessServiceTest {
         
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-        verify(mockedGoCardlessMandateHandler, never()).handle(any());
-        verify(mockedGoCardlessPaymentHandler, never()).handle(any());
+        verify(mockedGoCardlessMandateHandler, never()).handle(any(), any());
+        verify(mockedGoCardlessPaymentHandler, never()).handle(any(), any());
     }
 
     @Test
@@ -129,7 +131,8 @@ public class WebhookGoCardlessServiceTest {
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
 
-        doThrow(new GoCardlessPaymentNotFoundException("OOPSIE")).when(mockedGoCardlessPaymentHandler).handle(goCardlessEvent);
+        doThrow(new GoCardlessPaymentNotFoundException("OOPSIE"))
+                .when(mockedGoCardlessPaymentHandler).handle(goCardlessEvent, GoCardlessPaymentAction.CREATED);
         try {
             webhookGoCardlessService.handleEvents(events);
             fail("Expected GoCardlessPaymentNotFoundException.");
@@ -147,7 +150,8 @@ public class WebhookGoCardlessServiceTest {
                 goCardlessEvent.getLinksMandate().get(), goCardlessEvent.getLinksOrganisation()))
                 .thenReturn(mock(Mandate.class));
 
-        doThrow(new GoCardlessMandateNotFoundException("error", "OOPSIE")).when(mockedGoCardlessMandateHandler).handle(goCardlessEvent);
+        doThrow(new GoCardlessMandateNotFoundException("error", "OOPSIE"))
+                .when(mockedGoCardlessMandateHandler).handle(goCardlessEvent, GoCardlessMandateAction.CREATED);
         try {
             webhookGoCardlessService.handleEvents(events);
             fail("Expected GoCardlessMandateNotFoundException.");
@@ -163,8 +167,8 @@ public class WebhookGoCardlessServiceTest {
 
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-        verify(mockedGoCardlessMandateHandler, never()).handle(any());
-        verify(mockedGoCardlessPaymentHandler).handle(goCardlessEvent);
+        verify(mockedGoCardlessMandateHandler, never()).handle(any(), any());
+        verify(mockedGoCardlessPaymentHandler).handle(goCardlessEvent, GoCardlessPaymentAction.PAID_OUT);
     }
 
     @Test
@@ -179,8 +183,8 @@ public class WebhookGoCardlessServiceTest {
 
         webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-        verify(mockedGoCardlessMandateHandler).handle(goCardlessEvent);
-        verify(mockedGoCardlessPaymentHandler, never()).handle(any());
+        verify(mockedGoCardlessMandateHandler).handle(goCardlessEvent, GoCardlessMandateAction.CREATED);
+        verify(mockedGoCardlessPaymentHandler, never()).handle(any(), any());
     }
 
     @Test
