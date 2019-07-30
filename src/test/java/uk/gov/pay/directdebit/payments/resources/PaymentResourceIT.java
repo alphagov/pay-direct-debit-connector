@@ -21,6 +21,7 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
@@ -101,6 +102,7 @@ public class PaymentResourceIT {
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .withPayerFixture(payerFixture)
+                .withPaymentProviderId(SandboxMandateId.valueOf("sandbox-mandate-id"))
                 .withState(MandateState.ACTIVE)
                 .insert(testContext.getJdbi());
         String accountExternalId = testGatewayAccount.getExternalId();
@@ -169,6 +171,7 @@ public class PaymentResourceIT {
         MandateFixture mandateFixture = aMandateFixture()
                 .withGatewayAccountFixture(testGatewayAccount)
                 .withPayerFixture(payerFixture)
+                .withPaymentProviderId(SandboxMandateId.valueOf("sandbox-mandate-id"))
                 .withState(MandateState.ACTIVE)
                 .insert(testContext.getJdbi());
         String accountExternalId = testGatewayAccount.getExternalId();

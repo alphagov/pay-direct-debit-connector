@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.common.model.subtype.SunName;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.api.BankAccountValidationResponse;
 import uk.gov.pay.directdebit.payers.model.AccountNumber;
@@ -57,10 +57,9 @@ public class SandboxServiceTest {
 
     @Test
     public void collect_shouldReturnCollectionDate() {
-        Mandate mandate = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).toEntity();
         Payment payment = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture).toEntity();
 
-        PaymentProviderPaymentIdAndChargeDate providerPaymentIdAndChargeDate = service.collect(mandate, payment);
+        PaymentProviderPaymentIdAndChargeDate providerPaymentIdAndChargeDate = service.collect(payment, SandboxMandateId.valueOf("sandbox-mandate-id"));
 
         assertThat(providerPaymentIdAndChargeDate.getChargeDate(), is(LocalDateMatchers
                 .within(1, ChronoUnit.DAYS, LocalDate.now().plusDays(4))));

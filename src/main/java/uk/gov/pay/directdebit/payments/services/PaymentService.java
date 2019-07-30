@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
+import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
+import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
 import uk.gov.pay.directdebit.payments.model.Payment;
@@ -57,10 +59,10 @@ public class PaymentService {
         return govUkPayEventService.storeEventAndUpdateStateForPayment(insertedPayment, PAYMENT_CREATED);
     }
 
-    Payment submitPaymentToProvider(Payment payment) {
+    Payment submitPaymentToProvider(Payment payment, PaymentProviderMandateId paymentProviderMandateId) {
         var providerIdAndChargeDate = paymentProviderFactory
                 .getCommandServiceFor(payment.getMandate().getGatewayAccount().getPaymentProvider())
-                .collect(payment.getMandate(), payment);
+                .collect(payment, paymentProviderMandateId);
 
         Payment submittedPayment = fromPayment(payment)
                 .withProviderId(providerIdAndChargeDate.getPaymentProviderPaymentId())
