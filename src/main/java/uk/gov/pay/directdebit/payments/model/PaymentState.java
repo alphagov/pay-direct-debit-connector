@@ -2,22 +2,25 @@ package uk.gov.pay.directdebit.payments.model;
 
 import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_CANCELLED;
 import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_FAILED;
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_INDEMNITY_CLAIM;
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_PAID_OUT;
 import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_PENDING;
-import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_STARTED;
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_CREATED;
 import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_SUCCESS;
 
 public enum PaymentState implements DirectDebitState {
 
-    CREATED(EXTERNAL_STARTED),
+    CREATED(EXTERNAL_CREATED),
     SUBMITTED_TO_PROVIDER(EXTERNAL_PENDING),
     FAILED(EXTERNAL_FAILED),
-    CANCELLED(EXTERNAL_FAILED),
-    PAID_OUT(EXTERNAL_SUCCESS),
+    CANCELLED(EXTERNAL_CANCELLED),
+    PAID_OUT(EXTERNAL_PAID_OUT),
     CUSTOMER_APPROVAL_DENIED(EXTERNAL_FAILED),
     SUBMITTED_TO_BANK(EXTERNAL_PENDING),
     COLLECTED_BY_PROVIDER(EXTERNAL_SUCCESS),
-    INDEMNITY_CLAIM(EXTERNAL_FAILED);
+    INDEMNITY_CLAIM(EXTERNAL_INDEMNITY_CLAIM);
 
     private ExternalPaymentState externalState;
 

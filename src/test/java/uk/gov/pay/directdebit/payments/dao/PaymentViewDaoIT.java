@@ -312,7 +312,7 @@ public class PaymentViewDaoIT {
                 .insert(testContext.getJdbi());
 
         PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
-                .withState("started")
+                .withState("created")
                 .build();
 
         List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);

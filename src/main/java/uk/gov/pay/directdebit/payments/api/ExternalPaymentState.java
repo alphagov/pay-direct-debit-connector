@@ -7,13 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum ExternalPaymentState {
-    EXTERNAL_STARTED("started", false),
+    EXTERNAL_CREATED("created", false),
     EXTERNAL_PENDING("pending", false),
     EXTERNAL_SUCCESS("success", true),
     EXTERNAL_FAILED("failed", true),
     EXTERNAL_CANCELLED("cancelled", true),
-    EXTERNAL_EXPIRED("expired", true),
-    EXTERNAL_CANCELLED_USER_NOT_ELIGIBLE("cancelled", true, "P0060", "User not eligible for Direct Debit");
+    EXTERNAL_PAID_OUT("paidout", true),
+    EXTERNAL_INDEMNITY_CLAIM("indemnityclaim", true);
 
     @JsonProperty("status")
     private final String status;
