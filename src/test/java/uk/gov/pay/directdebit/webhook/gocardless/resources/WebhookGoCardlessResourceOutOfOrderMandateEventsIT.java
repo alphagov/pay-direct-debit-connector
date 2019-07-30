@@ -141,12 +141,12 @@ public class WebhookGoCardlessResourceOutOfOrderMandateEventsIT {
         postWebhook(MANDATE_CREATED_SUBMITTED_CANCELLED_OUT_OF_ORDER_WEBHOOK);
 
         Map<String, Object> mandateAfterFirstWebhook = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandateAfterFirstWebhook.get("state"), is("USER_SETUP_CANCELLED"));
+        assertThat(mandateAfterFirstWebhook.get("state"), is("CANCELLED"));
  
         postWebhook(MANDATE_ACTIVE_WEBHOOK);
 
         Map<String, Object> mandateAfterSecondWebhook = testContext.getDatabaseTestHelper().getMandateById(mandateFixture.getId());
-        assertThat(mandateAfterSecondWebhook.get("state"), is("USER_SETUP_CANCELLED"));
+        assertThat(mandateAfterSecondWebhook.get("state"), is("CANCELLED"));
     }
 
     private void postWebhook(Map<String, Object> webhook) throws IOException {
