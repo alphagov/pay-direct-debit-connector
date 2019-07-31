@@ -10,11 +10,11 @@ import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jdbi3.JdbiFactory;
+import io.dropwizard.jdbi3.bundles.JdbiExceptionsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.commons.utils.metrics.DatabaseMetricsService;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
@@ -80,6 +80,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
                 return configuration.getDataSourceFactory();
             }
         });
+        bootstrap.addBundle(new JdbiExceptionsBundle());
         bootstrap.addCommand(new DependentResourcesWaitCommand());
     }
 
