@@ -15,6 +15,7 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
+import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
@@ -29,9 +30,11 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_ERROR_SUBMITTING_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
@@ -149,6 +152,30 @@ public class PaymentServiceTest {
                 .build();
 
         assertThat(returnedPayment, is(paymentWithUpdatedState));
+    }
+
+    @Test
+    public void submitPaymentToProvider_shouldRegisterErrorSubmittingToProviderWhenCreatePaymentFailedException() {
+        Mandate mandate = mandateFixture.withPaymentProviderId(SANDBOX_MANDATE_ID).toEntity();
+
+        Payment payment = PaymentFixture
+                .aPaymentFixture()
+                .withAmount(123456L)
+                .withMandateFixture(mandateFixture)
+                .withDescription("a description")
+                .withReference("a reference")
+                .withState(CREATED)
+                .toEntity();
+
+        when(mockedPaymentProviderFactory.getCommandServiceFor(mandate.getGatewayAccount().getPaymentProvider())).thenReturn(mockedSandboxService);
+        when(mockedSandboxService.collect(payment, SANDBOX_MANDATE_ID)).thenThrow(CreatePaymentFailedException.class);
+
+        try {
+            service.submitPaymentToProvider(payment, SANDBOX_MANDATE_ID);
+        } catch (CreatePaymentFailedException e) {
+            verify(mockedUserNotificationService, never()).sendPaymentConfirmedEmailFor(any(Payment.class));
+            verify(mockedGovUkPayEventService).storeEventAndUpdateStateForPayment(payment, PAYMENT_ERROR_SUBMITTING_TO_PROVIDER);
+        }
     }
 
 }

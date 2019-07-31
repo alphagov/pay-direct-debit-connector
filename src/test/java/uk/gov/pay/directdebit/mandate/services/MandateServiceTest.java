@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.mandate.services;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,7 +15,6 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
 import uk.gov.pay.directdebit.mandate.api.MandateResponse;
@@ -25,16 +23,12 @@ import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
-import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
-import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
-import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
-import uk.gov.pay.directdebit.payments.services.SandboxService;
 import uk.gov.pay.directdebit.tokens.model.TokenExchangeDetails;
 import uk.gov.pay.directdebit.tokens.services.TokenService;
 
@@ -44,7 +38,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -54,10 +47,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.SANDBOX;
@@ -104,9 +95,6 @@ public class MandateServiceTest {
 
     @Mock
     private PaymentProviderFactory mockPaymentProviderFactory;
-
-    @Mock
-    private SandboxService mockSandboxService;
 
     private MandateService service;
 
@@ -231,33 +219,6 @@ public class MandateServiceTest {
             Mandate mandate = getMandateForProvider(p);
             assertThat(mandate.getMandateBankStatementReference().isEmpty(), is(true));
         });
-    }
-
-    @Test
-    public void confirm_shouldConfirmMandate() {
-        GatewayAccount gatewayAccount = aGatewayAccountFixture().withPaymentProvider(SANDBOX).toEntity();
-        Mandate mandate = getMandateForProvider(gatewayAccount);
-        Map<String, String> confirmMandateRequest = Map.of("sort_code", "123456", "account_number", "12345678");
-        ConfirmMandateRequest mandateConfirmationRequest = ConfirmMandateRequest.of(confirmMandateRequest);
-        BankAccountDetails bankAccountDetails = BankAccountDetails.of(confirmMandateRequest);
-        var confirmMandateResponse = new PaymentProviderMandateIdAndBankReference(
-                SandboxMandateId.valueOf(mandate.getExternalId().toString()),
-                MandateBankStatementReference.valueOf(RandomStringUtils.randomAlphanumeric(5)));
-
-        when(mockPaymentProviderFactory.getCommandServiceFor(SANDBOX)).thenReturn(mockSandboxService);
-        when(mockSandboxService.confirmMandate(mandate, bankAccountDetails)).thenReturn(confirmMandateResponse);
-
-        service.confirm(gatewayAccount, mandate, mandateConfirmationRequest);
-
-        var expectedUpdatedMandate = fromMandate(mandate)
-                .withState(CREATED)
-                .withPaymentProviderId(confirmMandateResponse.getPaymentProviderMandateId())
-                .withMandateBankStatementReference(confirmMandateResponse.getMandateBankStatementReference())
-                .build();
-
-        verify(mockUserNotificationService).sendMandateCreatedEmailFor(expectedUpdatedMandate);
-        verify(mockMandateDao).updateReferenceAndPaymentProviderId(expectedUpdatedMandate);
-        verify(mockGovUkPayEventService).storeEventAndUpdateStateForMandate(expectedUpdatedMandate, MANDATE_SUBMITTED_TO_PROVIDER);
     }
 
     @Test

@@ -4,12 +4,14 @@ import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.ImmutableGraph;
 import com.google.common.graph.MutableGraph;
 
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_ERROR_SUBMITTING_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_UNEXPECTED_ERROR;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 
@@ -30,7 +32,9 @@ public class GovUkPayEventStateGraph {
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_USER_SETUP_CANCELLED);
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE);
         graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_USER_SETUP_EXPIRED);
-        
+        graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_UNEXPECTED_ERROR);
+        graph.putEdge(MANDATE_TOKEN_EXCHANGED, MANDATE_ERROR_SUBMITTING_TO_PROVIDER);
+
         graph.addNode(PAYMENT_CREATED);
         graph.putEdge(PAYMENT_CREATED, PAYMENT_SUBMITTED);
 

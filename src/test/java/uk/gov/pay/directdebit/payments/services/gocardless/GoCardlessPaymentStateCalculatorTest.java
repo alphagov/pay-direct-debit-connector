@@ -40,7 +40,6 @@ import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGa
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.CUSTOMER_APPROVAL_DENIED;
 import static uk.gov.pay.directdebit.payments.services.GovUkPayEventToPaymentStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_PAYMENT_STATE;
 import static uk.gov.pay.directdebit.payments.services.gocardless.GoCardlessEventToPaymentStateMapper.GOCARDLESS_ACTIONS_THAT_CHANGE_PAYMENT_STATE;
 
@@ -108,7 +107,9 @@ public class GoCardlessPaymentStateCalculatorTest {
 
     @Test
     @Parameters({
-            "PAYMENT_SUBMITTED, SUBMITTED_TO_PROVIDER"
+            "PAYMENT_CREATED, CREATED",
+            "PAYMENT_SUBMITTED, SUBMITTED_TO_PROVIDER",
+            "PAYMENT_ERROR_SUBMITTING_TO_PROVIDER, ERROR_SUBMITTING_TO_PROVIDER"
     })
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
         GovUkPayEventType govUkPayEventType = GovUkPayEventType.valueOf(eventType);
