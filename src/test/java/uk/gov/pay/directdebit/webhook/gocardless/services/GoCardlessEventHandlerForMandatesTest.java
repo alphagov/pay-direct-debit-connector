@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoMandateIdException;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.events.model.GoCardlessMandateAction;
+import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
@@ -17,14 +17,22 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
+import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessEventHandler;
 
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GoCardlessMandateHandlerTest {
+public class GoCardlessEventHandlerForMandatesTest {
 
+    @Mock
+    private PaymentQueryService mockPaymentQueryService;
+    
     @Mock
     private MandateQueryService mockMandateQueryService;
 
@@ -32,7 +40,7 @@ public class GoCardlessMandateHandlerTest {
     private UserNotificationService userNotificationService;
 
     @InjectMocks
-    private GoCardlessMandateHandler goCardlessMandateHandler;
+    private GoCardlessEventHandler goCardlessEventHandler;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -48,6 +56,7 @@ public class GoCardlessMandateHandlerTest {
             .withPayerFixture(payerFixture);
 
     private GoCardlessEventFixture goCardlessEventFixture = GoCardlessEventFixture.aGoCardlessEventFixture()
+            .withResourceType(GoCardlessResourceType.MANDATES)
             .withLinksOrganisation(organisationIdentifier);
 
     @Test
@@ -58,9 +67,12 @@ public class GoCardlessMandateHandlerTest {
                 goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation()))
                 .thenReturn(mandateFixture.toEntity());
 
-        goCardlessMandateHandler.handle(goCardlessEvent, GoCardlessMandateAction.FAILED);
+        goCardlessEventHandler.handle(List.of(goCardlessEvent));
 
         verify(userNotificationService).sendMandateFailedEmailFor(mandateFixture.toEntity());
+        verify(mockMandateQueryService).findByGoCardlessMandateIdAndOrganisationId(
+                goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation());
+        verify(mockPaymentQueryService, never()).findByGoCardlessPaymentIdAndOrganisationId(any(), any());
     }
 
     @Test
@@ -71,9 +83,12 @@ public class GoCardlessMandateHandlerTest {
                 goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation()))
                 .thenReturn(mandateFixture.toEntity());
 
-        goCardlessMandateHandler.handle(goCardlessEvent, GoCardlessMandateAction.CANCELLED);
+        goCardlessEventHandler.handle(List.of(goCardlessEvent));
 
         verify(userNotificationService).sendMandateCancelledEmailFor(mandateFixture.toEntity());
+        verify(mockMandateQueryService).findByGoCardlessMandateIdAndOrganisationId(
+                goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation());
+        verify(mockPaymentQueryService, never()).findByGoCardlessPaymentIdAndOrganisationId(any(), any());
     }
 
     @Test
@@ -85,6 +100,8 @@ public class GoCardlessMandateHandlerTest {
                 .toEntity();
 
         thrown.expect(GoCardlessEventHasNoMandateIdException.class);
-        goCardlessMandateHandler.handle(goCardlessEvent, GoCardlessMandateAction.CANCELLED);
+        goCardlessEventHandler.handle(List.of(goCardlessEvent));
+        verify(mockPaymentQueryService, never()).findByGoCardlessPaymentIdAndOrganisationId(any(), any());
+        verify(mockMandateQueryService, never()).findByGoCardlessMandateIdAndOrganisationId(any(), any());
     }
 }

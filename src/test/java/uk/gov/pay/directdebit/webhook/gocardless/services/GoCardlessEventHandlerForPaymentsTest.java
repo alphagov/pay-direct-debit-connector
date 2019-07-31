@@ -9,24 +9,29 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.events.model.GoCardlessPaymentAction;
+import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
+import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessEventHandler;
 
+import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GoCardlessPaymentHandlerTest {
+public class GoCardlessEventHandlerForPaymentsTest {
 
     @Mock
     private UserNotificationService mockUserNotificationService;
@@ -34,14 +39,19 @@ public class GoCardlessPaymentHandlerTest {
     @Mock
     private PaymentQueryService mockPaymentQueryService;
 
+    @Mock
+    private MandateQueryService mockMandateQueryService;
+
     @InjectMocks
-    private GoCardlessPaymentHandler goCardlessPaymentHandler;
+    private GoCardlessEventHandler goCardlessEventHandler;
 
     private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_org_id");
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().withOrganisation(organisationIdentifier);
     private MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture);
     private Payment payment = PaymentFixture.aPaymentFixture().withMandateFixture(mandateFixture).toEntity();
-    private GoCardlessEventFixture goCardlessEventFixture = GoCardlessEventFixture.aGoCardlessEventFixture().withLinksOrganisation(organisationIdentifier);
+    private GoCardlessEventFixture goCardlessEventFixture = GoCardlessEventFixture.aGoCardlessEventFixture()
+            .withResourceType(GoCardlessResourceType.PAYMENTS)
+            .withLinksOrganisation(organisationIdentifier);
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -54,9 +64,12 @@ public class GoCardlessPaymentHandlerTest {
                 goCardlessEvent.getLinksOrganisation()))
                 .thenReturn(Optional.of(payment));
 
-        goCardlessPaymentHandler.handle(goCardlessEvent, GoCardlessPaymentAction.FAILED);
+        goCardlessEventHandler.handle(List.of(goCardlessEvent));
 
         verify(mockUserNotificationService).sendPaymentFailedEmailFor(payment);
+        verify(mockPaymentQueryService).findByGoCardlessPaymentIdAndOrganisationId(
+                goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation());
+        verify(mockMandateQueryService, never()).findByGoCardlessMandateIdAndOrganisationId(any(), any());
     }
 
     @Test
@@ -68,7 +81,9 @@ public class GoCardlessPaymentHandlerTest {
                 .toEntity();
 
         thrown.expect(GoCardlessEventHasNoPaymentIdException.class);
-        goCardlessPaymentHandler.handle(goCardlessEvent, GoCardlessPaymentAction.CREATED);
+        goCardlessEventHandler.handle(List.of(goCardlessEvent));
+        verify(mockPaymentQueryService, never()).findByGoCardlessPaymentIdAndOrganisationId(any(), any());
+        verify(mockMandateQueryService, never()).findByGoCardlessMandateIdAndOrganisationId(any(), any());
     }
 
 }

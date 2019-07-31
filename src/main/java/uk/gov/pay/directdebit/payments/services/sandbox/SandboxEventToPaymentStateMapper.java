@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.payments.services.sandbox;
 
 import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
-import uk.gov.pay.directdebit.events.model.GoCardlessPaymentAction;
 import uk.gov.pay.directdebit.events.model.SandboxEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
