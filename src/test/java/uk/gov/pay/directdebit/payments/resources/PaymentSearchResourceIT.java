@@ -383,7 +383,6 @@ public class PaymentSearchResourceIT { //TODO merge with PaymentResource
                 .contentType(JSON)
                 .body("count", is(3))
                 .body("results", hasSize(3))
-                .body("results[0].state.finished", is(true))
                 .body("results[0].state.status", is("cancelled"))
                 .body("results[0].state.details", is("state_details"));
     }

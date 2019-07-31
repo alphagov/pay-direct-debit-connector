@@ -72,7 +72,6 @@ public class PaymentResourceIT {
     private static final String JSON_MANDATE_ID_KEY = "mandate_id";
     private static final String JSON_PAYMENT_PROVIDER_KEY = "payment_provider";
     private static final String JSON_STATE_STATUS_KEY = "state.status";
-    private static final String JSON_STATE_FINISHED_KEY = "state.finished";
     private static final String JSON_STATE_DETAILS_KEY = "state.details";
     private static final long AMOUNT = 6234L;
     private GatewayAccountFixture testGatewayAccount;
@@ -151,7 +150,6 @@ public class PaymentResourceIT {
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
                 .body(JSON_MANDATE_ID_KEY, is(mandateFixture.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
-                .body(JSON_STATE_FINISHED_KEY, is(false))
                 .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
                 .body(JSON_PAYMENT_PROVIDER_KEY, is(SANDBOX.toString().toLowerCase()))
                 .contentType(JSON);
@@ -257,7 +255,6 @@ public class PaymentResourceIT {
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
                 .body(JSON_MANDATE_ID_KEY, is(mandate.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
-                .body(JSON_STATE_FINISHED_KEY, is(false))
                 .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
                 .body(JSON_PAYMENT_PROVIDER_KEY, is(GOCARDLESS.toString().toLowerCase()))
                 .contentType(JSON);
@@ -283,7 +280,6 @@ public class PaymentResourceIT {
                 .body(JSON_DESCRIPTION_KEY, is(expectedDescription))
                 .body(JSON_MANDATE_ID_KEY, is(mandate.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
-                .body(JSON_STATE_FINISHED_KEY, is(false))
                 .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
                 .body(JSON_PAYMENT_PROVIDER_KEY, is(GOCARDLESS.toString().toLowerCase()))
                 .contentType(JSON);
@@ -313,7 +309,6 @@ public class PaymentResourceIT {
                 .body(JSON_REFERENCE_KEY, is(paymentFixture.getReference()))
                 .body(JSON_DESCRIPTION_KEY, is(paymentFixture.getDescription()))
                 .body(JSON_STATE_STATUS_KEY, is(paymentFixture.getState().toExternal().getStatus()))
-                .body(JSON_STATE_FINISHED_KEY, is(false))
                 .body(JSON_STATE_DETAILS_KEY, is(paymentFixture.getStateDetails()));
     }
     
