@@ -17,22 +17,19 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
-import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessEventHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsForGoCardlessEventsHandler;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GoCardlessEventHandlerForMandatesTest {
+public class SendEmailsForGoCardlessMandateEventsHandlerTest {
 
-    @Mock
-    private PaymentQueryService mockPaymentQueryService;
-    
     @Mock
     private MandateQueryService mockMandateQueryService;
 
@@ -40,7 +37,7 @@ public class GoCardlessEventHandlerForMandatesTest {
     private UserNotificationService userNotificationService;
 
     @InjectMocks
-    private GoCardlessEventHandler goCardlessEventHandler;
+    private SendEmailsForGoCardlessEventsHandler sendEmailsForGoCardlessEventsHandler;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -60,39 +57,33 @@ public class GoCardlessEventHandlerForMandatesTest {
             .withLinksOrganisation(organisationIdentifier);
 
     @Test
-    public void handle_onAFailedMandateGoCardlessEvent_shouldRegisterAPayEventAsMandateFailed() {
+    public void assertEmailIsSentForFailedMandateGoCardlessEvent() {
         GoCardlessEvent goCardlessEvent = goCardlessEventFixture.withAction("failed").toEntity();
 
         when(mockMandateQueryService.findByGoCardlessMandateIdAndOrganisationId(
                 goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation()))
                 .thenReturn(mandateFixture.toEntity());
 
-        goCardlessEventHandler.handle(List.of(goCardlessEvent));
+        sendEmailsForGoCardlessEventsHandler.handle(List.of(goCardlessEvent));
 
-        verify(userNotificationService).sendMandateFailedEmailFor(mandateFixture.toEntity());
-        verify(mockMandateQueryService).findByGoCardlessMandateIdAndOrganisationId(
-                goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation());
-        verify(mockPaymentQueryService, never()).findByGoCardlessPaymentIdAndOrganisationId(any(), any());
+        verify(userNotificationService, times(1)).sendMandateFailedEmailFor(mandateFixture.toEntity());
     }
 
     @Test
-    public void handle_onACancelledMandateGoCardlessEvent_shouldRegisterAPayEventAsMandateCancelled() {
+    public void assertEmailIsSentForCancelledMandateGoCardlessEvent() {
         GoCardlessEvent goCardlessEvent = goCardlessEventFixture.withAction("cancelled").toEntity();
 
         when(mockMandateQueryService.findByGoCardlessMandateIdAndOrganisationId(
                 goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation()))
                 .thenReturn(mandateFixture.toEntity());
 
-        goCardlessEventHandler.handle(List.of(goCardlessEvent));
+        sendEmailsForGoCardlessEventsHandler.handle(List.of(goCardlessEvent));
 
-        verify(userNotificationService).sendMandateCancelledEmailFor(mandateFixture.toEntity());
-        verify(mockMandateQueryService).findByGoCardlessMandateIdAndOrganisationId(
-                goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation());
-        verify(mockPaymentQueryService, never()).findByGoCardlessPaymentIdAndOrganisationId(any(), any());
+        verify(userNotificationService, times(1)).sendMandateCancelledEmailFor(mandateFixture.toEntity());
     }
 
     @Test
-    public void handle_onCreateMandateGoCardlessEvent_shouldThrowExceptionWhenEventHasNoLinkedMandate() {
+    public void shouldThrowExceptionWhenEventHasNoLinkedMandate() {
         GoCardlessEvent goCardlessEvent = goCardlessEventFixture
                 .withLinksOrganisation(GoCardlessOrganisationId.valueOf("does_not_exist"))
                 .withAction("cancelled")
@@ -100,8 +91,7 @@ public class GoCardlessEventHandlerForMandatesTest {
                 .toEntity();
 
         thrown.expect(GoCardlessEventHasNoMandateIdException.class);
-        goCardlessEventHandler.handle(List.of(goCardlessEvent));
-        verify(mockPaymentQueryService, never()).findByGoCardlessPaymentIdAndOrganisationId(any(), any());
-        verify(mockMandateQueryService, never()).findByGoCardlessMandateIdAndOrganisationId(any(), any());
+        sendEmailsForGoCardlessEventsHandler.handle(List.of(goCardlessEvent));
+        verify(userNotificationService, never()).sendMandateCancelledEmailFor(any());
     }
 }

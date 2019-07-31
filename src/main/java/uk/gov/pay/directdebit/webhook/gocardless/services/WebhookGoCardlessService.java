@@ -15,7 +15,7 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessEventHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsForGoCardlessEventsHandler;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -36,7 +36,7 @@ public class WebhookGoCardlessService {
     private final PaymentStateUpdater paymentStateUpdater;
     private final MandateQueryService mandateQueryService;
     private final PaymentQueryService paymentQueryService;
-    private final GoCardlessEventHandler goCardlessEventHandler;
+    private final SendEmailsForGoCardlessEventsHandler sendEmailsForGoCardlessEventsHandler;
 
     @Inject
     WebhookGoCardlessService(GoCardlessEventService goCardlessService,
@@ -44,9 +44,9 @@ public class WebhookGoCardlessService {
                              PaymentStateUpdater paymentStateUpdater,
                              MandateQueryService mandateQueryService,
                              PaymentQueryService paymentQueryService, 
-                             GoCardlessEventHandler goCardlessEventHandler) {
+                             SendEmailsForGoCardlessEventsHandler sendEmailsForGoCardlessEventsHandler) {
         this.goCardlessService = goCardlessService;
-        this.goCardlessEventHandler = goCardlessEventHandler;
+        this.sendEmailsForGoCardlessEventsHandler = sendEmailsForGoCardlessEventsHandler;
         this.mandateStateUpdater = mandateStateUpdater;
         this.paymentStateUpdater = paymentStateUpdater;
         this.mandateQueryService = mandateQueryService;
@@ -56,7 +56,7 @@ public class WebhookGoCardlessService {
     public void processEvents(List<GoCardlessEvent> events) {
         events.forEach(goCardlessService::storeEvent);
         updateStatesForEvents(events);
-        goCardlessEventHandler.handle(events);
+        sendEmailsForGoCardlessEventsHandler.handle(events);
         //TODO goCardlessEventErrorLogger.logErrorsForEvents(events)
     }
 

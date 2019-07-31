@@ -12,38 +12,33 @@ import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.services.MandateQueryService;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture;
 import uk.gov.pay.directdebit.payments.fixtures.PaymentFixture;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessEventHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsForGoCardlessEventsHandler;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GoCardlessEventHandlerForPaymentsTest {
+public class SendEmailsForGoCardlessPaymentEventsHandlerTest {
 
     @Mock
     private UserNotificationService mockUserNotificationService;
 
     @Mock
     private PaymentQueryService mockPaymentQueryService;
-
-    @Mock
-    private MandateQueryService mockMandateQueryService;
-
+    
     @InjectMocks
-    private GoCardlessEventHandler goCardlessEventHandler;
+    private SendEmailsForGoCardlessEventsHandler sendEmailsForGoCardlessEventsHandler;
 
     private GoCardlessOrganisationId organisationIdentifier = GoCardlessOrganisationId.valueOf("test_org_id");
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().withOrganisation(organisationIdentifier);
@@ -57,23 +52,20 @@ public class GoCardlessEventHandlerForPaymentsTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void handle_onFailedPaymentGoCardlessEvent_shouldSendEmail() {
+    public void assertEmailIsSentForFailedPaymentGoCardlessEvent() {
         GoCardlessEvent goCardlessEvent = goCardlessEventFixture.withAction("failed").toEntity();
 
         when(mockPaymentQueryService.findByGoCardlessPaymentIdAndOrganisationId(goCardlessEvent.getLinksPayment().get(),
                 goCardlessEvent.getLinksOrganisation()))
                 .thenReturn(Optional.of(payment));
 
-        goCardlessEventHandler.handle(List.of(goCardlessEvent));
+        sendEmailsForGoCardlessEventsHandler.handle(List.of(goCardlessEvent));
 
         verify(mockUserNotificationService).sendPaymentFailedEmailFor(payment);
-        verify(mockPaymentQueryService).findByGoCardlessPaymentIdAndOrganisationId(
-                goCardlessEvent.getLinksPayment().get(), goCardlessEvent.getLinksOrganisation());
-        verify(mockMandateQueryService, never()).findByGoCardlessMandateIdAndOrganisationId(any(), any());
     }
 
     @Test
-    public void handle_onCreatePaymentGoCardlessEvent_shouldThrowExceptionWhenEventHasNoLinkedPayment() {
+    public void assertEmailIsSentForCreatePaymentGoCardlessEvent_shouldThrowExceptionWhenEventHasNoLinkedPayment() {
         GoCardlessEvent goCardlessEvent = goCardlessEventFixture
                 .withLinksOrganisation(GoCardlessOrganisationId.valueOf("does_not_exist"))
                 .withAction("created")
@@ -81,9 +73,8 @@ public class GoCardlessEventHandlerForPaymentsTest {
                 .toEntity();
 
         thrown.expect(GoCardlessEventHasNoPaymentIdException.class);
-        goCardlessEventHandler.handle(List.of(goCardlessEvent));
-        verify(mockPaymentQueryService, never()).findByGoCardlessPaymentIdAndOrganisationId(any(), any());
-        verify(mockMandateQueryService, never()).findByGoCardlessMandateIdAndOrganisationId(any(), any());
+        sendEmailsForGoCardlessEventsHandler.handle(List.of(goCardlessEvent));
+        verify(mockUserNotificationService, never()).sendPaymentFailedEmailFor(any());
     }
 
 }

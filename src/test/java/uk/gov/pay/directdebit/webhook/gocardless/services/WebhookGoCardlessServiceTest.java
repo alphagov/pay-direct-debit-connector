@@ -19,7 +19,7 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessEventHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsForGoCardlessEventsHandler;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,7 +41,7 @@ public class WebhookGoCardlessServiceTest {
     private GoCardlessEventService mockedGoCardlessEventService;
 
     @Mock
-    private GoCardlessEventHandler mockedGoCardlessEventHandler;
+    private SendEmailsForGoCardlessEventsHandler mockedSendEmailsForGoCardlessEventsHandler;
 
     @Mock
     private MandateStateUpdater mockedMandateStateUpdater;
@@ -60,12 +60,17 @@ public class WebhookGoCardlessServiceTest {
 
     @Test
     public void shouldInsertEvents() {
-        GoCardlessEvent first = aGoCardlessEventFixture().withResourceType(GoCardlessResourceType.REFUNDS).toEntity();
-        GoCardlessEvent second = aGoCardlessEventFixture().toEntity();
-        List<GoCardlessEvent> events = Arrays.asList(first, second);
-        webhookGoCardlessService.processEvents(events);
-        verify(mockedGoCardlessEventService).storeEvent(first);
-        verify(mockedGoCardlessEventService).storeEvent(second);
+        Arrays.stream(GoCardlessResourceType.values()).forEach(t -> {
+                    GoCardlessEvent event = aGoCardlessEventFixture().withResourceType(t).toEntity();
+
+                    when(mockedMandateQueryService.findByGoCardlessMandateIdAndOrganisationId(
+                            event.getLinksMandate().get(), event.getLinksOrganisation()))
+                            .thenReturn(mock(Mandate.class));
+
+                    webhookGoCardlessService.processEvents(List.of(event));
+                    verify(mockedGoCardlessEventService).storeEvent(event);
+                }
+        );
     }
     
     @Test
@@ -75,7 +80,7 @@ public class WebhookGoCardlessServiceTest {
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
 
         doThrow(new GoCardlessPaymentNotFoundException("OOPSIE"))
-                .when(mockedGoCardlessEventHandler).handle(List.of(goCardlessEvent));
+                .when(mockedSendEmailsForGoCardlessEventsHandler).handle(List.of(goCardlessEvent));
         try {
             webhookGoCardlessService.processEvents(events);
             fail("Expected GoCardlessPaymentNotFoundException.");
@@ -94,7 +99,7 @@ public class WebhookGoCardlessServiceTest {
                 .thenReturn(mock(Mandate.class));
 
         doThrow(new GoCardlessMandateNotFoundException("error", "OOPSIE"))
-                .when(mockedGoCardlessEventHandler).handle(List.of(goCardlessEvent));
+                .when(mockedSendEmailsForGoCardlessEventsHandler).handle(List.of(goCardlessEvent));
         try {
             webhookGoCardlessService.processEvents(events);
             fail("Expected GoCardlessMandateNotFoundException.");
