@@ -129,7 +129,7 @@ public class MandateResourceIT {
         String hrefNextUrlPost = "http://Frontend/secure";
 
         response.body("links", containsLink("next_url", "GET", hrefNextUrl))
-                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, 
+                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost,
                         "application/x-www-form-urlencoded", Map.of("chargeTokenId", token)));
 
         simulateFollowingNextUrlFromMandateCreation(externalMandateId);
@@ -141,7 +141,7 @@ public class MandateResourceIT {
                 .body("links", doesNotContainLink("next_url"))
                 .body("links", doesNotContainLink("next_url_post"));
     }
-    
+
     @Test
     public void payerEmailAndNameShouldBePopulatedOnInputOfUserDetails() throws Exception {
 
@@ -163,10 +163,10 @@ public class MandateResourceIT {
                 .body("payer.email", is(payerFixture.getEmail()))
                 .body("payer.name", is(payerFixture.getName()));
     }
-    
+
     @Test
     public void providerIdAndBankStatementReferenceShouldBePopulatedOnConfirmingAMandate() throws Exception {
-        
+
         String mandateExternalId = createMandate();
 
         simulateFollowingNextUrlFromMandateCreation(mandateExternalId);
@@ -175,7 +175,7 @@ public class MandateResourceIT {
 
         String providerId = "MD123";
         String reference = "REF-123";
-        
+
         simulateConfirmFromFrontend(mandateExternalId, providerId, reference);
 
         givenSetup()
@@ -285,7 +285,6 @@ public class MandateResourceIT {
                 .body("created_date", is(notNullValue()))
                 .body("state.status", is("created"))
                 .body("state.details", is(nullValue()))
-                .body("state.finished", is(false))
                 .body("service_reference", is("test-service-reference"))
                 .body("payment_provider", is(gatewayAccountFixture.getPaymentProvider().toString().toLowerCase()))
                 .body("provider_id", is(nullValue()))
@@ -304,8 +303,8 @@ public class MandateResourceIT {
         response.body("links", hasSize(3))
                 .body("links", containsLink("self", "GET", documentLocation))
                 .body("links", containsLink("next_url", "GET", hrefNextUrl))
-                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded", 
-                    Map.of("chargeTokenId", token)
+                .body("links", containsLink("next_url_post", "POST", hrefNextUrlPost, "application/x-www-form-urlencoded",
+                        Map.of("chargeTokenId", token)
                 ));
     }
 
@@ -408,7 +407,6 @@ public class MandateResourceIT {
                 .body("mandate_id", is(mandateFixture.getExternalId().toString()))
                 .body("return_url", is(mandateFixture.getReturnUrl()))
                 .body("state.status", is(mandateFixture.getState().toExternal().getState()))
-                .body("state.finished", is(mandateFixture.getState().toExternal().isFinished()))
                 .body("state.details", is(mandateFixture.getStateDetails()))
                 .body("service_reference", is(mandateFixture.getServiceReference()))
                 .body("mandate_reference", is(notNullValue()))
@@ -460,7 +458,7 @@ public class MandateResourceIT {
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .insert(testContext.getJdbi());
-        
+
         aGovUkPayEventFixture()
                 .withMandateId(testMandate.getId())
                 .withEventType(MANDATE_TOKEN_EXCHANGED)
@@ -483,7 +481,7 @@ public class MandateResourceIT {
     public void confirm_shouldCreateACustomerBankAccountMandate() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
-        
+
         MandateFixture mandateFixture = aMandateFixture()
                 .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
