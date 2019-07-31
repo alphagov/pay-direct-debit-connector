@@ -1,18 +1,21 @@
 package uk.gov.pay.directdebit.payments.params;
 
 import uk.gov.pay.directdebit.common.model.SearchParams;
-import uk.gov.pay.directdebit.payments.api.ExternalPaymentState;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_CREATED;
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_FAILED;
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_PENDING;
+import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_SUCCESS;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
 import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
+import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
 
 public class PaymentViewSearchParams implements SearchParams {
 
@@ -46,13 +49,13 @@ public class PaymentViewSearchParams implements SearchParams {
     static {
         // see uk.gov.pay.directdebit.payments.model.PaymentState for mappings
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_STARTED.getStatus(), CREATED.toSingleQuoteString());
+                .put(EXTERNAL_CREATED.getStatus(), CREATED.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_PENDING.getStatus(), SUBMITTED_TO_PROVIDER.toSingleQuoteString());
+                .put(EXTERNAL_PENDING.getStatus(), SUBMITTED_TO_PROVIDER.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_SUCCESS.getStatus(), PAID_OUT.toSingleQuoteString());
+                .put(EXTERNAL_SUCCESS.getStatus(), PAID_OUT.toSingleQuoteString());
         externalPaymentToInternalStateQueryMap
-                .put(ExternalPaymentState.EXTERNAL_FAILED.getStatus(), FAILED.toSingleQuoteString() + ", " + CANCELLED.toSingleQuoteString());
+                .put(EXTERNAL_FAILED.getStatus(), FAILED.toSingleQuoteString() + ", " + CANCELLED.toSingleQuoteString());
     }
 
     private PaymentViewSearchParams(PaymentViewSearchParamsBuilder builder) {
