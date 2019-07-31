@@ -6,6 +6,7 @@ import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_ERROR_SUBMITTING_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 
 public class GovUkPayEventStateGraphForPaymentsTest {
@@ -31,7 +32,7 @@ public class GovUkPayEventStateGraphForPaymentsTest {
     
     @Test
     public void shouldReturnFalseForInvalidTransition() {
-        boolean result = govUkPayEventStateGraph.isValidTransition(PAYMENT_SUBMITTED, PAYMENT_SUBMITTED);
+        boolean result = govUkPayEventStateGraph.isValidTransition(PAYMENT_SUBMITTED, PAYMENT_ERROR_SUBMITTING_TO_PROVIDER);
         assertThat(result, is(false));
     }
 }

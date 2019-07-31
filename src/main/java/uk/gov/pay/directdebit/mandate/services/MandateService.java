@@ -14,16 +14,19 @@ import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.mandate.api.ConfirmMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.CreateMandateRequest;
 import uk.gov.pay.directdebit.mandate.api.DirectDebitInfoFrontendResponse;
-import uk.gov.pay.directdebit.mandate.api.ExternalMandateState;
 import uk.gov.pay.directdebit.mandate.api.MandateResponse;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
+import uk.gov.pay.directdebit.mandate.exception.PayerNotFoundException;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateIdAndBankReference;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payers.model.BankAccountDetails;
+import uk.gov.pay.directdebit.payments.exception.CreateCustomerBankAccountFailedException;
+import uk.gov.pay.directdebit.payments.exception.CreateCustomerFailedException;
+import uk.gov.pay.directdebit.payments.exception.CreateMandateFailedException;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.Token;
@@ -47,8 +50,10 @@ import static uk.gov.pay.directdebit.common.util.URIBuilder.createLink;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.nextUrl;
 import static uk.gov.pay.directdebit.common.util.URIBuilder.selfUriFor;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_ERROR_SUBMITTING_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_SUBMITTED_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_TOKEN_EXCHANGED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_UNEXPECTED_ERROR;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED_NOT_ELIGIBLE;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
@@ -178,14 +183,24 @@ public class MandateService {
     }
 
     public void confirm(GatewayAccount gatewayAccount, Mandate mandate, ConfirmMandateRequest confirmDetailsRequest) {
-        PaymentProviderMandateIdAndBankReference paymentProviderMandateIdAndBankReference = paymentProviderFactory
-                .getCommandServiceFor(gatewayAccount.getPaymentProvider())
-                .confirmMandate(
-                        mandate,
-                        new BankAccountDetails(
-                                confirmDetailsRequest.getAccountNumber(),
-                                confirmDetailsRequest.getSortCode())
-                );
+        PaymentProviderMandateIdAndBankReference paymentProviderMandateIdAndBankReference;
+        try {
+            paymentProviderMandateIdAndBankReference = paymentProviderFactory
+                    .getCommandServiceFor(gatewayAccount.getPaymentProvider())
+                    .confirmMandate(
+                            mandate,
+                            new BankAccountDetails(
+                                    confirmDetailsRequest.getAccountNumber(),
+                                    confirmDetailsRequest.getSortCode())
+                    );
+
+        } catch (PayerNotFoundException e) {
+            govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, MANDATE_UNEXPECTED_ERROR);
+            throw e;
+        } catch (CreateCustomerFailedException | CreateCustomerBankAccountFailedException | CreateMandateFailedException e) {
+            govUkPayEventService.storeEventAndUpdateStateForMandate(mandate, MANDATE_ERROR_SUBMITTING_TO_PROVIDER);
+            throw e;
+        }
 
         Mandate updatedMandate = fromMandate(mandate)
                 .withMandateBankStatementReference(paymentProviderMandateIdAndBankReference.getMandateBankStatementReference())

@@ -6,11 +6,12 @@ import uk.gov.pay.directdebit.common.util.RandomIdGenerator;
 import uk.gov.pay.directdebit.events.services.GovUkPayEventService;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.model.PaymentProviderMandateId;
-import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import uk.gov.pay.directdebit.payments.dao.PaymentDao;
+import uk.gov.pay.directdebit.payments.exception.CreatePaymentFailedException;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
+import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
+import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_ERROR_SUBMITTING_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.aPayment;
 import static uk.gov.pay.directdebit.payments.model.Payment.PaymentBuilder.fromPayment;
@@ -60,9 +62,15 @@ public class PaymentService {
     }
 
     Payment submitPaymentToProvider(Payment payment, PaymentProviderMandateId paymentProviderMandateId) {
-        var providerIdAndChargeDate = paymentProviderFactory
-                .getCommandServiceFor(payment.getMandate().getGatewayAccount().getPaymentProvider())
-                .collect(payment, paymentProviderMandateId);
+        PaymentProviderPaymentIdAndChargeDate providerIdAndChargeDate;
+        try {
+            providerIdAndChargeDate = paymentProviderFactory
+                    .getCommandServiceFor(payment.getMandate().getGatewayAccount().getPaymentProvider())
+                    .collect(payment, paymentProviderMandateId);
+        } catch (CreatePaymentFailedException e) {
+            govUkPayEventService.storeEventAndUpdateStateForPayment(payment, PAYMENT_ERROR_SUBMITTING_TO_PROVIDER);
+            throw e;
+        }
 
         Payment submittedPayment = fromPayment(payment)
                 .withProviderId(providerIdAndChargeDate.getPaymentProviderPaymentId())

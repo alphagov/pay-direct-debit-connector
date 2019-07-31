@@ -7,6 +7,7 @@ import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_A
 import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_ACTIVE;
 import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_CANCELLED;
 import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_CREATED;
+import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_ERROR;
 import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_FAILED;
 import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_INACTIVE;
 import static uk.gov.pay.directdebit.mandate.api.ExternalMandateState.EXTERNAL_PENDING;
@@ -22,7 +23,9 @@ public enum MandateState implements DirectDebitState {
     EXPIRED(EXTERNAL_INACTIVE),
     CANCELLED(EXTERNAL_CANCELLED),
     USER_SETUP_CANCELLED(EXTERNAL_ABANDONED),
-    USER_SETUP_EXPIRED(EXTERNAL_ABANDONED);
+    USER_SETUP_EXPIRED(EXTERNAL_ABANDONED),
+    SETUP_ERROR(EXTERNAL_ERROR),
+    PROVIDER_ERROR(EXTERNAL_ERROR);
 
     private ExternalMandateState externalState;
 

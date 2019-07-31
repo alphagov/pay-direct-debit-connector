@@ -13,7 +13,8 @@ public enum ExternalPaymentState {
     EXTERNAL_FAILED("failed", true),
     EXTERNAL_CANCELLED("cancelled", true),
     EXTERNAL_PAID_OUT("paidout", true),
-    EXTERNAL_INDEMNITY_CLAIM("indemnityclaim", true);
+    EXTERNAL_INDEMNITY_CLAIM("indemnityclaim", true),
+    EXTERNAL_ERROR("error", true);
 
     @JsonProperty("status")
     private final String status;
