@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
+
 public class SandboxEventToPaymentStateMapper {
-    private static final Map<String, PaymentState> SANDBOX_ACTION_TO_PAYMENT_STATE = Map.of(
-            GoCardlessPaymentAction.PAID_OUT.toString(), PaymentState.PAID_OUT
-    );
+    private static final Map<String, PaymentState> SANDBOX_ACTION_TO_PAYMENT_STATE = Map.of("PAID_OUT", PAID_OUT);
 
     static final Set<String> SANDBOX_ACTIONS_THAT_CHANGE_PAYMENT_STATE = SANDBOX_ACTION_TO_PAYMENT_STATE.keySet();
 
