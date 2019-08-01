@@ -15,6 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.events.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
@@ -110,6 +111,37 @@ public class UnhandledGoCardlessEventsLoggerTest {
                 "Received a GoCardless event with id event1 for organisation ORG1 with action replaced for mandate test-mandate-id1, which we do not expect to receive and do not handle.",
                 "Received a GoCardless event with id event2 for organisation ORG1 with action resubmission_requested for mandate test-mandate-id2, which we do not expect to receive and do not handle.",
                 "Received a GoCardless event with id event4 for organisation ORG1 with action resubmission_requested for payment test-payment-id1, which we do not expect to receive and do not handle."));
+    }
+
+    @Test
+    public void shouldLogForUnhandledResourceTypes() {
+        GoCardlessEvent subscriptionsEvent = aGoCardlessEventFixture()
+                .withResourceType(GoCardlessResourceType.SUBSCRIPTIONS)
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("event1"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("ORG1"))
+                .toEntity();
+
+        GoCardlessEvent refundsEvent = aGoCardlessEventFixture()
+                .withResourceType(GoCardlessResourceType.REFUNDS)
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("event2"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("ORG1"))
+                .toEntity();
+        
+        GoCardlessEvent payoutsEvent = aGoCardlessEventFixture()
+                .withResourceType(GoCardlessResourceType.PAYOUTS)
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("event3"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("ORG1"))
+                .toEntity();
+
+        unhandledGoCardlessEventsLogger.logUnhandledEvents(List.of(subscriptionsEvent, refundsEvent, payoutsEvent));
+        
+        verify(mockAppender, times(2)).doAppend(loggingEventArgumentCaptor.capture());
+
+        List<String> loggedMessages = getLoggedMessages();
+
+        assertThat(loggedMessages, containsInAnyOrder(
+                "Received a GoCardless event with id event1 for organisation ORG1 with resource type SUBSCRIPTIONS, which we do not expect to receive and do not handle.",
+                "Received a GoCardless event with id event2 for organisation ORG1 with resource type REFUNDS, which we do not expect to receive and do not handle."));
     }
 
     private List<String> getLoggedMessages() {
