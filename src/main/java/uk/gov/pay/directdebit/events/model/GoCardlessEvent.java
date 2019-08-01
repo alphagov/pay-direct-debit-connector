@@ -10,6 +10,29 @@ import java.util.Optional;
 
 public class GoCardlessEvent implements Event {
 
+    public static final String ACTION_MANDATE_SUBMITTED = "submitted";
+    public static final String ACTION_MANDATE_ACTIVE = "active";
+    public static final String ACTION_MANDATE_FAILED = "failed";
+    public static final String ACTION_MANDATE_CANCELLED = "cancelled";
+    public static final String ACTION_MANDATE_EXPIRED = "expired";
+    public static final String ACTION_MANDATE_REINSTATED = "reinstated";
+    public static final String ACTION_MANDATE_REPLACED = "replaced";
+    public static final String ACTION_MANDATE_CUSTOMER_APPROVAL_GRANTED = "customer_approval_granted";
+    public static final String ACTION_MANDATE_CUSTOMER_APPROVAL_SKIPPED = "customer_approval_skipped";
+    public static final String ACTION_MANDATE_RESUBMISSION_REQUESTED = "resubmission_requested";
+
+    public static final String ACTION_PAYMENT_SUBMITTED = "submitted";
+    public static final String ACTION_PAYMENT_FAILED = "failed";
+    public static final String ACTION_PAYMENT_PAID_OUT = "paid_out";
+    public static final String ACTION_PAYMENT_CUSTOMER_APPROVAL_DENIED = "customer_approval_denied";
+    public static final String ACTION_PAYMENT_CONFIRMED = "confirmed";
+    public static final String ACTION_PAYMENT_CANCELLED = "cancelled";
+    public static final String ACTION_PAYMENT_CHARGED_BACK = "charged_back";
+    public static final String ACTION_PAYMENT_CHARGEBACK_SETTLED = "chargeback_settled";
+    public static final String ACTION_PAYMENT_CHARGEBACK_CANCELLED = "chargeback_cancelled";
+    public static final String ACTION_PAYMENT_LATE_FAILURE_SETTLED = "late_failure_settled";
+    public static final String ACTION_PAYMENT_RESUBMISSION_REQUESTED = "resubmission_requested";
+
     private final Long id;
     private final String resourceId;
     private final GoCardlessEventId goCardlessEventId;

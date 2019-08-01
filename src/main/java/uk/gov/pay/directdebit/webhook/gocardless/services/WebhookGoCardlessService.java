@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsForGoCardlessEventsHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.UnhandledGoCardlessEventsLogger;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -37,27 +38,30 @@ public class WebhookGoCardlessService {
     private final MandateQueryService mandateQueryService;
     private final PaymentQueryService paymentQueryService;
     private final SendEmailsForGoCardlessEventsHandler sendEmailsForGoCardlessEventsHandler;
+    private final UnhandledGoCardlessEventsLogger unhandledGoCardlessEventsLogger;
 
     @Inject
     WebhookGoCardlessService(GoCardlessEventService goCardlessService,
                              MandateStateUpdater mandateStateUpdater,
                              PaymentStateUpdater paymentStateUpdater,
                              MandateQueryService mandateQueryService,
-                             PaymentQueryService paymentQueryService, 
-                             SendEmailsForGoCardlessEventsHandler sendEmailsForGoCardlessEventsHandler) {
+                             PaymentQueryService paymentQueryService,
+                             SendEmailsForGoCardlessEventsHandler sendEmailsForGoCardlessEventsHandler,
+                             UnhandledGoCardlessEventsLogger unhandledGoCardlessEventsLogger) {
         this.goCardlessService = goCardlessService;
         this.sendEmailsForGoCardlessEventsHandler = sendEmailsForGoCardlessEventsHandler;
         this.mandateStateUpdater = mandateStateUpdater;
         this.paymentStateUpdater = paymentStateUpdater;
         this.mandateQueryService = mandateQueryService;
         this.paymentQueryService = paymentQueryService;
+        this.unhandledGoCardlessEventsLogger = unhandledGoCardlessEventsLogger;
     }
 
     public void processEvents(List<GoCardlessEvent> events) {
         events.forEach(goCardlessService::storeEvent);
         updateStatesForEvents(events);
         sendEmailsForGoCardlessEventsHandler.sendEmails(events);
-        //TODO goCardlessEventErrorLogger.logErrorsForEvents(events)
+        unhandledGoCardlessEventsLogger.logUnhandledEvents(events);
     }
 
     private void updateStatesForEvents(List<GoCardlessEvent> events) {
