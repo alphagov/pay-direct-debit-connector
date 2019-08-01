@@ -14,6 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessEventId;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 
@@ -52,33 +54,43 @@ public class UnhandledGoCardlessEventsLoggerTest {
     }
 
     @Test
-    public void shouldLogForUnhandledMandateActions() {
+    public void shouldLogForUnhandledEventActions() {
         GoCardlessEvent unhandledMandateEvent1 = aGoCardlessEventFixture()
                 .withResourceType(MANDATES)
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("event1"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("ORG1"))
                 .withAction(ACTION_MANDATE_REPLACED)
                 .withLinksMandate(GoCardlessMandateId.valueOf("test-mandate-id1"))
                 .toEntity();
 
         GoCardlessEvent unhandledMandateEvent2 = aGoCardlessEventFixture()
                 .withResourceType(MANDATES)
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("event2"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("ORG1"))
                 .withAction(ACTION_MANDATE_RESUBMISSION_REQUESTED)
                 .withLinksMandate(GoCardlessMandateId.valueOf("test-mandate-id2"))
                 .toEntity();
 
         GoCardlessEvent handledMandateEvent = aGoCardlessEventFixture()
                 .withResourceType(MANDATES)
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("event3"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("ORG1"))
                 .withAction(ACTION_MANDATE_ACTIVE)
                 .withLinksMandate(GoCardlessMandateId.valueOf("test-mandate-id3"))
                 .toEntity();
 
         GoCardlessEvent unhandledPaymentEvent = aGoCardlessEventFixture()
                 .withResourceType(PAYMENTS)
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("event4"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("ORG1"))
                 .withAction(ACTION_PAYMENT_RESUBMISSION_REQUESTED)
                 .withLinksPayment(GoCardlessPaymentId.valueOf("test-payment-id1"))
                 .toEntity();
         
         GoCardlessEvent handledPaymentEvent = aGoCardlessEventFixture()
                 .withResourceType(PAYMENTS)
+                .withGoCardlessEventId(GoCardlessEventId.valueOf("event5"))
+                .withLinksOrganisation(GoCardlessOrganisationId.valueOf("ORG1"))
                 .withAction(ACTION_PAYMENT_FAILED)
                 .withLinksPayment(GoCardlessPaymentId.valueOf("test-payment-id2"))
                 .toEntity();
@@ -95,16 +107,16 @@ public class UnhandledGoCardlessEventsLoggerTest {
         List<String> loggedMessages = getLoggedMessages();
 
         assertThat(loggedMessages, containsInAnyOrder(
-                "Received a GoCardless event with action replaced for mandate test-mandate-id1, which we do not expect to receive and do not handle",
-                "Received a GoCardless event with action resubmission_requested for mandate test-mandate-id2, which we do not expect to receive and do not handle",
-                "Received a GoCardless event with action resubmission_requested for payment test-payment-id1, which we do not expect to receive and do not handle"));
+                "Received a GoCardless event with id event1 for organisation ORG1 with action replaced for mandate test-mandate-id1, which we do not expect to receive and do not handle.",
+                "Received a GoCardless event with id event2 for organisation ORG1 with action resubmission_requested for mandate test-mandate-id2, which we do not expect to receive and do not handle.",
+                "Received a GoCardless event with id event4 for organisation ORG1 with action resubmission_requested for payment test-payment-id1, which we do not expect to receive and do not handle."));
     }
-    
+
     private List<String> getLoggedMessages() {
         return loggingEventArgumentCaptor
                     .getAllValues()
                     .stream()
                     .map(LoggingEvent::getFormattedMessage)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toUnmodifiableList());
     }
 }
