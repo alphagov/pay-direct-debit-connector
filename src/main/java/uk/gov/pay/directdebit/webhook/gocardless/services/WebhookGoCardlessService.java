@@ -16,6 +16,7 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsForGoCardlessEventsHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.UnhandledGoCardlessEventsLogger;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -57,7 +58,7 @@ public class WebhookGoCardlessService {
         events.forEach(goCardlessService::storeEvent);
         updateStatesForEvents(events);
         sendEmailsForGoCardlessEventsHandler.sendEmails(events);
-        //TODO goCardlessEventErrorLogger.logErrorsForEvents(events)
+        UnhandledGoCardlessEventsLogger.logUnhandledEvents(events);
     }
 
     private void updateStatesForEvents(List<GoCardlessEvent> events) {

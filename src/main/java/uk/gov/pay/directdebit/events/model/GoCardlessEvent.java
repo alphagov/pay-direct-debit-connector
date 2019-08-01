@@ -9,6 +9,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class GoCardlessEvent implements Event {
+    
+    public static final String ACTION_MANDATE_FAILED = "failed";
+    public static final String ACTION_MANDATE_CANCELLED = "cancelled";
+    public static final String ACTION_MANDATE_REPLACED = "replaced";
+    public static final String ACTION_PAYMENT_FAILED = "failed";
+    public static final String ACTION_PAYMENT_RESUBMISSION_REQUESTED = "resubmission_requested";
 
     private final Long id;
     private final String resourceId;

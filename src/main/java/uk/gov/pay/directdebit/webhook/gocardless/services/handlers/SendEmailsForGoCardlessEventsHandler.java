@@ -17,6 +17,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import static uk.gov.pay.directdebit.events.model.GoCardlessEvent.ACTION_MANDATE_CANCELLED;
+import static uk.gov.pay.directdebit.events.model.GoCardlessEvent.ACTION_MANDATE_FAILED;
+import static uk.gov.pay.directdebit.events.model.GoCardlessEvent.ACTION_PAYMENT_FAILED;
 import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.MANDATES;
 import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYMENTS;
 
@@ -42,15 +45,15 @@ public class SendEmailsForGoCardlessEventsHandler {
     }
 
     public void sendEmails(List<GoCardlessEvent> events) {
-        events.stream().filter(byValidEventsForMandateResourceTypes).forEach(e -> sendEmailForMandateEvents(e));
-        events.stream().filter(byValidEventsForPaymentsResourceTypes).forEach(e -> sendEmailForPaymentEvents(e));
+        events.stream().filter(byValidEventsForMandateResourceTypes).forEach(this::sendEmailForMandateEvents);
+        events.stream().filter(byValidEventsForPaymentsResourceTypes).forEach(this::sendEmailForPaymentEvents);
     }
 
     private void sendEmailForPaymentEvents(GoCardlessEvent event) {
         GoCardlessPaymentId goCardlessPaymentId = event.getLinksPayment()
                 .orElseThrow(() -> new GoCardlessEventHasNoPaymentIdException(event.getGoCardlessEventId()));
         
-        if (event.getAction().equals("failed")) {
+        if (event.getAction().equals(ACTION_PAYMENT_FAILED)) {
             Payment payment = paymentQueryService.findByGoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId, event.getLinksOrganisation())
                 .orElseThrow(() -> new PaymentNotFoundException(goCardlessPaymentId, event.getLinksOrganisation()));
             userNotificationService.sendPaymentFailedEmailFor(payment);
@@ -59,10 +62,10 @@ public class SendEmailsForGoCardlessEventsHandler {
 
     private void sendEmailForMandateEvents(GoCardlessEvent event) {
         switch (event.getAction()) {
-            case "cancelled": 
+            case ACTION_MANDATE_CANCELLED: 
                 userNotificationService.sendMandateCancelledEmailFor(getMandate(event)); 
                 break;
-            case "failed": 
+            case ACTION_MANDATE_FAILED: 
                 userNotificationService.sendMandateFailedEmailFor(getMandate(event));
         }
     }
