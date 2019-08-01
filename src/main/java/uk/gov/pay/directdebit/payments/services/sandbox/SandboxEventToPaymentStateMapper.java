@@ -3,16 +3,15 @@ package uk.gov.pay.directdebit.payments.services.sandbox;
 import uk.gov.pay.directdebit.common.model.DirectDebitStateWithDetails;
 import uk.gov.pay.directdebit.events.model.SandboxEvent;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
+
 public class SandboxEventToPaymentStateMapper {
-    private static final Map<String, PaymentState> SANDBOX_ACTION_TO_PAYMENT_STATE = Map.of(
-            GoCardlessPaymentHandler.GoCardlessPaymentAction.PAID_OUT.toString(), PaymentState.PAID_OUT
-    );
+    private static final Map<String, PaymentState> SANDBOX_ACTION_TO_PAYMENT_STATE = Map.of("PAID_OUT", PAID_OUT);
 
     static final Set<String> SANDBOX_ACTIONS_THAT_CHANGE_PAYMENT_STATE = SANDBOX_ACTION_TO_PAYMENT_STATE.keySet();
 

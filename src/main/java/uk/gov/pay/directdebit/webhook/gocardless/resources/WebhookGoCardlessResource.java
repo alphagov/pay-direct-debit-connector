@@ -39,7 +39,7 @@ public class WebhookGoCardlessResource {
         goCardlessWebhookVerifier.verify(body, webhookSignature);
         List<GoCardlessEvent> events = goCardlessWebhookParser.parse(body);
         LOGGER.info("Received valid webhook from GoCardless, containing {} events", events.size());
-        webhookGoCardlessService.handleEvents(events);
+        webhookGoCardlessService.processEvents(events);
         return Response.status(OK).build();
     }
 

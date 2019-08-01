@@ -4,7 +4,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
-import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.events.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
@@ -16,63 +15,55 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessActionHandler;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsForGoCardlessEventsHandler;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.groupingBy;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.MANDATES;
+import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYMENTS;
 
 public class WebhookGoCardlessService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebhookGoCardlessService.class);
 
     private final GoCardlessEventService goCardlessService;
-    private final GoCardlessPaymentHandler goCardlessPaymentHandler;
-    private final GoCardlessMandateHandler goCardlessMandateHandler;
     private final MandateStateUpdater mandateStateUpdater;
     private final PaymentStateUpdater paymentStateUpdater;
     private final MandateQueryService mandateQueryService;
     private final PaymentQueryService paymentQueryService;
+    private final SendEmailsForGoCardlessEventsHandler sendEmailsForGoCardlessEventsHandler;
 
     @Inject
     WebhookGoCardlessService(GoCardlessEventService goCardlessService,
-                             GoCardlessPaymentHandler goCardlessPaymentHandler,
-                             GoCardlessMandateHandler goCardlessMandateHandler,
                              MandateStateUpdater mandateStateUpdater,
                              PaymentStateUpdater paymentStateUpdater,
                              MandateQueryService mandateQueryService,
-                             PaymentQueryService paymentQueryService) {
+                             PaymentQueryService paymentQueryService, 
+                             SendEmailsForGoCardlessEventsHandler sendEmailsForGoCardlessEventsHandler) {
         this.goCardlessService = goCardlessService;
-        this.goCardlessPaymentHandler = goCardlessPaymentHandler;
-        this.goCardlessMandateHandler = goCardlessMandateHandler;
+        this.sendEmailsForGoCardlessEventsHandler = sendEmailsForGoCardlessEventsHandler;
         this.mandateStateUpdater = mandateStateUpdater;
         this.paymentStateUpdater = paymentStateUpdater;
         this.mandateQueryService = mandateQueryService;
         this.paymentQueryService = paymentQueryService;
     }
 
-    public void handleEvents(List<GoCardlessEvent> events) {
+    public void processEvents(List<GoCardlessEvent> events) {
         events.forEach(goCardlessService::storeEvent);
+        updateStatesForEvents(events);
+        sendEmailsForGoCardlessEventsHandler.sendEmails(events);
+        //TODO goCardlessEventErrorLogger.logErrorsForEvents(events)
+    }
 
-        Map<GoCardlessResourceType, List<GoCardlessEvent>> eventsGroupedByResourceType = events.stream().collect(groupingBy(GoCardlessEvent::getResourceType));
-        updateStateForMandateEvents(eventsGroupedByResourceType.getOrDefault(GoCardlessResourceType.MANDATES, Collections.emptyList()));
-        updateStateForPaymentEvents(eventsGroupedByResourceType.getOrDefault(GoCardlessResourceType.PAYMENTS, Collections.emptyList()));
-
-        events.forEach(event -> {
-            GoCardlessActionHandler handler = getHandlerFor(event.getResourceType());
-            LOGGER.info("About to handle event of type: {}, action: {}, resource id: {}",
-                    event.getResourceType(),
-                    event.getAction(),
-                    event.getResourceId());
-            handler.handle(event);
-        });
+    private void updateStatesForEvents(List<GoCardlessEvent> events) {
+        var eventsGroupedByResourceType = events.stream().collect(groupingBy(GoCardlessEvent::getResourceType));
+        updateStateForMandateEvents(eventsGroupedByResourceType.getOrDefault(MANDATES, emptyList()));
+        updateStateForPaymentEvents(eventsGroupedByResourceType.getOrDefault(PAYMENTS, emptyList()));
     }
 
     private void updateStateForMandateEvents(List<GoCardlessEvent> eventsThatAffectMandates) {
@@ -143,21 +134,5 @@ public class WebhookGoCardlessService {
                             goCardlessOrganisationId));
                     return Optional.empty();
                 });
-    }
-
-    private void logUnknownResourceTypeForEvent(GoCardlessEvent event) {
-        LOGGER.info("unhandled resource type for event with id {} ", event.getGoCardlessEventId());
-    }
-
-    private GoCardlessActionHandler getHandlerFor(GoCardlessResourceType goCardlessResourceType) {
-        switch (goCardlessResourceType) {
-            case PAYMENTS:
-            case PAYOUTS:
-                return goCardlessPaymentHandler;
-            case MANDATES:
-                return goCardlessMandateHandler;
-            default:
-                return this::logUnknownResourceTypeForEvent;
-        }
     }
 }

@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
+import uk.gov.pay.directdebit.events.model.GoCardlessResourceType;
 import uk.gov.pay.directdebit.events.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
@@ -18,8 +19,7 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessMandateHandler;
-import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.GoCardlessPaymentHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsForGoCardlessEventsHandler;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,21 +33,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.MANDATES;
 import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYMENTS;
-import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.REFUNDS;
-import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.SUBSCRIPTIONS;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 
 @RunWith(MockitoJUnitRunner.class)
-
 public class WebhookGoCardlessServiceTest {
     @Mock
     private GoCardlessEventService mockedGoCardlessEventService;
 
     @Mock
-    private GoCardlessPaymentHandler mockedGoCardlessPaymentHandler;
-
-    @Mock
-    private GoCardlessMandateHandler mockedGoCardlessMandateHandler;
+    private SendEmailsForGoCardlessEventsHandler mockedSendEmailsForGoCardlessEventsHandler;
 
     @Mock
     private MandateStateUpdater mockedMandateStateUpdater;
@@ -66,63 +60,29 @@ public class WebhookGoCardlessServiceTest {
 
     @Test
     public void shouldInsertEvents() {
-        GoCardlessEvent firstGoCardlessEvent = aGoCardlessEventFixture().toEntity();
-        GoCardlessEvent secondGoCardlessEvent = aGoCardlessEventFixture().toEntity();
-        List<GoCardlessEvent> events = Arrays.asList(firstGoCardlessEvent, secondGoCardlessEvent);
-        webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventService).storeEvent(firstGoCardlessEvent);
-        verify(mockedGoCardlessEventService).storeEvent(secondGoCardlessEvent);
+        Arrays.stream(GoCardlessResourceType.values()).forEach(t -> {
+                    GoCardlessEvent event = aGoCardlessEventFixture().withResourceType(t).toEntity();
+
+                    when(mockedMandateQueryService.findByGoCardlessMandateIdAndOrganisationId(
+                            event.getLinksMandate().get(), event.getLinksOrganisation()))
+                            .thenReturn(mock(Mandate.class));
+
+                    webhookGoCardlessService.processEvents(List.of(event));
+                    verify(mockedGoCardlessEventService).storeEvent(event);
+                }
+        );
     }
-
-    @Test
-    public void shouldStoreButNotHandleEventsWithRefundsResource() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(REFUNDS).withAction("created").toEntity();
-
-        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
-        webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-    }
-
-    @Test
-    public void shouldStoreButNotHandleEventsWithSubscriptionsResource() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(SUBSCRIPTIONS).withAction("created").toEntity();
-
-        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
-        webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-    }
-
-    @Test
-    public void shouldStoreButNotHandlePaymentEventsWithAnUnhandledAction() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(PAYMENTS).withAction("not_handled").toEntity();
-        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
-
-        webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-    }
-
-    @Test
-    public void shouldStoreButNotHandleMandateEventsWithAnUnhandledAction() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(MANDATES).withAction("not_handled_again").toEntity();
-        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
-
-        when(mockedMandateQueryService.findByGoCardlessMandateIdAndOrganisationId(
-                goCardlessEvent.getLinksMandate().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(mock(Mandate.class));
-
-        webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-    }
-
+    
     @Test
     public void shouldStorePaymentEventsWhenHandlingThemThrowsAnException() {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(PAYMENTS).withAction("created").toEntity();
 
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
 
-        doThrow(new GoCardlessPaymentNotFoundException("OOPSIE")).when(mockedGoCardlessPaymentHandler).handle(goCardlessEvent);
+        doThrow(new GoCardlessPaymentNotFoundException("OOPSIE"))
+                .when(mockedSendEmailsForGoCardlessEventsHandler).sendEmails(List.of(goCardlessEvent));
         try {
-            webhookGoCardlessService.handleEvents(events);
+            webhookGoCardlessService.processEvents(events);
             fail("Expected GoCardlessPaymentNotFoundException.");
         } catch (GoCardlessPaymentNotFoundException expected) {
         }
@@ -138,35 +98,13 @@ public class WebhookGoCardlessServiceTest {
                 goCardlessEvent.getLinksMandate().get(), goCardlessEvent.getLinksOrganisation()))
                 .thenReturn(mock(Mandate.class));
 
-        doThrow(new GoCardlessMandateNotFoundException("error", "OOPSIE")).when(mockedGoCardlessMandateHandler).handle(goCardlessEvent);
+        doThrow(new GoCardlessMandateNotFoundException("error", "OOPSIE"))
+                .when(mockedSendEmailsForGoCardlessEventsHandler).sendEmails(List.of(goCardlessEvent));
         try {
-            webhookGoCardlessService.handleEvents(events);
+            webhookGoCardlessService.processEvents(events);
             fail("Expected GoCardlessMandateNotFoundException.");
         } catch (GoCardlessMandateNotFoundException expected) {
         }
-        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-    }
-
-    @Test
-    public void shouldStorePaymentEventsWithAValidAction() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(PAYMENTS).withAction("paid_out").toEntity();
-        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
-
-        webhookGoCardlessService.handleEvents(events);
-        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
-    }
-
-    @Test
-    public void shouldStoreMandateEventsWithAValidAction() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(MANDATES).withAction("created").toEntity();
-
-        List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
-
-        when(mockedMandateQueryService.findByGoCardlessMandateIdAndOrganisationId(
-                goCardlessEvent.getLinksMandate().get(), goCardlessEvent.getLinksOrganisation()))
-                .thenReturn(mock(Mandate.class));
-
-        webhookGoCardlessService.handleEvents(events);
         verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
     }
 
@@ -183,36 +121,42 @@ public class WebhookGoCardlessServiceTest {
 
         GoCardlessEvent goCardlessOrganisation1Mandate1Event = aGoCardlessEventFixture()
                 .withResourceType(MANDATES)
+                .withAction("active")
                 .withLinksMandate(goCardlessMandateId1)
                 .withLinksOrganisation(goCardlessOrganisationId1)
                 .toEntity();
 
         GoCardlessEvent anotherGoCardlessOrganisation1Mandate1Event = aGoCardlessEventFixture()
                 .withResourceType(MANDATES)
+                .withAction("active")
                 .withLinksMandate(goCardlessMandateId1)
                 .withLinksOrganisation(goCardlessOrganisationId1)
                 .toEntity();
 
         GoCardlessEvent goCardlessOrganisation1Mandate2Event = aGoCardlessEventFixture()
                 .withResourceType(MANDATES)
+                .withAction("active")
                 .withLinksMandate(goCardlessMandateId2)
                 .withLinksOrganisation(goCardlessOrganisationId1)
                 .toEntity();
 
         GoCardlessEvent goCardlessOrganisation1Payment1Event = aGoCardlessEventFixture()
                 .withResourceType(PAYMENTS)
+                .withAction("confirmed")
                 .withLinksPayment(goCardlessPaymentId1)
                 .withLinksOrganisation(goCardlessOrganisationId1)
                 .toEntity();
 
         GoCardlessEvent goCardlessOrganisation1Payment2Event = aGoCardlessEventFixture()
                 .withResourceType(PAYMENTS)
+                .withAction("confirmed")
                 .withLinksPayment(goCardlessPaymentId2)
                 .withLinksOrganisation(goCardlessOrganisationId1)
                 .toEntity();
 
         GoCardlessEvent goCardlessOrganisation2Mandate1Event = aGoCardlessEventFixture()
                 .withResourceType(MANDATES)
+                .withAction("active")
                 .withLinksMandate(goCardlessMandateId1)
                 .withLinksOrganisation(goCardlessOrganisationId2)
                 .toEntity();
@@ -239,7 +183,7 @@ public class WebhookGoCardlessServiceTest {
         when(mockedPaymentQueryService.findByGoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId2, goCardlessOrganisationId1))
                 .thenReturn(Optional.of(payment2));
 
-        webhookGoCardlessService.handleEvents(List.of(
+        webhookGoCardlessService.processEvents(List.of(
                 goCardlessOrganisation1Mandate1Event,
                 goCardlessOrganisation1Mandate2Event,
                 anotherGoCardlessOrganisation1Mandate1Event,
@@ -262,24 +206,28 @@ public class WebhookGoCardlessServiceTest {
 
         GoCardlessEvent legitimateMandateEvent = aGoCardlessEventFixture()
                 .withResourceType(MANDATES)
+                .withAction("active")
                 .withLinksMandate(mandateId)
                 .withLinksOrganisation(organisationId)
                 .toEntity();
 
         GoCardlessEvent legitimatePaymentEvent = aGoCardlessEventFixture()
                 .withResourceType(PAYMENTS)
+                .withAction("confirmed")
                 .withLinksPayment(paymentId)
                 .withLinksOrganisation(organisationId)
                 .toEntity();
 
         GoCardlessEvent cursedMandateEventNotLinkedToMandate = aGoCardlessEventFixture()
                 .withResourceType(MANDATES)
+                .withAction("active")
                 .withLinksMandate(null)
                 .withLinksOrganisation(organisationId)
                 .toEntity();
 
         GoCardlessEvent cursedPaymentEventNotLinkedToPayment = aGoCardlessEventFixture()
                 .withResourceType(PAYMENTS)
+                .withAction("confirmed")
                 .withLinksPayment(null)
                 .withLinksOrganisation(organisationId)
                 .toEntity();
@@ -294,7 +242,7 @@ public class WebhookGoCardlessServiceTest {
         when(mockedPaymentQueryService.findByGoCardlessPaymentIdAndOrganisationId(paymentId, organisationId))
                 .thenReturn(Optional.of(payment));
 
-        webhookGoCardlessService.handleEvents(List.of(
+        webhookGoCardlessService.processEvents(List.of(
                 legitimateMandateEvent,
                 legitimatePaymentEvent,
                 cursedMandateEventNotLinkedToMandate,
