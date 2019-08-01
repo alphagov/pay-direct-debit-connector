@@ -16,8 +16,8 @@ import uk.gov.pay.directdebit.notifications.services.UserNotificationService;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 
 @RunWith(JUnitParamsRunner.class)
@@ -39,20 +39,20 @@ public class SendEmailsForGoCardlessEventsHandlerTest {
                 .withResourceType(GoCardlessResourceType.valueOf(resourceType))
                 .withAction("created")
                 .toEntity();
-        goCardlessMandateHandler.handle(List.of(goCardlessEvent));
-        verify(userNotificationService, never()).sendMandateCancelledEmailFor(any());
-        verify(userNotificationService, never()).sendMandateFailedEmailFor(any());
+        goCardlessMandateHandler.sendEmails(List.of(goCardlessEvent));
+        verifyZeroInteractions(userNotificationService);
+        verifyZeroInteractions(userNotificationService);
     }
 
     @Test
-    @Parameters({"PAYMENTS", "MANDATES"})
+    @Parameters({"PAYMENTS", "MANDATES", "PAYOUTS"})
     public void shouldNotSendEmailForEventsWithIrrevelantActions(String resourceType) {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture()
                 .withResourceType(GoCardlessResourceType.valueOf(resourceType))
                 .withAction("not_handled")
                 .toEntity();
-        goCardlessMandateHandler.handle(List.of(goCardlessEvent));
-        verify(userNotificationService, never()).sendMandateCancelledEmailFor(any());
-        verify(userNotificationService, never()).sendMandateFailedEmailFor(any());
+        goCardlessMandateHandler.sendEmails(List.of(goCardlessEvent));
+        verifyZeroInteractions(userNotificationService);
+        verifyZeroInteractions(userNotificationService);
     }
 }

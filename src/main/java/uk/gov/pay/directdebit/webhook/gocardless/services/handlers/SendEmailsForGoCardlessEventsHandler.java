@@ -24,15 +24,11 @@ import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYOUTS
 
 public class SendEmailsForGoCardlessEventsHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SendEmailsForGoCardlessEventsHandler.class);
-    
     private static Predicate<GoCardlessEvent> byValidEventsForMandateResourceTypes =
             event -> MANDATES.equals(event.getResourceType());
     
     private static Predicate<GoCardlessEvent> byValidEventsForPaymentsAndPayoutsResourceTypes =
-            event -> Set.of(PAYMENTS, PAYOUTS).contains(event.getResourceType()) &&
-                    Set.of("created", "submitted", "confirmed", "failed", "paid_out", "paid")
-                            .contains(event.getAction().toLowerCase());
+            event -> Set.of(PAYMENTS, PAYOUTS).contains(event.getResourceType());
 
     private final MandateQueryService mandateQueryService;
     private final UserNotificationService userNotificationService;
@@ -47,27 +43,24 @@ public class SendEmailsForGoCardlessEventsHandler {
         this.paymentQueryService = paymentQueryService;
     }
 
-    public void handle(List<GoCardlessEvent> events) {
-        events.stream().filter(byValidEventsForMandateResourceTypes).forEach(e -> handleMandate(e));
-        events.stream().filter(byValidEventsForPaymentsAndPayoutsResourceTypes).forEach(e -> handlePayment(e));
+    public void sendEmails(List<GoCardlessEvent> events) {
+        events.stream().filter(byValidEventsForMandateResourceTypes).forEach(e -> sendEmailForMandateEvents(e));
+        events.stream().filter(byValidEventsForPaymentsAndPayoutsResourceTypes).forEach(e -> sendEmailForPaymentEvents(e));
     }
 
-    private void handlePayment(GoCardlessEvent event) {
-        logEvent(event);
+    private void sendEmailForPaymentEvents(GoCardlessEvent event) {
         GoCardlessPaymentId goCardlessPaymentId = event.getLinksPayment()
                 .orElseThrow(() -> new GoCardlessEventHasNoPaymentIdException(event.getGoCardlessEventId()));
-
-        Payment payment = paymentQueryService.findByGoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId, event.getLinksOrganisation())
+        
+        if (event.getAction().equals("failed")) {
+            Payment payment = paymentQueryService.findByGoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId, event.getLinksOrganisation())
                 .orElseThrow(() -> new PaymentNotFoundException(goCardlessPaymentId, event.getLinksOrganisation()));
-
-        if (event.getAction().equalsIgnoreCase("failed")) {
             userNotificationService.sendPaymentFailedEmailFor(payment);
         }
     }
 
-    private void handleMandate(GoCardlessEvent event) {
-        logEvent(event);
-        switch (event.getAction().toLowerCase()) {
+    private void sendEmailForMandateEvents(GoCardlessEvent event) {
+        switch (event.getAction()) {
             case "cancelled": 
                 userNotificationService.sendMandateCancelledEmailFor(getMandate(event)); 
                 break;
@@ -80,12 +73,5 @@ public class SendEmailsForGoCardlessEventsHandler {
         return mandateQueryService.findByGoCardlessMandateIdAndOrganisationId(
                     event.getLinksMandate().orElseThrow(() -> new GoCardlessEventHasNoMandateIdException(event.getGoCardlessEventId())),
                     event.getLinksOrganisation());
-    }
-
-    private static void logEvent(GoCardlessEvent event) {
-        LOGGER.info("About to handle event of type: {}, action: {}, resource id: {}",
-                event.getResourceType(),
-                event.getAction(),
-                event.getResourceId());
     }
 }

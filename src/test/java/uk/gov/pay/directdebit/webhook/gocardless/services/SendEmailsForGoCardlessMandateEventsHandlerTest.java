@@ -22,9 +22,9 @@ import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsFor
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -64,9 +64,9 @@ public class SendEmailsForGoCardlessMandateEventsHandlerTest {
                 goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation()))
                 .thenReturn(mandateFixture.toEntity());
 
-        sendEmailsForGoCardlessEventsHandler.handle(List.of(goCardlessEvent));
+        sendEmailsForGoCardlessEventsHandler.sendEmails(List.of(goCardlessEvent));
 
-        verify(userNotificationService, times(1)).sendMandateFailedEmailFor(mandateFixture.toEntity());
+        verify(userNotificationService).sendMandateFailedEmailFor(mandateFixture.toEntity());
     }
 
     @Test
@@ -77,7 +77,7 @@ public class SendEmailsForGoCardlessMandateEventsHandlerTest {
                 goCardlessEvent.getLinksMandate().get(), goCardlessEventFixture.getLinksOrganisation()))
                 .thenReturn(mandateFixture.toEntity());
 
-        sendEmailsForGoCardlessEventsHandler.handle(List.of(goCardlessEvent));
+        sendEmailsForGoCardlessEventsHandler.sendEmails(List.of(goCardlessEvent));
 
         verify(userNotificationService, times(1)).sendMandateCancelledEmailFor(mandateFixture.toEntity());
     }
@@ -91,7 +91,7 @@ public class SendEmailsForGoCardlessMandateEventsHandlerTest {
                 .toEntity();
 
         thrown.expect(GoCardlessEventHasNoMandateIdException.class);
-        sendEmailsForGoCardlessEventsHandler.handle(List.of(goCardlessEvent));
-        verify(userNotificationService, never()).sendMandateCancelledEmailFor(any());
+        sendEmailsForGoCardlessEventsHandler.sendEmails(List.of(goCardlessEvent));
+        verifyZeroInteractions(userNotificationService);
     }
 }

@@ -80,7 +80,7 @@ public class WebhookGoCardlessServiceTest {
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
 
         doThrow(new GoCardlessPaymentNotFoundException("OOPSIE"))
-                .when(mockedSendEmailsForGoCardlessEventsHandler).handle(List.of(goCardlessEvent));
+                .when(mockedSendEmailsForGoCardlessEventsHandler).sendEmails(List.of(goCardlessEvent));
         try {
             webhookGoCardlessService.processEvents(events);
             fail("Expected GoCardlessPaymentNotFoundException.");
@@ -99,7 +99,7 @@ public class WebhookGoCardlessServiceTest {
                 .thenReturn(mock(Mandate.class));
 
         doThrow(new GoCardlessMandateNotFoundException("error", "OOPSIE"))
-                .when(mockedSendEmailsForGoCardlessEventsHandler).handle(List.of(goCardlessEvent));
+                .when(mockedSendEmailsForGoCardlessEventsHandler).sendEmails(List.of(goCardlessEvent));
         try {
             webhookGoCardlessService.processEvents(events);
             fail("Expected GoCardlessMandateNotFoundException.");
