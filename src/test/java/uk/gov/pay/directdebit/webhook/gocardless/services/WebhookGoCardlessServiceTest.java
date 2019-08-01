@@ -20,6 +20,7 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 import uk.gov.pay.directdebit.payments.services.PaymentStateUpdater;
 import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsForGoCardlessEventsHandler;
+import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.UnhandledGoCardlessEventsLogger;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,6 +55,9 @@ public class WebhookGoCardlessServiceTest {
     
     @Mock
     private PaymentQueryService mockedPaymentQueryService;
+    
+    @Mock
+    private UnhandledGoCardlessEventsLogger mockedUnhandledGoCardlessEventsLogger;
 
     @InjectMocks
     private WebhookGoCardlessService webhookGoCardlessService;

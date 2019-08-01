@@ -17,6 +17,9 @@ public class GoCardlessEvent implements Event {
     public static final String ACTION_MANDATE_EXPIRED = "expired";
     public static final String ACTION_MANDATE_REINSTATED = "reinstated";
     public static final String ACTION_MANDATE_REPLACED = "replaced";
+    public static final String ACTION_MANDATE_CUSTOMER_APPROVAL_GRANTED = "customer_approval_granted";
+    public static final String ACTION_MANDATE_CUSTOMER_APPROVAL_SKIPPED = "customer_approval_skipped";
+    public static final String ACTION_MANDATE_RESUBMISSION_REQUESTED = "resubmission_requested";
 
     public static final String ACTION_PAYMENT_SUBMITTED = "submitted";
     public static final String ACTION_PAYMENT_FAILED = "failed";
