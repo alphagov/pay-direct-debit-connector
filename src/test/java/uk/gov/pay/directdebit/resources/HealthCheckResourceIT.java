@@ -30,7 +30,7 @@ public class HealthCheckResourceIT {
                 .get("/healthcheck")
                 .then()
                 .statusCode(OK.getStatusCode())
-                .body("database.healthy", is(true))
+                .body("postgresql.healthy", is(true))
                 .body("ping.healthy", is(true));
     }
 }
