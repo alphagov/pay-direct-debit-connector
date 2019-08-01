@@ -1,7 +1,5 @@
 package uk.gov.pay.directdebit.webhook.gocardless.services.handlers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoMandateIdException;
 import uk.gov.pay.directdebit.events.exception.GoCardlessEventHasNoPaymentIdException;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
@@ -15,20 +13,20 @@ import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
 import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.MANDATES;
 import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYMENTS;
-import static uk.gov.pay.directdebit.events.model.GoCardlessResourceType.PAYOUTS;
 
 public class SendEmailsForGoCardlessEventsHandler {
 
     private static Predicate<GoCardlessEvent> byValidEventsForMandateResourceTypes =
             event -> MANDATES.equals(event.getResourceType());
     
-    private static Predicate<GoCardlessEvent> byValidEventsForPaymentsAndPayoutsResourceTypes =
-            event -> Set.of(PAYMENTS, PAYOUTS).contains(event.getResourceType());
+    private static Predicate<GoCardlessEvent> byValidEventsForPaymentsResourceTypes =
+            event -> PAYMENTS.equals(event.getResourceType());
 
     private final MandateQueryService mandateQueryService;
     private final UserNotificationService userNotificationService;
@@ -45,7 +43,7 @@ public class SendEmailsForGoCardlessEventsHandler {
 
     public void sendEmails(List<GoCardlessEvent> events) {
         events.stream().filter(byValidEventsForMandateResourceTypes).forEach(e -> sendEmailForMandateEvents(e));
-        events.stream().filter(byValidEventsForPaymentsAndPayoutsResourceTypes).forEach(e -> sendEmailForPaymentEvents(e));
+        events.stream().filter(byValidEventsForPaymentsResourceTypes).forEach(e -> sendEmailForPaymentEvents(e));
     }
 
     private void sendEmailForPaymentEvents(GoCardlessEvent event) {
