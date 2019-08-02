@@ -17,7 +17,7 @@ public class GovUkPayEventToPaymentStateMapper {
     private static final Map<GovUkPayEventType, PaymentState> GOV_UK_PAY_EVENT_TYPE_TO_PAYMENT_STATE = Map.of(
             PAYMENT_CREATED, PaymentState.CREATED,
             PAYMENT_SUBMITTED, PaymentState.SUBMITTED_TO_PROVIDER,
-            PAYMENT_ERROR_SUBMITTING_TO_PROVIDER, PaymentState.ERROR_SUBMITTING_TO_PROVIDER
+            PAYMENT_ERROR_SUBMITTING_TO_PROVIDER, PaymentState.PROVIDER_ERROR
     );
 
     public static final Set<GovUkPayEventType> GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_PAYMENT_STATE = GOV_UK_PAY_EVENT_TYPE_TO_PAYMENT_STATE.keySet();

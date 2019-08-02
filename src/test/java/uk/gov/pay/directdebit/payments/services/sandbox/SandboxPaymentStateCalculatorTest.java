@@ -92,7 +92,7 @@ public class SandboxPaymentStateCalculatorTest {
     @Parameters({
             "PAYMENT_CREATED, CREATED",
             "PAYMENT_SUBMITTED, SUBMITTED_TO_PROVIDER",
-            "PAYMENT_ERROR_SUBMITTING_TO_PROVIDER, ERROR_SUBMITTING_TO_PROVIDER"
+            "PAYMENT_ERROR_SUBMITTING_TO_PROVIDER, PROVIDER_ERROR"
     })
     public void govUkPayEventTypeMapsToState(String eventType, String expectedState) {
         GovUkPayEventType govUkPayEventType = GovUkPayEventType.valueOf(eventType);
