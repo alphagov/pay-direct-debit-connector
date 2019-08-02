@@ -20,10 +20,10 @@ public class PaymentViewDao {
             "p.state AS state, " +
             "p.state_details AS state_details, " +
             "p.state_details_description AS state_details_description, " +
+            "p.payment_provider_id as provider_id, " +
             "pa.name AS name, " +
             "pa.email AS email, " +
             "ga.payment_provider as payment_provider, " +
-            "m.payment_provider_id as provider_id, " +
             "m.external_id as mandate_external_id " +
             "FROM payments p " +
             "INNER JOIN mandates m ON p.mandate_id = m.id " +
