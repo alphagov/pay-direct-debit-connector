@@ -67,6 +67,7 @@ public interface MandateDao {
             "  m.state_details AS mandate_state_details," +
             "  m.state_details_description AS mandate_state_details_description," +
             "  m.created_date AS mandate_created_date," +
+            "  m.description AS mandate_description," +
             "  m.payment_provider_id AS mandate_payment_provider_id," +
             "  g.id AS gateway_account_id," +
             "  g.external_id AS gateway_account_external_id," +

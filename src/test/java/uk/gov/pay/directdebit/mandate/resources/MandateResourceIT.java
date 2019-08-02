@@ -224,7 +224,7 @@ public class MandateResourceIT {
 
     private String createMandate() throws JsonProcessingException {
         ValidatableResponse response = givenSetup()
-                .body(objectMapper.writeValueAsString(Map.of("return_url", "http://example.com", "service_reference", "ref")))
+                .body(objectMapper.writeValueAsString(Map.of("return_url", "http://example.com", "service_reference", "ref", "description", "desc")))
                 .post(format("/v1/api/accounts/%s/mandates", gatewayAccountFixture.getExternalId()))
                 .then()
                 .statusCode(HttpStatus.SC_CREATED)

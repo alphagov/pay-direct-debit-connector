@@ -30,6 +30,7 @@ public class MandateMapper implements RowMapper<Mandate> {
     private static final String EXTERNAL_ID_COLUMN = "mandate_external_id";
     private static final String STATE_COLUMN = "mandate_state";
     private static final String STATE_DETAILS_COLUMN = "mandate_state_details";
+    private static final String DESCRIPTION_COLUMN = "mandate_description";
     private static final String STATE_DETAILS_DESCRIPTION_COLUMN = "mandate_state_details_description";
     private static final String PAYMENT_PROVIDER_ID = "mandate_payment_provider_id";
     private static final String MANDATE_MANDATE_REFERENCE_COLUMN = "mandate_mandate_reference";
@@ -100,6 +101,9 @@ public class MandateMapper implements RowMapper<Mandate> {
                 .withReturnUrl(resultSet.getString(RETURN_URL_COLUMN))
                 .withCreatedDate(ZonedDateTime.ofInstant(resultSet.getTimestamp(CREATED_DATE_COLUMN).toInstant(), ZoneOffset.UTC))
                 .withPayer(payer);
+
+        Optional.ofNullable(resultSet.getString(DESCRIPTION_COLUMN))
+                .ifPresent(mandateBuilder::withDescription);
 
         Optional.ofNullable(resultSet.getString(PAYMENT_PROVIDER_ID))
                 .map(paymentProviderId -> resolvePaymentProviderMandateId(gatewayAccount.getPaymentProvider(), paymentProviderId))
