@@ -94,6 +94,14 @@ public class PaymentResponse {
         return reference;
     }
 
+    public MandateExternalId getMandateId() {
+        return mandateId;
+    }
+
+    public PaymentProviderPaymentId getProviderId() {
+        return providerId;
+    }
+
     public static PaymentResponse from(Payment payment) {
         PaymentResponseBuilder paymentResponseBuilder = aPaymentResponse()
                 .withPaymentExternalId(payment.getExternalId())

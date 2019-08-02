@@ -13,6 +13,8 @@ import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
+import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
+import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
 import uk.gov.pay.directdebit.payments.params.SearchDateParams;
@@ -24,6 +26,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
 import static uk.gov.pay.directdebit.mandate.fixtures.MandateFixture.aMandateFixture;
 import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
@@ -85,7 +88,7 @@ public class PaymentViewDaoIT {
             MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
             aPayerFixture()
                     .withMandateId(mandateFixture.getId())
-                    .withName("Joe Bog" + i)
+                    .withName("Joe Bloggs" + i)
                     .insert(testContext.getJdbi());
             aPaymentFixture()
                     .withId((long) i)
@@ -102,6 +105,49 @@ public class PaymentViewDaoIT {
                 .build();
         List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
         assertThat(viewList.size(), is(1));
+    }
+
+    @Test
+    public void responseShouldContainExpectedData() {
+        GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
+                .withPaymentProvider(GOCARDLESS)
+                .insert(testContext.getJdbi());
+
+        MandateFixture mandateFixture = aMandateFixture()
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .insert(testContext.getJdbi());
+        
+        aPayerFixture()
+                .withMandateId(mandateFixture.getId())
+                .withName("Joe Bloggs")
+                .insert(testContext.getJdbi());
+        
+        Payment payment = aPaymentFixture()
+                .withId(1L)
+                .withMandateFixture(mandateFixture)
+                .withReference("important reference")
+                .withDescription("description")
+                .withAmount(1000L)
+                .withExternalId("an-external-id")
+                .withPaymentProviderId(GoCardlessPaymentId.valueOf("PMTEST01"))
+                .insert(testContext.getJdbi())
+                .toEntity();
+
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountFixture.getExternalId())
+                .build();
+        
+        List<PaymentResponse> viewList = paymentViewDao.searchPaymentView(searchParams);
+        assertThat(viewList.size(), is(1));
+
+        PaymentResponse paymentResponse = viewList.get(0);
+        assertThat(paymentResponse.getCreatedDate(), is(payment.getCreatedDate()));
+        assertThat(paymentResponse.getReference(), is(payment.getReference()));
+        assertThat(paymentResponse.getAmount(), is(payment.getAmount()));
+        assertThat(paymentResponse.getDescription(), is(payment.getDescription()));
+        assertThat(paymentResponse.getPaymentExternalId(), is(payment.getExternalId()));
+        assertThat(paymentResponse.getPaymentProvider(), is(payment.getMandate().getGatewayAccount().getPaymentProvider()));
+        assertThat(paymentResponse.getMandateId(), is(payment.getMandate().getExternalId()));
+        assertThat(paymentResponse.getProviderId(), is(payment.getProviderId().get()));
     }
 
     @Test
@@ -143,7 +189,7 @@ public class PaymentViewDaoIT {
         assertThat(paymentViewList.get(1).getCreatedDate().isAfter(zonedDateTime7DaysAgo), is(true));
         assertThat(paymentViewList.get(1).getCreatedDate().isBefore(zonedDateTimeNow), is(true));
     }
-    
+
     @Test
     public void shouldReturn2PaymentView_withReferenceSet() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().insert(testContext.getJdbi());
@@ -402,8 +448,8 @@ public class PaymentViewDaoIT {
                 .withMandateFixture(mandateFixture)
                 .withState(PaymentState.CREATED)
                 .insert(testContext.getJdbi());
-        
-        List.of(1,2).forEach(i -> {
+
+        List.of(1, 2).forEach(i -> {
             aPaymentFixture()
                     .withMandateFixture(mandateFixture)
                     .withState(PaymentState.CANCELLED)
