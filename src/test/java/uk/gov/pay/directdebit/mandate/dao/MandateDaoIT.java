@@ -66,6 +66,7 @@ public class MandateDaoIT {
                         .withGatewayAccount(gatewayAccountFixture.toEntity())
                         .withExternalId(MandateExternalId.valueOf(RandomIdGenerator.newId()))
                         .withMandateBankStatementReference(MandateBankStatementReference.valueOf("test-reference"))
+                        .withDescription("a description")
                         .withServiceReference("test-service-reference")
                         .withState(ACTIVE)
                         .withReturnUrl("https://www.example.com/return_url")
@@ -77,6 +78,7 @@ public class MandateDaoIT {
         assertThat(mandate.get("external_id"), is(notNullValue()));
         assertThat(mandate.get("mandate_reference"), is("test-reference"));
         assertThat(mandate.get("service_reference"), is("test-service-reference"));
+        assertThat(mandate.get("description"), is("a description"));
         assertThat(mandate.get("return_url"), is("https://www.example.com/return_url"));
         assertThat(mandate.get("state"), is("ACTIVE"));
         assertThat((Timestamp) mandate.get("created_date"), isDate(createdDate));

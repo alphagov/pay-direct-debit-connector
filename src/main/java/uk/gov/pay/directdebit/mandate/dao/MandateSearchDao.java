@@ -63,6 +63,7 @@ public class MandateSearchDao {
                     "  m.gateway_account_id AS mandate_gateway_account_id," +
                     "  m.return_url AS mandate_return_url," +
                     "  m.state AS mandate_state," +
+                    "  m.description AS mandate_description," +
                     "  m.state_details AS mandate_state_details," +
                     "  m.state_details_description AS mandate_state_details_description," +
                     "  m.created_date AS mandate_created_date," +
