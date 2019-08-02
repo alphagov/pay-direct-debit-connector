@@ -48,8 +48,8 @@ jerseyClient:
 
 database:
   driverClass: org.postgresql.Driver
-  user: postgres
-  password: mysecretpassword
+  user:
+  password:
   url:
 
   # the maximum amount of time to wait on an empty pool before throwing an exception
