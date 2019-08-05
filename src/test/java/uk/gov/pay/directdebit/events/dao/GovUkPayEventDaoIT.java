@@ -33,7 +33,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFi
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class GovUkPayEventDaoITest {
+public class GovUkPayEventDaoIT {
 
     @DropwizardTestContext
     private TestContext testContext;

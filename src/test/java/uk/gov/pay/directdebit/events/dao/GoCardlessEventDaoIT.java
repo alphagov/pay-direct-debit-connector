@@ -29,7 +29,7 @@ import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aG
 
 @RunWith(DropwizardJUnitRunner.class)
 @DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class GoCardlessEventDaoITest {
+public class GoCardlessEventDaoIT {
 
     @DropwizardTestContext
     private TestContext testContext;
