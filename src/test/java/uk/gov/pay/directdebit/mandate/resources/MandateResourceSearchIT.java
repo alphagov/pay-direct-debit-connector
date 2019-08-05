@@ -51,7 +51,7 @@ public class MandateResourceSearchIT {
             "page, -1, Invalid attribute value: page. Must be greater than or equal to 1", 
             "display_size, 0, Invalid attribute value: display_size. Must be greater than or equal to 1", 
             "display_size, 501, Invalid attribute value: display_size. Must be less than or equal to 500",
-            "state, INVALID, Invalid attribute value: state is not a valid mandate external state"
+            "state, INVALID, Invalid attribute value: state. Must be a valid mandate external state"
     })
     public void searchWithInvalidParams(String param, String value, String expectedErrorMessage) {
         givenSetup()

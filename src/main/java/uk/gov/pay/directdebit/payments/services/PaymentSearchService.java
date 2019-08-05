@@ -1,10 +1,7 @@
 package uk.gov.pay.directdebit.payments.services;
 
 import uk.gov.pay.directdebit.common.model.SearchResponse;
-import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
-import uk.gov.pay.directdebit.gatewayaccounts.exception.GatewayAccountNotFoundException;
 import uk.gov.pay.directdebit.payments.api.PaymentResponse;
-import uk.gov.pay.directdebit.payments.api.PaymentViewValidator;
 import uk.gov.pay.directdebit.payments.dao.PaymentViewDao;
 import uk.gov.pay.directdebit.payments.model.LinksForSearchResult;
 import uk.gov.pay.directdebit.payments.params.PaymentViewSearchParams;
@@ -17,29 +14,28 @@ import java.util.List;
 public class PaymentSearchService {
 
     private final PaymentViewDao paymentViewDao;
-    private final GatewayAccountDao gatewayAccountDao;
-    private final PaymentViewValidator paymentViewValidator = new PaymentViewValidator();
     private UriInfo uriInfo;
 
     @Inject
-    PaymentSearchService(PaymentViewDao paymentViewDao, GatewayAccountDao gatewayAccountDao) {
+    PaymentSearchService(PaymentViewDao paymentViewDao) {
         this.paymentViewDao = paymentViewDao;
-        this.gatewayAccountDao = gatewayAccountDao;
     }
 
-    public SearchResponse<PaymentResponse> getPaymentSearchResponse(PaymentViewSearchParams searchParams) {
-        gatewayAccountDao.findByExternalId(searchParams.getGatewayExternalId())
-                .orElseThrow(() -> new GatewayAccountNotFoundException(searchParams.getGatewayExternalId()));
+    public SearchResponse<PaymentResponse> getPaymentSearchResponse(PaymentViewSearchParams searchParams, String gatewayAccountExternalId) {
+        int totalMatchingPayments = paymentViewDao.getPaymentViewCount(searchParams, gatewayAccountExternalId);
 
-        PaymentViewSearchParams validatedSearchParams = paymentViewValidator.validateParams(searchParams);
-        Integer total = getTotal(validatedSearchParams);
-        List<PaymentResponse> foundPayments = total > 0 ? getPaymentViewResultResponse(validatedSearchParams) : Collections.emptyList();
-        LinksForSearchResult linksForSearchResult = new LinksForSearchResult(validatedSearchParams, uriInfo, total, searchParams.getGatewayExternalId());
+        List<PaymentResponse> paymentsForRequestedPage = 
+                totalMatchingPayments > 0 
+                        ? paymentViewDao.searchPaymentView(searchParams, gatewayAccountExternalId) 
+                        : Collections.emptyList();
+
+        LinksForSearchResult linksForSearchResult = new LinksForSearchResult(
+                searchParams, uriInfo, totalMatchingPayments, gatewayAccountExternalId);
         
-        return new SearchResponse<PaymentResponse>(validatedSearchParams.getGatewayExternalId(),
-                total,
-                validatedSearchParams.getPage(),
-                foundPayments,
+        return new SearchResponse<>(gatewayAccountExternalId,
+                totalMatchingPayments,
+                searchParams.getPage(),
+                paymentsForRequestedPage,
                 linksForSearchResult);
     }
 
@@ -47,13 +43,4 @@ public class PaymentSearchService {
         this.uriInfo = uriInfo;
         return this;
     }
-
-    private Integer getTotal(PaymentViewSearchParams searchParams) {
-        return paymentViewDao.getPaymentViewCount(searchParams);
-    }
-
-    private List<PaymentResponse> getPaymentViewResultResponse(PaymentViewSearchParams searchParams) {
-        return paymentViewDao.searchPaymentView(searchParams);
-    }
-
 }

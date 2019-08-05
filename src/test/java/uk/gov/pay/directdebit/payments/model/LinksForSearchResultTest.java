@@ -35,7 +35,7 @@ public class LinksForSearchResultTest {
 
     @Test
     public void shouldNotShowPrevLinkAndFirstLinkIsEqualToLastLink_whenOnlyOnePage() {
-        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams()
                 .withPage(1)
                 .withDisplaySize(500)
                 .build();
@@ -49,7 +49,7 @@ public class LinksForSearchResultTest {
 
     @Test
     public void shouldShowPrevLinkAndFirstLinkAndLastLinkAsPage1_whenCurrentPageIsBiggerThanLastPage() {
-        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams()
                 .withPage(777)
                 .withDisplaySize(500)
                 .build();
@@ -62,7 +62,7 @@ public class LinksForSearchResultTest {
 
     @Test
     public void shouldShowPrevLinkAndFirstLinkAsEqualsAndLastLinkAndNextLinkAsEquals() {
-        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams()
                 .withPage(2)
                 .withDisplaySize(50)
                 .build();
@@ -76,7 +76,7 @@ public class LinksForSearchResultTest {
 
     @Test
     public void shouldShowAllLinksCorrectly_whenMultiplePagesExists() {
-        PaymentViewSearchParams searchParams = aPaymentViewSearchParams(gatewayAccountExternalId)
+        PaymentViewSearchParams searchParams = aPaymentViewSearchParams()
                 .withPage(3)
                 .withDisplaySize(10)
                 .build();

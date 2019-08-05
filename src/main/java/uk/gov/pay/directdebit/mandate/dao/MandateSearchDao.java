@@ -135,14 +135,10 @@ public class MandateSearchDao {
         if (searchMode.equals(SearchMode.SELECT)) {
             sql.append(" ORDER BY m.id DESC OFFSET :offset LIMIT :limit");
             sqlParams.put("limit", params.getDisplaySize());
-            sqlParams.put("offset", calculateOffset(params));
+            sqlParams.put("offset", params.getOffset());
         }
 
         return new SqlStatementAndParameters(sql.toString(), sqlParams);
-    }
-
-    private int calculateOffset(MandateSearchParams params) {
-        return params.getPage() == 1 ? 0 : (params.getPage() - 1) * params.getDisplaySize();
     }
     
     private static class SqlStatementAndParameters {
@@ -155,5 +151,5 @@ public class MandateSearchDao {
         }
     }
     
-    private enum SearchMode {COUNT, SELECT};
+    private enum SearchMode {COUNT, SELECT}
 }

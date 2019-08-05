@@ -1,212 +1,119 @@
 package uk.gov.pay.directdebit.payments.params;
 
+import uk.gov.pay.directdebit.common.exception.validation.ValidExternalPaymentState;
 import uk.gov.pay.directdebit.common.model.SearchParams;
+import uk.gov.pay.directdebit.payments.model.PaymentState;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.ws.rs.QueryParam;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_CREATED;
-import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_FAILED;
-import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_PENDING;
-import static uk.gov.pay.directdebit.payments.api.ExternalPaymentState.EXTERNAL_SUCCESS;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.CANCELLED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.CREATED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.FAILED;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
-import static uk.gov.pay.directdebit.payments.model.PaymentState.SUBMITTED_TO_PROVIDER;
 
-public class PaymentViewSearchParams implements SearchParams {
+public class PaymentViewSearchParams extends SearchParams {
 
-    private static final String GATEWAY_ACCOUNT_EXTERNAL_FIELD = "gatewayAccountExternalId";
-    private static final String PAGE_NUMBER_FIELD = "offset";
-    private static final String PAGE_SIZE_FIELD = "limit";
-    private static final String FROM_DATE_FIELD = "fromDate";
-    private static final String TO_DATE_FIELD = "toDate";
-    private static final String REFERENCE_FIELD = "reference";
-    private static final String AMOUNT_FIELD = "amount";
+    private static final String REFERENCE_KEY = "reference";
+    private static final String AMOUNT_KEY = "amount";
+    private static final String STATE_KEY = "state";
     private static final String MANDATE_ID_KEY = "mandate_id";
-    private static final String FROM_DATE_KEY = "from_date";
-    private static final String TO_DATE_KEY = "to_date";
-    private static final String STATE_FIELD = "state";
-    
-    private final String gatewayExternalId;
-    private final Integer page;
-    private final Integer displaySize;
-    private final String fromDateString;
-    private final String toDateString;
-    private final String reference;
-    private final Long amount;
-    private final String mandateId;
-    private final String state;
-    private final SearchDateParams searchDateParams;
-    private final PaginationParams paginationParams;
-    private Map<String, Object> queryMap;
 
-    private static Map<String, String> externalPaymentToInternalStateQueryMap = new HashMap<>(4);
+    @QueryParam(REFERENCE_KEY)
+    private String reference;
 
-    static {
-        // see uk.gov.pay.directdebit.payments.model.PaymentState for mappings
-        externalPaymentToInternalStateQueryMap
-                .put(EXTERNAL_CREATED.getStatus(), CREATED.toSingleQuoteString());
-        externalPaymentToInternalStateQueryMap
-                .put(EXTERNAL_PENDING.getStatus(), SUBMITTED_TO_PROVIDER.toSingleQuoteString());
-        externalPaymentToInternalStateQueryMap
-                .put(EXTERNAL_SUCCESS.getStatus(), PAID_OUT.toSingleQuoteString());
-        externalPaymentToInternalStateQueryMap
-                .put(EXTERNAL_FAILED.getStatus(), FAILED.toSingleQuoteString() + ", " + CANCELLED.toSingleQuoteString());
+    @QueryParam(AMOUNT_KEY)
+    private Long amount;
+
+    @QueryParam(MANDATE_ID_KEY)
+    private String mandateId;
+
+    @QueryParam(STATE_KEY)
+    @ValidExternalPaymentState(message = "Invalid attribute value: state. Must be a valid payment external state")
+    private String state;
+
+    public PaymentViewSearchParams() {
     }
 
     private PaymentViewSearchParams(PaymentViewSearchParamsBuilder builder) {
-        this.gatewayExternalId = builder.gatewayAccountExternalId;
         this.page = builder.page;
         this.displaySize = builder.displaySize;
-        this.fromDateString = builder.fromDateString;
-        this.toDateString = builder.toDateString;
+        this.fromDate = builder.fromDateString;
+        this.toDate = builder.toDateString;
         this.reference = builder.reference;
         this.amount = builder.amount;
         this.mandateId = builder.mandateId;
         this.state = builder.state;
-        this.searchDateParams = builder.searchDateParams;
-        this.paginationParams = builder.paginationParams;
     }
 
-    public String getGatewayExternalId() { return gatewayExternalId; }
-
-    public Integer getPage() { return page; }
-
-    public Integer getDisplaySize() { return displaySize; }
-
-    public String getFromDateString() { return fromDateString; }
-
-    public String getToDateString() { return toDateString; }
-
-    public String getReference() { return reference; }
-
-    public Long getAmount() { return amount; }
-
-    public String getMandateId() { return mandateId; }
-
-    public String getState() { return state; }
-
-    public PaginationParams getPaginationParams() {
-        if (paginationParams == null) {
-            return new PaginationParams(page, displaySize);
-        }
-        return paginationParams;
+    public Optional<String> getReference() {
+        return Optional.ofNullable(reference);
     }
 
-    public SearchDateParams getSearchDateParams() { return searchDateParams; }
-
-    public String generateQuery() {
-        StringBuilder sb = new StringBuilder();
-        if (isNotBlank(mandateId)) {
-            sb.append(" AND m.external_id = :" + MANDATE_ID_KEY);
-        }
-        if (searchDateParams != null) {
-            if (searchDateParams.getFromDate() != null) {
-                sb.append(" AND p.created_date > :" + FROM_DATE_FIELD);
-            }
-            if (searchDateParams.getToDate() != null) {
-                sb.append(" AND p.created_date < :" + TO_DATE_FIELD);
-            }
-        }
-        if (isNotBlank(reference)) {
-            sb.append(" AND p.reference ILIKE :" + REFERENCE_FIELD);
-        }
-        if (amount != null) {
-            sb.append(" AND p.amount = :" + AMOUNT_FIELD);
-        }
-        if (isNotBlank(state) && externalPaymentToInternalStateQueryMap.containsKey(state)) {
-            sb.append(format(" AND p.state IN(%s)", externalPaymentToInternalStateQueryMap.get(state)));
-        }
-        return sb.toString();
+    public Optional<Long> getAmount() {
+        return Optional.ofNullable(amount);
     }
 
-    public Map<String, Object> getQueryMap() {
-        if (queryMap == null) {
-            queryMap = new HashMap<>();
-            queryMap.put(GATEWAY_ACCOUNT_EXTERNAL_FIELD, gatewayExternalId);
-            queryMap.put(PAGE_NUMBER_FIELD, getPaginationParams().getPageNumber());//TODO fix this. offset is pageNubmer*pageSize
-            queryMap.put(PAGE_SIZE_FIELD, getPaginationParams().getDisplaySize());
-            if (isNotBlank(mandateId)) {
-                queryMap.put(MANDATE_ID_KEY, mandateId);
-            }
-            if (searchDateParams != null) {
-                if (searchDateParams.getFromDate() != null) {
-                    queryMap.put(FROM_DATE_FIELD, searchDateParams.getFromDate());
-                }
-                if (searchDateParams.getToDate() != null) {
-                    queryMap.put(TO_DATE_FIELD, searchDateParams.getToDate());
-                }
-            }
-            if (isNotBlank(reference)) {
-                queryMap.put(REFERENCE_FIELD, likeClause(reference));
-            }
-            if (amount != null) {
-                queryMap.put(AMOUNT_FIELD, amount);
-            }
-        }
-        return queryMap;
+    public Optional<String> getMandateId() {
+        return Optional.ofNullable(mandateId);
+    }
+
+    public Optional<String> getState() {
+        return Optional.ofNullable(state);
+    }
+
+    public List<PaymentState> getInternalStates() {
+        return Arrays.stream(PaymentState.values())
+                .filter(paymentState -> paymentState.toExternal().getStatus().equals(this.state))
+                .collect(Collectors.toUnmodifiableList());
     }
 
     public String buildQueryParamString() {
-        String query = "";
+        var paramsList = new ArrayList<String>();
+        
         if (isNotBlank(mandateId)) {
-            query += "&" + MANDATE_ID_KEY + "=" + mandateId;
+            paramsList.add(formatQueryParam(MANDATE_ID_KEY, mandateId));
         }
-        if (searchDateParams != null) {
-            if (searchDateParams.getFromDate() != null) {
-                query += "&" + FROM_DATE_KEY + "=" + searchDateParams.getFromDate().toString();
-            }
-            if (searchDateParams.getToDate() != null) {
-                query += "&" + TO_DATE_KEY + "=" + searchDateParams.getToDate().toString();
-            }
-        }
+
         if (isNotBlank(reference)) {
-            query += "&" + REFERENCE_FIELD + "=" + reference;
+            paramsList.add(formatQueryParam(REFERENCE_KEY, reference));
         }
+
         if (amount != null) {
-            query += "&" + AMOUNT_FIELD + "=" + amount;
+            paramsList.add(formatQueryParam(AMOUNT_KEY, amount.toString()));
         }
+
         if (isNotBlank(state)) {
-            query += "&" + STATE_FIELD + "=" + state;
+            paramsList.add(formatQueryParam(STATE_KEY, state));
         }
-        query += addPaginationParams();
-        return query.substring(1);
-    }
 
-    private String addPaginationParams() {
-        String queryParams = format("&page=%s", page);
-        queryParams += format("&display_size=%s", displaySize);
-        return queryParams;
-    }
+        if (fromDate != null) {
+            paramsList.add(formatQueryParam(FROM_DATE_KEY, fromDate));
+        }
 
-    private String likeClause(String rawUserInputText) {
-        return "%" + rawUserInputText + "%";
-    }
+        if (toDate != null) {
+            paramsList.add(formatQueryParam(TO_DATE_KEY, toDate));
+        }
 
+        paramsList.add(formatQueryParam(PAGE_KEY, page.toString()));
+        paramsList.add(formatQueryParam(DISPLAY_SIZE_KEY, displaySize.toString()));
+
+        return String.join("&", paramsList);
+    }
 
     public static final class PaymentViewSearchParamsBuilder {
-        private final String gatewayAccountExternalId;
-        private Integer page;
-        private Integer displaySize;
+        private Integer page = 1;
+        private Integer displaySize = 500;
         private String fromDateString;
         private String toDateString;
         private String reference;
         private Long amount;
         private String mandateId;
         private String state;
-        private SearchDateParams searchDateParams;
-        private PaginationParams paginationParams;
 
-        private PaymentViewSearchParamsBuilder(String gatewayAccountExternalId) {
-            this.gatewayAccountExternalId = gatewayAccountExternalId;
-        }
-
-        public static PaymentViewSearchParamsBuilder aPaymentViewSearchParams(String gatewayAccountExternalId) {
-            return new PaymentViewSearchParamsBuilder(gatewayAccountExternalId);
+        public static PaymentViewSearchParamsBuilder aPaymentViewSearchParams() {
+            return new PaymentViewSearchParamsBuilder();
         }
 
         public PaymentViewSearchParamsBuilder withPage(Integer page) {
@@ -246,16 +153,6 @@ public class PaymentViewSearchParams implements SearchParams {
 
         public PaymentViewSearchParamsBuilder withState(String state) {
             this.state = state;
-            return this;
-        }
-
-        public PaymentViewSearchParamsBuilder withSearchDateParams(SearchDateParams searchDateParams) {
-            this.searchDateParams = searchDateParams;
-            return this;
-        }
-
-        public PaymentViewSearchParamsBuilder withPaginationParams(PaginationParams paginationParams) {
-            this.paginationParams = paginationParams;
             return this;
         }
 
