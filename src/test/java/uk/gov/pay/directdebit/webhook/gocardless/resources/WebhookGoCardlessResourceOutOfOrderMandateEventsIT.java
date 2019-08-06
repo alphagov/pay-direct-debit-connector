@@ -124,7 +124,7 @@ public class WebhookGoCardlessResourceOutOfOrderMandateEventsIT {
     }
 
     @After
-    public void TearDown() {
+    public void tearDown() {
         app.getDatabaseTestHelper().truncateAllData();
     }
 

@@ -37,15 +37,16 @@ public class WebhookSandboxResourceIT {
     @Test
     public void handleWebhook_shouldChangeTheStateToSuccessAndReturn200() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
-        .withPaymentProvider(SANDBOX)
-        .withOrganisation(null)
-        .insert(app.getTestContext().getJdbi());
+                .withPaymentProvider(SANDBOX)
+                .withOrganisation(null)
+                .insert(app.getTestContext().getJdbi());
         MandateFixture mandateFixture = MandateFixture.aMandateFixture()
-        .withGatewayAccountFixture(gatewayAccountFixture)
-        .insert(app.getTestContext().getJdbi());
+                .withGatewayAccountFixture(gatewayAccountFixture)
+                .insert(app.getTestContext().getJdbi());
         PayerFixture.aPayerFixture()
-        .withMandateId(mandateFixture.getId())
-        .insert(app.getTestContext().getJdbi());
+                .withMandateId(mandateFixture.getId())
+                .insert(app.getTestContext()
+                .getJdbi());
 
         String sandboxPaymentExternalAndProviderId = RandomIdGenerator.newId();
         Long paymentId = aPaymentFixture()

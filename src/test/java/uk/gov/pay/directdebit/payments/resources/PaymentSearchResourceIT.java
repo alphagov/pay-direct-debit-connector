@@ -32,7 +32,7 @@ import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
-public class PaymentSearchResourceIT { //TODO merge with PaymentResource
+public class PaymentSearchResourceIT {
 
     private GatewayAccountFixture testGatewayAccount;
     private TestContext testContext;
