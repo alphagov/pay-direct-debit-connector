@@ -1,14 +1,10 @@
 package uk.gov.pay.directdebit.mandate.params;
 
-import uk.gov.pay.commons.validation.ValidDate;
 import uk.gov.pay.directdebit.common.exception.validation.ValidExternalMandateState;
 import uk.gov.pay.directdebit.common.model.SearchParams;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -16,57 +12,35 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class MandateSearchParams implements SearchParams {
+public class MandateSearchParams extends SearchParams {
 
-    private static final String REFERENCE = "reference";
-    private static final String STATE = "state";
-    private static final String BANK_STATEMENT_REFERENCE = "bank_statement_reference";
-    private static final String NAME = "name";
-    private static final String EMAIL = "email";
-    private static final String FROM_DATE = "from_date";
-    private static final String TO_DATE = "to_date";
-    private static final String PAGE = "page";
-    private static final String DISPLAY_SIZE = "display_size";
+    private static final String REFERENCE_KEY = "reference";
+    private static final String STATE_KEY = "state";
+    private static final String BANK_STATEMENT_REFERENCE_KEY = "bank_statement_reference";
+    private static final String NAME_KEY = "name";
+    private static final String EMAIL_KEY = "email";
 
-    @QueryParam(REFERENCE)
+    @QueryParam(REFERENCE_KEY)
     private String serviceReference;
 
-    @QueryParam(STATE)
-    @ValidExternalMandateState(message = "Invalid attribute value: state is not a valid mandate external state")
+    @QueryParam(STATE_KEY)
+    @ValidExternalMandateState(message = "Invalid attribute value: state. Must be a valid mandate external state")
     private String externalMandateState;
 
-    @QueryParam(BANK_STATEMENT_REFERENCE)
+    @QueryParam(BANK_STATEMENT_REFERENCE_KEY)
     private MandateBankStatementReference mandateBankStatementReference;
 
-    @QueryParam(NAME)
+    @QueryParam(NAME_KEY)
     private String name;
 
-    @QueryParam(EMAIL)
+    @QueryParam(EMAIL_KEY)
     private String email;
 
-    @QueryParam(FROM_DATE)
-    @ValidDate(message = "Invalid attribute value: from_date. Must be a valid date")
-    private String fromDate;
+    public MandateSearchParams() {
+    }
 
-    @QueryParam(TO_DATE)
-    @ValidDate(message = "Invalid attribute value: to_date. Must be a valid date")
-    private String toDate;
-
-    @QueryParam(PAGE)
-    @DefaultValue("1")
-    @Min(value = 1, message = "Invalid attribute value: page. Must be greater than or equal to {value}")
-    private Integer page = 1;
-
-    @QueryParam(DISPLAY_SIZE)
-    @DefaultValue("500")
-    @Min(value = 1, message = "Invalid attribute value: display_size. Must be greater than or equal to {value}")
-    @Max(value = 500, message = "Invalid attribute value: display_size. Must be less than or equal to {value}")
-    private Integer displaySize = 500;
-    
-    public MandateSearchParams() { };
-    
     private MandateSearchParams(MandateSearchParamsBuilder builder) {
-        this.serviceReference = builder.serviceReference; 
+        this.serviceReference = builder.serviceReference;
         this.externalMandateState = builder.externalMandateState;
         this.mandateBankStatementReference = builder.mandateBankStatementReference;
         this.name = builder.name;
@@ -123,48 +97,40 @@ public class MandateSearchParams implements SearchParams {
     public String buildQueryParamString() {
         var query = new StringBuilder();
 
-        query.append(createQueryParamFor(PAGE, page.toString()));
-        query.append(appendQueryParam(DISPLAY_SIZE, displaySize.toString()));
+        query.append(formatQueryParam(PAGE_KEY, page.toString()));
+        query.append(appendQueryParam(DISPLAY_SIZE_KEY, displaySize.toString()));
 
         if (serviceReference != null) {
-            query.append(appendQueryParam(REFERENCE, serviceReference));
+            query.append(appendQueryParam(REFERENCE_KEY, serviceReference));
         }
 
         if (externalMandateState != null) {
-            query.append(appendQueryParam(STATE, externalMandateState));
+            query.append(appendQueryParam(STATE_KEY, externalMandateState));
         }
 
         if (mandateBankStatementReference != null) {
-            query.append(appendQueryParam(BANK_STATEMENT_REFERENCE, mandateBankStatementReference.toString()));
+            query.append(appendQueryParam(BANK_STATEMENT_REFERENCE_KEY, mandateBankStatementReference.toString()));
         }
 
         if (name != null) {
-            query.append(appendQueryParam(NAME, name));
+            query.append(appendQueryParam(NAME_KEY, name));
         }
 
         if (email != null) {
-            query.append(appendQueryParam(EMAIL, email));
+            query.append(appendQueryParam(EMAIL_KEY, email));
         }
 
         if (fromDate != null) {
-            query.append(appendQueryParam(FROM_DATE, fromDate));
+            query.append(appendQueryParam(FROM_DATE_KEY, fromDate));
         }
 
         if (toDate != null) {
-            query.append(appendQueryParam(TO_DATE, toDate));
+            query.append(appendQueryParam(TO_DATE_KEY, toDate));
         }
 
         return query.toString();
     }
 
-    private String appendQueryParam(String name, String value) {
-        return "&" + createQueryParamFor(name, value);
-    }
-
-    private String createQueryParamFor(String name, String value) {
-        return name + "=" + value;
-    }
-    
     public static final class MandateSearchParamsBuilder {
         private String serviceReference;
         private String externalMandateState;
@@ -175,7 +141,7 @@ public class MandateSearchParams implements SearchParams {
         private String toDate;
         private Integer page = 1;
         private Integer displaySize = 500;
-        
+
         public static MandateSearchParamsBuilder aMandateSearchParams() {
             return new MandateSearchParamsBuilder();
         }
