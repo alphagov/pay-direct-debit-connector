@@ -9,6 +9,7 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import junitparams.Parameters;
 import junitparams.converters.Nullable;
+import junitparams.JUnitParamsRunner;
 import org.apache.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.After;
@@ -16,11 +17,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -74,8 +72,7 @@ import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 import static uk.gov.pay.directdebit.util.ResponseDoesNotContainLinkMatcher.doesNotContainLink;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+@RunWith(JUnitParamsRunner.class)
 public class MandateResourceIT {
 
     private static final String JSON_AMOUNT_KEY = "amount";
@@ -84,18 +81,16 @@ public class MandateResourceIT {
     private static final String JSON_STATE_KEY = "state.status";
     private static final String JSON_MANDATE_ID_KEY = "mandate_id";
 
-    @DropwizardTestContext
-    private TestContext testContext;
     //todo we should be able to override this in the test-it-config or else tests won't easily run in parallel. See https://payments-platform.atlassian.net/browse/PP-3374
     @Rule
     public WireMockRule wireMockRuleGoCardless = new WireMockRule(10107);
 
-    private WireMockServer wireMockAdminUsers = new WireMockServer(options().port(10110));
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
 
-    @After
-    public void tearDown() {
-        wireMockAdminUsers.shutdown();
-    }
+    private TestContext testContext;
+
+    private WireMockServer wireMockAdminUsers = new WireMockServer(options().port(10110));
 
     private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture().withPaymentProvider(GOCARDLESS);
 
@@ -105,8 +100,15 @@ public class MandateResourceIT {
 
     @Before
     public void setUp() {
+        testContext = app.getTestContext();
         wireMockAdminUsers.start();
         gatewayAccountFixture.insert(testContext.getJdbi());
+    }
+
+    @After
+    public void tearDown() {
+        wireMockAdminUsers.shutdown();
+        testContext.getDatabaseTestHelper().truncateAllData();
     }
 
     @Test

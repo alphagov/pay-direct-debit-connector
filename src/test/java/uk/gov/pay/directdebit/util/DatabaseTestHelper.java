@@ -221,7 +221,8 @@ public class DatabaseTestHelper {
 
     public void truncateAllData() {
         jdbi.withHandle(h -> h.createScript(
-        "TRUNCATE TABLE gateway_accounts CASCADE"
+        "TRUNCATE TABLE gateway_accounts, gocardless_customers, gocardless_events, gocardless_partner_app_account_connect_tokens, " +
+        "gocardless_payments, govukpay_events, mandates, payers, payments, sandbox_events, tokens CASCADE"
         ).execute());
     }
 }
