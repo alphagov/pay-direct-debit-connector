@@ -1,29 +1,24 @@
 package uk.gov.pay.directdebit.resources;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
-import uk.gov.pay.directdebit.junit.TestContext;
-
+import org.junit.Rule;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.core.Is.is;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class HealthCheckResourceIT {
 
-    @DropwizardTestContext
-    private TestContext testContext;
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
 
     @Test
     public void healthcheck_shouldReturnHealthy() {
+
+        System.out.println("Running test");
         given()
-                .port(testContext.getPort())
+                .port(app.getTestContext().getPort())
                 .contentType(JSON)
                 .when()
                 .accept(JSON)

@@ -2,16 +2,16 @@ package uk.gov.pay.directdebit.mandate.resources;
 
 import io.restassured.specification.RequestSpecification;
 import junitparams.Parameters;
+import junitparams.JUnitParamsRunner;
 import org.apache.http.HttpStatus;
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import uk.gov.pay.commons.model.ErrorIdentifier;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
@@ -30,18 +30,25 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
+@RunWith(JUnitParamsRunner.class)
 public class MandateResourceSearchIT {
 
-    @DropwizardTestContext
     private TestContext testContext;
 
     private GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture();
 
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
+
     @Before
     public void setUp() {
+        testContext = app.getTestContext();
         gatewayAccountFixture.insert(testContext.getJdbi());
+    }
+
+    @After
+    public void tearDown() {
+        testContext.getDatabaseTestHelper().truncateAllData();
     }
     
     @Test

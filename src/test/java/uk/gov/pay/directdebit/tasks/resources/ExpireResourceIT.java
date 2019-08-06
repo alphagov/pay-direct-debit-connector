@@ -1,12 +1,10 @@
 package uk.gov.pay.directdebit.tasks.resources;
 
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import org.junit.Rule;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
@@ -24,18 +22,24 @@ import static org.junit.Assert.assertEquals;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.payments.fixtures.GovUkPayEventFixture.aGovUkPayEventFixture;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class ExpireResourceIT {
 
-    @DropwizardTestContext
     private TestContext testContext;
     
     private GatewayAccountFixture testGatewayAccount;
 
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
+
     @Before
     public void setUp() {
+        testContext = app.getTestContext();
         testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+    }
+
+    @After
+    public void tearDown() {
+        app.getDatabaseTestHelper().truncateAllData();
     }
 
     @Test

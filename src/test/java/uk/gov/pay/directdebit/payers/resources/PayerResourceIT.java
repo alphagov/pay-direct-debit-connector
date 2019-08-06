@@ -8,14 +8,12 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.Before;
+import org.junit.After;
 import uk.gov.pay.commons.model.ErrorIdentifier;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -35,8 +33,6 @@ import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class PayerResourceIT {
     private final static String ACCOUNT_NUMBER_KEY = "account_number";
     private final static String SORT_CODE_KEY = "sort_code";
@@ -44,16 +40,27 @@ public class PayerResourceIT {
     private final static String EMAIL_KEY = "email";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    @DropwizardTestContext
-    private TestContext testContext;
-
     //todo we should be able to override this in the test-it-config or else tests won't easily run in parallel. See https://payments-platform.atlassian.net/browse/PP-3374
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(10107);
 
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
+
+    private TestContext testContext;
     private GatewayAccountFixture testGatewayAccount;
     private MandateFixture testMandate;
     private PayerFixture payerFixture = aPayerFixture().withAccountNumber("12345678");
+
+    @Before
+    public void setUp() {
+        testContext = app.getTestContext();
+    }
+
+    @After
+    public void tearDown() {
+        testContext.getDatabaseTestHelper().truncateAllData();
+    }
 
     private void createPayerFor(PaymentProvider paymentProvider) throws JsonProcessingException {
         createGatewayAccountWithTransactionAndRequestPath(paymentProvider);

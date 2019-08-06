@@ -2,15 +2,13 @@ package uk.gov.pay.directdebit.webhook.gocardless.resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
+import org.junit.Rule;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -29,8 +27,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class WebhookGoCardlessResourceOutOfOrderMandateEventsIT {
 
     private static final GoCardlessOrganisationId GOCARDLESS_ORGANISATION_ID = GoCardlessOrganisationId.valueOf("OR123");
@@ -112,16 +108,24 @@ public class WebhookGoCardlessResourceOutOfOrderMandateEventsIT {
             )
     );
 
-    @DropwizardTestContext
     private TestContext testContext;
 
     private GoCardlessWebhookSignatureCalculator goCardlessWebhookSignatureCalculator;
 
     private ObjectMapper objectMapper = new ObjectMapper().configure(ORDER_MAP_ENTRIES_BY_KEYS, true);
 
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
+
     @Before
     public void setUp() {
+        testContext = app.getTestContext();
         goCardlessWebhookSignatureCalculator = new GoCardlessWebhookSignatureCalculator(testContext.getGoCardlessWebhookSecret());
+    }
+
+    @After
+    public void TearDown() {
+        app.getDatabaseTestHelper().truncateAllData();
     }
 
     @Test

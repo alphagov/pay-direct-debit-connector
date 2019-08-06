@@ -10,13 +10,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -56,8 +52,6 @@ import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubCreatePayment;
 import static uk.gov.pay.directdebit.util.GoCardlessStubs.stubGetCreditor;
 import static uk.gov.pay.directdebit.util.NumberMatcher.isNumber;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class PaymentResourceIT {
 
     private static final String FRONTEND_CARD_DETAILS_URL = "/secure";
@@ -75,22 +69,25 @@ public class PaymentResourceIT {
     private static final String JSON_STATE_DETAILS_KEY = "state.details";
     private static final long AMOUNT = 6234L;
     private GatewayAccountFixture testGatewayAccount;
-
-    @DropwizardTestContext
     private TestContext testContext;
 
     @Rule
     public WireMockRule wireMockRuleGoCardless = new WireMockRule(10107);
+
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
 
     private WireMockServer wireMockAdminUsers = new WireMockServer(options().port(10110));
 
     @After
     public void tearDown() {
         wireMockAdminUsers.shutdown();
+        app.getDatabaseTestHelper().truncateAllData();
     }
 
     @Before
     public void setUp() {
+        testContext = app.getTestContext();
         wireMockAdminUsers.start();
         testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
     }

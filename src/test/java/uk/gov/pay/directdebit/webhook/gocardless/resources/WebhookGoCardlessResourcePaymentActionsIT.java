@@ -4,16 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
@@ -40,14 +37,14 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.notifications.model.EmailPayload.EmailTemplate;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class WebhookGoCardlessResourcePaymentActionsIT {
 
     @Rule
     public WireMockRule wireMockRuleForAdminUsersPort = new WireMockRule(10110);
 
-    @DropwizardTestContext
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
+
     private TestContext testContext;
 
     private GoCardlessWebhookSignatureCalculator goCardlessWebhookSignatureCalculator;
@@ -68,12 +65,18 @@ public class WebhookGoCardlessResourcePaymentActionsIT {
 
     @Before
     public void setUp() {
+        testContext = app.getTestContext();
         goCardlessWebhookSignatureCalculator = new GoCardlessWebhookSignatureCalculator(testContext.getGoCardlessWebhookSecret());
 
         gatewayAccountFixture.insert(testContext.getJdbi());
         mandateFixture.insert(testContext.getJdbi());
         payerFixture.insert(testContext.getJdbi());
         paymentFixture.insert(testContext.getJdbi());
+    }
+
+    @After
+    public void tearDown() {
+        app.getDatabaseTestHelper().truncateAllData();
     }
 
     @Test

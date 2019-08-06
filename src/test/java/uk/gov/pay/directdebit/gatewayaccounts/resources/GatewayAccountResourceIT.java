@@ -6,17 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.Rule;
 import uk.gov.pay.commons.model.ErrorIdentifier;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
 import uk.gov.pay.directdebit.junit.TestContext;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
@@ -43,8 +41,6 @@ import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountRes
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.util.ResponseContainsLinkMatcher.containsLink;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
 public class GatewayAccountResourceIT {
 
     private static final PaymentProvider PAYMENT_PROVIDER = PaymentProvider.SANDBOX;
@@ -64,20 +60,27 @@ public class GatewayAccountResourceIT {
     
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    @DropwizardTestContext
-    private TestContext testContext;
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
 
     private GatewayAccountFixture testGatewayAccount;
+    private TestContext testContext;
 
     @Before
     public void setUp() {
+        testContext = app.getTestContext();
         testGatewayAccount = aGatewayAccountFixture()
                         .withExternalId(EXTERNAL_ID)
                         .withPaymentProvider(PAYMENT_PROVIDER)
                         .withDescription(DESCRIPTION)
                         .withType(TYPE)
                         .withAnalyticsId(ANALYTICS_ID)
-                        .insert(testContext.getJdbi());
+                        .insert(app.getTestContext().getJdbi());
+    }
+
+    @After
+    public void tearDown() {
+        app.getDatabaseTestHelper().truncateAllData();
     }
 
     @Test

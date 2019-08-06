@@ -2,13 +2,11 @@ package uk.gov.pay.directdebit.payments.resources;
 
 import io.restassured.specification.RequestSpecification;
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.Rule;
 import uk.gov.pay.commons.model.ErrorIdentifier;
-import uk.gov.pay.directdebit.DirectDebitConnectorApp;
-import uk.gov.pay.directdebit.junit.DropwizardConfig;
-import uk.gov.pay.directdebit.junit.DropwizardJUnitRunner;
-import uk.gov.pay.directdebit.junit.DropwizardTestContext;
+import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
@@ -34,18 +32,23 @@ import static uk.gov.pay.directdebit.payers.fixtures.PayerFixture.aPayerFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture.aGatewayAccountFixture;
 import static uk.gov.pay.directdebit.payments.fixtures.PaymentFixture.aPaymentFixture;
 
-@RunWith(DropwizardJUnitRunner.class)
-@DropwizardConfig(app = DirectDebitConnectorApp.class, config = "config/test-it-config.yaml")
-public class PaymentSearchResourceIT {
+public class PaymentSearchResourceIT { //TODO merge with PaymentResource
 
     private GatewayAccountFixture testGatewayAccount;
-
-    @DropwizardTestContext
     private TestContext testContext;
+
+    @Rule
+    public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
 
     @Before
     public void setUp() {
+        testContext = app.getTestContext();
         testGatewayAccount = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
+    }
+
+    @After
+    public void tearDown() {
+        app.getDatabaseTestHelper().truncateAllData();
     }
 
     @Test
