@@ -17,7 +17,7 @@ public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundExceptio
     @Override
     public Response toResponse(NotFoundException exception) {
         LOGGER.error(exception.getMessage());
-        ErrorResponse errorResponse = new ErrorResponse(ErrorIdentifier.GENERIC, exception.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(exception.getErrorIdentifier(), exception.getMessage());
         return Response.status(404).entity(errorResponse).type(APPLICATION_JSON).build();
     }
 }
