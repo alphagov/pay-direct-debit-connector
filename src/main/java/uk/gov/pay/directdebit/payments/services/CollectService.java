@@ -1,8 +1,6 @@
 package uk.gov.pay.directdebit.payments.services;
 
-import uk.gov.pay.directdebit.common.exception.MandateIdInvalidException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
-import uk.gov.pay.directdebit.mandate.exception.MandateNotFoundException;
 import uk.gov.pay.directdebit.mandate.exception.MandateStateInvalidException;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.services.MandateQueryService;

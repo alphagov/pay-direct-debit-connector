@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.mandate.services;
 
-import uk.gov.pay.directdebit.common.exception.MandateIdInvalidException;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.mandate.dao.MandateDao;
@@ -35,7 +34,7 @@ public class MandateQueryService {
     public Mandate findByExternalIdAndGatewayAccountExternalId(MandateExternalId mandateExternalId, String gatewayAccountExternalId) {
         return mandateDao
                 .findByExternalIdAndGatewayAccountExternalId(mandateExternalId, gatewayAccountExternalId)
-                .orElseThrow(() -> new MandateIdInvalidException(mandateExternalId, gatewayAccountExternalId));
+                .orElseThrow(() -> new MandateNotFoundException(mandateExternalId, gatewayAccountExternalId));
     }
 
     public Mandate findByGoCardlessMandateIdAndOrganisationId(
