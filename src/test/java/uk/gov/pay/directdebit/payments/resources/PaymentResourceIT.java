@@ -11,8 +11,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
+import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
@@ -29,17 +29,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider.GOCARDLESS;
@@ -337,6 +332,29 @@ public class PaymentResourceIT {
                 .body("error_identifier", is("MANDATE_STATE_INVALID"))
                 .statusCode(500);
 
+    }
+    
+    @Test
+    public void shouldReceiveCorrectError_whenMandateDoesNotExist() throws Exception {
+        String accountExternalId = testGatewayAccount.getExternalId();
+        
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put(JSON_AMOUNT_KEY, AMOUNT)
+                .put(JSON_REFERENCE_KEY, "Test description")
+                .put(JSON_DESCRIPTION_KEY, "Test description")
+                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
+                .put(JSON_MANDATE_ID_KEY, "FAKEMANDATE")
+                .build());
+
+        String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
+                .replace("{accountId}", accountExternalId);
+
+        ValidatableResponse response = givenSetup()
+                .body(postBody)
+                .post(requestPath)
+                .then()
+                .body("error_identifier", is("MANDATE_ID_INVALID"))
+                .statusCode(404);
     }
     
     private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState,
