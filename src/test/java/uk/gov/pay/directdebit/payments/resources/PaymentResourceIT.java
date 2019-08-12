@@ -1,11 +1,13 @@
 package uk.gov.pay.directdebit.payments.resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -337,6 +339,29 @@ public class PaymentResourceIT {
                 .body("error_identifier", is("MANDATE_STATE_INVALID"))
                 .statusCode(500);
 
+    }
+    
+    @Test
+    public void shouldReceiveCorrectError_whenMandateDoesNotExist() throws Exception {
+        String accountExternalId = testGatewayAccount.getExternalId();
+        
+        String postBody = new ObjectMapper().writeValueAsString(ImmutableMap.builder()
+                .put(JSON_AMOUNT_KEY, AMOUNT)
+                .put(JSON_REFERENCE_KEY, "Test description")
+                .put(JSON_DESCRIPTION_KEY, "Test description")
+                .put(JSON_GATEWAY_ACC_KEY, accountExternalId)
+                .put(JSON_MANDATE_ID_KEY, "FAKEMANDATE")
+                .build());
+
+        String requestPath = "/v1/api/accounts/{accountId}/charges/collect"
+                .replace("{accountId}", accountExternalId);
+
+        ValidatableResponse response = givenSetup()
+                .body(postBody)
+                .post(requestPath)
+                .then()
+                .body("error_identifier", is("MANDATE_ID_INVALID"))
+                .statusCode(404);
     }
     
     private PaymentFixture createTransactionFixtureWith(MandateFixture mandateFixture, PaymentState paymentState,
