@@ -34,7 +34,7 @@ public class MandateQueryService {
     public Mandate findByExternalIdAndGatewayAccountExternalId(MandateExternalId mandateExternalId, String gatewayAccountExternalId) {
         return mandateDao
                 .findByExternalIdAndGatewayAccountExternalId(mandateExternalId, gatewayAccountExternalId)
-                .orElseThrow(() -> new MandateNotFoundException(mandateExternalId, gatewayAccountExternalId));
+                .orElseThrow(() -> new MandateNotFoundException(mandateExternalId));
     }
 
     public Mandate findByGoCardlessMandateIdAndOrganisationId(
