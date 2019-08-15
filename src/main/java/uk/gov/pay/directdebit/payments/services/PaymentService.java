@@ -13,11 +13,13 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
+import uk.gov.pay.logging.LoggingKeys;
 
 import javax.inject.Inject;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_ERROR_SUBMITTING_TO_PROVIDER;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
@@ -44,7 +46,7 @@ public class PaymentService {
     }
 
     Payment createPayment(long amount, String description, String reference, Mandate mandate) {
-        LOGGER.info("Creating payment for mandate {}", mandate.getExternalId());
+        LOGGER.info("Creating payment for mandate {}", kv(LoggingKeys.EXTERNAL_ID, mandate.getExternalId()));
         Payment payment = aPayment()
                 .withExternalId(RandomIdGenerator.newId())
                 .withAmount(amount)

@@ -16,6 +16,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import uk.gov.pay.commons.utils.logging.LoggingFilter;
+import uk.gov.pay.commons.utils.logging.LogstashConsoleAppenderFactory;
 import uk.gov.pay.commons.utils.metrics.DatabaseMetricsService;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
@@ -82,6 +83,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         });
         bootstrap.addBundle(new JdbiExceptionsBundle());
         bootstrap.addCommand(new DependentResourcesWaitCommand());
+        bootstrap.getObjectMapper().getSubtypeResolver().registerSubtypes(LogstashConsoleAppenderFactory.class);
     }
 
     @Override
