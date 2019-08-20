@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.common.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.common.model.ErrorResponse;
 
 import javax.ws.rs.core.Response;
@@ -16,7 +15,7 @@ public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundExceptio
 
     @Override
     public Response toResponse(NotFoundException exception) {
-        LOGGER.error(exception.getMessage());
+        LOGGER.warn(exception.getMessage());
         ErrorResponse errorResponse = new ErrorResponse(exception.getErrorIdentifier(), exception.getMessage());
         return Response.status(404).entity(errorResponse).type(APPLICATION_JSON).build();
     }
