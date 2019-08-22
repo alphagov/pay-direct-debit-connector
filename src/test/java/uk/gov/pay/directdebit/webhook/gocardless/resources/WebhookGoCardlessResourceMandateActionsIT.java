@@ -74,6 +74,11 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     }
 
     @Test
+    public void testLotsOfEvents() {
+        postWebhook("lots-of-events.json");
+    }
+    
+    @Test
     public void submittedChangesStateToSubmittedToBank() {
         postWebhook("gocardless-webhook-mandate-submitted.json");
 
