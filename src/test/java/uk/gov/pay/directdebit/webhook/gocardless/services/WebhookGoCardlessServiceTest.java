@@ -52,10 +52,10 @@ public class WebhookGoCardlessServiceTest {
 
     @Mock
     private MandateQueryService mockedMandateQueryService;
-    
+
     @Mock
     private PaymentQueryService mockedPaymentQueryService;
-    
+
     @Mock
     private UnhandledGoCardlessEventsLogger mockedUnhandledGoCardlessEventsLogger;
 
@@ -71,12 +71,13 @@ public class WebhookGoCardlessServiceTest {
                             event.getLinksMandate().get(), event.getLinksOrganisation()))
                             .thenReturn(mock(Mandate.class));
 
-                    webhookGoCardlessService.processEvents(List.of(event));
-                    verify(mockedGoCardlessEventService).storeEvent(event);
+                    List<GoCardlessEvent> events = List.of(event);
+                    webhookGoCardlessService.processEvents(events);
+                    verify(mockedGoCardlessEventService).storeEvents(events);
                 }
         );
     }
-    
+
     @Test
     public void shouldStorePaymentEventsWhenHandlingThemThrowsAnException() {
         GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().withResourceType(PAYMENTS).withAction("created").toEntity();
@@ -84,13 +85,13 @@ public class WebhookGoCardlessServiceTest {
         List<GoCardlessEvent> events = Collections.singletonList(goCardlessEvent);
 
         doThrow(new GoCardlessPaymentNotFoundException("OOPSIE"))
-                .when(mockedSendEmailsForGoCardlessEventsHandler).sendEmails(List.of(goCardlessEvent));
+                .when(mockedSendEmailsForGoCardlessEventsHandler).sendEmails(events);
         try {
             webhookGoCardlessService.processEvents(events);
             fail("Expected GoCardlessPaymentNotFoundException.");
         } catch (GoCardlessPaymentNotFoundException expected) {
         }
-        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvents(events);
     }
 
     @Test
@@ -103,13 +104,13 @@ public class WebhookGoCardlessServiceTest {
                 .thenReturn(mock(Mandate.class));
 
         doThrow(new GoCardlessMandateNotFoundException("error", "OOPSIE"))
-                .when(mockedSendEmailsForGoCardlessEventsHandler).sendEmails(List.of(goCardlessEvent));
+                .when(mockedSendEmailsForGoCardlessEventsHandler).sendEmails(events);
         try {
             webhookGoCardlessService.processEvents(events);
             fail("Expected GoCardlessMandateNotFoundException.");
         } catch (GoCardlessMandateNotFoundException expected) {
         }
-        verify(mockedGoCardlessEventService).storeEvent(goCardlessEvent);
+        verify(mockedGoCardlessEventService).storeEvents(events);
     }
 
     @Test
@@ -180,7 +181,7 @@ public class WebhookGoCardlessServiceTest {
 
         Payment payment1 = mock(Payment.class);
         Payment payment2 = mock(Payment.class);
-        
+
         when(mockedPaymentQueryService.findByGoCardlessPaymentIdAndOrganisationId(goCardlessPaymentId1, goCardlessOrganisationId1))
                 .thenReturn(Optional.of(payment1));
 
@@ -240,9 +241,9 @@ public class WebhookGoCardlessServiceTest {
 
         when(mockedMandateQueryService.findByGoCardlessMandateIdAndOrganisationId(mandateId, organisationId))
                 .thenReturn(mandate);
-        
+
         Payment payment = mock(Payment.class);
-        
+
         when(mockedPaymentQueryService.findByGoCardlessPaymentIdAndOrganisationId(paymentId, organisationId))
                 .thenReturn(Optional.of(payment));
 

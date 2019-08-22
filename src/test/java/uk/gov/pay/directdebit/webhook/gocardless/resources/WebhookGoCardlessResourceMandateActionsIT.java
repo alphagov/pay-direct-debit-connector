@@ -3,14 +3,14 @@ package uk.gov.pay.directdebit.webhook.gocardless.resources;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.junit.Before;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
+import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
 import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 import uk.gov.pay.directdebit.mandate.model.MandateState;
@@ -72,7 +72,7 @@ public class WebhookGoCardlessResourceMandateActionsIT {
     public void tearDown() {
         testContext.getDatabaseTestHelper().truncateAllData();
     }
-
+    
     @Test
     public void submittedChangesStateToSubmittedToBank() {
         postWebhook("gocardless-webhook-mandate-submitted.json");

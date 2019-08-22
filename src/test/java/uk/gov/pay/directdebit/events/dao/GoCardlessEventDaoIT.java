@@ -17,12 +17,12 @@ import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static java.time.ZoneOffset.UTC;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
@@ -45,7 +45,7 @@ public class GoCardlessEventDaoIT {
     public void shouldInsertAnEvent() {
         GoCardlessEventFixture goCardlessEventFixture = aGoCardlessEventFixture();
 
-        Long id = goCardlessEventDao.insert(goCardlessEventFixture.toEntity());
+        Long id = goCardlessEventDao.insert(List.of(goCardlessEventFixture.toEntity()));
 
         Map<String, Object> goCardlessEvent = testContext.getDatabaseTestHelper().getGoCardlessEventById(id);
 
@@ -104,11 +104,8 @@ public class GoCardlessEventDaoIT {
                 .withCreatedAt(ZonedDateTime.of(2019, 7, 5, 13, 0, 0, 0, UTC))
                 .withGoCardlessEventId(GoCardlessEventId.valueOf("This is an later event with the wrong organisation ID"));
 
-        goCardlessEventDao.insert(latestEvent.toEntity());
-        goCardlessEventDao.insert(earlierEvent.toEntity());
-        goCardlessEventDao.insert(laterEventWrongAction.toEntity());
-        goCardlessEventDao.insert(laterEventWrongMandateId.toEntity());
-        goCardlessEventDao.insert(laterEventWrongOrganisationId.toEntity());
+        goCardlessEventDao.insert(List.of(latestEvent.toEntity(), earlierEvent.toEntity(), laterEventWrongAction.toEntity(), 
+                laterEventWrongMandateId.toEntity(), laterEventWrongOrganisationId.toEntity()));
 
         GoCardlessEvent event = goCardlessEventDao.findLatestApplicableEventForMandate(
                 GoCardlessMandateId.valueOf("Mandate ID we want"),
@@ -150,11 +147,8 @@ public class GoCardlessEventDaoIT {
                 .withCreatedAt(ZonedDateTime.of(2019, 7, 5, 13, 0, 0, 0, UTC))
                 .withGoCardlessEventId(GoCardlessEventId.valueOf("This is an later event with the wrong organisation ID"));
 
-        goCardlessEventDao.insert(latestEvent.toEntity());
-        goCardlessEventDao.insert(earlierEvent.toEntity());
-        goCardlessEventDao.insert(laterEventWrongAction.toEntity());
-        goCardlessEventDao.insert(laterEventWrongPaymentId.toEntity());
-        goCardlessEventDao.insert(laterEventWrongOrganisationId.toEntity());
+        goCardlessEventDao.insert(List.of(latestEvent.toEntity(), earlierEvent.toEntity(), laterEventWrongAction.toEntity(), 
+                laterEventWrongPaymentId.toEntity(), laterEventWrongOrganisationId.toEntity()));
 
         GoCardlessEvent event = goCardlessEventDao.findLatestApplicableEventForPayment(
                 GoCardlessPaymentId.valueOf("Payment ID we want"),
