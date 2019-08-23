@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
@@ -34,8 +35,8 @@ public class GatewayAccountResponse {
     private String type;
     @JsonProperty("analytics_id")
     private String analyticsId;
-    @JsonProperty("organisation")
-    private String organisation;
+    @JsonProperty("provider_id")
+    private String provider_id;
     @JsonProperty("links")
     private List<Map<String, Object>> links = new ArrayList<>();
     @JsonProperty("is_connected")
@@ -47,7 +48,7 @@ public class GatewayAccountResponse {
         this.paymentProvider = gatewayAccountBuilder.paymentProvider;
         this.description = gatewayAccountBuilder.description;
         this.type = gatewayAccountBuilder.type;
-        this.organisation = gatewayAccountBuilder.organisation;
+        this.provider_id = gatewayAccountBuilder.organisation;
         this.analyticsId = gatewayAccountBuilder.analyticsId;
         this.isConnected = gatewayAccountBuilder.isConnected;
     }
@@ -61,7 +62,7 @@ public class GatewayAccountResponse {
                 .withType(gatewayAccount.getType().toString())
                 .withAnalyticsId(gatewayAccount.getAnalyticsId())
                 .withIsConnected(gatewayAccount.getAccessToken().isPresent());
-        gatewayAccount.getOrganisation().ifPresent(organisation -> builder.withOrganisation(organisation.toString()));
+        gatewayAccount.getOrganisation().map(GoCardlessOrganisationId::toString).ifPresent(builder::withOrganisation);
         return builder.build();
     }
 

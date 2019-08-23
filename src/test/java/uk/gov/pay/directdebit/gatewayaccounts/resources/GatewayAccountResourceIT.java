@@ -8,14 +8,14 @@ import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
-import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
+import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
@@ -31,9 +31,11 @@ import static org.apache.commons.lang.RandomStringUtils.randomAlphabetic;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource.GATEWAY_ACCOUNTS_API_PATH;
@@ -435,7 +437,23 @@ public class GatewayAccountResourceIT {
         givenSetup()
                 .get(GATEWAY_ACCOUNT_API_PATH.replace("{accountId}", "osiuoiorga"))
                 .then()
-                .body("organisation",is("anorganisat"));
+                .body("provider_id",is("anorganisat"));
+    }
+
+    @Test
+    public void shouldReturnNull_whenOrganisationIsNull() {
+        testGatewayAccount = aGatewayAccountFixture()
+                .withExternalId("osiuoiorga")
+                .withPaymentProvider(PaymentProvider.GOCARDLESS)
+                .withDescription("a org description")
+                .withType(GatewayAccount.Type.TEST)
+                .withAnalyticsId("analytics")
+                .withOrganisation(null)
+                .insert(app.getTestContext().getJdbi());
+        givenSetup()
+                .get(GATEWAY_ACCOUNT_API_PATH.replace("{accountId}", "osiuoiorga"))
+                .then()
+                .body("$", not(hasKey("provider_id")));
     }
 
     private RequestSpecification givenSetup() {
