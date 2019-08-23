@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.Rule;
 import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.gatewayaccounts.model.GatewayAccount;
+import uk.gov.pay.directdebit.gatewayaccounts.model.GoCardlessOrganisationId;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
@@ -419,6 +420,22 @@ public class GatewayAccountResourceIT {
                 .patch(requestPath)
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+    }
+    
+    @Test
+    public void shouldReturnOrganisation_whenItsNotNull() {
+        testGatewayAccount = aGatewayAccountFixture()
+                .withExternalId("osiuoiorga")
+                .withPaymentProvider(PaymentProvider.GOCARDLESS)
+                .withDescription("a org description")
+                .withType(GatewayAccount.Type.TEST)
+                .withAnalyticsId("analytics")
+                .withOrganisation(GoCardlessOrganisationId.valueOf("anorganisat"))
+                .insert(app.getTestContext().getJdbi());
+        givenSetup()
+                .get(GATEWAY_ACCOUNT_API_PATH.replace("{accountId}", "osiuoiorga"))
+                .then()
+                .body("organisation",is("anorganisat"));
     }
 
     private RequestSpecification givenSetup() {
