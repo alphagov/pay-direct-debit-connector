@@ -90,8 +90,7 @@ public class GoCardlessService implements DirectDebitPaymentProviderCommandServi
         } catch (ValidationFailedException exc) {
             return new BankAccountValidationResponse(false);
         } catch (GoCardlessException exc) {
-            LOGGER.error("Exception while validating bank account details in GoCardless, message: {}", exc.getMessage());
-            throw new InternalServerErrorException("Exception while validating bank account details in GoCardless");
+            throw new InternalServerErrorException("Exception while validating bank account details in GoCardless", exc);
         }
     }
 

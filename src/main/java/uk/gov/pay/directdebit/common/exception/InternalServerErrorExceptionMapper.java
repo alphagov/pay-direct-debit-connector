@@ -16,7 +16,15 @@ public class InternalServerErrorExceptionMapper implements ExceptionMapper<Inter
 
     @Override
     public Response toResponse(InternalServerErrorException exception) {
-        LOGGER.error(exception.getMessage());
+        StringBuilder sb = new StringBuilder();
+        sb.append("Internal server error");
+        if (exception.getMessage() != null) {
+            sb.append(": ").append(exception.getMessage());
+        }
+        if (exception.getCause() != null) {
+            sb.append(ExceptionSummariser.summarise(exception.getCause()));
+        }
+        LOGGER.error(sb.toString());
         ErrorResponse errorResponse = new ErrorResponse(ErrorIdentifier.GENERIC, exception.getMessage());
         return Response.status(500).entity(errorResponse).type(APPLICATION_JSON).build();
     }
