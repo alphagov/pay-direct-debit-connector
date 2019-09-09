@@ -31,7 +31,6 @@ import uk.gov.pay.directdebit.tokens.services.TokenService;
 
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -100,7 +99,7 @@ public class MandateServiceConfirmTest {
     private MandateService service;
 
     @Before
-    public void setUp() throws URISyntaxException {
+    public void setUp() {
         when(mockPaymentProviderFactory.getCommandServiceFor(SANDBOX)).thenReturn(mockSandboxService);
         when(mockDirectDebitConfig.getLinks()).thenReturn(mockLinksConfig);
 

@@ -1,7 +1,6 @@
 package uk.gov.pay.directdebit.payments.api;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
