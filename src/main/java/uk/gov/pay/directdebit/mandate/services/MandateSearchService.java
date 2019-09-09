@@ -1,6 +1,5 @@
 package uk.gov.pay.directdebit.mandate.services;
 
-import uk.gov.pay.directdebit.mandate.dao.MandateDao;
 import uk.gov.pay.directdebit.mandate.dao.MandateSearchDao;
 import uk.gov.pay.directdebit.mandate.model.Mandate;
 import uk.gov.pay.directdebit.mandate.params.MandateSearchParams;

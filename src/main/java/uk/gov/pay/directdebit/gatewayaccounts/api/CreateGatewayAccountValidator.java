@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.gatewayaccounts.api;
 
 import com.google.common.collect.ImmutableMap;
 import uk.gov.pay.directdebit.common.validation.ApiValidation;
-import uk.gov.pay.directdebit.common.validation.FieldSize;
 
 import java.util.Map;
 import java.util.function.Function;

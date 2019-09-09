@@ -21,7 +21,6 @@ import uk.gov.pay.directdebit.webhook.gocardless.services.handlers.SendEmailsFor
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;

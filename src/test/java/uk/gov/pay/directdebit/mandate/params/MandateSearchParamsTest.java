@@ -2,7 +2,6 @@ package uk.gov.pay.directdebit.mandate.params;
 
 
 import org.junit.Test;
-import uk.gov.pay.directdebit.mandate.api.ExternalMandateState;
 import uk.gov.pay.directdebit.mandate.model.MandateBankStatementReference;
 
 import java.time.LocalDate;

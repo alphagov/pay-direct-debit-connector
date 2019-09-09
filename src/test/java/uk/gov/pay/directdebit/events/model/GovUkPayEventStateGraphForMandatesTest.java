@@ -8,8 +8,6 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_CANCELLED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_CREATED;
 import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.MANDATE_USER_SETUP_EXPIRED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_CREATED;
-import static uk.gov.pay.directdebit.events.model.GovUkPayEventType.PAYMENT_SUBMITTED;
 
 public class GovUkPayEventStateGraphForMandatesTest {
 
