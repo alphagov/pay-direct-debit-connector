@@ -6,8 +6,8 @@ import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
-import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import uk.gov.pay.directdebit.events.dao.mapper.GoCardlessEventMapper;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 import uk.gov.pay.directdebit.events.model.GoCardlessEventIdArgumentFactory;
@@ -18,6 +18,7 @@ import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateIdArgumentFactory;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentId;
 import uk.gov.pay.directdebit.payments.model.GoCardlessPaymentIdArgumentFactory;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,8 +28,8 @@ import java.util.Set;
 @RegisterArgumentFactory(GoCardlessOrganisationIdArgumentFactory.class)
 @RegisterRowMapper(GoCardlessEventMapper.class)
 public interface GoCardlessEventDao {
-
-    @SqlUpdate("INSERT INTO gocardless_events(" +
+    
+    @SqlBatch("INSERT INTO gocardless_events(" +
             " event_id," +
             " action," +
             " resource_type," +
@@ -71,7 +72,7 @@ public interface GoCardlessEventDao {
             " :linksSubscription," +
             " :createdAt)")
     @GetGeneratedKeys
-    Long insert(@BindBean GoCardlessEvent goCardlessEvent);
+    Long insert(@BindBean() List<GoCardlessEvent> events);
 
     @SqlQuery("SELECT id, " +
             "event_id, " +

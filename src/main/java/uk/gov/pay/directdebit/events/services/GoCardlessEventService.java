@@ -6,6 +6,7 @@ import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 
 import javax.inject.Inject;
+import java.util.List;
 
 public class GoCardlessEventService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GoCardlessEventService.class);
@@ -17,9 +18,8 @@ public class GoCardlessEventService {
         this.goCardlessEventDao = goCardlessEventDao;
     }
 
-    public void storeEvent(GoCardlessEvent event) {
+    public void storeEvents(List<GoCardlessEvent> event) {
         goCardlessEventDao.insert(event);
-        LOGGER.info("Inserted gocardless event with gocardless event id {} ", event.getGoCardlessEventId());
     }
 
 }

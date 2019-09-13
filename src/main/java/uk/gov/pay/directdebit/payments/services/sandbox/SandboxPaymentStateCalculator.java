@@ -16,7 +16,6 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static uk.gov.pay.directdebit.payments.model.PaymentState.PAID_OUT;
 import static java.lang.String.format;
 import static uk.gov.pay.directdebit.payments.services.GovUkPayEventToPaymentStateMapper.GOV_UK_PAY_EVENT_TYPES_THAT_CHANGE_PAYMENT_STATE;
 import static uk.gov.pay.directdebit.payments.services.GovUkPayEventToPaymentStateMapper.mapGovUkPayEventToPaymentState;

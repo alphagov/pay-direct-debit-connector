@@ -12,7 +12,6 @@ import uk.gov.pay.directdebit.util.DatabaseTestHelper;
 
 import static io.dropwizard.testing.ConfigOverride.config;
 import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
-import static uk.gov.pay.directdebit.junit.PostgresTemplate.createTemplate;
 import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbPassword;
 import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbUri;
 import static uk.gov.pay.directdebit.junit.PostgresTestDocker.getDbUsername;

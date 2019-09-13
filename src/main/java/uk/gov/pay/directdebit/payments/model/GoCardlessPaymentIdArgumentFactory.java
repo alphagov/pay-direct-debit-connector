@@ -3,7 +3,6 @@ package uk.gov.pay.directdebit.payments.model;
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
 import org.jdbi.v3.core.argument.Argument;
 import org.jdbi.v3.core.config.ConfigRegistry;
-import uk.gov.pay.directdebit.mandate.model.GoCardlessMandateId;
 
 import java.sql.Types;
 

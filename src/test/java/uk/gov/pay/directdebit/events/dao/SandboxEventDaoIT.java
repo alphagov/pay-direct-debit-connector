@@ -14,7 +14,6 @@ import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.model.SandboxMandateId;
 import uk.gov.pay.directdebit.payments.model.SandboxPaymentId;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -44,7 +43,7 @@ public class SandboxEventDaoIT {
     }
 
     @Test
-    public void shouldInsertAnEvent() throws IOException {
+    public void shouldInsertAnEvent() {
         SandboxEvent sandboxEvent = aSandboxEvent()
                 .withMandateId(SandboxMandateId.valueOf("aMandateId"))
                 .withPaymentId(SandboxPaymentId.valueOf("aPaymentId"))

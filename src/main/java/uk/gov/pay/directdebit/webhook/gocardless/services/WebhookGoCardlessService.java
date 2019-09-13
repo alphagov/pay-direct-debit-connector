@@ -58,7 +58,7 @@ public class WebhookGoCardlessService {
     }
 
     public void processEvents(List<GoCardlessEvent> events) {
-        events.forEach(goCardlessService::storeEvent);
+        goCardlessService.storeEvents(events);
         updateStatesForEvents(events);
         sendEmailsForGoCardlessEventsHandler.sendEmails(events);
         unhandledGoCardlessEventsLogger.logUnhandledEvents(events);

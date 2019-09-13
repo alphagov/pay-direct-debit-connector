@@ -11,6 +11,8 @@ import uk.gov.pay.directdebit.events.dao.GoCardlessEventDao;
 import uk.gov.pay.directdebit.events.services.GoCardlessEventService;
 import uk.gov.pay.directdebit.events.model.GoCardlessEvent;
 
+import java.util.List;
+
 import static org.mockito.Mockito.verify;
 import static uk.gov.pay.directdebit.payments.fixtures.GoCardlessEventFixture.aGoCardlessEventFixture;
 
@@ -31,8 +33,8 @@ public class GoCardlessEventServiceTest {
     
     @Test
     public void storeEvent_shouldStoreAGoCardlessEvent() {
-        GoCardlessEvent goCardlessEvent = aGoCardlessEventFixture().toEntity();
-        service.storeEvent(goCardlessEvent);
-        verify(mockedGoCardlessEventDao).insert(goCardlessEvent);
+        List<GoCardlessEvent> goCardlessEvents = List.of(aGoCardlessEventFixture().toEntity());
+        service.storeEvents(goCardlessEvents);
+        verify(mockedGoCardlessEventDao).insert(goCardlessEvents);
     }
 }

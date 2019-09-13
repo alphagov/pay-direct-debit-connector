@@ -13,8 +13,6 @@ import uk.gov.pay.directdebit.payments.services.PaymentQueryService;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static uk.gov.pay.directdebit.events.model.GoCardlessEvent.ACTION_MANDATE_CANCELLED;
