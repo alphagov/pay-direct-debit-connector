@@ -7,7 +7,6 @@ The [GOV.UK Pay](https://www.payments.service.gov.uk/) Direct Debit Connector
 | NAME                    | DESCRIPTION                                                                    |
 | ----------------------- | ------------------------------------------------------------------------------ |
 | `ADMIN_PORT`            | The port number to listen for Dropwizard admin requests on. Defaults to `8081`. |
-| `CERTS_PATH`            | If set, add all certificates in this directory to the default Java truststore. |
 | `RUN_APP`               | Set to `true` to run the application. Defaults to `true`. |
 | `PORT`                  | The port number to listen for requests on. Defaults to `8080`. |
 | `JAVA_OPTS`             | Commandline arguments to pass to the java runtime. Optional. |
