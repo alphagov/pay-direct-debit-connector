@@ -8,9 +8,6 @@ server:
 
 logging:
   level: INFO
-  layout:
-      type: json
-
   appenders:
     - type: logstash-console
       threshold: ALL
