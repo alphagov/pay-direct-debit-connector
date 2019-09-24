@@ -16,6 +16,10 @@ logging:
       layout:
         type: json
         timestampFormat: "yyyy-MM-dd HH:mm:ss.SSS"
+    - type: sentry
+      threshold: ERROR
+      dsn: ${SENTRY_DSN}
+      environment: ${ENVIRONMENT}
 
 links:
   frontendUrl: ${FRONTEND_URL:-}
