@@ -9,6 +9,7 @@ The [GOV.UK Pay](https://www.payments.service.gov.uk/) Direct Debit Connector
 | `ADMIN_PORT`            | The port number to listen for Dropwizard admin requests on. Defaults to `8081`. |
 | `RUN_APP`               | Set to `true` to run the application. Defaults to `true`. |
 | `PORT`                  | The port number to listen for requests on. Defaults to `8080`. |
+| `ENVIRONMENT`           | The name of the environment for tagging Sentry errors. |
 | `JAVA_OPTS`             | Commandline arguments to pass to the java runtime. Optional. |
 | `JAVA_HOME`             | The location of the JRE. Set to `/opt/java/openjdk` in the `Dockerfile`. |
 | `DB_HOST`               | The hostname of the database server. |
@@ -21,6 +22,7 @@ The [GOV.UK Pay](https://www.payments.service.gov.uk/) Direct Debit Connector
 | `ADMINUSERS_URL`        | The URL of the [pay-adminusers](https://github.com/alphagov/pay-adminusers) microservice. Defaults to the empty string. |
 | `METRICS_HOST`          | The hostname to send graphite metrics to. Defaults to `localhost`. |
 | `METRICS_PORT`          | The port number to send graphite metrics to. Defaults to `8092`. |
+| `SENTRY_DSN`            | The DSN (API key) for reporting issues to Sentry. |
 
 ### GoCardless settings
 
