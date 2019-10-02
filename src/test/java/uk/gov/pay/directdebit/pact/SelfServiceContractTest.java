@@ -20,7 +20,7 @@ import uk.gov.pay.directdebit.payments.fixtures.GatewayAccountFixture;
 @PactBroker(scheme = "https", host = "pact-broker-test.cloudapps.digital", tags = {"${PACT_CONSUMER_TAG}", "test"},
         authentication = @PactBrokerAuth(username = "${PACT_BROKER_USERNAME}", password = "${PACT_BROKER_PASSWORD}"),
         consumers = {"selfservice"})
-public class SelfServiceApiContractTest {
+public class SelfServiceContractTest {
 
     @ClassRule
     public static DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
