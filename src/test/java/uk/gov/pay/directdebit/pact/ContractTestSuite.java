@@ -1,5 +1,6 @@
 package uk.gov.pay.directdebit.pact;
 
+import com.google.common.collect.ImmutableSetMultimap;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.TestSuite;
 import org.junit.runner.RunWith;
@@ -13,7 +14,7 @@ import java.util.Map;
 public class ContractTestSuite {
 
     public static TestSuite suite() {
-        Map<String, JUnit4TestAdapter> map = Map.of(
+        ImmutableSetMultimap<String, JUnit4TestAdapter> map = ImmutableSetMultimap.of(
                 "publicapi", new JUnit4TestAdapter(PublicApiContractTest.class),
                 "selfservice", new JUnit4TestAdapter(SelfServiceContractTest.class));
         return CreateTestSuite.create(map);
