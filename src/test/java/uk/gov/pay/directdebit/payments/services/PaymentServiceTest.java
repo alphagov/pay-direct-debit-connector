@@ -139,7 +139,7 @@ public class PaymentServiceTest {
         when(mockedGovUkPayEventService.storeEventAndUpdateStateForPayment(paymentWithProviderIdAndChargeDate, PAYMENT_SUBMITTED))
                 .thenAnswer(invocationOnMock -> {
                     Payment paymentToUpdate = invocationOnMock.getArgument(0, Payment.class);
-                    return Payment.PaymentBuilder.fromPayment(paymentToUpdate).withState(SUBMITTED_TO_PROVIDER).build();
+                    return fromPayment(paymentToUpdate).withState(SUBMITTED_TO_PROVIDER).build();
                 });
 
         Payment returnedPayment = service.submitPaymentToProvider(payment, SANDBOX_MANDATE_ID);

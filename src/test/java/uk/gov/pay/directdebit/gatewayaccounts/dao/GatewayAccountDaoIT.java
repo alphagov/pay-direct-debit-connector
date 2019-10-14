@@ -105,7 +105,7 @@ public class GatewayAccountDaoIT {
         String description2 = "can't type and is not drunk maybe";
         String analyticsId2 = "DD_234098_BBBLABLA";
         testGatewayAccount.insert(testContext.getJdbi());
-        GatewayAccountFixture.aGatewayAccountFixture()
+        aGatewayAccountFixture()
                 .withExternalId(externalId2)
                 .withDescription(description2)
                 .withPaymentProvider(paymentProvider2)
@@ -155,16 +155,14 @@ public class GatewayAccountDaoIT {
         PaymentProviderAccessToken accessToken             = PaymentProviderAccessToken.of("gimmeaccess");
         GoCardlessOrganisationId organisation = GoCardlessOrganisationId.valueOf("organisation");
 
-        GatewayAccountFixture
-          .aGatewayAccountFixture()
+        aGatewayAccountFixture()
           .withExternalId(externalId)
           .withDescription(description)
           .withPaymentProvider(paymentProvider)
           .withAnalyticsId(analyticsId)
           .insert(testContext.getJdbi());
 
-        GatewayAccountFixture
-          .aGatewayAccountFixture()
+        aGatewayAccountFixture()
           .withExternalId(externalId2)
           .withDescription(description2)
           .withPaymentProvider(paymentProvider2)

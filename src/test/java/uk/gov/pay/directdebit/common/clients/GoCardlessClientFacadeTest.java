@@ -59,10 +59,10 @@ public class GoCardlessClientFacadeTest {
     private com.gocardless.resources.Payment mockPayment;
 
     @Mock
-    private com.gocardless.resources.Creditor mockCreditor;
+    private Creditor mockCreditor;
 
     @Mock
-    private com.gocardless.resources.Creditor.SchemeIdentifier mockSchemeIdentifier;
+    private Creditor.SchemeIdentifier mockSchemeIdentifier;
 
     private GoCardlessClientFacade goCardlessClientFacade;
 

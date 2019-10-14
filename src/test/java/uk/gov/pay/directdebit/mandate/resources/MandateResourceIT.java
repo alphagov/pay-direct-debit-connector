@@ -7,9 +7,9 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.converters.Nullable;
-import junitparams.JUnitParamsRunner;
 import org.apache.http.HttpStatus;
 import org.hamcrest.MatcherAssert;
 import org.junit.After;
@@ -17,10 +17,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
+import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
-import uk.gov.pay.directdebit.mandate.model.MandateState;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
 import uk.gov.pay.directdebit.payers.fixtures.GoCardlessCustomerFixture;
 import uk.gov.pay.directdebit.payers.fixtures.PayerFixture;
@@ -31,6 +30,7 @@ import uk.gov.pay.directdebit.payments.model.PaymentState;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -288,7 +288,7 @@ public class MandateResourceIT {
                 .body("state.status", is("created"))
                 .body("state.details", is(nullValue()))
                 .body("service_reference", is("test-service-reference"))
-                .body("payment_provider", is(gatewayAccountFixture.getPaymentProvider().toString().toLowerCase()))
+                .body("payment_provider", is(gatewayAccountFixture.getPaymentProvider().toString().toLowerCase(Locale.ENGLISH)))
                 .body("provider_id", is(nullValue()))
                 .body("mandate_reference", is(nullValue()))
                 .body("description", optionalMatcher(description))
@@ -485,7 +485,7 @@ public class MandateResourceIT {
                 .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
 
         MandateFixture mandateFixture = aMandateFixture()
-                .withState(MandateState.AWAITING_DIRECT_DEBIT_DETAILS)
+                .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
                 .withPayerFixture(payerFixture)
                 .insert(testContext.getJdbi());
