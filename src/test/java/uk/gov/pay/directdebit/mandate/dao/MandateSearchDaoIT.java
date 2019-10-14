@@ -56,7 +56,7 @@ public class MandateSearchDaoIT {
     }
     
     @Before
-    public void setup() {
+    public void setUp() {
         mandateSearchDao = new MandateSearchDao(testContext.getJdbi());
 
         gatewayAccountFixture.insert(testContext.getJdbi());

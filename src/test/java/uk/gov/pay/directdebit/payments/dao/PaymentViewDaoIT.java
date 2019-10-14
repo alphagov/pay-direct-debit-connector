@@ -46,7 +46,7 @@ public class PaymentViewDaoIT {
     private Payment mandate2Payment1;
 
     @Before
-    public void setup() {
+    public void setUp() {
         paymentViewDao = new PaymentViewDao(testContext.getJdbi());
 
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()

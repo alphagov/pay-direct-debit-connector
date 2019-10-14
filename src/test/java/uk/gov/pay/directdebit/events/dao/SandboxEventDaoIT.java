@@ -38,7 +38,7 @@ public class SandboxEventDaoIT {
     private TestContext testContext;
 
     @Before
-    public void setup() {
+    public void setUp() {
         sandboxEventDao = testContext.getJdbi().onDemand(SandboxEventDao.class);
     }
 

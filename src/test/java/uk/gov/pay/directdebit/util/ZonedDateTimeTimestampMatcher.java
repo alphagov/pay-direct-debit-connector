@@ -12,6 +12,7 @@ public class ZonedDateTimeTimestampMatcher extends TypeSafeMatcher<Timestamp> {
     private Timestamp from;
 
     private ZonedDateTimeTimestampMatcher(Timestamp from) {
+        super();
         this.from = from;
     }
 

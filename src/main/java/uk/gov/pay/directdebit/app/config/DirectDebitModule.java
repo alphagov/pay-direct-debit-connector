@@ -32,6 +32,7 @@ public class DirectDebitModule extends AbstractModule {
     private final Jdbi jdbi;
 
     public DirectDebitModule(final DirectDebitConfig configuration, final Environment environment, final Jdbi jdbi) {
+        super();
         this.configuration = configuration;
         this.environment = environment;
         this.jdbi = jdbi;

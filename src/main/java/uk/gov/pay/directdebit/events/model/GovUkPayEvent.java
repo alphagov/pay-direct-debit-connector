@@ -75,8 +75,14 @@ public class GovUkPayEvent implements Event {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         GovUkPayEvent that = (GovUkPayEvent) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(mandateId, that.mandateId) &&

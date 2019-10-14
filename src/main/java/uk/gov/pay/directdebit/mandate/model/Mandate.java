@@ -92,8 +92,14 @@ public class Mandate {
     }
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         Mandate mandate = (Mandate) o;
         return Objects.equals(id, mandate.id) &&
                 Objects.equals(externalId, mandate.externalId) &&

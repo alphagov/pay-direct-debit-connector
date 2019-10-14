@@ -37,7 +37,7 @@ public class GoCardlessEventDaoIT {
     private GoCardlessEventDao goCardlessEventDao;
 
     @Before
-    public void setup() {
+    public void setUp() {
         goCardlessEventDao = testContext.getJdbi().onDemand(GoCardlessEventDao.class);
     }
 

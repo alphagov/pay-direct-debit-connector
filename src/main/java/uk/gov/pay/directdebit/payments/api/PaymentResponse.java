@@ -134,8 +134,14 @@ public class PaymentResponse {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         PaymentResponse that = (PaymentResponse) o;
         return Objects.equals(paymentExternalId, that.paymentExternalId) &&
                 Objects.equals(amount, that.amount) &&

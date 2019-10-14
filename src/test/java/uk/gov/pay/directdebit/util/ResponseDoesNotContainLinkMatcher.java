@@ -13,6 +13,7 @@ public class ResponseDoesNotContainLinkMatcher extends TypeSafeMatcher<List<Map<
     private final String rel;
 
     private ResponseDoesNotContainLinkMatcher(String rel) {
+        super();
         checkNotNull(rel);
         this.rel = rel;
     }
