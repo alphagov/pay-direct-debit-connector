@@ -173,7 +173,7 @@ public class GovUkPayEventServiceTest {
     @Test
     public void insertPaymentEvent_shouldThrowForInvalidEventTransition() {
         var previousEvent = aGovUkPayEventFixture()
-                .withResourceType(GovUkPayEvent.ResourceType.PAYMENT)
+                .withResourceType(PAYMENT)
                 .withPaymentId(paymentId)
                 .withEventType(PAYMENT_SUBMITTED)
                 .toEntity();

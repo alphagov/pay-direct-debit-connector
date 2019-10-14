@@ -18,6 +18,7 @@ import javax.json.JsonObjectBuilder;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -171,7 +172,7 @@ public class GoCardlessWebhookParserTest {
                 .add("metadata",
                         Json.createObjectBuilder()
                         .build())
-                .add("resource_type", resourceType.toString().toLowerCase())
+                .add("resource_type", resourceType.toString().toLowerCase(Locale.ENGLISH))
                 .add("links", buildLinks(organisationIdentifier, resourceType, resourceId))
                 .build().toString(); 
     }

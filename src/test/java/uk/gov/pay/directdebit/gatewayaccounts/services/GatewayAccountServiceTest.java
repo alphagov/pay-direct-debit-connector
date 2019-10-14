@@ -182,8 +182,7 @@ public class GatewayAccountServiceTest {
     @Test
     public void shouldUpdateAGatewayAccount() {
         String externalAccountId = "an-external-id";
-        GatewayAccount gatewayAccount = GatewayAccountFixture
-                .aGatewayAccountFixture()
+        GatewayAccount gatewayAccount = aGatewayAccountFixture()
                 .withExternalId(externalAccountId)
                 .toEntity();
         when(gatewayAccountDao.findByExternalId(externalAccountId)).thenReturn(Optional.of(gatewayAccount));

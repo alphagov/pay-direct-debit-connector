@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -143,7 +144,7 @@ public class PaymentResourceIT {
                 .body(JSON_MANDATE_ID_KEY, is(mandateFixture.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
                 .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
-                .body(JSON_PAYMENT_PROVIDER_KEY, is(SANDBOX.toString().toLowerCase()))
+                .body(JSON_PAYMENT_PROVIDER_KEY, is(SANDBOX.toString().toLowerCase(Locale.ENGLISH)))
                 .contentType(JSON);
 
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
@@ -188,7 +189,7 @@ public class PaymentResourceIT {
     @Test
     public void shouldCollectAPayment_forGoCardless() throws Exception {
         GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
-                .withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
+                .withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         PayerFixture payerFixture = aPayerFixture();
         GoCardlessMandateId goCardlessMandate = GoCardlessMandateId.valueOf("aGoCardlessMandateId");
         Mandate mandate = aMandateFixture()
@@ -248,7 +249,7 @@ public class PaymentResourceIT {
                 .body(JSON_MANDATE_ID_KEY, is(mandate.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
                 .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
-                .body(JSON_PAYMENT_PROVIDER_KEY, is(GOCARDLESS.toString().toLowerCase()))
+                .body(JSON_PAYMENT_PROVIDER_KEY, is(GOCARDLESS.toString().toLowerCase(Locale.ENGLISH)))
                 .contentType(JSON);
         
         String externalTransactionId = response.extract().path(JSON_PAYMENT_ID_KEY).toString();
@@ -273,7 +274,7 @@ public class PaymentResourceIT {
                 .body(JSON_MANDATE_ID_KEY, is(mandate.getExternalId().toString()))
                 .body(JSON_STATE_STATUS_KEY, is("pending"))
                 .body(JSON_PROVIDER_ID_KEY, is(notNullValue()))
-                .body(JSON_PAYMENT_PROVIDER_KEY, is(GOCARDLESS.toString().toLowerCase()))
+                .body(JSON_PAYMENT_PROVIDER_KEY, is(GOCARDLESS.toString().toLowerCase(Locale.ENGLISH)))
                 .contentType(JSON);
     }
 

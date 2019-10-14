@@ -145,7 +145,9 @@ public class PaymentSearchResourceIT {
     @Test
     public void shouldReturnPageOfPaginatedResults() {
         for (int i = 0; i < 15; i++) {
-            MandateFixture mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).insert(testContext.getJdbi());
+            MandateFixture mandateFixture = aMandateFixture()
+                    .withGatewayAccountFixture(testGatewayAccount)
+                    .insert(testContext.getJdbi());
 
             aPaymentFixture()
                     .withId((long) i)

@@ -70,7 +70,7 @@ public class GoCardlessPaymentStateCalculatorTest {
     @Before
     public void setUp() {
         GatewayAccountFixture gatewayAccountFixture = aGatewayAccountFixture()
-                .withPaymentProvider(PaymentProvider.GOCARDLESS)
+                .withPaymentProvider(GOCARDLESS)
                 .withOrganisation(goCardlessOrganisationId);
 
         MandateFixture mandateFixture = aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture);

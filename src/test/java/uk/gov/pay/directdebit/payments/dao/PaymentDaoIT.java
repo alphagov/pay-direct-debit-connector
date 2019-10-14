@@ -311,7 +311,7 @@ public class PaymentDaoIT {
     
     @Test
     public void shouldFindAllPaymentsByPaymentStateAndProvider() {
-        GatewayAccountFixture goCardlessGatewayAccount = aGatewayAccountFixture().withPaymentProvider(PaymentProvider.GOCARDLESS).insert(testContext.getJdbi());
+        GatewayAccountFixture goCardlessGatewayAccount = aGatewayAccountFixture().withPaymentProvider(GOCARDLESS).insert(testContext.getJdbi());
         GatewayAccountFixture sandboxGatewayAccount = aGatewayAccountFixture().withPaymentProvider(SANDBOX).insert(testContext.getJdbi());
 
         MandateFixture sandboxMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(sandboxGatewayAccount).insert(testContext.getJdbi());
@@ -417,12 +417,12 @@ public class PaymentDaoIT {
 
     @Test
     public void shouldUpdateStateByProviderIdAndOrganisationAndReturnNumberOfAffectedRows() {
-        GatewayAccountFixture goCardlessGatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture goCardlessGatewayAccountFixture = aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS)
                 .withOrganisation(GoCardlessOrganisationId.valueOf("Organisation ID we want"))
                 .insert(testContext.getJdbi());
 
-        GatewayAccountFixture goCardlessGatewayAccountFixtureWithWrongOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture goCardlessGatewayAccountFixtureWithWrongOrganisation = aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS)
                 .withOrganisation(GoCardlessOrganisationId.valueOf("Different organisation"))
                 .insert(testContext.getJdbi());
@@ -435,18 +435,18 @@ public class PaymentDaoIT {
                 .withGatewayAccountFixture(goCardlessGatewayAccountFixtureWithWrongOrganisation)
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withExternalId("Payment we want")
                 .withPaymentProviderId(GoCardlessPaymentId.valueOf("Payment ID we want"))
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withPaymentProviderId(GoCardlessPaymentId.valueOf("Different payment ID"))
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixtureWithWrongOrganisation)
                 .withPaymentProviderId(GoCardlessPaymentId.valueOf("Payment ID we want"))
                 .insert(testContext.getJdbi());
@@ -464,12 +464,12 @@ public class PaymentDaoIT {
 
     @Test
     public void shouldUpdateStateByProviderIdAndOrganisationWithNoDetailsAndDescriptionAndReturnNumberOfAffectedRows() {
-        GatewayAccountFixture goCardlessGatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture goCardlessGatewayAccountFixture = aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS)
                 .withOrganisation(GoCardlessOrganisationId.valueOf("Organisation ID we want"))
                 .insert(testContext.getJdbi());
 
-        GatewayAccountFixture goCardlessGatewayAccountFixtureWithWrongOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture goCardlessGatewayAccountFixtureWithWrongOrganisation = aGatewayAccountFixture()
                 .withPaymentProvider(GOCARDLESS)
                 .withOrganisation(GoCardlessOrganisationId.valueOf("Different organisation"))
                 .insert(testContext.getJdbi());
@@ -482,7 +482,7 @@ public class PaymentDaoIT {
                 .withGatewayAccountFixture(goCardlessGatewayAccountFixtureWithWrongOrganisation)
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withExternalId("Payment we want")
                 .withStateDetails("state details before update")
@@ -490,12 +490,12 @@ public class PaymentDaoIT {
                 .withPaymentProviderId(GoCardlessPaymentId.valueOf("Payment ID we want"))
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixture)
                 .withPaymentProviderId(GoCardlessPaymentId.valueOf("Different payment ID"))
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixtureWithWrongOrganisation)
                 .withPaymentProviderId(GoCardlessPaymentId.valueOf("Payment ID we want"))
                 .insert(testContext.getJdbi());
@@ -513,12 +513,12 @@ public class PaymentDaoIT {
     
     @Test
     public void shouldUpdateStateByProviderIdAndNoOrganisationAndReturnNumberOfAffectedRows() {
-        GatewayAccountFixture gatewayAccountFixtureWithNoOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture gatewayAccountFixtureWithNoOrganisation = aGatewayAccountFixture()
                 .withPaymentProvider(SANDBOX)
                 .withOrganisation(null)
                 .insert(testContext.getJdbi());
 
-        GatewayAccountFixture gatewayAccountFixtureWithWrongOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture gatewayAccountFixtureWithWrongOrganisation = aGatewayAccountFixture()
                 .withPaymentProvider(SANDBOX)
                 .withOrganisation(GoCardlessOrganisationId.valueOf("Different organisation"))
                 .insert(testContext.getJdbi());
@@ -531,18 +531,18 @@ public class PaymentDaoIT {
                 .withGatewayAccountFixture(gatewayAccountFixtureWithWrongOrganisation)
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixtureWithNoOrganisation)
                 .withExternalId("Payment we want")
                 .withPaymentProviderId(SandboxPaymentId.valueOf("Payment ID we want"))
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixtureWithNoOrganisation)
                 .withPaymentProviderId(SandboxPaymentId.valueOf("Different payment ID"))
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixtureWithWrongOrganisation)
                 .withPaymentProviderId(SandboxPaymentId.valueOf("Payment ID we want"))
                 .insert(testContext.getJdbi());
@@ -563,12 +563,12 @@ public class PaymentDaoIT {
 
     @Test
     public void shouldUpdateStateByProviderIdAndNoOrganisationWithNoDetailsAndDescriptionAndReturnNumberOfAffectedRows() {
-        GatewayAccountFixture gatewayAccountFixtureWithNoOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture gatewayAccountFixtureWithNoOrganisation = aGatewayAccountFixture()
                 .withPaymentProvider(SANDBOX)
                 .withOrganisation(null)
                 .insert(testContext.getJdbi());
 
-        GatewayAccountFixture gatewayAccountFixtureWithWrongOrganisation = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture gatewayAccountFixtureWithWrongOrganisation = aGatewayAccountFixture()
                 .withPaymentProvider(SANDBOX)
                 .withOrganisation(GoCardlessOrganisationId.valueOf("Different organisation"))
                 .insert(testContext.getJdbi());
@@ -581,18 +581,18 @@ public class PaymentDaoIT {
                 .withGatewayAccountFixture(gatewayAccountFixtureWithWrongOrganisation)
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixtureWithNoOrganisation)
                 .withExternalId("Payment we want")
                 .withPaymentProviderId(SandboxPaymentId.valueOf("Payment ID we want"))
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixtureWithNoOrganisation)
                 .withPaymentProviderId(SandboxPaymentId.valueOf("Different payment ID"))
                 .insert(testContext.getJdbi());
 
-        PaymentFixture.aPaymentFixture()
+        aPaymentFixture()
                 .withMandateFixture(mandateFixtureWithWrongOrganisation)
                 .withPaymentProviderId(SandboxPaymentId.valueOf("Payment ID we want"))
                 .withStateDetails("state details before update")

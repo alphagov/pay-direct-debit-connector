@@ -129,7 +129,7 @@ public class GatewayAccountResourceIT {
 
     @Test
     public void shouldReturnAGatewayAccountWithMinimalFields() {
-        GatewayAccountFixture testGatewayAccount2 = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture testGatewayAccount2 = aGatewayAccountFixture()
                 .withExternalId("externalId")
                 .withPaymentProvider(PaymentProvider.GOCARDLESS)
                 .withType(GatewayAccount.Type.LIVE)
@@ -162,7 +162,7 @@ public class GatewayAccountResourceIT {
         String analyticsId2 = "DD_234098_BBBLABLA";
         String externalId2 = "DD_234098_BBBLABLA";
 
-        GatewayAccountFixture testGatewayAccount2 = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture testGatewayAccount2 = aGatewayAccountFixture()
                 .withExternalId(externalId2)
                 .withDescription(description2)
                 .withPaymentProvider(paymentProvider2)
@@ -223,7 +223,7 @@ public class GatewayAccountResourceIT {
         String analyticsId3 = "DD_234099_BBBLABLA";
         String externalId3 = "DD_234099_BBBLABLA";
 
-        GatewayAccountFixture testGatewayAccount3 = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture testGatewayAccount3 = aGatewayAccountFixture()
                 .withExternalId(externalId3)
                 .withDescription(description3)
                 .withPaymentProvider(paymentProvider3)
@@ -234,7 +234,7 @@ public class GatewayAccountResourceIT {
           .forEach(path -> givenSetup()
             .queryParam(
                 "externalAccountIds",
-                String.format("%s,%s", EXTERNAL_ID, externalId3)
+                format("%s,%s", EXTERNAL_ID, externalId3)
                 )
             .get(path)
             .then()
@@ -382,7 +382,7 @@ public class GatewayAccountResourceIT {
         String description4 = "can't type and is not hungover maybe";
         String analyticsId4 = "DD_234099_BBBLABLA";
 
-        GatewayAccountFixture testGatewayAccount4 = GatewayAccountFixture.aGatewayAccountFixture()
+        GatewayAccountFixture testGatewayAccount4 = aGatewayAccountFixture()
                 .withExternalId(externalId4)
                 .withDescription(description4)
                 .withPaymentProvider(paymentProvider3)

@@ -52,7 +52,7 @@ public class MandateSearchDaoIT {
             .withCreatedDate(now().minusHours(6));
     
     private static ZonedDateTime now() {
-        return java.time.ZonedDateTime.now(ZoneOffset.UTC);
+        return ZonedDateTime.now(ZoneOffset.UTC);
     }
     
     @Before

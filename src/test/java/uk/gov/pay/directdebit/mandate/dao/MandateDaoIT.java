@@ -529,11 +529,11 @@ public class MandateDaoIT {
         MandateFixture.aMandateFixture()
                 .withState(SUBMITTED_TO_PROVIDER)
                 .withGatewayAccountFixture(gatewayAccountFixture)
-                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .withCreatedDate(now().minusMinutes(91L))
                 .insert(testContext.getJdbi());
         
         Set<MandateState> states = Set.of(CREATED, AWAITING_DIRECT_DEBIT_DETAILS);
-        List<Mandate> transactions = mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
+        List<Mandate> transactions = mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, now().minusMinutes(90L));
         assertThat(transactions.size(), is(0));
     }
 
@@ -542,11 +542,11 @@ public class MandateDaoIT {
         MandateFixture.aMandateFixture()
                 .withState(CREATED)
                 .withGatewayAccountFixture(gatewayAccountFixture)
-                .withCreatedDate(ZonedDateTime.now())
+                .withCreatedDate(now())
                 .insert(testContext.getJdbi());
 
         Set<MandateState> states = Set.of(CREATED, AWAITING_DIRECT_DEBIT_DETAILS);
-        List<Mandate> transactions = mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
+        List<Mandate> transactions = mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, now().minusMinutes(90L));
         assertThat(transactions.size(), is(0));
     }
 
@@ -555,23 +555,23 @@ public class MandateDaoIT {
         MandateFixture.aMandateFixture()
                 .withState(AWAITING_DIRECT_DEBIT_DETAILS)
                 .withGatewayAccountFixture(gatewayAccountFixture)
-                .withCreatedDate(ZonedDateTime.now().minusMinutes(200L))
+                .withCreatedDate(now().minusMinutes(200L))
                 .insert(testContext.getJdbi());
 
         MandateFixture.aMandateFixture()
                 .withState(CREATED)
                 .withGatewayAccountFixture(gatewayAccountFixture)
-                .withCreatedDate(ZonedDateTime.now().minusMinutes(100L))
+                .withCreatedDate(now().minusMinutes(100L))
                 .insert(testContext.getJdbi());
 
         MandateFixture.aMandateFixture()
                 .withState(SUBMITTED_TO_PROVIDER)
                 .withGatewayAccountFixture(gatewayAccountFixture)
-                .withCreatedDate(ZonedDateTime.now().minusMinutes(91L))
+                .withCreatedDate(now().minusMinutes(91L))
                 .insert(testContext.getJdbi());
 
         Set<MandateState> states = Set.of(CREATED, AWAITING_DIRECT_DEBIT_DETAILS, SUBMITTED_TO_PROVIDER);
-        List<Mandate> transactions = mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, ZonedDateTime.now().minusMinutes(90L));
+        List<Mandate> transactions = mandateDao.findAllMandatesBySetOfStatesAndMaxCreationTime(states, now().minusMinutes(90L));
         assertThat(transactions.size(), is(3));
     }
 }
