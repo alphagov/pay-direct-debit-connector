@@ -18,6 +18,7 @@ public class ResponseContainsLinkMatcher extends TypeSafeMatcher<List<Map<String
     private Map<String, Object> params;
 
     private ResponseContainsLinkMatcher(String rel, String method, String href) {
+        super();
         checkNotNull(rel);
         checkNotNull(method);
         checkNotNull(href);

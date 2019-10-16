@@ -30,7 +30,7 @@ public class GoCardlessAppConnectAccountTokenDaoIT {
     private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
-    public void setup() {
+    public void setUp() {
         tokenDao = testContext.getJdbi().onDemand(GoCardlessAppConnectAccountTokenDao.class);
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture()
                 .insert(testContext.getJdbi());

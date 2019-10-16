@@ -37,9 +37,11 @@ public class MandateSearchParams extends SearchParams {
     private String email;
 
     public MandateSearchParams() {
+        super();
     }
 
     private MandateSearchParams(MandateSearchParamsBuilder builder) {
+        super();
         this.serviceReference = builder.serviceReference;
         this.externalMandateState = builder.externalMandateState;
         this.mandateBankStatementReference = builder.mandateBankStatementReference;

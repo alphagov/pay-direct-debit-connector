@@ -56,7 +56,7 @@ public class PaymentDaoIT {
     private MandateFixture testMandate;
 
     @Before
-    public void setup() {
+    public void setUp() {
         paymentDao = testContext.getJdbi().onDemand(PaymentDao.class);
         testGatewayAccount = aGatewayAccountFixture().insert(testContext.getJdbi());
         testMandate = MandateFixture.aMandateFixture().withGatewayAccountFixture(testGatewayAccount).withStateDetails("state details").insert(testContext.getJdbi());

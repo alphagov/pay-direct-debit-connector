@@ -39,7 +39,7 @@ public class TokenDaoIT {
     private TestContext testContext;
 
     @Before
-    public void setup() {
+    public void setUp() {
         tokenDao = testContext.getJdbi().onDemand(TokenDao.class);
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
         mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());

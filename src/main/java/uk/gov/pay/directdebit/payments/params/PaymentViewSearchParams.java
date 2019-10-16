@@ -34,9 +34,11 @@ public class PaymentViewSearchParams extends SearchParams {
     private String state;
 
     public PaymentViewSearchParams() {
+        super();
     }
 
     private PaymentViewSearchParams(PaymentViewSearchParamsBuilder builder) {
+        super();
         this.page = builder.page;
         this.displaySize = builder.displaySize;
         this.fromDate = builder.fromDateString;

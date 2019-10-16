@@ -11,6 +11,7 @@ public class NumberMatcher extends BaseMatcher<Number> {
     private String actualClass;
 
     private NumberMatcher(Number expectation) {
+        super();
         this.expectation = expectation;
     }
 

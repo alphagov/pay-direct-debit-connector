@@ -51,10 +51,16 @@ public class SearchResponse<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         SearchResponse<?> that = (SearchResponse<?>) o;
-        return count == that.count &&
+        return count.equals(that.count) &&
                 Objects.equals(gatewayExternalId, that.gatewayExternalId) &&
                 Objects.equals(total, that.total) &&
                 Objects.equals(page, that.page) &&

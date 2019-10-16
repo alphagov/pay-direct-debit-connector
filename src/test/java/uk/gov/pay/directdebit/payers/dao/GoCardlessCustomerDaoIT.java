@@ -37,7 +37,7 @@ public class GoCardlessCustomerDaoIT {
     private GatewayAccountFixture gatewayAccountFixture;
 
     @Before
-    public void setup() {
+    public void setUp() {
         gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture().insert(testContext.getJdbi());
         mandateFixture = MandateFixture.aMandateFixture().withGatewayAccountFixture(gatewayAccountFixture).insert(testContext.getJdbi());
         paymentFixture = PaymentFixture.aPaymentFixture()

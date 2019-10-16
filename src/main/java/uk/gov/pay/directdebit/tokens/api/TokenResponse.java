@@ -86,7 +86,9 @@ public class TokenResponse {
         }
         if (mandateReference != null ? !mandateReference.equals(that.mandateReference) : that.mandateReference != null) {
             return false;
-        } else return true;
+        } else {
+            return true;
+        }
     }
 
     @Override

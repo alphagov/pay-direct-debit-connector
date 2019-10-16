@@ -41,6 +41,7 @@ public class CustomInetSocketAddressProxySelector extends ProxySelector {
     public CustomInetSocketAddressProxySelector(ProxySelector defaultProxySelector,
                                                 String proxyHostname,
                                                 int proxyPort) {
+        super();
         this.defaultProxySelector = defaultProxySelector;
     }
 

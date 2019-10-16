@@ -43,7 +43,7 @@ public class GatewayAccountDaoIT {
     private GatewayAccountFixture testGatewayAccount;
 
     @Before
-    public void setup() {
+    public void setUp() {
         gatewayAccountDao = testContext.getJdbi().onDemand(GatewayAccountDao.class);
         this.testGatewayAccount = aGatewayAccountFixture()
                 .withExternalId(EXTERNAL_ID)

@@ -54,7 +54,7 @@ public class MandateDaoIT {
     private GatewayAccountFixture gatewayAccountFixture = GatewayAccountFixture.aGatewayAccountFixture();
 
     @Before
-    public void setup() {
+    public void setUp() {
         gatewayAccountFixture.insert(testContext.getJdbi());
         mandateDao = testContext.getJdbi().onDemand(MandateDao.class);
     }

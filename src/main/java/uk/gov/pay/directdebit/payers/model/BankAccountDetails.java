@@ -28,12 +28,20 @@ public class BankAccountDetails {
     
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         BankAccountDetails that = (BankAccountDetails) o;
 
-        if (!accountNumber.equals(that.accountNumber)) return false;
+        if (!accountNumber.equals(that.accountNumber)) {
+            return false;
+        }
+
         return sortCode.equals(that.sortCode);
     }
 

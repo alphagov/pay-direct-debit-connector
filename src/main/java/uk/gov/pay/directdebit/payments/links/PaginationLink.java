@@ -34,8 +34,14 @@ public class PaginationLink {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         PaginationLink link = (PaginationLink) o;
         return Objects.equals(href, link.href);
     }
