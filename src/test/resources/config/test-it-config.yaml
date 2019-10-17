@@ -13,7 +13,7 @@ logging:
       threshold: ALL
       target: stdout
       customFields:
-        label: "directdebit-connector"
+        container: "directdebit-connector"
 
 links:
   frontendUrl: http://Frontend
