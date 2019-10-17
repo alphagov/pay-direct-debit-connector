@@ -13,7 +13,7 @@ logging:
       threshold: ALL
       target: stdout
       customFields:
-        label: "directdebit-connector"
+        container: "directdebit-connector"
     - type: sentry
       threshold: ERROR
       dsn: ${SENTRY_DSN:-https://example.com@dummy/1}
