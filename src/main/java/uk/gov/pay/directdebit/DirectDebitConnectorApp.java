@@ -48,6 +48,7 @@ import uk.gov.pay.directdebit.tokens.resources.SecurityTokensResource;
 import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExceptionMapper;
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
+import uk.gov.pay.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
 import uk.gov.pay.logging.LogstashConsoleAppenderFactory;
 
 import java.net.ProxySelector;
@@ -84,6 +85,7 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         bootstrap.addBundle(new JdbiExceptionsBundle());
         bootstrap.addCommand(new DependentResourcesWaitCommand());
         bootstrap.getObjectMapper().getSubtypeResolver().registerSubtypes(LogstashConsoleAppenderFactory.class);
+        bootstrap.getObjectMapper().getSubtypeResolver().registerSubtypes(GovUkPayDropwizardRequestJsonLogLayoutFactory.class);
     }
 
     @Override
