@@ -15,7 +15,6 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.commons.utils.metrics.DatabaseMetricsService;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
@@ -49,6 +48,7 @@ import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExcepti
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
 import uk.gov.pay.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
+import uk.gov.pay.logging.LoggingFilter;
 import uk.gov.pay.logging.LogstashConsoleAppenderFactory;
 
 import java.net.ProxySelector;
