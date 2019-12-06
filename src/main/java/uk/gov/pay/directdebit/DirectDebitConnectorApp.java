@@ -33,6 +33,8 @@ import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.PreconditionFailedExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.UnlinkedGCMerchantAccountExceptionMapper;
 import uk.gov.pay.directdebit.common.proxy.CustomInetSocketAddressProxySelector;
+import uk.gov.pay.directdebit.filters.LoggingMDCRequestFilter;
+import uk.gov.pay.directdebit.filters.LoggingMDCResponseFilter;
 import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
@@ -103,6 +105,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         final Jdbi jdbi = new JdbiFactory().build(environment, configuration.getDataSourceFactory(), "postgresql");
         final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment, jdbi));
 
+        environment.jersey().register(injector.getInstance(LoggingMDCRequestFilter.class));
+        environment.jersey().register(injector.getInstance(LoggingMDCResponseFilter.class));
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
         environment.healthChecks().register("ping", new Ping());
