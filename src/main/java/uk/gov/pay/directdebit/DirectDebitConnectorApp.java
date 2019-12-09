@@ -15,7 +15,6 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
-import uk.gov.pay.commons.utils.logging.LoggingFilter;
 import uk.gov.pay.commons.utils.metrics.DatabaseMetricsService;
 import uk.gov.pay.directdebit.app.bootstrap.DependentResourcesWaitCommand;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
@@ -34,6 +33,8 @@ import uk.gov.pay.directdebit.common.exception.NotFoundExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.PreconditionFailedExceptionMapper;
 import uk.gov.pay.directdebit.common.exception.UnlinkedGCMerchantAccountExceptionMapper;
 import uk.gov.pay.directdebit.common.proxy.CustomInetSocketAddressProxySelector;
+import uk.gov.pay.directdebit.filters.LoggingMDCRequestFilter;
+import uk.gov.pay.directdebit.filters.LoggingMDCResponseFilter;
 import uk.gov.pay.directdebit.gatewayaccounts.GatewayAccountParamConverterProvider;
 import uk.gov.pay.directdebit.gatewayaccounts.resources.GatewayAccountResource;
 import uk.gov.pay.directdebit.healthcheck.resources.HealthCheckResource;
@@ -49,6 +50,7 @@ import uk.gov.pay.directdebit.webhook.gocardless.exception.InvalidWebhookExcepti
 import uk.gov.pay.directdebit.webhook.gocardless.resources.WebhookGoCardlessResource;
 import uk.gov.pay.directdebit.webhook.sandbox.resources.WebhookSandboxResource;
 import uk.gov.pay.logging.GovUkPayDropwizardRequestJsonLogLayoutFactory;
+import uk.gov.pay.logging.LoggingFilter;
 import uk.gov.pay.logging.LogstashConsoleAppenderFactory;
 
 import java.net.ProxySelector;
@@ -103,6 +105,8 @@ public class DirectDebitConnectorApp extends Application<DirectDebitConfig> {
         final Jdbi jdbi = new JdbiFactory().build(environment, configuration.getDataSourceFactory(), "postgresql");
         final Injector injector = Guice.createInjector(new DirectDebitModule(configuration, environment, jdbi));
 
+        environment.jersey().register(injector.getInstance(LoggingMDCRequestFilter.class));
+        environment.jersey().register(injector.getInstance(LoggingMDCResponseFilter.class));
         environment.servlets().addFilter("LoggingFilter", new LoggingFilter())
                 .addMappingForUrlPatterns(of(REQUEST), true, "/v1/*");
         environment.healthChecks().register("ping", new Ping());

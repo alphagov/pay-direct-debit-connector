@@ -46,7 +46,7 @@ public class PaymentService {
     }
 
     Payment createPayment(long amount, String description, String reference, Mandate mandate) {
-        LOGGER.info("Creating payment for mandate {}", kv(LoggingKeys.EXTERNAL_ID, mandate.getExternalId()));
+        LOGGER.info("Creating payment for mandate {}", kv(LoggingKeys.MANDATE_EXTERNAL_ID, mandate.getExternalId()));
         Payment payment = aPayment()
                 .withExternalId(RandomIdGenerator.newId())
                 .withAmount(amount)
