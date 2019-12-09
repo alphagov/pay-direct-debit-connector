@@ -14,6 +14,7 @@ import static uk.gov.pay.logging.LoggingKeys.GATEWAY_ACCOUNT_TYPE;
 import static uk.gov.pay.logging.LoggingKeys.MANDATE_EXTERNAL_ID;
 import static uk.gov.pay.logging.LoggingKeys.PAYMENT_EXTERNAL_ID;
 import static uk.gov.pay.logging.LoggingKeys.PROVIDER;
+import static uk.gov.pay.logging.LoggingKeys.SECURE_TOKEN;
 
 public class LoggingMDCRequestFilter implements ContainerRequestFilter {
 
@@ -39,6 +40,9 @@ public class LoggingMDCRequestFilter implements ContainerRequestFilter {
 
         getPathParameterFromRequest("paymentExternalId", requestContext)
                 .ifPresent(mandateExternalId -> MDC.put(PAYMENT_EXTERNAL_ID, mandateExternalId));
+        
+        getPathParameterFromRequest("token", requestContext)
+                .ifPresent(token -> MDC.put(SECURE_TOKEN, token));
     }
 
     private Optional<String> getPathParameterFromRequest(String parameterName, ContainerRequestContext requestContext) {
