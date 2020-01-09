@@ -35,7 +35,7 @@ final class DropwizardTestApplications {
         }));
     }
 
-    static Optional<DropwizardTestSupport> createIfNotRunning(Class<? extends Application> appClass, String configClasspathLocation, ConfigOverride... configOverrides) {
+    static Optional<DropwizardTestSupport> createIfNotRunning(Class<? extends Application> appClass, String configClasspathLocation, ConfigOverride... configOverrides) throws Exception {
         Pair<Class<? extends Application>, String> key = Pair.of(appClass, configClasspathLocation);
         if (!apps.containsKey(key)) {
             String resourceConfigFilePath = ResourceHelpers.resourceFilePath(configClasspathLocation);

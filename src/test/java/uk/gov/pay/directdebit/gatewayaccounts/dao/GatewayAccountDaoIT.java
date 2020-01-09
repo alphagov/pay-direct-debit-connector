@@ -45,6 +45,7 @@ public class GatewayAccountDaoIT {
     @Before
     public void setUp() {
         gatewayAccountDao = testContext.getJdbi().onDemand(GatewayAccountDao.class);
+        testContext.getDatabaseTestHelper().truncateAllData();
         this.testGatewayAccount = aGatewayAccountFixture()
                 .withExternalId(EXTERNAL_ID)
                 .withPaymentProvider(PAYMENT_PROVIDER)

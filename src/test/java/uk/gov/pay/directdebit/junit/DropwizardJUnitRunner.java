@@ -62,14 +62,14 @@ public final class DropwizardJUnitRunner extends JUnitParamsRunner {
             configOverride.add(config("database.user", getDbUsername()));
             configOverride.add(config("database.password", getDbPassword()));
         }
-        Optional<DropwizardTestSupport> createdApp = createIfNotRunning(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config(), configOverride.toArray(new ConfigOverride[0]));
-        if (dropwizardConfigAnnotation.withDockerPostgres() && createdApp.isPresent()) {
-            try {
+        try {
+            Optional<DropwizardTestSupport> createdApp = createIfNotRunning(dropwizardConfigAnnotation.app(), dropwizardConfigAnnotation.config(), configOverride.toArray(new ConfigOverride[0]));
+            if (dropwizardConfigAnnotation.withDockerPostgres() && createdApp.isPresent()) {
                 createdApp.get().getApplication().run("db", "migrate", resourceFilePath(dropwizardConfigAnnotation.config()));
                 createTemplate(getDbUri(), getDbUsername(), getDbPassword());
-            } catch (Exception e) {
-                throw new DropwizardJUnitRunnerException(e);
             }
+        } catch (Exception e) {
+            throw new DropwizardJUnitRunnerException(e);
         }
 
         return super.classBlock(notifier);

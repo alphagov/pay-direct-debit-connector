@@ -29,14 +29,14 @@ public class CreateGatewayAccountRequestTest {
     public void shouldGiveConstraintViolationForNullPaymentProvider() {
         Set<ConstraintViolation<CreateGatewayAccountRequest>> violations = validator.validateValue(CreateGatewayAccountRequest.class, "paymentProvider", null);
         assertThat(violations.size(), is(1));
-        assertThat(violations.iterator().next().getMessage(), is("may not be null"));
+        assertThat(violations.iterator().next().getMessage(), is("must not be null"));
     }
 
     @Test
     public void shouldGiveConstraintViolationForNullType() {
         Set<ConstraintViolation<CreateGatewayAccountRequest>> violations = validator.validateValue(CreateGatewayAccountRequest.class, "type", null);
         assertThat(violations.size(), is(1));
-        assertThat(violations.iterator().next().getMessage(), is("may not be null"));
+        assertThat(violations.iterator().next().getMessage(), is("must not be null"));
     }
 
     @Test
