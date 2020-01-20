@@ -1,0 +1,20 @@
+memory: 500M
+db_password: mysecretpassword
+db_user: directdebit_connector
+db_name: directdebit_connector
+db_ssl_option: ssl=none
+disk_quota: 500M
+disable_internal_https: 'true'
+run_migration: 'true'
+gocardless_test_client_id: gocardless-test-oauth-client-id
+gocardless_test_client_secret: gocardless-test-oauth-client-secret
+gocardless_live_client_id: gocardless-live-oauth-client-id
+gocardless_live_client_secret: gocardless-live-oauth-client-secret
+gocardless_test_oauth_base_url: https://connect-sandbox.gocardless.com
+gocardless_live_oauth_base_url: https://connect-sandbox.gocardless.com
+
+gds_directdebit_connector_gocardless_acccess_token: supersecret
+gds_directdebit_connector_gocardless_url: https://example.com
+gds_directdebit_connector_gocardless_webhook_secret: supersecret
+gds_directdebit_connector_gocardless_environment: sandbox
+
