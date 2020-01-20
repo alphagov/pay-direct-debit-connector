@@ -1,0 +1,53 @@
+---
+applications:
+  - name: directdebit-connector
+    buildpacks:
+      - java_buildpack
+    path: target/pay-direct-debit-connector-0.1-SNAPSHOT-allinone.jar
+    health-check-type: http
+    health-check-http-endpoint: '/healthcheck'
+    health-check-invocation-timeout: 5
+    memory: ((memory))
+    disk_quota: ((disk_quota))
+    env:
+      ADMIN_PORT: '10201'
+      DISABLE_INTERNAL_HTTPS: ((disable_internal_https))
+      ENVIRONMENT: ((space))
+      FRONTEND_URL: ((frontend_url))
+      ADMINUSERS_URL: ((adminusers_url))
+      JAVA_OPTS: -Xms512m -Xmx1G
+      JBP_CONFIG_JAVA_MAIN: '{ arguments: "server /home/vcap/app/config/config.yaml" }'
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+ } }'
+      JPA_LOG_LEVEL: 'INFO'
+      JPA_SQL_LOG_LEVEL: 'INFO'
+
+      # Provide via dd-connector-db service
+      DB_HOST: postgres-((space)).apps.internal
+      DB_NAME: ((db_name))
+      DB_PASSWORD: ((db_password))
+      DB_USER: ((db_user))
+      DB_SSL_OPTION: ((db_ssl_option))
+
+      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN: ((gds_directdebit_connector_gocardless_acccess_token))
+      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_URL: ((gds_directdebit_connector_gocardless_url))
+      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_WEBHOOK_SECRET: ((gds_directdebit_connector_gocardless_webhook_secret))
+      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ENVIRONMENT: ((gds_directdebit_connector_gocardless_environment))
+      AUTH_READ_TIMEOUT_SECONDS: '1'
+
+      # Provide via GOCARDLESS service
+      GOCARDLESS_TEST_CLIENT_ID: ((gocardless_test_client_id))
+      GOCARDLESS_TEST_CLIENT_SECRET: ((gocardless_test_client_secret))
+      GOCARDLESS_LIVE_CLIENT_ID: ((gocardless_live_client_secret))
+      GOCARDLESS_LIVE_CLIENT_SECRET: ((gocardless_live_client_secret))
+      GOCARDLESS_TEST_OAUTH_BASE_URL: ((gocardless_test_oauth_base_url))
+      GOCARDLESS_LIVE_OAUTH_BASE_URL: ((gocardless_live_oauth_base_url))
+
+      AWS_XRAY_CONTEXT_MISSING: LOG_ERROR
+
+      # Provide via Sentry service
+      SENTRY_DSN: noop://localhost
+
+      RUN_APP: 'true'
+      RUN_MIGRATION: ((run_migration))
+    routes:
+      - route: ((directdebit_connector_route))
