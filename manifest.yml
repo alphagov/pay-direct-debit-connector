@@ -13,7 +13,7 @@ applications:
       ADMIN_PORT: '10201'
       DISABLE_INTERNAL_HTTPS: ((disable_internal_https))
       ENVIRONMENT: ((space))
-      FRONTEND_URL: ((frontend_url))
+      FRONTEND_URL: ((directdebit_frontend_url))
       ADMINUSERS_URL: ((adminusers_url))
       JAVA_OPTS: -Xms512m -Xmx1G
       JBP_CONFIG_JAVA_MAIN: '{ arguments: "server /home/vcap/app/config/config.yaml" }'
