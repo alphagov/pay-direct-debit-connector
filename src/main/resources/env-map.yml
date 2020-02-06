@@ -1,0 +1,8 @@
+env_vars:
+  ADMINUSERS_URL:  '.[][] | select(.name == "app-catalog")              | .credentials.adminusers_url          '
+  FRONTEND_URL:    '.[][] | select(.name == "app-catalog")              | .credentials.card_frontend_url       '
+  DB_HOST:         '.[][] | select(.name == "directdebit-connector-db") | .credentials.host                    '
+  DB_NAME:         '.[][] | select(.name == "directdebit-connector-db") | .credentials.name                    '
+  DB_PASSWORD:     '.[][] | select(.name == "directdebit-connector-db") | .credentials.password                '
+  DB_USER:         '.[][] | select(.name == "directdebit-connector-db") | .credentials.username                '
+  DB_SSL_OPTION:   '.[][] | select(.name == "directdebit-connector-db") | .credentials.ssl_option // "ssl=true"'
