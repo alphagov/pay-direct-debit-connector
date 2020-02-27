@@ -24,23 +24,9 @@ applications:
       JPA_LOG_LEVEL: 'INFO'
       JPA_SQL_LOG_LEVEL: 'INFO'
 
-
-      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN: ((gds_directdebit_connector_gocardless_acccess_token))
-      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_URL: ((gds_directdebit_connector_gocardless_url))
-      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_WEBHOOK_SECRET: ((gds_directdebit_connector_gocardless_webhook_secret))
-      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ENVIRONMENT: ((gds_directdebit_connector_gocardless_environment))
       AUTH_READ_TIMEOUT_SECONDS: '1'
-
-      GOCARDLESS_TEST_CLIENT_ID: ((gocardless_test_client_id))
-      GOCARDLESS_TEST_CLIENT_SECRET: ((gocardless_test_client_secret))
-      GOCARDLESS_LIVE_CLIENT_ID: ((gocardless_live_client_secret))
-      GOCARDLESS_LIVE_CLIENT_SECRET: ((gocardless_live_client_secret))
-      GOCARDLESS_TEST_OAUTH_BASE_URL: ((gocardless_test_oauth_base_url))
-      GOCARDLESS_LIVE_OAUTH_BASE_URL: ((gocardless_live_oauth_base_url))
-
       AWS_XRAY_CONTEXT_MISSING: LOG_ERROR
       SENTRY_DSN: noop://localhost
-
       RUN_APP: 'true'
       RUN_MIGRATION: ((run_migration))
 
@@ -54,3 +40,15 @@ applications:
       DB_PASSWORD: ""
       DB_USER: ""
       DB_SSL_OPTION: ""
+
+      # Provided by dd-connector-secret-service, see env-map.yml
+      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ACCESS_TOKEN: ""
+      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_URL: ""
+      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_WEBHOOK_SECRET: ""
+      GDS_DIRECTDEBIT_CONNECTOR_GOCARDLESS_ENVIRONMENT: ""
+      GOCARDLESS_TEST_CLIENT_ID: ""
+      GOCARDLESS_TEST_CLIENT_SECRET: ""
+      GOCARDLESS_LIVE_CLIENT_ID: ""
+      GOCARDLESS_LIVE_CLIENT_SECRET: ""
+      GOCARDLESS_TEST_OAUTH_BASE_URL: ""
+      GOCARDLESS_LIVE_OAUTH_BASE_URL: ""
