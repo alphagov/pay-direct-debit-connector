@@ -34,6 +34,8 @@ applications:
       # Provided via app-catalog see env-map.yml
       FRONTEND_URL: ""
       ADMINUSERS_URL: ""
+      METRICS_HOST: ""
+      METRICS_PORT: ""
 
       # Provide via dd-connector-db service see env-map.yml
       DB_HOST: ""
