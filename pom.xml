@@ -26,7 +26,7 @@
         <jackson.version>2.10.0</jackson.version>
         <guice.version>4.2.2</guice.version>
         <guava.version>28.0-jre</guava.version>
-        <gocardless.version>3.8.0</gocardless.version>
+        <gocardless.version>3.15.1</gocardless.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rest-assured.version>4.1.2</rest-assured.version>
         <mockito.version>3.1.0</mockito.version>
