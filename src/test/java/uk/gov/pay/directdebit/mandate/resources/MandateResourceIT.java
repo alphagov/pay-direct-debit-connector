@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import uk.gov.pay.commons.testing.port.PortFactory;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.junit.TestContext;
 import uk.gov.pay.directdebit.mandate.fixtures.MandateFixture;
@@ -81,9 +82,11 @@ public class MandateResourceIT {
     private static final String JSON_STATE_KEY = "state.status";
     private static final String JSON_MANDATE_ID_KEY = "mandate_id";
 
+    private int wireMockRulePort = PortFactory.findFreePort();
+
     //todo we should be able to override this in the test-it-config or else tests won't easily run in parallel. See https://payments-platform.atlassian.net/browse/PP-3374
     @Rule
-    public WireMockRule wireMockRuleGoCardless = new WireMockRule(10107);
+    public WireMockRule wireMockRuleGoCardless = new WireMockRule(wireMockRulePort);
 
     @Rule
     public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();

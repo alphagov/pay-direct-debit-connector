@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.gov.pay.commons.testing.port.PortFactory;
 import uk.gov.pay.directdebit.gatewayaccounts.model.PaymentProvider;
 import uk.gov.pay.directdebit.junit.DropwizardAppWithPostgresRule;
 import uk.gov.pay.directdebit.junit.TestContext;
@@ -67,8 +68,10 @@ public class PaymentResourceIT {
     private GatewayAccountFixture testGatewayAccount;
     private TestContext testContext;
 
+    private int wireMockRulePort = PortFactory.findFreePort();
+
     @Rule
-    public WireMockRule wireMockRuleGoCardless = new WireMockRule(10107);
+    public WireMockRule wireMockRuleGoCardless = new WireMockRule(wireMockRulePort);
 
     @Rule
     public DropwizardAppWithPostgresRule app = new DropwizardAppWithPostgresRule();
