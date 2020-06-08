@@ -24,7 +24,7 @@
         <liquibase.version>3.9.0</liquibase.version>
         <jackson.version>2.11.0</jackson.version>
         <postgresql.version>42.2.13</postgresql.version>
-        <guice.version>4.2.2</guice.version>
+        <guice.version>4.2.3</guice.version>
         <guava.version>29.0-jre</guava.version>
         <gocardless.version>4.1.0</gocardless.version>
         <hamcrest.version>2.2</hamcrest.version>
