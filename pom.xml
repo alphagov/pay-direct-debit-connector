@@ -31,7 +31,7 @@
         <rest-assured.version>4.3.0</rest-assured.version>
         <mockito.version>3.3.3</mockito.version>
         <pay-java-commons.version>1.0.20200601131959</pay-java-commons.version>
-        <surefire.version>3.0.0-M4</surefire.version>
+        <surefire.version>3.0.0-M5</surefire.version>
     </properties>
 
     <parent>
