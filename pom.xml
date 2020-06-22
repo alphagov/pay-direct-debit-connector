@@ -26,7 +26,7 @@
         <postgresql.version>42.2.14</postgresql.version>
         <guice.version>4.2.3</guice.version>
         <guava.version>29.0-jre</guava.version>
-        <gocardless.version>4.1.0</gocardless.version>
+        <gocardless.version>4.2.0</gocardless.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rest-assured.version>4.3.0</rest-assured.version>
         <mockito.version>3.3.3</mockito.version>
