@@ -67,17 +67,6 @@ pipeline {
         }
       }
     }
-    stage('End-to-End tests') {
-      when {
-        anyOf {
-          branch 'master'
-          environment name: 'RUN_END_TO_END_ON_PR', value: 'true'
-        }
-      }
-      steps {
-        runAppE2E("directdebit-connector", "directdebit")
-      }
-    }
     stage('Docker Tag') {
       steps {
         script {
@@ -98,14 +87,6 @@ pipeline {
       }
       steps {
         deployEcs("directdebit-connector")
-      }
-    }
-    stage('Smoke Tests') {
-      when {
-        branch 'master'
-      }
-      steps {
-        runDirectDebitSmokeTest()
       }
     }
     stage('Pact Tag') {
