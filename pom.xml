@@ -29,7 +29,7 @@
         <gocardless.version>4.2.0</gocardless.version>
         <hamcrest.version>2.2</hamcrest.version>
         <rest-assured.version>4.3.0</rest-assured.version>
-        <mockito.version>3.3.3</mockito.version>
+        <mockito.version>3.5.13</mockito.version>
         <pay-java-commons.version>1.0.20200629180713</pay-java-commons.version>
         <surefire.version>3.0.0-M5</surefire.version>
     </properties>
