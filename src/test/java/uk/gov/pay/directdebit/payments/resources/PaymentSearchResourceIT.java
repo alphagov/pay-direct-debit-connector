@@ -118,7 +118,7 @@ public class PaymentSearchResourceIT {
 
     @Test
     public void shouldReturnEmptyResults_whenPaginationFindsNoRecords() {
-        for (int i = 0; i < 2; i++) {
+        for (int i = 5; i < 7; i++) {
             MandateFixture mandateFixture = aMandateFixture()
                     .withGatewayAccountFixture(testGatewayAccount)
                     .insert(testContext.getJdbi());
