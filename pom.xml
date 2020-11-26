@@ -30,7 +30,7 @@
         <hamcrest.version>2.2</hamcrest.version>
         <rest-assured.version>4.3.2</rest-assured.version>
         <mockito.version>3.6.0</mockito.version>
-        <pay-java-commons.version>1.0.20201117103358</pay-java-commons.version>
+        <pay-java-commons.version>1.0.20201125120106</pay-java-commons.version>
         <surefire.version>3.0.0-M5</surefire.version>
     </properties>
 
