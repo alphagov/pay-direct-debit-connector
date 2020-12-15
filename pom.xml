@@ -28,7 +28,7 @@
         <guava.version>29.0-jre</guava.version>
         <gocardless.version>4.6.0</gocardless.version>
         <hamcrest.version>2.2</hamcrest.version>
-        <rest-assured.version>4.3.2</rest-assured.version>
+        <rest-assured.version>4.3.3</rest-assured.version>
         <mockito.version>3.6.28</mockito.version>
         <pay-java-commons.version>1.0.20201130170501</pay-java-commons.version>
         <surefire.version>3.0.0-M5</surefire.version>
