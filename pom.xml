@@ -21,7 +21,7 @@
         <mainClass>uk.gov.pay.directdebit.DirectDebitConnectorApp</mainClass>
 
         <wiremock.version>2.27.2</wiremock.version>
-        <liquibase.version>3.10.0</liquibase.version>
+        <liquibase.version>4.2.2</liquibase.version>
         <jackson.version>2.12.1</jackson.version>
         <postgresql.version>42.2.18</postgresql.version>
         <guice.version>4.2.3</guice.version>
