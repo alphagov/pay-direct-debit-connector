@@ -22,7 +22,7 @@
 
         <wiremock.version>2.27.2</wiremock.version>
         <liquibase.version>3.10.0</liquibase.version>
-        <jackson.version>2.12.1</jackson.version>
+        <jackson.version>2.12.2</jackson.version>
         <postgresql.version>42.2.19</postgresql.version>
         <guice.version>5.0.1</guice.version>
         <guava.version>29.0-jre</guava.version>
