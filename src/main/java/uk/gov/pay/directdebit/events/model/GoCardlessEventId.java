@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.events.model;
 
-import uk.gov.pay.commons.model.WrappedStringValue;
+import uk.gov.service.payments.commons.model.WrappedStringValue;
 
 /**
  * The ID assigned by GoCardless to one of their events e.g. "EV123"

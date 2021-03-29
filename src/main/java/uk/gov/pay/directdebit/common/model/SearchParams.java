@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.common.model;
 
-import uk.gov.pay.commons.validation.ValidDate;
+import uk.gov.service.payments.commons.validation.ValidDate;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

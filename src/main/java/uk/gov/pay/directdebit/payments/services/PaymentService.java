@@ -13,7 +13,7 @@ import uk.gov.pay.directdebit.payments.model.Payment;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderFactory;
 import uk.gov.pay.directdebit.payments.model.PaymentProviderPaymentIdAndChargeDate;
 import uk.gov.pay.directdebit.payments.model.PaymentState;
-import uk.gov.pay.logging.LoggingKeys;
+import uk.gov.service.payments.logging.LoggingKeys;
 
 import javax.inject.Inject;
 import java.time.ZoneOffset;

@@ -4,7 +4,7 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Environment;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import uk.gov.pay.directdebit.app.config.DirectDebitConfig;
-import uk.gov.pay.logging.LoggingFilter;
+import uk.gov.service.payments.logging.LoggingFilter;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;

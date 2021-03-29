@@ -1,7 +1,7 @@
 package uk.gov.pay.directdebit.tokens.exception;
 
-import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.common.exception.NotFoundException;
+import uk.gov.service.payments.commons.model.ErrorIdentifier;
 
 public class TokenNotFoundException extends NotFoundException {
 

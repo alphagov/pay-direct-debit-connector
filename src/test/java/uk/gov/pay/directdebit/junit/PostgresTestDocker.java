@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.junit;
 
-import uk.gov.pay.commons.testing.db.PostgresContainer;
+import uk.gov.service.payments.commons.testing.db.PostgresContainer;
 
 import java.sql.Connection;
 import java.sql.SQLException;

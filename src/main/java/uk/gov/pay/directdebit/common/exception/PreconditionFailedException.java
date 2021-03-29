@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.common.exception;
 
-import uk.gov.pay.commons.model.ErrorIdentifier;
+import uk.gov.service.payments.commons.model.ErrorIdentifier;
 
 public class PreconditionFailedException extends RuntimeException {
 
