@@ -2,9 +2,9 @@ package uk.gov.pay.directdebit.common.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.common.model.ErrorResponse;
 import uk.gov.pay.directdebit.mandate.exception.MandateStateInvalidException;
+import uk.gov.service.payments.commons.model.ErrorIdentifier;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;

@@ -3,8 +3,8 @@ package uk.gov.pay.directdebit.common.exception;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.common.model.ErrorResponse;
+import uk.gov.service.payments.commons.model.ErrorIdentifier;
 
 import javax.annotation.Priority;
 import javax.ws.rs.core.Response;

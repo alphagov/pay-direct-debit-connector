@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.mandate.model;
 
-import uk.gov.pay.commons.model.WrappedStringValue;
+import uk.gov.service.payments.commons.model.WrappedStringValue;
 
 public abstract class PaymentProviderMandateId extends WrappedStringValue {
 

@@ -6,15 +6,14 @@ import uk.gov.pay.directdebit.gatewayaccounts.dao.GatewayAccountDao;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import java.io.IOException;
 import java.util.Optional;
 
-import static uk.gov.pay.logging.LoggingKeys.GATEWAY_ACCOUNT_ID;
-import static uk.gov.pay.logging.LoggingKeys.GATEWAY_ACCOUNT_TYPE;
-import static uk.gov.pay.logging.LoggingKeys.MANDATE_EXTERNAL_ID;
-import static uk.gov.pay.logging.LoggingKeys.PAYMENT_EXTERNAL_ID;
-import static uk.gov.pay.logging.LoggingKeys.PROVIDER;
-import static uk.gov.pay.logging.LoggingKeys.SECURE_TOKEN;
+import static uk.gov.service.payments.logging.LoggingKeys.GATEWAY_ACCOUNT_ID;
+import static uk.gov.service.payments.logging.LoggingKeys.GATEWAY_ACCOUNT_TYPE;
+import static uk.gov.service.payments.logging.LoggingKeys.MANDATE_EXTERNAL_ID;
+import static uk.gov.service.payments.logging.LoggingKeys.PAYMENT_EXTERNAL_ID;
+import static uk.gov.service.payments.logging.LoggingKeys.PROVIDER;
+import static uk.gov.service.payments.logging.LoggingKeys.SECURE_TOKEN;
 
 public class LoggingMDCRequestFilter implements ContainerRequestFilter {
 
@@ -26,7 +25,7 @@ public class LoggingMDCRequestFilter implements ContainerRequestFilter {
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(ContainerRequestContext requestContext) {
         getPathParameterFromRequest("accountId", requestContext)
                 .flatMap(gatewayAccountDao::findByExternalId)
                 .ifPresent(gatewayAccount -> {

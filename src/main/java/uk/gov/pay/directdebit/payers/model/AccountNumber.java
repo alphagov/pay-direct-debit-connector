@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.payers.model;
 
-import uk.gov.pay.commons.model.WrappedStringValue;
+import uk.gov.service.payments.commons.model.WrappedStringValue;
 
 import java.util.regex.Pattern;
 

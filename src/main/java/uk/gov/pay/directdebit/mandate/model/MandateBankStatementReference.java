@@ -1,6 +1,6 @@
 package uk.gov.pay.directdebit.mandate.model;
 
-import uk.gov.pay.commons.model.WrappedStringValue;
+import uk.gov.service.payments.commons.model.WrappedStringValue;
 
 /**
  * Reference for a mandate, which may be shown on the paying user’s bank

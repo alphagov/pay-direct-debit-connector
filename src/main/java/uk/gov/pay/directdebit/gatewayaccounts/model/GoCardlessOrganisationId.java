@@ -1,6 +1,7 @@
 package uk.gov.pay.directdebit.gatewayaccounts.model;
 
-import uk.gov.pay.commons.model.WrappedStringValue;
+
+import uk.gov.service.payments.commons.model.WrappedStringValue;
 
 /**
  * An ID that GoCardless assign to a GoCardless account belonging to a

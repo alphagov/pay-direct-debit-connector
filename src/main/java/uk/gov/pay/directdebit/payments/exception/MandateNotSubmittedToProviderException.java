@@ -1,8 +1,8 @@
 package uk.gov.pay.directdebit.payments.exception;
 
-import uk.gov.pay.commons.model.ErrorIdentifier;
 import uk.gov.pay.directdebit.common.exception.NotFoundException;
 import uk.gov.pay.directdebit.mandate.model.subtype.MandateExternalId;
+import uk.gov.service.payments.commons.model.ErrorIdentifier;
 
 public class MandateNotSubmittedToProviderException extends NotFoundException {
 
