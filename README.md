@@ -1,5 +1,8 @@
 # pay-direct-debit-connector
 
+> As of September 2021 this repository is no longer actively maintained by
+> the GOV.UK Pay team. 
+
 The [GOV.UK Pay](https://www.payments.service.gov.uk/) Direct Debit Connector
 
 ## Environment Variables
